@@ -3892,3 +3892,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P9 — מיפוי-אימוג'י לפי הצילומים (D17) · מגודר `kInternalCard`
 > `_heroEmoji(p)` (card-local, לא נוגע ב-`typeEmoji` המשותף) ממפה לפי צורות-הפיטינג בצילומים: ברך/זווית→🦵 · מסעף→🔱 · צינור→🟫 · מצרה→🔻 · ניפל→🔗 · פקק→⬛ · מצמד→🧷 · אום→🔩 (fallback לגליף המשותף). מחווט ל-`_bigImage` + עיגולי-הפולס + נתיב-ההשלמה.
 - gate: `flutter analyze` **0** · `full_internal_card_test` **7/7**.
+
+### #internal-card P10 — 📋 טאבים inline (D15) · מגודר `kInternalCard`
+> 📋 מחליף את התמונה **במקום** ב-5 טאבים (מפרט·תקן·אזהרה·חומר·טמפ'), כל טאב = פלח מ-13 הסקציות: מפרט=engSpec+config+variants+connects · תקן=compliance · אזהרה=warnings+instructions+steps · חומר=materials+kit+complements · טמפ'=temperature+price. גובה-פאנל = גובה-התמונה (236), טאב-בר למעלה + תוכן-גלילה. `specTab` state + `onPickSpecTab`.
+- gate: `flutter analyze` **0** · `full_internal_card_test` **7/7** (כולל מעבר-טאב מפרט→טמפ׳).

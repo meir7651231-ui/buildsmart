@@ -103,14 +103,21 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
 
   void _toggleSpec() => setState(() => _specOpen = !_specOpen);
 
+  /// D15 — which spec tab is active (מפרט / תקן / אזהרה / חומר / טמפ׳).
+  int _specTab = 0;
+
+  void _pickSpecTab(int i) => setState(() => _specTab = i);
+
   @override
   Widget build(BuildContext context) => _CardView(
         product: _current,
         unit: _unit,
         specOpen: _specOpen,
+        specTab: _specTab,
         onStepVariant: _stepVariant,
         onPickUnit: _pickUnit,
         onToggleSpec: _toggleSpec,
+        onPickSpecTab: _pickSpecTab,
       );
 }
 
@@ -121,9 +128,11 @@ class _CardView extends ConsumerWidget {
     required this.product,
     required this.unit,
     required this.specOpen,
+    required this.specTab,
     this.onStepVariant,
     this.onPickUnit,
     this.onToggleSpec,
+    this.onPickSpecTab,
   });
 
   final LipskeyCatalogProduct product;
@@ -134,6 +143,9 @@ class _CardView extends ConsumerWidget {
   /// D15 — whether the 📋 spec panel is showing (in place of the big image).
   final bool specOpen;
 
+  /// D15 — the active spec tab index.
+  final int specTab;
+
   /// D5 — the name-swipe steps the variant family by ±1 (null ⇒ inert).
   final void Function(int dir)? onStepVariant;
 
@@ -142,6 +154,9 @@ class _CardView extends ConsumerWidget {
 
   /// D15 — toggle the spec panel (null ⇒ inert).
   final VoidCallback? onToggleSpec;
+
+  /// D15 — pick a spec tab (null ⇒ inert).
+  final void Function(int index)? onPickSpecTab;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -307,35 +322,117 @@ class _CardView extends ConsumerWidget {
     );
   }
 
-  // ── D15 · spec panel — all the engineering sections, shown ONLY behind 📋 ──────
+  // ── D15 · spec panel — 5 inline tabs that swap the image IN PLACE (screenshot 7)
+  static const List<(String, String)> _specTabs = [
+    ('📐', 'מפרט'),
+    ('📋', 'תקן'),
+    ('⚠️', 'אזהרה'),
+    ('🧱', 'חומר'),
+    ('🌡️', 'טמפ׳'),
+  ];
+
   Widget _specPanel(
     BuildContext context,
     LipskeyCatalogProduct p,
     CatalogSettings s,
   ) {
-    final sections = <Widget>[
-      ..._configSection(),
-      ..._variantsSection(p),
-      ..._connectsSection(p),
-      ..._connectionInstructionsSection(p),
-      ..._installStepsSection(p),
-      ..._kitSection(p),
-      ..._materialsSection(p),
-      ..._engSpecSection(p),
-      ..._temperatureSection(p),
-      ..._complianceSection(p),
-      ..._warningsSection(p),
-      ..._complementsSection(p),
-      ..._priceSection(p, s),
+    final active = specTab.clamp(0, _specTabs.length - 1);
+    final content = <Widget>[
+      if (active == 0) ...[
+        ..._engSpecSection(p),
+        ..._configSection(),
+        ..._variantsSection(p),
+        ..._connectsSection(p),
+      ],
+      if (active == 1) ..._complianceSection(p),
+      if (active == 2) ...[
+        ..._warningsSection(p),
+        ..._connectionInstructionsSection(p),
+        ..._installStepsSection(p),
+      ],
+      if (active == 3) ...[
+        ..._materialsSection(p),
+        ..._kitSection(p),
+        ..._complementsSection(p),
+      ],
+      if (active == 4) ...[
+        ..._temperatureSection(p),
+        ..._priceSection(p, s),
+      ],
     ];
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 300),
-      child: SingleChildScrollView(
-        key: const Key('internalCardSpecPanel'),
+    return Container(
+      key: const Key('internalCardSpecPanel'),
+      height: 236,
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+      decoration: BoxDecoration(
+        color: _cImgBg,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          ColoredBox(
+            color: _cCard,
+            child: Row(
+              children: [
+                for (var i = 0; i < _specTabs.length; i++)
+                  Expanded(
+                    child: _specTabBtn(
+                      _specTabs[i].$1,
+                      _specTabs[i].$2,
+                      i == active,
+                      () => onPickSpecTab?.call(i),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: content.isEmpty
+                ? const Center(
+                    child: Text('אין נתונים', style: TextStyle(color: _cDim)),
+                  )
+                : SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: content,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _specTabBtn(String icon, String label, bool active, VoidCallback onTap) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: active ? _cAccent : Colors.transparent,
+              width: 2,
+            ),
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: sections,
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 13)),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: active ? _cAccent : _cBody,
+              ),
+            ),
+          ],
         ),
       ),
     );

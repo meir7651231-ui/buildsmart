@@ -40,12 +40,16 @@ void main() {
     expect(find.byKey(const Key('internalCardSpecPanel')), findsNothing);
     expect(find.text('מפרט הנדסי'), findsNothing);
 
-    // Tapping 📋 swaps the image for the spec panel; engineeringSpecFor then
-    // drives the מפרט-הנדסי + טמפרטורה sections — presence proves live wiring.
+    // Tapping 📋 swaps the image for the tabbed spec panel; the default tab
+    // (מפרט) shows engineeringSpecFor's מפרט-הנדסי — presence proves live wiring.
     await tester.tap(find.byKey(const Key('internalCardSpecToggle')));
     await tester.pump();
     expect(find.byKey(const Key('internalCardSpecPanel')), findsOneWidget);
     expect(find.text('מפרט הנדסי'), findsOneWidget);
+
+    // Switching to the טמפ׳ tab reveals the טמפרטורה section (live tab switch).
+    await tester.tap(find.text('טמפ׳'));
+    await tester.pump();
     expect(find.text('טמפרטורה'), findsOneWidget);
   });
 
