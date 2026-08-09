@@ -7,6 +7,7 @@
 import 'package:buildsmart/features/fittings/engine/grid_cell.dart';
 import 'package:buildsmart/features/fittings/engine/grid_topology.dart';
 import 'package:buildsmart/features/fittings/engine/models.dart';
+import 'package:buildsmart/features/fittings/ui/line_3d.dart';
 import 'package:flutter/material.dart';
 
 const Color _cInk = Color(0xFF232A33);
@@ -68,6 +69,9 @@ class _SudokuGridState extends State<SudokuGrid> {
   /// The empty cell the user is filling (null = none active).
   late (int, int)? _active = widget.initialActive;
 
+  /// D12 — 2D grid vs the isometric 3D-cubes view of the same line.
+  bool _is3D = false;
+
   List<GridCell> get _cells => [
         for (final e in _placed.entries)
           GridCell(e.key.$2, -e.key.$1, 0, e.value),
@@ -113,16 +117,49 @@ class _SudokuGridState extends State<SudokuGrid> {
               ),
             ),
           ),
-          for (var r = 0; r < widget.rows; r++)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [for (var c = 0; c < widget.cols; c++) _cell(r, c)],
-            ),
-          const SizedBox(height: 12),
-          _suggestionArea(),
+          _viewToggle(),
+          const SizedBox(height: 8),
+          if (_is3D)
+            Line3DView(cells: _cells, height: 280)
+          else ...[
+            for (var r = 0; r < widget.rows; r++)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [for (var c = 0; c < widget.cols; c++) _cell(r, c)],
+              ),
+            const SizedBox(height: 12),
+            _suggestionArea(),
+          ],
           const SizedBox(height: 12),
           _actions(),
         ],
+      ),
+    );
+  }
+
+  Widget _viewToggle() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: GestureDetector(
+        key: const Key('gridToggle3D'),
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _is3D = !_is3D),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: _is3D ? _cAccent : _cImgBg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: _is3D ? _cAccent : _cLine),
+          ),
+          child: Text(
+            _is3D ? '▦ 2D' : '📦 3D',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: _is3D ? Colors.white : _cInk,
+            ),
+          ),
+        ),
       ),
     );
   }

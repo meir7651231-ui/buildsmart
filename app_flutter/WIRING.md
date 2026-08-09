@@ -3925,3 +3925,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P6·8 — משיכת-תמונה → רַכֶּבֶת "מה מתחבר" (D4) · מגודר `kInternalCard`
 > החלקה אופקית על התמונה חושפת `_sideRail` — רשימת תואמים (`compatibleProductsFor`) עם אימוג'י-צורה; החלקה/הקשה חוזרת מחזירה לתמונה. כנות-סקופ: הרַכֶּבֶת מציגה תאימות-כלל-מוצר; פילוח פר-צד-מובחן (שמאל≠ימין) הוא עידון עתידי דרך `compatibleProductsForEnd` מעל המנוע.
 - gate: `flutter analyze` **0** · `full_internal_card_test` **9/9** (כולל משיכת-תמונה→רַכֶּבֶת).
+
+### #fittings P6·9 — תצוגת קוביות-3D + toggle D12 · מגודר `kFittingEngine`
+> `line_3d.dart` (`Line3DView`): `CustomPainter` איזומטרי — הקו כקוביות (היטל 2:1 · מיון-עומק painter's · 3 פאות מוצללות · כתום=פיטינג/אפור=מצמד/כהה=פקק). מחווט ל-`SudokuGrid` כ-toggle **📦3D ↔ ▦2D**. תואם צילומים #10/#11.
+- gate: `flutter analyze` **0** · `line_3d_test` **2/2** · fittings **33/33**.
