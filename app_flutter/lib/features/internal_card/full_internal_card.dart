@@ -56,13 +56,20 @@ const Color _cHotBorder = Color(0xFFFFD6BD);
 /// size-variant family (D5). Reusable (any fitting SKU); the home embed +
 /// standalone route both seed it with the SmartLock elbow hero.
 class FullInternalCard extends ConsumerStatefulWidget {
-  const FullInternalCard({required this.product, super.key});
+  const FullInternalCard({
+    required this.product,
+    this.initialRailSide = 0,
+    super.key,
+  });
 
   /// The default hero — SmartLock ברך 90° 50 (real SKU; mockup's 120050 is not
   /// in the catalog). Resolved via [catalogProductForSku].
   static const String heroSku = '70055960';
 
   final LipskeyCatalogProduct product;
+
+  /// D4 — pre-open a side rail on first build (previews/tests): -1 left, +1 right.
+  final int initialRailSide;
 
   @override
   ConsumerState<FullInternalCard> createState() => _FullInternalCardState();
@@ -110,10 +117,12 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
 
   void _pickSpecTab(int i) => setState(() => _specTab = i);
 
-  /// D4 — swiping the image reveals the "what connects" rail over it.
-  bool _railOpen = false;
+  /// D4 — which side's connect-rail is showing: 0 = image, -1 = left end,
+  /// +1 = right end. Swiping the image toggles the matching side.
+  late int _railSide = widget.initialRailSide;
 
-  void _toggleRail() => setState(() => _railOpen = !_railOpen);
+  void _swipeImage(int dir) =>
+      setState(() => _railSide = _railSide == dir ? 0 : dir);
 
   @override
   Widget build(BuildContext context) => _CardView(
@@ -121,12 +130,12 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
         unit: _unit,
         specOpen: _specOpen,
         specTab: _specTab,
-        railOpen: _railOpen,
+        railSide: _railSide,
         onStepVariant: _stepVariant,
         onPickUnit: _pickUnit,
         onToggleSpec: _toggleSpec,
         onPickSpecTab: _pickSpecTab,
-        onToggleRail: _toggleRail,
+        onSwipeImage: _swipeImage,
       );
 }
 
@@ -138,12 +147,12 @@ class _CardView extends ConsumerWidget {
     required this.unit,
     required this.specOpen,
     required this.specTab,
-    required this.railOpen,
+    required this.railSide,
     this.onStepVariant,
     this.onPickUnit,
     this.onToggleSpec,
     this.onPickSpecTab,
-    this.onToggleRail,
+    this.onSwipeImage,
   });
 
   final LipskeyCatalogProduct product;
@@ -169,11 +178,11 @@ class _CardView extends ConsumerWidget {
   /// D15 — pick a spec tab (null ⇒ inert).
   final void Function(int index)? onPickSpecTab;
 
-  /// D4 — whether the "what connects" rail is showing (over the image).
-  final bool railOpen;
+  /// D4 — which side's connect-rail is showing (0 image · -1 left · +1 right).
+  final int railSide;
 
-  /// D4 — toggle the connects-rail (null ⇒ inert).
-  final VoidCallback? onToggleRail;
+  /// D4 — swipe the image by dir (-1 left · +1 right); null ⇒ inert.
+  final void Function(int dir)? onSwipeImage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -194,8 +203,8 @@ class _CardView extends ConsumerWidget {
             // swaps it for the spec panel in place (D15) — spec is never spilled.
             if (specOpen)
               _specPanel(context, p, settings)
-            else if (railOpen)
-              _sideRail(context, p)
+            else if (railSide != 0)
+              _sideRail(context, p, railSide)
             else
               _bigImage(context, p),
             _footer(p),
@@ -268,11 +277,12 @@ class _CardView extends ConsumerWidget {
       key: const Key('internalCardImage'),
       behavior: HitTestBehavior.opaque,
       onTap: () => _openGallery(context, p),
-      // D4 — swipe the image to reveal the "what connects" rail.
-      onHorizontalDragEnd: onToggleRail == null
+      // D4 — swipe the image to reveal the per-side "what connects" rail.
+      onHorizontalDragEnd: onSwipeImage == null
           ? null
           : (d) {
-              if ((d.primaryVelocity ?? 0).abs() > 0) onToggleRail!();
+              final v = d.primaryVelocity ?? 0;
+              if (v != 0) onSwipeImage!(v < 0 ? -1 : 1);
             },
       child: Container(
         height: 236,
@@ -295,14 +305,24 @@ class _CardView extends ConsumerWidget {
     );
   }
 
-  // ── D4 · the "what connects" rail (revealed by swiping the image) ────────────
-  Widget _sideRail(BuildContext context, LipskeyCatalogProduct p) {
-    final mates = compatibleProductsFor(p);
+  // ── D4 · the per-side "what connects" rail (revealed by swiping the image) ────
+  Widget _sideRail(BuildContext context, LipskeyCatalogProduct p, int side) {
+    // side −1 → the first end, +1 → the last end (each physical end differs).
+    final ends = verifiedEndsCountFor(p);
+    final endIndex = side < 0 ? 0 : (ends <= 1 ? 0 : ends - 1);
+    final mates = compatibleProductsForEnd(p, endIndex).take(6).toList();
+    final label = side < 0 ? 'מה מתחבר לצד שמאל' : 'מה מתחבר לצד ימין';
+    final railLeft = side < 0;
+    final asset = p.imageAsset;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onToggleRail,
-      onHorizontalDragEnd:
-          onToggleRail == null ? null : (_) => onToggleRail!(),
+      onTap: onSwipeImage == null ? null : () => onSwipeImage!(side),
+      onHorizontalDragEnd: onSwipeImage == null
+          ? null
+          : (d) {
+              final v = d.primaryVelocity ?? 0;
+              if (v != 0) onSwipeImage!(v < 0 ? -1 : 1);
+            },
       child: Container(
         key: const Key('internalCardRail'),
         height: 236,
@@ -312,62 +332,113 @@ class _CardView extends ConsumerWidget {
           borderRadius: BorderRadius.circular(14),
         ),
         clipBehavior: Clip.antiAlias,
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: [
-            const Text(
-              '🔗 מה מתחבר · החלק ↔ לחזרה',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w800,
-                color: _cAccent,
+            // The product image stays visible in the centre.
+            Center(
+              child: asset == null
+                  ? Text(_heroEmoji(p), style: const TextStyle(fontSize: 88))
+                  : Image(
+                      image: resolveProductImage(asset),
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) =>
+                          Text(_heroEmoji(p), style: const TextStyle(fontSize: 88)),
+                    ),
+            ),
+            // The connection-point dot on the active side of the image.
+            Positioned.fill(
+              child: Align(
+                alignment: railLeft
+                    ? const Alignment(-0.35, 0)
+                    : const Alignment(0.35, 0),
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.black.withValues(alpha: 0.28),
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Expanded(
+            // Header label.
+            Positioned(
+              top: 8,
+              left: 8,
+              right: 8,
+              child: Text(
+                '🔗 $label · החלק ↔',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                  color: _cAccent,
+                ),
+              ),
+            ),
+            // The vertical rail of round icon-chips along the active edge.
+            Positioned(
+              top: 30,
+              bottom: 8,
+              left: railLeft ? 6 : null,
+              right: railLeft ? null : 6,
               child: mates.isEmpty
-                  ? const Center(
-                      child: Text('אין תואם ישיר בקטלוג',
-                          style: TextStyle(color: _cDim)),
+                  ? const Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 6),
+                        child: Text('אין תואם ישיר',
+                            style: TextStyle(fontSize: 10, color: _cDim)),
+                      ),
                     )
-                  : ListView(
-                      children: [
-                        for (final m in mates.take(8))
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: _cCard,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: _cLine),
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(_heroEmoji(m),
-                                      style: const TextStyle(fontSize: 18)),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      m.nameHe,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          fontSize: 12.5, color: _cInk),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [for (final m in mates) _railChip(m)],
                     ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// One round mate-chip on the side rail: emoji circle + a tiny label.
+  Widget _railChip(LipskeyCatalogProduct m) {
+    final sz = m.connectionSizes.isNotEmpty ? m.connectionSizes.first : '';
+    final word = m.nameHe.split(' ').first;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _cCard,
+              border: Border.all(color: _cAccent, width: 1.5),
+              boxShadow: const [
+                BoxShadow(
+                    color: Color(0x22000000), blurRadius: 4, offset: Offset(0, 2)),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: Text(_heroEmoji(m), style: const TextStyle(fontSize: 17)),
+          ),
+          const SizedBox(height: 1),
+          SizedBox(
+            width: 54,
+            child: Text(
+              sz.isEmpty ? word : '$word $sz',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 8, color: _cBody),
+            ),
+          ),
+        ],
       ),
     );
   }

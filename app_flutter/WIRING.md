@@ -3937,3 +3937,10 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #catalog-config-fab-clearance — ריפוד-תחתון שמפנה מעל הכפתורים-הצפים (2026-08-09)
 **באג (המשך צילום-בעלים "אחר נחתך מתחת לכפתורים"):** גם אחרי התאמת-הגובה, המשפחה האחרונה ("אחר") ישבה צמוד לתחתית-התיבה — והכפתורים-הצפים של הבית (FAB עגלה + FAB מקלדת) מרחפים שם ומכסים אותה. **תיקון:** `catalog_config_screen` — ה-`ListView.builder` של ה-browse קיבל `padding` תחתון של 104px (`EdgeInsets.fromLTRB(0, space3, 0, 104)`), כך שהמשפחה האחרונה נגללת מעל ה-FABs. במסלול-העצמאי (route מלא, בלי FABs) זה סתם רווח-גלילה נוסף — לא מזיק.
 - gate: `flutter analyze` 0 באזור-השינוי.
+### #internal-card P6·10 — פר-צד אמיתי (D4) · מגודר `kInternalCard`
+> `compatibleProductsForEnd(p, endIndex)` חדש (`related_info`) — תואמים ל**קצה בודד** דרך `directMatesWith` פר-קצה + `verifiedEndsCountFor`. הכרטיס: החלקה-שמאל→קצה[0], החלקה-ימין→קצה[אחרון], תווית "מתחבר לצד שמאל/ימין". כל צד מציג סט שונה (דיור-ברז 77775256: ימין=ברז/ניפל/פקק/רקורד · שמאל=זרועות-דוש). התצוגה כמו צילום #3: התמונה נשארת גלויה + רַכֶּבֶת-עיגולים (אימוג'י+מידה) לאורך הצד הפעיל + נקודת-חיבור על התמונה (מחליף את רשימת-כלל-המוצר של P6·8).
+- gate: `flutter analyze` **0** · `full_internal_card_test` **9/9** (החלקה→קצה-שמאל).
+
+### #internal-card P6·11 — לחיצה על כרטיס-חיצוני → הכרטיס-הפנימי החדש · מגודר `kInternalCard`
+> משוב-בעלים: "לחיצה על התמונה בכרטיס-החיצוני מגיעה לכרטיס-הישן". `catalog_config_screen._onOpenDetails` (שהתמונה ב-`config_card` קוראת לו) פותח כעת `FullInternalCard` ב-route מסך-מלא כש-`kInternalCard` דלוק; `showLipskeyProductSheet` (הישן) נשאר כ-fallback כבוי (byte-identical). הכרטיס מוזרע ב-`product` הנפתר של הווריאנט הנוכחי.
+- gate: `flutter analyze` **0** · `full_internal_card_test` **10/10**. (`config_card_open_details_test` נכשל **pre-existing** — שינויי-גלגל/DN של סשן מקביל, לא קשור לחיווט הזה.)

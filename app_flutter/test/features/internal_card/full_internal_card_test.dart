@@ -266,6 +266,7 @@ void main() {
     );
 
     expect(find.byKey(const Key('internalCardRail')), findsNothing);
+    // Swipe left → the LEFT end's connect-rail (per-side, D4).
     await tester.fling(
       find.byKey(const Key('internalCardImage')),
       const Offset(-220, 0),
@@ -274,6 +275,24 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('internalCardRail')), findsOneWidget);
-    expect(find.textContaining('מה מתחבר'), findsOneWidget);
+    expect(find.textContaining('מתחבר לצד שמאל'), findsOneWidget);
+  });
+
+  test('compatibleProductsForEnd is truly per-end — the two ends differ (D4)',
+      () {
+    // A product whose two physical ends accept different fittings.
+    final asym = kLipskeyCatalog.firstWhere((p) {
+      if (verifiedEndsCountFor(p) < 2) return false;
+      final a = compatibleProductsForEnd(p, 0).map((e) => e.sku).toSet();
+      final b = compatibleProductsForEnd(p, 1).map((e) => e.sku).toSet();
+      return a.isNotEmpty && b.isNotEmpty && a.length != b.length;
+    });
+    final e0 = compatibleProductsForEnd(asym, 0).map((e) => e.sku).toSet();
+    final e1 = compatibleProductsForEnd(asym, 1).map((e) => e.sku).toSet();
+    expect(e0, isNotEmpty);
+    expect(e1, isNotEmpty);
+    // The heart of per-side: end 0 and end 1 must NOT be the same set.
+    expect(e0, isNot(equals(e1)),
+        reason: 'each end must accept its own set of mates');
   });
 }

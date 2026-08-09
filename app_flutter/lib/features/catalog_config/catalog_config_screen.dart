@@ -24,6 +24,10 @@ import 'package:buildsmart/features/catalog_config/product_chips.dart';
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
 import 'package:buildsmart/features/catalog_config/variant_image.dart'
     show familyProducts, variantForSelection;
+import 'package:buildsmart/features/internal_card/full_internal_card.dart'
+    show FullInternalCard;
+import 'package:buildsmart/features/internal_card/internal_card_flags.dart'
+    show kInternalCard;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/state/smart_cart.dart';
@@ -175,6 +179,39 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
             for (final p in resolvedCatalogProducts)
               if (p.categoryHe == product.categoryHe) p,
           ];
+    // The NEW image-first internal card (D1–D18) when its flag is on; the legacy
+    // sheet stays as the flag-off fallback (byte-identical production).
+    if (kInternalCard) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          fullscreenDialog: true,
+          builder: (_) => Scaffold(
+            backgroundColor: const Color(0xFFE9ECF1),
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF232A33),
+              elevation: 0.5,
+              title: Text(
+                product.nameHe,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              ),
+            ),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: FullInternalCard(product: product),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
     showLipskeyProductSheet(context, product, siblings);
   }
 

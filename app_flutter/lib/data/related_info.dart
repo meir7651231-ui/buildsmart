@@ -274,6 +274,33 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
   return _compatCache[p.sku] = out;
 }
 
+/// D4 · how many physical connector ends [p] has (0 when no verified spec).
+int verifiedEndsCountFor(LipskeyCatalogProduct p) =>
+    kVerifiedSpecs[p.sku]?.ends.length ?? 0;
+
+/// D4 · per-SIDE compatibility — the products that mate the SINGLE end
+/// [endIndex] of [p] (not the whole product). Powers the card's left/right
+/// swipe rail: each physical end can accept a different set of fittings. A
+/// product mates this end when any of its own ends `directMatesWith` it.
+/// Empty when [p] has no verified spec or [endIndex] is out of range.
+List<LipskeyCatalogProduct> compatibleProductsForEnd(
+    LipskeyCatalogProduct p, int endIndex) {
+  final mySpec = kVerifiedSpecs[p.sku];
+  if (mySpec == null || endIndex < 0 || endIndex >= mySpec.ends.length) {
+    return const [];
+  }
+  final myEnd = mySpec.ends[endIndex];
+  final out = <LipskeyCatalogProduct>[];
+  for (final entry in kVerifiedSpecs.entries) {
+    if (entry.key == p.sku) continue;
+    final q = _skuIndex[entry.key];
+    if (q == null) continue;
+    if (entry.value.ends.any(myEnd.directMatesWith)) out.add(q);
+  }
+  out.sort((a, b) => a.page.compareTo(b.page));
+  return out;
+}
+
 /// The matched joint between [a] and [b] as structured data — the STRONGEST
 /// joint (a direct thread/press/drain mate is preferred over a compression-
 /// socket share). Returns null when they don't really mate (mirrors
