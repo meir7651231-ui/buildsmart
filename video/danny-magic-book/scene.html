@@ -1,0 +1,620 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Danny &amp; the Magic Book</title>
+<style>
+  html,body{margin:0;padding:0;background:#000;overflow:hidden}
+  canvas{width:270px;height:480px;display:block}
+</style>
+<script type="importmap">
+  { "imports": { "three": "./node_modules/three/build/three.module.js" } }
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+
+/* ============================================================
+   Danny & the Magic Book — 12s @ 30fps, 1080x1920 (9:16)
+   Fully deterministic: everything is a pure function of t.
+   ============================================================ */
+
+const W = 1080, H = 1920, DUR = 12;
+
+// ---------- seeded PRNG (determinism across render workers) ----------
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rng = mulberry32(1337);
+
+// ---------- easing helpers ----------
+const clamp = (x,a,b)=>Math.min(b,Math.max(a,x));
+const seg   = (t,a,b)=>clamp((t-a)/(b-a),0,1);
+const ease  = x=>x*x*(3-2*x);                       // smoothstep
+const easeIO= x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2; // cubic in-out
+const back  = x=>{const c=1.70158;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const lerp  = (a,b,x)=>a+(b-a)*x;
+
+// ---------- renderer ----------
+const renderer = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(1);
+renderer.setSize(W,H,false);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.12;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xfdeed7);
+const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 60);
+
+// ---------- materials ----------
+const M = (color,opts={})=>new THREE.MeshStandardMaterial({color,roughness:.85,metalness:0,flatShading:true,...opts});
+const skinM   = M(0xf2c49b);
+const hairM   = M(0x6b4023,{roughness:.95});
+const shirtM  = M(0x2e6fd8);
+const stripeM = M(0xf5f5f5);
+const shortsM = M(0xcdb488);
+const shoeRM  = M(0xd6402e);
+const shoeBM  = M(0x2857c9);
+const packM   = M(0x3f9e4d);
+const leatherM= M(0x7a4a26,{roughness:.7});
+const leatherInM = M(0x8a5530,{roughness:.8});
+const pageM   = M(0xfdf3da,{roughness:.9});
+const goldM   = new THREE.MeshStandardMaterial({color:0xffc44d,emissive:0xffaa22,emissiveIntensity:.4,roughness:.4,metalness:.6});
+
+// ---------- lights ----------
+scene.add(new THREE.AmbientLight(0xfff0dd, .5));
+const hemi = new THREE.HemisphereLight(0xfff5e0, 0xc9a27a, .45); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff0d0, 1.9);
+sun.position.set(2.6, 3.6, 1.4);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-4; sun.shadow.camera.right=4;
+sun.shadow.camera.top=5;  sun.shadow.camera.bottom=-2;
+sun.shadow.bias = -0.0004;
+scene.add(sun);
+const bookLight = new THREE.PointLight(0xffc44d, 0, 5, 1.8);
+scene.add(bookLight);
+
+/* ============================================================
+   THE ROOM
+   ============================================================ */
+const room = new THREE.Group(); scene.add(room);
+
+// floor — warm wood planks
+const floor = new THREE.Mesh(new THREE.BoxGeometry(7,.1,8), M(0xc98f5e,{roughness:.9}));
+floor.position.y=-.05; floor.receiveShadow=true; room.add(floor);
+for(let i=0;i<9;i++){ // plank grooves
+  const s=new THREE.Mesh(new THREE.BoxGeometry(7,.012,.03),M(0xb27a4c));
+  s.position.set(0,.005,-3.2+i*.8); room.add(s);
+}
+// walls
+const wallM = M(0xf6d9a8,{roughness:.95});
+const backWall = new THREE.Mesh(new THREE.BoxGeometry(7,3.4,.1), wallM);
+backWall.position.set(0,1.7,-3); backWall.receiveShadow=true; room.add(backWall);
+const leftWall = new THREE.Mesh(new THREE.BoxGeometry(.1,3.4,8), M(0xf0c98f,{roughness:.95}));
+leftWall.position.set(-3,1.7,0); leftWall.receiveShadow=true; room.add(leftWall);
+const rightWall = new THREE.Mesh(new THREE.BoxGeometry(.1,3.4,8), M(0xf0c98f,{roughness:.95}));
+rightWall.position.set(3,1.7,0); rightWall.receiveShadow=true; room.add(rightWall);
+// skirting
+const skirt=new THREE.Mesh(new THREE.BoxGeometry(7,.14,.06),M(0xfaf0dc));
+skirt.position.set(0,.07,-2.95); room.add(skirt);
+
+// window on back wall (right side) with sky + frame + sun shaft
+const winG = new THREE.Group(); winG.position.set(1.15,2.05,-2.94); room.add(winG);
+const sky = new THREE.Mesh(new THREE.PlaneGeometry(1.0,1.25), new THREE.MeshBasicMaterial({color:0xa8dcff}));
+winG.add(sky);
+const cloudM=new THREE.MeshBasicMaterial({color:0xffffff});
+const cl1=new THREE.Mesh(new THREE.SphereGeometry(.09,8,6),cloudM); cl1.scale.set(1.6,.7,.4); cl1.position.set(-.2,.25,.02); winG.add(cl1);
+const cl2=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),cloudM); cl2.scale.set(1.8,.8,.4); cl2.position.set(.25,-.1,.02); winG.add(cl2);
+const frameM=M(0xfdf6e3);
+const fH=new THREE.Mesh(new THREE.BoxGeometry(1.12,.07,.08),frameM);
+const fH2=fH.clone(); fH.position.y=.63; fH2.position.y=-.63;
+const fV=new THREE.Mesh(new THREE.BoxGeometry(.07,1.32,.08),frameM);
+const fV2=fV.clone(); fV.position.x=-.53; fV2.position.x=.53;
+const fC=new THREE.Mesh(new THREE.BoxGeometry(.05,1.26,.06),frameM);
+const fC2=new THREE.Mesh(new THREE.BoxGeometry(1.06,.05,.06),frameM);
+winG.add(fH,fH2,fV,fV2,fC,fC2);
+// sun shaft (fake volumetric)
+const shaftTex = (()=>{const c=document.createElement('canvas');c.width=64;c.height=256;
+  const g=c.getContext('2d');const gr=g.createLinearGradient(0,0,0,256);
+  gr.addColorStop(0,'rgba(255,225,160,.55)');gr.addColorStop(1,'rgba(255,225,160,0)');
+  g.fillStyle=gr;g.fillRect(0,0,64,256);return new THREE.CanvasTexture(c);})();
+const shaft = new THREE.Mesh(new THREE.PlaneGeometry(1.15,3.4),
+  new THREE.MeshBasicMaterial({map:shaftTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+shaft.position.set(.7,1.35,-1.6); shaft.rotation.set(-.55,.12,0); room.add(shaft);
+
+// ---------- bed (left side) with space underneath ----------
+const bed = new THREE.Group(); bed.position.set(-2.05,0,-.7); room.add(bed);
+const legM=M(0x8a5c34);
+[[-.5,-.95],[.5,-.95],[-.5,.95],[.5,.95]].forEach(([x,z])=>{
+  const leg=new THREE.Mesh(new THREE.BoxGeometry(.09,.28,.09),legM);
+  leg.position.set(x,.14,z); leg.castShadow=true; bed.add(leg);
+});
+const base=new THREE.Mesh(new THREE.BoxGeometry(1.15,.16,2.1),M(0x9a6a3e));
+base.position.y=.36; base.castShadow=true; bed.add(base);
+const mattress=new THREE.Mesh(new THREE.BoxGeometry(1.1,.16,2.0),M(0xfdf6e3));
+mattress.position.y=.52; mattress.castShadow=true; bed.add(mattress);
+const blanket=new THREE.Mesh(new THREE.BoxGeometry(1.12,.1,1.3),M(0xe8593f));
+blanket.position.set(0,.62,.3); blanket.castShadow=true; bed.add(blanket);
+const blanket2=new THREE.Mesh(new THREE.BoxGeometry(1.12,.04,.25),M(0xf7b32b));
+blanket2.position.set(0,.685,-.3); bed.add(blanket2);
+const pillow=new THREE.Mesh(new THREE.BoxGeometry(.7,.14,.42),M(0x8fc7ea));
+pillow.rotation.y=.06; pillow.position.set(0,.65,-.72); pillow.castShadow=true; bed.add(pillow);
+const headboard=new THREE.Mesh(new THREE.BoxGeometry(1.15,.7,.09),M(0x9a6a3e));
+headboard.position.set(0,.6,-1.08); headboard.castShadow=true; bed.add(headboard);
+
+// ---------- shelves with toys (back wall, left) ----------
+function toyCube(color,s=.13){const m=new THREE.Mesh(new THREE.BoxGeometry(s,s,s),M(color));m.castShadow=true;return m}
+const shelfM=M(0xa9713f);
+[1.35, 1.95].forEach((y,si)=>{
+  const sh=new THREE.Mesh(new THREE.BoxGeometry(1.5,.06,.32),shelfM);
+  sh.position.set(-1.05,y,-2.8); sh.castShadow=true; room.add(sh);
+});
+// toys on shelves
+const t1=toyCube(0xe8593f); t1.position.set(-1.6,1.35+.1,-2.8); room.add(t1);
+const t2=toyCube(0x2e9e4f,.11); t2.position.set(-1.42,1.35+.09,-2.78); room.add(t2);
+const t3=toyCube(0xf7b32b,.12); t3.position.set(-1.51,1.35+.215,-2.79); room.add(t3);
+const ball=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),M(0x3d7be0)); ball.castShadow=true;
+ball.position.set(-1.0,1.35+.14,-2.8); room.add(ball);
+const ballStripe=new THREE.Mesh(new THREE.SphereGeometry(.112,16,12,0,Math.PI*2,Math.PI*.42,Math.PI*.16),M(0xf2f2f2));
+ballStripe.position.copy(ball.position); room.add(ballStripe);
+// toy rocket
+const rocket=new THREE.Group(); rocket.position.set(-.55,1.95+.03,-2.8); room.add(rocket);
+const rBody=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,.22,10),M(0xe0e6ec)); rBody.position.y=.11; rBody.castShadow=true;
+const rNose=new THREE.Mesh(new THREE.ConeGeometry(.055,.1,10),M(0xe8593f)); rNose.position.y=.27;
+const rFin=new THREE.Mesh(new THREE.BoxGeometry(.14,.06,.02),M(0xe8593f)); rFin.position.y=.03;
+rocket.add(rBody,rNose,rFin);
+// teddy bear on upper shelf
+const teddy=new THREE.Group(); teddy.position.set(-1.45,1.95+.03,-2.8); room.add(teddy);
+const tedM=M(0xb9814e);
+const tBody=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),tedM); tBody.position.y=.09; tBody.scale.set(1,.95,.8); tBody.castShadow=true;
+const tHead=new THREE.Mesh(new THREE.SphereGeometry(.065,10,8),tedM); tHead.position.y=.21;
+const tE1=new THREE.Mesh(new THREE.SphereGeometry(.028,8,6),tedM); tE1.position.set(-.05,.265,0);
+const tE2=tE1.clone(); tE2.position.x=.05;
+const tMuz=new THREE.Mesh(new THREE.SphereGeometry(.03,8,6),M(0xe6c9a1)); tMuz.position.set(0,.2,.05);
+teddy.add(tBody,tHead,tE1,tE2,tMuz);
+// posters
+const post1=new THREE.Mesh(new THREE.PlaneGeometry(.55,.72),new THREE.MeshBasicMaterial({color:0x7ec8f0}));
+post1.position.set(-2.0,2.25,-2.94); room.add(post1);
+const post1s=new THREE.Mesh(new THREE.CircleGeometry(.16,5),new THREE.MeshBasicMaterial({color:0xf7d23b}));
+post1s.position.set(-2.0,2.3,-2.93); room.add(post1s);
+const post2=new THREE.Mesh(new THREE.PlaneGeometry(.5,.62),new THREE.MeshBasicMaterial({color:0xf4a2c0}));
+post2.position.set(2.35,2.2,-2.94); room.add(post2);
+const post2h=new THREE.Mesh(new THREE.CircleGeometry(.13,16),new THREE.MeshBasicMaterial({color:0xe8593f}));
+post2h.position.set(2.35,2.26,-2.93); room.add(post2h);
+// toy chest right side + blocks on floor
+const chest=new THREE.Mesh(new THREE.BoxGeometry(.9,.5,.5),M(0x4f8fd0)); chest.position.set(2.2,.25,-2.3); chest.castShadow=true; room.add(chest);
+const chestLid=new THREE.Mesh(new THREE.BoxGeometry(.94,.1,.54),M(0x3d76b3)); chestLid.position.set(2.2,.55,-2.3); chestLid.castShadow=true; room.add(chestLid);
+const b1=toyCube(0xf7b32b,.14); b1.position.set(1.5,.07,-1.0); b1.rotation.y=.4; room.add(b1);
+const b2=toyCube(0x2e9e4f,.12); b2.position.set(1.75,.06,-.8); b2.rotation.y=-.3; room.add(b2);
+const b3=toyCube(0xe8593f,.12); b3.position.set(1.6,.19,-.95); b3.rotation.y=.9; room.add(b3);
+
+// rug — colorful rings, under Danny
+const rug=new THREE.Group(); rug.position.set(-.25,.011,.5); room.add(rug);
+[[.85,0x69b7e8],[.62,0xf7d23b],[.4,0xef8354],[.2,0xfaf0dc]].forEach(([r,c],i)=>{
+  const ring=new THREE.Mesh(new THREE.CircleGeometry(r,40),M(c,{roughness:.95}));
+  ring.rotation.x=-Math.PI/2; ring.position.y=i*.002; ring.receiveShadow=true; rug.add(ring);
+});
+
+/* ============================================================
+   DANNY — low-poly boy, rigged with groups
+   ============================================================ */
+const danny=new THREE.Group(); danny.position.set(-.35,0,.35); scene.add(danny);
+const body=new THREE.Group(); danny.add(body);       // moves down when kneeling
+// -- legs (hip pivots) --
+function makeLeg(shoeMat,side){ // side: -1 left, +1 right
+  const hip=new THREE.Group(); hip.position.set(side*.1,.56,0);
+  const thigh=new THREE.Mesh(new THREE.CylinderGeometry(.055,.05,.26,10),skinM);
+  thigh.position.y=-.13; thigh.castShadow=true; hip.add(thigh);
+  const knee=new THREE.Group(); knee.position.y=-.26; hip.add(knee);
+  const shin=new THREE.Mesh(new THREE.CylinderGeometry(.048,.042,.24,10),skinM);
+  shin.position.y=-.12; shin.castShadow=true; knee.add(shin);
+  const shoe=new THREE.Mesh(new THREE.BoxGeometry(.11,.07,.19),shoeMat);
+  shoe.position.set(0,-.245,.04); shoe.castShadow=true; knee.add(shoe);
+  const sole=new THREE.Mesh(new THREE.BoxGeometry(.115,.025,.2),M(0xf2f2f2));
+  sole.position.set(0,-.285,.04); knee.add(sole);
+  return {hip,knee};
+}
+const legL=makeLeg(shoeRM,-1), legR=makeLeg(shoeBM,1);
+body.add(legL.hip,legR.hip);
+// -- pelvis / shorts --
+const pelvis=new THREE.Group(); pelvis.position.y=.56; body.add(pelvis);
+const shorts=new THREE.Mesh(new THREE.BoxGeometry(.27,.16,.17),shortsM);
+shorts.position.y=.02; shorts.castShadow=true; pelvis.add(shorts);
+// -- torso (pivot at waist for bending) --
+const torso=new THREE.Group(); torso.position.y=.08; pelvis.add(torso);
+const chestMesh=new THREE.Mesh(new THREE.BoxGeometry(.3,.3,.19),shirtM);
+chestMesh.position.y=.17; chestMesh.castShadow=true; torso.add(chestMesh);
+const stripe=new THREE.Mesh(new THREE.BoxGeometry(.305,.07,.195),stripeM);
+stripe.position.y=.17; torso.add(stripe);
+// backpack
+const pack=new THREE.Mesh(new THREE.BoxGeometry(.24,.26,.1),packM);
+pack.position.set(0,.16,-.15); pack.castShadow=true; torso.add(pack);
+const packPocket=new THREE.Mesh(new THREE.BoxGeometry(.15,.13,.04),M(0x2e7a3a));
+packPocket.position.set(0,.12,-.21); torso.add(packPocket);
+const strapL=new THREE.Mesh(new THREE.BoxGeometry(.05,.26,.02),M(0x2e7a3a));
+strapL.position.set(-.09,.17,.1); torso.add(strapL);
+const strapR=strapL.clone(); strapR.position.x=.09; torso.add(strapR);
+// -- arms --
+function makeArm(side){
+  const sh=new THREE.Group(); sh.position.set(side*.17,.3,0);
+  const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(.05,.048,.1,10),shirtM);
+  sleeve.position.y=-.04; sleeve.castShadow=true; sh.add(sleeve);
+  const upper=new THREE.Mesh(new THREE.CylinderGeometry(.042,.038,.14,10),skinM);
+  upper.position.y=-.14; upper.castShadow=true; sh.add(upper);
+  const elbow=new THREE.Group(); elbow.position.y=-.2; sh.add(elbow);
+  const fore=new THREE.Mesh(new THREE.CylinderGeometry(.036,.032,.16,10),skinM);
+  fore.position.y=-.08; fore.castShadow=true; elbow.add(fore);
+  const hand=new THREE.Mesh(new THREE.SphereGeometry(.048,10,8),skinM);
+  hand.position.y=-.18; hand.castShadow=true; elbow.add(hand);
+  return {sh,elbow};
+}
+const armL=makeArm(-1), armR=makeArm(1);
+torso.add(armL.sh,armR.sh);
+// -- head --
+const neck=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.07,8),skinM);
+neck.position.y=.34; torso.add(neck);
+const head=new THREE.Group(); head.position.y=.38; torso.add(head);
+const skull=new THREE.Mesh(new THREE.SphereGeometry(.17,20,16),skinM);
+skull.position.y=.13; skull.scale.set(1,1.05,.95); skull.castShadow=true; head.add(skull);
+// ears
+const earL=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),skinM); earL.position.set(-.165,.12,0); head.add(earL);
+const earR=earL.clone(); earR.position.x=.165; head.add(earR);
+// curly brown hair — cluster of spheres
+const curlPos=[[0,.28,0],[-.09,.26,.05],[.09,.26,.05],[-.13,.22,-.02],[.13,.22,-.02],
+  [-.06,.29,-.06],[.06,.29,-.06],[0,.26,.11],[-.11,.24,.1],[.11,.24,.1],
+  [-.15,.17,-.08],[.15,.17,-.08],[0,.28,-.11],[-.08,.24,-.12],[.08,.24,-.12],[0,.31,.05]];
+curlPos.forEach(p=>{
+  const c=new THREE.Mesh(new THREE.SphereGeometry(.062+rng()*.02,8,6),hairM);
+  c.position.set(p[0],p[1],p[2]); c.castShadow=true; head.add(c);
+});
+// face — big friendly eyes
+function makeEye(side){
+  const g=new THREE.Group(); g.position.set(side*.066,.14,.145);
+  const white=new THREE.Mesh(new THREE.SphereGeometry(.045,12,10),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.3}));
+  white.scale.set(1,1.15,.55); g.add(white);
+  const pupil=new THREE.Mesh(new THREE.SphereGeometry(.022,10,8),new THREE.MeshStandardMaterial({color:0x3a2a18,roughness:.25}));
+  pupil.position.set(0,0,.033); g.add(pupil);
+  const glint=new THREE.Mesh(new THREE.SphereGeometry(.008,6,5),new THREE.MeshBasicMaterial({color:0xffffff}));
+  glint.position.set(.008,.012,.052); g.add(glint);
+  return {g,pupil,glint};
+}
+const eyeL=makeEye(-1), eyeR=makeEye(1);
+head.add(eyeL.g,eyeR.g);
+// eyebrows
+const browM=M(0x5a3620);
+const browL=new THREE.Mesh(new THREE.BoxGeometry(.07,.016,.02),browM);
+browL.position.set(-.066,.2,.16); browL.rotation.z=.12; head.add(browL);
+const browR=browL.clone(); browR.position.x=.066; browR.rotation.z=-.12; head.add(browR);
+// mouth: smile arc (torus) + amazed "O"
+const smile=new THREE.Mesh(new THREE.TorusGeometry(.05,.011,8,16,Math.PI*.75),M(0x9c4a35));
+smile.position.set(0,.055,.15); smile.rotation.z=Math.PI+Math.PI*.125; head.add(smile);
+const mouthO=new THREE.Mesh(new THREE.SphereGeometry(.03,10,8),M(0x7a3226));
+mouthO.position.set(0,.045,.15); mouthO.scale.set(1,1.25,.4); head.add(mouthO);
+// blush
+const blushM=new THREE.MeshBasicMaterial({color:0xf0977b,transparent:true,opacity:.55});
+const blushL=new THREE.Mesh(new THREE.CircleGeometry(.028,10),blushM); blushL.position.set(-.11,.08,.145); head.add(blushL);
+const blushR=blushL.clone(); blushR.position.x=.11; head.add(blushR);
+// nose
+const nose=new THREE.Mesh(new THREE.SphereGeometry(.02,8,6),skinM); nose.position.set(0,.1,.165); head.add(nose);
+
+/* ============================================================
+   THE MAGIC BOOK
+   ============================================================ */
+const book=new THREE.Group(); scene.add(book);
+// bottom cover (right half when open)
+const covB=new THREE.Mesh(new THREE.BoxGeometry(.36,.022,.5),leatherM);
+covB.position.set(.18,.011,0); covB.castShadow=true; book.add(covB);
+// golden edge trim on bottom cover
+const trimB=new THREE.Mesh(new THREE.BoxGeometry(.375,.012,.515),goldM);
+trimB.position.set(.18,.004,0); book.add(trimB);
+// static right page block
+const pagesR=new THREE.Mesh(new THREE.BoxGeometry(.33,.05,.46),pageM);
+pagesR.position.set(.17,.048,0); book.add(pagesR);
+// flip group: top cover + left page block — rotates -PI to open
+const flipG=new THREE.Group(); flipG.position.set(0,.08,0); book.add(flipG);
+const covT=new THREE.Mesh(new THREE.BoxGeometry(.36,.022,.5),leatherM);
+covT.position.set(.18,.02,0); covT.castShadow=true; flipG.add(covT);
+const trimT=new THREE.Mesh(new THREE.BoxGeometry(.375,.012,.515),goldM);
+trimT.position.set(.18,.028,0); flipG.add(trimT);
+const covTin=new THREE.Mesh(new THREE.BoxGeometry(.35,.004,.49),leatherInM);
+covTin.position.set(.175,.007,0); flipG.add(covTin);
+const pagesL=new THREE.Mesh(new THREE.BoxGeometry(.33,.02,.46),pageM);
+pagesL.position.set(.17,-.006,0); flipG.add(pagesL);
+// spine
+const spine=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.5,10,1,false),leatherM);
+spine.rotation.x=Math.PI/2; spine.position.set(0,.045,0); spine.castShadow=true; book.add(spine);
+const spineTrim=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.1,10),goldM);
+spineTrim.rotation.x=Math.PI/2; spineTrim.position.set(0,.045,0); book.add(spineTrim);
+// emblem on top cover — golden star
+const emblem=new THREE.Mesh(new THREE.CircleGeometry(.07,5),goldM);
+emblem.rotation.x=-Math.PI/2; emblem.position.set(.18,.0325,0); flipG.add(emblem);
+// individual flipping pages
+const flipPages=[];
+for(let i=0;i<5;i++){
+  const pg=new THREE.Group(); pg.position.set(0,.078+i*.0022,0); book.add(pg);
+  const sheet=new THREE.Mesh(new THREE.PlaneGeometry(.33,.46),
+    new THREE.MeshStandardMaterial({color:0xfdf3da,roughness:.9,side:THREE.DoubleSide}));
+  sheet.rotation.x=-Math.PI/2; sheet.position.set(.168,0,0); pg.add(sheet);
+  // faint golden scribbles
+  const scr=new THREE.Mesh(new THREE.PlaneGeometry(.2,.02),
+    new THREE.MeshBasicMaterial({color:0xd8a53e,transparent:true,opacity:.7,side:THREE.DoubleSide}));
+  scr.rotation.x=-Math.PI/2; scr.position.set(.15,.001,-.08+i*.03); pg.add(scr);
+  flipPages.push(pg);
+}
+
+// glow sprite behind book
+function radialTex(inner,outer){
+  const c=document.createElement('canvas'); c.width=c.height=256;
+  const g=c.getContext('2d');
+  const gr=g.createRadialGradient(128,128,0,128,128,128);
+  gr.addColorStop(0,inner); gr.addColorStop(1,outer);
+  g.fillStyle=gr; g.fillRect(0,0,256,256);
+  return new THREE.CanvasTexture(c);
+}
+const glowSprite=new THREE.Sprite(new THREE.SpriteMaterial({
+  map:radialTex('rgba(255,214,120,.85)','rgba(255,190,80,0)'),
+  transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0}));
+glowSprite.scale.set(1.6,1.6,1); scene.add(glowSprite);
+
+// ---------- sparkle particles ----------
+const NP=150;
+const pGeo=new THREE.BufferGeometry();
+const pPos=new Float32Array(NP*3);
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+const pDat=[];
+for(let i=0;i<NP;i++) pDat.push({ph:rng()*Math.PI*2, sp:.6+rng()*1.4, r:.15+rng()*.5, rise:.25+rng()*.5, off:rng()*1.6});
+const pMat=new THREE.PointsMaterial({color:0xffd873,size:.05,transparent:true,opacity:0,
+  depthWrite:false,blending:THREE.AdditiveBlending,sizeAttenuation:true,
+  map:radialTex('rgba(255,255,255,1)','rgba(255,255,255,0)')});
+const sparkles=new THREE.Points(pGeo,pMat); sparkles.frustumCulled=false; scene.add(sparkles);
+
+// ---------- "BE WISE" glowing text ----------
+const txtCanvas=document.createElement('canvas'); txtCanvas.width=1024; txtCanvas.height=380;
+{
+  const g=txtCanvas.getContext('2d');
+  g.clearRect(0,0,1024,380);
+  g.textAlign='center'; g.textBaseline='middle';
+  g.font='900 170px Georgia, "Times New Roman", serif';
+  // outer glow layers
+  g.shadowColor='rgba(255,150,30,.95)';
+  for(const b of [70,40,18]){ g.shadowBlur=b; g.fillStyle='rgba(255,185,60,.8)'; g.fillText('BE WISE',512,195); }
+  // gold gradient fill
+  const gr=g.createLinearGradient(0,80,0,300);
+  gr.addColorStop(0,'#fffbe8'); gr.addColorStop(.45,'#ffd75e'); gr.addColorStop(1,'#e08a10');
+  g.shadowBlur=0;
+  g.lineWidth=10; g.strokeStyle='rgba(96,52,6,.95)'; g.strokeText('BE WISE',512,195);
+  g.fillStyle=gr; g.fillText('BE WISE',512,195);
+}
+const txtTex=new THREE.CanvasTexture(txtCanvas);
+const txtMesh=new THREE.Mesh(new THREE.PlaneGeometry(.55,.2),
+  new THREE.MeshBasicMaterial({map:txtTex,transparent:true,depthWrite:false,depthTest:false,opacity:0}));
+txtMesh.renderOrder=20; scene.add(txtMesh);
+const txtGlow=new THREE.Sprite(new THREE.SpriteMaterial({
+  map:radialTex('rgba(255,220,130,.6)','rgba(255,200,90,0)'),
+  transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,opacity:0}));
+txtGlow.renderOrder=19; txtGlow.scale.set(2.2,1.1,1); scene.add(txtGlow);
+
+// dust motes in sun light (ambience)
+const ND=60, dGeo=new THREE.BufferGeometry(), dPos=new Float32Array(ND*3);
+const dDat=[]; for(let i=0;i<ND;i++) dDat.push({x:.1+rng()*1.6,y:rng()*2.6,z:-2.5+rng()*2.2,ph:rng()*6.28,sp:.06+rng()*.1});
+dGeo.setAttribute('position',new THREE.BufferAttribute(dPos,3));
+const dust=new THREE.Points(dGeo,new THREE.PointsMaterial({color:0xffe9b8,size:.018,transparent:true,opacity:.5,
+  depthWrite:false,blending:THREE.AdditiveBlending,sizeAttenuation:true}));
+dust.frustumCulled=false; scene.add(dust);
+
+/* ============================================================
+   TIMELINE — everything below is a pure function of t
+   ============================================================ */
+const V3=THREE.Vector3;
+const camStart={pos:new V3(.25,1.75,7.2), look:new V3(-.25,1.05,-.6)};
+const camEnd  ={pos:new V3(-.12,1.02,2.15), look:new V3(-.3,.72,.62)};
+const RY0=-1.95, RY1=.12;         // Danny facing bed -> facing camera
+const rootPos=new V3(-.35,0,.35);
+
+function bookWorldTarget(t){
+  // where the book should be, along its journey
+  const under=new V3(-1.62,.09,.05);                      // under the bed
+  const heldBed=new V3(-.8,.42,.22);                      // pulled out, held while facing bed
+  const p=new V3();
+  if(t<3.05){ p.copy(under); }
+  else if(t<4.3){ p.lerpVectors(under,heldBed,easeIO(seg(t,3.05,4.3))); }
+  else {
+    // follows in front of Danny as he turns, then settles down in front of him
+    const turn=ease(seg(t,4.35,5.6));
+    const ry=lerp(RY0,RY1,turn);
+    const dist=lerp(.62,.5,turn), h=lerp(.5,.42,turn);
+    p.set(rootPos.x+Math.sin(ry)*dist, h, rootPos.z+Math.cos(ry)*dist);
+    const settle=ease(seg(t,5.3,6.1));
+    p.y=lerp(p.y,.4,settle);
+  }
+  return p;
+}
+
+function glowLevel(t){
+  let g=.35*ease(seg(t,3.1,4.3));
+  g+=.2*ease(seg(t,4.3,5.6));
+  g+=.25*ease(seg(t,5.7,7.0));
+  g+=.2*ease(seg(t,7.0,8.8));
+  if(t>8.6) g+=.2*ease(seg(t,8.6,9.2));      // flash when words appear
+  g*=1+.08*Math.sin(t*9)+.05*Math.sin(t*23); // magical flicker
+  return clamp(g,0,1.05);
+}
+
+function blinkAmt(t){
+  let a=0;
+  for(const b of [2.35,5.05,7.25]){ a=Math.max(a, clamp(1-Math.abs(t-b)/.09,0,1)); }
+  return a;
+}
+
+window.renderFrame = function(tFrame){
+  const t=clamp(tFrame,0,DUR);
+
+  // ---------- camera: slow dolly in ----------
+  const cp=easeIO(seg(t,.3,11.5));
+  camera.position.lerpVectors(camStart.pos,camEnd.pos,cp);
+  camera.position.y+=.012*Math.sin(t*1.1);              // gentle handheld float
+  camera.position.x+=.008*Math.sin(t*.7+1.3);
+  const look=new V3().lerpVectors(camStart.look,camEnd.look,cp);
+  camera.lookAt(look);
+
+  // ---------- Danny pose params ----------
+  const bendIn = ease(seg(t,1.05,2.0));                  // torso bends down
+  const bendOut= ease(seg(t,4.0,5.2));                   // straighten after grab
+  const bend   = bendIn*(1-.85*bendOut);
+  const kneel  = ease(seg(t,1.35,2.5));                  // stand -> kneel
+  const reach  = ease(seg(t,2.15,2.95))*(1-ease(seg(t,3.5,4.35))); // right arm to bed
+  const holdBk = ease(seg(t,3.4,4.4));                   // both hands carry book
+  const openPo = ease(seg(t,5.5,6.6));                   // hands on open book
+  const amaze  = ease(seg(t,8.7,9.6));                   // WOW
+  const turn   = ease(seg(t,4.35,5.6));
+
+  danny.rotation.y=lerp(RY0,RY1,turn);
+  danny.position.copy(rootPos);
+
+  // body drops when kneeling: hips from .56(stand) to ~.30(kneel)
+  body.position.y=lerp(0,-.27,kneel);
+  body.position.y+=.006*Math.sin(t*3.1);                 // breathing
+
+  // legs — kneel: shins fold back flat on floor
+  legL.hip.rotation.x=lerp(0,-.12,kneel);
+  legR.hip.rotation.x=lerp(0,-.12,kneel);
+  legL.knee.rotation.x=lerp(0,1.62,kneel);
+  legR.knee.rotation.x=lerp(0,1.62,kneel);
+  // knees apart a touch when kneeling
+  legL.hip.rotation.z=lerp(0,.12,kneel);
+  legR.hip.rotation.z=lerp(0,-.12,kneel);
+
+  // torso bend + reach lean + amazed lean-back
+  torso.rotation.x=bend*.6 + reach*.25 - amaze*.22;
+  torso.rotation.y=reach*.15;
+  torso.scale.y=1+.012*Math.sin(t*3.1);
+
+  // ---------- arms ----------
+  // defaults: relaxed
+  let shL={x:.08,z:.15,el:-.15}, shR={x:.08,z:-.15,el:-.15};
+  // reach: right arm stretches forward-down toward under-bed
+  shR.x=lerp(shR.x,-1.05,reach); shR.el=lerp(shR.el,-.15,reach);
+  shL.x=lerp(shL.x,-.35,reach*.6);                       // left braces on floor
+  // carrying book: both arms forward, elbows bent
+  shL.x=lerp(shL.x,-.55,holdBk); shL.z=lerp(shL.z,.28,holdBk); shL.el=lerp(shL.el,-.9,holdBk);
+  shR.x=lerp(shR.x,-.55,holdBk); shR.z=lerp(shR.z,-.28,holdBk); shR.el=lerp(shR.el,-.9,holdBk);
+  // open pose: hands lower onto the book
+  shL.x=lerp(shL.x,-.35,openPo); shL.el=lerp(shL.el,-.55,openPo);
+  shR.x=lerp(shR.x,-.35,openPo); shR.el=lerp(shR.el,-.55,openPo);
+  // amazed: arms fly up-out, palms open
+  shL.x=lerp(shL.x,-1.15,amaze); shL.z=lerp(shL.z,.55,amaze); shL.el=lerp(shL.el,-.35,amaze);
+  shR.x=lerp(shR.x,-1.15,amaze); shR.z=lerp(shR.z,-.55,amaze); shR.el=lerp(shR.el,-.35,amaze);
+  armL.sh.rotation.x=shL.x; armL.sh.rotation.z=shL.z; armL.elbow.rotation.x=shL.el;
+  armR.sh.rotation.x=shR.x; armR.sh.rotation.z=shR.z; armR.elbow.rotation.x=shR.el;
+
+  // ---------- head ----------
+  const readLook=ease(seg(t,5.4,6.4));
+  head.rotation.x = bend*-.25 + reach*.35 + readLook*.32 - amaze*.5;
+  head.rotation.y = Math.sin(t*.9)*.03 + reach*.2;
+  head.rotation.z = amaze*.06*Math.sin(t*2);
+
+  // face: amazement
+  const eyeScale=1+.3*amaze;
+  const blink=blinkAmt(t);
+  [eyeL,eyeR].forEach(e=>{
+    e.g.scale.set(eyeScale,eyeScale*(1-.92*blink),eyeScale);
+    e.pupil.scale.setScalar(1-.2*amaze);
+  });
+  browL.position.y=.2+.03*amaze; browR.position.y=.2+.03*amaze;
+  browL.rotation.z=.12+.2*amaze; browR.rotation.z=-.12-.2*amaze;
+  smile.scale.setScalar(Math.max(.001,1-amaze));
+  smile.visible=amaze<.95;
+  mouthO.scale.set(1,1.25,.4); mouthO.scale.multiplyScalar(Math.max(.001,amaze));
+  mouthO.visible=amaze>.03;
+
+  // ---------- book ----------
+  const bp=bookWorldTarget(t);
+  book.position.copy(bp);
+  if(t<4.35){
+    book.rotation.set(0,RY0+Math.PI/2,0);                // spine toward Danny while carried
+    // slight wobble while being pulled
+    const pull=seg(t,3.05,4.3);
+    book.rotation.z=.15*Math.sin(pull*Math.PI)*Math.sin(t*7);
+  } else {
+    const trn=ease(seg(t,4.35,5.6));
+    book.rotation.set(0,lerp(RY0+Math.PI/2,RY1,trn),0);
+    const tilt=ease(seg(t,5.3,6.2));
+    book.rotation.x=lerp(0,-.24,tilt);                   // tilt toward camera so pages read
+  }
+  book.scale.setScalar(.8);
+  const openA=easeIO(seg(t,5.75,7.0));
+  flipG.rotation.z=-Math.PI*openA;
+  // floating rise as magic intensifies
+  book.position.y+=.06*ease(seg(t,7.2,9.2))*(1+.25*Math.sin(t*2.6));
+  // pages flip by themselves
+  flipPages.forEach((pg,i)=>{
+    const a=easeIO(seg(t,7.0+i*.38,7.62+i*.38));
+    pg.rotation.z=-Math.PI*a*openA;                      // only after book is open
+    pg.visible=openA>.98;
+  });
+
+  // ---------- glow / light / sparkles ----------
+  const gl=glowLevel(t);
+  bookLight.position.set(bp.x,bp.y+.35,bp.z+.15);
+  bookLight.intensity=1.0*gl;
+  goldM.emissiveIntensity=.4+1.2*gl;
+  glowSprite.position.set(bp.x,bp.y+.1,bp.z);
+  glowSprite.material.opacity=.45*clamp(gl,0,1);
+  glowSprite.scale.setScalar(.85+ .55*gl + .05*Math.sin(t*5));
+
+  const pArr=pGeo.attributes.position.array;
+  for(let i=0;i<NP;i++){
+    const d=pDat[i];
+    const ang=d.ph+t*d.sp;
+    const yy=((t*d.rise+d.off)%1.5);
+    pArr[i*3]  =bp.x+Math.cos(ang)*d.r*(1-yy*.35);
+    pArr[i*3+1]=bp.y+.05+yy;
+    pArr[i*3+2]=bp.z+Math.sin(ang)*d.r*(1-yy*.35);
+  }
+  pGeo.attributes.position.needsUpdate=true;
+  pMat.opacity=.85*clamp(gl,0,1);
+  pMat.size=.045+.02*Math.sin(t*6);
+
+  // dust motes
+  const dArr=dGeo.attributes.position.array;
+  for(let i=0;i<ND;i++){
+    const d=dDat[i];
+    dArr[i*3]  =d.x+.06*Math.sin(t*d.sp*4+d.ph);
+    dArr[i*3+1]=((d.y+t*d.sp)%2.6)+.15;
+    dArr[i*3+2]=d.z+.05*Math.cos(t*d.sp*3+d.ph);
+  }
+  dGeo.attributes.position.needsUpdate=true;
+
+  // ---------- "BE WISE" ----------
+  const ta=seg(t,8.75,9.55);
+  const tScale=Math.max(.001,back(ta));
+  const bob=.025*Math.sin(t*2.3);
+  txtMesh.position.set(bp.x,bp.y+.68+.08*ta+bob,bp.z+.14);
+  txtMesh.scale.set(tScale,tScale,1);
+  txtMesh.quaternion.copy(camera.quaternion);
+  txtMesh.material.opacity=ease(seg(t,8.75,9.3));
+  txtGlow.position.copy(txtMesh.position);
+  txtGlow.material.opacity=.35*ease(seg(t,8.75,9.4))*(1+.15*Math.sin(t*4.4));
+  txtGlow.scale.set(1.25*tScale,.6*tScale,1);
+
+  renderer.render(scene,camera);
+};
+
+window.captureFrame = function(tFrame){
+  window.renderFrame(tFrame);
+  return renderer.domElement.toDataURL('image/png');
+};
+
+window.SCENE_READY = true;
+// live preview when opened manually in a browser
+if(!navigator.webdriver){
+  const t0=performance.now();
+  (function loop(){ window.renderFrame(((performance.now()-t0)/1000)%DUR); requestAnimationFrame(loop); })();
+}
+</script>
+</body>
+</html>
