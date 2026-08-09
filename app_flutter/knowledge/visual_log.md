@@ -2538,3 +2538,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #fittings P6·שלב-6 — UI גריד-הסודוקו (2026-08-08)
 **שינוי-UI (מגודר `kFittingEngine`):** גריד-סודוקו — משבצת מסומנת → 💡 "מתחברים לשכן" (הצעות-מנוע בלבד) → הנחה; כפתורי השלם/בדיקה/קו דרך `freeEndsOf`. **אימות:** `sudoku_grid_test` **4/4** + screenshot תואם צילום 5.
+
+## #internal-card P6·7 — קו→גריד (2026-08-08)
+**שינוי-UI (מגודר `kInternalCard`):** כפתור קו פותח את גריד-הסודוקו ב-sheet — הגריד נגיש דרך הכרטיס, ושניהם deployable (INTERNAL_CARD כבר דלוק ב-web-deploy). **אימות:** `full_internal_card_test` **8/8**.

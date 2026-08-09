@@ -221,4 +221,31 @@ void main() {
 
     expect(find.textContaining('השלמת חיבור'), findsOneWidget);
   });
+
+  testWidgets('קו opens the sudoku line-builder grid (D11/D13)',
+      (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
+          ),
+        ),
+      ),
+    );
+
+    // Add a product so the line strip (with קו) appears.
+    await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('internalCardBuy')));
+    await tester.pump(const Duration(seconds: 5)); // add + flush toast
+
+    await tester.ensureVisible(find.byKey(const Key('lineBtnLine')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('lineBtnLine')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('sudokuGrid')), findsOneWidget);
+  });
 }

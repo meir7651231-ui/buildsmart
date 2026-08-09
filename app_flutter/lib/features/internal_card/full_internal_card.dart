@@ -26,6 +26,8 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/features/fittings/ui/sudoku_grid.dart'
+    show SudokuGrid;
 import 'package:buildsmart/logic/install_engine.dart' show findShortestPath;
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -995,7 +997,7 @@ class _CardView extends ConsumerWidget {
             child: _lineBtn(
               '🔗 קו',
               const Key('lineBtnLine'),
-              () => _addToLine(context, ref, p),
+              () => _openGrid(context),
             ),
           ),
           const SizedBox(width: 6),
@@ -1048,20 +1050,26 @@ class _CardView extends ConsumerWidget {
   }
 
   /// קו — seed the line (the cart is the line the engine reads).
-  void _addToLine(BuildContext context, WidgetRef ref, LipskeyCatalogProduct p) {
-    ref.read(smartCartProvider.notifier).add(
-          SmartCartLine(
-            productKey: 'lip:${p.sku}',
-            productName: p.nameHe,
-            productEmoji: _heroEmoji(p),
-            brandName: p.brand,
-            brandPrice: priceFor(p) ?? 0,
-            productQty: 1,
-            accessories: const [],
-            selection: const {'יחידה': 'בודד'},
-          ),
-        );
-    showToast(context, 'נוסף לקו');
+  /// קו — opens the sudoku line-builder grid (D11/D13) in a sheet: the
+  /// engine-driven "only what mates the neighbour" board (P6·6).
+  void _openGrid(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: _cCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          14,
+          16,
+          14,
+          16 + MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: const SingleChildScrollView(child: SudokuGrid()),
+      ),
+    );
   }
 
   /// בדיקה — per-end needs + direct-mate count + any connection warning.

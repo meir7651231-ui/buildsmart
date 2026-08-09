@@ -3914,3 +3914,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #fittings P6·שלב-6 — UI גריד-הסודוקו D11/D13 · מגודר `kFittingEngine`
 > `sudoku_grid.dart` (`SudokuGrid`): גריד R×C · זרע-מצמד במרכז · הקש משבצת-ריקה שכנה → `gridSuggestionsAt` מציג **רק מתחברים-לשכן** (עם אימוג'י-צורה) → הקש-הצעה מניח. 3 כפתורים (השלם/בדיקה/קו) מדווחים דרך `freeEndsOf`. צרכן דק של מנוע-הכיוונים (P6·1–5). מגודר · לא מחווט לפרודקשן עדיין. תואם צילום #5.
 - gate: `flutter analyze` **0** · `sudoku_grid_test` **4/4** (הצעות-שכן · תא-רחוק-ריק · הנחה · בדיקה→קצוות).
+
+### #internal-card P6·7 — חיווט הכרטיס↔גריד (קו→סודוקו) · מגודר `kInternalCard`
+> כפתור **קו** בכרטיס פותח כעת את `SudokuGrid` ב-modal-sheet (במקום add-to-cart שהיה זמני). הגריד **נגיש** דרך הכרטיס; ומאחר ש-`INTERNAL_CARD=true` כבר בשני workflows של הפצת-web (`web-deploy.yml` + `firebase-hosting.yml`), גם הכרטיס וגם הגריד **מוכנים ל-deploy** בהרצת `web-deploy`.
+- gate: `flutter analyze` **0** · `full_internal_card_test` **8/8** (כולל קו→גריד).
