@@ -206,7 +206,12 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
         body: browse.families.isEmpty
             ? const _EmptyState()
             : ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+                // Bottom clearance so the LAST family ("אחר") scrolls clear of the
+                // home's floating buttons (cart + keyboard FABs) that hover over the
+                // bottom when this screen is embedded full-screen on the home (owner:
+                // "אחר נחתך מתחת לכפתורים"). Harmless extra scroll on the standalone
+                // route (no FABs there).
+                padding: const EdgeInsets.fromLTRB(0, BsTokens.space3, 0, 104),
                 itemCount: browse.families.length,
                 itemBuilder: (context, i) => _FamilySection(
                   family: browse.families[i],

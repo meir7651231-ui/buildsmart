@@ -3933,3 +3933,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #catalog-config-home-fullscreen-fit — תיקון-חיתוך: התאמה ל-viewport של ה-shell (2026-08-09)
 **באג (מצילום-בעלים "נחתך באמצע"):** הגובה היה `viewport − status-bar` בלבד — לא הורד ה-`_HomeAppBar` (kToolbarHeight=56) ו-ה-`_BottomNav` (`_kHomeNavHeight`=58, main.dart). התיבה חרגה ~114px: התחתית נפלה ל-dead-zone של גלילה-מקוננת מאחורי הניווט, והשורה העליונה נדחקה מתחת לכותרת. **תיקון:** `SizedBox(height: media.size.height − padding.top − padding.bottom − kToolbarHeight − 58)` (רצפה 360) = **בדיוק גוף-ה-viewport של HomeShell** → הקטלוג נכנס וגולל בפנים, בלי חיתוך. `home_shell.dart`: `appBar:_HomeAppBar(preferredSize=kToolbarHeight)` + `bottomNavigationBar:_BottomNav`.
 - gate: `flutter analyze` 0 באזור-השינוי · בדיקות-בית ירוקות.
+
+### #catalog-config-fab-clearance — ריפוד-תחתון שמפנה מעל הכפתורים-הצפים (2026-08-09)
+**באג (המשך צילום-בעלים "אחר נחתך מתחת לכפתורים"):** גם אחרי התאמת-הגובה, המשפחה האחרונה ("אחר") ישבה צמוד לתחתית-התיבה — והכפתורים-הצפים של הבית (FAB עגלה + FAB מקלדת) מרחפים שם ומכסים אותה. **תיקון:** `catalog_config_screen` — ה-`ListView.builder` של ה-browse קיבל `padding` תחתון של 104px (`EdgeInsets.fromLTRB(0, space3, 0, 104)`), כך שהמשפחה האחרונה נגללת מעל ה-FABs. במסלול-העצמאי (route מלא, בלי FABs) זה סתם רווח-גלילה נוסף — לא מזיק.
+- gate: `flutter analyze` 0 באזור-השינוי.
