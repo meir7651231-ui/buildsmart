@@ -26,10 +26,6 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart';
 import 'package:buildsmart/features/catalog_config/image_quality.dart';
-import 'package:buildsmart/features/word_finder/material_lexicon.dart'
-    show materialOfEnriched;
-import 'package:buildsmart/features/word_finder/material_taxonomy.dart'
-    show canonicalMaterial;
 import 'package:flutter/foundation.dart';
 
 /// The representative product of [group] — the one with the BRIGHTEST image
@@ -340,7 +336,7 @@ ConfigBrowse browseAll(List<LipskeyCatalogProduct> products) {
   final familyEmoji = <String, String>{};
   for (final product in products) {
     final family = familyGroupOf(product);
-    final material = _materialOf(product);
+    final material = materialOf(product);
     final groupKey = '$material${typeKeyOf(product)}';
     if (!familyGroups.containsKey(family)) {
       familyOrder.add(family);
@@ -374,13 +370,6 @@ ConfigBrowse browseAll(List<LipskeyCatalogProduct> products) {
         ),
     ],
   );
-}
-
-/// The canonical MATERIAL of a product (PPR · HDPE · נחושת · …), or `''` when none
-/// is detected — the axis the family rail pages by (owner).
-String _materialOf(LipskeyCatalogProduct p) {
-  final m = materialOfEnriched(p);
-  return m == null ? '' : canonicalMaterial(m);
 }
 
 /// Material display order in a rail — plastics first (most of the catalog), then

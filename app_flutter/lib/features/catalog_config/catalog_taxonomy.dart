@@ -16,6 +16,10 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/category_groups.dart' show groupOf;
+import 'package:buildsmart/features/word_finder/material_lexicon.dart'
+    show materialOfEnriched;
+import 'package:buildsmart/features/word_finder/material_taxonomy.dart'
+    show canonicalMaterial;
 import 'package:buildsmart/features/word_finder/synonym_bridge.dart'
     show kQuerySynonyms;
 import 'package:buildsmart/features/word_finder/word_extraction.dart'
@@ -73,4 +77,13 @@ List<LipskeyCatalogProduct> typeGroupOf(
     for (final m in universe)
       if (typeKeyOf(m) == key) m,
   ];
+}
+
+/// The canonical MATERIAL of [p] (PPR · HDPE · נחושת · …) via the finder's
+/// material lexicon, or `''` when none is detected. The SINGLE derivation the
+/// browse rail groups by AND the config card scopes to, so a material tile and
+/// its card agree (owner: "לפי הכותרת" — filter to the current material).
+String materialOf(LipskeyCatalogProduct p) {
+  final m = materialOfEnriched(p);
+  return m == null ? '' : canonicalMaterial(m);
 }

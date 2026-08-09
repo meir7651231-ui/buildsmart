@@ -35,7 +35,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart'
-    show typeGroupOf;
+    show materialOf, typeGroupOf;
 import 'package:buildsmart/features/catalog_config/product_chips.dart'
     show chipValuesOf, variantByAxes;
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
@@ -157,17 +157,23 @@ class _ConfigCardState extends State<ConfigCard> {
     }
   }
 
-  /// Resolves the card's product ([_cardProduct]), its VARIANT family — the TYPE
-  /// GROUP ([typeGroupOf]): every size/angle/… of the same type — and the family's
-  /// precomputed chip-values ([_familyChips]). The centre image + name resolve
-  /// against this set as the selection changes (so a drag SWAPS the photo). Empty
-  /// when the sku is not a live catalog product (a synthetic test schema).
+  /// Resolves the card's product ([_cardProduct]), its VARIANT family, and the
+  /// family's precomputed chip-values ([_familyChips]). The family is the TYPE
+  /// GROUP ([typeGroupOf]) SCOPED TO THE CARD'S MATERIAL (owner: the card filters
+  /// to the tapped tile's material — a PPR ברך shows only PPR sizes/angles, never
+  /// mixed with HDPE/נחושת). So the wheels + the drag variant-swap stay within one
+  /// material. Empty when the sku is not a live catalog product (a synthetic test
+  /// schema).
   void _resolveFamily() {
     for (final p in resolvedCatalogProducts) {
       if (p.sku == widget.schema.sku) {
         _cardProduct = p;
         _cardChips = chipValuesOf(p);
-        _family = typeGroupOf(p, resolvedCatalogProducts);
+        final material = materialOf(p);
+        _family = [
+          for (final m in typeGroupOf(p, resolvedCatalogProducts))
+            if (materialOf(m) == material) m,
+        ];
         _familyChips = [for (final m in _family) (m, chipValuesOf(m))];
         return;
       }

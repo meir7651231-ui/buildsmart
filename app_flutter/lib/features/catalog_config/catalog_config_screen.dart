@@ -19,6 +19,8 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/features/catalog_config/browse_model.dart';
 import 'package:buildsmart/features/catalog_config/catalog_config_flags.dart';
+import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart'
+    show materialOf, typeGroupOf;
 import 'package:buildsmart/features/catalog_config/config_card.dart';
 import 'package:buildsmart/features/catalog_config/product_chips.dart';
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
@@ -61,6 +63,18 @@ LipskeyCatalogProduct? _product(String sku) {
     }
   }
   return null;
+}
+
+/// The card's MATERIAL-scoped universe — the products of [product]'s TYPE that
+/// share its material (via [materialOf]), so `prioritizedSchema` builds wheels
+/// listing only this material's sizes/angles (owner: "לפי הכותרת" — the card
+/// filters to the tapped tile's material, not the whole cross-material type group).
+List<LipskeyCatalogProduct> _materialUniverse(LipskeyCatalogProduct product) {
+  final material = materialOf(product);
+  return [
+    for (final p in typeGroupOf(product, resolvedCatalogProducts))
+      if (materialOf(p) == material) p,
+  ];
 }
 
 /// The gated catalog-config dive screen (browse + inline card). STATEFUL only to
@@ -348,7 +362,13 @@ class _FamilySectionState extends State<_FamilySection> {
             ),
             child: ConfigCard(
               key: ValueKey<String>(tile.sku),
-              schema: prioritizedSchema(product),
+              // schema scoped to the tile's MATERIAL (owner: "לפי הכותרת") — the
+              // wheels list only this material's sizes/angles, not the whole type
+              // group across materials.
+              schema: prioritizedSchema(
+                product,
+                universe: _materialUniverse(product),
+              ),
               imageAsset: tile.imageAsset,
               onAddToCart: widget.onAddToCart,
               onBuildLine: widget.onBuildLine,
