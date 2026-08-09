@@ -26,6 +26,10 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart';
 import 'package:buildsmart/features/catalog_config/image_quality.dart';
+import 'package:buildsmart/features/word_finder/material_lexicon.dart'
+    show materialOfEnriched;
+import 'package:buildsmart/features/word_finder/material_taxonomy.dart'
+    show canonicalMaterial;
 import 'package:flutter/foundation.dart';
 
 /// The representative product of [group] — the one with the BRIGHTEST image
@@ -61,6 +65,7 @@ class ConfigTile {
     required this.nameHe,
     required this.emoji,
     this.imageAsset,
+    this.materialHe = '',
   });
 
   /// Build a tile from a catalog product. [emoji] is the product's
@@ -98,16 +103,22 @@ class ConfigTile {
   /// [emoji] when absent (plan D.2 · never empty). Tolerant — null is fine.
   final String? imageAsset;
 
+  /// The tile's canonical MATERIAL (PPR · HDPE · נחושת · …), or `''` when the
+  /// product carries no detected material. The family rail pages by this — a
+  /// header swipe walks the materials (owner: "מושך את הכותרת → סוג החומר").
+  final String materialHe;
+
   @override
   bool operator ==(Object other) =>
       other is ConfigTile &&
       other.sku == sku &&
       other.nameHe == nameHe &&
       other.emoji == emoji &&
-      other.imageAsset == imageAsset;
+      other.imageAsset == imageAsset &&
+      other.materialHe == materialHe;
 
   @override
-  int get hashCode => Object.hash(sku, nameHe, emoji, imageAsset);
+  int get hashCode => Object.hash(sku, nameHe, emoji, imageAsset, materialHe);
 }
 
 /// A family = a catalog tree LEAF that carries a `lipskeyCategory`, with the
@@ -163,6 +174,22 @@ class ConfigFamily {
 
   /// The sub-header badge — the total product count (all variations).
   int get count => productCount;
+
+  /// The distinct MATERIALS in this family, in rail order (PPR · HDPE · נחושת · …,
+  /// the material-less group `''` last). The header pages through these; the rail
+  /// shows one at a time (owner: a header swipe = the material). Since [tiles] are
+  /// already material-grouped, first-appearance preserves the order.
+  List<String> get materials {
+    final seen = <String>[];
+    for (final tile in tiles) {
+      if (!seen.contains(tile.materialHe)) seen.add(tile.materialHe);
+    }
+    return seen;
+  }
+
+  /// The tiles carrying [material] — one material page's content.
+  List<ConfigTile> tilesFor(String material) =>
+      [for (final tile in tiles) if (tile.materialHe == material) tile];
 
   @override
   bool operator ==(Object other) =>
@@ -302,23 +329,29 @@ ConfigBrowse browseSection(
 /// REPLACES the per-leaf tree walk against fragmentation (93 leaves → ~12 families).
 /// Family + type keep first-appearance (catalog) order.
 ConfigBrowse browseAll(List<LipskeyCatalogProduct> products) {
-  final familyTypes = <String, List<String>>{}; // family -> type keys, in order
-  final byType = <String, List<LipskeyCatalogProduct>>{}; // type key -> products
+  // family -> ordered (material⋄type) group keys · groupKey -> products + material.
+  // A TYPE splits per MATERIAL (owner: header swipe = the material) — the same ברך
+  // becomes a PPR tile, an HDPE tile and a נחושת tile, and the rail orders them by
+  // material so paging the header walks PPR → HDPE → נחושת.
+  final familyGroups = <String, List<String>>{};
+  final byGroup = <String, List<LipskeyCatalogProduct>>{};
+  final groupMaterial = <String, String>{};
   final familyOrder = <String>[];
   final familyEmoji = <String, String>{};
   for (final product in products) {
     final family = familyGroupOf(product);
-    final typeKey = typeKeyOf(product);
-    if (!familyTypes.containsKey(family)) {
+    final material = _materialOf(product);
+    final groupKey = '$material${typeKeyOf(product)}';
+    if (!familyGroups.containsKey(family)) {
       familyOrder.add(family);
-      familyTypes[family] = <String>[];
+      familyGroups[family] = <String>[];
       familyEmoji[family] = product.categoryEmoji;
     }
-    final types = familyTypes[family]!;
-    final list = byType[typeKey];
+    final list = byGroup[groupKey];
     if (list == null) {
-      byType[typeKey] = [product];
-      types.add(typeKey);
+      byGroup[groupKey] = [product];
+      familyGroups[family]!.add(groupKey);
+      groupMaterial[groupKey] = material;
     } else {
       list.add(product);
     }
@@ -331,26 +364,66 @@ ConfigBrowse browseAll(List<LipskeyCatalogProduct> products) {
           id: family,
           titleHe: family,
           emoji: tileEmoji(familyEmoji[family]!),
-          productCount: familyTypes[family]!
-              .fold(0, (sum, tk) => sum + byType[tk]!.length),
+          productCount:
+              familyGroups[family]!.fold(0, (sum, k) => sum + byGroup[k]!.length),
           tiles: [
-            for (final typeKey in familyTypes[family]!) _typeTile(byType[typeKey]!),
+            for (final key
+                in _byMaterialThenType(familyGroups[family]!, groupMaterial))
+              _typeTile(byGroup[key]!, groupMaterial[key]!),
           ],
         ),
     ],
   );
 }
 
-/// One tile per TYPE group — label = the [typeWordOf]; sku from the BRIGHTEST member
-/// ([_pickRep]); image = that photo unless it is genuinely black ([_repImage] → null
-/// ⇒ the emoji), so a tile never leads with a black photo (owner).
-ConfigTile _typeTile(List<LipskeyCatalogProduct> group) {
+/// The canonical MATERIAL of a product (PPR · HDPE · נחושת · …), or `''` when none
+/// is detected — the axis the family rail pages by (owner).
+String _materialOf(LipskeyCatalogProduct p) {
+  final m = materialOfEnriched(p);
+  return m == null ? '' : canonicalMaterial(m);
+}
+
+/// Material display order in a rail — plastics first (most of the catalog), then
+/// metals; an unknown material sits between known and material-less, and the
+/// material-less tiles ('') come LAST.
+const List<String> _kMaterialOrder = [
+  'PPR', 'רב-שכבתי', 'פקס', 'HDPE', 'PE', 'PVC', 'פוליאתילן',
+  'נחושת', 'פליז', 'פלדה', 'נירוסטה', 'אלומיניום',
+];
+
+int _materialRank(String material) {
+  if (material.isEmpty) return 1 << 20; // material-less → last
+  final i = _kMaterialOrder.indexOf(material);
+  return i < 0 ? 1 << 10 : i; // unknown → between known and material-less
+}
+
+/// Order a family's (material⋄type) group keys by material rank, STABLE within a
+/// material (first-appearance / catalog order kept) — so the rail reads
+/// PPR-tiles · HDPE-tiles · נחושת-tiles, grouped, as the owner asked.
+List<String> _byMaterialThenType(
+  List<String> keys,
+  Map<String, String> groupMaterial,
+) {
+  final indexed = [for (var i = 0; i < keys.length; i++) (i, keys[i])]
+    ..sort((a, b) {
+      final ra = _materialRank(groupMaterial[a.$2]!);
+      final rb = _materialRank(groupMaterial[b.$2]!);
+      return ra != rb ? ra.compareTo(rb) : a.$1.compareTo(b.$1);
+    });
+  return [for (final e in indexed) e.$2];
+}
+
+/// One tile per (material × TYPE) group — label = the [typeWordOf]; sku from the
+/// BRIGHTEST member ([_pickRep]); image = that photo unless genuinely black
+/// ([_repImage] → null ⇒ the emoji); [material] tags the tile for rail paging.
+ConfigTile _typeTile(List<LipskeyCatalogProduct> group, [String material = '']) {
   final rep = _pickRep(group);
   return ConfigTile(
     sku: rep.sku,
     nameHe: typeWordOf(rep),
     emoji: tileEmoji(rep.categoryEmoji),
     imageAsset: _repImage(rep),
+    materialHe: material,
   );
 }
 

@@ -260,12 +260,16 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
   }
 }
 
-/// One family: a brand-accent header (emoji + title) above its OPEN, visible
-/// horizontal rail of product tiles (design: "משפחות פתוחות"). When one of its
-/// tiles is [expandedSku], that tile's generic config card opens INLINE below the
-/// rail (accordion) — the rail itself stays visible (plan B.2). A tile whose sku
-/// resolves to no catalog product (a stale/foreign sku) simply skips the card.
-class _FamilySection extends StatelessWidget {
+/// Px of a HEADER horizontal drag that advances one MATERIAL page (owner).
+const double _kMaterialDragStep = 64;
+
+/// One family: a brand-accent header (emoji + title + MATERIAL label/dots) above
+/// its OPEN horizontal rail of product tiles (design: "משפחות פתוחות"). A header
+/// swipe pages the material (PPR → HDPE → נחושת · owner); the rail shows that
+/// material's TYPES. When one of its tiles is [expandedSku], that tile's config
+/// card opens INLINE below the rail (accordion). A tile whose sku resolves to no
+/// catalog product (a stale/foreign sku) simply skips the card.
+class _FamilySection extends StatefulWidget {
   const _FamilySection({
     required this.family,
     required this.expandedSku,
@@ -287,11 +291,52 @@ class _FamilySection extends StatelessWidget {
   final ConfigCardAction onOpenDetails;
 
   @override
+  State<_FamilySection> createState() => _FamilySectionState();
+}
+
+class _FamilySectionState extends State<_FamilySection> {
+  /// Which MATERIAL page the family is on — a header swipe walks it (owner).
+  int _matIdx = 0;
+  double _accH = 0; // header-drag accumulator (px)
+
+  List<String> get _materials => widget.family.materials;
+
+  String get _material => _materials.isEmpty
+      ? ''
+      : _materials[_matIdx.clamp(0, _materials.length - 1)];
+
+  /// The tiles of the current material page.
+  List<ConfigTile> get _tiles => widget.family.tilesFor(_material);
+
+  String _label(String m) => m.isEmpty ? 'כללי' : m;
+
+  void _onHeaderDrag(DragUpdateDetails d) {
+    if (_materials.length < 2) return;
+    _accH += d.delta.dx;
+    while (_accH <= -_kMaterialDragStep) {
+      _accH += _kMaterialDragStep;
+      _stepMaterial(1); // drag left → next material
+    }
+    while (_accH >= _kMaterialDragStep) {
+      _accH -= _kMaterialDragStep;
+      _stepMaterial(-1);
+    }
+  }
+
+  void _stepMaterial(int dir) {
+    final next = (_matIdx + dir).clamp(0, _materials.length - 1);
+    if (next != _matIdx) setState(() => _matIdx = next);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // The one open tile in THIS family (if any) → its inline card below the rail.
+    final tiles = _tiles;
+    final multi = _materials.length > 1;
+
+    // The one open tile in the CURRENT material page → its inline card below.
     Widget? inlineCard;
-    for (final tile in family.tiles) {
-      if (tile.sku == expandedSku) {
+    for (final tile in tiles) {
+      if (tile.sku == widget.expandedSku) {
         final product = _product(tile.sku);
         if (product != null) {
           inlineCard = Padding(
@@ -305,9 +350,9 @@ class _FamilySection extends StatelessWidget {
               key: ValueKey<String>(tile.sku),
               schema: prioritizedSchema(product),
               imageAsset: tile.imageAsset,
-              onAddToCart: onAddToCart,
-              onBuildLine: onBuildLine,
-              onOpenDetails: onOpenDetails,
+              onAddToCart: widget.onAddToCart,
+              onBuildLine: widget.onBuildLine,
+              onOpenDetails: widget.onOpenDetails,
             ),
           );
         }
@@ -318,55 +363,89 @@ class _FamilySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            BsTokens.space4,
-            BsTokens.space4,
-            BsTokens.space4,
-            BsTokens.space2,
-          ),
-          child: Row(
-            children: [
-              // Layer 2 sub-header: the family's DERIVED representative image
-              // (first pictured product) + title + product count.
-              _ProductThumb(
-                imageAsset: family.representativeImage,
-                emoji: family.emoji,
-                width: 38,
-                height: 38,
-                emojiSize: 20,
-                radius: 9,
-              ),
-              const SizedBox(width: BsTokens.space3),
-              Expanded(
-                child: Text(
-                  family.titleHe,
-                  style: const TextStyle(
-                    color: BsTokens.brand,
-                    fontSize: BsTokens.typeSubhead,
-                    fontWeight: FontWeight.w800,
-                  ),
+        // SWIPEABLE header — a horizontal drag pages the MATERIAL (owner: "מושך
+        // את הכותרת → סוג החומר"); the label + dots signal the swipe, the rail
+        // below shows that material's types.
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragUpdate: multi ? _onHeaderDrag : null,
+          onHorizontalDragEnd: multi ? (_) => _accH = 0 : null,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              BsTokens.space4,
+              BsTokens.space4,
+              BsTokens.space4,
+              BsTokens.space2,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _ProductThumb(
+                      imageAsset: widget.family.representativeImage,
+                      emoji: widget.family.emoji,
+                      width: 38,
+                      height: 38,
+                      emojiSize: 20,
+                      radius: 9,
+                    ),
+                    const SizedBox(width: BsTokens.space3),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: widget.family.titleHe,
+                              style: const TextStyle(
+                                color: BsTokens.brand,
+                                fontSize: BsTokens.typeSubhead,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            if (multi)
+                              TextSpan(
+                                text: '  ·  ${_label(_material)}',
+                                style: const TextStyle(
+                                  color: BsTokens.brandDark,
+                                  fontSize: BsTokens.typeSubhead,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: BsTokens.space2),
+                    _CountBadge(count: widget.family.count),
+                  ],
                 ),
-              ),
-              const SizedBox(width: BsTokens.space2),
-              _CountBadge(count: family.count),
-            ],
+                if (multi) ...[
+                  const SizedBox(height: 6),
+                  _MaterialDots(count: _materials.length, index: _matIdx),
+                ],
+              ],
+            ),
           ),
         ),
         SizedBox(
           height: 116,
           child: ListView.separated(
+            // reset the type scroll when the material page changes.
+            key: ValueKey<String>('${widget.family.id}:$_material'),
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: BsTokens.space4),
-            itemCount: family.tiles.length,
+            itemCount: tiles.length,
             separatorBuilder: (_, __) =>
                 const SizedBox(width: BsTokens.space3),
             itemBuilder: (context, i) {
-              final tile = family.tiles[i];
+              final tile = tiles[i];
               return _Tile(
                 tile: tile,
-                selected: tile.sku == expandedSku,
-                onTap: () => onToggle(tile),
+                selected: tile.sku == widget.expandedSku,
+                onTap: () => widget.onToggle(tile),
               );
             },
           ),
@@ -509,6 +588,44 @@ class _CountBadge extends StatelessWidget {
           fontWeight: FontWeight.w800,
         ),
       ),
+    );
+  }
+}
+
+/// The MATERIAL pager dots on a swipeable family header — a wide brand pill for
+/// the current material, muted dots for the rest, with a ↔ cue that the header
+/// swipes between materials (owner).
+class _MaterialDots extends StatelessWidget {
+  const _MaterialDots({required this.count, required this.index});
+
+  final int count;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          '↔',
+          style: TextStyle(
+            color: BsTokens.mutedLight,
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(width: BsTokens.space2),
+        for (var i = 0; i < count; i++)
+          Container(
+            width: i == index ? 14 : 6,
+            height: 6,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: i == index ? BsTokens.brand : const Color(0xFFCFD4DA),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+      ],
     );
   }
 }

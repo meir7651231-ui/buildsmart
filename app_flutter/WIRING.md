@@ -3948,3 +3948,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P6·12 — הכרטיס-הפנימי במסך-מלא · מגודר `kInternalCard`
 > משוב-בעלים ("אני רוצה מסך מלא"). ב-route של הכרטיס (`_onOpenDetails`) הוסרו `Center`+`ConstrainedBox(maxWidth:440)` והרקע-האפור → הכרטיס ממלא-רוחב **edge-to-edge** (רקע לבן, `AppBar` עם שם-המוצר), במקום חלון-ממורכז-440. תואם דפוס ה-full-screen של catalog-config של הסשן-המקביל.
 - gate: `flutter analyze` **0** · `full_internal_card_test` **10/10**.
+
+### #catalog-config-material-rail — רכבת-משפחה מדופדפת-לפי-חומר (2026-08-09)
+משוב-בעלים: "מושך את כותרת-המשפחה ←/→ = סוג החומר" (חיבורים ומחברים: PPR→HDPE→נחושת). **`browse_model`:** `browseAll` מקבץ אריח פר-(חומר×סוג) במקום פר-סוג — אותו ברך הופך לאריח-PPR, אריח-HDPE, אריח-נחושת; `_materialOf` (materialOfEnriched→canonicalMaterial), `_byMaterialThenType` ממיין לפי `_kMaterialOrder` (פלסטיק→מתכת→חסר-חומר אחרון · stable בתוך חומר). `ConfigTile += materialHe`; `ConfigFamily += materials` (חומרים נבדלים בסדר-הרכבת) + `tilesFor(material)`. **`catalog_config_screen`:** `_FamilySection` הפך `StatefulWidget` — משיכה-אופקית על הכותרת (`_onHeaderDrag`, `_kMaterialDragStep`=64) מדפדפת את `_matIdx`; הרכבת מציגה רק `tilesFor(_material)`; הכותרת מציגה תווית-חומר + `_MaterialDots` (↔ + נקודות). אריחים משותפים מחליפים תמונה [א]; ייחודיים-לחומר מופיעים/נעלמים [ב]. השורה עדיין נגללת אופקית לסוגים (אין התנגשות — כותרת=חומר, שורה=סוגים).
+- gate: `flutter analyze` 0 · catalog_config **108/108** (+4 material_rail).
