@@ -110,16 +110,23 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
 
   void _pickSpecTab(int i) => setState(() => _specTab = i);
 
+  /// D4 — swiping the image reveals the "what connects" rail over it.
+  bool _railOpen = false;
+
+  void _toggleRail() => setState(() => _railOpen = !_railOpen);
+
   @override
   Widget build(BuildContext context) => _CardView(
         product: _current,
         unit: _unit,
         specOpen: _specOpen,
         specTab: _specTab,
+        railOpen: _railOpen,
         onStepVariant: _stepVariant,
         onPickUnit: _pickUnit,
         onToggleSpec: _toggleSpec,
         onPickSpecTab: _pickSpecTab,
+        onToggleRail: _toggleRail,
       );
 }
 
@@ -131,10 +138,12 @@ class _CardView extends ConsumerWidget {
     required this.unit,
     required this.specOpen,
     required this.specTab,
+    required this.railOpen,
     this.onStepVariant,
     this.onPickUnit,
     this.onToggleSpec,
     this.onPickSpecTab,
+    this.onToggleRail,
   });
 
   final LipskeyCatalogProduct product;
@@ -160,6 +169,12 @@ class _CardView extends ConsumerWidget {
   /// D15 — pick a spec tab (null ⇒ inert).
   final void Function(int index)? onPickSpecTab;
 
+  /// D4 — whether the "what connects" rail is showing (over the image).
+  final bool railOpen;
+
+  /// D4 — toggle the connects-rail (null ⇒ inert).
+  final VoidCallback? onToggleRail;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(catalogSettingsProvider);
@@ -179,6 +194,8 @@ class _CardView extends ConsumerWidget {
             // swaps it for the spec panel in place (D15) — spec is never spilled.
             if (specOpen)
               _specPanel(context, p, settings)
+            else if (railOpen)
+              _sideRail(context, p)
             else
               _bigImage(context, p),
             _footer(p),
@@ -251,6 +268,12 @@ class _CardView extends ConsumerWidget {
       key: const Key('internalCardImage'),
       behavior: HitTestBehavior.opaque,
       onTap: () => _openGallery(context, p),
+      // D4 — swipe the image to reveal the "what connects" rail.
+      onHorizontalDragEnd: onToggleRail == null
+          ? null
+          : (d) {
+              if ((d.primaryVelocity ?? 0).abs() > 0) onToggleRail!();
+            },
       child: Container(
         height: 236,
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 4),
@@ -268,6 +291,83 @@ class _CardView extends ConsumerWidget {
                 errorBuilder: (_, __, ___) =>
                     Text(_heroEmoji(p), style: const TextStyle(fontSize: 104)),
               ),
+      ),
+    );
+  }
+
+  // ── D4 · the "what connects" rail (revealed by swiping the image) ────────────
+  Widget _sideRail(BuildContext context, LipskeyCatalogProduct p) {
+    final mates = compatibleProductsFor(p);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onToggleRail,
+      onHorizontalDragEnd:
+          onToggleRail == null ? null : (_) => onToggleRail!(),
+      child: Container(
+        key: const Key('internalCardRail'),
+        height: 236,
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+        decoration: BoxDecoration(
+          color: _cImgBg,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        clipBehavior: Clip.antiAlias,
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              '🔗 מה מתחבר · החלק ↔ לחזרה',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                color: _cAccent,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: mates.isEmpty
+                  ? const Center(
+                      child: Text('אין תואם ישיר בקטלוג',
+                          style: TextStyle(color: _cDim)),
+                    )
+                  : ListView(
+                      children: [
+                        for (final m in mates.take(8))
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _cCard,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: _cLine),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(_heroEmoji(m),
+                                      style: const TextStyle(fontSize: 18)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      m.nameHe,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 12.5, color: _cInk),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

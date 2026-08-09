@@ -248,4 +248,32 @@ void main() {
 
     expect(find.byKey(const Key('sudokuGrid')), findsOneWidget);
   });
+
+  testWidgets('swiping the image reveals the connects-rail (D4)',
+      (tester) async {
+    final withCompat =
+        kLipskeyCatalog.firstWhere((p) => compatibleProductsFor(p).isNotEmpty);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: FullInternalCard(product: withCompat),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('internalCardRail')), findsNothing);
+    await tester.fling(
+      find.byKey(const Key('internalCardImage')),
+      const Offset(-220, 0),
+      900,
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('internalCardRail')), findsOneWidget);
+    expect(find.textContaining('מה מתחבר'), findsOneWidget);
+  });
 }

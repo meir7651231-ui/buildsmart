@@ -3922,3 +3922,6 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #catalog-config-home-fullscreen — הקטלוג-המגדיר מסך-מלא על הבית (2026-08-07)
 משוב-בעלים: "תן אותו מסך מלא · פתוח מלא · לא בתוך חלון · על מסך הבית ללא חלון". `_CatalogConfigOpen` (smart_home_screen) רינדר את `CatalogConfigScreen` בתוך `Container(height:560 + border)` — "חלון" מגודר על הבית. כעת `SizedBox(height: viewport − status-bar)` בלי מסגרת ובלי כותרת-מקומית → הקטלוג ממלא את הבית **edge-to-edge**, כשה-AppBar של המסך עצמו הוא הכותרת. אותה תבנית-הטמעה (ילד-`ListView` חייב גובה-חסום — לא יכול `Expand`), רק מלא-גובה וללא-chrome. טוקן-התצוגה-המקדימה (`_CatalogConfigHero`) ללא-שינוי.
 - gate: `flutter analyze` 0 באזור-השינוי · בדיקות-בית ירוקות (t3 · screen_sections · hidden_sections).
+### #internal-card P6·8 — משיכת-תמונה → רַכֶּבֶת "מה מתחבר" (D4) · מגודר `kInternalCard`
+> החלקה אופקית על התמונה חושפת `_sideRail` — רשימת תואמים (`compatibleProductsFor`) עם אימוג'י-צורה; החלקה/הקשה חוזרת מחזירה לתמונה. כנות-סקופ: הרַכֶּבֶת מציגה תאימות-כלל-מוצר; פילוח פר-צד-מובחן (שמאל≠ימין) הוא עידון עתידי דרך `compatibleProductsForEnd` מעל המנוע.
+- gate: `flutter analyze` **0** · `full_internal_card_test` **9/9** (כולל משיכת-תמונה→רַכֶּבֶת).
