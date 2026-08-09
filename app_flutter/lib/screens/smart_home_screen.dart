@@ -799,31 +799,14 @@ class _CatalogConfigOpen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pal = _pal(context);
-    return _Pad(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: BsTokens.space2),
-            child: Text('🎛️ קטלוג מגדיר',
-                style: TextStyle(
-                  color: pal.ink,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                )),
-          ),
-          Container(
-            height: 560,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(cfgRadius(context)),
-              border: Border.all(color: const Color(0x331E88E5)),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: const CatalogConfigScreen(),
-          ),
-        ],
-      ),
+    // FULL-SCREEN open on the home (owner: "מסך מלא · פתוח מלא · ללא חלון") — NOT a
+    // bordered 560px window and no extra title chrome; the [CatalogConfigScreen]'s
+    // own AppBar heads it. Sized to the viewport height so it fills the home
+    // edge-to-edge (a ListView child must be height-bounded, so it can't Expand).
+    final media = MediaQuery.of(context);
+    return SizedBox(
+      height: media.size.height - media.padding.top,
+      child: const CatalogConfigScreen(),
     );
   }
 }
