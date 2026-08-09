@@ -3929,3 +3929,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #fittings P6·9 — תצוגת קוביות-3D + toggle D12 · מגודר `kFittingEngine`
 > `line_3d.dart` (`Line3DView`): `CustomPainter` איזומטרי — הקו כקוביות (היטל 2:1 · מיון-עומק painter's · 3 פאות מוצללות · כתום=פיטינג/אפור=מצמד/כהה=פקק). מחווט ל-`SudokuGrid` כ-toggle **📦3D ↔ ▦2D**. תואם צילומים #10/#11.
 - gate: `flutter analyze` **0** · `line_3d_test` **2/2** · fittings **33/33**.
+
+### #catalog-config-home-fullscreen-fit — תיקון-חיתוך: התאמה ל-viewport של ה-shell (2026-08-09)
+**באג (מצילום-בעלים "נחתך באמצע"):** הגובה היה `viewport − status-bar` בלבד — לא הורד ה-`_HomeAppBar` (kToolbarHeight=56) ו-ה-`_BottomNav` (`_kHomeNavHeight`=58, main.dart). התיבה חרגה ~114px: התחתית נפלה ל-dead-zone של גלילה-מקוננת מאחורי הניווט, והשורה העליונה נדחקה מתחת לכותרת. **תיקון:** `SizedBox(height: media.size.height − padding.top − padding.bottom − kToolbarHeight − 58)` (רצפה 360) = **בדיוק גוף-ה-viewport של HomeShell** → הקטלוג נכנס וגולל בפנים, בלי חיתוך. `home_shell.dart`: `appBar:_HomeAppBar(preferredSize=kToolbarHeight)` + `bottomNavigationBar:_BottomNav`.
+- gate: `flutter analyze` 0 באזור-השינוי · בדיקות-בית ירוקות.

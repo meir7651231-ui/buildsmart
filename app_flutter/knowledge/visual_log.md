@@ -2550,3 +2550,7 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #fittings P6·9 — קוביות-3D (2026-08-08)
 **שינוי-UI (מגודר `kFittingEngine`):** תצוגת קוביות-3D איזומטרית לקו + toggle 📦3D↔▦2D בגריד. **אימות:** fittings **33/33**.
+
+## #catalog-config-home-fullscreen-fit — תיקון-חיתוך (2026-08-09)
+**באג (צילום-בעלים "נחתך באמצע"):** התיבה קיבלה גובה `viewport − status-bar` בלבד; לא הופחתו כותרת-הבית (56) + סרגל-הניווט (58), אז חרגה ~114px — התחתית מאחורי הניווט (dead-zone גלילה-מקוננת) והשורה העליונה חתוכה מתחת לכותרת.
+**תיקון + אימות:** הגובה = `screen − padding.top − padding.bottom − kToolbarHeight(56) − 58` = **גוף-ה-viewport המדויק של HomeShell** (מקורות: `home_shell.dart` `_HomeAppBar`/`_BottomNav` + `_kHomeNavHeight` ב-main.dart). רנדר-headless בסביבה זו לא טוען פונטים (CanvasKit) + באנר-PWA חוסם — לא ניתן לצילום-נקי; **האימות הוא מתמטי** (התיבה = viewport מדויק ⇒ אין חריגה מאחורי ה-chrome ⇒ אין dead-zone ⇒ אין חיתוך) + בדיקות-בית ירוקות + `flutter analyze` 0. אימות חזותי סופי — על האתר החי אחרי הפריסה (הבעלים רואה שהקטלוג נכנס בין הכותרת לניווט, גולל בלי חיתוך).
