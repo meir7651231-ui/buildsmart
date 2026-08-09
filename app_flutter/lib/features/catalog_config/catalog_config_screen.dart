@@ -186,7 +186,7 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
         MaterialPageRoute<void>(
           fullscreenDialog: true,
           builder: (_) => Scaffold(
-            backgroundColor: const Color(0xFFE9ECF1),
+            backgroundColor: Colors.white,
             appBar: AppBar(
               backgroundColor: Colors.white,
               foregroundColor: const Color(0xFF232A33),
@@ -196,15 +196,11 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
               ),
             ),
+            // Full-screen: the card fills the width edge-to-edge (no windowed
+            // max-width), scrollable for its full height.
             body: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 440),
-                    child: FullInternalCard(product: product),
-                  ),
-                ),
+                child: FullInternalCard(product: product),
               ),
             ),
           ),

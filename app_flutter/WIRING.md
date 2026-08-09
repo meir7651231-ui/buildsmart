@@ -3944,3 +3944,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P6·11 — לחיצה על כרטיס-חיצוני → הכרטיס-הפנימי החדש · מגודר `kInternalCard`
 > משוב-בעלים: "לחיצה על התמונה בכרטיס-החיצוני מגיעה לכרטיס-הישן". `catalog_config_screen._onOpenDetails` (שהתמונה ב-`config_card` קוראת לו) פותח כעת `FullInternalCard` ב-route מסך-מלא כש-`kInternalCard` דלוק; `showLipskeyProductSheet` (הישן) נשאר כ-fallback כבוי (byte-identical). הכרטיס מוזרע ב-`product` הנפתר של הווריאנט הנוכחי.
 - gate: `flutter analyze` **0** · `full_internal_card_test` **10/10**. (`config_card_open_details_test` נכשל **pre-existing** — שינויי-גלגל/DN של סשן מקביל, לא קשור לחיווט הזה.)
+
+### #internal-card P6·12 — הכרטיס-הפנימי במסך-מלא · מגודר `kInternalCard`
+> משוב-בעלים ("אני רוצה מסך מלא"). ב-route של הכרטיס (`_onOpenDetails`) הוסרו `Center`+`ConstrainedBox(maxWidth:440)` והרקע-האפור → הכרטיס ממלא-רוחב **edge-to-edge** (רקע לבן, `AppBar` עם שם-המוצר), במקום חלון-ממורכז-440. תואם דפוס ה-full-screen של catalog-config של הסשן-המקביל.
+- gate: `flutter analyze` **0** · `full_internal_card_test` **10/10**.
