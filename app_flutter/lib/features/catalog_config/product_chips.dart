@@ -247,7 +247,41 @@ ProductConfigSchema prioritizedSchema(
     nameHe: base.nameHe,
     familyId: base.familyId,
     emoji: base.emoji,
-    attributes: [for (final a in ordered) _dnAttribute(a)],
+    attributes: [for (final a in ordered) _angleAttribute(_dnAttribute(a))],
+  );
+}
+
+/// The bare degree number of an angle label/token (`15°` → `15`) — mirrors
+/// product_config_schema `_angleValues` (`\d+`) and [chipValuesOf]'s angle fold.
+String _angleDigits(String s) => RegExp(r'\d+').firstMatch(s)?.group(0) ?? s;
+
+/// Rewrite the ANGLE wheel's match token onto the bare degree number, so it
+/// compares 1:1 with the family chip ([chipValuesOf] folds the angle the same way)
+/// when a vertical drag re-resolves the variant. TWO wheel sources disagree
+/// otherwise: the engine elbow family (`_angleValues`) already emits `45`/`90`, but
+/// the §4 axis chip (`catAxesOf`) emits `15°`/`45°`. Only `canonical` (the machine
+/// token) is folded; `labelHe` keeps the human `15°`. Symmetric with [_dnAttribute].
+AttributeDef _angleAttribute(AttributeDef a) {
+  if (a.id != 'angle') return a;
+  return AttributeDef(
+    id: a.id,
+    tradeId: a.tradeId,
+    nameHe: a.nameHe,
+    emoji: a.emoji,
+    kind: a.kind,
+    unitHe: a.unitHe,
+    isVariantAxis: a.isVariantAxis,
+    required: a.required,
+    matchTokens: a.matchTokens,
+    values: [
+      for (final v in a.values)
+        AttributeValue(
+          id: v.id,
+          labelHe: v.labelHe,
+          canonical: _angleDigits(v.canonical ?? v.labelHe),
+          sortIndex: v.sortIndex,
+        ),
+    ],
   );
 }
 
@@ -318,6 +352,15 @@ Map<String, Set<String>> chipValuesOf(LipskeyCatalogProduct p) {
     // Fold every diameter representation (inch/DN/mm/odOf) to the one DN scale,
     // so a live selection token compares 1:1 against a candidate on the same scale.
     if (chipId == 'diameter') v = canonicalDn(v);
+    // Fold the angle to its bare degree number (`45°` → `45`), MIRRORING the wheel's
+    // own canonical (product_config_schema `_angleValues` reads the degrees with the
+    // same `\d+`). Without this the family carries `45°`/`90°` while the wheel/selection
+    // token is `45`/`90`, so a vertical (angle) drag never matches a variant and the
+    // photo/name never swap — only the diameter drag worked (owner: "משיכה של התמונות").
+    if (chipId == 'angle') {
+      final m = RegExp(r'\d+').firstMatch(v);
+      if (m != null) v = m.group(0)!;
+    }
     if (chipId == 'color' && !isTrueColor(v)) return;
     out.putIfAbsent(chipId, () => <String>{}).add(v);
   }
