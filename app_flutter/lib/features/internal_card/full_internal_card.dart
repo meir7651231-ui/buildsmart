@@ -246,7 +246,7 @@ class _CardView extends ConsumerWidget {
               ),
             ),
             const Spacer(),
-            const Text('→', style: TextStyle(fontSize: 20, color: _cAccent)),
+            const Icon(Icons.arrow_forward, size: 22, color: _cAccent),
           ],
         ),
       ),
@@ -285,21 +285,21 @@ class _CardView extends ConsumerWidget {
               if (v != 0) onSwipeImage!(v < 0 ? -1 : 1);
             },
       child: Container(
-        height: 236,
+        height: 360,
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 4),
         decoration: BoxDecoration(
           color: _cImgBg,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(18),
         ),
         clipBehavior: Clip.antiAlias,
         alignment: Alignment.center,
         child: asset == null
-            ? Text(_heroEmoji(p), style: const TextStyle(fontSize: 104))
+            ? Text(_heroEmoji(p), style: const TextStyle(fontSize: 148))
             : Image(
                 image: resolveProductImage(asset),
                 fit: BoxFit.contain,
                 errorBuilder: (_, __, ___) =>
-                    Text(_heroEmoji(p), style: const TextStyle(fontSize: 104)),
+                    Text(_heroEmoji(p), style: const TextStyle(fontSize: 148)),
               ),
       ),
     );
@@ -1009,16 +1009,35 @@ class _CardView extends ConsumerWidget {
             child: InkWell(
               onTap: () => _addToCart(context, ref, p, selected, mult),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Center(
-                  child: Text(
-                    '＋ הוסף לסל$priceStr',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add, size: 18, color: Colors.white),
+                        SizedBox(width: 3),
+                        Text(
+                          'הוסף לסל',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                    if (priceStr.isNotEmpty)
+                      Text(
+                        '$selected$priceStr',
+                        style: const TextStyle(
+                          color: Color(0xFFFFE3D2),
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
