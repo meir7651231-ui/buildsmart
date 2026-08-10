@@ -1168,7 +1168,7 @@ class _CardView extends ConsumerWidget {
             child: _lineBtn(
               '🔗 קו',
               const Key('lineBtnLine'),
-              () => _openGrid(context),
+              () => _openGrid(context, p),
             ),
           ),
           const SizedBox(width: 6),
@@ -1223,7 +1223,7 @@ class _CardView extends ConsumerWidget {
   /// קו — seed the line (the cart is the line the engine reads).
   /// קו — opens the sudoku line-builder grid (D11/D13) in a sheet: the
   /// engine-driven "only what mates the neighbour" board (P6·6).
-  void _openGrid(BuildContext context) {
+  void _openGrid(BuildContext context, LipskeyCatalogProduct p) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -1238,7 +1238,7 @@ class _CardView extends ConsumerWidget {
           14,
           16 + MediaQuery.of(ctx).viewInsets.bottom,
         ),
-        child: const SingleChildScrollView(child: SudokuGrid()),
+        child: SingleChildScrollView(child: SudokuGrid(seedProduct: p)),
       ),
     );
   }
