@@ -24,6 +24,35 @@ const Color _cImgBg = Color(0xFFF4F6F9);
 const Color _cHotBg = Color(0xFFFFF2EA);
 const Color _cGreen = Color(0xFF1F9D57);
 
+/// Dashed rounded-rect outline for empty grid slots (screenshot #6).
+class _DashedRect extends CustomPainter {
+  const _DashedRect(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const dash = 5.0;
+    const gap = 4.0;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6
+      ..color = color;
+    final path = Path()
+      ..addRRect(
+          RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(14)));
+    for (final metric in path.computeMetrics()) {
+      var d = 0.0;
+      while (d < metric.length) {
+        canvas.drawPath(metric.extractPath(d, d + dash), paint);
+        d += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRect old) => old.color != color;
+}
+
 /// The candidate palette the grid offers (od 50 for the demo hero size).
 const List<RunElement> _kCandidates = [
   RunElement(Family.coupler, 50),
@@ -188,6 +217,20 @@ class _SudokuGridState extends State<SudokuGrid> {
     ..clearSnackBars()
     ..showSnackBar(SnackBar(content: Text(msg), duration: const Duration(seconds: 2)));
 
+  /// The placed fitting orthogonally adjacent to the active cell — the neighbour
+  /// the suggestions must mate (drives the "מתחברות ל-…" header, screenshot #6).
+  RunElement? get _activeNeighbour {
+    final a = _active;
+    if (a == null) return null;
+    for (final e in _placed.entries) {
+      if ((e.key.$1 - a.$1).abs() + (e.key.$2 - a.$2).abs() == 1) return e.value;
+    }
+    return null;
+  }
+
+  static String _odLabel(RunElement el) =>
+      el.od2 != null ? '${el.od}×${el.od2}' : '${el.od}';
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -196,32 +239,60 @@ class _SudokuGridState extends State<SudokuGrid> {
         key: const Key('sudokuGrid'),
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(0, 4, 0, 10),
-            child: Text(
-              '🧵 בניית הגריד — הקש משבצת ריקה שכנה',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: _cInk,
-              ),
-            ),
-          ),
+          _header(),
           _viewToggle(),
           const SizedBox(height: 8),
           if (_is3D)
             Line3DView(cells: _cells, height: 280)
           else ...[
-            for (var r = 0; r < widget.rows; r++)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [for (var c = 0; c < widget.cols; c++) _cell(r, c)],
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: _cImgBg,
+                borderRadius: BorderRadius.circular(18),
               ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var r = 0; r < widget.rows; r++)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var c = 0; c < widget.cols; c++) _cell(r, c),
+                      ],
+                    ),
+                ],
+              ),
+            ),
             const SizedBox(height: 12),
             _suggestionArea(),
           ],
           const SizedBox(height: 12),
           _actions(),
+        ],
+      ),
+    );
+  }
+
+  Widget _header() {
+    final n = _activeNeighbour;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 4, 0, 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '🧵 בניית הגריד',
+            style: TextStyle(
+                fontSize: 15, fontWeight: FontWeight.w800, color: _cInk),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            n == null
+                ? 'הקש משבצת ריקה שכנה'
+                : 'נגעת במשבצת שמתחת ל־${famEmoji(n.family)} ${n.family.label}',
+            style: const TextStyle(fontSize: 12, color: _cDim),
+          ),
         ],
       ),
     );
@@ -257,38 +328,55 @@ class _SudokuGridState extends State<SudokuGrid> {
   Widget _cell(int r, int c) {
     final el = _placed[(r, c)];
     final active = _active == (r, c);
-    return Container(
-      width: 64,
-      height: 64,
-      margin: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: el != null
-            ? _cHotBg
-            : active
-                ? _cHotBg
-                : _cImgBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: el != null || active ? _cAccent : _cLine,
-          width: el != null || active ? 2 : 1,
+    const size = 64.0;
+    // Placed → a white raised tile with the fitting icon (screenshot #6).
+    if (el != null) {
+      return Container(
+        width: size,
+        height: size,
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x14000000), blurRadius: 6, offset: Offset(0, 2)),
+          ],
         ),
-      ),
-      alignment: Alignment.center,
-      child: el != null
-          ? Text(famEmoji(el.family), style: const TextStyle(fontSize: 26))
-          : GestureDetector(
-              key: Key('cell_${r}_$c'),
-              behavior: HitTestBehavior.opaque,
-              onTap: () => _tapEmpty(r, c),
-              child: const SizedBox(
-                width: 64,
-                height: 64,
-                child: Center(
-                  child: Text('+',
-                      style: TextStyle(fontSize: 22, color: _cDim)),
-                ),
+        alignment: Alignment.center,
+        child: Text(famEmoji(el.family), style: const TextStyle(fontSize: 28)),
+      );
+    }
+    // Empty → dashed slot; the active one glows orange with a '+'.
+    return GestureDetector(
+      key: Key('cell_${r}_$c'),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _tapEmpty(r, c),
+      child: Container(
+        width: size,
+        height: size,
+        margin: const EdgeInsets.all(5),
+        decoration: active
+            ? BoxDecoration(
+                color: _cHotBg,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _cAccent, width: 2),
+              )
+            : null,
+        child: CustomPaint(
+          painter: active ? null : const _DashedRect(Color(0xFFCBD2DA)),
+          child: Center(
+            child: Text(
+              '+',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: active ? _cAccent : _cDim,
               ),
             ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -301,41 +389,82 @@ class _SudokuGridState extends State<SudokuGrid> {
       return const Text('אין אביזר שמתחבר לשכן כאן',
           style: TextStyle(fontSize: 12.5, color: _cDim));
     }
+    final n = _activeNeighbour;
+    final header = n == null
+        ? '💡 מתחברים לשכן'
+        : '💡 הצעות שמתחברות ל־${famEmoji(n.family)} ${n.family.label} ${n.od}';
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('💡 מתחברים לשכן:',
-            style: TextStyle(
+        Text(header,
+            key: const Key('suggestHeader'),
+            style: const TextStyle(
                 fontSize: 12.5, fontWeight: FontWeight.w800, color: _cAccent)),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 12,
+          runSpacing: 12,
           alignment: WrapAlignment.center,
-          children: [
-            for (var i = 0; i < s.length; i++)
-              GestureDetector(
-                key: Key('suggest_$i'),
-                behavior: HitTestBehavior.opaque,
-                onTap: () => _place(s[i]),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _cImgBg,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: _cLine),
-                  ),
-                  child: Text(
-                    '${famEmoji(s[i].family)} ${s[i].family.label}',
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700, color: _cInk),
-                  ),
-                ),
-              ),
-          ],
+          children: [for (var i = 0; i < s.length; i++) _suggChip(i, s[i])],
         ),
       ],
+    );
+  }
+
+  /// A round suggestion chip: white circle + fitting icon, OD label beneath, and
+  /// a green ✓ badge — "only what mates the neighbour" (screenshot #6).
+  Widget _suggChip(int i, RunElement el) {
+    return GestureDetector(
+      key: Key('suggest_$i'),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _place(el),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: _cLine),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Color(0x14000000),
+                        blurRadius: 5,
+                        offset: Offset(0, 1)),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Text(famEmoji(el.family),
+                    style: const TextStyle(fontSize: 25)),
+              ),
+              Positioned(
+                top: -2,
+                right: -2,
+                child: Container(
+                  width: 19,
+                  height: 19,
+                  decoration: BoxDecoration(
+                    color: _cGreen,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 1.6),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.check, size: 12, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(_odLabel(el),
+              style: const TextStyle(
+                  fontSize: 11, fontWeight: FontWeight.w700, color: _cDim)),
+        ],
+      ),
     );
   }
 

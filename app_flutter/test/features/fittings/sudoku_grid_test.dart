@@ -13,10 +13,10 @@ void main() {
     await tester.tap(find.byKey(const Key('cell_1_2')));
     await tester.pump();
 
-    expect(find.textContaining('מתחברים לשכן'), findsOneWidget);
-    // At least one mate is offered, and the coupler is among them.
+    expect(find.byKey(const Key('suggestHeader')), findsOneWidget);
+    // At least one round mate-chip is offered (OD label shown beneath it).
     expect(find.byKey(const Key('suggest_0')), findsOneWidget);
-    expect(find.textContaining('מצמד'), findsWidgets);
+    expect(find.textContaining('50'), findsWidgets);
   });
 
   testWidgets('a far cell with no placed neighbour offers nothing',
@@ -37,7 +37,7 @@ void main() {
 
     // The empty-cell tap target is gone (now placed) and suggestions cleared.
     expect(find.byKey(const Key('cell_1_2')), findsNothing);
-    expect(find.textContaining('מתחברים לשכן'), findsNothing);
+    expect(find.byKey(const Key('suggestHeader')), findsNothing);
   });
 
   testWidgets('check button reports free ends via the engine', (tester) async {

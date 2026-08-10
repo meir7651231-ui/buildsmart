@@ -74,7 +74,7 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    expect(find.textContaining('מתחברים לשכן'), findsOneWidget);
+    expect(find.byKey(const Key('suggestHeader')), findsOneWidget);
     expect(find.byKey(const Key('suggest_0')), findsOneWidget);
   });
 }
