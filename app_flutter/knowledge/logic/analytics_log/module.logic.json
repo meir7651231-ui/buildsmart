@@ -1,0 +1,197 @@
+{
+  "module": "analytics_log",
+  "source": "lib/state/analytics_log.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "fn": "AnalyticsLogNotifier.record",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String name, {Map<String, String> props = const {}}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "maxEntries"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "event = AnalyticsEvent(name: name, props: props, at: DateTime.now())"
+          },
+          {
+            "kind": "init",
+            "detail": "next = <AnalyticsEvent>[event, ...state]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if next.length > maxEntries"
+          }
+        ]
+      },
+      "floor": [
+        "AnalyticsEvent",
+        "now",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(String name, {Map<String, String> props = const {}})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AnalyticsLogNotifier.clear",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = const []"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AnalyticsLogNotifier.countByName",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String name) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "state.where((e) => e.name == name).length"
+          }
+        ]
+      },
+      "floor": [
+        "where"
+      ],
+      "contract": {
+        "input": "(String name)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AnalyticsLogNotifier.recent",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({String? name, int limit = 50}) -> List<AnalyticsEvent>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          },
+          {
+            "kind": "global",
+            "name": "unmodifiable"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "filtered = name == null ? state : state.where((e) => e.name == name).toList(growable: false)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if filtered.length <= limit → return List<AnalyticsEvent>.unmodifiable(filtered)"
+          },
+          {
+            "kind": "return",
+            "detail": "List<AnalyticsEvent>.unmodifiable(filtered.sublist(0, limit))"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "sublist",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "({String? name, int limit = 50})",
+        "output": "List<AnalyticsEvent>",
+        "purity": "pure",
+        "precond": [
+          "if filtered.length <= limit → return List<AnalyticsEvent>.unmodifiable(filtered)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

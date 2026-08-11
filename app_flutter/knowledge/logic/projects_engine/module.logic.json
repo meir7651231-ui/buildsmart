@@ -1,0 +1,744 @@
+{
+  "module": "projects_engine",
+  "source": "lib/state/projects_engine.dart",
+  "atomCount": 12,
+  "atoms": [
+    {
+      "fn": "LiveProject.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? name, String? addr, String? manager, List<SmartCartLine>? cart, int? treeCount}) -> LiveProject",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "LiveProject(id: id, name: name ?? this.name, addr: addr ?? this.addr, manager: manager ??…"
+          }
+        ]
+      },
+      "floor": [
+        "LiveProject"
+      ],
+      "contract": {
+        "input": "({String? name, String? addr, String? manager, List<SmartCartLine>? cart, int? treeCount})",
+        "output": "LiveProject",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "LiveProject.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "addr"
+          },
+          {
+            "kind": "field",
+            "name": "cart"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "manager"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "treeCount"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'name' : name, 'addr' : addr, 'manager' : manager, 'cart' : [for (final l in …"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsState.active",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> LiveProject",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "activeId"
+          },
+          {
+            "kind": "field",
+            "name": "projects"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "projects.isEmpty ? const LiveProject(id: '', name: '', addr: '', manager: '') : projects.…"
+          }
+        ]
+      },
+      "floor": [
+        "LiveProject",
+        "firstWhere"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "LiveProject",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsState.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({List<LiveProject>? projects, String? activeId, int? seq}) -> ProjectsState",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ProjectsState(projects: projects ?? this.projects, activeId: activeId ?? this.activeId, s…"
+          }
+        ]
+      },
+      "floor": [
+        "ProjectsState"
+      ],
+      "contract": {
+        "input": "({List<LiveProject>? projects, String? activeId, int? seq})",
+        "output": "ProjectsState",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kProjectsKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "ProjectsState",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "toInt"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kProjectsKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "ProjectsNotifier.state="
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsNotifier.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (ProjectsState value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kProjectsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProjectsState value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsNotifier.switchProject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, {List<SmartCartLine> outgoingCart = const []}) -> List<SmartCartLine>?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kProjectsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if id == state.activeId → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !state.projects.any((p) => p.id == id) → return null"
+          },
+          {
+            "kind": "init",
+            "detail": "updated = [for (final p in state.projects) if (p.id == state.activeId) p.copyWith(cart: outgoingCar…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(projects: updated, activeId: id)"
+          },
+          {
+            "kind": "return",
+            "detail": "state.active.cart"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, {List<SmartCartLine> outgoingCart = const []})",
+        "output": "List<SmartCartLine>?",
+        "purity": "side-effecting",
+        "precond": [
+          "if id == state.activeId → return null",
+          "if !state.projects.any((p) => p.id == id) → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "id == state.activeId · !state.projects.any((p) => p.id == id) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsNotifier.editProject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, {required String name, required String addr, required String manager}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kProjectsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = name.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if n.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(projects: [for (final p in state.projects) if (p.id == id) p.copyW…"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String id, {required String name, required String addr, required String manager})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if n.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsNotifier.addProject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String name, String addr = '', String manager = ''}) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kProjectsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = name.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if n.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = 'PRJ-${state.seq}'"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(projects: [...state.projects, LiveProject(id: id, name: n, addr: a…"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [
+        "LiveProject",
+        "copyWith",
+        "trim"
+      ],
+      "contract": {
+        "input": "({required String name, String addr = '', String manager = ''})",
+        "output": "String?",
+        "purity": "side-effecting",
+        "precond": [
+          "if n.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "n.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsNotifier.stashActiveCart",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(List<SmartCartLine> cart) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kProjectsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(projects: [for (final p in state.projects) if (p.id == state.activ…"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(List<SmartCartLine> cart)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectsNotifier.resetToSeed",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kProjectsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_seed"
+          },
+          {
+            "kind": "field",
+            "name": "_seedActiveId"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state = ProjectsState(projects: [for (final p in _seed) LiveProject.fromSeed(p)], activeI…"
+          }
+        ]
+      },
+      "floor": [
+        "ProjectsState",
+        "fromSeed"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

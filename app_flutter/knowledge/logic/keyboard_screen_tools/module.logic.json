@@ -1,0 +1,493 @@
+{
+  "module": "keyboard_screen_tools",
+  "source": "lib/state/keyboard_screen_tools.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "fn": "currentScreenTools",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<KbScreenToolsEntry> stack) -> List<KbToolNode>?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "stack.isEmpty ? null : stack.last.tools"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<KbScreenToolsEntry> stack)",
+        "output": "List<KbToolNode>?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "KbScreenToolsEntry.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "token"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is KbScreenToolsEntry && other.token == token"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KbScreenToolsEntry.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "token"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "token.hashCode"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KeyboardScreenToolsNotifier.push",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(KbScreenToolsEntry entry) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if state.any((e) => e.token == entry.token)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = <KbScreenToolsEntry>[...state, entry]"
+          }
+        ]
+      },
+      "floor": [
+        "any"
+      ],
+      "contract": {
+        "input": "(KbScreenToolsEntry entry)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KeyboardScreenToolsNotifier.removeToken",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Object token) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.any((e) => e.token == token) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = <KbScreenToolsEntry>[for (final e in state) if (e.token != token) e]"
+          }
+        ]
+      },
+      "floor": [
+        "any"
+      ],
+      "contract": {
+        "input": "(Object token)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.any((e) => e.token == token) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KbScreen.createState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> ConsumerState<KbScreen>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_KbScreenState()"
+          }
+        ]
+      },
+      "floor": [
+        "_KbScreenState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "ConsumerState<KbScreen>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_KbScreenState.initState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kKbGlobal"
+          },
+          {
+            "kind": "field",
+            "name": "_token"
+          },
+          {
+            "kind": "global",
+            "name": "keyboardScreenToolsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          },
+          {
+            "kind": "global",
+            "name": "ref"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_notifier"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.initState()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !kKbGlobal → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "WidgetsBinding.instance.addPostFrameCallback((_) {if (!mounted) return; final notifier = …"
+          }
+        ]
+      },
+      "floor": [
+        "KbScreenToolsEntry",
+        "addPostFrameCallback",
+        "initState",
+        "push",
+        "read"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !kKbGlobal → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_KbScreenState.didUpdateWidget",
+      "kind": "method",
+      "object": {
+        "signature": "(covariant KbScreen oldWidget) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kKbGlobal"
+          },
+          {
+            "kind": "field",
+            "name": "_token"
+          },
+          {
+            "kind": "global",
+            "name": "keyboardScreenToolsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          },
+          {
+            "kind": "global",
+            "name": "ref"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_notifier"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.didUpdateWidget(oldWidget)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !kKbGlobal → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !identical(oldWidget.tools, widget.tools)"
+          }
+        ]
+      },
+      "floor": [
+        "KbScreenToolsEntry",
+        "didUpdateWidget",
+        "identical",
+        "microtask",
+        "push",
+        "read"
+      ],
+      "contract": {
+        "input": "(covariant KbScreen oldWidget)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !kKbGlobal → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_KbScreenState.dispose",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kKbGlobal"
+          },
+          {
+            "kind": "field",
+            "name": "_notifier"
+          },
+          {
+            "kind": "field",
+            "name": "_token"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if kKbGlobal"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "dispose",
+        "microtask",
+        "removeToken"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_KbScreenState.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "widget.child"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

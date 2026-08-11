@@ -1,0 +1,1255 @@
+{
+  "module": "notif_settings",
+  "source": "lib/state/notif_settings.dart",
+  "atomCount": 19,
+  "atoms": [
+    {
+      "fn": "_enum",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw, List<T> values, T fallback) -> T",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "NotifSettings.fromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if raw is String"
+          },
+          {
+            "kind": "return",
+            "detail": "fallback"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? raw, List<T> values, T fallback)",
+        "output": "T",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "notifFeedbackFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(NotifSettings s) -> NotifFeedback",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "playInAppNotifFeedback"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if s.isSnoozedNow || s.isInQuietHours → return (sound: false, vibrate: false)"
+          },
+          {
+            "kind": "return",
+            "detail": "(sound: s.soundEnabled, vibrate: s.vibrationEnabled)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(NotifSettings s)",
+        "output": "NotifFeedback",
+        "purity": "pure",
+        "precond": [
+          "if s.isSnoozedNow || s.isInQuietHours → return (sound: false, vibrate: false)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "playInAppNotifFeedback",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(NotifSettings s) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "notifFeedbackFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "fb = notifFeedbackFor(s)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if fb.vibrate"
+          },
+          {
+            "kind": "branch",
+            "detail": "if fb.sound"
+          }
+        ]
+      },
+      "floor": [
+        "mediumImpact",
+        "play",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(NotifSettings s)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.quietStart",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> TimeOfDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "quietStartHour"
+          },
+          {
+            "kind": "field",
+            "name": "quietStartMin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TimeOfDay(hour: quietStartHour, minute: quietStartMin)"
+          }
+        ]
+      },
+      "floor": [
+        "TimeOfDay"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TimeOfDay",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.quietEnd",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> TimeOfDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "quietEndHour"
+          },
+          {
+            "kind": "field",
+            "name": "quietEndMin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TimeOfDay(hour: quietEndHour, minute: quietEndMin)"
+          }
+        ]
+      },
+      "floor": [
+        "TimeOfDay"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TimeOfDay",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.dailySummaryTime",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> TimeOfDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "dailySummaryHour"
+          },
+          {
+            "kind": "field",
+            "name": "dailySummaryMin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TimeOfDay(hour: dailySummaryHour, minute: dailySummaryMin)"
+          }
+        ]
+      },
+      "floor": [
+        "TimeOfDay"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TimeOfDay",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.morningReportTime",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> TimeOfDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "morningReportHour"
+          },
+          {
+            "kind": "field",
+            "name": "morningReportMin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TimeOfDay(hour: morningReportHour, minute: morningReportMin)"
+          }
+        ]
+      },
+      "floor": [
+        "TimeOfDay"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TimeOfDay",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.eveningSummaryTime",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> TimeOfDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "eveningSummaryHour"
+          },
+          {
+            "kind": "field",
+            "name": "eveningSummaryMin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TimeOfDay(hour: eveningSummaryHour, minute: eveningSummaryMin)"
+          }
+        ]
+      },
+      "floor": [
+        "TimeOfDay"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TimeOfDay",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.isSnoozedNow",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "snoozeUntilMs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "snoozeUntilMs > DateTime.now().millisecondsSinceEpoch"
+          }
+        ]
+      },
+      "floor": [
+        "now"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.isInQuietHours",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "quietEndHour"
+          },
+          {
+            "kind": "field",
+            "name": "quietEndMin"
+          },
+          {
+            "kind": "field",
+            "name": "quietHoursEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "quietStartHour"
+          },
+          {
+            "kind": "field",
+            "name": "quietStartMin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !quietHoursEnabled → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "now = DateTime.now()"
+          },
+          {
+            "kind": "compute",
+            "detail": "nowMins = now.hour * 60 + now.minute"
+          },
+          {
+            "kind": "compute",
+            "detail": "startMins = quietStartHour * 60 + quietStartMin"
+          },
+          {
+            "kind": "compute",
+            "detail": "endMins = quietEndHour * 60 + quietEndMin"
+          },
+          {
+            "kind": "precond",
+            "detail": "if startMins < endMins → return nowMins >= startMins && nowMins < endMins"
+          }
+        ]
+      },
+      "floor": [
+        "now"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if !quietHoursEnabled → return false",
+          "if startMins < endMins → return nowMins >= startMins && nowMins < endMins"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({bool? pushEnabled, bool? emailEnabled, bool? typeOrders, bool? typeShipments, bool? typePriceDrops, bool? quietHoursEnabled, int? quietStartHour, int? quietStartMin, int? quietEndHour, int? quietEndMin, bool? dailySummary, int? dailySummaryHour, int? dailySummaryMin, NotifLockScreen? lockScreen, int? snoozeUntilMs, bool? smsEnabled, bool? whatsappEnabled, bool? typeDeals, bool? typeSupplierOffers, bool? typeBackInStock, bool? typeReminders, bool? typeNewChats, bool? typeProjectUpdates, bool? quietOnShabbat, bool? quietInMeetings, bool? quietWhileDriving, bool? soundEnabled, bool? vibrationEnabled, bool? soundPerType, NotifImportance? importanceFilter, bool? personaContractor, bool? personaStore, bool? personaCourier, bool? personaWorker, bool? personaAdmin, bool? morningReport, int? morningReportHour, int? morningReportMin, bool? eveningSummary, int? eveningSummaryHour, int? eveningSummaryMin, bool? weeklySummary, bool? monthlySummary, bool? biometricToOpen, bool? dontForwardToWatch}) -> NotifSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "NotifSettings(pushEnabled: pushEnabled ?? this.pushEnabled, emailEnabled: emailEnabled ??…"
+          }
+        ]
+      },
+      "floor": [
+        "NotifSettings"
+      ],
+      "contract": {
+        "input": "({bool? pushEnabled, bool? emailEnabled, bool? typeOrders, bool? typeShipments, bool? typePriceDrops, bool? quietHoursEnabled, int? quietStartHour, int? quietStartMin, int? quietEndHour, int? quietEndMin, bool? dailySummary, int? dailySummaryHour, int? dailySummaryMin, NotifLockScreen? lockScreen, int? snoozeUntilMs, bool? smsEnabled, bool? whatsappEnabled, bool? typeDeals, bool? typeSupplierOffers, bool? typeBackInStock, bool? typeReminders, bool? typeNewChats, bool? typeProjectUpdates, bool? quietOnShabbat, bool? quietInMeetings, bool? quietWhileDriving, bool? soundEnabled, bool? vibrationEnabled, bool? soundPerType, NotifImportance? importanceFilter, bool? personaContractor, bool? personaStore, bool? personaCourier, bool? personaWorker, bool? personaAdmin, bool? morningReport, int? morningReportHour, int? morningReportMin, bool? eveningSummary, int? eveningSummaryHour, int? eveningSummaryMin, bool? weeklySummary, bool? monthlySummary, bool? biometricToOpen, bool? dontForwardToWatch})",
+        "output": "NotifSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "biometricToOpen"
+          },
+          {
+            "kind": "field",
+            "name": "dailySummary"
+          },
+          {
+            "kind": "field",
+            "name": "dailySummaryHour"
+          },
+          {
+            "kind": "field",
+            "name": "dailySummaryMin"
+          },
+          {
+            "kind": "field",
+            "name": "dontForwardToWatch"
+          },
+          {
+            "kind": "field",
+            "name": "emailEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "eveningSummary"
+          },
+          {
+            "kind": "field",
+            "name": "eveningSummaryHour"
+          },
+          {
+            "kind": "field",
+            "name": "eveningSummaryMin"
+          },
+          {
+            "kind": "field",
+            "name": "importanceFilter"
+          },
+          {
+            "kind": "field",
+            "name": "lockScreen"
+          },
+          {
+            "kind": "field",
+            "name": "monthlySummary"
+          },
+          {
+            "kind": "field",
+            "name": "morningReport"
+          },
+          {
+            "kind": "field",
+            "name": "morningReportHour"
+          },
+          {
+            "kind": "field",
+            "name": "morningReportMin"
+          },
+          {
+            "kind": "field",
+            "name": "personaAdmin"
+          },
+          {
+            "kind": "field",
+            "name": "personaContractor"
+          },
+          {
+            "kind": "field",
+            "name": "personaCourier"
+          },
+          {
+            "kind": "field",
+            "name": "personaStore"
+          },
+          {
+            "kind": "field",
+            "name": "personaWorker"
+          },
+          {
+            "kind": "field",
+            "name": "pushEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "quietEndHour"
+          },
+          {
+            "kind": "field",
+            "name": "quietEndMin"
+          },
+          {
+            "kind": "field",
+            "name": "quietHoursEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "quietInMeetings"
+          },
+          {
+            "kind": "field",
+            "name": "quietOnShabbat"
+          },
+          {
+            "kind": "field",
+            "name": "quietStartHour"
+          },
+          {
+            "kind": "field",
+            "name": "quietStartMin"
+          },
+          {
+            "kind": "field",
+            "name": "quietWhileDriving"
+          },
+          {
+            "kind": "field",
+            "name": "smsEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "snoozeUntilMs"
+          },
+          {
+            "kind": "field",
+            "name": "soundEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "soundPerType"
+          },
+          {
+            "kind": "field",
+            "name": "typeBackInStock"
+          },
+          {
+            "kind": "field",
+            "name": "typeDeals"
+          },
+          {
+            "kind": "field",
+            "name": "typeNewChats"
+          },
+          {
+            "kind": "field",
+            "name": "typeOrders"
+          },
+          {
+            "kind": "field",
+            "name": "typePriceDrops"
+          },
+          {
+            "kind": "field",
+            "name": "typeProjectUpdates"
+          },
+          {
+            "kind": "field",
+            "name": "typeReminders"
+          },
+          {
+            "kind": "field",
+            "name": "typeShipments"
+          },
+          {
+            "kind": "field",
+            "name": "typeSupplierOffers"
+          },
+          {
+            "kind": "field",
+            "name": "vibrationEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "weeklySummary"
+          },
+          {
+            "kind": "field",
+            "name": "whatsappEnabled"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'pushEnabled' : pushEnabled, 'emailEnabled' : emailEnabled, 'typeOrders' : typeOrders, '…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettings.fromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Map<String, dynamic> j) -> NotifSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "biometricToOpen"
+          },
+          {
+            "kind": "field",
+            "name": "dailySummary"
+          },
+          {
+            "kind": "field",
+            "name": "dailySummaryHour"
+          },
+          {
+            "kind": "field",
+            "name": "dailySummaryMin"
+          },
+          {
+            "kind": "field",
+            "name": "dontForwardToWatch"
+          },
+          {
+            "kind": "field",
+            "name": "emailEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "eveningSummary"
+          },
+          {
+            "kind": "field",
+            "name": "eveningSummaryHour"
+          },
+          {
+            "kind": "field",
+            "name": "eveningSummaryMin"
+          },
+          {
+            "kind": "field",
+            "name": "importanceFilter"
+          },
+          {
+            "kind": "field",
+            "name": "lockScreen"
+          },
+          {
+            "kind": "field",
+            "name": "monthlySummary"
+          },
+          {
+            "kind": "field",
+            "name": "morningReport"
+          },
+          {
+            "kind": "field",
+            "name": "morningReportHour"
+          },
+          {
+            "kind": "field",
+            "name": "morningReportMin"
+          },
+          {
+            "kind": "field",
+            "name": "personaAdmin"
+          },
+          {
+            "kind": "field",
+            "name": "personaContractor"
+          },
+          {
+            "kind": "field",
+            "name": "personaCourier"
+          },
+          {
+            "kind": "field",
+            "name": "personaStore"
+          },
+          {
+            "kind": "field",
+            "name": "personaWorker"
+          },
+          {
+            "kind": "field",
+            "name": "pushEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "quietEndHour"
+          },
+          {
+            "kind": "field",
+            "name": "quietEndMin"
+          },
+          {
+            "kind": "field",
+            "name": "quietHoursEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "quietInMeetings"
+          },
+          {
+            "kind": "field",
+            "name": "quietOnShabbat"
+          },
+          {
+            "kind": "field",
+            "name": "quietStartHour"
+          },
+          {
+            "kind": "field",
+            "name": "quietStartMin"
+          },
+          {
+            "kind": "field",
+            "name": "quietWhileDriving"
+          },
+          {
+            "kind": "field",
+            "name": "smsEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "snoozeUntilMs"
+          },
+          {
+            "kind": "field",
+            "name": "soundEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "soundPerType"
+          },
+          {
+            "kind": "field",
+            "name": "typeBackInStock"
+          },
+          {
+            "kind": "field",
+            "name": "typeDeals"
+          },
+          {
+            "kind": "field",
+            "name": "typeNewChats"
+          },
+          {
+            "kind": "field",
+            "name": "typeOrders"
+          },
+          {
+            "kind": "field",
+            "name": "typePriceDrops"
+          },
+          {
+            "kind": "field",
+            "name": "typeProjectUpdates"
+          },
+          {
+            "kind": "field",
+            "name": "typeReminders"
+          },
+          {
+            "kind": "field",
+            "name": "typeShipments"
+          },
+          {
+            "kind": "field",
+            "name": "typeSupplierOffers"
+          },
+          {
+            "kind": "field",
+            "name": "vibrationEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "weeklySummary"
+          },
+          {
+            "kind": "field",
+            "name": "whatsappEnabled"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_enum",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "NotifSettings(pushEnabled: bTrue('pushEnabled'), emailEnabled: bTrue('emailEnabled'), typ…"
+          }
+        ]
+      },
+      "floor": [
+        "NotifSettings",
+        "bFalse",
+        "bTrue",
+        "i",
+        "toInt"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> j)",
+        "output": "NotifSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettingsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettingsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "NotifSettingsNotifier.update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettingsNotifier.update",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(NotifSettings Function(NotifSettings) f) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "NotifSettingsNotifier.cancelSnooze",
+          "NotifSettingsNotifier.snoozeForMinutes"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = f(state)"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          }
+        ]
+      },
+      "floor": [
+        "f",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(NotifSettings Function(NotifSettings) f)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettingsNotifier.snoozeForMinutes",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int minutes) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "update",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "until = DateTime.now().add(Duration(minutes: minutes))"
+          },
+          {
+            "kind": "effect",
+            "detail": "update((s) => s.copyWith(snoozeUntilMs: until.millisecondsSinceEpoch))"
+          }
+        ]
+      },
+      "floor": [
+        "Duration",
+        "add",
+        "copyWith",
+        "now"
+      ],
+      "contract": {
+        "input": "(int minutes)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettingsNotifier.cancelSnooze",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "update",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "update((s) => s.copyWith(snoozeUntilMs: 0))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NotifSettingsNotifier.reset",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = NotifSettings.defaults"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "remove"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

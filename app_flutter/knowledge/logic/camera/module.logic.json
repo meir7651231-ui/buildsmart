@@ -1,0 +1,402 @@
+{
+  "module": "camera",
+  "source": "lib/features/fittings/render/camera.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "perspective",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double fov, double aspect, double near, double far) -> Mat4",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "filled"
+          },
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = 1 / math.tan(fov / 2)"
+          },
+          {
+            "kind": "init",
+            "detail": "m = List<double>.filled(16, 0)"
+          },
+          {
+            "kind": "effect",
+            "detail": "m[0] = t / aspect"
+          },
+          {
+            "kind": "effect",
+            "detail": "m[5] = t"
+          },
+          {
+            "kind": "effect",
+            "detail": "m[10] = (far + near) / (near - far)"
+          },
+          {
+            "kind": "effect",
+            "detail": "m[11] = -1"
+          },
+          {
+            "kind": "effect",
+            "detail": "m[14] = 2 * far * near / (near - far)"
+          },
+          {
+            "kind": "return",
+            "detail": "Mat4(m)"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "Mat4",
+        "tan"
+      ],
+      "contract": {
+        "input": "(double fov, double aspect, double near, double far)",
+        "output": "Mat4",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "lookAt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Vec3 eye, Vec3 center, Vec3 up) -> Mat4",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "z = eye - center"
+          },
+          {
+            "kind": "effect",
+            "detail": "z = z.norm()"
+          },
+          {
+            "kind": "compute",
+            "detail": "x = up.cross(z)"
+          },
+          {
+            "kind": "compute",
+            "detail": "xl = x.length"
+          },
+          {
+            "kind": "effect",
+            "detail": "x = xl == 0 ? x : x.scale(1 / xl)"
+          },
+          {
+            "kind": "compute",
+            "detail": "y = z.cross(x)"
+          },
+          {
+            "kind": "return",
+            "detail": "Mat4([x.x, y.x, z.x, 0, x.y, y.y, z.y, 0, x.z, y.z, z.z, 0, -x.dot(eye), -y.dot(eye), -z.…"
+          }
+        ]
+      },
+      "floor": [
+        "Mat4",
+        "cross",
+        "dot",
+        "norm",
+        "scale"
+      ],
+      "contract": {
+        "input": "(Vec3 eye, Vec3 center, Vec3 up)",
+        "output": "Mat4",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "orbitEye",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Vec3 target, double dist, double yaw, double pitch) -> Vec3",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Vec3(target.x + dist * math.cos(pitch) * math.sin(yaw), target.y + dist * math.sin(pitch)…"
+          }
+        ]
+      },
+      "floor": [
+        "Vec3",
+        "cos",
+        "sin"
+      ],
+      "contract": {
+        "input": "(Vec3 target, double dist, double yaw, double pitch)",
+        "output": "Vec3",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "projectToScreen",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Mat4 proj, Mat4 view, Vec3 world, double width, double height) -> ScreenPoint",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "clip = proj.mul(view).apply(world)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if clip.w == 0 → return const ScreenPoint(0, 0, 0, 0)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ndcX = clip.x / clip.w"
+          },
+          {
+            "kind": "compute",
+            "detail": "ndcY = clip.y / clip.w"
+          },
+          {
+            "kind": "compute",
+            "detail": "ndcZ = clip.z / clip.w"
+          },
+          {
+            "kind": "compute",
+            "detail": "sx = (ndcX * 0.5 + 0.5) * width"
+          },
+          {
+            "kind": "compute",
+            "detail": "sy = (1 - (ndcY * 0.5 + 0.5)) * height"
+          },
+          {
+            "kind": "return",
+            "detail": "ScreenPoint(sx, sy, ndcZ, clip.w)"
+          }
+        ]
+      },
+      "floor": [
+        "ScreenPoint",
+        "apply",
+        "mul"
+      ],
+      "contract": {
+        "input": "(Mat4 proj, Mat4 view, Vec3 world, double width, double height)",
+        "output": "ScreenPoint",
+        "purity": "pure",
+        "precond": [
+          "if clip.w == 0 → return const ScreenPoint(0, 0, 0, 0)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Mat4.mul",
+      "kind": "method",
+      "object": {
+        "signature": "(Mat4 b) -> Mat4",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "m"
+          },
+          {
+            "kind": "global",
+            "name": "filled"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "o = List<double>.filled(16, 0)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var c = 0; c < 4; c++"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var r = 0; r < 4; r++"
+          },
+          {
+            "kind": "return",
+            "detail": "Mat4(o)"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "Mat4"
+      ],
+      "contract": {
+        "input": "(Mat4 b)",
+        "output": "Mat4",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Mat4.apply",
+      "kind": "method",
+      "object": {
+        "signature": "(Vec3 p, {double w = 1}) -> ({double x, double y, double z, double w})",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "m"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "x = m[0] * p.x + m[4] * p.y + m[8] * p.z + m[12] * w"
+          },
+          {
+            "kind": "compute",
+            "detail": "y = m[1] * p.x + m[5] * p.y + m[9] * p.z + m[13] * w"
+          },
+          {
+            "kind": "compute",
+            "detail": "z = m[2] * p.x + m[6] * p.y + m[10] * p.z + m[14] * w"
+          },
+          {
+            "kind": "compute",
+            "detail": "ww = m[3] * p.x + m[7] * p.y + m[11] * p.z + m[15] * w"
+          },
+          {
+            "kind": "return",
+            "detail": "(x: x, y: y, z: z, w: ww)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Vec3 p, {double w = 1})",
+        "output": "({double x, double y, double z, double w})",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenPoint.visible",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "w"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "w > 0"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,789 @@
+{
+  "module": "ring_dive_catalog",
+  "source": "/home/user/buildsmart/app_flutter/lib/features/ring_dive/ring_dive_catalog.dart",
+  "atomCount": 14,
+  "caches": [
+    "_deptByCatHe",
+    "_rdPool",
+    "_taxoByCatHe"
+  ],
+  "atoms": [
+    {
+      "fn": "_taxo",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Map<String, _Taxo>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_taxoByCatHe"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "cached = _taxoByCatHe"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cached != null → return cached"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, _Taxo>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final top in kCatalogTree"
+          },
+          {
+            "kind": "effect",
+            "detail": "walk(top, top.title)"
+          },
+          {
+            "kind": "return",
+            "detail": "_taxoByCatHe = out"
+          }
+        ]
+      },
+      "floor": [
+        "_Taxo",
+        "walk"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, _Taxo>",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if cached != null → return cached"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_dept",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Map<String, String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kDeptCatHeadings"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_deptByCatHe"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_leafCatsUnderTitle",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "cached = _deptByCatHe"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cached != null → return cached"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, String>{}"
+          },
+          {
+            "kind": "effect",
+            "detail": "kDeptCatHeadings.forEach((dept, headings) {for (final h in headings) {for (final title in…"
+          },
+          {
+            "kind": "return",
+            "detail": "_deptByCatHe = out"
+          }
+        ]
+      },
+      "floor": [
+        "forEach",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, String>",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if cached != null → return cached"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_leafCatsUnderTitle",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String title) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_dept"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "cats = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in kCatalogTree"
+          },
+          {
+            "kind": "effect",
+            "detail": "find(t)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if cats.isEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "cats"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "find",
+        "gatherLeaves"
+      ],
+      "contract": {
+        "input": "(String title)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "rdAxesOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> Map<String, Set<String>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <String, Set<String>>{}"
+          },
+          {
+            "kind": "compute",
+            "detail": "taxo = _taxo[p.categoryHe]"
+          },
+          {
+            "kind": "compute",
+            "detail": "dept = _dept[p.categoryHe]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if dept != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "put('cat', <String>[taxo?.cat ?? p.categoryHe])"
+          },
+          {
+            "kind": "effect",
+            "detail": "put('type', <String>[taxo?.type ?? p.categoryHe])"
+          },
+          {
+            "kind": "effect",
+            "detail": "put('size', productSizeTokens(p).map((t) => t.label))"
+          },
+          {
+            "kind": "effect",
+            "detail": "put('angle', parseAngleTokens(p.nameHe).map((t) => t.label))"
+          },
+          {
+            "kind": "compute",
+            "detail": "material = materialOf(p)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if material != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "color = p.color"
+          },
+          {
+            "kind": "branch",
+            "detail": "if color != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "put('brand', <String>[p.brand])"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "materialOf",
+        "parseAngleTokens",
+        "productSizeTokens",
+        "put",
+        "trim"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "Map<String, Set<String>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "rdPool",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<RdProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_rdPool"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_rdPool ??= <RdProduct>[for (final p in kDivePool) RdProduct(p)]"
+          }
+        ]
+      },
+      "floor": [
+        "RdProduct"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<RdProduct>",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "rdMatching",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RdCons cons, [List<RdProduct>? pool]) -> List<RdProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "rdFindAxes",
+          "rdOptsFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ps = pool ?? rdPool"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cons.isEmpty → return ps"
+          },
+          {
+            "kind": "return",
+            "detail": "ps.where((rp) => cons.entries.every((e) => rp.has(e.key, e.value))).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "every",
+        "has",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(RdCons cons, [List<RdProduct>? pool])",
+        "output": "List<RdProduct>",
+        "purity": "pure",
+        "precond": [
+          "if cons.isEmpty → return ps"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_rank",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String field, String value) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRdOrder"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "rdOptsFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ord = kRdOrder[field]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if ord == null → return 999"
+          },
+          {
+            "kind": "compute",
+            "detail": "i = ord.indexOf(value)"
+          },
+          {
+            "kind": "return",
+            "detail": "i < 0 ? 999 : i"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(String field, String value)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if ord == null → return 999"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "rdOptsFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String field, RdCons cons, [List<RdProduct>? pool, List<RdProduct>? matched]) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRdOrder",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "rdMatching",
+            "module": true
+          },
+          {
+            "name": "_rank",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "rdFindAxes"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "base = matched ?? rdMatching(cons, pool)"
+          },
+          {
+            "kind": "init",
+            "detail": "set = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final rp in base"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = rp.axes[field]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = set.toList()..sort((a, b) {final r = _rank(field, a).compareTo(_rank(field, b)); return r…"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "compareTo",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(String field, RdCons cons, [List<RdProduct>? pool, List<RdProduct>? matched])",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "rdFindAxes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RdCons cons, [List<RdProduct>? pool]) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRdAxes"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "rdMatching",
+            "module": true
+          },
+          {
+            "name": "rdOptsFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "matched = rdMatching(cons, pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if matched.length <= 1 → return const <String>[]"
+          },
+          {
+            "kind": "return",
+            "detail": "<String>[for (final f in kRdAxes) if (!cons.containsKey(f) && rdOptsFor(f, cons, pool, ma…"
+          }
+        ]
+      },
+      "floor": [
+        "containsKey"
+      ],
+      "contract": {
+        "input": "(RdCons cons, [List<RdProduct>? pool])",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [
+          "if matched.length <= 1 → return const <String>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RdProduct.sku",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "product"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "product.sku"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RdProduct.name",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "product"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "product.nameHe"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RdProduct.color",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "product"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "product.color"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "RdProduct.brand",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "product"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "product.brand"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RdProduct.has",
+      "kind": "method",
+      "object": {
+        "signature": "(String field, String value) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "axes"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "axes[field]?.contains(value) ?? false"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String field, String value)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

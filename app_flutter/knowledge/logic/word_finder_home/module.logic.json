@@ -1,0 +1,282 @@
+{
+  "module": "word_finder_home",
+  "source": "lib/features/word_finder/word_finder_home.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "WordFinderHome.createState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> ConsumerState<WordFinderHome>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_WordFinderHomeState()"
+          }
+        ]
+      },
+      "floor": [
+        "_WordFinderHomeState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "ConsumerState<WordFinderHome>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WordFinderHomeState._setMode",
+      "kind": "method",
+      "object": {
+        "signature": "(_Mode mode) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_mode"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "_WordFinderHomeState._body",
+          "_WordFinderHomeState._segment"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _mode == mode → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "setState(() => _mode = mode)"
+          }
+        ]
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "input": "(_Mode mode)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if _mode == mode → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WordFinderHomeState._segment",
+      "kind": "method",
+      "object": {
+        "signature": "(String label, _Mode mode) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_mode",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_setMode",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_WordFinderHomeState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Expanded(child: Semantics(selected: _mode == mode, container: false, child: BsKey(model: …"
+          }
+        ]
+      },
+      "floor": [
+        "BsKey",
+        "Expanded",
+        "KbKey",
+        "Semantics"
+      ],
+      "contract": {
+        "input": "(String label, _Mode mode)",
+        "output": "Widget",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WordFinderHomeState._body",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_mode",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_setMode",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_WordFinderHomeState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "IndexedStack(index: _mode.index, sizing: StackFit.expand, children: [const WordFinderScre…"
+          }
+        ]
+      },
+      "floor": [
+        "IndexedStack",
+        "QuickPadScreen",
+        "WordFinderScreen"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Widget",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WordFinderHomeState.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWordFinderFlag"
+          },
+          {
+            "kind": "field",
+            "name": "_cascadeLabel"
+          },
+          {
+            "kind": "field",
+            "name": "_mode",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_quickPadLabel"
+          },
+          {
+            "kind": "global",
+            "name": "featureFlagsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "ref"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_segment",
+            "module": true
+          },
+          {
+            "name": "_body",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "on = ref.watch(featureFlagsProvider).contains(kWordFinderFlag)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !on → return const SizedBox.shrink()"
+          },
+          {
+            "kind": "return",
+            "detail": "Directionality(textDirection: TextDirection.rtl, child: Column(crossAxisAlignment: CrossA…"
+          }
+        ]
+      },
+      "floor": [
+        "Column",
+        "Directionality",
+        "Expanded",
+        "Material",
+        "Padding",
+        "Row",
+        "SizedBox",
+        "all",
+        "contains",
+        "shrink",
+        "watch"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [
+          "if !on → return const SizedBox.shrink()"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

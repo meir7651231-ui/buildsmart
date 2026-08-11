@@ -1,0 +1,1112 @@
+{
+  "module": "worker_trainings",
+  "source": "lib/state/worker_trainings.dart",
+  "atomCount": 15,
+  "atoms": [
+    {
+      "fn": "demoSeedTrainings",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<WorkerTraining>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDemoContractorId"
+          },
+          {
+            "kind": "const",
+            "name": "kTrainingDemoUser"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "WorkerTrainingsNotifier._load",
+          "WorkerTrainingsNotifier.debugSeedDemo"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[WorkerTraining(id: 'train-demo-1', username: kTrainingDemoUser, title: 'הדרכת בטיחות כלל…"
+          }
+        ]
+      },
+      "floor": [
+        "DateTime",
+        "WorkerTraining"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<WorkerTraining>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTraining.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? id, String? username, String? title, String? by, DateTime? date, String? doc, bool clearDoc = false, String? status, String? employerId}) -> WorkerTraining",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "WorkerTraining(id: id ?? this.id, username: username ?? this.username, title: title ?? th…"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerTraining"
+      ],
+      "contract": {
+        "input": "({String? id, String? username, String? title, String? by, DateTime? date, String? doc, bool clearDoc = false, String? status, String? employerId})",
+        "output": "WorkerTraining",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTraining.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "by"
+          },
+          {
+            "kind": "field",
+            "name": "date"
+          },
+          {
+            "kind": "field",
+            "name": "doc"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          },
+          {
+            "kind": "field",
+            "name": "title"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'username' : username, 'title' : title, 'by' : by, 'date' : date.toIso8601Str…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTraining.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> WorkerTraining?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTrainingRecorded"
+          },
+          {
+            "kind": "field",
+            "name": "by"
+          },
+          {
+            "kind": "field",
+            "name": "doc"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "username = raw['username']"
+          },
+          {
+            "kind": "compute",
+            "detail": "title = raw['title']"
+          },
+          {
+            "kind": "compute",
+            "detail": "date = DateTime.tryParse('${raw['date']}')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! String || username is! String || title is! String || date == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "WorkerTraining(id: id, username: username, title: title, by: raw['by'] is String ? raw['b…"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerTraining",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "WorkerTraining?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if id is! String || username is! String || title is! String || date == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · id is! String || username is! String || title is! String || date == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDemoContractorId",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTrainingDemoUser",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "debugPersistOverride",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "demoSeedTrainings",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted || _userTouched → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(storageKey)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw == null"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "tryFromJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted || _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier.debugSeedDemo",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDemoContractorId",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTrainingDemoUser",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "demoSeedTrainings",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = demoSeedTrainings()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "debugPersistOverride"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          },
+          {
+            "kind": "field",
+            "name": "storageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "WorkerTrainingsNotifier._decide",
+          "WorkerTrainingsNotifier._load",
+          "WorkerTrainingsNotifier.add",
+          "WorkerTrainingsNotifier.attachDoc",
+          "WorkerTrainingsNotifier.remove",
+          "WorkerTrainingsNotifier.sendForApproval"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "override = debugPersistOverride"
+          },
+          {
+            "kind": "precond",
+            "detail": "if override != null → return override()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !persist → return true"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "override",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if override != null → return override()",
+          "if !persist → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier.forUser",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username) -> List<WorkerTraining>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.where((t) => t.username == username).toList()..sort((a, b) => b.date.compareTo(a.da…"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "sort",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String username)",
+        "output": "List<WorkerTraining>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier.add",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String username, required String title, required String by, required DateTime date, String? doc, String employerId = ''}) -> Future<WorkerTraining?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_seq"
+          },
+          {
+            "kind": "field",
+            "name": "debugPersistOverride",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "t = WorkerTraining(id: 'train-${DateTime.now().microsecondsSinceEpoch}-${_seq++}', username: …"
+          },
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, t]"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok"
+          },
+          {
+            "kind": "return",
+            "detail": "t"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerTraining",
+        "now",
+        "trim"
+      ],
+      "contract": {
+        "input": "({required String username, required String title, required String by, required DateTime date, String? doc, String employerId = ''})",
+        "output": "Future<WorkerTraining?>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier.remove",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "debugPersistOverride",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final t in state) if (t.id != id) t]"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier.attachDoc",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String dataUrl) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "debugPersistOverride",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !before.any((t) => t.id == id) → return false"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final t in before) if (t.id == id) t.copyWith(doc: dataUrl) else t]"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, String dataUrl)",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !before.any((t) => t.id == id) → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier.sendForApproval",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTrainingPending"
+          },
+          {
+            "kind": "const",
+            "name": "kTrainingRecorded"
+          },
+          {
+            "kind": "field",
+            "name": "debugPersistOverride",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final t in state) if (t.id == id && t.status == kTrainingRecorded) t.copyWi…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier.approve",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTrainingApproved"
+          },
+          {
+            "kind": "const",
+            "name": "kTrainingPending",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_decide",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_decide(id, kTrainingApproved)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier.reject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTrainingPending",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTrainingRejected"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_decide",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_decide(id, kTrainingRejected)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTrainingsNotifier._decide",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String status) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTrainingPending"
+          },
+          {
+            "kind": "field",
+            "name": "debugPersistOverride",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "WorkerTrainingsNotifier.approve",
+          "WorkerTrainingsNotifier.reject"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.any((t) => t.id == id && t.status == kTrainingPending) → return false"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final t in state) if (t.id == id && t.status == kTrainingPending) t.copyWit…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, String status)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.any((t) => t.id == id && t.status == kTrainingPending) → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

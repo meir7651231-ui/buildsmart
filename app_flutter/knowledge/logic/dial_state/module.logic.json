@@ -1,0 +1,47 @@
+{
+  "module": "dial_state",
+  "source": "lib/state/dial_state.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "resetAllDials",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "activePersonaProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "ref.read(activePersonaProvider.notifier).state = null"
+          }
+        ]
+      },
+      "floor": [
+        "read"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

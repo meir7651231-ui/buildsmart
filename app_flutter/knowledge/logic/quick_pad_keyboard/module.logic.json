@@ -1,0 +1,502 @@
+{
+  "module": "quick_pad_keyboard",
+  "source": "lib/features/word_finder/quick_pad_keyboard.dart",
+  "atomCount": 9,
+  "atoms": [
+    {
+      "fn": "QuickPadKeyboard.createState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> State<QuickPadKeyboard>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_QuickPadKeyboardState()"
+          }
+        ]
+      },
+      "floor": [
+        "_QuickPadKeyboardState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "State<QuickPadKeyboard>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_QuickPadKeyboardState._key",
+      "kind": "method",
+      "object": {
+        "signature": "(QuickPadItem item) -> Object",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_QuickPadKeyboardState._decrement",
+          "_QuickPadKeyboardState._increment",
+          "_QuickPadKeyboardState._qtyOf"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "item.payload ?? item.label"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(QuickPadItem item)",
+        "output": "Object",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_QuickPadKeyboardState._qtyOf",
+      "kind": "method",
+      "object": {
+        "signature": "(QuickPadItem item) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_qty"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_key",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_QuickPadKeyboardState._buildItemCell",
+          "_QuickPadKeyboardState._decrement",
+          "_QuickPadKeyboardState._increment"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_qty[_key(item)] ?? 1"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(QuickPadItem item)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_QuickPadKeyboardState._increment",
+      "kind": "method",
+      "object": {
+        "signature": "(QuickPadItem item) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMaxQty"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_qty"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_qtyOf",
+            "module": true
+          },
+          {
+            "name": "_key",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_QuickPadKeyboardState._buildItemCell"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "setState(() {final next = _qtyOf(item) + 1; _qty[_key(item)] = next > kMaxQty ? kMaxQty :…"
+          }
+        ]
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "input": "(QuickPadItem item)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_QuickPadKeyboardState._decrement",
+      "kind": "method",
+      "object": {
+        "signature": "(QuickPadItem item) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_qty"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_qtyOf",
+            "module": true
+          },
+          {
+            "name": "_key",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_QuickPadKeyboardState._buildItemCell"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "setState(() {final next = _qtyOf(item) - 1; _qty[_key(item)] = next < 1 ? 1 : next;})"
+          }
+        ]
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "input": "(QuickPadItem item)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_QuickPadKeyboardState._buildItemCell",
+      "kind": "method",
+      "object": {
+        "signature": "(int index) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMaxQty",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_qty",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_qtyOf",
+            "module": true
+          },
+          {
+            "name": "_decrement",
+            "module": true
+          },
+          {
+            "name": "_increment",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_QuickPadKeyboardState._buildItemRow"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "item = widget.items[index]"
+          },
+          {
+            "kind": "compute",
+            "detail": "qty = _qtyOf(item)"
+          },
+          {
+            "kind": "return",
+            "detail": "Column(mainAxisSize: MainAxisSize.min, children: [BsKey(model: KbKey(item.label), onTap: …"
+          }
+        ]
+      },
+      "floor": [
+        "BsKey",
+        "Column",
+        "Expanded",
+        "KbKey",
+        "Row",
+        "Semantics",
+        "SizedBox",
+        "onAdd"
+      ],
+      "contract": {
+        "input": "(int index)",
+        "output": "Widget",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_QuickPadKeyboardState._buildItemRow",
+      "kind": "method",
+      "object": {
+        "signature": "(int start, int end) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_buildItemCell",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_QuickPadKeyboardState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "children = <Widget>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = start; i < end; i++"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i > start"
+          },
+          {
+            "kind": "effect",
+            "detail": "children.add(Expanded(child: _buildItemCell(i)))"
+          },
+          {
+            "kind": "return",
+            "detail": "Row(crossAxisAlignment: CrossAxisAlignment.start, children: children)"
+          }
+        ]
+      },
+      "floor": [
+        "Expanded",
+        "Row",
+        "SizedBox",
+        "add"
+      ],
+      "contract": {
+        "input": "(int start, int end)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_QuickPadKeyboardState._buildUtilityRow",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_QuickPadKeyboardState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Row(children: [Expanded(child: BsKey(model: const KbKey('מצב רגיל'), onTap: () => widget.…"
+          }
+        ]
+      },
+      "floor": [
+        "BsKey",
+        "Expanded",
+        "KbKey",
+        "Row",
+        "call"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_QuickPadKeyboardState.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_buildItemRow",
+            "module": true
+          },
+          {
+            "name": "_buildUtilityRow",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "rowWidgets = <Widget>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < widget.items.length; i += QuickPadKeyboard._itemsPerRow"
+          },
+          {
+            "kind": "compute",
+            "detail": "end = (i + QuickPadKeyboard._itemsPerRow < widget.items.length) ? i + QuickPadKeyboard._itemsPe…"
+          },
+          {
+            "kind": "effect",
+            "detail": "rowWidgets..add(_buildItemRow(i, end))..add(const SizedBox(height: BsTokens.space1))"
+          },
+          {
+            "kind": "branch",
+            "detail": "if widget.onSwitchMode != null"
+          },
+          {
+            "kind": "return",
+            "detail": "Directionality(textDirection: TextDirection.ltr, child: Material(color: BsTokens.surfaceM…"
+          }
+        ]
+      },
+      "floor": [
+        "Column",
+        "Directionality",
+        "Material",
+        "Padding",
+        "SizedBox",
+        "add",
+        "all"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,439 @@
+{
+  "module": "actor_key",
+  "source": "lib/state/intel/actor_key.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "AnonActorKeyNotifier.ready",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ready"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ready"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AnonActorKeyNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kActorKeyPrefsKey"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_mintKey",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "setString"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AnonActorKeyNotifier.erase",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kActorKeyPrefsKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = null"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "remove"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AnonActorKeyNotifier._mintKey",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AnonActorKeyNotifier._load"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "rnd = Random.secure()"
+          },
+          {
+            "kind": "init",
+            "detail": "b = List<int>.generate(16, (_) => rnd.nextInt(256))"
+          },
+          {
+            "kind": "effect",
+            "detail": "b[6] = (b[6] & 0x0f) | 0x40"
+          },
+          {
+            "kind": "effect",
+            "detail": "b[8] = (b[8] & 0x3f) | 0x80"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = StringBuffer()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < 16; i++"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.write(b[i].toRadixString(16).padLeft(2, '0'))"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i == 3 || i == 5 || i == 7 || i == 9"
+          },
+          {
+            "kind": "return",
+            "detail": "out.toString()"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "StringBuffer",
+        "nextInt",
+        "padLeft",
+        "secure",
+        "toRadixString",
+        "toString",
+        "write"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NoopActorStitchWriter.writeStitch",
+      "kind": "method",
+      "object": {
+        "signature": "({required String uid, required String anonKey}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [],
+      "contract": {
+        "input": "({required String uid, required String anonKey})",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ActorStitch.onUidChanged",
+      "kind": "method",
+      "object": {
+        "signature": "(String? prev, String? next) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "actorStitchWriterProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "anonActorKeyProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelBusProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_stitch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if next == null || next.isEmpty || next == prev → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_stitch(next)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String? prev, String? next)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if next == null || next.isEmpty || next == prev → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ActorStitch._stitch",
+      "kind": "method",
+      "object": {
+        "signature": "(String uid) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "actorStitchWriterProvider"
+          },
+          {
+            "kind": "global",
+            "name": "anonActorKeyProvider"
+          },
+          {
+            "kind": "global",
+            "name": "intelBusProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_write",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ActorStitch.onUidChanged"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "anonKey = _ref.read(anonActorKeyProvider)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if anonKey == null || anonKey.isEmpty || anonKey == uid → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ref.read(intelBusProvider).identify(anonKey: anonKey, uid: uid)"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_write(_ref.read(actorStitchWriterProvider), uid, anonKey))"
+          }
+        ]
+      },
+      "floor": [
+        "identify",
+        "read",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(String uid)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if anonKey == null || anonKey.isEmpty || anonKey == uid → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ActorStitch._write",
+      "kind": "method",
+      "object": {
+        "signature": "(ActorStitchWriter writer, String uid, String anonKey) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ActorStitch._stitch"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "debugPrint",
+        "writeStitch"
+      ],
+      "contract": {
+        "input": "(ActorStitchWriter writer, String uid, String anonKey)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

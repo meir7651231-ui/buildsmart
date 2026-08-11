@@ -1,0 +1,729 @@
+{
+  "module": "distinct_label",
+  "source": "lib/features/word_finder/distinct_label.dart",
+  "atomCount": 13,
+  "atoms": [
+    {
+      "fn": "_numberSuffix",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int ordinal) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "distinctSelectionLabels"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "' ($ordinal)'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int ordinal)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_wordTokens",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String name) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_kHasDigit"
+          },
+          {
+            "kind": "global",
+            "name": "_kWordSplit"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_sharedWordTokens",
+          "_wordValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "name.split(_kWordSplit).where((w) => w.length >= 2 && !_kHasDigit.hasMatch(w)).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "hasMatch",
+        "split",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String name)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_sizeValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_axisValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "productSizeTokens(p).map((t) => t.label).join(' ')"
+          }
+        ]
+      },
+      "floor": [
+        "join",
+        "map",
+        "productSizeTokens"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_angleValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_axisValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "angleTokensIn(<LipskeyCatalogProduct>[p]).map((t) => t.label).join(' ')"
+          }
+        ]
+      },
+      "floor": [
+        "angleTokensIn",
+        "join",
+        "map"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_colorValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_axisValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "p.color?.trim() ?? ''"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_brandValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_axisValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "p.brand.trim()"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_baseLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "distinctSelectionLabels"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "base = quickLabel(p)"
+          },
+          {
+            "kind": "return",
+            "detail": "base.isEmpty ? p.sku : base"
+          }
+        ]
+      },
+      "floor": [
+        "quickLabel"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_wordValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(_Row row, String baseLabel, Set<String> sharedTokens) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_kHasDigit",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_kWordSplit",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_wordTokens",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_axisValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final t in _wordTokens(row.product.nameHe)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t == baseLabel → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if sharedTokens.contains(t) → continue"
+          },
+          {
+            "kind": "return",
+            "detail": "t"
+          },
+          {
+            "kind": "return",
+            "detail": "''"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(_Row row, String baseLabel, Set<String> sharedTokens)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_sharedWordTokens",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<_Row> rows) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_kHasDigit",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_kWordSplit",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_wordTokens",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_applyAxisToBucket"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if rows.isEmpty → return <String>{}"
+          },
+          {
+            "kind": "compute",
+            "detail": "shared = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final r in rows"
+          },
+          {
+            "kind": "compute",
+            "detail": "toks = _wordTokens(r.product.nameHe).toSet()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if shared == null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if shared.isEmpty → break"
+          },
+          {
+            "kind": "return",
+            "detail": "shared ?? <String>{}"
+          }
+        ]
+      },
+      "floor": [
+        "intersection",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(List<_Row> rows)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [
+          "if rows.isEmpty → return <String>{}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_axisValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axis, _Row row, String baseLabel, Set<String> sharedTokens) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_wordValue",
+            "module": true
+          },
+          {
+            "name": "_sizeValue",
+            "module": true
+          },
+          {
+            "name": "_angleValue",
+            "module": true
+          },
+          {
+            "name": "_colorValue",
+            "module": true
+          },
+          {
+            "name": "_brandValue",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_applyAxisToBucket"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch axis"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String axis, _Row row, String baseLabel, Set<String> sharedTokens)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_groupByLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<_Row> rows) -> Map<String, List<_Row>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "distinctSelectionLabels"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <String, List<_Row>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final r in rows"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.putIfAbsent(r.label, () => <_Row>[]).add(r)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(List<_Row> rows)",
+        "output": "Map<String, List<_Row>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_applyAxisToBucket",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axis, List<_Row> bucket, String baseLabel) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kLabelAxisSeparator"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_sharedWordTokens",
+            "module": true
+          },
+          {
+            "name": "_axisValue",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "distinctSelectionLabels"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "sharedTokens = axis == 'word' ? _sharedWordTokens(bucket) : const <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "values = <_Row, String>{for (final r in bucket) r : _axisValue(axis, r, baseLabel, sharedTokens)}"
+          },
+          {
+            "kind": "precond",
+            "detail": "if values.values.toSet().length < 2 → return (void)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final r in bucket"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = values[r]!"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v.isEmpty → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "r.label = '${r.label}$kLabelAxisSeparator$v'"
+          }
+        ]
+      },
+      "floor": [
+        "toSet"
+      ],
+      "contract": {
+        "input": "(String axis, List<_Row> bucket, String baseLabel)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if values.values.toSet().length < 2 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "distinctSelectionLabels",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> products) -> Map<String, String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDistinctAxisOrder"
+          },
+          {
+            "kind": "const",
+            "name": "kLabelAxisSeparator",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_baseLabel",
+            "module": true
+          },
+          {
+            "name": "_groupByLabel",
+            "module": true
+          },
+          {
+            "name": "_applyAxisToBucket",
+            "module": true
+          },
+          {
+            "name": "_numberSuffix",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if products.isEmpty → return const <String, String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "rows = <_Row>[for (var i = 0; i < products.length; i++) _Row(products[i], i, _baseLabel(products…"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final entry in _groupByLabel(rows).entries"
+          },
+          {
+            "kind": "compute",
+            "detail": "baseLabel = entry.key"
+          },
+          {
+            "kind": "compute",
+            "detail": "group = entry.value"
+          },
+          {
+            "kind": "branch",
+            "detail": "if group.length < 2 → continue"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final axis in kDistinctAxisOrder"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final bucket in _groupByLabel(rows).values"
+          },
+          {
+            "kind": "branch",
+            "detail": "if bucket.length < 2 → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "bucket.sort((a, b) => a.index.compareTo(b.index))"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var k = 1; k < bucket.length; k++"
+          },
+          {
+            "kind": "return",
+            "detail": "<String, String>{for (final r in rows) r.product.sku : r.label}"
+          }
+        ]
+      },
+      "floor": [
+        "_Row",
+        "compareTo",
+        "sort",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> products)",
+        "output": "Map<String, String>",
+        "purity": "pure",
+        "precond": [
+          "if products.isEmpty → return const <String, String>{}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

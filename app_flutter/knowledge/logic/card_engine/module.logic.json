@@ -1,0 +1,828 @@
+{
+  "module": "card_engine",
+  "source": "lib/features/card_keyboard/card_engine.dart",
+  "atomCount": 10,
+  "caches": [
+    "_mergedKeysMemo"
+  ],
+  "atoms": [
+    {
+      "fn": "mergedKeys",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, List<NewbieStep> stack, WordLexicon lexicon, String? subtype, {Set<String> historySkus = const <String>{}}) -> CardVerdict",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFirstQuestion"
+          },
+          {
+            "kind": "const",
+            "name": "kFirstWordCount"
+          },
+          {
+            "kind": "const",
+            "name": "kMaxDiveTurns"
+          },
+          {
+            "kind": "const",
+            "name": "kMergedAxisFloor",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kMergedAxisMaxPerAxis",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kMergedKeyCap",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kShowProductsThreshold"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "divePoolBySku",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_mergedChips",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "mergedKeysMemoized"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if stack.isEmpty → return CardAskWords(kFirstQuestion, wordsByFrequency(lexicon).take(kFirstWordCount).toList())"
+          },
+          {
+            "kind": "precond",
+            "detail": "if pool.isNotEmpty && distinctCardCount(pool) <= 1 → return CardResolve(pool.first, pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if distinctCardCount(pool) <= kShowProductsThreshold → return CardShowProducts(distinctProducts(pool, cap: pool.length))"
+          },
+          {
+            "kind": "precond",
+            "detail": "if stack.length >= kMaxDiveTurns - 1 → return CardShowProducts(distinctProducts(pool, cap: pool.length))"
+          },
+          {
+            "kind": "compute",
+            "detail": "chips = _mergedChips(pool, stack, subtype, historySkus)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if chips.isEmpty → return CardShowProducts(distinctProducts(pool, cap: pool.length))"
+          },
+          {
+            "kind": "return",
+            "detail": "MergedKeys(chips)"
+          }
+        ]
+      },
+      "floor": [
+        "CardAskWords",
+        "CardResolve",
+        "CardShowProducts",
+        "MergedKeys",
+        "distinctCardCount",
+        "distinctProducts",
+        "take",
+        "toList",
+        "wordsByFrequency"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, List<NewbieStep> stack, WordLexicon lexicon, String? subtype, {Set<String> historySkus = const <String>{}})",
+        "output": "CardVerdict",
+        "purity": "pure",
+        "precond": [
+          "if stack.isEmpty → return CardAskWords(kFirstQuestion, wordsByFrequency(lexicon).take(kFirstWordCount).toList())",
+          "if pool.isNotEmpty && distinctCardCount(pool) <= 1 → return CardResolve(pool.first, pool)",
+          "if distinctCardCount(pool) <= kShowProductsThreshold → return CardShowProducts(distinctProducts(pool, cap: pool.length))",
+          "if stack.length >= kMaxDiveTurns - 1 → return CardShowProducts(distinctProducts(pool, cap: pool.length))",
+          "if chips.isEmpty → return CardShowProducts(distinctProducts(pool, cap: pool.length))"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "clearMergedKeysMemo",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_mergedKeysMemo"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_mergedKeysMemo.clear()"
+          }
+        ]
+      },
+      "floor": [
+        "clear"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "mergedKeysMemoized",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, List<NewbieStep> stack, WordLexicon lexicon, String? subtype, {bool enabled = kCensusMemoEnabled}) -> CardVerdict",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFirstQuestion",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kFirstWordCount",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kMaxDiveTurns",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kShowProductsThreshold",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "collapseKeyOf"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_mergedKeysMemo"
+          }
+        ],
+        "calls": [
+          {
+            "name": "mergedKeys",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !enabled → return mergedKeys(pool, stack, lexicon, subtype)"
+          },
+          {
+            "kind": "compute",
+            "detail": "poolSig = (pool.map(collapseKeyOf).toSet().toList()..sort()).join('|')"
+          },
+          {
+            "kind": "compute",
+            "detail": "axesSig = (stack.map((s) => s.axisLabel).toSet().toList()..sort()).join(',')"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = '$poolSig##$axesSig##$subtype'"
+          },
+          {
+            "kind": "return",
+            "detail": "_mergedKeysMemo.putIfAbsent(key, () => mergedKeys(pool, stack, lexicon, subtype))"
+          }
+        ]
+      },
+      "floor": [
+        "join",
+        "map",
+        "putIfAbsent",
+        "sort",
+        "toList",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, List<NewbieStep> stack, WordLexicon lexicon, String? subtype, {bool enabled = kCensusMemoEnabled})",
+        "output": "CardVerdict",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if !enabled → return mergedKeys(pool, stack, lexicon, subtype)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_mergedChips",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, List<NewbieStep> stack, String? subtype, Set<String> historySkus) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMergedAxisFloor"
+          },
+          {
+            "kind": "const",
+            "name": "kMergedAxisMaxPerAxis"
+          },
+          {
+            "kind": "const",
+            "name": "kMergedKeyCap"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          },
+          {
+            "kind": "global",
+            "name": "divePoolBySku"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_scoreAxis",
+            "module": true
+          },
+          {
+            "name": "_softTiltSorted",
+            "module": true
+          },
+          {
+            "name": "representativeTake",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "mergedKeys"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "answered = <String>{for (final s in stack) s.axisLabel}"
+          },
+          {
+            "kind": "init",
+            "detail": "scored = <_AxisScore>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "sources = sourcesFor(subtype)"
+          },
+          {
+            "kind": "compute",
+            "detail": "anchor = softAnchor(pool)"
+          },
+          {
+            "kind": "init",
+            "detail": "connMates = <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "recipeMates = <String>{}"
+          },
+          {
+            "kind": "branch",
+            "detail": "if anchor != null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var rank = 0; rank < sources.length; rank++"
+          },
+          {
+            "kind": "compute",
+            "detail": "src = sources[rank]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if answered.contains(src.axisName) → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "score = _scoreAxis(rank, src, pool)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if score != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "scored.sort((a, b) {final lhs = a.sumSq * b.n; final rhs = b.sumSq * a.n; if (lhs != rhs)…"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <SignalChip>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final a in scored"
+          },
+          {
+            "kind": "branch",
+            "detail": "if out.length >= kMergedKeyCap → break"
+          },
+          {
+            "kind": "compute",
+            "detail": "room = kMergedKeyCap - out.length"
+          },
+          {
+            "kind": "branch",
+            "detail": "if out.isNotEmpty && room < kMergedAxisFloor → break"
+          },
+          {
+            "kind": "compute",
+            "detail": "take = room < kMergedAxisMaxPerAxis ? room : kMergedAxisMaxPerAxis"
+          },
+          {
+            "kind": "compute",
+            "detail": "src = sources[a.rank]"
+          },
+          {
+            "kind": "compute",
+            "detail": "isMagnitude = const {'size', 'angle'}.contains(a.chips.first.axisId)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ordered = (anchor == null || isMagnitude) ? a.chips : _softTiltSorted(a.chips, src, pool, connMates…"
+          },
+          {
+            "kind": "compute",
+            "detail": "taken = isMagnitude ? representativeTake(ordered, take) : ordered.take(take).toList()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in taken"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "addAll",
+        "any",
+        "compareTo",
+        "compatibleProductsFor",
+        "contains",
+        "distinctCardCount",
+        "kitSkusFor",
+        "matches",
+        "softAnchor",
+        "sort",
+        "sourcesFor",
+        "take",
+        "toDouble",
+        "toList",
+        "where",
+        "withInfoGain"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, List<NewbieStep> stack, String? subtype, Set<String> historySkus)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_softTiltSorted",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<SignalChip> chips, SignalSource src, List<LipskeyCatalogProduct> pool, Set<String> connMates, Set<String> recipeMates, Set<String> historySkus) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_mergedChips"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "ranked = [for (var i = 0; i < chips.length; i++) (index: i, chip: chips[i], tilt: tiltOf(chips[i])…"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final e in ranked) e.chip]"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "compareTo",
+        "contains",
+        "matches",
+        "softTilt",
+        "sort",
+        "tiltOf",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<SignalChip> chips, SignalSource src, List<LipskeyCatalogProduct> pool, Set<String> connMates, Set<String> recipeMates, Set<String> historySkus)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_scoreAxis",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int rank, SignalSource src, List<LipskeyCatalogProduct> pool) -> _AxisScore?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMergedAxisFloor"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_mergedChips"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "chips = src.chipsFor(pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if chips.length < kMergedAxisFloor → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = distinctCardCount(pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if n == 0 → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "sumSq = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "anySplit = false"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final chip in chips"
+          },
+          {
+            "kind": "compute",
+            "detail": "nc = distinctCardCount(pool.where((p) => src.matches(p, chip)).toList())"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nc < n"
+          },
+          {
+            "kind": "effect",
+            "detail": "sumSq += nc * nc"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !anySplit → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "_AxisScore(rank, chips, sumSq, n)"
+          }
+        ]
+      },
+      "floor": [
+        "_AxisScore",
+        "chipsFor",
+        "distinctCardCount",
+        "matches",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(int rank, SignalSource src, List<LipskeyCatalogProduct> pool)",
+        "output": "_AxisScore?",
+        "purity": "pure",
+        "precond": [
+          "if chips.length < kMergedAxisFloor → return null",
+          "if n == 0 → return null",
+          "if !anySplit → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "chips.length < kMergedAxisFloor · n == 0 · !anySplit · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "representativeTake",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<SignalChip> chips, int count) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_mergedChips"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if count <= 1 || chips.length <= count → return chips.take(count).toList()"
+          },
+          {
+            "kind": "init",
+            "detail": "picked = <int>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <SignalChip>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < count; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = (i * (chips.length - 1) / (count - 1)).round()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if picked.add(idx)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "round",
+        "take",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<SignalChip> chips, int count)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [
+          "if count <= 1 || chips.length <= count → return chips.take(count).toList()"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SignalChip.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "axisId"
+          },
+          {
+            "kind": "field",
+            "name": "axisName"
+          },
+          {
+            "kind": "field",
+            "name": "displayLabel"
+          },
+          {
+            "kind": "field",
+            "name": "soft"
+          },
+          {
+            "kind": "field",
+            "name": "value"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is SignalChip && other.axisId == axisId && other.value == value && other.displayLab…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SignalChip.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "axisId"
+          },
+          {
+            "kind": "field",
+            "name": "axisName"
+          },
+          {
+            "kind": "field",
+            "name": "displayLabel"
+          },
+          {
+            "kind": "field",
+            "name": "soft"
+          },
+          {
+            "kind": "field",
+            "name": "value"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(axisId, value, displayLabel, axisName, soft)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SignalChip.withInfoGain",
+      "kind": "method",
+      "object": {
+        "signature": "(double gain, {bool isDestination = false}) -> SignalChip",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "axisId"
+          },
+          {
+            "kind": "field",
+            "name": "axisName"
+          },
+          {
+            "kind": "field",
+            "name": "displayLabel"
+          },
+          {
+            "kind": "field",
+            "name": "infoGain"
+          },
+          {
+            "kind": "field",
+            "name": "soft"
+          },
+          {
+            "kind": "field",
+            "name": "value"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "SignalChip(axisId: axisId, value: value, displayLabel: displayLabel, axisName: axisName, …"
+          }
+        ]
+      },
+      "floor": [
+        "SignalChip"
+      ],
+      "contract": {
+        "input": "(double gain, {bool isDestination = false})",
+        "output": "SignalChip",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

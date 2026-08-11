@@ -1,0 +1,657 @@
+{
+  "module": "route_layout",
+  "source": "lib/features/fittings/layout/route_layout.dart",
+  "atomCount": 12,
+  "atoms": [
+    {
+      "fn": "_dirVec",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Dir d, Vec3 f, Vec3 u) -> Vec3",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "layoutRoute"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "side = f.cross(u).norm()"
+          },
+          {
+            "kind": "return",
+            "detail": "switch (d) {Dir.down => u.scale(-1), Dir.right => side, Dir.left => side.scale(-1), Dir.u…"
+          }
+        ]
+      },
+      "floor": [
+        "cross",
+        "norm",
+        "scale"
+      ],
+      "contract": {
+        "input": "(Dir d, Vec3 f, Vec3 u)",
+        "output": "Vec3",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "layoutRoute",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<RunElement> route) -> List<Placement>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_dirVec",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "p = const Vec3(0, 0, 0)"
+          },
+          {
+            "kind": "init",
+            "detail": "f = const Vec3(1, 0, 0)"
+          },
+          {
+            "kind": "init",
+            "detail": "u = const Vec3(0, 1, 0)"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <Placement>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final el in route"
+          },
+          {
+            "kind": "compute",
+            "detail": "delta = layoutDeltaFor(el.family.label, el.od, od2: el.od2)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if delta == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = _dirVec(el.dir, f, u)"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add(Placement(family: el.family.label, od: el.od, position: p, forward: f, up: u))"
+          },
+          {
+            "kind": "compute",
+            "detail": "bendAxis = delta.turn != 0 ? b : u"
+          },
+          {
+            "kind": "effect",
+            "detail": "p = p + f.scale(delta.ex) + bendAxis.scale(delta.ey)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if delta.turn != 0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if delta.terminal → break"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "Placement",
+        "Vec3",
+        "add",
+        "cos",
+        "dot",
+        "layoutDeltaFor",
+        "norm",
+        "scale",
+        "sin"
+      ],
+      "contract": {
+        "input": "(List<RunElement> route)",
+        "output": "List<Placement>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.+",
+      "kind": "method",
+      "object": {
+        "signature": "(Vec3 o) -> Vec3",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x"
+          },
+          {
+            "kind": "field",
+            "name": "y"
+          },
+          {
+            "kind": "field",
+            "name": "z"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Vec3(x + o.x, y + o.y, z + o.z)"
+          }
+        ]
+      },
+      "floor": [
+        "Vec3"
+      ],
+      "contract": {
+        "input": "(Vec3 o)",
+        "output": "Vec3",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.-",
+      "kind": "method",
+      "object": {
+        "signature": "(Vec3 o) -> Vec3",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x"
+          },
+          {
+            "kind": "field",
+            "name": "y"
+          },
+          {
+            "kind": "field",
+            "name": "z"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Vec3(x - o.x, y - o.y, z - o.z)"
+          }
+        ]
+      },
+      "floor": [
+        "Vec3"
+      ],
+      "contract": {
+        "input": "(Vec3 o)",
+        "output": "Vec3",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.scale",
+      "kind": "method",
+      "object": {
+        "signature": "(double s) -> Vec3",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x"
+          },
+          {
+            "kind": "field",
+            "name": "y"
+          },
+          {
+            "kind": "field",
+            "name": "z"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "Vec3.norm"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Vec3(x * s, y * s, z * s)"
+          }
+        ]
+      },
+      "floor": [
+        "Vec3"
+      ],
+      "contract": {
+        "input": "(double s)",
+        "output": "Vec3",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.dot",
+      "kind": "method",
+      "object": {
+        "signature": "(Vec3 o) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x"
+          },
+          {
+            "kind": "field",
+            "name": "y"
+          },
+          {
+            "kind": "field",
+            "name": "z"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "Vec3.length"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "x * o.x + y * o.y + z * o.z"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Vec3 o)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.cross",
+      "kind": "method",
+      "object": {
+        "signature": "(Vec3 o) -> Vec3",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x"
+          },
+          {
+            "kind": "field",
+            "name": "y"
+          },
+          {
+            "kind": "field",
+            "name": "z"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Vec3(y * o.z - z * o.y, z * o.x - x * o.z, x * o.y - y * o.x)"
+          }
+        ]
+      },
+      "floor": [
+        "Vec3"
+      ],
+      "contract": {
+        "input": "(Vec3 o)",
+        "output": "Vec3",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.length",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "y",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "z",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "dot",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "math.sqrt(dot(this))"
+          }
+        ]
+      },
+      "floor": [
+        "sqrt"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.norm",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Vec3",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "y",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "z",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "scale",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = length"
+          },
+          {
+            "kind": "return",
+            "detail": "n == 0 ? this : scale(1 / n)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Vec3",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x"
+          },
+          {
+            "kind": "field",
+            "name": "y"
+          },
+          {
+            "kind": "field",
+            "name": "z"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is Vec3 && other.x == x && other.y == y && other.z == z"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x"
+          },
+          {
+            "kind": "field",
+            "name": "y"
+          },
+          {
+            "kind": "field",
+            "name": "z"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(x, y, z)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Vec3.toString",
+      "kind": "method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "x"
+          },
+          {
+            "kind": "field",
+            "name": "y"
+          },
+          {
+            "kind": "field",
+            "name": "z"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'(${x.toStringAsFixed(3)}, ${y.toStringAsFixed(3)}, ${z.toStringAsFixed(3)})'"
+          }
+        ]
+      },
+      "floor": [
+        "toStringAsFixed"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

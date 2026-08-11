@@ -1,0 +1,416 @@
+{
+  "module": "config_sink_firebase",
+  "source": "lib/state/studio/config_sink_firebase.dart",
+  "atomCount": 9,
+  "atoms": [
+    {
+      "fn": "FirestoreConfigDocPort._ref",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> DocumentReference<Map<String, dynamic>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStudioLiveCollection"
+          },
+          {
+            "kind": "const",
+            "name": "kStudioLiveDocId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "FirebaseFirestore.instance.collection(kStudioLiveCollection).doc(kStudioLiveDocId)"
+          }
+        ]
+      },
+      "floor": [
+        "collection",
+        "doc"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "DocumentReference<Map<String, dynamic>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreConfigDocPort.read",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<Map<String, dynamic>?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(await _ref.get()).data()"
+          }
+        ]
+      },
+      "floor": [
+        "data",
+        "get"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<Map<String, dynamic>?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreConfigDocPort.write",
+      "kind": "method",
+      "object": {
+        "signature": "(Map<String, dynamic> data) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "_ref.set"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ref.set(data)"
+          }
+        ]
+      },
+      "floor": [
+        "set"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> data)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreConfigDocPort.remove",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ref.delete()"
+          }
+        ]
+      },
+      "floor": [
+        "delete"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreConfigDocPort.snapshots",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Stream<Map<String, dynamic>?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ref.snapshots().map((s) => s.data())"
+          }
+        ]
+      },
+      "floor": [
+        "data",
+        "map",
+        "snapshots"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Stream<Map<String, dynamic>?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreConfigSink._sharedView",
+      "kind": "method",
+      "object": {
+        "signature": "(ConfigDoc doc) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirestoreConfigSink.save"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ConfigDoc(published: doc.published, schemaVersion: doc.schemaVersion).toJson()"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigDoc",
+        "toJson"
+      ],
+      "contract": {
+        "input": "(ConfigDoc doc)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreConfigSink.save",
+      "kind": "method",
+      "object": {
+        "signature": "(ConfigDoc doc) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_cache"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_lastPublished"
+          },
+          {
+            "kind": "state",
+            "name": "_port"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_sharedView",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "await _cache.save(doc)"
+          },
+          {
+            "kind": "compute",
+            "detail": "prev = _lastPublished"
+          },
+          {
+            "kind": "precond",
+            "detail": "if prev != null && prev == doc.published → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if prev == null && doc.published.isEmpty"
+          },
+          {
+            "kind": "effect",
+            "detail": "_lastPublished = doc.published"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "remove",
+        "save",
+        "write"
+      ],
+      "contract": {
+        "input": "(ConfigDoc doc)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if prev != null && prev == doc.published → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreConfigSink.load",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<ConfigDoc?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_cache"
+          },
+          {
+            "kind": "field",
+            "name": "_port"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_lastPublished"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "_cache.load()"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigDoc",
+        "debugPrint",
+        "fromJson",
+        "load",
+        "read"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<ConfigDoc?>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreConfigSink.watch",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Stream<ConfigDoc>?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_port"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_lastPublished"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_port.snapshots().map((data) {if (data == null) return ConfigDoc.empty; final remote = Co…"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "fromJson",
+        "handleError",
+        "map",
+        "snapshots"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Stream<ConfigDoc>?",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    }
+  ]
+}

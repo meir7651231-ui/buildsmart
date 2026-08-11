@@ -1,0 +1,658 @@
+{
+  "module": "app_settings",
+  "source": "lib/state/app_settings.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "fn": "_enum",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw, List<T> values, T fallback) -> T",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AppSettings.fromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if raw is String"
+          },
+          {
+            "kind": "return",
+            "detail": "fallback"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? raw, List<T> values, T fallback)",
+        "output": "T",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_timeoutToInt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BsSessionTimeout t) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AppSettings.toJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (t) {BsSessionTimeout.m5 => 5, BsSessionTimeout.m15 => 15, BsSessionTimeout.m30 =>…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(BsSessionTimeout t)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_intToTimeout",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> BsSessionTimeout",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AppSettings.fromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = raw is num ? raw.toInt() : 15"
+          },
+          {
+            "kind": "return",
+            "detail": "switch (n) {5 => BsSessionTimeout.m5, 30 => BsSessionTimeout.m30, 60 => BsSessionTimeout.…"
+          }
+        ]
+      },
+      "floor": [
+        "toInt"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "BsSessionTimeout",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppSettings.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({BsTheme? theme, BsTextSize? textSize, bool? reduceMotion, BsLang? lang, BsUnits? units, BsCurrency? currency, BsHaulSize? haul, bool? express, bool? highContrast, bool? twoFA, bool? biometric, bool? locationPerm, BsSessionTimeout? sessionTimeout, bool? notifShipments, bool? notifDeals, bool? notifBudget, bool? notifOrders, bool? privAnalytics, bool? privLocation, bool? privMarketing, bool? privCrashReports, bool? privPresence, int? consentedPolicyVersion}) -> AppSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "AppSettings(theme: theme ?? this.theme, textSize: textSize ?? this.textSize, reduceMotion…"
+          }
+        ]
+      },
+      "floor": [
+        "AppSettings"
+      ],
+      "contract": {
+        "input": "({BsTheme? theme, BsTextSize? textSize, bool? reduceMotion, BsLang? lang, BsUnits? units, BsCurrency? currency, BsHaulSize? haul, bool? express, bool? highContrast, bool? twoFA, bool? biometric, bool? locationPerm, BsSessionTimeout? sessionTimeout, bool? notifShipments, bool? notifDeals, bool? notifBudget, bool? notifOrders, bool? privAnalytics, bool? privLocation, bool? privMarketing, bool? privCrashReports, bool? privPresence, int? consentedPolicyVersion})",
+        "output": "AppSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppSettings.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "biometric"
+          },
+          {
+            "kind": "field",
+            "name": "consentedPolicyVersion"
+          },
+          {
+            "kind": "field",
+            "name": "currency"
+          },
+          {
+            "kind": "field",
+            "name": "express"
+          },
+          {
+            "kind": "field",
+            "name": "haul"
+          },
+          {
+            "kind": "field",
+            "name": "highContrast"
+          },
+          {
+            "kind": "field",
+            "name": "lang"
+          },
+          {
+            "kind": "field",
+            "name": "locationPerm"
+          },
+          {
+            "kind": "field",
+            "name": "notifBudget"
+          },
+          {
+            "kind": "field",
+            "name": "notifDeals"
+          },
+          {
+            "kind": "field",
+            "name": "notifOrders"
+          },
+          {
+            "kind": "field",
+            "name": "notifShipments"
+          },
+          {
+            "kind": "field",
+            "name": "privAnalytics"
+          },
+          {
+            "kind": "field",
+            "name": "privCrashReports"
+          },
+          {
+            "kind": "field",
+            "name": "privLocation"
+          },
+          {
+            "kind": "field",
+            "name": "privMarketing"
+          },
+          {
+            "kind": "field",
+            "name": "privPresence"
+          },
+          {
+            "kind": "field",
+            "name": "reduceMotion"
+          },
+          {
+            "kind": "field",
+            "name": "sessionTimeout"
+          },
+          {
+            "kind": "field",
+            "name": "textSize"
+          },
+          {
+            "kind": "field",
+            "name": "theme"
+          },
+          {
+            "kind": "field",
+            "name": "twoFA"
+          },
+          {
+            "kind": "field",
+            "name": "units"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_timeoutToInt",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'display' : {'theme' : theme.name, 'textSize' : textSize.name, 'reduceMotion' : reduceMo…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppSettings.fromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Map<String, dynamic> j) -> AppSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "biometric"
+          },
+          {
+            "kind": "field",
+            "name": "consentedPolicyVersion"
+          },
+          {
+            "kind": "field",
+            "name": "currency"
+          },
+          {
+            "kind": "field",
+            "name": "express"
+          },
+          {
+            "kind": "field",
+            "name": "haul"
+          },
+          {
+            "kind": "field",
+            "name": "highContrast"
+          },
+          {
+            "kind": "field",
+            "name": "lang"
+          },
+          {
+            "kind": "field",
+            "name": "locationPerm"
+          },
+          {
+            "kind": "field",
+            "name": "notifBudget"
+          },
+          {
+            "kind": "field",
+            "name": "notifDeals"
+          },
+          {
+            "kind": "field",
+            "name": "notifOrders"
+          },
+          {
+            "kind": "field",
+            "name": "notifShipments"
+          },
+          {
+            "kind": "field",
+            "name": "privAnalytics"
+          },
+          {
+            "kind": "field",
+            "name": "privCrashReports"
+          },
+          {
+            "kind": "field",
+            "name": "privLocation"
+          },
+          {
+            "kind": "field",
+            "name": "privMarketing"
+          },
+          {
+            "kind": "field",
+            "name": "privPresence"
+          },
+          {
+            "kind": "field",
+            "name": "reduceMotion"
+          },
+          {
+            "kind": "field",
+            "name": "sessionTimeout"
+          },
+          {
+            "kind": "field",
+            "name": "textSize"
+          },
+          {
+            "kind": "field",
+            "name": "theme"
+          },
+          {
+            "kind": "field",
+            "name": "twoFA"
+          },
+          {
+            "kind": "field",
+            "name": "units"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_enum",
+            "module": true
+          },
+          {
+            "name": "_intToTimeout",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "display = m('display')"
+          },
+          {
+            "kind": "compute",
+            "detail": "notif = m('notif')"
+          },
+          {
+            "kind": "compute",
+            "detail": "region = m('region')"
+          },
+          {
+            "kind": "compute",
+            "detail": "delivery = m('delivery')"
+          },
+          {
+            "kind": "compute",
+            "detail": "acc = m('accessibility')"
+          },
+          {
+            "kind": "compute",
+            "detail": "sec = m('security')"
+          },
+          {
+            "kind": "compute",
+            "detail": "priv = (sec['privacy'] as Map<String, dynamic>?) ?? const {}"
+          },
+          {
+            "kind": "return",
+            "detail": "AppSettings(theme: _enum(display['theme'], BsTheme.values, BsTheme.light), textSize: _enu…"
+          }
+        ]
+      },
+      "floor": [
+        "AppSettings",
+        "m",
+        "toInt"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> j)",
+        "output": "AppSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppSettingsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppSettingsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "AppSettingsNotifier.update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppSettingsNotifier.update",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(AppSettings Function(AppSettings) f) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = f(state)"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          }
+        ]
+      },
+      "floor": [
+        "f",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(AppSettings Function(AppSettings) f)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppSettingsNotifier.reset",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = AppSettings.defaults"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "remove"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

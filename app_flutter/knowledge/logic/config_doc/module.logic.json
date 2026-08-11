@@ -1,0 +1,973 @@
+{
+  "module": "config_doc",
+  "source": "lib/state/studio/config_doc.dart",
+  "atomCount": 19,
+  "atoms": [
+    {
+      "fn": "_migrate",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic> j) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSchemaVersion"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "from = (j['schemaVersion'] as num?)?.toInt() ?? 1"
+          },
+          {
+            "kind": "precond",
+            "detail": "if from == kSchemaVersion → return j"
+          },
+          {
+            "kind": "return",
+            "detail": "j"
+          }
+        ]
+      },
+      "floor": [
+        "toInt"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> j)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [
+          "if from == kSchemaVersion → return j"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_nodeMap",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> Map<String, CfgNode>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_asStrMap",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_personaMap"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return const {}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, CfgNode>{}"
+          },
+          {
+            "kind": "effect",
+            "detail": "raw.forEach((k, v) {if (v is Map) out[k.toString()] = CfgNode.fromJson(_asStrMap(v));})"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "forEach",
+        "fromJson",
+        "toString"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "Map<String, CfgNode>",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return const {}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_personaMap",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> Map<String, Map<String, CfgNode>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_nodeMap",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return const {}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, Map<String, CfgNode>>{}"
+          },
+          {
+            "kind": "effect",
+            "detail": "raw.forEach((role, m) {if (m is Map) out[role.toString()] = _nodeMap(m);})"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "forEach",
+        "toString"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "Map<String, Map<String, CfgNode>>",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return const {}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_asStrMap",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_nodeMap"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "raw is Map ? raw.map((k, v) => MapEntry(k.toString(), v)) : const {}"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "map",
+        "toString"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_personaEquals",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, Map<String, CfgNode>> a, Map<String, Map<String, CfgNode>> b) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConfigLayer.=="
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if a.length != b.length → return false"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final k in a.keys"
+          },
+          {
+            "kind": "compute",
+            "detail": "bm = b[k]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if bm == null || !mapEquals(a[k], bm) → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "mapEquals"
+      ],
+      "contract": {
+        "input": "(Map<String, Map<String, CfgNode>> a, Map<String, Map<String, CfgNode>> b)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if a.length != b.length → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigLayer.isEmpty",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "global"
+          },
+          {
+            "kind": "field",
+            "name": "persona"
+          },
+          {
+            "kind": "field",
+            "name": "structure"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "global.isEmpty && persona.isEmpty && structure.isEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigLayer.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({Map<String, CfgNode>? global, Map<String, Map<String, CfgNode>>? persona, Map<String, dynamic>? structure}) -> ConfigLayer",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ConfigLayer(global: global ?? this.global, persona: persona ?? this.persona, structure: s…"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigLayer"
+      ],
+      "contract": {
+        "input": "({Map<String, CfgNode>? global, Map<String, Map<String, CfgNode>>? persona, Map<String, dynamic>? structure})",
+        "output": "ConfigLayer",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigLayer.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "global"
+          },
+          {
+            "kind": "field",
+            "name": "persona"
+          },
+          {
+            "kind": "field",
+            "name": "structure"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "j = <String, dynamic>{}"
+          },
+          {
+            "kind": "branch",
+            "detail": "if global.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if persona.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if structure.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "j"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "map",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigLayer.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "global"
+          },
+          {
+            "kind": "field",
+            "name": "persona"
+          },
+          {
+            "kind": "field",
+            "name": "structure"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_personaEquals",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "identical(this, other) || other is ConfigLayer && mapEquals(other.global, global) && _per…"
+          }
+        ]
+      },
+      "floor": [
+        "identical",
+        "mapEquals"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigLayer.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "global"
+          },
+          {
+            "kind": "field",
+            "name": "persona"
+          },
+          {
+            "kind": "field",
+            "name": "structure"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(global.length, persona.length, structure.length)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigVersion.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "byEmail"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "note"
+          },
+          {
+            "kind": "field",
+            "name": "publishedAtMs"
+          },
+          {
+            "kind": "field",
+            "name": "snapshot"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<String, dynamic>{'id' : id, 'snapshot' : snapshot.toJson(), 'publishedAtMs' : publishedA…"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigVersion.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "byEmail"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "note"
+          },
+          {
+            "kind": "field",
+            "name": "publishedAtMs"
+          },
+          {
+            "kind": "field",
+            "name": "snapshot"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "identical(this, other) || other is ConfigVersion && other.id == id && other.publishedAtMs…"
+          }
+        ]
+      },
+      "floor": [
+        "identical"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigVersion.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "byEmail"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "note"
+          },
+          {
+            "kind": "field",
+            "name": "publishedAtMs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(id, publishedAtMs, note, byEmail)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigDoc.isEmpty",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "draft"
+          },
+          {
+            "kind": "field",
+            "name": "history"
+          },
+          {
+            "kind": "field",
+            "name": "published"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "published.isEmpty && draft.isEmpty && history.isEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigDoc.draftNodeCount",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "draft"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "draft.global.length + draft.persona.values.fold<int>(0, (s, m) => s + m.length) + draft.s…"
+          }
+        ]
+      },
+      "floor": [
+        "fold"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigDoc.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({ConfigLayer? published, ConfigLayer? draft, List<ConfigVersion>? history, int? schemaVersion}) -> ConfigDoc",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ConfigDoc(published: published ?? this.published, draft: draft ?? this.draft, history: hi…"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigDoc"
+      ],
+      "contract": {
+        "input": "({ConfigLayer? published, ConfigLayer? draft, List<ConfigVersion>? history, int? schemaVersion})",
+        "output": "ConfigDoc",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigDoc.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "draft"
+          },
+          {
+            "kind": "field",
+            "name": "history"
+          },
+          {
+            "kind": "field",
+            "name": "published"
+          },
+          {
+            "kind": "field",
+            "name": "schemaVersion"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "j = <String, dynamic>{'schemaVersion' : schemaVersion}"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !published.isEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !draft.isEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if history.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "j"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigDoc.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "draft"
+          },
+          {
+            "kind": "field",
+            "name": "history"
+          },
+          {
+            "kind": "field",
+            "name": "published"
+          },
+          {
+            "kind": "field",
+            "name": "schemaVersion"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "identical(this, other) || other is ConfigDoc && other.published == published && other.dra…"
+          }
+        ]
+      },
+      "floor": [
+        "identical",
+        "listEquals"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigDoc.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "draft"
+          },
+          {
+            "kind": "field",
+            "name": "history"
+          },
+          {
+            "kind": "field",
+            "name": "published"
+          },
+          {
+            "kind": "field",
+            "name": "schemaVersion"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(published, draft, history.length, schemaVersion)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

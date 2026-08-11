@@ -1,0 +1,322 @@
+{
+  "module": "route_assembly",
+  "source": "lib/features/fittings/geometry/route_assembly.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "_dirVec",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Dir d, Vec3 f, Vec3 u) -> Vec3",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "assembleRoute"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "side = f.cross(u).norm()"
+          },
+          {
+            "kind": "return",
+            "detail": "switch (d) {Dir.down => u.scale(-1), Dir.right => side, Dir.left => side.scale(-1), Dir.u…"
+          }
+        ]
+      },
+      "floor": [
+        "cross",
+        "norm",
+        "scale"
+      ],
+      "contract": {
+        "input": "(Dir d, Vec3 f, Vec3 u)",
+        "output": "Vec3",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_place",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Mesh local, Vec3 p, Vec3 f, Vec3 axis) -> Mesh",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "assembleRoute"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "side = f.cross(axis).norm()"
+          },
+          {
+            "kind": "init",
+            "detail": "wp = <double>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "wn = <double>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var v = 0; v < local.vertexCount; v++"
+          },
+          {
+            "kind": "compute",
+            "detail": "lx = local.positions[v * 3]"
+          },
+          {
+            "kind": "compute",
+            "detail": "ly = local.positions[v * 3 + 1]"
+          },
+          {
+            "kind": "compute",
+            "detail": "lz = local.positions[v * 3 + 2]"
+          },
+          {
+            "kind": "compute",
+            "detail": "w = p + f.scale(lx) + axis.scale(ly) + side.scale(lz)"
+          },
+          {
+            "kind": "effect",
+            "detail": "wp.addAll([w.x, w.y, w.z])"
+          },
+          {
+            "kind": "compute",
+            "detail": "nx = local.normals[v * 3]"
+          },
+          {
+            "kind": "compute",
+            "detail": "ny = local.normals[v * 3 + 1]"
+          },
+          {
+            "kind": "compute",
+            "detail": "nz = local.normals[v * 3 + 2]"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = (f.scale(nx) + axis.scale(ny) + side.scale(nz)).norm()"
+          },
+          {
+            "kind": "effect",
+            "detail": "wn.addAll([n.x, n.y, n.z])"
+          },
+          {
+            "kind": "return",
+            "detail": "Mesh(wp, wn, local.indices)"
+          }
+        ]
+      },
+      "floor": [
+        "Mesh",
+        "addAll",
+        "cross",
+        "norm",
+        "scale"
+      ],
+      "contract": {
+        "input": "(Mesh local, Vec3 p, Vec3 f, Vec3 axis)",
+        "output": "Mesh",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "assembleRoute",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<RunElement> route, {double explode = 0}) -> List<WorldPart>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kExplodeGap"
+          },
+          {
+            "kind": "const",
+            "name": "kPipeLen"
+          },
+          {
+            "kind": "const",
+            "name": "kStubLen"
+          },
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_place",
+            "module": true
+          },
+          {
+            "name": "_dirVec",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <WorldPart>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "steps = <({RunElement el, ElementMeshes em})>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final el in route"
+          },
+          {
+            "kind": "compute",
+            "detail": "em = elementMeshesFor(el.family.label, el.od, od2: el.od2)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if em != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if steps.isEmpty → return out"
+          },
+          {
+            "kind": "init",
+            "detail": "p = const Vec3(0, 0, 0)"
+          },
+          {
+            "kind": "init",
+            "detail": "f = const Vec3(1, 0, 0)"
+          },
+          {
+            "kind": "init",
+            "detail": "u = const Vec3(0, 1, 0)"
+          },
+          {
+            "kind": "compute",
+            "detail": "firstOd = steps.first.el.od"
+          },
+          {
+            "kind": "effect",
+            "detail": "emitPipe(kStubLen, firstOd, firstOd)"
+          },
+          {
+            "kind": "compute",
+            "detail": "prev = firstOd"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < steps.length; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "el = steps[i].el"
+          },
+          {
+            "kind": "compute",
+            "detail": "em = steps[i].em"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i > 0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if explode > 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = _dirVec(el.dir, f, u)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final part in em.parts"
+          },
+          {
+            "kind": "compute",
+            "detail": "bendAxis = em.turn != 0 ? b : u"
+          },
+          {
+            "kind": "effect",
+            "detail": "p = p + f.scale(em.ex) + bendAxis.scale(em.ey)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if em.turn != 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "prev = el.family == Family.reducer ? (el.od2 ?? el.od) : el.od"
+          },
+          {
+            "kind": "branch",
+            "detail": "if em.term → return out"
+          },
+          {
+            "kind": "effect",
+            "detail": "emitPipe(kStubLen, prev, prev)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "Vec3",
+        "WorldPart",
+        "add",
+        "cos",
+        "dot",
+        "elementMeshesFor",
+        "emitPipe",
+        "norm",
+        "scale",
+        "sin",
+        "straightPipe",
+        "taperGeom",
+        "toDouble"
+      ],
+      "contract": {
+        "input": "(List<RunElement> route, {double explode = 0})",
+        "output": "List<WorldPart>",
+        "purity": "pure",
+        "precond": [
+          "if steps.isEmpty → return out"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "module": "catalog_slang",
+  "source": "/home/user/buildsmart/app_flutter/lib/features/ring_dive/catalog_slang.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "catValueLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axis, String value) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAxisValueSlang"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kAxisValueSlang[axis]?[value] ?? value"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String axis, String value)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

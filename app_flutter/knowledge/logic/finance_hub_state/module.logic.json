@@ -1,0 +1,442 @@
+{
+  "module": "finance_hub_state",
+  "source": "lib/state/finance_hub_state.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "canDo",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String perm) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRbacMatrix"
+          },
+          {
+            "kind": "global",
+            "name": "securityRoleProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "requirePerm"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "role = ref.read(securityRoleProvider)"
+          },
+          {
+            "kind": "return",
+            "detail": "(kRbacMatrix[role] ?? const []).contains(perm)"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "read"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String perm)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "requirePerm",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String perm, String label) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRbacMatrix",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "auditTrailProvider"
+          },
+          {
+            "kind": "global",
+            "name": "securityRoleProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "canDo",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if canDo(ref, perm) → return true"
+          },
+          {
+            "kind": "compute",
+            "detail": "role = ref.read(securityRoleProvider)"
+          },
+          {
+            "kind": "effect",
+            "detail": "ref.read(auditTrailProvider.notifier).log('הרשאה נדחתה', label, role)"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [
+        "log",
+        "read"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String perm, String label)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if canDo(ref, perm) → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FinanceApproval.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? status}) -> FinanceApproval",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "amount"
+          },
+          {
+            "kind": "field",
+            "name": "by"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "what"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "FinanceApproval(id: id, what: what, amount: amount, by: by, status: status ?? this.status)"
+          }
+        ]
+      },
+      "floor": [
+        "FinanceApproval"
+      ],
+      "contract": {
+        "input": "({String? status})",
+        "output": "FinanceApproval",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ApprovalQueueNotifier._syncFromRepo",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_repo"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = _repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
+      },
+      "floor": [
+        "approvals"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ApprovalQueueNotifier.decide",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, bool ok) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_repo"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = [for (final a in state) a.id == id ? a.copyWith(status: ok ? 'אושר' : 'נדחה') : a]"
+          },
+          {
+            "kind": "effect",
+            "detail": "_repo?.decide(id, ok)"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "decide"
+      ],
+      "contract": {
+        "input": "(String id, bool ok)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ApprovalQueueNotifier.dispose",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_listenable"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_listenable?.removeListener(_syncFromRepo)"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "dispose",
+        "removeListener"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PenaltyLedgerNotifier.add",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int days, {DateTime? now}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPenaltyPerDay"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "d = days < 1 ? 1 : days"
+          },
+          {
+            "kind": "compute",
+            "detail": "row = Penalty(id: 'PEN-${300 + state.length + 1}', days: d, perDay: kPenaltyPerDay, amount: d *…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [row, ...state]"
+          },
+          {
+            "kind": "return",
+            "detail": "row.amount"
+          }
+        ]
+      },
+      "floor": [
+        "Penalty",
+        "caToday"
+      ],
+      "contract": {
+        "input": "(int days, {DateTime? now})",
+        "output": "int",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuditTrailNotifier.log",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String action, String detail, String role, {DateTime? now}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "entry = AuditEntry(action: action, detail: detail, role: role, time: (now ?? DateTime.now()).toIs…"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [entry, ...state]"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next.length > 200 ? next.sublist(0, 200) : next"
+          }
+        ]
+      },
+      "floor": [
+        "AuditEntry",
+        "now",
+        "sublist",
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "(String action, String detail, String role, {DateTime? now})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

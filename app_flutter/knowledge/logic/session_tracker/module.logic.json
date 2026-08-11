@@ -1,0 +1,920 @@
+{
+  "module": "session_tracker",
+  "source": "lib/state/intel/session_tracker.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "fn": "SessionTracker.sessionId",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sessionId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_sessionId"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker._startSession",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kIdleEnd",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_armIdle",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_clock"
+          },
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "actorKeyProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "appSettingsProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "currentUidProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelBusProvider"
+          },
+          {
+            "kind": "global",
+            "name": "mainTabProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "presenceWriterProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "roleProvider"
+          },
+          {
+            "kind": "global",
+            "name": "sessionIdProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_idleTimer",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_presence",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_sessionId"
+          },
+          {
+            "kind": "field",
+            "name": "_startedAt"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_mintSessionId",
+            "module": true
+          },
+          {
+            "name": "_armIdleTimer",
+            "module": true
+          },
+          {
+            "name": "_maybeStartPresence",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "SessionTracker.didChangeAppLifecycleState"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state == SessionPhase.active → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_sessionId = _mintSessionId()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_startedAt = _clock()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ref.read(sessionIdProvider.notifier).state = _sessionId"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = SessionPhase.active"
+          },
+          {
+            "kind": "compute",
+            "detail": "role = _ref.read(roleProvider)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ref.read(intelBusProvider).track(IntelEvents.sessionStart, props: <String, String>{'acto…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_armIdleTimer()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_maybeStartPresence()"
+          }
+        ]
+      },
+      "floor": [
+        "_clock",
+        "read",
+        "track"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state == SessionPhase.active → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker._endSession",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String reason) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_clock"
+          },
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "field",
+            "name": "_startedAt"
+          },
+          {
+            "kind": "global",
+            "name": "intelBusProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_idleTimer"
+          },
+          {
+            "kind": "field",
+            "name": "_presence"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "SessionTracker._armIdleTimer",
+          "SessionTracker._onUid",
+          "SessionTracker.didChangeAppLifecycleState"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state != SessionPhase.active → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "startedAt = _startedAt"
+          },
+          {
+            "kind": "compute",
+            "detail": "durS = startedAt == null ? 0 : _clock().difference(startedAt).inSeconds"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ref.read(intelBusProvider).track(IntelEvents.sessionEnd, props: <String, String>{'reason…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = SessionPhase.ended"
+          },
+          {
+            "kind": "effect",
+            "detail": "_idleTimer?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_idleTimer = null"
+          },
+          {
+            "kind": "compute",
+            "detail": "presence = _presence"
+          },
+          {
+            "kind": "effect",
+            "detail": "_presence = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(presence?.stop())"
+          }
+        ]
+      },
+      "floor": [
+        "_clock",
+        "cancel",
+        "difference",
+        "read",
+        "stop",
+        "track",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(String reason)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state != SessionPhase.active → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker._armIdleTimer",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kIdleEnd"
+          },
+          {
+            "kind": "field",
+            "name": "_armIdle"
+          },
+          {
+            "kind": "field",
+            "name": "_clock",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_startedAt",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelBusProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_idleTimer"
+          },
+          {
+            "kind": "field",
+            "name": "_presence",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_endSession",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "SessionTracker._startSession",
+          "SessionTracker.onActivity"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_idleTimer?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_idleTimer = null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !_armIdle → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_idleTimer = Timer(kIdleEnd, () => _endSession('idle'))"
+          }
+        ]
+      },
+      "floor": [
+        "Timer",
+        "cancel"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !_armIdle → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker.onActivity",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kIdleEnd",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_armIdle",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_idleTimer",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_armIdleTimer",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "SessionTracker.didChangeAppLifecycleState"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if state == SessionPhase.active"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker._maybeStartPresence",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "actorKeyProvider"
+          },
+          {
+            "kind": "global",
+            "name": "appSettingsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "currentUidProvider"
+          },
+          {
+            "kind": "global",
+            "name": "mainTabProvider"
+          },
+          {
+            "kind": "global",
+            "name": "presenceWriterProvider"
+          },
+          {
+            "kind": "global",
+            "name": "roleProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_presence"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "SessionTracker._startSession"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "settings = _ref.read(appSettingsProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "role = _ref.read(roleProvider)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !presenceForwardEnabled(settings, role) → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "actorKey = _ref.read(actorKeyProvider)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if actorKey == null || actorKey.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_presence = Presence(_ref.read(presenceWriterProvider), actorKey: actorKey, uid: _ref.rea…"
+          }
+        ]
+      },
+      "floor": [
+        "Presence",
+        "presenceForwardEnabled",
+        "read",
+        "screenKeyForTab",
+        "start"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !presenceForwardEnabled(settings, role) → return (void)",
+          "if actorKey == null || actorKey.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker.didChangeAppLifecycleState",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(AppLifecycleState lifecycle) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_clock",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelBusProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "roleProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "sessionIdProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_idleTimer",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_presence",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_sessionId",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_startedAt",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_endSession",
+            "module": true
+          },
+          {
+            "name": "_startSession",
+            "module": true
+          },
+          {
+            "name": "onActivity",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch lifecycle"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(AppLifecycleState lifecycle)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker._onUid",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String? prev, String? next) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_clock",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_startedAt",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelBusProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_idleTimer",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_presence",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_endSession",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if (prev != null && prev.isNotEmpty) && (next == null || next.isEmpty)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String? prev, String? next)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker._mintSessionId",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "SessionTracker._startSession"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "rnd = Random.secure()"
+          },
+          {
+            "kind": "init",
+            "detail": "b = List<int>.generate(16, (_) => rnd.nextInt(256))"
+          },
+          {
+            "kind": "effect",
+            "detail": "b[6] = (b[6] & 0x0f) | 0x40"
+          },
+          {
+            "kind": "effect",
+            "detail": "b[8] = (b[8] & 0x3f) | 0x80"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = StringBuffer()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < 16; i++"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.write(b[i].toRadixString(16).padLeft(2, '0'))"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i == 3 || i == 5 || i == 7 || i == 9"
+          },
+          {
+            "kind": "return",
+            "detail": "out.toString()"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "StringBuffer",
+        "nextInt",
+        "padLeft",
+        "secure",
+        "toRadixString",
+        "toString",
+        "write"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SessionTracker.dispose",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_bindLifecycle"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_authRemove"
+          },
+          {
+            "kind": "field",
+            "name": "_idleTimer"
+          },
+          {
+            "kind": "field",
+            "name": "_presence"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if _bindLifecycle"
+          },
+          {
+            "kind": "effect",
+            "detail": "_idleTimer?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_idleTimer = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_authRemove?.call()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_authRemove = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_presence?.stop())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_presence = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "call",
+        "cancel",
+        "dispose",
+        "removeObserver",
+        "stop",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

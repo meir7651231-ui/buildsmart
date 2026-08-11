@@ -1,0 +1,948 @@
+{
+  "module": "word_finder_engine",
+  "source": "lib/features/word_finder/word_finder_engine.dart",
+  "atomCount": 16,
+  "caches": [
+    "_divePoolBySku",
+    "kReachUniverse"
+  ],
+  "atoms": [
+    {
+      "fn": "divePoolBySku",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Map<String, LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_divePoolBySku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_divePoolBySku"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "collapseKeyOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_kWhitespace",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_collapseKey",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_collapseKey(p)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_buildReachUniverse",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          },
+          {
+            "kind": "global",
+            "name": "_kWhitespace",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_collapseKey",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "seen = <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <LipskeyCatalogProduct>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kDivePool"
+          },
+          {
+            "kind": "branch",
+            "detail": "if seen.add(_collapseKey(p))"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "reachUniverseSize",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "kReachUniverse"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kReachUniverse.length"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_collapseKey",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_kWhitespace"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_buildReachUniverse",
+          "collapseKeyOf",
+          "distinctProducts"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "remove = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in parseSizeTokens(p.nameHe)"
+          },
+          {
+            "kind": "effect",
+            "detail": "remove.add(t.label)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in parseAngleTokens(p.nameHe)"
+          },
+          {
+            "kind": "effect",
+            "detail": "remove.add(t.label)"
+          },
+          {
+            "kind": "compute",
+            "detail": "color = p.color?.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "stripped = p.nameHe"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final r in remove"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if color != null && color.isNotEmpty"
+          },
+          {
+            "kind": "effect",
+            "detail": "stripped = stripped.split(_kWhitespace).where((w) => w.isNotEmpty).join(' ')"
+          },
+          {
+            "kind": "return",
+            "detail": "'${p.brand}||${p.categoryHe}||$stripped'"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "join",
+        "parseAngleTokens",
+        "parseSizeTokens",
+        "replaceAll",
+        "split",
+        "trim",
+        "where"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "distinctCardCount",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "axisExpectedRemaining",
+          "offerQuestion"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "pool.map(_collapseKey).toSet().length"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "distinctProducts",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, {int cap = kShowProductsCap}) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_kWhitespace",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_collapseKey",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "offerQuestion"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "seen = <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <LipskeyCatalogProduct>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in pool"
+          },
+          {
+            "kind": "branch",
+            "detail": "if seen.add(_collapseKey(p))"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, {int cap = kShowProductsCap})",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_candidateAxes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<({String label, List<String> chips})>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "bestUnansweredAxis"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<({String label, List<String> chips})>[(label: 'גודל', chips: sizeTokensIn(pool).map((t) …"
+          }
+        ]
+      },
+      "floor": [
+        "angleTokensIn",
+        "colorOptions",
+        "map",
+        "sizeTokensIn",
+        "toList",
+        "wordOptions"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<({String label, List<String> chips})>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "axisExpectedRemaining",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, List<String> chips) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "distinctCardCount",
+            "module": true
+          },
+          {
+            "name": "applyNarrow",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "bestUnansweredAxis"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = distinctCardCount(pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if n == 0 → return 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "sumSq = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in chips"
+          },
+          {
+            "kind": "compute",
+            "detail": "nc = distinctCardCount(applyNarrow(pool, c))"
+          },
+          {
+            "kind": "effect",
+            "detail": "sumSq += nc * nc"
+          },
+          {
+            "kind": "return",
+            "detail": "sumSq / n"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, List<String> chips)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [
+          "if n == 0 → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "bestUnansweredAxis",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, Set<String> answeredLabels) -> ({String label, List<String> chips})?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_candidateAxes",
+            "module": true
+          },
+          {
+            "name": "axisExpectedRemaining",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "offerQuestion"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "compute",
+            "detail": "bestScore = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in _candidateAxes(pool)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if answeredLabels.contains(c.label) → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if c.chips.toSet().length <= 1 → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "score = axisExpectedRemaining(pool, c.chips)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if bestScore == null || score < bestScore"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, Set<String> answeredLabels)",
+        "output": "({String label, List<String> chips})?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "wordsByFrequency",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WordLexicon lexicon) -> List<WordEntry>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "offerQuestion"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "indexed = <({WordEntry e, int i})>[for (var i = 0; i < lexicon.entries.length; i++) (e: lexicon.ent…"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final r in indexed) r.e]"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "sort"
+      ],
+      "contract": {
+        "input": "(WordLexicon lexicon)",
+        "output": "List<WordEntry>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "offerQuestion",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, List<NewbieStep> stack, WordLexicon lexicon, String? subtype) -> NewbieQuestion",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAxisFallbackQuestion"
+          },
+          {
+            "kind": "const",
+            "name": "kAxisQuestion"
+          },
+          {
+            "kind": "const",
+            "name": "kFirstQuestion"
+          },
+          {
+            "kind": "const",
+            "name": "kFirstWordCount"
+          },
+          {
+            "kind": "const",
+            "name": "kShowProductsThreshold"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "wordsByFrequency",
+            "module": true
+          },
+          {
+            "name": "distinctCardCount",
+            "module": true
+          },
+          {
+            "name": "distinctProducts",
+            "module": true
+          },
+          {
+            "name": "bestUnansweredAxis",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if stack.isEmpty → return AskWords(kFirstQuestion, wordsByFrequency(lexicon).take(kFirstWordCount).toList())"
+          },
+          {
+            "kind": "precond",
+            "detail": "if pool.isNotEmpty && distinctCardCount(pool) <= 1 → return Resolve(pool.first, pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if distinctCardCount(pool) <= kShowProductsThreshold → return ShowProducts(distinctProducts(pool))"
+          },
+          {
+            "kind": "init",
+            "detail": "answeredAxes = {for (final s in stack) s.axisLabel}"
+          },
+          {
+            "kind": "compute",
+            "detail": "best = bestUnansweredAxis(pool, answeredAxes)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if best != null → return AskAxis(kAxisQuestion[best.label] ?? kAxisFallbackQuestion, best.chips, best.label)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ax = offerAxis(pool, subtype)"
+          },
+          {
+            "kind": "compute",
+            "detail": "axIsUnanswered = ax.label.isEmpty || !answeredAxes.contains(ax.label)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if axIsUnanswered && ax.chips.isNotEmpty → return AskAxis(kAxisQuestion[ax.label] ?? kAxisFallbackQuestion, ax.chips, ax.label)"
+          },
+          {
+            "kind": "return",
+            "detail": "ShowProducts(distinctProducts(pool))"
+          }
+        ]
+      },
+      "floor": [
+        "AskAxis",
+        "AskWords",
+        "Resolve",
+        "ShowProducts",
+        "contains",
+        "offerAxis",
+        "take",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, List<NewbieStep> stack, WordLexicon lexicon, String? subtype)",
+        "output": "NewbieQuestion",
+        "purity": "pure",
+        "precond": [
+          "if stack.isEmpty → return AskWords(kFirstQuestion, wordsByFrequency(lexicon).take(kFirstWordCount).toList())",
+          "if pool.isNotEmpty && distinctCardCount(pool) <= 1 → return Resolve(pool.first, pool)",
+          "if distinctCardCount(pool) <= kShowProductsThreshold → return ShowProducts(distinctProducts(pool))",
+          "if best != null → return AskAxis(kAxisQuestion[best.label] ?? kAxisFallbackQuestion, best.chips, best.label)",
+          "if axIsUnanswered && ax.chips.isNotEmpty → return AskAxis(kAxisQuestion[ax.label] ?? kAxisFallbackQuestion, ax.chips, ax.label)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "resolveWord",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String word, WordLexicon lexicon) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_divePoolBySku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "skus = lexicon.wordToSkus[word]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if skus == null → return const <LipskeyCatalogProduct>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <LipskeyCatalogProduct>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final sku in skus"
+          },
+          {
+            "kind": "compute",
+            "detail": "p = _divePoolBySku[sku]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if p != null"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add"
+      ],
+      "contract": {
+        "input": "(String word, WordLexicon lexicon)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [
+          "if skus == null → return const <LipskeyCatalogProduct>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "applyNarrow",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, String chipLabel) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "axisExpectedRemaining"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "pool.where((p) => productHasChip(p, chipLabel)).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "productHasChip",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, String chipLabel)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "isConnectionAnchor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct anchor) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "divePoolIndex"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "connectionsFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "m = divePoolIndex[anchor.sku]"
+          },
+          {
+            "kind": "return",
+            "detail": "m != null && m.inCompat && m.hasSpec"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct anchor)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "connectionsFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct anchor, {int tempC = 20}) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "divePoolIndex",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "isConnectionAnchor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !isConnectionAnchor(anchor) → return const <LipskeyCatalogProduct>[]"
+          },
+          {
+            "kind": "return",
+            "detail": "compatibleWith(anchor, tempC: tempC)"
+          }
+        ]
+      },
+      "floor": [
+        "compatibleWith"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct anchor, {int tempC = 20})",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [
+          "if !isConnectionAnchor(anchor) → return const <LipskeyCatalogProduct>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

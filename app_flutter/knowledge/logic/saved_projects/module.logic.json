@@ -1,0 +1,445 @@
+{
+  "module": "saved_projects",
+  "source": "lib/state/saved_projects.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "SavedProject.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "accessories"
+          },
+          {
+            "kind": "field",
+            "name": "anchorSkus"
+          },
+          {
+            "kind": "field",
+            "name": "branchSkus"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "savedAt"
+          },
+          {
+            "kind": "field",
+            "name": "tempC"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'name' : name, 'anchorSkus' : anchorSkus, 'branchSkus' : branchSkus, 'tempC' …"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedProjectsNotifier.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (List<SavedProject> value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<SavedProject> value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedProjectsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(_kStorageKey)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw == null"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "map",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedProjectsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "SavedProjectsNotifier.remove",
+          "SavedProjectsNotifier.rename",
+          "SavedProjectsNotifier.save"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "map",
+        "setString",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedProjectsNotifier.save",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String name, required List<String> anchorSkus, required int tempC, required Set<String> accessories, List<String> branchSkus = const []}) -> Future<SavedProject>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_seq"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "p = SavedProject(id: '${DateTime.now().microsecondsSinceEpoch}-${_seq++}', name: name, anchor…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [p, ...state]"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _persist()"
+          },
+          {
+            "kind": "return",
+            "detail": "p"
+          }
+        ]
+      },
+      "floor": [
+        "SavedProject",
+        "now",
+        "of"
+      ],
+      "contract": {
+        "input": "({required String name, required List<String> anchorSkus, required int tempC, required Set<String> accessories, List<String> branchSkus = const []})",
+        "output": "Future<SavedProject>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedProjectsNotifier.remove",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = state.where((p) => p.id != id).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _persist()"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedProjectsNotifier.rename",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String newName) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = [for (final p in state) if (p.id == id) SavedProject(id: p.id, name: newName, anc…"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _persist()"
+          }
+        ]
+      },
+      "floor": [
+        "SavedProject"
+      ],
+      "contract": {
+        "input": "(String id, String newName)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

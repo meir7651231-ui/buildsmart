@@ -1,0 +1,251 @@
+{
+  "module": "product_images",
+  "source": "lib/data/product_images.dart",
+  "atomCount": 5,
+  "caches": [
+    "productImageCache"
+  ],
+  "atoms": [
+    {
+      "fn": "productImageUrl",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String assetPath) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kImageBaseUrl"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "resolveProductImage"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "rel = assetPath.startsWith('assets/') ? assetPath.substring('assets/'.length) : assetPath"
+          },
+          {
+            "kind": "return",
+            "detail": "'$kImageBaseUrl/$rel'"
+          }
+        ]
+      },
+      "floor": [
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String assetPath)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "resolveProductImage",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String assetPath) -> ImageProvider",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kImageBaseUrl"
+          },
+          {
+            "kind": "global",
+            "name": "productImageCache"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "productImageUrl",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "productImage"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if assetPath.startsWith('http://') || assetPath.startsWith('https://') → return CachedNetworkImageProvider(assetPath, cacheManager: productImageCache)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if kImageBaseUrl.isEmpty → return AssetImage(assetPath)"
+          },
+          {
+            "kind": "return",
+            "detail": "CachedNetworkImageProvider(productImageUrl(assetPath), cacheManager: productImageCache)"
+          }
+        ]
+      },
+      "floor": [
+        "AssetImage",
+        "CachedNetworkImageProvider",
+        "startsWith"
+      ],
+      "contract": {
+        "input": "(String assetPath)",
+        "output": "ImageProvider",
+        "purity": "pure",
+        "precond": [
+          "if assetPath.startsWith('http://') || assetPath.startsWith('https://') → return CachedNetworkImageProvider(assetPath, cacheManager: productImageCache)",
+          "if kImageBaseUrl.isEmpty → return AssetImage(assetPath)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_productImagePlaceholder",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if wasSynchronouslyLoaded || frame != null → return AnimatedOpacity(opacity: 1, duration: const Duration(milliseconds: 250), curve: Curves.ea…"
+          },
+          {
+            "kind": "return",
+            "detail": "const ColoredBox(color: Color(0x14000000))"
+          }
+        ]
+      },
+      "floor": [
+        "AnimatedOpacity",
+        "Color",
+        "ColoredBox",
+        "Duration"
+      ],
+      "contract": {
+        "input": "(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [
+          "if wasSynchronouslyLoaded || frame != null → return AnimatedOpacity(opacity: 1, duration: const Duration(milliseconds: 250), curve: Curves.ea…"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_productImageErrorFallback",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context, Object error, StackTrace? stackTrace) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "const SizedBox.shrink()"
+          }
+        ]
+      },
+      "floor": [
+        "shrink"
+      ],
+      "contract": {
+        "input": "(BuildContext context, Object error, StackTrace? stackTrace)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "productImage",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String assetPath, {Key? key, double? width, double? height, BoxFit? fit, AlignmentGeometry alignment = Alignment.center, ImageRepeat repeat = ImageRepeat.noRepeat, Color? color, BlendMode? colorBlendMode, bool gaplessPlayback = false, FilterQuality filterQuality = FilterQuality.medium, ImageErrorWidgetBuilder? errorBuilder, ImageFrameBuilder? frameBuilder, String? semanticLabel}) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kImageBaseUrl",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "productImageCache",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "resolveProductImage",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Image(key: key, image: resolveProductImage(assetPath), width: width, height: height, fit:…"
+          }
+        ]
+      },
+      "floor": [
+        "Image"
+      ],
+      "contract": {
+        "input": "(String assetPath, {Key? key, double? width, double? height, BoxFit? fit, AlignmentGeometry alignment = Alignment.center, ImageRepeat repeat = ImageRepeat.noRepeat, Color? color, BlendMode? colorBlendMode, bool gaplessPlayback = false, FilterQuality filterQuality = FilterQuality.medium, ImageErrorWidgetBuilder? errorBuilder, ImageFrameBuilder? frameBuilder, String? semanticLabel})",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

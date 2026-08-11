@@ -1,0 +1,807 @@
+{
+  "module": "vacation_requests",
+  "source": "lib/state/vacation_requests.dart",
+  "atomCount": 12,
+  "atoms": [
+    {
+      "fn": "VacationRequest.range",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "from"
+          },
+          {
+            "kind": "field",
+            "name": "to"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_sameDay",
+            "module": true
+          },
+          {
+            "name": "_d",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "from.isAtSameMomentAs(to) || _sameDay(from, to) ? _d(from) : '${_d(from)}–${_d(to)}'"
+          }
+        ]
+      },
+      "floor": [
+        "isAtSameMomentAs"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequest._sameDay",
+      "kind": "method",
+      "object": {
+        "signature": "(DateTime a, DateTime b) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "VacationRequest.range"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "a.year == b.year && a.month == b.month && a.day == b.day"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(DateTime a, DateTime b)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequest._d",
+      "kind": "method",
+      "object": {
+        "signature": "(DateTime d) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "VacationRequest.range"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'${d.day}.${d.month}.${d.year}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(DateTime d)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequest.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? status, DateTime? decidedTs, String? signature, bool? declared, String? employerId}) -> VacationRequest",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "createdTs"
+          },
+          {
+            "kind": "field",
+            "name": "from"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "reason"
+          },
+          {
+            "kind": "field",
+            "name": "role"
+          },
+          {
+            "kind": "field",
+            "name": "to"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          },
+          {
+            "kind": "field",
+            "name": "workerName"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "VacationRequest(id: id, username: username, workerName: workerName, from: from, to: to, r…"
+          }
+        ]
+      },
+      "floor": [
+        "VacationRequest"
+      ],
+      "contract": {
+        "input": "({String? status, DateTime? decidedTs, String? signature, bool? declared, String? employerId})",
+        "output": "VacationRequest",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequest.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "createdTs"
+          },
+          {
+            "kind": "field",
+            "name": "decidedTs"
+          },
+          {
+            "kind": "field",
+            "name": "declared"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "from"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "reason"
+          },
+          {
+            "kind": "field",
+            "name": "role"
+          },
+          {
+            "kind": "field",
+            "name": "signature"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          },
+          {
+            "kind": "field",
+            "name": "to"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          },
+          {
+            "kind": "field",
+            "name": "workerName"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'username' : username, 'workerName' : workerName, 'from' : from.toIso8601Stri…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequest.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> VacationRequest?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVacationPending"
+          },
+          {
+            "kind": "field",
+            "name": "createdTs"
+          },
+          {
+            "kind": "field",
+            "name": "decidedTs"
+          },
+          {
+            "kind": "field",
+            "name": "declared"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "reason"
+          },
+          {
+            "kind": "field",
+            "name": "role"
+          },
+          {
+            "kind": "field",
+            "name": "signature"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "username = raw['username']"
+          },
+          {
+            "kind": "compute",
+            "detail": "workerName = raw['workerName']"
+          },
+          {
+            "kind": "compute",
+            "detail": "from = DateTime.tryParse('${raw['from']}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "to = DateTime.tryParse('${raw['to']}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "created = DateTime.tryParse('${raw['createdTs']}')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! String || username is! String || workerName is! String || from == null || to == nu… → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "VacationRequest(id: id, username: username, workerName: workerName, from: from, to: to, r…"
+          }
+        ]
+      },
+      "floor": [
+        "VacationRequest",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "VacationRequest?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if id is! String || username is! String || workerName is! String || from == null || to == nu… → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · id is! String || username is! String || workerName is! String || from == null || to == nu… · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequestsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVacationRequestsKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(kVacationRequestsKey)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw == null || _userTouched → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "tryFromJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted → return (void)",
+          "if raw == null || _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequestsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVacationRequestsKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "VacationRequestsNotifier._decide",
+          "VacationRequestsNotifier.submit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequestsNotifier.submit",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String username, required String workerName, required DateTime from, required DateTime to, required String reason, String role = 'worker', String employerId = '', String signature = '', bool declared = false}) -> VacationRequest",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVacationRequestsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_seq"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_seq++"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = VacationRequest(id: 'vac-${DateTime.now().microsecondsSinceEpoch}-$_seq', username: usern…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, r]"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          },
+          {
+            "kind": "return",
+            "detail": "r"
+          }
+        ]
+      },
+      "floor": [
+        "VacationRequest",
+        "now",
+        "trim"
+      ],
+      "contract": {
+        "input": "({required String username, required String workerName, required DateTime from, required DateTime to, required String reason, String role = 'worker', String employerId = '', String signature = '', bool declared = false})",
+        "output": "VacationRequest",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequestsNotifier.approve",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVacationApproved"
+          },
+          {
+            "kind": "const",
+            "name": "kVacationPending",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_decide",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_decide(id, kVacationApproved)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequestsNotifier.reject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVacationPending",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVacationRejected"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_decide",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_decide(id, kVacationRejected)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VacationRequestsNotifier._decide",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String status) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVacationPending"
+          },
+          {
+            "kind": "const",
+            "name": "kVacationRequestsKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "VacationRequestsNotifier.approve",
+          "VacationRequestsNotifier.reject"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.any((r) => r.id == id && r.status == kVacationPending) → return false"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final r in state) if (r.id == id && r.status == kVacationPending) r.copyWit…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith",
+        "now"
+      ],
+      "contract": {
+        "input": "(String id, String status)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.any((r) => r.id == id && r.status == kVacationPending) → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

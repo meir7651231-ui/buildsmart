@@ -1,0 +1,382 @@
+{
+  "module": "ab_experiments",
+  "source": "lib/state/ab_experiments.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "AbExperimentsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(_key)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw != null"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "map"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AbExperimentsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "AbExperimentsNotifier.clear",
+          "AbExperimentsNotifier.ensure",
+          "AbExperimentsNotifier.override"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setString(_key, jsonEncode(state))"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AbExperimentsNotifier.ensure",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String experiment, List<String> variants) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if variants.isEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "existing = state[experiment]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if existing != null → return existing"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = experiment.hashCode.abs() % variants.length"
+          },
+          {
+            "kind": "compute",
+            "detail": "pick = variants[idx]"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, experiment : pick}"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          },
+          {
+            "kind": "return",
+            "detail": "pick"
+          }
+        ]
+      },
+      "floor": [
+        "abs",
+        "value"
+      ],
+      "contract": {
+        "input": "(String experiment, List<String> variants)",
+        "output": "String",
+        "purity": "side-effecting",
+        "precond": [
+          "if existing != null → return existing"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": [
+          "ArgumentError.value(variants, 'variants', 'must contain at least one variant')"
+        ]
+      }
+    },
+    {
+      "fn": "AbExperimentsNotifier.variantOf",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String experiment) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state[experiment]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String experiment)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "AbExperimentsNotifier.override",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String experiment, String variant) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state[experiment] == variant → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, experiment : variant}"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String experiment, String variant)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state[experiment] == variant → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AbExperimentsNotifier.clear",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String experiment) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.containsKey(experiment) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state}..remove(experiment)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "containsKey",
+        "remove"
+      ],
+      "contract": {
+        "input": "(String experiment)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.containsKey(experiment) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

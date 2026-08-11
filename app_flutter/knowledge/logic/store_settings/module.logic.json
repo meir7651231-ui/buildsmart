@@ -1,0 +1,664 @@
+{
+  "module": "store_settings",
+  "source": "lib/state/store_settings.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "_enum",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw, List<T> values, T fallback) -> T",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "StoreSettings.fromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if raw is String"
+          },
+          {
+            "kind": "return",
+            "detail": "fallback"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? raw, List<T> values, T fallback)",
+        "output": "T",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreSettings.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? defaultAddress, StorePayment? defaultPayment, bool? vatInclusive, int? minOrderAmount, StoreSortDefault? sortDefault, bool? notifDeals, bool? notifBackInStock, bool? confirmLargeOrder, int? largeOrderThreshold, StoreDeliveryWindow? preferredDeliveryWindow, String? deliveryAreas, String? courierInstructions, bool? selfPickupDefault, StoreInstallments? defaultInstallments, bool? supplierCreditEnabled, String? businessName, String? businessId, bool? exportToAccountant, bool? autoReceipts, bool? notifPriceDrop, bool? notifOrderStatus, bool? notifShipmentEnRoute, bool? repeatOrders, bool? shareCartWithTeam, bool? saveCartToProject, int? maxSupplierDistance, StoreMinRating? minSupplierRating, bool? localSuppliersOnly, StoreDisplayMode? displayMode, StoreUnitSystem? unitSystem, bool? showStock, bool? fastDelivery, bool? regularDelivery, StoreReturnPolicy? returnPolicy, bool? extendedWarranty, bool? purchaseHistory, bool? biometricConfirm, int? dailyCreditLimit}) -> StoreSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "StoreSettings(defaultAddress: defaultAddress ?? this.defaultAddress, defaultPayment: defa…"
+          }
+        ]
+      },
+      "floor": [
+        "StoreSettings"
+      ],
+      "contract": {
+        "input": "({String? defaultAddress, StorePayment? defaultPayment, bool? vatInclusive, int? minOrderAmount, StoreSortDefault? sortDefault, bool? notifDeals, bool? notifBackInStock, bool? confirmLargeOrder, int? largeOrderThreshold, StoreDeliveryWindow? preferredDeliveryWindow, String? deliveryAreas, String? courierInstructions, bool? selfPickupDefault, StoreInstallments? defaultInstallments, bool? supplierCreditEnabled, String? businessName, String? businessId, bool? exportToAccountant, bool? autoReceipts, bool? notifPriceDrop, bool? notifOrderStatus, bool? notifShipmentEnRoute, bool? repeatOrders, bool? shareCartWithTeam, bool? saveCartToProject, int? maxSupplierDistance, StoreMinRating? minSupplierRating, bool? localSuppliersOnly, StoreDisplayMode? displayMode, StoreUnitSystem? unitSystem, bool? showStock, bool? fastDelivery, bool? regularDelivery, StoreReturnPolicy? returnPolicy, bool? extendedWarranty, bool? purchaseHistory, bool? biometricConfirm, int? dailyCreditLimit})",
+        "output": "StoreSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreSettings.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "autoReceipts"
+          },
+          {
+            "kind": "field",
+            "name": "biometricConfirm"
+          },
+          {
+            "kind": "field",
+            "name": "businessId"
+          },
+          {
+            "kind": "field",
+            "name": "businessName"
+          },
+          {
+            "kind": "field",
+            "name": "confirmLargeOrder"
+          },
+          {
+            "kind": "field",
+            "name": "courierInstructions"
+          },
+          {
+            "kind": "field",
+            "name": "dailyCreditLimit"
+          },
+          {
+            "kind": "field",
+            "name": "defaultAddress"
+          },
+          {
+            "kind": "field",
+            "name": "defaultInstallments"
+          },
+          {
+            "kind": "field",
+            "name": "defaultPayment"
+          },
+          {
+            "kind": "field",
+            "name": "deliveryAreas"
+          },
+          {
+            "kind": "field",
+            "name": "displayMode"
+          },
+          {
+            "kind": "field",
+            "name": "exportToAccountant"
+          },
+          {
+            "kind": "field",
+            "name": "extendedWarranty"
+          },
+          {
+            "kind": "field",
+            "name": "fastDelivery"
+          },
+          {
+            "kind": "field",
+            "name": "largeOrderThreshold"
+          },
+          {
+            "kind": "field",
+            "name": "localSuppliersOnly"
+          },
+          {
+            "kind": "field",
+            "name": "maxSupplierDistance"
+          },
+          {
+            "kind": "field",
+            "name": "minOrderAmount"
+          },
+          {
+            "kind": "field",
+            "name": "minSupplierRating"
+          },
+          {
+            "kind": "field",
+            "name": "notifBackInStock"
+          },
+          {
+            "kind": "field",
+            "name": "notifDeals"
+          },
+          {
+            "kind": "field",
+            "name": "notifOrderStatus"
+          },
+          {
+            "kind": "field",
+            "name": "notifPriceDrop"
+          },
+          {
+            "kind": "field",
+            "name": "notifShipmentEnRoute"
+          },
+          {
+            "kind": "field",
+            "name": "preferredDeliveryWindow"
+          },
+          {
+            "kind": "field",
+            "name": "purchaseHistory"
+          },
+          {
+            "kind": "field",
+            "name": "regularDelivery"
+          },
+          {
+            "kind": "field",
+            "name": "repeatOrders"
+          },
+          {
+            "kind": "field",
+            "name": "returnPolicy"
+          },
+          {
+            "kind": "field",
+            "name": "saveCartToProject"
+          },
+          {
+            "kind": "field",
+            "name": "selfPickupDefault"
+          },
+          {
+            "kind": "field",
+            "name": "shareCartWithTeam"
+          },
+          {
+            "kind": "field",
+            "name": "showStock"
+          },
+          {
+            "kind": "field",
+            "name": "sortDefault"
+          },
+          {
+            "kind": "field",
+            "name": "supplierCreditEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "unitSystem"
+          },
+          {
+            "kind": "field",
+            "name": "vatInclusive"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'defaultAddress' : defaultAddress, 'defaultPayment' : defaultPayment.name, 'vatInclusive…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreSettings.fromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Map<String, dynamic> j) -> StoreSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "autoReceipts"
+          },
+          {
+            "kind": "field",
+            "name": "biometricConfirm"
+          },
+          {
+            "kind": "field",
+            "name": "businessId"
+          },
+          {
+            "kind": "field",
+            "name": "businessName"
+          },
+          {
+            "kind": "field",
+            "name": "confirmLargeOrder"
+          },
+          {
+            "kind": "field",
+            "name": "courierInstructions"
+          },
+          {
+            "kind": "field",
+            "name": "dailyCreditLimit"
+          },
+          {
+            "kind": "field",
+            "name": "defaultAddress"
+          },
+          {
+            "kind": "field",
+            "name": "defaultInstallments"
+          },
+          {
+            "kind": "field",
+            "name": "defaultPayment"
+          },
+          {
+            "kind": "field",
+            "name": "deliveryAreas"
+          },
+          {
+            "kind": "field",
+            "name": "displayMode"
+          },
+          {
+            "kind": "field",
+            "name": "exportToAccountant"
+          },
+          {
+            "kind": "field",
+            "name": "extendedWarranty"
+          },
+          {
+            "kind": "field",
+            "name": "fastDelivery"
+          },
+          {
+            "kind": "field",
+            "name": "largeOrderThreshold"
+          },
+          {
+            "kind": "field",
+            "name": "localSuppliersOnly"
+          },
+          {
+            "kind": "field",
+            "name": "maxSupplierDistance"
+          },
+          {
+            "kind": "field",
+            "name": "minOrderAmount"
+          },
+          {
+            "kind": "field",
+            "name": "minSupplierRating"
+          },
+          {
+            "kind": "field",
+            "name": "notifBackInStock"
+          },
+          {
+            "kind": "field",
+            "name": "notifDeals"
+          },
+          {
+            "kind": "field",
+            "name": "notifOrderStatus"
+          },
+          {
+            "kind": "field",
+            "name": "notifPriceDrop"
+          },
+          {
+            "kind": "field",
+            "name": "notifShipmentEnRoute"
+          },
+          {
+            "kind": "field",
+            "name": "preferredDeliveryWindow"
+          },
+          {
+            "kind": "field",
+            "name": "purchaseHistory"
+          },
+          {
+            "kind": "field",
+            "name": "regularDelivery"
+          },
+          {
+            "kind": "field",
+            "name": "repeatOrders"
+          },
+          {
+            "kind": "field",
+            "name": "returnPolicy"
+          },
+          {
+            "kind": "field",
+            "name": "saveCartToProject"
+          },
+          {
+            "kind": "field",
+            "name": "selfPickupDefault"
+          },
+          {
+            "kind": "field",
+            "name": "shareCartWithTeam"
+          },
+          {
+            "kind": "field",
+            "name": "showStock"
+          },
+          {
+            "kind": "field",
+            "name": "sortDefault"
+          },
+          {
+            "kind": "field",
+            "name": "supplierCreditEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "unitSystem"
+          },
+          {
+            "kind": "field",
+            "name": "vatInclusive"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_enum",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "StoreSettings(defaultAddress: (j['defaultAddress'] as String?) ?? '', defaultPayment: _en…"
+          }
+        ]
+      },
+      "floor": [
+        "StoreSettings",
+        "toInt"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> j)",
+        "output": "StoreSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreSettingsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreSettingsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "StoreSettingsNotifier.update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreSettingsNotifier.update",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(StoreSettings Function(StoreSettings) f) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = f(state)"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          }
+        ]
+      },
+      "floor": [
+        "f",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(StoreSettings Function(StoreSettings) f)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreSettingsNotifier.reset",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = StoreSettings.defaults"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "remove"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

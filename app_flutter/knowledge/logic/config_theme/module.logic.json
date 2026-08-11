@@ -1,0 +1,413 @@
+{
+  "module": "config_theme",
+  "source": "lib/theme/config_theme.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "fn": "cfgBrand",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context) -> Color",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Theme.of(context).extension<CfgTheme>()?.brand ?? BsTokens.brand"
+          }
+        ]
+      },
+      "floor": [
+        "extension",
+        "of"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Color",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "cfgSurface",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context) -> Color",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Theme.of(context).extension<CfgTheme>()?.surface ?? BsTokens.cardLight"
+          }
+        ]
+      },
+      "floor": [
+        "extension",
+        "of"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Color",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "cfgInk",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context) -> Color",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Theme.of(context).extension<CfgTheme>()?.ink ?? BsTokens.inkLight"
+          }
+        ]
+      },
+      "floor": [
+        "extension",
+        "of"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Color",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "cfgRadius",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Theme.of(context).extension<CfgTheme>()?.radius ?? BsTokens.radiusCard"
+          }
+        ]
+      },
+      "floor": [
+        "extension",
+        "of"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "cfgFontScale",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Theme.of(context).extension<CfgTheme>()?.fontScale ?? 1.0"
+          }
+        ]
+      },
+      "floor": [
+        "extension",
+        "of"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "combinedTextScale",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double inApp, double os, double ownerFontScale) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(inApp * os * ownerFontScale).clamp(0.85, 1.35).toDouble()"
+          }
+        ]
+      },
+      "floor": [
+        "clamp",
+        "toDouble"
+      ],
+      "contract": {
+        "input": "(double inApp, double os, double ownerFontScale)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgTheme.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({Color? brand, Color? surface, Color? ink, double? radius, double? fontScale}) -> CfgTheme",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgTheme(brand: brand ?? this.brand, surface: surface ?? this.surface, ink: ink ?? this.i…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgTheme",
+        "clamp"
+      ],
+      "contract": {
+        "input": "({Color? brand, Color? surface, Color? ink, double? radius, double? fontScale})",
+        "output": "CfgTheme",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgTheme.lerp",
+      "kind": "method",
+      "object": {
+        "signature": "(ThemeExtension<CfgTheme>? other, double t) -> CfgTheme",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "brand"
+          },
+          {
+            "kind": "field",
+            "name": "fontScale"
+          },
+          {
+            "kind": "field",
+            "name": "ink"
+          },
+          {
+            "kind": "field",
+            "name": "radius"
+          },
+          {
+            "kind": "field",
+            "name": "surface"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if other is! CfgTheme → return this"
+          },
+          {
+            "kind": "return",
+            "detail": "CfgTheme(brand: Color.lerp(brand, other.brand, t)!, surface: Color.lerp(surface, other.su…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgTheme",
+        "lerp"
+      ],
+      "contract": {
+        "input": "(ThemeExtension<CfgTheme>? other, double t)",
+        "output": "CfgTheme",
+        "purity": "pure",
+        "precond": [
+          "if other is! CfgTheme → return this"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgTheme.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "brand"
+          },
+          {
+            "kind": "field",
+            "name": "fontScale"
+          },
+          {
+            "kind": "field",
+            "name": "ink"
+          },
+          {
+            "kind": "field",
+            "name": "radius"
+          },
+          {
+            "kind": "field",
+            "name": "surface"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'brand' : brand.toARGB32(), 'surface' : surface.toARGB32(), 'ink' : ink.toARGB32(), 'rad…"
+          }
+        ]
+      },
+      "floor": [
+        "toARGB32"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgTheme._color",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? v, Color fallback) -> Color",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "v is int ? Color(v) : fallback"
+          }
+        ]
+      },
+      "floor": [
+        "Color"
+      ],
+      "contract": {
+        "input": "(Object? v, Color fallback)",
+        "output": "Color",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

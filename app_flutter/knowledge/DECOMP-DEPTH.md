@@ -79,3 +79,23 @@ live inside the home shell via flags/provider-swaps, invisible to a route tool;
 Open/Hero live+preview pair) — the golden was regenerated to track it. A real
 tool bug was fixed in passing: a `lastIndexOf(...) < 0` guard no longer
 mis-reads as a currency sign (primitive edge detector).
+
+## Round 3 — the whole `state/` + engine tail, completed
+
+Phase S opened only the 10 decision-helpers and left the rest of `state/` as a
+documented residual. Round 3 closes that residual: **every** logic-bearing module
+in `lib/` was swept — the full `state/` tier (auth/login, registration, customers,
+orders, push, personas, projects, rewards, notifications, …), the
+`features/card_keyboard` finder engine, the `features/fittings` geometry/render
+engines, and the `features/ring_dive` catalog engines.
+
+**~150 new modules · ~1,370 new atoms** → the logic layer is now
+**206 modules · 1,852 atoms**. Named anchors the owner asked for: `auth_state`
+(41 atoms, the login engine), `user_profile` (11, the registration heart),
+`customers_store` (12).
+
+**The remaining "gaps" are not gaps:** the `data/repositories/*` abstract
+interfaces have no body to open (0 atoms — their concrete `*_firebase` impls are
+decomposed), and files like `ring_dive_qty` / `route_preview` are Widgets /
+CustomPainters (UI, they belong to the screens/journeys layer, not logic). After
+Round 3 **no logic-bearing module in `lib/` is left name-only.**
