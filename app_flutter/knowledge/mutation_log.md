@@ -2050,3 +2050,12 @@
 - **תקלות מוזרקות (mutation-sensitivity):** (1) החזרת מיפוי `92117042→98417808` → ברך-90° מציג צווארון → trace-image נכשל (`ppr_p19_b`≠`98417808`). (2) החזרת `_lastAxis` → material-less ↕ קופץ ל-NTM (drag-trace). (3) הסרת גם מיפויי-המסעף (992213) → מסעפים מאבדים תמונה (over-removal). (4) ביטול תיקון-הטוקן → PPR ↕ מפסיק לעבוד (`image_drag_test`).
 - **בטיחות:** `fitting_image_overrides` = data-only, נצרך ב-`polyroll_catalog` כ-`imageAssetOverride`; הסרה מפעילה את ה-fallback הקיים (לא ריק). `_lastAxis` היה תוספת-סשן, ביטולו מחזיר להתנהגות-הבסיס. מגודר-על-הבית (חי).
 - **אימות:** `flutter analyze` 0 · catalog_config **112/112**. fixture של `BOTH ↕ and ↔` הוחלף מ-213072 (edge-case חד-זוויתי-לקוטר) ל-92117102 (PPR · DN20 ב-45°+90°) עם universe מסונן-חומר (כמו המסך). drag-trace: ברך-PPR 90° → `ppr_p19_b.jpg`.
+
+## #auth-registration-audit — 2 תיקונים בטוחים; #5 (דליפת-מחיקה) לא-בטוח-כעצמאי (2026-08-11)
+- **הנכס:** ביקורת הרשמה/ניהול-חשבונות. אובחן ע"י 2 Explore agents (registration flow + account-mgmt flow) + recon של הנחיל. המערכת בריאה: 162 טסטים ירוקים, 0 analyze-errors, 0 TODO/FIXME בליבה, מנגנון מלא client+functions+rules+audit.
+- **תוקן (בטוח):** (1) `welcome_screen._registerViaAuth` — register() אחרי הצלחת createUser (לא לפני), כדי שכישלון לא ישאיר `registered:true` שקרי. מאחורי kEmailPasswordAuth OFF. (2) הערת `auth_state.usersProfileWriterProvider` — deny-list מדויק (role/roles/storeUid/orgId/status קפואים) במקום "2 שדות מותרים".
+- **לא-תוקן (מכוון):** מחיקת-חשבון לא מנקה חנויות-לוח מקומיות. recon הוכיח: `WorkerProfileStore extends StateNotifier<Map<String,WorkerProfile>>` — מפתח יחיד לכל השמות, מנותק מ-uid. ניקוי-עיוור ⇒ מחיקת PII של אחרים במכשיר משותף (רגרסיית-פרטיות גרועה יותר מהדליפה). תלוי בקשירת-uid (#1/UID_SCOPED_QUERIES). נדחה לעבודת-launch.
+- **החלטות-launch (לא באגים, לא הודלקו):** kUserSystem (אישור-pending — הדלקה נאיבית מקפיאה משתמשים), UID_SCOPED_QUERIES (לוחות אמיתיים), kEmailPasswordAuth (אימייל), onboarding-בחי. דורשים תוכנית-הטמעה, לא flag-flip.
+- **תקלות מוזרקות:** (1) החזרת register() לפני createUser → אין טסט-flag-ON בסביבה (device-only), אומת ידנית שהסדר החדש מקביל ל-login_sheet._emailCreate. (2) ביטול תיקון-ההערה → הערה-שגויה חוזרת (doc-only).
+- **בטיחות:** welcome_screen שינוי-סדר בענף כבוי (0 השפעה חיה); auth_state שינוי-הערה בלבד. אין שינוי-התנהגות חי.
+- **אימות:** analyze 0-errors (baseline 56 warn/3631 info לא-חדשים, לא בקבצים שנגעתי); test/welcome_auth_gate + auth/email_password_door + auth_state + login_sheet + onboarding = 81/81 ירוק.

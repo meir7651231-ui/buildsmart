@@ -870,9 +870,12 @@ final roleSwitchLockedProvider = Provider<bool>((ref) {
 /// Writer for the `users/{uid}` profile mirror — the S2 seam pointed at
 /// `users`, null without the live backend (the same `useFirebaseBackend` gate
 /// every other provider uses). After login the welcome flow mirrors the
-/// identity fields (`displayName`/`phone`) through it; S5 rules let a signed-in
-/// user self-write exactly those mirror fields (role stays admin-only), and the
-/// write is a merge so it never clobbers `fcmToken`/role.
+/// identity fields (`displayName`/`phone`/`email`/`profession`/`address`/
+/// `businessId` — see `_mirrorToServer` in user_profile.dart) through it. S5
+/// rules gate this as a DENY-LIST: a signed-in user may self-write any
+/// `users/{uid}` field EXCEPT the privilege set (`role`/`roles`/`storeUid`/
+/// `orgId`/`status` — server/callable/admin-only), and the write is a merge so
+/// it never clobbers `fcmToken`/role.
 final usersProfileWriterProvider = Provider<RemoteCollectionSource?>((ref) {
   if (useFirebaseBackend) return FirestoreCollectionSource('users');
   return null;

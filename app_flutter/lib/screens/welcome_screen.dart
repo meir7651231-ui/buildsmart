@@ -157,12 +157,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // calls createUserWithEmailPassword, so it is the line that must be right
     // even if a future edit loosens the form validation above.
     if (kEmailPasswordAuth && validEmail(contact)) {
-      // Mirror the typed name locally so the post-auth users/{uid} write and
-      // the profile chip carry it (the account itself is the real Firebase
-      // identity — this is the on-device display copy, like the login flow).
-      ref
-          .read(userProfileProvider.notifier)
-          .register(name: _name.text, contact: contact);
       try {
         await ref
             .read(authStateProvider.notifier)
@@ -175,6 +169,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         return;
       }
       if (!mounted) return;
+      // Mirror the typed name locally ONLY now that the account actually exists.
+      // Registering BEFORE the await left the profile falsely `registered` when
+      // createUser threw (email-already-in-use / weak-password): no Firebase
+      // account, yet a local profile that claimed one. The login sheet defers
+      // the name the same way (login_sheet `_emailCreate`).
+      ref
+          .read(userProfileProvider.notifier)
+          .register(name: _name.text, contact: contact);
       // The account now exists (createUser signed us in at the FirebaseAuth
       // level). The authStateProvider STREAM may not have propagated to the
       // snapshot yet, so do NOT gate on `signedIn` — that race left a freshly
