@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'card_detail_mode.dart';
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'user_profile.dart';
 
 /// Who's using the card — affects which detail level is the *sensible default*
@@ -63,12 +64,20 @@ ProfessionMode professionModeFromTrade(String trade) {
   }
 }
 
-class ProfessionModeNotifier extends StateNotifier<ProfessionMode> {
+class ProfessionModeNotifier extends StateNotifier<ProfessionMode>
+    with EnumPrefsPersisted<ProfessionMode> {
   ProfessionModeNotifier() : super(ProfessionMode.contractor) {
     _load();
   }
 
   static const _key = 'bs.profession-mode.v1';
+
+  // Bespoke [_load] below (derives from onboarding + seeds cardDetailMode) is a
+  // genuine variant — kept verbatim; only persist/set come from the mixin.
+  @override
+  String get persistKey => _key;
+  @override
+  List<ProfessionMode> get persistValues => ProfessionMode.values;
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -103,16 +112,7 @@ class ProfessionModeNotifier extends StateNotifier<ProfessionMode> {
     }
   }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, state.name);
-  }
-
-  void set(ProfessionMode mode) {
-    if (state == mode) return;
-    state = mode;
-    _persist();
-  }
+  void set(ProfessionMode mode) => setPersisted(mode);
 }
 
 final professionModeProvider =

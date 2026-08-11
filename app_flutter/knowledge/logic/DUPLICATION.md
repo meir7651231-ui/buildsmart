@@ -1,5 +1,16 @@
 # דוח כפילויות — שכבת ה-state (מבוסס על הפירוק המלא)
 
+> ## 🟢 סטטוס-ביצוע (opt-in, לא-שובר)
+> - **slice 1 — שלישיית ה-enum ✅ בוצע.** `card_detail_mode` + `project_mode`
+>   (מלא) + `profession_mode` (חלקי — `_load` המיוחד נשמר verbatim) עברו למיקסין
+>   `EnumPrefsPersisted<T>` (`lib/state/prefs_persisted.dart`). ה-`set`/`persist`
+>   המשוכפלים ×3 → מקום אחד. 3 בדיקות ייעודיות ירוקות (defaults · שמירה על-פני
+>   notifier חדש · no-op אידמפוטנטי). analyze נקי.
+> - הבא בתור: slice 2 (5 מודולי-ההגדרות · `update(f)`) → slice 3 (list/json) →
+>   slice 4 (6 המנועים · `state=`).
+
+
+
 > נגזר אוטומטית מ-1,852 האטומים המפורקים (`knowledge/logic/*`), ע"י השוואת
 > **גוף-האלגוריתם** (behaviour IR) בין מודולים — לא רק שמות. קורא-בלבד: הדוח
 > **מתעד** את החוב ומציע פתרון; הוא **לא** משנה קוד.

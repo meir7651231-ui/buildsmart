@@ -3973,3 +3973,10 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 
 ### #user-approval-rollout שלב-0 — guard-test לסדר-הכתיבה (2026-08-11)
 צעד ראשון בהטמעת מנגנון-האישור (`PLAN-user-approval-rollout.md`). נוסף `test/user_system/welcome_enqueue_order_test.dart` — טסט-**מבני** שמקבע ש-`.onRegisteredLogin(` (ensureUser born-pending) מופיע במקור **לפני** `writer.set(` (ה-mirror) בתוך `_finishAfterAuth`. היפוך-הסדר יוצר doc חסר-status → כל משתמש-רשום קופא pending; behavioral-test אי-אפשר (`kUserSystem` const-folds false ב-`flutter test`), לכן שער-מבני. **mutation-verified:** היפוך → RED (שורת-order), שחזור → GREEN. אין שינוי קוד-פרודקשן. אימות-פריסה: 3 ה-Functions (reviewRoleRequest/onUserCreatedQueueApproval/approveUsers) מיוצאים ב-index.ts ו-CI פורס `--only functions` (firebase-deploy.yml:175).
+
+### #dedup-slice-1 — שלישיית enum-mode → EnumPrefsPersisted mixin (2026-08-11)
+צעד-ביצוע ראשון של `knowledge/logic/DUPLICATION.md` (חוב-כפילות שנחשף מהפירוק). קוד-שמירה/טעינה/set שהועתק-הודבק ×3 במודולי-ה-enum → מיקסין opt-in אחד, **זהה-התנהגות**.
+- **חדש `lib/state/prefs_persisted.dart`:** `mixin EnumPrefsPersisted<T extends Enum>` — `readPersistedEnum` (getString→match-by-name) · `persistEnum` (setString(name)) · `setPersisted` (no-op-אם-זהה→state→persist). הלוגיקה שנכתבה 3× עכשיו פעם-אחת.
+- **`card_detail_mode` + `project_mode`:** הועברו מלא (`set`/`_persist`→מיקסין · `_load`→שורתיים `readPersistedEnum`).
+- **`profession_mode`:** חלקי-מכוון — ה-`_load` המיוחד (גזירה מ-onboarding-trade + seed ל-cardDetailMode) נשמר **verbatim**; רק persist/set אימצו את המיקסין. עקרון-בטיחות: לא דוחפים variant בכוח.
+- **אימות:** 3 בדיקות ייעודיות ירוקות (`card_detail_mode`/`project_mode`/`profession_mode`_test — defaults · שמירה-על-notifier-חדש · no-op אידמפוטנטי) · analyze נקי · net −19 שורות. קורא-בלבד על ההתנהגות, dedup בלבד.

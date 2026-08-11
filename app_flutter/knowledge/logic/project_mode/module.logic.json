@@ -1,7 +1,7 @@
 {
   "module": "project_mode",
-  "source": "lib/state/project_mode.dart",
-  "atomCount": 6,
+  "source": "/home/user/buildsmart/app_flutter/lib/state/project_mode.dart",
+  "atomCount": 7,
   "atoms": [
     {
       "fn": "nextProjectMode",
@@ -70,6 +70,72 @@
       }
     },
     {
+      "fn": "ProjectModeNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'bs.project-mode.v1'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectModeNotifier.persistValues",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<ProjectMode>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ProjectMode.values"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<ProjectMode>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
       "fn": "ProjectModeNotifier._load",
       "kind": "notifier-method",
       "object": {
@@ -77,12 +143,7 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key"
-          }
-        ],
+        "reads": [],
         "writes": [
           {
             "kind": "state",
@@ -97,87 +158,16 @@
         "steps": [
           {
             "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "compute",
-            "detail": "s = prefs.getString(_key)"
-          },
-          {
-            "kind": "precond",
-            "detail": "if s == null → return (void)"
-          },
-          {
-            "kind": "loop",
-            "detail": "for final m in ProjectMode.values"
+            "detail": "v = await readPersistedEnum()"
           },
           {
             "kind": "branch",
-            "detail": "if m.name == s"
+            "detail": "if v != null"
           }
         ]
       },
       "floor": [
-        "getInstance",
-        "getString"
-      ],
-      "contract": {
-        "input": "()",
-        "output": "Future<void>",
-        "purity": "side-effecting",
-        "precond": [
-          "if s == null → return (void)"
-        ],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
-      "fn": "ProjectModeNotifier._persist",
-      "kind": "notifier-method",
-      "object": {
-        "signature": "() -> Future<void>",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key"
-          },
-          {
-            "kind": "field",
-            "name": "state"
-          }
-        ],
-        "writes": [
-          {
-            "kind": "io",
-            "name": "prefs.setString"
-          }
-        ],
-        "calls": [],
-        "calledBy": [
-          "ProjectModeNotifier.set"
-        ],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "effect",
-            "detail": "await prefs.setString(_key, state.name)"
-          }
-        ]
-      },
-      "floor": [
-        "getInstance",
-        "setString"
+        "readPersistedEnum"
       ],
       "contract": {
         "input": "()",
@@ -197,57 +187,28 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key",
-            "transitive": true
-          }
-        ],
-        "writes": [
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
+        "reads": [],
+        "writes": [],
+        "calls": [],
         "calledBy": [],
         "gatedBy": []
       },
       "behaviour": {
         "steps": [
           {
-            "kind": "precond",
-            "detail": "if state == mode → return (void)"
-          },
-          {
-            "kind": "effect",
-            "detail": "state = mode"
-          },
-          {
-            "kind": "effect",
-            "detail": "_persist()"
+            "kind": "formula",
+            "detail": "setPersisted(mode)"
           }
         ]
       },
-      "floor": [],
+      "floor": [
+        "setPersisted"
+      ],
       "contract": {
         "input": "(ProjectMode mode)",
         "output": "void",
-        "purity": "side-effecting",
-        "precond": [
-          "if state == mode → return (void)"
-        ],
+        "purity": "pure",
+        "precond": [],
         "postcond": [],
         "invariants": [],
         "throws": []

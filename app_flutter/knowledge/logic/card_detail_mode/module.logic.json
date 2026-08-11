@@ -1,8 +1,74 @@
 {
   "module": "card_detail_mode",
-  "source": "lib/state/card_detail_mode.dart",
-  "atomCount": 5,
+  "source": "/home/user/buildsmart/app_flutter/lib/state/card_detail_mode.dart",
+  "atomCount": 6,
   "atoms": [
+    {
+      "fn": "CardDetailModeNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'bs.card-detail-mode.v1'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardDetailModeNotifier.persistValues",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<CardDetailMode>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CardDetailMode.values"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<CardDetailMode>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
     {
       "fn": "CardDetailModeNotifier._load",
       "kind": "notifier-method",
@@ -11,12 +77,7 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key"
-          }
-        ],
+        "reads": [],
         "writes": [
           {
             "kind": "state",
@@ -31,81 +92,16 @@
         "steps": [
           {
             "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "compute",
-            "detail": "v = prefs.getString(_key)"
+            "detail": "v = await readPersistedEnum()"
           },
           {
             "kind": "branch",
-            "detail": "if v == 'simple'"
-          },
-          {
-            "kind": "branch",
-            "detail": "if v == 'expert'"
+            "detail": "if v != null"
           }
         ]
       },
       "floor": [
-        "getInstance",
-        "getString"
-      ],
-      "contract": {
-        "input": "()",
-        "output": "Future<void>",
-        "purity": "side-effecting",
-        "precond": [],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
-      "fn": "CardDetailModeNotifier._persist",
-      "kind": "notifier-method",
-      "object": {
-        "signature": "() -> Future<void>",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key"
-          },
-          {
-            "kind": "field",
-            "name": "state"
-          }
-        ],
-        "writes": [
-          {
-            "kind": "io",
-            "name": "prefs.setString"
-          }
-        ],
-        "calls": [],
-        "calledBy": [
-          "CardDetailModeNotifier.set"
-        ],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "effect",
-            "detail": "await prefs.setString(_key, state.name)"
-          }
-        ]
-      },
-      "floor": [
-        "getInstance",
-        "setString"
+        "readPersistedEnum"
       ],
       "contract": {
         "input": "()",
@@ -125,30 +121,9 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key",
-            "transitive": true
-          }
-        ],
-        "writes": [
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
+        "reads": [],
+        "writes": [],
+        "calls": [],
         "calledBy": [
           "CardDetailModeNotifier.toggle"
         ],
@@ -157,27 +132,19 @@
       "behaviour": {
         "steps": [
           {
-            "kind": "precond",
-            "detail": "if state == mode → return (void)"
-          },
-          {
-            "kind": "effect",
-            "detail": "state = mode"
-          },
-          {
-            "kind": "effect",
-            "detail": "_persist()"
+            "kind": "formula",
+            "detail": "setPersisted(mode)"
           }
         ]
       },
-      "floor": [],
+      "floor": [
+        "setPersisted"
+      ],
       "contract": {
         "input": "(CardDetailMode mode)",
         "output": "void",
-        "purity": "side-effecting",
-        "precond": [
-          "if state == mode → return (void)"
-        ],
+        "purity": "pure",
+        "precond": [],
         "postcond": [],
         "invariants": [],
         "throws": []
@@ -191,14 +158,13 @@
         "constants": []
       },
       "connections": {
-        "reads": [],
-        "writes": [
+        "reads": [
           {
-            "kind": "state",
-            "name": "state",
-            "transitive": true
+            "kind": "field",
+            "name": "state"
           }
         ],
+        "writes": [],
         "calls": [
           {
             "name": "set",
@@ -220,7 +186,7 @@
       "contract": {
         "input": "()",
         "output": "void",
-        "purity": "side-effecting",
+        "purity": "pure",
         "precond": [],
         "postcond": [],
         "invariants": [],
