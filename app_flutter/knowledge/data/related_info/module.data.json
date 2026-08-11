@@ -1,6 +1,6 @@
 {
   "module": "related_info",
-  "source": "/home/user/buildsmart/app_flutter/lib/data/related_info.dart",
+  "source": "../../../app_flutter/lib/data/related_info.dart",
   "entityCount": 1,
   "entities": [
     {

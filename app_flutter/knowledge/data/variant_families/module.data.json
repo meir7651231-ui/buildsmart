@@ -1,6 +1,6 @@
 {
   "module": "variant_families",
-  "source": "/home/user/buildsmart/app_flutter/lib/data/variant_families.dart",
+  "source": "../../../app_flutter/lib/data/variant_families.dart",
   "entityCount": 2,
   "entities": [
     {

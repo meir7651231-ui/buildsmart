@@ -1,0 +1,245 @@
+{
+  "module": "grid_topology",
+  "source": "../../../app_flutter/lib/features/fittings/engine/grid_topology.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "freeEndsOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<GridCell> cells) -> List<FreeEnd>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "byPos = <(int, int, int), GridCell>{for (final c in cells) (c.x, c.y, c.z) : c}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <FreeEnd>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in cells"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in directedPortsOf(c.element)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "FreeEnd",
+        "add",
+        "cellsConnect",
+        "directedPortsOf",
+        "snapToGrid"
+      ],
+      "contract": {
+        "input": "(List<GridCell> cells)",
+        "output": "List<FreeEnd>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "gridSuggestionsAt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<GridCell> cells, (int, int, int) target, List<RunElement> candidates) -> List<RunElement>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if cells.any((c) => c.x == tx && c.y == ty && c.z == tz) → return const []"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final cand in candidates) if (cells.any((c) => cellsConnect(GridCell(tx, ty, tz, ca…"
+          }
+        ]
+      },
+      "floor": [
+        "GridCell",
+        "any",
+        "cellsConnect"
+      ],
+      "contract": {
+        "input": "(List<GridCell> cells, (int, int, int) target, List<RunElement> candidates)",
+        "output": "List<RunElement>",
+        "purity": "pure",
+        "precond": [
+          "if cells.any((c) => c.x == tx && c.y == ty && c.z == tz) → return const []"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FreeEnd.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "cell"
+          },
+          {
+            "kind": "field",
+            "name": "od"
+          },
+          {
+            "kind": "field",
+            "name": "step"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is FreeEnd && other.cell == cell && other.step == step && other.od == od"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FreeEnd.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "cell"
+          },
+          {
+            "kind": "field",
+            "name": "od"
+          },
+          {
+            "kind": "field",
+            "name": "step"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(cell, step, od)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FreeEnd.toString",
+      "kind": "method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "cell"
+          },
+          {
+            "kind": "field",
+            "name": "od"
+          },
+          {
+            "kind": "field",
+            "name": "step"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'FreeEnd(${cell.x},${cell.y},${cell.z} → $step, od$od)'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

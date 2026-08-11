@@ -60,3 +60,22 @@ The server's typed throws mirror the client's typed exceptions:
 `tools/atom/decompose` — one CLI, six modes: `--logic` · `--data` ·
 `--primitives` · `--journeys[-batch]` · `--async[-batch]` · `--backend[-batch]`.
 Re-run any of them to regenerate the knowledge under `app_flutter/knowledge/`.
+
+## Round 2 — the parallel session's build, decomposed
+
+The catalog-config + internal-card + fittings-grid work (55 commits) was opened
+by the SAME six modes, no tool change needed — proof the decomposer generalizes:
+
+| layer | opened | scale |
+|---|---|---|
+| logic | fittings connection-geometry (`directedPortsOf`, `portsFace`, grid topology) + catalog-config browse engine (`browse_model` 20 atoms) | **8 engines · 59 atoms** |
+| data | `VariantFamily` · `GridCell` · `ProductConfigSchema` · `related_info` | **4 modules · 5 entities** |
+| primitives | `snapOdToDn` (od → DN scale) · `imageBrightness` · `canonicalDn` | **2 modules · 7 primitives** |
+| journeys | the new feature screens — 148 nodes, only 5 edges: they are **home-embedded** (flag + provider-swap), not Navigator routes | `knowledge/journeys-features/` |
+
+Two findings surfaced and were **documented, not fixed**: (1) the new features
+live inside the home shell via flags/provider-swaps, invisible to a route tool;
+(2) `smart_home_screen` grew 10→14 atoms (catalog-config + internal-card each an
+Open/Hero live+preview pair) — the golden was regenerated to track it. A real
+tool bug was fixed in passing: a `lastIndexOf(...) < 0` guard no longer
+mis-reads as a currency sign (primitive edge detector).

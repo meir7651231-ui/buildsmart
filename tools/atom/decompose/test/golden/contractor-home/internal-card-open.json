@@ -1,0 +1,43 @@
+{
+  "name": "_InternalCardOpen",
+  "role": "section",
+  "section": "internalCard",
+  "variant": "live",
+  "gate": "kInternalCard",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🃏 כרטיס פנימי"
+      },
+      {
+        "kind": "text",
+        "text": "—"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "🃏 כרטיס פנימי",
+      "—"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 2"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "catalogProductForSku",
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

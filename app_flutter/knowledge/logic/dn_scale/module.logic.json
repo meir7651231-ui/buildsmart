@@ -1,0 +1,217 @@
+{
+  "module": "dn_scale",
+  "source": "../../../app_flutter/lib/features/catalog_config/dn_scale.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "snapOdToDn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(num od) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDnRungs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "canonicalDn"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "best = kDnRungs.first"
+          },
+          {
+            "kind": "compute",
+            "detail": "bestDist = (od - best).abs()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final rung in kDnRungs"
+          },
+          {
+            "kind": "compute",
+            "detail": "dist = (od - rung).abs()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if dist < bestDist"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "abs"
+      ],
+      "contract": {
+        "input": "(num od)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "canonicalDn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String token) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDnRungs",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kInchToDn"
+          },
+          {
+            "kind": "global",
+            "name": "_kFirstNum"
+          },
+          {
+            "kind": "global",
+            "name": "num"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "snapOdToDn",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = token.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "inch = kInchToDn[t]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if inch != null → return 'DN$inch'"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = _kFirstNum.firstMatch(t)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if m == null → return t"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = num.tryParse(m.group(1)!)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if n == null → return t"
+          },
+          {
+            "kind": "return",
+            "detail": "'DN${snapOdToDn(n)}'"
+          }
+        ]
+      },
+      "floor": [
+        "firstMatch",
+        "group",
+        "trim",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(String token)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if inch != null → return 'DN$inch'",
+          "if m == null → return t",
+          "if n == null → return t"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "dnNumber",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String label) -> int",
+        "constants": [
+          "1 << 30"
+        ]
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_kFirstNum"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "m = _kFirstNum.firstMatch(label)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if m == null → return 1 << 30"
+          },
+          {
+            "kind": "return",
+            "detail": "int.tryParse(m.group(1)!.split('.').first) ?? (1 << 30)"
+          }
+        ]
+      },
+      "floor": [
+        "firstMatch",
+        "group",
+        "split",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(String label)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if m == null → return 1 << 30"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -84,10 +84,13 @@ PrimitiveContract _contractOf(FunctionDeclaration d, int line) {
       RegExp(r'isEmpty\)\s*return\s*""').hasMatch(src);
   final emptyToFalse = src.contains('isEmpty') && src.contains('return false');
 
+  final moneySign = RegExp(r"<\s*0\s*\?\s*'?-").hasMatch(src);
   add(src.contains('.abs()'), '.abs()',
       'negative input → absolute value (caller prepends the sign)');
-  add(RegExp(r'<\s*0\s*\?').hasMatch(src), 'n<0 ? …',
+  add(moneySign, 'n<0 ? "-"',
       'sign is placed BEFORE the symbol (never "symbol-minus")');
+  add(!moneySign && RegExp(r'<\s*0\s*\?').hasMatch(src), 'lookup < 0',
+      'a not-found lookup (index < 0) → the fallback branch');
   add(emptyToStr, 'isEmpty → ""',
       'no usable characters → "" (caller decides what empty means)');
   add(emptyToFalse && !emptyToStr, 'isEmpty → false',

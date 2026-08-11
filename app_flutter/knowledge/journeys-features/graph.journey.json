@@ -1,0 +1,639 @@
+{
+  "nodeCount": 148,
+  "edgeCount": 5,
+  "nodes": [
+    {
+      "screen": "SignalChip",
+      "line": 51
+    },
+    {
+      "screen": "CardVerdict",
+      "line": 128
+    },
+    {
+      "screen": "CardAskWords",
+      "line": 133
+    },
+    {
+      "screen": "CardResolve",
+      "line": 142
+    },
+    {
+      "screen": "CardShowProducts",
+      "line": 150
+    },
+    {
+      "screen": "MergedKeys",
+      "line": 160
+    },
+    {
+      "screen": "_AxisScore",
+      "line": 256
+    },
+    {
+      "screen": "_Tap",
+      "line": 71
+    },
+    {
+      "screen": "_SeedTap",
+      "line": 76
+    },
+    {
+      "screen": "_ChipTap",
+      "line": 82
+    },
+    {
+      "screen": "_ProductTap",
+      "line": 94
+    },
+    {
+      "screen": "CardKeyboardScreen",
+      "line": 120
+    },
+    {
+      "screen": "_CardKeyboardScreenState",
+      "line": 162
+    },
+    {
+      "screen": "CardPick",
+      "line": 17
+    },
+    {
+      "screen": "CardPicksNotifier",
+      "line": 31
+    },
+    {
+      "screen": "CardSeed",
+      "line": 11
+    },
+    {
+      "screen": "SignalSource",
+      "line": 44
+    },
+    {
+      "screen": "SizeSignal",
+      "line": 76
+    },
+    {
+      "screen": "AngleSignal",
+      "line": 104
+    },
+    {
+      "screen": "ColorSignal",
+      "line": 128
+    },
+    {
+      "screen": "WordSignal",
+      "line": 152
+    },
+    {
+      "screen": "MaterialSignal",
+      "line": 194
+    },
+    {
+      "screen": "CuratedFacetSignal",
+      "line": 244
+    },
+    {
+      "screen": "FindKeyboardPanel",
+      "line": 32
+    },
+    {
+      "screen": "_FindKeyboardPanelState",
+      "line": 54
+    },
+    {
+      "screen": "FindSession",
+      "line": 55
+    },
+    {
+      "screen": "HopGraph",
+      "line": 68
+    },
+    {
+      "screen": "HopStack",
+      "line": 10
+    },
+    {
+      "screen": "OpeningSurface",
+      "line": 14
+    },
+    {
+      "screen": "ConfigTile",
+      "line": 58
+    },
+    {
+      "screen": "ConfigFamily",
+      "line": 124
+    },
+    {
+      "screen": "ConfigBrowse",
+      "line": 208
+    },
+    {
+      "screen": "CatalogConfigScreen",
+      "line": 84
+    },
+    {
+      "screen": "_CatalogConfigScreenState",
+      "line": 116
+    },
+    {
+      "screen": "_FamilySection",
+      "line": 280
+    },
+    {
+      "screen": "_FamilySectionState",
+      "line": 305
+    },
+    {
+      "screen": "_Tile",
+      "line": 476
+    },
+    {
+      "screen": "_ProductThumb",
+      "line": 539
+    },
+    {
+      "screen": "_CountBadge",
+      "line": 581
+    },
+    {
+      "screen": "_MaterialDots",
+      "line": 612
+    },
+    {
+      "screen": "_EmptyState",
+      "line": 649
+    },
+    {
+      "screen": "ConfigCard",
+      "line": 86
+    },
+    {
+      "screen": "_ConfigCardState",
+      "line": 118
+    },
+    {
+      "screen": "ProductConfigSchema",
+      "line": 41
+    },
+    {
+      "screen": "WheelPicker",
+      "line": 60
+    },
+    {
+      "screen": "_WheelPickerState",
+      "line": 90
+    },
+    {
+      "screen": "_SelectionBand",
+      "line": 212
+    },
+    {
+      "screen": "_ColorRow",
+      "line": 232
+    },
+    {
+      "screen": "DirectedPort",
+      "line": 21
+    },
+    {
+      "screen": "GridCell",
+      "line": 17
+    },
+    {
+      "screen": "FreeEnd",
+      "line": 18
+    },
+    {
+      "screen": "Dims",
+      "line": 39
+    },
+    {
+      "screen": "RunElement",
+      "line": 52
+    },
+    {
+      "screen": "Route",
+      "line": 65
+    },
+    {
+      "screen": "ElementPart",
+      "line": 22
+    },
+    {
+      "screen": "ElementMeshes",
+      "line": 32
+    },
+    {
+      "screen": "Mesh",
+      "line": 14
+    },
+    {
+      "screen": "WorldPart",
+      "line": 19
+    },
+    {
+      "screen": "BuildPlanExportScreen",
+      "line": 13
+    },
+    {
+      "screen": "BuildPlanScreen",
+      "line": 14
+    },
+    {
+      "screen": "_CutTile",
+      "line": 80
+    },
+    {
+      "screen": "CompatibilityScreen",
+      "line": 13
+    },
+    {
+      "screen": "_CompatRow",
+      "line": 68
+    },
+    {
+      "screen": "ExplodedViewScreen",
+      "line": 12
+    },
+    {
+      "screen": "_ExplodedViewScreenState",
+      "line": 30
+    },
+    {
+      "screen": "BomRow",
+      "line": 16
+    },
+    {
+      "screen": "LineBom",
+      "line": 25
+    },
+    {
+      "screen": "LineBomScreen",
+      "line": 11
+    },
+    {
+      "screen": "_StatusBar",
+      "line": 72
+    },
+    {
+      "screen": "_BomRowTile",
+      "line": 101
+    },
+    {
+      "screen": "LineBuilderScreen",
+      "line": 15
+    },
+    {
+      "screen": "_LineSummary",
+      "line": 55
+    },
+    {
+      "screen": "CutSegment",
+      "line": 15
+    },
+    {
+      "screen": "FittingLinePlan",
+      "line": 20
+    },
+    {
+      "screen": "LinePressureScreen",
+      "line": 13
+    },
+    {
+      "screen": "_SuggestionTile",
+      "line": 86
+    },
+    {
+      "screen": "Product3dScreen",
+      "line": 17
+    },
+    {
+      "screen": "_SpecPanel",
+      "line": 64
+    },
+    {
+      "screen": "Vec3",
+      "line": 18
+    },
+    {
+      "screen": "Placement",
+      "line": 48
+    },
+    {
+      "screen": "LayoutDelta",
+      "line": 19
+    },
+    {
+      "screen": "BuildableSpec",
+      "line": 35
+    },
+    {
+      "screen": "Envelope",
+      "line": 14
+    },
+    {
+      "screen": "SafetyAdvisory",
+      "line": 20
+    },
+    {
+      "screen": "WeldParams",
+      "line": 30
+    },
+    {
+      "screen": "Mat4",
+      "line": 15
+    },
+    {
+      "screen": "ScreenPoint",
+      "line": 91
+    },
+    {
+      "screen": "RenderTriangle",
+      "line": 37
+    },
+    {
+      "screen": "RoutePainter",
+      "line": 43
+    },
+    {
+      "screen": "FittingPreview3d",
+      "line": 105
+    },
+    {
+      "screen": "_FittingPreview3dState",
+      "line": 117
+    },
+    {
+      "screen": "FittingPreviewScreen",
+      "line": 174
+    },
+    {
+      "screen": "Line3DView",
+      "line": 20
+    },
+    {
+      "screen": "_IsoPainter",
+      "line": 51
+    },
+    {
+      "screen": "_DashedRect",
+      "line": 28
+    },
+    {
+      "screen": "SudokuGrid",
+      "line": 136
+    },
+    {
+      "screen": "_SudokuGridState",
+      "line": 164
+    },
+    {
+      "screen": "SearchResult",
+      "line": 52
+    },
+    {
+      "screen": "GlobalSearchIndex",
+      "line": 111
+    },
+    {
+      "screen": "FullInternalCard",
+      "line": 58
+    },
+    {
+      "screen": "_FullInternalCardState",
+      "line": 93
+    },
+    {
+      "screen": "_CardView",
+      "line": 189
+    },
+    {
+      "screen": "_InternalCardGallery",
+      "line": 1493
+    },
+    {
+      "screen": "_InternalCardGalleryState",
+      "line": 1503
+    },
+    {
+      "screen": "CatAxis",
+      "line": 32
+    },
+    {
+      "screen": "CatProduct",
+      "line": 144
+    },
+    {
+      "screen": "CatalogWheelScreen",
+      "line": 28
+    },
+    {
+      "screen": "_CatalogWheelScreenState",
+      "line": 35
+    },
+    {
+      "screen": "PlainNode",
+      "line": 42
+    },
+    {
+      "screen": "PlainDiveScreen",
+      "line": 19
+    },
+    {
+      "screen": "_PlainDiveScreenState",
+      "line": 26
+    },
+    {
+      "screen": "_Taxo",
+      "line": 73
+    },
+    {
+      "screen": "RdProduct",
+      "line": 175
+    },
+    {
+      "screen": "RingDiveGeo",
+      "line": 21
+    },
+    {
+      "screen": "RingDiveDial",
+      "line": 34
+    },
+    {
+      "screen": "_DialPainter",
+      "line": 73
+    },
+    {
+      "screen": "RingDiveQty",
+      "line": 27
+    },
+    {
+      "screen": "_RingDiveQtyState",
+      "line": 51
+    },
+    {
+      "screen": "_QtyPainter",
+      "line": 233
+    },
+    {
+      "screen": "_CartItem",
+      "line": 84
+    },
+    {
+      "screen": "RingDiveScreen",
+      "line": 98
+    },
+    {
+      "screen": "_RingDiveScreenState",
+      "line": 105
+    },
+    {
+      "screen": "RingDiveWheel",
+      "line": 26
+    },
+    {
+      "screen": "_RingDiveWheelState",
+      "line": 61
+    },
+    {
+      "screen": "_Row",
+      "line": 131
+    },
+    {
+      "screen": "Membership",
+      "line": 81
+    },
+    {
+      "screen": "QuickPick",
+      "line": 37
+    },
+    {
+      "screen": "QuickPadItem",
+      "line": 11
+    },
+    {
+      "screen": "QuickPadKeyboard",
+      "line": 37
+    },
+    {
+      "screen": "_QuickPadKeyboardState",
+      "line": 66
+    },
+    {
+      "screen": "QuickPadScreen",
+      "line": 46
+    },
+    {
+      "screen": "_QuickPadScreenState",
+      "line": 57
+    },
+    {
+      "screen": "KitLine",
+      "line": 63
+    },
+    {
+      "screen": "KitCoverage",
+      "line": 271
+    },
+    {
+      "screen": "NewbieStep",
+      "line": 57
+    },
+    {
+      "screen": "NewbieQuestion",
+      "line": 84
+    },
+    {
+      "screen": "AskWords",
+      "line": 91
+    },
+    {
+      "screen": "AskAxis",
+      "line": 103
+    },
+    {
+      "screen": "Resolve",
+      "line": 119
+    },
+    {
+      "screen": "ShowProducts",
+      "line": 140
+    },
+    {
+      "screen": "WordFinderHome",
+      "line": 58
+    },
+    {
+      "screen": "_WordFinderHomeState",
+      "line": 65
+    },
+    {
+      "screen": "WordFinderScreen",
+      "line": 164
+    },
+    {
+      "screen": "_WordFinderScreenState",
+      "line": 176
+    },
+    {
+      "screen": "WordKeyboard",
+      "line": 31
+    },
+    {
+      "screen": "WordKey",
+      "line": 8
+    },
+    {
+      "screen": "WordEntry",
+      "line": 29
+    },
+    {
+      "screen": "WordLexicon",
+      "line": 52
+    }
+  ],
+  "edges": [
+    {
+      "from": "global_search_sources",
+      "to": "HomeShell#tab2",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 125,
+      "params": "2"
+    },
+    {
+      "from": "global_search_sources",
+      "to": "HomeShell#tab3",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 154,
+      "params": "3"
+    },
+    {
+      "from": "global_search_sources",
+      "to": "Store/orders",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 155,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "global_search_sources",
+      "to": "HomeShell#tab2",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 182,
+      "params": "2"
+    },
+    {
+      "from": "_WordFinderScreenState",
+      "to": "AiFinderScreen",
+      "trigger": "_buildAiFinderEntry",
+      "kind": "push",
+      "line": 1432
+    }
+  ]
+}

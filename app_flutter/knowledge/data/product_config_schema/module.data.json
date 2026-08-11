@@ -1,0 +1,89 @@
+{
+  "module": "product_config_schema",
+  "source": "../../../app_flutter/lib/features/catalog_config/product_config_schema.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "ProductConfigSchema",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "sku",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "familyId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "type": "List<AttributeDef>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "hasWheels",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "familyId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "attributes",
+            "ref": "AttributeDef",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "sku",
+          "nameHe",
+          "familyId",
+          "emoji",
+          "attributes"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

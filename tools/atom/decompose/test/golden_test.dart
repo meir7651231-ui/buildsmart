@@ -39,18 +39,33 @@ void main() {
 
     final d = decompose(_source, _registry, screenName: 'contractor-home');
 
-    // Spec anchor: the screen started at 8 atoms; parallel screen-mgmt slices
-    // (s6/s9/s10) added the two super-finder sections and routed the trailing
-    // blocks through the dispatch, so the FULL current screen is 10 atoms — a
-    // superset, never a subset. Registry stays 6/6 (the new sections use plain
-    // Text, no CfgText ids). If the screen shrinks/grows again, update here.
-    test('spec anchors — full coverage (10 atoms), one composer, registry 6/6',
+    // Spec anchor: the screen started at 8 atoms; the super-finder slices took it
+    // to 10, and the parallel session's home work added the catalog-config and
+    // internal-card sections (each an Open/Hero live+preview pair, same pattern),
+    // so the FULL current screen is 14 atoms — a superset, never a subset.
+    // Registry stays 6/6 (the new sections use plain Text, no CfgText ids). If the
+    // screen shrinks/grows again, update here.
+    test('spec anchors — full coverage (14 atoms), one composer, registry 6/6',
         () {
-      expect(d.atoms.length, 10);
+      expect(d.atoms.length, 14);
       expect(d.atoms.where((a) => a.role == 'composer').length, 1);
       expect(d.atoms.first.name, 'SmartHomeBody');
       expect(d.registry.total, 6);
       expect(d.registry.matched, 6, reason: 'every id resolves in the registry');
+    });
+
+    // The parallel session's new home sections follow the super-finder pattern
+    // exactly: a gated LIVE opener + a PREVIEW hero. This pins that their work is
+    // decomposed the same way (a superset of the old golden, nothing lost).
+    test('new home sections — catalog-config + internal-card live/preview', () {
+      final byName = {for (final a in d.atoms) a.name: a};
+      final card = byName['_InternalCardOpen'];
+      expect(card, isNotNull, reason: 'the 13-section internal card opener');
+      expect(card!.variant, 'live');
+      expect(card.gate, 'kInternalCard');
+      expect(card.section, 'internalCard');
+      expect(byName['_InternalCardHero']?.variant, 'preview');
+      expect(byName['_CatalogConfigHero']?.section, 'catalogConfig');
     });
 
     test('section→HomeSection mapping is recovered from the dispatch switch', () {
