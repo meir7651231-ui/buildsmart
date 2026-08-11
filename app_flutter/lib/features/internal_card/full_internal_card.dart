@@ -27,6 +27,10 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/features/fittings/engine/models.dart' show RunElement;
+// `Family` collides with Riverpod's provider `Family`, so the engine enums come
+// in under a prefix (used only by the gallery-3D route builder).
+import 'package:buildsmart/features/fittings/engine/models.dart' as fm
+    show Dir, Family;
 import 'package:buildsmart/features/fittings/render/product_line_3d.dart'
     show ProductLine3D;
 import 'package:buildsmart/features/fittings/ui/sudoku_grid.dart'
@@ -1392,18 +1396,37 @@ class _CardView extends ConsumerWidget {
   }
 }
 
-/// A small seeded 3D route for the gallery's תלת-ממד page: the product itself +
-/// its first two real mates. Fed verbatim to the real welded-pipe renderer
-/// (`ProductLine3D`). Empty ⇒ untyped product ⇒ the caller shows the emoji.
+/// The gallery's תלת-ממד page: THIS product, welded into a complete connected
+/// run. The product leads (its routing revealed so an elbow/tee shows its
+/// turn/branch instead of hiding inline) and its real compatible mates close the
+/// line — the assembler adds the transition-pipes + end-stubs. A terminator
+/// (plug) trails the mates so it caps a real run rather than an empty stub.
+/// Empty ⇒ untyped product ⇒ the caller shows the emoji.
 List<RunElement> _galleryThreeDRoute(LipskeyCatalogProduct p) {
   final seed = runElementFor(p);
   if (seed == null) return const [];
-  return [
-    seed,
+  final star = _revealRouting(seed);
+  final mates = [
     for (final m in compatibleProductsFor(p).take(2))
       if (runElementFor(m) case final RunElement e) e,
   ];
+  // A plug terminates the assembler ⇒ put it last so the mates render first.
+  return star.family == fm.Family.plug ? [...mates, star] : [star, ...mates];
 }
+
+/// Re-stamp a bending fitting so its geometry reads in the static gallery view:
+/// an elbow/tee/saddle laid out inline (`Dir.right`) hides its turn behind the
+/// pipe. Point it UP and the 90°/branch becomes unmistakable. Straight families
+/// (coupler · reducer · valve · adapter · plug · collar) are unchanged.
+RunElement _revealRouting(RunElement e) => switch (e.family) {
+      fm.Family.elbow90 ||
+      fm.Family.elbow45 ||
+      fm.Family.miteredElbow ||
+      fm.Family.tee ||
+      fm.Family.saddle =>
+        RunElement(e.family, e.od, dir: fm.Dir.up, od2: e.od2),
+      _ => e,
+    };
 
 /// D3 — the tap-image gallery: a full-screen dark pager over the product
 /// image(s), the spec diagram(s), and a seeded 3D page — each pinch/slider-
