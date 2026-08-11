@@ -4051,3 +4051,8 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`main.dart`:** ‏`FirebaseFirestore.settings` — כש-kEdgeProxy דלוק: `host: kEdgeFsHost, sslEnabled: true`; כבוי: כמו היום (ביט-זהה).
 - **אימות:** ‏analyze 0-errors · ‏edge_proxy_test (off-by-default + host נקי).
 - **נותר לבעלים:** להוסיף ל-Worker תת-דומיין `fs.buildsmart-il.com` (Custom Domain), ואז build עם `--dart-define=EDGE_PROXY=true` לבדיקה על קו-מסונן. ⚠️ התנהגות WebChannel של Firestore-Web דרך proxy = אימות-שטח (לא ניתן לבדיקה מקומית).
+### #user-delete — מחיקת-משתמש מכל-מקום (🗑️ במרכז) (2026-08-11)
+כפתור-מחיקה שמוחק משתמש מ**כל המערכות** (SSOT: `knowledge/SSOT-delete-user.md`), לבקשת-הבעלים. נבנה על תשתית-ה-GDPR הקיימת (`deleteAccount.ts`):
+- **שרת (`functions/src/deleteAccount.ts`):** חילוץ `eraseUserCompletely(uid, actor)` (הליבה: users/diag purge + multi-party scrub + intel purge + Auth-delete + audit) — `deleteAccount` (self) קורא לו, **התנהגות זהה-בייטים**. נוסף `deleteUser` callable (מנהל→יעד): הרשאת-מנהל (`mayApproveUsers`) · **owner-guard** (`getUser`→`isOwnerEmail({token:{email}})` — object-arg, קריטי) · no-self · **סובלנות ל-`auth/user-not-found`** (מנקה יתומים שה-Auth שלהם כבר נמחק). מיוצא ב-index.ts.
+- **לקוח:** `userDeleterProvider`/`UserDeleter` (role_requests.dart, מראה `userApproverProvider`, OFF-null) → callable `deleteUser({uid})`. כפתור **🗑️ מחק** ב-`_CustomerActionRow` (אדום/הרסני, `confirmDestructive`, gated `uid.isNotEmpty`). owner-hide נשען על שער-השרת (אין email בשורה) + השורה-של-הבעלים ממילא מוחרגת מה-directory.
+- **directory מתנקה אוטומטית** דרך cascade של `onUserDocWritten` על מחיקת users-doc. אימות: functions `tsc` נקי · client analyze 0 · 59 טסטים ירוקים (כולל userDeleterProvider OFF-null + OFF-path ללא-רגרסיה).

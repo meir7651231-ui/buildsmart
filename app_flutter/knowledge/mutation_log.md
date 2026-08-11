@@ -2072,3 +2072,9 @@
 - **הפעולה:** חילוץ `accountFilterMatch` ל-public top-level (`manager_dashboard_screen.dart:2233`) + `test/user_hub_filter_test.dart` (4 טסטים טהורים).
 - **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp, לא git-checkout — לשמר עבודת-fixer לא-מחויבת) → מוטציה `case 'pending' → return true` (occurrence יחיד) → `flutter test` נכשל RED בטסט "pending → only pending" → שחזור → GREEN 4/4. הטסט בעל-שיניים.
 - **מיקוד-הבורר:** `manager_role_assign_sheet_a12_test` +3 טסטים (picker מוסתר · 👤 subject · `{targetUid,role}` לשרת) — 8/8, מאמת התנהגות אמיתית, לא prose.
+
+## #user-delete — deleteUser callable + owner-guard (2026-08-11)
+- **הנכס:** מחיקת-משתמש הרסנית מכל-מקום. הבטיחות הקריטית: owner-guard + manager-auth (צד-שרת).
+- **אימות (בהיעדר טסט-functions — תקדים deleteAccount):** `tsc --noEmit` נקי · byte-verify: `isOwnerEmail({token:{email}})` object-arg נוכח (הטעות ש-fixer תפס: bare-string היה מחזיר תמיד false → הבעלים מחיק) · `mayApproveUsers` (×2) · סובלנות `auth/user-not-found` (×2). self-path של deleteAccount אושר זהה-בייטים.
+- **client OFF-null:** `userDeleterProvider` → null ללא-backend (טסט חדש, מראה userApproverProvider) → הכפתור-ההרסני בלתי-נגיש כבוי. **mutation-verify פורמלי לא בוצע:** הבטיחות היחידה-הקריטית היא צד-שרת (אין טסט-functions, כתקדים deleteAccount); ה-supervisor מאמת שער+שומרים. הטסט-OFF-null עצמו לא-קטסטרופלי.
+- **טרם:** deploy (functions auto על push) → הבעלים מוחק את 6-הזבל בכפתור.

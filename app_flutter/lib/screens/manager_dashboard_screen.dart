@@ -83,7 +83,7 @@ import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:buildsmart/state/org_gates.dart'
     show elementVisible, featEnabled, orgTerm;
 import 'package:buildsmart/state/role_requests.dart'
-    show userApproverProvider;
+    show userApproverProvider, userDeleterProvider;
 import 'package:buildsmart/state/screen_sections.dart'
     show screenSectionsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -98,6 +98,7 @@ import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart' show confirmDestructive;
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
@@ -3457,12 +3458,15 @@ class _RoleBadge extends StatelessWidget {
 }
 
 /// #reg-approval — the manager's ACTION row on the customer-detail sheet, mounted
-/// ONLY for a real app-user (a directory-sourced row: `view.uid.isNotEmpty`). Two
-/// affordances, both through EXISTING server seams — NO client-side authorization:
+/// ONLY for a real app-user (a directory-sourced row: `view.uid.isNotEmpty`). Three
+/// affordances, all through EXISTING server seams — NO client-side authorization:
 ///   • ✓ אשר (a `pending` account) / ⏸️ השהה (an `active` one) →
 ///     [userApproverProvider]([uid], approve:), the SAME callable the top-of-tab
 ///     pending panel uses (mirrors `_PendingApprovalPanel._approve`);
 ///   • 🔑 שנה תפקיד → [showManagerRoleAssignSheet] focused on this uid/name.
+///   • 🗑️ מחק → [userDeleterProvider]([uid]), a full-system account+data delete
+///     behind a destructive confirm; the SERVER authorizes + owner-guards (the
+///     manager's OWN row is already out of the directory, so it never appears).
 /// The approve/suspend button is disabled (a spinner) while the call is in flight,
 /// so a double-tap can never kick a second server call. An order-derived / OFF row
 /// has uid=='' ⇒ this row is absent ⇒ the sheet is byte-identical off.
@@ -3493,6 +3497,34 @@ class _CustomerActionRowState extends ConsumerState<_CustomerActionRow> {
       }
     } on Object catch (_) {
       if (mounted) showToast(context, 'הפעולה נכשלה — נסה שוב');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// #reg-approval — irreversible full-system delete of this user (account + all
+  /// data) via [userDeleterProvider], behind a destructive confirm. The SERVER
+  /// authorizes + owner-guards; this mirrors [_setApproval]'s `_busy`/try pattern
+  /// (the shared `_busy` disables BOTH buttons during any in-flight call). The row
+  /// removes itself when the live directory stream drops the deleted uid.
+  Future<void> _delete() async {
+    final deleter = ref.read(userDeleterProvider);
+    if (deleter == null || _busy) return;
+    final ok = await confirmDestructive(
+      context,
+      title: 'מחיקת משתמש',
+      message:
+          'למחוק לצמיתות את ${widget.view.customer.name} מכל המערכות '
+          '(חשבון + כל הנתונים)? הפעולה בלתי-הפיכה.',
+      confirmLabel: 'מחק',
+    );
+    if (!ok || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await deleter(widget.view.uid);
+      if (mounted) showToast(context, 'המשתמש נמחק');
+    } on Object catch (_) {
+      if (mounted) showToast(context, 'המחיקה נכשלה — נסה שוב');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -3542,6 +3574,24 @@ class _CustomerActionRowState extends ConsumerState<_CustomerActionRow> {
             child: const Text('🔑 שנה תפקיד'),
           ),
         ),
+        // 🗑️ מחק — irreversible account+data delete, mounted ONLY for a real
+        // directory row (uid non-empty). Destructive red (dangerDark text /
+        // danger border, the 'הסר'-label pairing) and disabled while any call is
+        // in flight (`_busy`). The SERVER authorizes + owner-guards.
+        if (view.uid.isNotEmpty) ...[
+          const SizedBox(width: BsTokens.space3),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _busy ? null : _delete,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: BsTokens.dangerDark,
+                side: const BorderSide(color: BsTokens.danger),
+                padding: const EdgeInsets.symmetric(vertical: 11),
+              ),
+              child: const Text('🗑️ מחק'),
+            ),
+          ),
+        ],
       ],
     );
   }

@@ -194,7 +194,7 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
 //                                        ~1 doc, never the raw collections; R1-1/2/3)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export { deleteAccount } from "./deleteAccount";
+export { deleteAccount, deleteUser } from "./deleteAccount";
 export { advanceOrderStage, revertIllegalOrderStageWrite } from "./orders";
 export { onOrderCreatedEmail } from "./orderEmail";
 export { computeCredit } from "./credit";

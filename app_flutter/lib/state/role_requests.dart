@@ -172,6 +172,28 @@ final userApproverProvider = Provider<UserApprover?>((ref) {
   };
 });
 
+// ── account removal (manager-driven user deletion) ───────────────────────────
+
+/// Seam over the `deleteUser` callable (manager-driven account removal) — a
+/// function so tests inject a fake (the real impl needs FirebaseFunctions, which
+/// a Firebase-free test can't construct). Deletes the user identified by [uid].
+typedef UserDeleter = Future<void> Function(String uid);
+
+/// The user-deleter — null Firebase-free / demo (byte-identical when off, like
+/// every seam here), so the delete control is inert without the live backend.
+/// Region must match the function (kAuthFunctionsRegion = me-west1), exactly like
+/// [userApproverProvider] above. The SERVER enforces the manager/admin auth
+/// (callerRoles); this only forwards the uid.
+final userDeleterProvider = Provider<UserDeleter?>((ref) {
+  if (!useFirebaseBackend) return null;
+  final functions = FirebaseFunctions.instanceFor(region: kAuthFunctionsRegion);
+  return (String uid) async {
+    await functions.httpsCallable('deleteUser').call<dynamic>(
+      <String, dynamic>{'uid': uid},
+    );
+  };
+});
+
 /// Set true by the registration flow (`WelcomeScreen._finishAfterAuth`) the
 /// moment a NEW user finishes registering, so the shell opens the role-request
 /// sheet ONCE — "בקשת תפקיד במסך אחד אחרי הרשמה". The shell resets it after
