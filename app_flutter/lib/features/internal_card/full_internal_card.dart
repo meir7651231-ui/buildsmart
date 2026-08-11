@@ -50,6 +50,7 @@ const Color _cSecBorder = Color(0xFFE3E7EC);
 const Color _cBody = Color(0xFF48505A);
 const Color _cHotBg = Color(0xFFFFF2EA);
 const Color _cHotBorder = Color(0xFFFFD6BD);
+const Color _cGreen = Color(0xFF1F9D57); // D9 "אשר · סה״כ" confirm button
 
 /// THE full internal card. Give it a [product]; it renders every section the
 /// engine can populate for that product, and a swipe on the name cycles the
@@ -1121,33 +1122,41 @@ class _CardView extends ConsumerWidget {
     final selected = units.containsKey(unit) ? unit : units.keys.first;
     final mult = units[selected] ?? 1;
     final base = priceFor(p);
-    final total =
+    final priceStr =
         base == null ? '' : ' · ${formatCatalogPrice(base * mult * qty, s)}';
-    final line2 = '$qty × $selected$total';
+    // Screen #2 — once THIS product is in the line the button turns GREEN
+    // "✓ אשר · סה״כ <line-total>"; before, it's the orange "+ הוסף לסל".
+    final line = ref.watch(smartCartProvider);
+    final inLine = line.any((l) => l.productKey == 'lip:${p.sku}');
+    final lineTotal = line.fold<int>(0, (sum, l) => sum + l.total);
+    final line2 = inLine
+        ? 'סה״כ ${formatCatalogPrice(lineTotal, s)}'
+        : '$qty × $selected$priceStr';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // No visible unit chips — the unit is swipe-selected on the button
-        // itself (◀▶) and shown on it; the chips were redundant clutter.
-        // D6 — the gesture hint: swipe ◀▶ to change unit, ▲▼ to change quantity.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(13, 5, 13, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (units.length > 1) ...[
-                const Icon(Icons.swap_horiz, size: 12, color: _cDim),
+        // The swipe hint (◀▶ unit · ▲▼ qty) — only while still adding; once the
+        // product is in the line the button becomes "אשר".
+        if (!inLine)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(13, 5, 13, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (units.length > 1) ...[
+                  const Icon(Icons.swap_horiz, size: 12, color: _cDim),
+                  const SizedBox(width: 2),
+                  const Text('יחידה',
+                      style: TextStyle(fontSize: 10, color: _cDim)),
+                  const SizedBox(width: 10),
+                ],
+                const Icon(Icons.swap_vert, size: 12, color: _cDim),
                 const SizedBox(width: 2),
-                const Text('יחידה', style: TextStyle(fontSize: 10, color: _cDim)),
-                const SizedBox(width: 10),
+                const Text('כמות', style: TextStyle(fontSize: 10, color: _cDim)),
               ],
-              const Icon(Icons.swap_vert, size: 12, color: _cDim),
-              const SizedBox(width: 2),
-              const Text('כמות', style: TextStyle(fontSize: 10, color: _cDim)),
-            ],
+            ),
           ),
-        ),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           // Horizontal drag cycles the unit; vertical drag bumps the quantity.
@@ -1167,7 +1176,7 @@ class _CardView extends ConsumerWidget {
             margin: const EdgeInsets.fromLTRB(13, 6, 13, 13),
             child: Material(
               key: const Key('internalCardBuy'),
-              color: _cAccent,
+              color: inLine ? _cGreen : _cAccent,
               borderRadius: BorderRadius.circular(11),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
@@ -1177,14 +1186,15 @@ class _CardView extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Row(
+                      Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.add, size: 18, color: Colors.white),
-                          SizedBox(width: 3),
+                          Icon(inLine ? Icons.check : Icons.add,
+                              size: 18, color: Colors.white),
+                          const SizedBox(width: 3),
                           Text(
-                            'הוסף לסל',
-                            style: TextStyle(
+                            inLine ? 'אשר' : 'הוסף לסל',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
@@ -1194,8 +1204,10 @@ class _CardView extends ConsumerWidget {
                       ),
                       Text(
                         line2,
-                        style: const TextStyle(
-                          color: Color(0xFFFFE3D2),
+                        style: TextStyle(
+                          color: inLine
+                              ? const Color(0xFFDDF3E2)
+                              : const Color(0xFFFFE3D2),
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1339,31 +1351,22 @@ class _CardView extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final hot = (highlightLine ?? line.length - 1).clamp(0, line.length - 1);
-    final total = line.fold<int>(0, (sum, l) => sum + l.total);
     return Column(
       key: const Key('internalCardLineStrip'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        // A header so the circle(s) read as "your line", with the running total.
+        // No header — the total lives on the green "אשר" button (screen #2).
+        // A bare bold "+" (left, per "+ בשמאל") + the product circles.
         Padding(
-          padding: const EdgeInsets.fromLTRB(13, 8, 13, 2),
-          child: Text(
-            '🧵 הקו שלך · ${line.length} '
-            '${line.length == 1 ? 'פריט' : 'פריטים'} · '
-            '${formatCatalogPrice(total, s)}',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 12, fontWeight: FontWeight.w800, color: _cInk),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(13, 0, 13, 2),
+          padding: const EdgeInsets.fromLTRB(13, 6, 13, 2),
           child: Wrap(
             spacing: 10,
             runSpacing: 8,
             alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              for (var i = 0; i < line.length; i++)
+              // RTL: last-added circle is rightmost, "+" ends up leftmost.
+              for (var i = line.length - 1; i >= 0; i--)
                 GestureDetector(
                   key: Key('lineCircle_$i'),
                   behavior: HitTestBehavior.opaque,
@@ -1374,30 +1377,26 @@ class _CardView extends ConsumerWidget {
                     highlighted: i == hot,
                   ),
                 ),
-              // "+" — add ANOTHER (compatible) product to the line (screen #2
-              // "+ בשמאל" · screen #7 "+ פתוח").
+              // "+" — add ANOTHER (compatible) product: a bare bold orange "+",
+              // no ring (screen #2 "+ בשמאל · אייקון עבה").
               GestureDetector(
                 key: const Key('lineAddMore'),
                 behavior: HitTestBehavior.opaque,
                 onTap: () => _openAddMore(context, ref, p),
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _cHotBg,
-                    border: Border.all(color: _cAccent, width: 2),
+                child: const SizedBox(
+                  width: 38,
+                  height: 40,
+                  child: Center(
+                    child: Icon(Icons.add, color: _cAccent, size: 32),
                   ),
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.add, color: _cAccent, size: 24),
                 ),
               ),
             ],
           ),
         ),
         const Text(
-          'הקש עיגול לבחירה · הקש שוב להסרה · + להוספת מוצר',
-          style: TextStyle(fontSize: 10, color: _cDim),
+          'האחרון מודגש · הקש עיגול=בחירה · הקש מודגש=הסרה · +=הוספה',
+          style: TextStyle(fontSize: 9.5, color: _cDim),
         ),
         _lineActions(context, ref, p),
       ],
@@ -1411,8 +1410,8 @@ class _CardView extends ConsumerWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          width: 44,
-          height: 44,
+          width: 38,
+          height: 38,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: highlighted ? _cHotBg : _cImgBg,
@@ -1424,7 +1423,7 @@ class _CardView extends ConsumerWidget {
           alignment: Alignment.center,
           child: Text(
             emoji.trim().isEmpty ? '📦' : emoji,
-            style: const TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 18),
           ),
         ),
         if (qty > 1)
