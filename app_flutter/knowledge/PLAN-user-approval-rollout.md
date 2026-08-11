@@ -81,8 +81,9 @@ node scripts/seed/backfill_user_status.js --project buildsmart-b0b78            
 | 5 | `requirePermission` דורמנטי (0 call-sites) | `rbac.dart:217` | אכיפה ע"י checkout+rules ל-v1; להקשיח אח"כ |
 | 6 | באנר-מת (`PendingApprovalBanner` לא-mounted) | `home_shell.dart:771` (`_RoleStatusChip` הוא החי) | להשתמש בשבב; לעדכן QA/comms |
 
-## 5. צעד-הקוד היחיד שמומלץ לפני ה-flip
-להוסיף **טסט-אינטגרציה שמקבע את סדר-הכתיבה** ב-`_finishAfterAuth`: ש-`ensureUser` (born-pending) נכנס-לתור **לפני** ה-identity-mirror. היום זה נכון בקוד אך **בלתי-שמור** — עריכה עתידית שתהפוך את הסדר תקפיא כל משתמש-רשום, בשקט (permission-denied נבלע). זה הפער-בדיקה היחיד עם השפעה קטסטרופלית; שאר המנגנון מכוסה-predicate.
+## 5. צעד-הקוד היחיד שמומלץ לפני ה-flip — ✅ בוצע (שלב 0)
+נדרש **טסט שמקבע את סדר-הכתיבה** ב-`_finishAfterAuth`: ש-`ensureUser` (born-pending) נכנס-לתור **לפני** ה-identity-mirror. היה נכון בקוד אך בלתי-שמור — היפוך עתידי מקפיא כל משתמש-רשום בשקט (permission-denied נבלע). זה הפער-בדיקה היחיד עם השפעה קטסטרופלית; השאר מכוסה-predicate.
+**בוצע:** `test/user_system/welcome_enqueue_order_test.dart` — טסט-מבני שקורא את המקור ומאמת `.onRegisteredLogin(` לפני `writer.set(` (behavioral-test אי-אפשר: `kUserSystem` const-folds false תחת `flutter test`). **mutation-verified:** היפוך שני הבלוקים → הטסט נכשל (RED, שורת-ה-order); שחזור → GREEN.
 
 ## 6. החלטות פתוחות לבעלים
 1. **קצה משתמש-בלי-doc:** לגבב ל-active ב-login הראשון, או להשאיר pending (דורש אישור)?

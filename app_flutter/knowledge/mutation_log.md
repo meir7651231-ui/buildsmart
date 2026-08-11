@@ -2059,3 +2059,10 @@
 - **תקלות מוזרקות:** (1) החזרת register() לפני createUser → אין טסט-flag-ON בסביבה (device-only), אומת ידנית שהסדר החדש מקביל ל-login_sheet._emailCreate. (2) ביטול תיקון-ההערה → הערה-שגויה חוזרת (doc-only).
 - **בטיחות:** welcome_screen שינוי-סדר בענף כבוי (0 השפעה חיה); auth_state שינוי-הערה בלבד. אין שינוי-התנהגות חי.
 - **אימות:** analyze 0-errors (baseline 56 warn/3631 info לא-חדשים, לא בקבצים שנגעתי); test/welcome_auth_gate + auth/email_password_door + auth_state + login_sheet + onboarding = 81/81 ירוק.
+
+## #user-approval-rollout שלב-0 — guard-test לסדר-הכתיבה הטעון (2026-08-11)
+- **הנכס:** שלב 0 בתוכנית-הטמעת-האישור. הפער היחיד עם השפעה קטסטרופלית: סדר-הכתיבה ב-`welcome_screen._finishAfterAuth` (ensureUser לפני mirror) נכון בקוד אך בלתי-שמור בטסט.
+- **הפעולה:** `test/user_system/welcome_enqueue_order_test.dart` — טסט-מבני (קורא מקור, מאמת `.onRegisteredLogin(` < `writer.set(`). behavioral-test אי-אפשר: `kUserSystem = bool.fromEnvironment` const-folds false תחת flutter test → כל בלוק ה-`if (kUserSystem)` מת בבניית-הטסט. אין שינוי קוד-פרודקשן (welcome_screen שוחזר byte-identical אחרי ה-mutation).
+- **mutation-verify (בוצע בפועל, לא רק בטענה):** היפוך שני הבלוקים ב-welcome_screen (mirror לפני ensureUser) → `flutter test` נכשל ב-RED בשורת-ה-order-assertion (line 66); `git checkout` שחזור → GREEN. הטסט בעל-שיניים.
+- **אימות-פריסה:** 3 ה-Functions מיוצאים ב-`functions/src/index.ts` (:210-217) ו-`.github/workflows/firebase-deploy.yml:175` פורס `--only functions`. אימות-runtime-חי דורש Firebase console (ידני).
+- **טרם:** flip הדגל, backfill, dark-launch — ממתינים ל-3 החלטות §6 ולאישור.
