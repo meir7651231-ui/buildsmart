@@ -26,10 +26,9 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
-import 'package:buildsmart/features/fittings/engine/grid_cell.dart'
-    show GridCell;
 import 'package:buildsmart/features/fittings/engine/models.dart' show RunElement;
-import 'package:buildsmart/features/fittings/ui/line_3d.dart' show Line3DView;
+import 'package:buildsmart/features/fittings/render/product_line_3d.dart'
+    show ProductLine3D;
 import 'package:buildsmart/features/fittings/ui/sudoku_grid.dart'
     show SudokuGrid, runElementFor;
 import 'package:buildsmart/logic/install_kit.dart';
@@ -1393,20 +1392,17 @@ class _CardView extends ConsumerWidget {
   }
 }
 
-/// A small seeded 3D line for the gallery's תלת-ממד page: the product itself +
-/// its first two real mates (one branching into depth). Empty ⇒ untyped product.
-List<GridCell> _galleryThreeDCells(LipskeyCatalogProduct p) {
+/// A small seeded 3D route for the gallery's תלת-ממד page: the product itself +
+/// its first two real mates. Fed verbatim to the real welded-pipe renderer
+/// (`ProductLine3D`). Empty ⇒ untyped product ⇒ the caller shows the emoji.
+List<RunElement> _galleryThreeDRoute(LipskeyCatalogProduct p) {
   final seed = runElementFor(p);
   if (seed == null) return const [];
-  final mates = [
-    for (final m in compatibleProductsFor(p).take(2)) runElementFor(m),
-  ].whereType<RunElement>().toList();
-  final cells = <GridCell>[GridCell(0, 0, 0, seed)];
-  const dirs = [(1, 0, 0), (0, 0, 1)];
-  for (var i = 0; i < mates.length && i < dirs.length; i++) {
-    cells.add(GridCell(dirs[i].$1, dirs[i].$2, dirs[i].$3, mates[i]));
-  }
-  return cells;
+  return [
+    seed,
+    for (final m in compatibleProductsFor(p).take(2))
+      if (runElementFor(m) case final RunElement e) e,
+  ];
 }
 
 /// D3 — the tap-image gallery: a full-screen dark pager over the product
@@ -1491,9 +1487,9 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                 itemBuilder: (context, i) {
                   // The extra last page is the seeded 3D view (תלת-ממד).
                   if (i >= widget.images.length) {
-                    final cells = _galleryThreeDCells(widget.product);
+                    final route = _galleryThreeDRoute(widget.product);
                     return Center(
-                      child: cells.isEmpty
+                      child: route.isEmpty
                           ? Text(widget.product.typeEmoji,
                               style: const TextStyle(fontSize: 96))
                           : Container(
@@ -1503,7 +1499,7 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(18),
                               ),
-                              child: Line3DView(cells: cells, height: 320),
+                              child: ProductLine3D(route: route),
                             ),
                     );
                   }

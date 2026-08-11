@@ -1,7 +1,7 @@
 # WIRING CONTRACT — app_flutter
 
-## #fittings-render-productline3d — 🧊 drop-in סטטי של ה-3D-האמיתי לכרטיס-הפנימי (מגודר · לא-מחווט) — 2026-08-12
-`lib/features/fittings/render/product_line_3d.dart` (מגודר `kFittingEngine3d` · טהור-widget) — `ProductLine3D(route)` = render **סטטי** (בלי מחוות · לא מתנגש עם PageView/זום של הגלריה) של רצף-אביזרים דרך ה-`RoutePainter` שלי: הצנרת המרותכת האמיתית (PP-R ירוק · צינור אפור · פליז · ברק ספקולרי), מסגור-אוטומטי מ-bbox, זווית-ברירת-מחדל. **נועד להחליף שורה-אחת** בעמוד-ה-3D של הכרטיס-הפנימי: `Line3DView(cells:…)` (קוביות-איזומטריות) → `ProductLine3D(route:…)`. **🔒 keystone:** אף מסך עדיין לא מייבא אותו (מאומת NONE) ⇒ tree-shaken ⇒ byte-identical — **מוכן-לחיווט, לא-מחווט** (החלטת-הטמעה = בעלים/ארכיטקט). smoke (`product_line_3d_test`): CustomPaint לרצף · אפס-GestureDetector · רצף-ריק→תיבה-בטוחה. אינטראקציה-מלאה = `FittingPreview3d`.
+## #fittings-render-productline3d — 🧊 ה-3D-האמיתי מחווט לעמוד-הגלריה של הכרטיס-הפנימי (מגודר) — 2026-08-12
+`lib/features/fittings/render/product_line_3d.dart` (מגודר `kFittingEngine3d` · טהור-widget) — `ProductLine3D(route)` = render **סטטי** (בלי מחוות · לא מתנגש עם PageView/זום של הגלריה) של רצף-אביזרים דרך ה-`RoutePainter` שלי: הצנרת המרותכת האמיתית (PP-R ירוק · צינור אפור · פליז · ברק ספקולרי), מסגור-אוטומטי מ-bbox, זווית-ברירת-מחדל. **✅ מחווט** — עמוד-ה-3D של הכרטיס-הפנימי (`full_internal_card.dart`, `_InternalCardGallery`) החליף `Line3DView(cells:…)` (קוביות-איזומטריות) → `ProductLine3D(route:…)`; הרצף נבנה ב-`_galleryThreeDRoute` (המוצר + עד 2 אחים-תואמים דרך `runElementFor`/`compatibleProductsFor`). **🔒 keystone:** נטען רק דרך `features/internal_card/` המגודר (`INTERNAL_CARD`) ⇒ tree-shaken בבנייה הדמו ⇒ byte-identical. smoke (`product_line_3d_test`): CustomPaint לרצף · אפס-GestureDetector · רצף-ריק→תיבה-בטוחה. אינטראקציה-מלאה = `FittingPreview3d`.
 
 
 ## #catalog-config-details-fix — 🔗 fix: החיצוני→פנימי נפתח (באג 94%-no-op) + כפתור "📄 פרטים" — 2026-08-06
