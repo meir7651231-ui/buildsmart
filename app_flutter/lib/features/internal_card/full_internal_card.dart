@@ -26,8 +26,12 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/features/fittings/engine/grid_cell.dart'
+    show GridCell;
+import 'package:buildsmart/features/fittings/engine/models.dart' show RunElement;
+import 'package:buildsmart/features/fittings/ui/line_3d.dart' show Line3DView;
 import 'package:buildsmart/features/fittings/ui/sudoku_grid.dart'
-    show SudokuGrid;
+    show SudokuGrid, runElementFor;
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart'
@@ -1389,8 +1393,25 @@ class _CardView extends ConsumerWidget {
   }
 }
 
-/// D3 — the tap-image gallery: a full-screen dark pager over the product image(s)
-/// then the spec diagram(s), each pinch-zoomable, with a ✕ and page dots. A
+/// A small seeded 3D line for the gallery's תלת-ממד page: the product itself +
+/// its first two real mates (one branching into depth). Empty ⇒ untyped product.
+List<GridCell> _galleryThreeDCells(LipskeyCatalogProduct p) {
+  final seed = runElementFor(p);
+  if (seed == null) return const [];
+  final mates = [
+    for (final m in compatibleProductsFor(p).take(2)) runElementFor(m),
+  ].whereType<RunElement>().toList();
+  final cells = <GridCell>[GridCell(0, 0, 0, seed)];
+  const dirs = [(1, 0, 0), (0, 0, 1)];
+  for (var i = 0; i < mates.length && i < dirs.length; i++) {
+    cells.add(GridCell(dirs[i].$1, dirs[i].$2, dirs[i].$3, mates[i]));
+  }
+  return cells;
+}
+
+/// D3 — the tap-image gallery: a full-screen dark pager over the product
+/// image(s), the spec diagram(s), and a seeded 3D page — each pinch/slider-
+/// zoomable, with a ✕, page dots, a zoom slider, and מפרט/תלת-ממד side jumps. A
 /// missing asset degrades to the big product emoji (never a broken box).
 class _InternalCardGallery extends StatefulWidget {
   const _InternalCardGallery({required this.product, required this.images});
@@ -1415,6 +1436,40 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
     super.dispose();
   }
 
+  void _jumpTo(int page) => _ctrl.animateToPage(
+        page,
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOut,
+      );
+
+  /// A side-jump chip (מפרט / תלת-ממד) on the gallery edge.
+  Widget _galleryThumb(String emoji, String label, VoidCallback onTap) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: 54,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: Colors.white24,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 22)),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -1427,28 +1482,69 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
               PageView.builder(
                 key: const Key('internalCardGallery'),
                 controller: _ctrl,
-                itemCount: widget.images.length,
+                itemCount: widget.images.length + 1,
                 onPageChanged: (i) => setState(() {
                   _page = i;
                   _scale = 1;
                   _zoom.value = Matrix4.identity();
                 }),
-                itemBuilder: (context, i) => InteractiveViewer(
-                  transformationController: i == _page ? _zoom : null,
-                  minScale: 1,
-                  maxScale: 4,
-                  onInteractionEnd: (_) => setState(
-                      () => _scale = _zoom.value.getMaxScaleOnAxis().clamp(1, 4)),
-                  child: Center(
-                    child: Image(
-                      image: resolveProductImage(widget.images[i]),
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Text(
-                        widget.product.typeEmoji,
-                        style: const TextStyle(fontSize: 96),
+                itemBuilder: (context, i) {
+                  // The extra last page is the seeded 3D view (תלת-ממד).
+                  if (i >= widget.images.length) {
+                    final cells = _galleryThreeDCells(widget.product);
+                    return Center(
+                      child: cells.isEmpty
+                          ? Text(widget.product.typeEmoji,
+                              style: const TextStyle(fontSize: 96))
+                          : Container(
+                              margin: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Line3DView(cells: cells, height: 320),
+                            ),
+                    );
+                  }
+                  return InteractiveViewer(
+                    transformationController: i == _page ? _zoom : null,
+                    minScale: 1,
+                    maxScale: 4,
+                    onInteractionEnd: (_) => setState(() =>
+                        _scale = _zoom.value.getMaxScaleOnAxis().clamp(1, 4)),
+                    child: Center(
+                      child: Image(
+                        image: resolveProductImage(widget.images[i]),
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Text(
+                          widget.product.typeEmoji,
+                          style: const TextStyle(fontSize: 96),
+                        ),
                       ),
                     ),
+                  );
+                },
+              ),
+              // Side jumps (screen #7): מפרט (spec diagram, right) · תלת-ממד
+              // (the 3D page, left).
+              if (widget.product.specImageAssets.isNotEmpty)
+                Positioned(
+                  right: 8,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: _galleryThumb('📐', 'מפרט',
+                        () => _jumpTo(widget.product.imageAssets.length)),
                   ),
+                ),
+              Positioned(
+                left: 8,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: _galleryThumb(
+                      '🧊', 'תלת-ממד', () => _jumpTo(widget.images.length)),
                 ),
               ),
               Positioned(
@@ -1490,27 +1586,26 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                   ],
                 ),
               ),
-              if (widget.images.length > 1)
-                Positioned(
-                  bottom: 58,
-                  left: 0,
-                  right: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (var i = 0; i < widget.images.length; i++)
-                        Container(
-                          width: 7,
-                          height: 7,
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: i == _page ? _cAccent : Colors.white38,
-                          ),
+              Positioned(
+                bottom: 58,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var i = 0; i < widget.images.length + 1; i++)
+                      Container(
+                        width: 7,
+                        height: 7,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: i == _page ? _cAccent : Colors.white38,
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
