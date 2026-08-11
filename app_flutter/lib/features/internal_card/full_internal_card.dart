@@ -59,6 +59,7 @@ class FullInternalCard extends ConsumerStatefulWidget {
   const FullInternalCard({
     required this.product,
     this.initialRailSide = 0,
+    this.initialSpecOpen = false,
     this.fillHeight = false,
     this.onBack,
     super.key,
@@ -72,6 +73,9 @@ class FullInternalCard extends ConsumerStatefulWidget {
 
   /// D4 — pre-open a side rail on first build (previews/tests): -1 left, +1 right.
   final int initialRailSide;
+
+  /// D15 — pre-open the 📋 spec panel on first build (previews/tests).
+  final bool initialSpecOpen;
 
   /// Full-screen mode — the card fills the whole screen (the hero image expands
   /// to take the slack, the buy area pins near the bottom) instead of shrink-
@@ -145,7 +149,7 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
   /// D15 — the spec is HIDDEN behind the 📋 clipboard; tapping it swaps the big
   /// product image for the spec panel in place (the card is image-first, not a
   /// text dump).
-  bool _specOpen = false;
+  late bool _specOpen = widget.initialSpecOpen;
 
   void _toggleSpec() => setState(() => _specOpen = !_specOpen);
 
@@ -271,14 +275,9 @@ class _CardView extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _topBar(context, p),
-            // Full-screen: the hero fills the slack (spec panel scrolls inside);
-            // embedded: it shrink-wraps.
-            if (fillHeight)
-              Expanded(
-                child: specOpen ? SingleChildScrollView(child: hero) : hero,
-              )
-            else
-              hero,
+            // Full-screen: the hero (image / spec panel / rail) fills the slack;
+            // each scrolls internally when it needs to. Embedded: shrink-wraps.
+            if (fillHeight) Expanded(child: hero) else hero,
             _footer(p),
             _buyArea(context, ref, p, settings),
             // D6–D9/D14 — the line strip (circles + קו/בדיקה/השלם) appears ONLY
@@ -635,7 +634,8 @@ class _CardView extends ConsumerWidget {
     ];
     return Container(
       key: const Key('internalCardSpecPanel'),
-      height: 236,
+      // Full-screen: fill the slack (content scrolls inside). Embedded: 236.
+      height: fillHeight ? null : 236,
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 4),
       decoration: BoxDecoration(
         color: _cImgBg,

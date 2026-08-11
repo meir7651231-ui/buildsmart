@@ -183,6 +183,27 @@ void main() {
     expect(find.textContaining('2 ×'), findsOneWidget);
   });
 
+  testWidgets('spec panel fills the screen in full-screen mode (no white gap)',
+      (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FullInternalCard(
+              product: hero,
+              fillHeight: true,
+              initialSpecOpen: true,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('internalCardSpecPanel')), findsOneWidget);
+  });
+
   testWidgets('line buttons are hidden until a product is added (D6/D14)',
       (tester) async {
     final hero = catalogProductForSku(FullInternalCard.heroSku)!;
