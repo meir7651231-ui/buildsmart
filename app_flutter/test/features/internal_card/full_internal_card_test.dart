@@ -106,6 +106,28 @@ void main() {
     expect(find.text(expected.nameHe), findsOneWidget);
   });
 
+  testWidgets('tapping a size dot jumps straight to that variant (D5)',
+      (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    final fam = variantSiblingsOf(hero);
+    expect(fam.length, greaterThan(1));
+    final cur = fam.indexWhere((s) => s.sku == hero.sku);
+    final target = cur == 0 ? 1 : 0; // a different variant's dot
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(Key('variantDot_$target')));
+    await tester.pump();
+    expect(find.text(fam[target].nameHe), findsOneWidget);
+  });
+
   testWidgets('add-to-cart adds a line for the current variant (D6)',
       (tester) async {
     final hero = catalogProductForSku(FullInternalCard.heroSku)!;

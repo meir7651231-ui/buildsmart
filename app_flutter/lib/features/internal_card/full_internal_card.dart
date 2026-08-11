@@ -97,18 +97,28 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
     }
   }
 
-  /// D5 — step the variant family by [dir] (clamped to the ends). The whole card
-  /// re-resolves against the new SKU (name · image · spec · variants).
+  /// D5 — step the variant family by [dir], WRAPPING around the ends so every
+  /// swipe changes the size (clamping left one swipe direction inert at the
+  /// ends, which read as "broken"). The card re-resolves against the new SKU.
   void _stepVariant(int dir) {
     final fam = variantSiblingsOf(_current);
     if (fam.length < 2) {
       return;
     }
     final i = fam.indexWhere((s) => s.sku == _current.sku);
-    final next = (i + dir).clamp(0, fam.length - 1);
+    final next = (i + dir + fam.length) % fam.length;
     if (next != i) {
       setState(() => _current = fam[next]);
     }
+  }
+
+  /// D5 — jump straight to variant [index] (tapping a size dot).
+  void _pickVariant(int index) {
+    final fam = variantSiblingsOf(_current);
+    if (index < 0 || index >= fam.length || fam[index].sku == _current.sku) {
+      return;
+    }
+    setState(() => _current = fam[index]);
   }
 
   /// D6 — the chosen sale unit (בודד / ארגז / משטח).
@@ -145,6 +155,7 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
         fillHeight: widget.fillHeight,
         onBack: widget.onBack,
         onStepVariant: _stepVariant,
+        onPickVariant: _pickVariant,
         onPickUnit: _pickUnit,
         onToggleSpec: _toggleSpec,
         onPickSpecTab: _pickSpecTab,
@@ -164,6 +175,7 @@ class _CardView extends ConsumerWidget {
     this.fillHeight = false,
     this.onBack,
     this.onStepVariant,
+    this.onPickVariant,
     this.onPickUnit,
     this.onToggleSpec,
     this.onPickSpecTab,
@@ -189,6 +201,9 @@ class _CardView extends ConsumerWidget {
 
   /// D5 — the name-swipe steps the variant family by ±1 (null ⇒ inert).
   final void Function(int dir)? onStepVariant;
+
+  /// D5 — jump to a specific variant by tapping its size dot (null ⇒ inert).
+  final void Function(int index)? onPickVariant;
 
   /// D6 — pick a sale unit (null ⇒ inert).
   final void Function(String unit)? onPickUnit;
@@ -489,25 +504,27 @@ class _CardView extends ConsumerWidget {
       if (dn.isNotEmpty) '$dn מ״מ',
       if (p.brand.isNotEmpty) p.brand,
     ].join(' · ');
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 2, 12, 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // D5 — swiping the name steps the variant family (size).
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onHorizontalDragEnd: onStepVariant == null
-                ? null
-                : (d) {
-                    final v = d.primaryVelocity ?? 0;
-                    if (v < 0) {
-                      onStepVariant!(1);
-                    } else if (v > 0) {
-                      onStepVariant!(-1);
-                    }
-                  },
-            child: Text(
+    final hasVariants = variantSiblingsOf(p).length >= 2;
+    // D5 — a horizontal drag ANYWHERE on the name block steps the size (bigger
+    // target than the name text alone); tapping a dot jumps to that size.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragEnd: onStepVariant == null
+          ? null
+          : (d) {
+              final v = d.primaryVelocity ?? 0;
+              if (v < 0) {
+                onStepVariant!(1);
+              } else if (v > 0) {
+                onStepVariant!(-1);
+              }
+            },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
               p.nameHe,
               key: const Key('internalCardName'),
               textAlign: TextAlign.center,
@@ -517,18 +534,32 @@ class _CardView extends ConsumerWidget {
                 color: _cInk,
               ),
             ),
-          ),
-          if (sub.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              sub,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12.5, color: _cDim),
-            ),
+            if (sub.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                sub,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12.5, color: _cDim),
+              ),
+            ],
+            const SizedBox(height: 6),
+            _variantDots(p),
+            if (hasVariants) ...[
+              const SizedBox(height: 3),
+              const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.swap_horiz, size: 13, color: _cDim),
+                  SizedBox(width: 3),
+                  Text(
+                    'החלק או הקש נקודה להחלפת מידה',
+                    style: TextStyle(fontSize: 10.5, color: _cDim),
+                  ),
+                ],
+              ),
+            ],
           ],
-          const SizedBox(height: 6),
-          _variantDots(p),
-        ],
+        ),
       ),
     );
   }
@@ -657,23 +688,29 @@ class _CardView extends ConsumerWidget {
       return const SizedBox(height: 2);
     }
     final sel = fam.indexWhere((s) => s.sku == p.sku);
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var i = 0; i < fam.length; i++)
-            Container(
-              width: 6,
-              height: 6,
-              margin: const EdgeInsets.only(left: 4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: i == sel ? _cAccent : _cLine,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < fam.length; i++)
+          GestureDetector(
+            key: Key('variantDot_$i'),
+            behavior: HitTestBehavior.opaque,
+            onTap: onPickVariant == null ? null : () => onPickVariant!(i),
+            child: Padding(
+              // Generous hit area — the dot itself is tiny.
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: i == sel ? 18 : 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: i == sel ? _cAccent : _cLine,
+                ),
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 
