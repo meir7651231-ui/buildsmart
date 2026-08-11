@@ -1238,6 +1238,91 @@ class _CardView extends ConsumerWidget {
     showToast(context, qty > 1 ? 'נוספו $qty × $unitKey לסל' : 'נוסף לסל');
   }
 
+  /// D8/screen #2 — "+" in the line strip: a sheet of the product's compatible
+  /// mates; tapping one adds it to the line (cart), so a multi-product line is
+  /// built without leaving the card. No mates ⇒ a toast, no sheet.
+  void _openAddMore(
+    BuildContext context,
+    WidgetRef ref,
+    LipskeyCatalogProduct p,
+  ) {
+    final mates = compatibleProductsFor(p);
+    if (mates.isEmpty) {
+      showToast(context, 'אין תואמים להוספה');
+      return;
+    }
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: _cCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 14, 16, 6),
+                child: Text(
+                  '➕ הוסף לקו · מה שמתחבר',
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: _cInk),
+                ),
+              ),
+              Flexible(
+                child: ListView.separated(
+                  key: const Key('addMoreSheet'),
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(bottom: 8),
+                  itemCount: mates.length,
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, color: _cLine),
+                  itemBuilder: (c, i) {
+                    final m = mates[i];
+                    final price = priceFor(m);
+                    return ListTile(
+                      leading: Text(_heroEmoji(m),
+                          style: const TextStyle(fontSize: 26)),
+                      title: Text(m.nameHe,
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      subtitle: Text(
+                        [m.brand, if (price != null) '$price₪']
+                            .where((e) => e.isNotEmpty)
+                            .join(' · '),
+                        style: const TextStyle(fontSize: 12, color: _cDim),
+                      ),
+                      trailing: const Icon(Icons.add_circle, color: _cAccent),
+                      onTap: () {
+                        ref.read(smartCartProvider.notifier).add(
+                              SmartCartLine(
+                                productKey: 'lip:${m.sku}',
+                                productName: m.nameHe,
+                                productEmoji: _heroEmoji(m),
+                                brandName: m.brand,
+                                brandPrice: price ?? 0,
+                                productQty: 1,
+                                accessories: const [],
+                              ),
+                            );
+                        Navigator.of(ctx).pop();
+                        showToast(context, 'נוסף לקו: ${m.nameHe}');
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ── D6–D9 · line strip — circles + the smart buttons, only after a product ────
   /// The "pulse" area under the buy button: each added product is a circle (the
   /// last one highlighted), and the קו/בדיקה/השלם buttons appear ONLY once the
@@ -1289,11 +1374,29 @@ class _CardView extends ConsumerWidget {
                     highlighted: i == hot,
                   ),
                 ),
+              // "+" — add ANOTHER (compatible) product to the line (screen #2
+              // "+ בשמאל" · screen #7 "+ פתוח").
+              GestureDetector(
+                key: const Key('lineAddMore'),
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _openAddMore(context, ref, p),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _cHotBg,
+                    border: Border.all(color: _cAccent, width: 2),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.add, color: _cAccent, size: 24),
+                ),
+              ),
             ],
           ),
         ),
         const Text(
-          'הקש עיגול לבחירה · הקש שוב להסרה',
+          'הקש עיגול לבחירה · הקש שוב להסרה · + להוספת מוצר',
           style: TextStyle(fontSize: 10, color: _cDim),
         ),
         _lineActions(context, ref, p),
