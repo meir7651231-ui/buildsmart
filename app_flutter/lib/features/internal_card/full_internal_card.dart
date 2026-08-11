@@ -294,7 +294,9 @@ class _CardView extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 11, 12, 6),
+        // Full-screen: extra top inset so the SKU clears the always-on
+        // "🟢 מחובר לשרת" connection pill that overlays the top of every screen.
+        padding: EdgeInsets.fromLTRB(12, fillHeight ? 34 : 11, 12, 6),
         child: Row(
           children: [
             GestureDetector(
@@ -1269,16 +1271,27 @@ class _CardView extends ConsumerWidget {
       key: const Key('internalCardLineStrip'),
       mainAxisSize: MainAxisSize.min,
       children: [
+        // A header so the circle(s) read as "your line", not a floating dot.
         Padding(
-          padding: const EdgeInsets.fromLTRB(13, 10, 13, 2),
+          padding: const EdgeInsets.fromLTRB(13, 8, 13, 2),
+          child: Text(
+            '🧵 הקו שלך · ${line.length} ${line.length == 1 ? 'פריט' : 'פריטים'}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                fontSize: 12, fontWeight: FontWeight.w800, color: _cInk),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(13, 0, 13, 2),
           child: Wrap(
-            spacing: 8,
+            spacing: 10,
             runSpacing: 8,
             alignment: WrapAlignment.center,
             children: [
               for (var i = 0; i < line.length; i++)
                 _lineCircle(
                   line[i].productEmoji,
+                  line[i].productQty,
                   highlighted: i == line.length - 1,
                 ),
             ],
@@ -1289,22 +1302,51 @@ class _CardView extends ConsumerWidget {
     );
   }
 
-  /// One product in the line — a circle with its emoji; the last-added is
-  /// highlighted (D8 · "היחיד = המוצר האחרון").
-  Widget _lineCircle(String emoji, {required bool highlighted}) {
-    return Container(
-      width: 42,
-      height: 42,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: highlighted ? _cHotBg : _cImgBg,
-        border: Border.all(
-          color: highlighted ? _cAccent : _cLine,
-          width: highlighted ? 2 : 1,
+  /// One product in the line — a circle with its emoji + a ×qty badge; the
+  /// last-added is highlighted (D8 · "היחיד = המוצר האחרון").
+  Widget _lineCircle(String emoji, int qty, {required bool highlighted}) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: highlighted ? _cHotBg : _cImgBg,
+            border: Border.all(
+              color: highlighted ? _cAccent : _cLine,
+              width: highlighted ? 2 : 1,
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            emoji.trim().isEmpty ? '📦' : emoji,
+            style: const TextStyle(fontSize: 20),
+          ),
         ),
-      ),
-      alignment: Alignment.center,
-      child: Text(emoji, style: const TextStyle(fontSize: 20)),
+        if (qty > 1)
+          Positioned(
+            top: -4,
+            right: -4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: _cAccent,
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
+              child: Text(
+                '×$qty',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
