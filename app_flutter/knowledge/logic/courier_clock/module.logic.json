@@ -1,0 +1,66 @@
+{
+  "module": "courier_clock",
+  "source": "/home/user/buildsmart/app_flutter/lib/state/courier_clock.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "stampCourierClock",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String orderId, {bool pickedUp = false, bool delivered = false}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kCourierClockKey"
+          },
+          {
+            "kind": "global",
+            "name": "from"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !pickedUp && !delivered → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "Map",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "jsonEncode",
+        "now",
+        "setString",
+        "toIso8601String",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(String orderId, {bool pickedUp = false, bool delivered = false})",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !pickedUp && !delivered → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}
