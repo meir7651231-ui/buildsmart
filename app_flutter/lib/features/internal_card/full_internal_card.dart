@@ -26,6 +26,8 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/features/fittings/ui/sudoku_grid.dart'
+    show SudokuGrid;
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart'
@@ -1247,19 +1249,11 @@ class _CardView extends ConsumerWidget {
     showToast(context, qty > 1 ? 'נוספו $qty × $unitKey לסל' : 'נוסף לסל');
   }
 
-  /// D8/screen #2 — "+" in the line strip: a sheet of the product's compatible
-  /// mates; tapping one adds it to the line (cart), so a multi-product line is
-  /// built without leaving the card. No mates ⇒ a toast, no sheet.
-  void _openAddMore(
-    BuildContext context,
-    WidgetRef ref,
-    LipskeyCatalogProduct p,
-  ) {
-    final mates = compatibleProductsFor(p);
-    if (mates.isEmpty) {
-      showToast(context, 'אין תואמים להוספה');
-      return;
-    }
+  /// "+" in the line strip → the line-builder grid (D11/D13) SEEDED from this
+  /// product: the palette + "only what mates the neighbour" suggestions +
+  /// קו/בדיקה/השלם ("+ פתוח · בחר מוצרים לקו", screen #7 · reconnects the grid
+  /// entry the card lost when its קו/בדיקה/השלם row was removed).
+  void _openLineGrid(BuildContext context, LipskeyCatalogProduct p) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -1267,67 +1261,14 @@ class _CardView extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 14, 16, 6),
-                child: Text(
-                  '➕ הוסף לקו · מה שמתחבר',
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: _cInk),
-                ),
-              ),
-              Flexible(
-                child: ListView.separated(
-                  key: const Key('addMoreSheet'),
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.only(bottom: 8),
-                  itemCount: mates.length,
-                  separatorBuilder: (_, __) =>
-                      const Divider(height: 1, color: _cLine),
-                  itemBuilder: (c, i) {
-                    final m = mates[i];
-                    final price = priceFor(m);
-                    return ListTile(
-                      leading: Text(_heroEmoji(m),
-                          style: const TextStyle(fontSize: 26)),
-                      title: Text(m.nameHe,
-                          maxLines: 1, overflow: TextOverflow.ellipsis),
-                      subtitle: Text(
-                        [m.brand, if (price != null) '$price₪']
-                            .where((e) => e.isNotEmpty)
-                            .join(' · '),
-                        style: const TextStyle(fontSize: 12, color: _cDim),
-                      ),
-                      trailing: const Icon(Icons.add_circle, color: _cAccent),
-                      onTap: () {
-                        ref.read(smartCartProvider.notifier).add(
-                              SmartCartLine(
-                                productKey: 'lip:${m.sku}',
-                                productName: m.nameHe,
-                                productEmoji: _heroEmoji(m),
-                                brandName: m.brand,
-                                brandPrice: price ?? 0,
-                                productQty: 1,
-                                accessories: const [],
-                              ),
-                            );
-                        Navigator.of(ctx).pop();
-                        showToast(context, 'נוסף לקו: ${m.nameHe}');
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          14,
+          16,
+          14,
+          16 + MediaQuery.of(ctx).viewInsets.bottom,
         ),
+        child: SingleChildScrollView(child: SudokuGrid(seedProduct: p)),
       ),
     );
   }
@@ -1374,12 +1315,12 @@ class _CardView extends ConsumerWidget {
                     highlighted: i == hot,
                   ),
                 ),
-              // "+" — add ANOTHER (compatible) product: a bare bold orange "+",
-              // no ring (screen #2 "+ בשמאל · אייקון עבה").
+              // "+" — open the line-builder (grid) seeded from this product:
+              // "בחר מוצרים לקו (מרובה)" + קו/בדיקה/השלם (screen #7 "+ פתוח").
               GestureDetector(
                 key: const Key('lineAddMore'),
                 behavior: HitTestBehavior.opaque,
-                onTap: () => _openAddMore(context, ref, p),
+                onTap: () => _openLineGrid(context, p),
                 child: const SizedBox(
                   width: 38,
                   height: 40,
@@ -1463,11 +1404,14 @@ class _InternalCardGallery extends StatefulWidget {
 
 class _InternalCardGalleryState extends State<_InternalCardGallery> {
   final PageController _ctrl = PageController();
+  final TransformationController _zoom = TransformationController();
   int _page = 0;
+  double _scale = 1;
 
   @override
   void dispose() {
     _ctrl.dispose();
+    _zoom.dispose();
     super.dispose();
   }
 
@@ -1484,9 +1428,17 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                 key: const Key('internalCardGallery'),
                 controller: _ctrl,
                 itemCount: widget.images.length,
-                onPageChanged: (i) => setState(() => _page = i),
+                onPageChanged: (i) => setState(() {
+                  _page = i;
+                  _scale = 1;
+                  _zoom.value = Matrix4.identity();
+                }),
                 itemBuilder: (context, i) => InteractiveViewer(
+                  transformationController: i == _page ? _zoom : null,
+                  minScale: 1,
                   maxScale: 4,
+                  onInteractionEnd: (_) => setState(
+                      () => _scale = _zoom.value.getMaxScaleOnAxis().clamp(1, 4)),
                   child: Center(
                     child: Image(
                       image: resolveProductImage(widget.images[i]),
@@ -1512,9 +1464,35 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                   ),
                 ),
               ),
+              // Zoom slider (screen #7 · gallery mode): − … slider … 🔍.
+              Positioned(
+                bottom: 18,
+                left: 22,
+                right: 22,
+                child: Row(
+                  children: [
+                    const Icon(Icons.remove, color: Colors.white70, size: 20),
+                    Expanded(
+                      child: Slider(
+                        key: const Key('galleryZoom'),
+                        value: _scale,
+                        min: 1,
+                        max: 4,
+                        activeColor: _cAccent,
+                        onChanged: (v) => setState(() {
+                          _scale = v;
+                          _zoom.value = Matrix4.identity()
+                            ..scaleByDouble(v, v, v, 1);
+                        }),
+                      ),
+                    ),
+                    const Icon(Icons.zoom_in, color: Colors.white70, size: 22),
+                  ],
+                ),
+              ),
               if (widget.images.length > 1)
                 Positioned(
-                  bottom: 16,
+                  bottom: 58,
                   left: 0,
                   right: 0,
                   child: Row(

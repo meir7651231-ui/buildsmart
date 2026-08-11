@@ -236,13 +236,13 @@ void main() {
     await tester.pump(const Duration(seconds: 5)); // flush the toast timer
   });
 
-  testWidgets('the line "+" opens the add-more sheet of compatible mates',
+  testWidgets('the line "+" opens the seeded line-builder grid (screen #7)',
       (tester) async {
     tester.view.physicalSize = const Size(430, 1500);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    // A product WITH verified mates (the hero has none, so "+" would toast).
+    // A product WITH verified mates so the seeded grid has real candidates.
     final p =
         kLipskeyCatalog.firstWhere((x) => compatibleProductsFor(x).isNotEmpty);
     final container = ProviderContainer();
@@ -258,10 +258,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('internalCardBuy')));
     await tester.pump();
-    // The line strip (with its "+") now shows.
+    // The line strip (with its "+") now shows; tapping "+" opens the grid.
     await tester.tap(find.byKey(const Key('lineAddMore')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('addMoreSheet')), findsOneWidget);
+    expect(find.byKey(const Key('sudokuGrid')), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 5)); // flush the toast timer
   });
