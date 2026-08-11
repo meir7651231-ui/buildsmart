@@ -17,8 +17,11 @@
 >   `StringSetPrefsPersisted` (getStringList→toSet / setStringList). **−20 שורות**,
 >   ה-import של shared_preferences הוסר לגמרי (דדופ מלא). 37 בדיקות ירוקות.
 >   `smart_project_engine` — variant (`_load` שונה) → דולג לפי כלל-הבטיחות.
-> - הבא בתור: slice 3b (json-object — `card_projects`/`draft_quote`...) →
->   slice 4 (6 המנועים · `state=`) → slice 5 (HR-records).
+> - **slice 3b — 4 מודולי Map/List-json ✅ בוצע.** `ab_experiments`+`card_selection`
+>   (Map<String,String> → `StringMapPrefsPersisted`) · `card_versions`+`draft_quote`
+>   (List → `JsonListPrefsPersisted<E>`). **−47 שורות**. 14 בדיקות ירוקות.
+> - הבא בתור: slice 4 (6 המנועים · `state=` invariant — hard-case #6) →
+>   slice 5 (HR-records).
 
 
 

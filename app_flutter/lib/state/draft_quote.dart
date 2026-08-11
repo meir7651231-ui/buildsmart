@@ -1,8 +1,7 @@
-import 'dart:convert';
 
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// A quote text the user prepared but hasn't shared yet — saved under a label
 /// so the user can come back to it. Roadmap step 48 adjacent (extends the
@@ -36,32 +35,22 @@ class DraftQuote {
       );
 }
 
-class DraftQuoteNotifier extends StateNotifier<List<DraftQuote>> {
+class DraftQuoteNotifier extends StateNotifier<List<DraftQuote>>
+    with JsonListPrefsPersisted<DraftQuote> {
   DraftQuoteNotifier({this.maxEntries = 30}) : super(const []) {
-    _load();
+    loadFromPrefs();
   }
+
+  @override
+  String get persistKey => _key;
+  @override
+  DraftQuote decodeElement(Map<String, dynamic> json) => DraftQuote.fromJson(json);
+  @override
+  Map<String, dynamic> encodeElement(DraftQuote element) => element.toJson();
   final int maxEntries;
   static const _key = 'bs.draft-quotes.v1';
 
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    if (raw != null) {
-      try {
-        state = (jsonDecode(raw) as List)
-            .map((e) => DraftQuote.fromJson(e as Map<String, dynamic>))
-            .toList();
-      } catch (_) {
-        // corrupt/legacy payload — keep default state
-      }
-    }
-  }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-        _key, jsonEncode(state.map((e) => e.toJson()).toList()));
-  }
 
   /// Save a draft. If a draft with the same [label] already exists, REPLACE
   /// its text (no duplicate). Otherwise append; trim to [maxEntries] keeping
@@ -75,7 +64,7 @@ class DraftQuoteNotifier extends StateNotifier<List<DraftQuote>> {
     state = next.length > maxEntries
         ? next.sublist(next.length - maxEntries)
         : next;
-    _persist();
+    persistToPrefs();
     return q;
   }
 
@@ -83,13 +72,13 @@ class DraftQuoteNotifier extends StateNotifier<List<DraftQuote>> {
     final next = state.where((d) => d.id != id).toList();
     if (next.length == state.length) return;
     state = next;
-    _persist();
+    persistToPrefs();
   }
 
   void clear() {
     if (state.isEmpty) return;
     state = const [];
-    _persist();
+    persistToPrefs();
   }
 
   DraftQuote? byLabel(String label) {

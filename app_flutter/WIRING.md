@@ -3993,3 +3993,10 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - הוסרו 2 סעיפי-הכפילות בטאב ניהול (roles + accountApprovals) + 2 מחלקות מתות (`_RoleAssignBody`/`_NewAccountApprovalsBody`) + import מיותם.
 - נבנה ע"י הנחיל (2 fixers, disjoint files) + orchestrator (טסטים/docs/gate). analyze 0 · targeted 51/51 · mutation-verified.
 - **פתוח (follow-up, לא-חוסם):** לרנדר-מחדש `test/generated/` (2 wired-cases של הסעיפים שהוסרו · opt-in, atomgen) · לגזום 2 ids מ-element_registry.
+
+### #dedup-slice-3b — Map/List json notifiers → StringMap/JsonList mixins (2026-08-11)
+צעד-ביצוע רביעי של `knowledge/logic/DUPLICATION.md`. load/persist מבוססי-json שהיו זהים → 2 מיקסינים.
+- **`lib/state/prefs_persisted.dart`:** נוספו `mixin StringMapPrefsPersisted on StateNotifier<Map<String,String>>` + `mixin JsonListPrefsPersisted<E> on StateNotifier<List<E>>` (codec-אלמנט מוזרק).
+- **`ab_experiments` · `card_selection`** (Map) + **`card_versions` · `draft_quote`** (List) → מיקסין. `dart:convert`+`shared_preferences` הוסרו (דדופ מלא).
+- **`ab_experiments`:** ללא `@override` על `persistKey` — למחלקה מתודה בשם `override` שמצלה את אנוטציית dart:core (תועד בהערה).
+- **אימות:** 14 בדיקות ירוקות (כולל `state_loaded_guard`) · analyze נקי · net −47 שורות.

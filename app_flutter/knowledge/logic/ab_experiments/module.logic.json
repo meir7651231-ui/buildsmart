@@ -1,13 +1,13 @@
 {
   "module": "ab_experiments",
-  "source": "lib/state/ab_experiments.dart",
-  "atomCount": 6,
+  "source": "/home/user/buildsmart/app_flutter/lib/state/ab_experiments.dart",
+  "atomCount": 5,
   "atoms": [
     {
-      "fn": "AbExperimentsNotifier._load",
-      "kind": "notifier-method",
+      "fn": "AbExperimentsNotifier.persistKey",
+      "kind": "getter",
       "object": {
-        "signature": "() -> Future<void>",
+        "signature": "get () -> String",
         "constants": []
       },
       "connections": {
@@ -17,12 +17,7 @@
             "name": "_key"
           }
         ],
-        "writes": [
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
+        "writes": [],
         "calls": [],
         "calledBy": [],
         "gatedBy": []
@@ -30,89 +25,16 @@
       "behaviour": {
         "steps": [
           {
-            "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "compute",
-            "detail": "raw = prefs.getString(_key)"
-          },
-          {
-            "kind": "branch",
-            "detail": "if raw != null"
+            "kind": "formula",
+            "detail": "_key"
           }
         ]
       },
-      "floor": [
-        "MapEntry",
-        "getInstance",
-        "getString",
-        "jsonDecode",
-        "map"
-      ],
+      "floor": [],
       "contract": {
         "input": "()",
-        "output": "Future<void>",
-        "purity": "side-effecting",
-        "precond": [],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
-      "fn": "AbExperimentsNotifier._persist",
-      "kind": "notifier-method",
-      "object": {
-        "signature": "() -> Future<void>",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key"
-          },
-          {
-            "kind": "field",
-            "name": "state"
-          }
-        ],
-        "writes": [
-          {
-            "kind": "io",
-            "name": "prefs.setString"
-          }
-        ],
-        "calls": [],
-        "calledBy": [
-          "AbExperimentsNotifier.clear",
-          "AbExperimentsNotifier.ensure",
-          "AbExperimentsNotifier.override"
-        ],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "effect",
-            "detail": "await prefs.setString(_key, jsonEncode(state))"
-          }
-        ]
-      },
-      "floor": [
-        "getInstance",
-        "jsonEncode",
-        "setString"
-      ],
-      "contract": {
-        "input": "()",
-        "output": "Future<void>",
-        "purity": "side-effecting",
+        "output": "String",
+        "purity": "pure",
         "precond": [],
         "postcond": [],
         "invariants": [],
@@ -127,30 +49,14 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
           }
         ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
+        "calls": [],
         "calledBy": [],
         "gatedBy": []
       },
@@ -182,7 +88,7 @@
           },
           {
             "kind": "effect",
-            "detail": "_persist()"
+            "detail": "persistToPrefs()"
           },
           {
             "kind": "return",
@@ -192,6 +98,7 @@
       },
       "floor": [
         "abs",
+        "persistToPrefs",
         "value"
       ],
       "contract": {
@@ -255,30 +162,14 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
           }
         ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
+        "calls": [],
         "calledBy": [],
         "gatedBy": []
       },
@@ -294,11 +185,13 @@
           },
           {
             "kind": "effect",
-            "detail": "_persist()"
+            "detail": "persistToPrefs()"
           }
         ]
       },
-      "floor": [],
+      "floor": [
+        "persistToPrefs"
+      ],
       "contract": {
         "input": "(String experiment, String variant)",
         "output": "void",
@@ -319,30 +212,14 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
           }
         ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
+        "calls": [],
         "calledBy": [],
         "gatedBy": []
       },
@@ -358,12 +235,13 @@
           },
           {
             "kind": "effect",
-            "detail": "_persist()"
+            "detail": "persistToPrefs()"
           }
         ]
       },
       "floor": [
         "containsKey",
+        "persistToPrefs",
         "remove"
       ],
       "contract": {

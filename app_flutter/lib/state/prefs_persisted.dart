@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -72,5 +74,62 @@ mixin StringSetPrefsPersisted on StateNotifier<Set<String>> {
   Future<void> persistToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(persistKey, state.toList());
+  }
+}
+
+/// Opt-in persistence for a `Map<String, String>`-valued [StateNotifier], stored
+/// as a JSON object. Factors out the byte-identical tolerant load + jsonEncode
+/// persist shared by `ab_experiments` and `card_selection` — see
+/// `knowledge/logic/DUPLICATION.md`.
+mixin StringMapPrefsPersisted on StateNotifier<Map<String, String>> {
+  String get persistKey;
+
+  Future<void> loadFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(persistKey);
+    if (raw != null) {
+      try {
+        final m = jsonDecode(raw) as Map<String, dynamic>;
+        state = m.map((k, v) => MapEntry(k, v as String));
+      } on Object catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
+    }
+  }
+
+  Future<void> persistToPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(persistKey, jsonEncode(state));
+  }
+}
+
+/// Opt-in persistence for a `List<E>`-valued [StateNotifier] of json-encodable
+/// records, stored as a JSON array. Factors out the tolerant list load +
+/// `jsonEncode(state.map(toJson))` persist shared by `card_versions` and
+/// `draft_quote` — see `knowledge/logic/DUPLICATION.md`. The per-element codec
+/// is injected (each module keeps its own `fromJson`/`toJson`).
+mixin JsonListPrefsPersisted<E> on StateNotifier<List<E>> {
+  String get persistKey;
+  E decodeElement(Map<String, dynamic> json);
+  Map<String, dynamic> encodeElement(E element);
+
+  Future<void> loadFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(persistKey);
+    if (raw != null) {
+      try {
+        state = (jsonDecode(raw) as List)
+            .map((e) => decodeElement(e as Map<String, dynamic>))
+            .toList();
+      } on Object catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
+    }
+  }
+
+  Future<void> persistToPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        persistKey, jsonEncode(state.map(encodeElement).toList()));
   }
 }

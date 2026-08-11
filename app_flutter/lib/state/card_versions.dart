@@ -1,7 +1,6 @@
-import 'dart:convert';
 
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// A saved named snapshot of a card selection (product + brand), used to
 /// compare alternatives later. Distinct from [SavedConfigsNotifier] (which is
@@ -40,32 +39,22 @@ class ConfigVersion {
       );
 }
 
-class CardVersionsNotifier extends StateNotifier<List<ConfigVersion>> {
+class CardVersionsNotifier extends StateNotifier<List<ConfigVersion>>
+    with JsonListPrefsPersisted<ConfigVersion> {
   CardVersionsNotifier() : super(const []) {
-    _load();
+    loadFromPrefs();
   }
+
+  @override
+  String get persistKey => _key;
+  @override
+  ConfigVersion decodeElement(Map<String, dynamic> json) => ConfigVersion.fromJson(json);
+  @override
+  Map<String, dynamic> encodeElement(ConfigVersion element) => element.toJson();
 
   static const _key = 'bs.card-versions.v1';
 
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    if (raw != null) {
-      try {
-        state = (jsonDecode(raw) as List)
-            .map((e) => ConfigVersion.fromJson(e as Map<String, dynamic>))
-            .toList();
-      } catch (_) {
-        // corrupt/legacy payload — keep default state
-      }
-    }
-  }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-        _key, jsonEncode(state.map((e) => e.toJson()).toList()));
-  }
 
   /// Save a new named version. If a version with the same (productKey, label)
   /// already exists, it's replaced (so re-saving under the same label updates
@@ -87,13 +76,13 @@ class CardVersionsNotifier extends StateNotifier<List<ConfigVersion>> {
         .where((x) => !(x.productKey == productKey && x.label == label))
         .toList();
     state = [...filtered, v];
-    _persist();
+    persistToPrefs();
     return v;
   }
 
   void remove(String id) {
     state = state.where((x) => x.id != id).toList();
-    _persist();
+    persistToPrefs();
   }
 
   List<ConfigVersion> forProduct(String productKey) =>
