@@ -6,8 +6,14 @@
 >   `EnumPrefsPersisted<T>` (`lib/state/prefs_persisted.dart`). ה-`set`/`persist`
 >   המשוכפלים ×3 → מקום אחד. 3 בדיקות ייעודיות ירוקות (defaults · שמירה על-פני
 >   notifier חדש · no-op אידמפוטנטי). analyze נקי.
-> - הבא בתור: slice 2 (5 מודולי-ההגדרות · `update(f)`) → slice 3 (list/json) →
->   slice 4 (6 המנועים · `state=`).
+> - **slice 2 — 5 מודולי-ההגדרות ⛔ חסום (הכרעת-בעלים).** `app/catalog/chat/notif/
+>   store_settings` מוגנים ע"י **Gate 25** בשער-הפרוטוקול (`שער 25: משותף עם
+>   Preact — אסור לגעת`). הם חלק מחוזה ה-parity Flutter↔Preact ולא ניתן לפרק אותם
+>   באופן חד-צדדי. **דילגתי, כיבדתי את השער** — הדדופ שלהם דורש override מפורש של
+>   Gate 25 מהבעלים. (הכפילות מתועדת; הפתרון `JsonPrefsPersisted` מוכן אם/כאשר
+>   יאושר.)
+> - הבא בתור: slice 3 (list/json — לא-מוגנים) → slice 4 (6 המנועים · `state=`) →
+>   slice 5 (HR-records).
 
 
 
