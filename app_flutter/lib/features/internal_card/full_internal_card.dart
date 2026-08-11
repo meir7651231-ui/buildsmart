@@ -26,9 +26,6 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
-import 'package:buildsmart/features/fittings/ui/sudoku_grid.dart'
-    show SudokuGrid;
-import 'package:buildsmart/logic/install_engine.dart' show findShortestPath;
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart'
@@ -1398,7 +1395,6 @@ class _CardView extends ConsumerWidget {
           'האחרון מודגש · הקש עיגול=בחירה · הקש מודגש=הסרה · +=הוספה',
           style: TextStyle(fontSize: 9.5, color: _cDim),
         ),
-        _lineActions(context, ref, p),
       ],
     );
   }
@@ -1448,184 +1444,6 @@ class _CardView extends ConsumerWidget {
             ),
           ),
       ],
-    );
-  }
-
-  // ── D14 · line actions (קו · בדיקה · השלם) ───────────────────────────────────
-  /// Three connection actions over the live install engine. "קו" seeds the line
-  /// (the cart-derived line the engine reads); "בדיקה" reports the product's
-  /// per-end needs + direct-mate count; "השלם" runs the (ungated) BFS solver
-  /// `findShortestPath` from this product to its best partner and shows the
-  /// auto-completed path (connectors inserted by the engine). The full
-  /// multi-fixture line is the D11/D12 grid endgame — here it is card-scoped.
-  Widget _lineActions(
-    BuildContext context,
-    WidgetRef ref,
-    LipskeyCatalogProduct p,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(13, 8, 13, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: _lineBtn(
-              '🔗 קו',
-              const Key('lineBtnLine'),
-              () => _openGrid(context, p),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: _lineBtn(
-              '🔍 בדיקה',
-              const Key('lineBtnCheck'),
-              () => _showCheck(context, p),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: _lineBtn(
-              '🧩 השלם',
-              const Key('lineBtnSolve'),
-              () => _showSolve(context, p),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _lineBtn(String label, Key key, VoidCallback onTap) {
-    return Material(
-      key: key,
-      color: _cImgBg,
-      borderRadius: BorderRadius.circular(10),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: _cLine),
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              color: _cInk,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// קו — seed the line (the cart is the line the engine reads).
-  /// קו — opens the sudoku line-builder grid (D11/D13) in a sheet: the
-  /// engine-driven "only what mates the neighbour" board (P6·6).
-  void _openGrid(BuildContext context, LipskeyCatalogProduct p) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: _cCard,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          14,
-          16,
-          14,
-          16 + MediaQuery.of(ctx).viewInsets.bottom,
-        ),
-        child: SingleChildScrollView(child: SudokuGrid(seedProduct: p)),
-      ),
-    );
-  }
-
-  /// בדיקה — per-end needs + direct-mate count + any connection warning.
-  void _showCheck(BuildContext context, LipskeyCatalogProduct p) {
-    final compat = compatibleProductsFor(p);
-    final warn = connectionWarningHe(p);
-    final lines = <String>[
-      if (compat.isEmpty)
-        'אין תואם ישיר בקטלוג'
-      else
-        'מתחבר ישירות ל־${compat.length} מוצרים',
-      if (warn != null) '⚠️ $warn',
-      ...connectionNeedsHe(p),
-    ];
-    _infoSheet(context, '🔍 בדיקת חיבורים', lines);
-  }
-
-  /// השלם — run the BFS solver from this product to its best partner and show
-  /// the auto-completed path (the engine inserts any needed connectors).
-  void _showSolve(BuildContext context, LipskeyCatalogProduct p) {
-    final compat = compatibleProductsFor(p);
-    if (compat.isEmpty) {
-      showToast(context, 'אין מוצר תואם להשלמה');
-      return;
-    }
-    final path = findShortestPath(p, compat.first);
-    if (path == null || path.isEmpty) {
-      showToast(context, 'לא נמצא מסלול חיבור');
-      return;
-    }
-    _infoSheet(
-      context,
-      '🧩 השלמת חיבור · ${path.length} פריטים',
-      [
-        for (var i = 0; i < path.length; i++)
-          '${i + 1}. ${_heroEmoji(path[i])} ${path[i].nameHe}',
-      ],
-    );
-  }
-
-  void _infoSheet(BuildContext context, String title, List<String> lines) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: _cCard,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: _cInk,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                if (lines.isEmpty)
-                  const Text('אין נתונים', style: TextStyle(color: _cDim))
-                else
-                  for (final l in lines)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Text(
-                        l,
-                        style: const TextStyle(
-                          fontSize: 13.5,
-                          color: _cInk,
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

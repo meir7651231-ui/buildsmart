@@ -266,7 +266,7 @@ void main() {
     await tester.pump(const Duration(seconds: 5)); // flush the toast timer
   });
 
-  testWidgets('line buttons are hidden until a product is added (D6/D14)',
+  testWidgets('the line strip appears only after a product is added (D8)',
       (tester) async {
     final hero = catalogProductForSku(FullInternalCard.heroSku)!;
     await tester.pumpWidget(
@@ -279,102 +279,19 @@ void main() {
       ),
     );
 
-    // Base card: no line strip, no smart buttons.
+    // Base card: no line strip.
     expect(find.byKey(const Key('internalCardLineStrip')), findsNothing);
-    expect(find.byKey(const Key('lineBtnCheck')), findsNothing);
 
-    // Add a product → the line strip (circles + buttons) appears.
+    // Add a product → the line strip (circles + "+") appears. Screen #2 puts
+    // NO קו/בדיקה/השלם on the card — those live in the grid.
     await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('internalCardBuy')));
     await tester.pump();
 
     expect(find.byKey(const Key('internalCardLineStrip')), findsOneWidget);
-    expect(find.byKey(const Key('lineBtnCheck')), findsOneWidget);
+    expect(find.byKey(const Key('lineAddMore')), findsOneWidget);
     await tester.pump(const Duration(seconds: 5));
-  });
-
-  testWidgets('בדיקה opens the connection-check sheet after adding (D14)',
-      (tester) async {
-    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
-    await tester.pumpWidget(
-      ProviderScope(
-        child: MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
-          ),
-        ),
-      ),
-    );
-
-    await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('internalCardBuy')));
-    await tester.pump(const Duration(seconds: 5)); // add + flush toast
-
-    await tester.ensureVisible(find.byKey(const Key('lineBtnCheck')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('lineBtnCheck')));
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('בדיקת חיבורים'), findsOneWidget);
-  });
-
-  testWidgets('השלם runs the solver and shows a path after adding (D14)',
-      (tester) async {
-    // A product that actually has compatible mates (SmartLock has none).
-    final withCompat =
-        kLipskeyCatalog.firstWhere((p) => compatibleProductsFor(p).isNotEmpty);
-    await tester.pumpWidget(
-      ProviderScope(
-        child: MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FullInternalCard(product: withCompat),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('internalCardBuy')));
-    await tester.pump(const Duration(seconds: 5));
-
-    await tester.ensureVisible(find.byKey(const Key('lineBtnSolve')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('lineBtnSolve')));
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('השלמת חיבור'), findsOneWidget);
-  });
-
-  testWidgets('קו opens the sudoku line-builder grid (D11/D13)',
-      (tester) async {
-    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
-    await tester.pumpWidget(
-      ProviderScope(
-        child: MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
-          ),
-        ),
-      ),
-    );
-
-    // Add a product so the line strip (with קו) appears.
-    await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('internalCardBuy')));
-    await tester.pump(const Duration(seconds: 5)); // add + flush toast
-
-    await tester.ensureVisible(find.byKey(const Key('lineBtnLine')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('lineBtnLine')));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('sudokuGrid')), findsOneWidget);
   });
 
   testWidgets('swiping the image reveals the connects-rail (D4)',
