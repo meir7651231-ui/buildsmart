@@ -3,11 +3,11 @@ import preact from '@preact/preset-vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
 
-/* 11.8: buildsmart-il.com מחובר כ-custom domain אמיתי של GitHub Pages
- * (עד היום הדומיין רק הפנה ל-github.io — וסינוני-הרשת חסמו את היעד).
- * האתר מוגש משורש הדומיין ⇒ base='/' בכל סביבה; הקידומת /buildsmart/
- * ההיסטורית מתה יחד עם ההגשה מ-github.io (הכתובת הישנה מפנה אוטומטית). */
-const base = '/';
+/* GitHub Pages serves the app at https://<user>.github.io/buildsmart/.
+ * When building for Pages (CI sets GITHUB_PAGES=1), Vite must emit
+ * asset URLs prefixed with /buildsmart/. Local dev + Vercel keep '/'. */
+const isPages = process.env.GITHUB_PAGES === '1';
+const base = isPages ? '/buildsmart/' : '/';
 
 export default defineConfig({
   base,

@@ -70,8 +70,7 @@ jobs:
         working-directory: app_flutter
         # KB_GLOBAL cut-over: the unified "keyboard on every screen" goes live
         # (the contractor board — swarm-audited, GATE-PASS, verified merged).
-        # 11.8: custom domain — האתר בשורש buildsmart-il.com ⇒ הבסיס /flutter/
-        run: flutter build web --release --base-href "/flutter/" --dart-define=KB_GLOBAL=true
+        run: flutter build web --release --base-href "/buildsmart/flutter/" --dart-define=KB_GLOBAL=true
 
       - name: Stage Flutter under /flutter/
         run: |
@@ -92,7 +91,7 @@ jobs:
           ( cd /tmp/preview-src && bash scripts/gen_version.sh )
           ( cd /tmp/preview-src/app_flutter \
               && flutter pub get \
-              && flutter build web --release --base-href "/flutter-preview/" )
+              && flutter build web --release --base-href "/buildsmart/flutter-preview/" )
           mkdir -p app/dist/flutter-preview
           cp -r /tmp/preview-src/app_flutter/build/web/* app/dist/flutter-preview/
 
@@ -103,9 +102,6 @@ jobs:
         run: |
           cd app/dist
           touch .nojekyll
-          # 11.8: קובץ-הדומיין חייב להיכתב בכל deploy — הדחיפה למטה היא force,
-          # ובלעדיו ה-custom domain מתנתק בשקט בפריסה הבאה (מלכודת ידועה).
-          echo buildsmart-il.com > CNAME
           git init -q
           git config user.email "bot@buildsmart"
           git config user.name "BuildSmart CI"
