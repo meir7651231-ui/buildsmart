@@ -122,6 +122,8 @@ void main() {
     WidgetTester t, {
     _FakeAuthGateway? gateway,
     _FakeUsersSource? source,
+    String? targetUid,
+    String? targetName,
   }) async {
     await t.pumpWidget(
       ProviderScope(
@@ -132,12 +134,15 @@ void main() {
           else
             usersLookupProvider.overrideWithValue(null),
         ],
-        child: const MaterialApp(
-          locale: Locale('he'),
+        child: MaterialApp(
+          locale: const Locale('he'),
           home: Scaffold(
             body: Directionality(
               textDirection: TextDirection.rtl,
-              child: ManagerRoleAssignSheet(),
+              child: ManagerRoleAssignSheet(
+                targetUid: targetUid,
+                targetName: targetName,
+              ),
             ),
           ),
         ),
@@ -236,6 +241,56 @@ void main() {
         ),
       );
       expect(inkwell.onTap, isNull, reason: 'disabled with no backend');
+    });
+  });
+
+  // #user-hub — the sheet opened PRE-TARGETED from a hub user-row's
+  // "🔑 שנה תפקיד" button: the user-picker is hidden, a fixed 👤 subject is
+  // shown, and the picked role forwards to the row's uid (no phone lookup).
+  group('ManagerRoleAssignSheet — pre-targeted (hub row → שנה תפקיד)', () {
+    testWidgets(
+        'targeted: hides the picker, shows the 👤 subject, forwards {targetUid, role}',
+        (t) async {
+      final gw = _FakeAuthGateway();
+      final src = _FakeUsersSource(sampleUsers());
+      await pumpSheet(t,
+          gateway: gw,
+          source: src,
+          targetUid: 'uid-target',
+          targetName: 'אבי כהן');
+
+      // The user-picker phone field is GONE when pre-targeted.
+      expect(find.byKey(const ValueKey('role-assign-phone')), findsNothing);
+      // The fixed subject panel is shown with the target's name.
+      expect(find.byKey(const ValueKey('role-assign-target')), findsOneWidget);
+      expect(find.textContaining('אבי כהן'), findsOneWidget);
+
+      // Pick a role + submit → the EXACT {uid: target, role} rides the seam,
+      // with no phone→uid lookup.
+      await t.tap(find.byKey(const ValueKey('role-chip-store')));
+      await settle(t);
+      await t.tap(find.byKey(const ValueKey('role-assign-submit')));
+      await settle(t);
+      expect(gw.setRoleCalls, [(uid: 'uid-target', role: 'store')]);
+    });
+
+    testWidgets('targeted with no name falls back to the uid as the subject',
+        (t) async {
+      final gw = _FakeAuthGateway();
+      final src = _FakeUsersSource(sampleUsers());
+      await pumpSheet(t, gateway: gw, source: src, targetUid: 'uid-solo');
+      expect(find.byKey(const ValueKey('role-assign-target')), findsOneWidget);
+      expect(find.textContaining('uid-solo'), findsOneWidget);
+    });
+
+    testWidgets(
+        'no-arg (existing call site) still shows the picker — zero regression',
+        (t) async {
+      final gw = _FakeAuthGateway();
+      final src = _FakeUsersSource(sampleUsers());
+      await pumpSheet(t, gateway: gw, source: src);
+      expect(find.byKey(const ValueKey('role-assign-phone')), findsOneWidget);
+      expect(find.byKey(const ValueKey('role-assign-target')), findsNothing);
     });
   });
 }

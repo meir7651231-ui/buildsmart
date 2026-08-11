@@ -71,7 +71,16 @@ const List<RoleOption> kAssignableRoles = [
 /// Open the role-assignment sheet (the manager ניהול tab's hook calls this).
 /// A modal bottom sheet, RTL, LIGHT — matching the manager dashboard's other
 /// sheets (`showModalBottomSheet` + `Directionality` + `cardLight`).
-Future<void> showManagerRoleAssignSheet(BuildContext context) {
+///
+/// Optionally PRE-TARGETED: pass [targetUid] (+ [targetName] for display) to
+/// open the sheet already fixed on ONE user (a user-row entry point) — the
+/// picker is hidden and the manager only picks a role. Omit both for the
+/// standalone phone/uid lookup flow (byte-identical to before).
+Future<void> showManagerRoleAssignSheet(
+  BuildContext context, {
+  String? targetUid,
+  String? targetName,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: BsTokens.cardLight,
@@ -80,9 +89,12 @@ Future<void> showManagerRoleAssignSheet(BuildContext context) {
       borderRadius:
           BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
     ),
-    builder: (sheetCtx) => const Directionality(
+    builder: (sheetCtx) => Directionality(
       textDirection: TextDirection.rtl,
-      child: ManagerRoleAssignSheet(),
+      child: ManagerRoleAssignSheet(
+        targetUid: targetUid,
+        targetName: targetName,
+      ),
     ),
   );
 }
@@ -93,8 +105,20 @@ Future<void> showManagerRoleAssignSheet(BuildContext context) {
 /// existing `assignRole` seam ([authStateProvider]'s notifier). Success/failure
 /// surface as Hebrew toasts. With no live backend the action is disabled and a
 /// banner explains the feature is owner/backend-gated (HARD RULE #1).
+///
+/// PRE-TARGETED mode: when [targetUid] is non-empty (a user-row entry point) the
+/// user-picker is hidden and the role applies to that uid; [targetName] (else the
+/// uid) is shown as the fixed subject. Null [targetUid] = the lookup flow above.
 class ManagerRoleAssignSheet extends ConsumerStatefulWidget {
-  const ManagerRoleAssignSheet({super.key});
+  const ManagerRoleAssignSheet({super.key, this.targetUid, this.targetName});
+
+  /// When non-null/non-empty, the sheet is PRE-TARGETED at this uid — the picker
+  /// is hidden and the assignment applies here. Null = standalone lookup flow.
+  final String? targetUid;
+
+  /// The pre-targeted user's display name (the fixed subject); falls back to
+  /// [targetUid] when null/empty. Ignored unless [targetUid] is set.
+  final String? targetName;
 
   @override
   ConsumerState<ManagerRoleAssignSheet> createState() =>
@@ -113,6 +137,22 @@ class _ManagerRoleAssignSheetState
   /// callable round-trips, so a double-tap can't fire two assignments.
   bool _busy = false;
 
+  /// True when the sheet was opened PRE-TARGETED at a specific uid (a user-row
+  /// entry point): the user-picker is hidden and [_assign] applies the role to
+  /// [ManagerRoleAssignSheet.targetUid] directly.
+  bool get _isTargeted {
+    final uid = widget.targetUid?.trim();
+    return uid != null && uid.isNotEmpty;
+  }
+
+  /// The fixed subject shown in [_isTargeted] mode — the display name, or the
+  /// uid as a fallback. Only read when [_isTargeted] (targetUid is non-empty).
+  String get _targetLabel {
+    final name = widget.targetName?.trim();
+    if (name != null && name.isNotEmpty) return name;
+    return widget.targetUid!.trim();
+  }
+
   @override
   void dispose() {
     _phoneCtrl.dispose();
@@ -129,17 +169,20 @@ class _ManagerRoleAssignSheetState
     final roleId = _roleId;
     if (roleId == null || _busy) return;
 
-    // Resolve the uid: a pasted uid is authoritative; else look up by phone.
+    // Resolve the uid. When PRE-TARGETED (opened from a user row) the widget's
+    // targetUid is authoritative and the picker is hidden; otherwise a pasted
+    // uid wins; else the phone is translated via [UsersLookup.uidByPhone].
+    final targetUid = widget.targetUid?.trim() ?? '';
     final typedUid = _uidCtrl.text.trim();
     final phone = _phoneCtrl.text.trim();
-    if (typedUid.isEmpty && phone.isEmpty) {
+    if (targetUid.isEmpty && typedUid.isEmpty && phone.isEmpty) {
       showToast(context, 'הזן מספר טלפון או מזהה משתמש (uid).');
       return;
     }
 
     setState(() => _busy = true);
     try {
-      var uid = typedUid;
+      var uid = targetUid.isNotEmpty ? targetUid : typedUid;
       if (uid.isEmpty) {
         // Phone → uid through the A7 directory. Null when no live backend
         // (the provider is null) OR no users doc carries that phone.
@@ -243,12 +286,17 @@ class _ManagerRoleAssignSheetState
               ),
             ),
             const SizedBox(height: 2),
-            CfgText(
-              'manager_role_assign_sheet.t02',
-              'אתר משתמש לפי טלפון (או הדבק מזהה uid) ובחר תפקיד להקצאה.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-            ),
+            // Pre-targeted: the fixed subject (name/uid) instead of the lookup
+            // subtitle — the manager only picks a role for this known user.
+            if (_isTargeted)
+              _TargetSubject(name: _targetLabel)
+            else
+              CfgText(
+                'manager_role_assign_sheet.t02',
+                'אתר משתמש לפי טלפון (או הדבק מזהה uid) ובחר תפקיד להקצאה.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+              ),
             const SizedBox(height: BsTokens.space4),
 
             if (!hasBackend) ...[
@@ -256,24 +304,28 @@ class _ManagerRoleAssignSheetState
               const SizedBox(height: BsTokens.space4),
             ],
 
-            // The user lookup: phone (primary) + an optional explicit uid.
-            TextField(
-              key: const ValueKey('role-assign-phone'),
-              controller: _phoneCtrl,
-              enabled: hasBackend && !_busy,
-              keyboardType: TextInputType.phone,
-              textDirection: TextDirection.ltr,
-              decoration: _fieldDecoration('טלפון המשתמש', '050-1234567'),
-            ),
-            const SizedBox(height: BsTokens.space3),
-            TextField(
-              key: const ValueKey('role-assign-uid'),
-              controller: _uidCtrl,
-              enabled: hasBackend && !_busy,
-              textDirection: TextDirection.ltr,
-              decoration: _fieldDecoration('מזהה משתמש (uid) — אופציונלי', 'uid'),
-            ),
-            const SizedBox(height: BsTokens.space4),
+            // The user lookup: phone (primary) + an optional explicit uid. Shown
+            // only in the standalone flow — hidden when PRE-TARGETED (the subject
+            // is fixed above, so there is nothing to look up).
+            if (!_isTargeted) ...[
+              TextField(
+                key: const ValueKey('role-assign-phone'),
+                controller: _phoneCtrl,
+                enabled: hasBackend && !_busy,
+                keyboardType: TextInputType.phone,
+                textDirection: TextDirection.ltr,
+                decoration: _fieldDecoration('טלפון המשתמש', '050-1234567'),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              TextField(
+                key: const ValueKey('role-assign-uid'),
+                controller: _uidCtrl,
+                enabled: hasBackend && !_busy,
+                textDirection: TextDirection.ltr,
+                decoration: _fieldDecoration('מזהה משתמש (uid) — אופציונלי', 'uid'),
+              ),
+              const SizedBox(height: BsTokens.space4),
+            ],
 
             Align(
               alignment: AlignmentDirectional.centerStart,
@@ -357,6 +409,43 @@ class _NoBackendBanner extends StatelessWidget {
           fontSize: 13,
           fontWeight: FontWeight.w600,
           height: 1.35,
+        ),
+      ),
+    );
+  }
+}
+
+/// The PRE-TARGETED subject panel — shown INSTEAD of the user-picker when the
+/// sheet is opened for a specific user (a user-row entry point). A read-only
+/// outlined panel naming WHO gets the role; the manager only picks a role. The
+/// name is dynamic (per-user) so it is a plain [Text], not a [CfgText]. Keyed
+/// `role-assign-target` so a test can assert the sheet came up pre-targeted.
+class _TargetSubject extends StatelessWidget {
+  const _TargetSubject({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('role-assign-target'),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space4,
+        vertical: BsTokens.space3,
+      ),
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        border: Border.all(color: const Color(0xFFE2E2E2)),
+      ),
+      child: Text(
+        '👤 $name',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: BsTokens.inkLight,
+          fontSize: 15,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

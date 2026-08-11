@@ -44,8 +44,6 @@ import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
 import 'package:buildsmart/screens/org_setup_wizard_screen.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
-import 'package:buildsmart/screens/role_requests_inbox_screen.dart'
-    show RoleRequestsInboxScreen;
 import 'package:buildsmart/screens/studio/studio_entry.dart';
 import 'package:buildsmart/screens/studio_screen.dart';
 import 'package:buildsmart/screens/trade_builder/trade_builder_home.dart';
@@ -85,7 +83,7 @@ import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:buildsmart/state/org_gates.dart'
     show elementVisible, featEnabled, orgTerm;
 import 'package:buildsmart/state/role_requests.dart'
-    show pendingRoleRequestsProvider, userApproverProvider;
+    show userApproverProvider;
 import 'package:buildsmart/state/screen_sections.dart'
     show screenSectionsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -2105,6 +2103,7 @@ class _CustomerView {
     required this.sites,
     this.uid = '',
     this.accountStatus = '',
+    this.role,
   });
 
   final ManagerCustomer customer;
@@ -2119,9 +2118,15 @@ class _CustomerView {
 
   /// #reg-approval — the account-lifecycle status from the directory
   /// ([kDirectoryStatusPending]/[kDirectoryStatusActive]), '' when order-derived-
-  /// only / backend OFF. Drives the ממתין/מאושר row badge; NEVER a permission
+  /// only / backend OFF. Drives the ממתין/פעיל row badge; NEVER a permission
   /// decision (the `approveUsers` callable authorizes server-side).
   final String accountStatus;
+
+  /// #reg-approval — the directory role for this row ([BsRole]), or null for an
+  /// order-derived / CRM-only row (and ANY row when the backend is OFF — the
+  /// directory is empty then). Drives the row's role badge; display-only, NEVER
+  /// a permission decision.
+  final BsRole? role;
 
   /// @legacy index.html:16562 — `pct>=90?'low':pct>0?'live':'off'`.
   String get status => pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
@@ -2188,6 +2193,7 @@ final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
       sites: sitesByBuyer[base.name]?.length ?? 0,
       uid: e.uid,
       accountStatus: e.status,
+      role: e.role,
     ));
     if (stats != null) takenNames.add(key);
   }
@@ -2216,6 +2222,30 @@ final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
 
   return views;
 });
+
+/// #reg-approval — PURE predicate for the user-management hub's account-status
+/// filter chips ([_AccountFilterChips]). [filter] ∈ 'all' | 'pending' | 'active'
+/// | 'customers' (the `_accountFilter` values): 'all' passes every row,
+/// 'pending'/'active' match the directory [accountStatus]
+/// ([kDirectoryStatusPending]/[kDirectoryStatusActive]), 'customers' = a row with
+/// NO app account (uid==''). Display-only filtering; NEVER a permission decision.
+/// Top-level + public so it is unit-testable project-style.
+bool accountFilterMatch({
+  required String accountStatus,
+  required String uid,
+  required String filter,
+}) {
+  switch (filter) {
+    case 'pending':
+      return accountStatus == kDirectoryStatusPending;
+    case 'active':
+      return accountStatus == kDirectoryStatusActive;
+    case 'customers':
+      return uid.isEmpty;
+    default:
+      return true;
+  }
+}
 
 /// A13 (launch server-connect) — the server-canonical credit AGGREGATE for one
 /// contractor, routed through `CustomersRepository.computeCredit(name)` (the
@@ -2283,6 +2313,13 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
   /// legacy `mc-pill` surfaces). Local widget state; no engine/global write.
   String _filter = 'all';
 
+  /// #reg-approval — the active ACCOUNT-status filter for the user-management hub:
+  /// `'all'` / `pending` / `active` / `customers` (= a row with no app account,
+  /// uid==''). Local widget state (setState). Defaults to `'all'` (a no-op), so
+  /// the list is byte-identical until the manager picks a chip; the chip row
+  /// itself is absent unless the merged list carries a directory-sourced row.
+  String _accountFilter = 'all';
+
   /// GIANT Phase-2 — the fuzzy search query (opt-in `search.fuzzy`). Local
   /// state, EMPTY by default (the live-reflow test depends on empty =
   /// pass-through); no debounce — the customer set is tiny.
@@ -2330,12 +2367,26 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
     final effectiveFilter =
         _filter == 'all' || (counts[_filter] ?? 0) > 0 ? _filter : 'all';
 
-    // The status chip AND the fuzzy name query compose (never replace). An
-    // empty query passes every row, so the chip filter alone is unchanged.
+    // #reg-approval — the ACCOUNT-status filter (user-management hub). DATA-DRIVEN:
+    // the chip row exists only when the merged list carries a directory-sourced
+    // row (uid != ''), which is NEVER the case off (the directory is empty) ⇒ the
+    // OFF/demo path has no account chips and this collapses to `all` ⇒ the list is
+    // byte-identical. `customers` = a CRM/order-derived row with no app account.
+    final hasDirectory = views.any((v) => v.uid.isNotEmpty);
+    final effectiveAccountFilter = hasDirectory ? _accountFilter : 'all';
+
+    // The status chip, the account chip AND the fuzzy name query compose (never
+    // replace). An empty query / `all` account filter passes every row, so the
+    // credit-status chip filter alone is unchanged.
     final list = [
       for (final v in views)
         if (effectiveFilter == 'all' || v.status == effectiveFilter)
-          if (q.isEmpty || fuzzyNameMatch(q, v.customer.name)) v,
+          if (accountFilterMatch(
+            accountStatus: v.accountStatus,
+            uid: v.uid,
+            filter: effectiveAccountFilter,
+          ))
+            if (q.isEmpty || fuzzyNameMatch(q, v.customer.name)) v,
     ];
 
     return ListView(
@@ -2370,6 +2421,16 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
           onSelect: (st) => setState(() => _filter = st),
         ),
         const SizedBox(height: BsTokens.space4),
+        // #reg-approval — the account-status filter row (הכל / ממתינים / פעילים /
+        // לקוחות בלבד). Absent unless the merged list carries a directory-sourced
+        // row (see `hasDirectory`), so the OFF/demo tab is byte-identical.
+        if (hasDirectory) ...[
+          _AccountFilterChips(
+            active: effectiveAccountFilter,
+            onSelect: (k) => setState(() => _accountFilter = k),
+          ),
+          const SizedBox(height: BsTokens.space4),
+        ],
         // GIANT Phase-2 wave-3d — CSV bulk-import, behind the same opt-in
         // `manager.customers` gate as the saved-customer block it feeds;
         // absent by default ⇒ the tab is byte-identical.
@@ -2594,6 +2655,66 @@ class _CustomerStatusChips extends StatelessWidget {
   }
 }
 
+/// #reg-approval — the account-status filter chip row for the user-management hub:
+/// הכל / ממתינים / פעילים / לקוחות בלבד, filtering the merged customer list by the
+/// directory `accountStatus` (ממתינים→pending · פעילים→active) or by `uid==''`
+/// (לקוחות בלבד = a CRM/order-derived row with NO app account). Display-only
+/// filter; the active chip is a `brand` fill, the rest light outlines — the SAME
+/// style as [_CustomerStatusChips]. The tab mounts this ONLY when the list carries
+/// a directory-sourced row, so it is ABSENT on the OFF/demo path ⇒ byte-identical.
+class _AccountFilterChips extends StatelessWidget {
+  const _AccountFilterChips({required this.active, required this.onSelect});
+
+  final String active;
+  final ValueChanged<String> onSelect;
+
+  /// The chip key→label per account filter, verbatim (no counts — a light row).
+  static const List<MapEntry<String, String>> _options = [
+    MapEntry('all', 'הכל'),
+    MapEntry('pending', 'ממתינים'),
+    MapEntry('active', 'פעילים'),
+    MapEntry('customers', 'לקוחות בלבד'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chip(String key, String label) {
+      final on = active == key;
+      return Material(
+        color: on ? BsTokens.brand : BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: () => onSelect(key),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: on ? bsOnAccent(context) : BsTokens.inkLight,
+                fontSize: 13,
+                fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: BsTokens.space2,
+      runSpacing: BsTokens.space2,
+      children: [
+        for (final o in _options) chip(o.key, o.value),
+      ],
+    );
+  }
+}
+
 /// One customer card (@index.html:16593-16604 `mc-card`) — `👷 name` + the
 /// `N הזמנות · M אתרים` sub-line + a status pill on top, then the credit block:
 /// a utilisation bar (green, or amber `hot` at pct≥90) and the line
@@ -2725,15 +2846,26 @@ class _CustomerCard extends ConsumerWidget {
                               ),
                             ),
                             // #reg-approval — the account-lifecycle badge
-                            // (⏳ ממתין / ✓ מאושר). LIVE-ONLY: only a directory-
-                            // sourced row carries a status, and the directory is
-                            // empty when the backend is OFF, so this is absent off
-                            // ⇒ the card is byte-identical (the seed cards show no
-                            // badge, as today).
+                            // (⏳ ממתין / ✓ פעיל) + the directory ROLE badge
+                            // (קבלן / מנהל / …). LIVE-ONLY: only a directory-
+                            // sourced row carries a status/role, and the directory
+                            // is empty when the backend is OFF, so this is absent
+                            // off ⇒ the card is byte-identical (the seed cards show
+                            // no badge, as today).
                             if (useFirebaseBackend &&
-                                view.accountStatus.isNotEmpty) ...[
+                                (view.accountStatus.isNotEmpty ||
+                                    view.role != null)) ...[
                               const SizedBox(height: 4),
-                              _ApprovalBadge(status: view.accountStatus),
+                              Wrap(
+                                spacing: BsTokens.space2,
+                                runSpacing: 4,
+                                children: [
+                                  if (view.accountStatus.isNotEmpty)
+                                    _ApprovalBadge(status: view.accountStatus),
+                                  if (view.role != null)
+                                    _RoleBadge(role: view.role!),
+                                ],
+                              ),
                             ],
                           ],
                         ),
@@ -2947,6 +3079,15 @@ class _CustomerDetailSheet extends ConsumerWidget {
               style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
             const SizedBox(height: BsTokens.space4),
+            // #reg-approval — the manager's ACTION row, shown ONLY for a real
+            // app-user (a directory-sourced row: uid != ''). approve/suspend +
+            // role-change route through the EXISTING server seams; an order-
+            // derived / OFF row has uid=='' ⇒ this block is absent ⇒ the sheet is
+            // byte-identical off. The read-only CRM/contractor detail stays below.
+            if (view.uid.isNotEmpty) ...[
+              _CustomerActionRow(view: view),
+              const SizedBox(height: BsTokens.space4),
+            ],
             Row(
               children: [
                 tile('$liveOrderCount', 'הזמנות'),
@@ -3236,7 +3377,7 @@ const Map<BsRole, String> _kBsRoleLabel = {
 };
 
 /// #reg-approval — the account-lifecycle badge shown on a customer row and echoed
-/// in the pending checklist: ⏳ ממתין (amber) for a `pending` account, ✓ מאושר
+/// in the pending checklist: ⏳ ממתין (amber) for a `pending` account, ✓ פעיל
 /// (green) for an `active` one. LIGHT tokens; only mounted on the LIVE path
 /// (directory-sourced status), so the card is byte-identical when the backend is
 /// off.
@@ -3252,7 +3393,7 @@ class _ApprovalBadge extends StatelessWidget {
     final label = pending
         ? '⏳ ממתין'
         : active
-            ? '✓ מאושר'
+            ? '✓ פעיל'
             : status;
     final color = pending
         ? const Color(0xFFB07400)
@@ -3276,6 +3417,132 @@ class _ApprovalBadge extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
+    );
+  }
+}
+
+/// #reg-approval — the directory ROLE badge beside a customer row's name
+/// (קבלן / מנהל / חנות / שליח / עובד, from [_kBsRoleLabel]). A brand-tinted pill
+/// in the SAME light style as [_ApprovalBadge]; an absent/bot role ('' label)
+/// renders nothing. LIVE-ONLY (only a directory-sourced row carries a role), so
+/// it is absent when the backend is OFF ⇒ the card is byte-identical.
+class _RoleBadge extends StatelessWidget {
+  const _RoleBadge({required this.role});
+
+  final BsRole role;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = _kBsRoleLabel[role] ?? '';
+    if (label.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space2,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: BsTokens.brand.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: BsTokens.brand,
+          fontSize: BsTokens.typeLabel,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// #reg-approval — the manager's ACTION row on the customer-detail sheet, mounted
+/// ONLY for a real app-user (a directory-sourced row: `view.uid.isNotEmpty`). Two
+/// affordances, both through EXISTING server seams — NO client-side authorization:
+///   • ✓ אשר (a `pending` account) / ⏸️ השהה (an `active` one) →
+///     [userApproverProvider]([uid], approve:), the SAME callable the top-of-tab
+///     pending panel uses (mirrors `_PendingApprovalPanel._approve`);
+///   • 🔑 שנה תפקיד → [showManagerRoleAssignSheet] focused on this uid/name.
+/// The approve/suspend button is disabled (a spinner) while the call is in flight,
+/// so a double-tap can never kick a second server call. An order-derived / OFF row
+/// has uid=='' ⇒ this row is absent ⇒ the sheet is byte-identical off.
+class _CustomerActionRow extends ConsumerStatefulWidget {
+  const _CustomerActionRow({required this.view});
+
+  final _CustomerView view;
+
+  @override
+  ConsumerState<_CustomerActionRow> createState() => _CustomerActionRowState();
+}
+
+class _CustomerActionRowState extends ConsumerState<_CustomerActionRow> {
+  /// True while the approve/suspend call is in flight (button disabled + spinner).
+  bool _busy = false;
+
+  Future<void> _setApproval({required bool approve}) async {
+    final approver = ref.read(userApproverProvider);
+    if (approver == null || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final n = await approver([widget.view.uid], approve: approve);
+      if (mounted) {
+        showToast(
+          context,
+          n > 0 ? (approve ? '✓ אושר' : '⏸️ הושהה') : 'לא בוצעה פעולה',
+        );
+      }
+    } on Object catch (_) {
+      if (mounted) showToast(context, 'הפעולה נכשלה — נסה שוב');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final view = widget.view;
+    final pending = view.accountStatus == kDirectoryStatusPending;
+    final active = view.accountStatus == kDirectoryStatusActive;
+    return Row(
+      children: [
+        // ✓ אשר (pending) / ⏸️ השהה (active) — one server call (approveUsers).
+        if (pending || active) ...[
+          Expanded(
+            child: FilledButton(
+              onPressed: _busy ? null : () => _setApproval(approve: pending),
+              style: FilledButton.styleFrom(
+                backgroundColor: BsTokens.brand,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 11),
+              ),
+              child: _busy
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(pending ? '✓ אשר' : '⏸️ השהה'),
+            ),
+          ),
+          const SizedBox(width: BsTokens.space3),
+        ],
+        // 🔑 שנה תפקיד — the role-assign sheet, focused on this user.
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () => showManagerRoleAssignSheet(
+              context,
+              targetUid: view.uid,
+              targetName: view.customer.name,
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: BsTokens.brandDark,
+              side: const BorderSide(color: BsTokens.brand),
+              padding: const EdgeInsets.symmetric(vertical: 11),
+            ),
+            child: const Text('🔑 שנה תפקיד'),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -4232,55 +4499,6 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
           const SizedBox(height: BsTokens.space3),
         ],
 
-        // 6. 🔑 שיוך תפקידים (A12 — launch Phase A) — the manager assigns a role
-        // to a user via the `setRole` callable seam. SELF-CONTAINED in
-        // manager_role_assign_sheet.dart; this is just the mount hook (one
-        // button → the sheet). Gracefully disabled with a clear message when no
-        // live backend (the sheet gates on authGatewayProvider).
-        _ManageSection(
-          sectionKey: 'roles',
-          titleCfgId: 'manager.manage.roles.title',
-          emoji: '🔑',
-          title: 'שיוך תפקידים',
-          sub: 'הקצאת תפקיד (חנות / שליח / עובד / מנהל) למשתמש',
-          open: _open == 'roles',
-          onTap: () => _toggle('roles'),
-          child: _RoleAssignBody(
-            onOpen: () => showManagerRoleAssignSheet(context),
-          ),
-        ),
-
-        // 6b. 📋 בקשות אישור — the approval QUEUE, sitting next to the role
-        // assignment it feeds. The inbox itself already existed, but it was
-        // reachable only from the profile screen — an odd place to run the
-        // platform's admin work from, and easy to never find. Approving here
-        // does both halves at once: it grants the role AND flips the account
-        // from `pending` to `active`.
-        //
-        // The profile link is kept for the OTHER approver tiers — a store owner
-        // signs off couriers and a contractor signs off workers, and neither of
-        // them has this dashboard at all. Moving it outright would have taken
-        // their own people's approvals away from them.
-        const SizedBox(height: BsTokens.space3),
-        _ManageSection(
-          // A DISTINCT key. The first version of this card reused 'approvals',
-          // which is the worker-approvals section's key — and since the accordion
-          // holds ONE open key, both cards expanded together and both chevrons
-          // flipped. They also shared a titleCfgId, so a Studio text edit renamed
-          // both. Two different approvals, two different keys.
-          sectionKey: 'accountApprovals',
-          titleCfgId: 'manager.manage.accountApprovals.title',
-          emoji: '📋',
-          title: 'אישור חשבונות חדשים',
-          sub: 'מי נרשם וממתין — אישור נותן תפקיד ומפעיל את החשבון',
-          open: _open == 'accountApprovals',
-          onTap: () => _toggle('accountApprovals'),
-          child: _NewAccountApprovalsBody(
-            onOpen: () => Navigator.of(context)
-                .push(RoleRequestsInboxScreen.route()),
-          ),
-        ),
-
         // 7. 🏗️ בונה ענפים (Pillar-2 · step 44) — the OWNER-GATED authoring
         // entry. A collection-`if` on [featureFlagsProvider] (kTradeBuilderFlag,
         // default OFF — absent from prefs AND `_forcedOnFlags`), so with the
@@ -5213,153 +5431,6 @@ class _RegressionBody extends StatelessWidget {
                   child: CfgText(
                     'manager.manage.regression.open',
                     '🔬 פתח מרכז בדיקות רגרסיה',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: bsOnAccent(context),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The 🔑 שיוך תפקידים body (A12) — a short note + a `brand` action button that
-/// opens the self-contained [ManagerRoleAssignSheet] (manager_role_assign_sheet
-/// .dart). The sheet owns ALL the logic (phone→uid lookup, the assignRole call,
-/// the no-backend gating); this is purely the mount hook. [onOpen] performs the
-/// `showModalBottomSheet`. Keyed `open-role-assign` so a test can tap it.
-/// The approvals card body: a LIVE count of who is waiting, and the way in.
-///
-/// The count is the point. Approval is invisible work — nobody opens a queue to
-/// check whether it is empty — so the number has to come to the manager rather
-/// than the other way round. It reads the same stream the inbox does, scoped
-/// server-side to the tier this caller may actually review.
-class _NewAccountApprovalsBody extends ConsumerWidget {
-  const _NewAccountApprovalsBody({required this.onOpen});
-
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pending = ref.watch(pendingRoleRequestsProvider);
-    final count = pending.asData?.value.length;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        CfgText(
-          'manager_dashboard_screen.approvals_intro',
-          'כל מי שנרשם ממתין לאישור וחסום עד שיאושר. אישור נותן תפקיד ומפעיל '
-          'את החשבון בו-זמנית — ומופיע אצלו על המסך מיד.',
-          style: const TextStyle(
-            color: BsTokens.inkLight,
-            fontSize: 13,
-            height: 1.35,
-          ),
-        ),
-        const SizedBox(height: BsTokens.space3),
-        if (count != null)
-          Text(
-            count == 0 ? 'אין ממתינים כרגע' : 'ממתינים לאישור: $count',
-            style: TextStyle(
-              color: count == 0 ? BsTokens.mutedLight : BsTokens.warnText,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        const SizedBox(height: BsTokens.space3),
-        HelpTarget(
-          title: 'בקשות אישור',
-          body: 'פותח את תיבת הבקשות: מי ממתין, ואישור או דחייה לכל אחד. '
-              'אישור נותן את התפקיד ומשחרר את החשבון מהמתנה.',
-          // giant · composite hide: an org that hides
-          // 'manager.manage.approvals.open' removes the WHOLE button (not an
-          // empty shell — CfgText alone would blank only the label). CfgVisible
-          // wraps the outer button; absent config ⇒ child verbatim ⇒
-          // byte-identical.
-          child: CfgVisible(
-            'manager.manage.approvals.open',
-            child: Material(
-              color: BsTokens.brand,
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              child: InkWell(
-                key: const ValueKey('open-approvals'),
-                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                onTap: onOpen,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: CfgText(
-                    'manager.manage.approvals.open',
-                    '📋 פתח בקשות אישור',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: bsOnAccent(context),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RoleAssignBody extends StatelessWidget {
-  const _RoleAssignBody({required this.onOpen});
-
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const CfgText(
-          'manager_dashboard_screen.roleassign_intro',
-          'הקצאת תפקיד למשתמש לפי טלפון או מזהה (uid). השיוך מופעל ע״י השרת '
-          'של בעל המערכת ומשפיע על המשתמש בהתחברות הבאה.',
-          style: TextStyle(
-            color: BsTokens.inkLight,
-            fontSize: 13,
-            height: 1.35,
-          ),
-        ),
-        const SizedBox(height: BsTokens.space3),
-        // #31 — help mode rings + explains; otherwise opens the role-assign
-        // sheet.
-        HelpTarget(
-          title: 'שיוך תפקידים',
-          body:
-              'פותח את גיליון שיוך התפקידים: הקצאת תפקיד (חנות/שליח/עובד/מנהל) '
-              'למשתמש לפי טלפון או מזהה. השיוך מבוצע דרך השרת של בעל המערכת.',
-          // giant · composite hide: an org that hides 'manager.manage.roles.open'
-          // removes the WHOLE button (not an empty shell — CfgText alone would
-          // blank only the label). CfgVisible wraps the outer button; absent
-          // config ⇒ child verbatim ⇒ byte-identical.
-          child: CfgVisible(
-            'manager.manage.roles.open',
-            child: Material(
-              color: BsTokens.brand,
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              child: InkWell(
-                key: const ValueKey('open-role-assign'),
-                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                onTap: onOpen,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: CfgText(
-                    'manager.manage.roles.open',
-                    '🔑 פתח שיוך תפקידים',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: bsOnAccent(context),

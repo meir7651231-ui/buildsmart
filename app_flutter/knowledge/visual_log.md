@@ -2484,7 +2484,7 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ## #reg-approval — פאנל אישור-הרשמה בטאב 👥 לקוחות (2026-08-02)
 **שינוי-UI (גדור `useFirebaseBackend` + persona מנהל):** טאב-הלקוחות של המנהל חוּוט (לא נבנה-מחדש):
 - **`_PendingApprovalPanel`** בראש הטאב — כרטיס עם מסגרת-כתומה, כותרת "🔔 אישור משתמשים חדשים (N)", צ'ק-ליסט של הממתינים (כל שורה: checkbox + שם + תפקיד + תג ⏳ ממתין, **מסומן כברירת-מחדל**), ושני כפתורים: **"אשר הכל (N)"** (brand מלא) + **"אשר מסומנים (M)"** (outline; מושבת כשאין סימון). ריק-ממתינים ⇒ הפאנל נעלם לגמרי (`SizedBox.shrink`). בעת-אישור ⇒ spinner במקום הכפתורים.
-- **`_ApprovalBadge`** פר-כרטיס-לקוח: ⏳ ממתין (ענבר) / ✓ מאושר (ירוק) — live-only.
+- **`_ApprovalBadge`** פר-כרטיס-לקוח: ⏳ ממתין (ענבר) / ✓ פעיל (ירוק) — live-only. (התווית עודכנה `מאושר`→`פעיל` ב-#user-hub, 2026-08-11.)
 - **רשימת-הלקוחות** מציגה כעת את **כל** הרשומים (איחוד directory + הזמנות), לא רק מי שהזמין.
 **מדוע אין screenshot מקומי (זהה ל-#8/3ב · #8/3ג · #identity):** כל המשטח גדור `useFirebaseBackend` (compile-time const) + persona מנהל — בכל build ללא הדגל הוא **tree-shaken/נעדר**, ואי-אפשר לרנדר אותו בסביבת-הסוכן בלי backend חי + התחברות-מנהל + משתמשים-ממתינים זרועים. **מה כן אומת:** לוגיקת-הצ'ק-ליסט (all/selected/all-except + stale-exclusion + OFF-gate) ב-`manager_approval_panel_test` **8/8**; **כל חבילת-הבדיקות ירוקה (baseline 0, אפס רגרסיה)**; `flutter analyze` **0 errors**; מבנה-ה-widget נסקר בקוד; מסלול-כבוי מוכח זהה-בייטים (directory ריק ⇒ מתקפל לרשימת-היום). **אימות חזותי בפועל — על האתר החי לאחר הפריסה** (הבעלים רואה את הפאנל בכניסת-מנהל · חסימת-הקופה עד אישור · הזרימה ⏳→✓).
 
@@ -2583,3 +2583,11 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #auth-registration-audit — welcome_screen register-ordering (ללא שינוי-חזותי · 2026-08-11)
 **שינוי:** `welcome_screen._registerViaAuth` — הזזת `userProfileProvider.register(...)` לאחר הצלחת `createUserWithEmailPassword` (במקום לפניה) + הערות. **visual-verify: אין שינוי חזותי.** הענף היחיד שנגע (`if (kEmailPasswordAuth && validEmail(contact))`) **מגודר מאחורי `kEmailPasswordAuth` שכבוי** — לא נרנדר ב-build המשווק. השינוי מזיז אך ורק את **סדר קריאת state מקומית** (register) על מסלול שאינו מצייר widget; ה-layout, הטקסט, ה-FAB וזרימת-המסך זהים בייט-לבייט. אומת: `flutter test test/welcome_auth_gate_test.dart` (נתיב flag-OFF, המסלול החי) ירוק, ו-`git diff` מראה 0 שינוי ב-build()/render. אין screenshot כי אין פיקסל שהשתנה.
+
+## #user-hub — מרכז ניהול-משתמשים אחד בטאב 👥 (2026-08-11)
+**שינוי-UI (גדור `useFirebaseBackend` + persona מנהל · המשך #reg-approval):** טאב-הלקוחות הפך למרכז-המשתמשים היחיד — כל ניהול-המשתמשים במקום אחד, לא מפורק (לבקשת-הבעלים):
+- **תגי-שורה:** ליד שם כל רשומה — תג-סטטוס (⏳ ממתין / ✓ פעיל, `_ApprovalBadge`) + תג-תפקיד (`_RoleBadge`, מ-`_kBsRoleLabel`). מוצג רק live + כשיש סטטוס/תפקיד; שורות order-derived/CRM נקיות.
+- **צ׳יפי-סינון (`_AccountFilterChips`):** הכל / ממתינים / פעילים / לקוחות בלבד — מעל הרשימה ליד צ׳יפי-האשראי. data-gated (`if hasDirectory`), predicate טהור `accountFilterMatch`.
+- **פעולות-בגיליון (`_CustomerActionRow`, `if uid.isNotEmpty`):** ✓ אשר / ⏸️ השהה (`userApproverProvider`) + 🔑 שנה תפקיד → בורר-התפקידים **ממוקד** ל-uid (`showManagerRoleAssignSheet(targetUid,targetName)`). מעל פירוט-ה-CRM הקיים.
+- **איחוד:** 2 סעיפי-הכפילות בטאב 🛠️ ניהול (🔑 שיוך תפקידים · 📋 אישור חשבונות) הוסרו — הפונקציונליות עברה למרכז. אין "איפה זה היה".
+**מדוע אין screenshot מקומי (זהה ל-#reg-approval):** כל המשטח גדור `useFirebaseBackend` const + persona מנהל → tree-shaken בכל build ללא הדגל; אי-אפשר לרנדר בסביבת-הסוכן בלי backend חי + כניסת-מנהל + directory זרוע. **מה כן אומת:** מיקוד-הבורר (`manager_role_assign_sheet_a12_test`, 3 טסטים חדשים — picker מוסתר · 👤 subject · `{targetUid,role}` לשרת) + role-sheet **8/8**; predicate-הסינון (`user_hub_filter_test`, 4 טסטים, **mutation-verified** RED→GREEN); מסלול-כבוי מוכח זהה-בייטים (`manager_dashboard_screen_test` ירוק — 5 כלי-הניהול + גיליון-הלקוח); `flutter analyze` **0 errors** · כל החבילה ירוקה. **אימות חזותי בפועל — על האתר החי לאחר הפריסה** (הבעלים רואה תגים/סינון/פעולות בטאב 👥 בכניסת-מנהל).

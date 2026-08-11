@@ -3987,3 +3987,9 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`comparison_set` · `stage_progress` · `hidden_catalog_sections` · `onboarding_progress`:** מחקו `_load`/`_persist`, מכריזים `persistKey`, call-sites → `loadFromPrefs`/`persistToPrefs`. ה-import של `shared_preferences` הוסר לגמרי (השתמשו בו רק ל-load/persist).
 - **`smart_project_engine`:** variant אמיתי (`_load` שונה) — נשמר כמו-שהוא (כלל-בטיחות).
 - **אימות:** 37 בדיקות ירוקות (6 קבצים) · analyze נקי · net −20 שורות · זהה-התנהגות.
+### #user-hub — מרכז ניהול-משתמשים אחד (טאב 👥) (2026-08-11)
+איחוד כל ניהול-המשתמשים למקום אחד (SSOT: `knowledge/SSOT-user-management-hub.md`), לבקשת-הבעלים "הכל במקום אחד, לא מפורק". הרחבת `_CustomersTab` (המיזוג directory+CRM+orders כבר קיים ב-`_customerViewsProvider`):
+- תגי סטטוס+תפקיד בשורה · צ׳יפי-סינון (`accountFilterMatch` public, :2233) · פעולות אשר/השהה/שנה-תפקיד בגיליון (`_CustomerActionRow`) · בורר-תפקיד ממוקד-uid (`showManagerRoleAssignSheet(targetUid,targetName)`).
+- הוסרו 2 סעיפי-הכפילות בטאב ניהול (roles + accountApprovals) + 2 מחלקות מתות (`_RoleAssignBody`/`_NewAccountApprovalsBody`) + import מיותם.
+- נבנה ע"י הנחיל (2 fixers, disjoint files) + orchestrator (טסטים/docs/gate). analyze 0 · targeted 51/51 · mutation-verified.
+- **פתוח (follow-up, לא-חוסם):** לרנדר-מחדש `test/generated/` (2 wired-cases של הסעיפים שהוסרו · opt-in, atomgen) · לגזום 2 ids מ-element_registry.

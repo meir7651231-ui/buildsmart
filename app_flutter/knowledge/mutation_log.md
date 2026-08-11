@@ -2066,3 +2066,9 @@
 - **mutation-verify (בוצע בפועל, לא רק בטענה):** היפוך שני הבלוקים ב-welcome_screen (mirror לפני ensureUser) → `flutter test` נכשל ב-RED בשורת-ה-order-assertion (line 66); `git checkout` שחזור → GREEN. הטסט בעל-שיניים.
 - **אימות-פריסה:** 3 ה-Functions מיוצאים ב-`functions/src/index.ts` (:210-217) ו-`.github/workflows/firebase-deploy.yml:175` פורס `--only functions`. אימות-runtime-חי דורש Firebase console (ידני).
 - **טרם:** flip הדגל, backfill, dark-launch — ממתינים ל-3 החלטות §6 ולאישור.
+
+## #user-hub — accountFilterMatch predicate guard (2026-08-11)
+- **הנכס:** predicate-הסינון של מרכז-המשתמשים (הכל/ממתינים/פעילים/לקוחות) — הלוגיקה החדשה היחידה שאינה מכוסה-seam-קיים.
+- **הפעולה:** חילוץ `accountFilterMatch` ל-public top-level (`manager_dashboard_screen.dart:2233`) + `test/user_hub_filter_test.dart` (4 טסטים טהורים).
+- **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp, לא git-checkout — לשמר עבודת-fixer לא-מחויבת) → מוטציה `case 'pending' → return true` (occurrence יחיד) → `flutter test` נכשל RED בטסט "pending → only pending" → שחזור → GREEN 4/4. הטסט בעל-שיניים.
+- **מיקוד-הבורר:** `manager_role_assign_sheet_a12_test` +3 טסטים (picker מוסתר · 👤 subject · `{targetUid,role}` לשרת) — 8/8, מאמת התנהגות אמיתית, לא prose.
