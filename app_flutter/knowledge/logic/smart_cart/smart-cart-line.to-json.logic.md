@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `accessories` · `brandName` · `brandPrice` · `productEmoji` · `productKey` · `productName` · `productQty`
+- **reads:** `accessories` · `brandName` · `brandPrice` · `productEmoji` · `productKey` · `productName` · `productQty` · `selection`
 - **writes:** _none_
 - **calls:** _none_
 - **called-by:** _none_

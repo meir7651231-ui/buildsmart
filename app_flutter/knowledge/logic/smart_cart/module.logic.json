@@ -1,7 +1,7 @@
 {
   "module": "smart_cart",
   "source": "/home/user/buildsmart/app_flutter/lib/state/smart_cart.dart",
-  "atomCount": 13,
+  "atomCount": 12,
   "atoms": [
     {
       "fn": "SmartCartAcc.toJson",
@@ -147,6 +147,10 @@
           {
             "kind": "field",
             "name": "productQty"
+          },
+          {
+            "kind": "field",
+            "name": "selection"
           }
         ],
         "writes": [],
@@ -178,72 +182,6 @@
       }
     },
     {
-      "fn": "SmartCartNotifier.state=",
-      "kind": "setter",
-      "object": {
-        "signature": "set (List<SmartCartLine> value) -> void",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_prefsKey",
-            "transitive": true
-          }
-        ],
-        "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded"
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
-        "calledBy": [],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "effect",
-            "detail": "_loaded = true"
-          },
-          {
-            "kind": "effect",
-            "detail": "super.state = value"
-          },
-          {
-            "kind": "effect",
-            "detail": "_persist()"
-          }
-        ]
-      },
-      "floor": [],
-      "contract": {
-        "input": "(List<SmartCartLine> value)",
-        "output": "void",
-        "purity": "side-effecting",
-        "precond": [],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
       "fn": "SmartCartNotifier._load",
       "kind": "notifier-method",
       "object": {
@@ -257,21 +195,7 @@
             "name": "_prefsKey"
           }
         ],
-        "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded"
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
+        "writes": [],
         "calls": [],
         "calledBy": [],
         "gatedBy": []
@@ -285,12 +209,14 @@
         "getString",
         "jsonDecode",
         "map",
+        "markLoaded",
+        "seedIfUnloaded",
         "toList"
       ],
       "contract": {
         "input": "()",
         "output": "Future<void>",
-        "purity": "side-effecting",
+        "purity": "pure",
         "precond": [],
         "postcond": [],
         "invariants": [],
@@ -298,7 +224,7 @@
       }
     },
     {
-      "fn": "SmartCartNotifier._persist",
+      "fn": "SmartCartNotifier.persistState",
       "kind": "notifier-method",
       "object": {
         "signature": "() -> Future<void>",
@@ -322,9 +248,7 @@
           }
         ],
         "calls": [],
-        "calledBy": [
-          "SmartCartNotifier.state="
-        ],
+        "calledBy": [],
         "gatedBy": []
       },
       "behaviour": {
@@ -356,24 +280,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_prefsKey",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -410,24 +318,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_prefsKey",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -466,24 +358,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_prefsKey",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -582,24 +458,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_prefsKey",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -643,24 +503,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_prefsKey",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -697,24 +541,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_prefsKey",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"

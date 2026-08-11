@@ -133,3 +133,37 @@ mixin JsonListPrefsPersisted<E> on StateNotifier<List<E>> {
         persistKey, jsonEncode(state.map(encodeElement).toList()));
   }
 }
+
+/// Opt-in for a persisting [StateNotifier] whose `set state` override
+/// auto-persists AND must guard against an async `_load` clobbering a mutation
+/// that arrived before SharedPreferences resolved (the `bool _loaded` latch —
+/// see `test/state_loaded_guard_test.dart` and hard-case #6 in DUPLICATION.md).
+///
+/// The setter (`_loaded=true; super.state; persistState()`) and the latch live
+/// here once; each engine keeps its own [persistState] and calls [seedIfUnloaded]
+/// / [markLoaded] from its bespoke `_load`. Behaviour is identical to the
+/// hand-written invariant it replaces.
+mixin PersistOnWrite<T> on StateNotifier<T> {
+  bool _loaded = false;
+
+  /// The engine's own persist (was its `_persist`).
+  Future<void> persistState();
+
+  @override
+  set state(T value) {
+    _loaded = true; // a mutation happened — block any pending _load
+    super.state = value;
+    persistState();
+  }
+
+  /// Apply a persisted [value] only if no mutation has arrived yet, then latch.
+  /// (Bypasses the setter so loading does not re-persist.) Identical to the
+  /// hand-written `if (!_loaded) { super.state = value; } _loaded = true;`.
+  void seedIfUnloaded(T value) {
+    if (!_loaded) super.state = value;
+    _loaded = true;
+  }
+
+  /// Latch as loaded without seeding (the empty / corrupt `_load` paths).
+  void markLoaded() => _loaded = true;
+}

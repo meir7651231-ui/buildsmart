@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -93,47 +94,37 @@ class SmartCartLine {
       );
 }
 
-class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
+class SmartCartNotifier extends StateNotifier<List<SmartCartLine>>
+    with PersistOnWrite<List<SmartCartLine>> {
   SmartCartNotifier() : super(const []) {
     _load();
   }
 
   static const _prefsKey = 'bs.smart-cart.v1';
 
-  /// True once any mutation has been applied (or _load completes).
-  /// Guards against _load clobbering a mutation that arrived before prefs.
-  bool _loaded = false;
-
-  // Persist the cart on every change so it survives app restarts.
-  @override
-  set state(List<SmartCartLine> value) {
-    _loaded = true; // mutation happened — block any pending _load
-    super.state = value;
-    _persist();
-  }
+  // The set-state auto-persist invariant + the `_loaded` load-clobber latch are
+  // provided by PersistOnWrite; this engine keeps its own persistState + _load.
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_prefsKey);
       if (raw == null || raw.isEmpty) {
-        _loaded = true;
+        markLoaded();
         return;
       }
       final list = (jsonDecode(raw) as List<dynamic>)
           .map((e) => SmartCartLine.fromJson(e as Map<String, dynamic>))
           .toList();
-      if (!_loaded) {
-        super.state = list; // bypass re-persisting the value we just loaded
-        _loaded = true;
-      }
+      seedIfUnloaded(list);
     } catch (_) {
       // Corrupt/old payload — ignore and start empty.
-      _loaded = true;
+      markLoaded();
     }
   }
 
-  Future<void> _persist() async {
+  @override
+  Future<void> persistState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(

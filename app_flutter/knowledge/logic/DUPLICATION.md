@@ -20,8 +20,11 @@
 > - **slice 3b — 4 מודולי Map/List-json ✅ בוצע.** `ab_experiments`+`card_selection`
 >   (Map<String,String> → `StringMapPrefsPersisted`) · `card_versions`+`draft_quote`
 >   (List → `JsonListPrefsPersisted<E>`). **−47 שורות**. 14 בדיקות ירוקות.
-> - הבא בתור: slice 4 (6 המנועים · `state=` invariant — hard-case #6) →
->   slice 5 (HR-records).
+> - **slice 4a — smart_cart (hard-case #6) ✅ בוצע.** ה-`set state` auto-persist +
+>   `_loaded` latch → `mixin PersistOnWrite<T>`. `state_loaded_guard_test` נשאר
+>   ירוק. 46 בדיקות ירוקות. **5 מנועים נוספים (orders/tasks/projects/sys_chat/
+>   persona) — ליבת-הכסף, 2 וריאנטים — ממתינים לצ'קפוינט.**
+> - הבא בתור: slice 4b (5 המנועים — בזהירות, פר-מנוע) → slice 5 (HR-records).
 
 
 

@@ -9,8 +9,8 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `_prefsKey↝`
-- **writes:** `field:_loaded↝` · `io:prefs.setString↝` · `state:state`
+- **reads:** _none_
+- **writes:** `state:state`
 - **calls:** `remove`
 - **called-by:** _none_
 - **gated-by:** _none_

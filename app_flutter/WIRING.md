@@ -4000,3 +4000,11 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`ab_experiments` · `card_selection`** (Map) + **`card_versions` · `draft_quote`** (List) → מיקסין. `dart:convert`+`shared_preferences` הוסרו (דדופ מלא).
 - **`ab_experiments`:** ללא `@override` על `persistKey` — למחלקה מתודה בשם `override` שמצלה את אנוטציית dart:core (תועד בהערה).
 - **אימות:** 14 בדיקות ירוקות (כולל `state_loaded_guard`) · analyze נקי · net −47 שורות.
+
+### #dedup-slice-4a — smart_cart → PersistOnWrite mixin (hard-case #6) (2026-08-11)
+צעד חמישי של `knowledge/logic/DUPLICATION.md` — ה-invariant הכי-רגיש (set-state auto-persist + `_loaded` load-clobber latch, hard-case #6). smart_cart כהוכחה.
+- **`lib/state/prefs_persisted.dart`:** נוסף `mixin PersistOnWrite<T> on StateNotifier<T>` — ה-`set state` (`_loaded=true; super.state; persistState()`) + ה-latch במקום אחד; `seedIfUnloaded`/`markLoaded` ל-`_load` הייחודי; `persistState` מוזרק.
+- **`smart_cart`:** מחק `bool _loaded` + `set state`, `_persist`→`persistState`, ה-`_load` קורא `markLoaded`/`seedIfUnloaded`. זהה-התנהגות.
+- **`state_loaded_guard_test` נשאר ירוק:** smart_cart איבד `set state(` → מדולג; `prefs_persisted.dart` מחזיק `set state(`+`SharedPreferences`+`bool _loaded` → guarded>0, אפס offenders.
+- **אימות:** 46 בדיקות ירוקות (כולל guard-test + מנוע-ההזמנות-המשותף) · analyze נקי.
+- **פתוח:** 5 מנועים נוספים עם הדפוס (orders/tasks/projects/sys_chat/persona) — 2 וריאנטים של setter; ממתין לצ'קפוינט לפני נגיעה בהם (ליבת-הכסף).

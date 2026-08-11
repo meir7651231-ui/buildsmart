@@ -10,7 +10,7 @@
 
 ## חיבורים · connections
 - **reads:** `_prefsKey`
-- **writes:** `field:_loaded` · `io:prefs.setString↝` · `state:state`
+- **writes:** _none_
 - **calls:** _none_
 - **called-by:** _none_
 - **gated-by:** _none_
@@ -19,10 +19,10 @@
 ## התנהגות · behaviour (algorithm)
 
 ## floor
-- `fromJson` · `getInstance` · `getString` · `jsonDecode` · `map` · `toList`
+- `fromJson` · `getInstance` · `getString` · `jsonDecode` · `map` · `markLoaded` · `seedIfUnloaded` · `toList`
 
 ## חוזה · contract
 - **input:** `()`
 - **output:** `Future<void>`
-- **purity:** side-effecting
+- **purity:** pure
 - **throws:** _none_
