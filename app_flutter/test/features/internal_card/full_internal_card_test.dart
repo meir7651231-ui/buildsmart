@@ -160,6 +160,29 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  testWidgets('swiping the buy button up raises the quantity (D6)',
+      (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    // Full-screen (no scroll view) so the vertical drag hits the button.
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FullInternalCard(product: hero, fillHeight: true),
+          ),
+        ),
+      ),
+    );
+    expect(find.textContaining('1 ×'), findsOneWidget);
+    await tester.fling(
+      find.byKey(const Key('internalCardBuy')),
+      const Offset(0, -220),
+      1200,
+    );
+    await tester.pump();
+    expect(find.textContaining('2 ×'), findsOneWidget);
+  });
+
   testWidgets('line buttons are hidden until a product is added (D6/D14)',
       (tester) async {
     final hero = catalogProductForSku(FullInternalCard.heroSku)!;

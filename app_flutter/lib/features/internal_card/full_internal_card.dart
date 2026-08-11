@@ -126,6 +126,22 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
 
   void _pickUnit(String u) => setState(() => _unit = u);
 
+  /// D6 — how many of the selected unit to add (up/down swipe on the buy button).
+  int _qty = 1;
+
+  /// D6 — cycle the sale unit by a horizontal swipe on the buy button.
+  void _stepUnit(int dir) {
+    final keys = _current.saleUnits.keys.toList();
+    if (keys.length < 2) return;
+    final cur = keys.indexOf(_unit);
+    final i = cur < 0 ? 0 : cur;
+    setState(() => _unit = keys[(i + dir + keys.length) % keys.length]);
+  }
+
+  /// D6 — bump the quantity by a vertical swipe (up = +1, down = −1; min 1).
+  void _stepQty(int delta) =>
+      setState(() => _qty = (_qty + delta).clamp(1, 999));
+
   /// D15 — the spec is HIDDEN behind the 📋 clipboard; tapping it swaps the big
   /// product image for the spec panel in place (the card is image-first, not a
   /// text dump).
@@ -157,6 +173,9 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
         onStepVariant: _stepVariant,
         onPickVariant: _pickVariant,
         onPickUnit: _pickUnit,
+        qty: _qty,
+        onCycleUnit: _stepUnit,
+        onStepQty: _stepQty,
         onToggleSpec: _toggleSpec,
         onPickSpecTab: _pickSpecTab,
         onSwipeImage: _swipeImage,
@@ -177,6 +196,9 @@ class _CardView extends ConsumerWidget {
     this.onStepVariant,
     this.onPickVariant,
     this.onPickUnit,
+    this.qty = 1,
+    this.onCycleUnit,
+    this.onStepQty,
     this.onToggleSpec,
     this.onPickSpecTab,
     this.onSwipeImage,
@@ -207,6 +229,15 @@ class _CardView extends ConsumerWidget {
 
   /// D6 — pick a sale unit (null ⇒ inert).
   final void Function(String unit)? onPickUnit;
+
+  /// D6 — quantity of the selected unit to add.
+  final int qty;
+
+  /// D6 — cycle the sale unit (horizontal swipe on the buy button; null ⇒ inert).
+  final void Function(int dir)? onCycleUnit;
+
+  /// D6 — bump the quantity (vertical swipe on the buy button; null ⇒ inert).
+  final void Function(int delta)? onStepQty;
 
   /// D15 — toggle the spec panel (null ⇒ inert).
   final VoidCallback? onToggleSpec;
@@ -1067,52 +1098,86 @@ class _CardView extends ConsumerWidget {
     final selected = units.containsKey(unit) ? unit : units.keys.first;
     final mult = units[selected] ?? 1;
     final base = priceFor(p);
-    final priceStr =
-        base == null ? '' : ' · ${formatCatalogPrice(base * mult, s)}';
+    final total =
+        base == null ? '' : ' · ${formatCatalogPrice(base * mult * qty, s)}';
+    final line2 = '$qty × $selected$total';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (units.length > 1) _unitSelector(units, selected),
-        Container(
-          margin: const EdgeInsets.fromLTRB(13, 8, 13, 13),
-          child: Material(
-            key: const Key('internalCardBuy'),
-            color: _cAccent,
-            borderRadius: BorderRadius.circular(11),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: () => _addToCart(context, ref, p, selected, mult),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 9),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add, size: 18, color: Colors.white),
-                        SizedBox(width: 3),
-                        Text(
-                          'הוסף לסל',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
+        // D6 — the gesture hint: swipe ◀▶ to change unit, ▲▼ to change quantity.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(13, 5, 13, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (units.length > 1) ...[
+                const Icon(Icons.swap_horiz, size: 12, color: _cDim),
+                const SizedBox(width: 2),
+                const Text('יחידה', style: TextStyle(fontSize: 10, color: _cDim)),
+                const SizedBox(width: 10),
+              ],
+              const Icon(Icons.swap_vert, size: 12, color: _cDim),
+              const SizedBox(width: 2),
+              const Text('כמות', style: TextStyle(fontSize: 10, color: _cDim)),
+            ],
+          ),
+        ),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          // Horizontal drag cycles the unit; vertical drag bumps the quantity.
+          onHorizontalDragEnd: (onCycleUnit == null || units.length < 2)
+              ? null
+              : (d) {
+                  final v = d.primaryVelocity ?? 0;
+                  if (v != 0) onCycleUnit!(v < 0 ? 1 : -1);
+                },
+          onVerticalDragEnd: onStepQty == null
+              ? null
+              : (d) {
+                  final v = d.primaryVelocity ?? 0;
+                  if (v != 0) onStepQty!(v < 0 ? 1 : -1); // swipe up = +1
+                },
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(13, 6, 13, 13),
+            child: Material(
+              key: const Key('internalCardBuy'),
+              color: _cAccent,
+              borderRadius: BorderRadius.circular(11),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => _addToCart(context, ref, p, selected, mult, qty),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, size: 18, color: Colors.white),
+                          SizedBox(width: 3),
+                          Text(
+                            'הוסף לסל',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    if (priceStr.isNotEmpty)
+                        ],
+                      ),
                       Text(
-                        '$selected$priceStr',
+                        line2,
                         style: const TextStyle(
                           color: Color(0xFFFFE3D2),
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1161,14 +1226,15 @@ class _CardView extends ConsumerWidget {
     );
   }
 
-  /// D6 — add the current variant to the smart cart in the selected unit
-  /// (quantity = the unit's piece-count). Toasts confirmation.
+  /// D6 — add the current variant to the smart cart: [qty] of [unitKey], each
+  /// unit worth [mult] pieces ⇒ mult × qty pieces total. Toasts confirmation.
   void _addToCart(
     BuildContext context,
     WidgetRef ref,
     LipskeyCatalogProduct p,
     String unitKey,
     int mult,
+    int qty,
   ) {
     ref.read(smartCartProvider.notifier).add(
           SmartCartLine(
@@ -1177,12 +1243,12 @@ class _CardView extends ConsumerWidget {
             productEmoji: _heroEmoji(p),
             brandName: p.brand,
             brandPrice: priceFor(p) ?? 0,
-            productQty: mult,
+            productQty: mult * qty,
             accessories: const [],
             selection: {'יחידה': unitKey},
           ),
         );
-    showToast(context, 'נוסף לסל');
+    showToast(context, qty > 1 ? 'נוספו $qty × $unitKey לסל' : 'נוסף לסל');
   }
 
   // ── D6–D9 · line strip — circles + the smart buttons, only after a product ────
