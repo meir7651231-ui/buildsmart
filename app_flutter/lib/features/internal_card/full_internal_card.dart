@@ -145,6 +145,23 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
   void _stepQty(int delta) =>
       setState(() => _qty = (_qty + delta).clamp(1, 999));
 
+  /// D8 — which line circle is highlighted (null ⇒ the last-added). Tapping a
+  /// circle highlights it; tapping the already-highlighted one removes it
+  /// (screen #2: "לחיצה על עיגול = מדגיש · לחיצה על המודגש = מסיר").
+  int? _highlightLine;
+
+  void _tapLineCircle(int index) {
+    final line = ref.read(smartCartProvider);
+    if (index < 0 || index >= line.length) return;
+    final highlighted = _highlightLine ?? line.length - 1;
+    if (index == highlighted) {
+      ref.read(smartCartProvider.notifier).remove(index);
+      setState(() => _highlightLine = null);
+    } else {
+      setState(() => _highlightLine = index);
+    }
+  }
+
   /// D15 — the spec is HIDDEN behind the 📋 clipboard; tapping it swaps the big
   /// product image for the spec panel in place (the card is image-first, not a
   /// text dump).
@@ -178,6 +195,8 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
         qty: _qty,
         onCycleUnit: _stepUnit,
         onStepQty: _stepQty,
+        highlightLine: _highlightLine,
+        onTapLine: _tapLineCircle,
         onToggleSpec: _toggleSpec,
         onPickSpecTab: _pickSpecTab,
         onSwipeImage: _swipeImage,
@@ -200,6 +219,8 @@ class _CardView extends ConsumerWidget {
     this.qty = 1,
     this.onCycleUnit,
     this.onStepQty,
+    this.highlightLine,
+    this.onTapLine,
     this.onToggleSpec,
     this.onPickSpecTab,
     this.onSwipeImage,
@@ -236,6 +257,12 @@ class _CardView extends ConsumerWidget {
 
   /// D6 — bump the quantity (vertical swipe on the buy button; null ⇒ inert).
   final void Function(int delta)? onStepQty;
+
+  /// D8 — highlighted line-circle index (null ⇒ the last-added).
+  final int? highlightLine;
+
+  /// D8 — tap a line circle: highlight it, or remove it if already highlighted.
+  final void Function(int index)? onTapLine;
 
   /// D15 — toggle the spec panel (null ⇒ inert).
   final VoidCallback? onToggleSpec;
@@ -276,7 +303,7 @@ class _CardView extends ConsumerWidget {
             _buyArea(context, ref, p, settings),
             // D6–D9/D14 — the line strip (circles + קו/בדיקה/השלם) appears ONLY
             // after a product is added; the base card is just image + add.
-            _lineStrip(context, ref, p),
+            _lineStrip(context, ref, p, settings),
           ],
         ),
       ),
@@ -1220,20 +1247,25 @@ class _CardView extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     LipskeyCatalogProduct p,
+    CatalogSettings s,
   ) {
     final line = ref.watch(smartCartProvider);
     if (line.isEmpty) {
       return const SizedBox.shrink();
     }
+    final hot = (highlightLine ?? line.length - 1).clamp(0, line.length - 1);
+    final total = line.fold<int>(0, (sum, l) => sum + l.total);
     return Column(
       key: const Key('internalCardLineStrip'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        // A header so the circle(s) read as "your line", not a floating dot.
+        // A header so the circle(s) read as "your line", with the running total.
         Padding(
           padding: const EdgeInsets.fromLTRB(13, 8, 13, 2),
           child: Text(
-            '🧵 הקו שלך · ${line.length} ${line.length == 1 ? 'פריט' : 'פריטים'}',
+            '🧵 הקו שלך · ${line.length} '
+            '${line.length == 1 ? 'פריט' : 'פריטים'} · '
+            '${formatCatalogPrice(total, s)}',
             textAlign: TextAlign.center,
             style: const TextStyle(
                 fontSize: 12, fontWeight: FontWeight.w800, color: _cInk),
@@ -1247,13 +1279,22 @@ class _CardView extends ConsumerWidget {
             alignment: WrapAlignment.center,
             children: [
               for (var i = 0; i < line.length; i++)
-                _lineCircle(
-                  line[i].productEmoji,
-                  line[i].productQty,
-                  highlighted: i == line.length - 1,
+                GestureDetector(
+                  key: Key('lineCircle_$i'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onTapLine == null ? null : () => onTapLine!(i),
+                  child: _lineCircle(
+                    line[i].productEmoji,
+                    line[i].productQty,
+                    highlighted: i == hot,
+                  ),
                 ),
             ],
           ),
+        ),
+        const Text(
+          'הקש עיגול לבחירה · הקש שוב להסרה',
+          style: TextStyle(fontSize: 10, color: _cDim),
         ),
         _lineActions(context, ref, p),
       ],

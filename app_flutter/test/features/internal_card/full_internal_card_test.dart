@@ -204,6 +204,38 @@ void main() {
     expect(find.byKey(const Key('internalCardSpecPanel')), findsOneWidget);
   });
 
+  testWidgets('tapping the highlighted line circle removes it (screen 2)',
+      (tester) async {
+    tester.view.physicalSize = const Size(430, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: FullInternalCard(product: hero, fillHeight: true),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('internalCardBuy')));
+    await tester.pump();
+    expect(container.read(smartCartProvider), hasLength(1));
+
+    // The single (last-added) circle is highlighted → tapping it removes it.
+    await tester.tap(find.byKey(const Key('lineCircle_0')));
+    await tester.pump();
+    expect(container.read(smartCartProvider), isEmpty);
+
+    await tester.pump(const Duration(seconds: 5)); // flush the toast timer
+  });
+
   testWidgets('line buttons are hidden until a product is added (D6/D14)',
       (tester) async {
     final hero = catalogProductForSku(FullInternalCard.heroSku)!;
