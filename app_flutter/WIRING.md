@@ -3980,3 +3980,10 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`card_detail_mode` + `project_mode`:** הועברו מלא (`set`/`_persist`→מיקסין · `_load`→שורתיים `readPersistedEnum`).
 - **`profession_mode`:** חלקי-מכוון — ה-`_load` המיוחד (גזירה מ-onboarding-trade + seed ל-cardDetailMode) נשמר **verbatim**; רק persist/set אימצו את המיקסין. עקרון-בטיחות: לא דוחפים variant בכוח.
 - **אימות:** 3 בדיקות ייעודיות ירוקות (`card_detail_mode`/`project_mode`/`profession_mode`_test — defaults · שמירה-על-notifier-חדש · no-op אידמפוטנטי) · analyze נקי · net −19 שורות. קורא-בלבד על ההתנהגות, dedup בלבד.
+
+### #dedup-slice-3a — 4 מודולי Set<String> → StringSetPrefsPersisted mixin (2026-08-11)
+צעד-ביצוע שלישי של `knowledge/logic/DUPLICATION.md` (slice-2/settings דולג — Gate 25 Preact-shared). קוד `getStringList→toSet` / `setStringList(toList)` שהיה זהה-בייט-בבייט → מיקסין opt-in אחד.
+- **`lib/state/prefs_persisted.dart`:** נוסף `mixin StringSetPrefsPersisted on StateNotifier<Set<String>>` (`loadFromPrefs`/`persistToPrefs`).
+- **`comparison_set` · `stage_progress` · `hidden_catalog_sections` · `onboarding_progress`:** מחקו `_load`/`_persist`, מכריזים `persistKey`, call-sites → `loadFromPrefs`/`persistToPrefs`. ה-import של `shared_preferences` הוסר לגמרי (השתמשו בו רק ל-load/persist).
+- **`smart_project_engine`:** variant אמיתי (`_load` שונה) — נשמר כמו-שהוא (כלל-בטיחות).
+- **אימות:** 37 בדיקות ירוקות (6 קבצים) · analyze נקי · net −20 שורות · זהה-התנהגות.

@@ -12,8 +12,13 @@
 >   באופן חד-צדדי. **דילגתי, כיבדתי את השער** — הדדופ שלהם דורש override מפורש של
 >   Gate 25 מהבעלים. (הכפילות מתועדת; הפתרון `JsonPrefsPersisted` מוכן אם/כאשר
 >   יאושר.)
-> - הבא בתור: slice 3 (list/json — לא-מוגנים) → slice 4 (6 המנועים · `state=`) →
->   slice 5 (HR-records).
+> - **slice 3a — 4 מודולי Set-list ✅ בוצע.** `comparison_set` · `stage_progress`
+>   · `hidden_catalog_sections` · `onboarding_progress` עברו למיקסין
+>   `StringSetPrefsPersisted` (getStringList→toSet / setStringList). **−20 שורות**,
+>   ה-import של shared_preferences הוסר לגמרי (דדופ מלא). 37 בדיקות ירוקות.
+>   `smart_project_engine` — variant (`_load` שונה) → דולג לפי כלל-הבטיחות.
+> - הבא בתור: slice 3b (json-object — `card_projects`/`draft_quote`...) →
+>   slice 4 (6 המנועים · `state=`) → slice 5 (HR-records).
 
 
 

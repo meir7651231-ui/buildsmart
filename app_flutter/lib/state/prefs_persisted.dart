@@ -49,3 +49,28 @@ mixin EnumPrefsPersisted<T extends Enum> on StateNotifier<T> {
     persistEnum();
   }
 }
+
+/// Opt-in persistence for a `Set<String>`-valued [StateNotifier], stored as a
+/// string list in SharedPreferences. Factors out the byte-identical
+/// getStringList→toSet load and setStringList(toList) persist shared by the
+/// UI-state set notifiers (`comparison_set`, `stage_progress`,
+/// `hidden_catalog_sections`, `onboarding_progress`) — see
+/// `knowledge/logic/DUPLICATION.md`. Behaviour is identical to the hand-written
+/// versions: a missing list keeps the current default.
+mixin StringSetPrefsPersisted on StateNotifier<Set<String>> {
+  /// The SharedPreferences key (was the module's `_key`).
+  String get persistKey;
+
+  /// Load the stored list into the set; a missing value keeps the default.
+  Future<void> loadFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(persistKey);
+    if (list != null) state = list.toSet();
+  }
+
+  /// Persist the set as a string list.
+  Future<void> persistToPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(persistKey, state.toList());
+  }
+}

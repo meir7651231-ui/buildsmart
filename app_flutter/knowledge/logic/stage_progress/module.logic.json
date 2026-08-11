@@ -1,7 +1,7 @@
 {
   "module": "stage_progress",
-  "source": "lib/state/stage_progress.dart",
-  "atomCount": 7,
+  "source": "/home/user/buildsmart/app_flutter/lib/state/stage_progress.dart",
+  "atomCount": 6,
   "atoms": [
     {
       "fn": "stageProgressNext",
@@ -40,6 +40,44 @@
       }
     },
     {
+      "fn": "StageProgressNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_key"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
       "fn": "StageProgressNotifier.keyFor",
       "kind": "notifier-method",
       "object": {
@@ -68,113 +106,6 @@
       "contract": {
         "input": "(String productKey, int stageIndex)",
         "output": "String",
-        "purity": "pure",
-        "precond": [],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
-      "fn": "StageProgressNotifier._load",
-      "kind": "notifier-method",
-      "object": {
-        "signature": "() -> Future<void>",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key"
-          }
-        ],
-        "writes": [
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
-        "calls": [],
-        "calledBy": [],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "compute",
-            "detail": "list = prefs.getStringList(_key)"
-          },
-          {
-            "kind": "branch",
-            "detail": "if list != null"
-          }
-        ]
-      },
-      "floor": [
-        "getInstance",
-        "getStringList",
-        "toSet"
-      ],
-      "contract": {
-        "input": "()",
-        "output": "Future<void>",
-        "purity": "side-effecting",
-        "precond": [],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
-      "fn": "StageProgressNotifier._persist",
-      "kind": "notifier-method",
-      "object": {
-        "signature": "() -> Future<void>",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key"
-          },
-          {
-            "kind": "field",
-            "name": "state"
-          }
-        ],
-        "writes": [],
-        "calls": [],
-        "calledBy": [
-          "StageProgressNotifier.toggle"
-        ],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "effect",
-            "detail": "await prefs.setStringList(_key, state.toList())"
-          }
-        ]
-      },
-      "floor": [
-        "getInstance",
-        "setStringList",
-        "toList"
-      ],
-      "contract": {
-        "input": "()",
-        "output": "Future<void>",
         "purity": "pure",
         "precond": [],
         "postcond": [],
@@ -237,13 +168,7 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
           {
             "kind": "state",
@@ -253,10 +178,6 @@
         "calls": [
           {
             "name": "keyFor",
-            "module": true
-          },
-          {
-            "name": "_persist",
             "module": true
           }
         ],
@@ -275,12 +196,13 @@
           },
           {
             "kind": "effect",
-            "detail": "_persist()"
+            "detail": "persistToPrefs()"
           }
         ]
       },
       "floor": [
         "contains",
+        "persistToPrefs",
         "remove"
       ],
       "contract": {

@@ -1,13 +1,13 @@
 {
   "module": "onboarding_progress",
-  "source": "lib/state/onboarding_progress.dart",
-  "atomCount": 6,
+  "source": "/home/user/buildsmart/app_flutter/lib/state/onboarding_progress.dart",
+  "atomCount": 5,
   "atoms": [
     {
-      "fn": "OnboardingProgressNotifier._load",
-      "kind": "notifier-method",
+      "fn": "OnboardingProgressNotifier.persistKey",
+      "kind": "getter",
       "object": {
-        "signature": "() -> Future<void>",
+        "signature": "get () -> String",
         "constants": []
       },
       "connections": {
@@ -17,12 +17,7 @@
             "name": "_key"
           }
         ],
-        "writes": [
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
+        "writes": [],
         "calls": [],
         "calledBy": [],
         "gatedBy": []
@@ -30,80 +25,15 @@
       "behaviour": {
         "steps": [
           {
-            "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "compute",
-            "detail": "list = prefs.getStringList(_key)"
-          },
-          {
-            "kind": "branch",
-            "detail": "if list != null"
+            "kind": "formula",
+            "detail": "_key"
           }
         ]
       },
-      "floor": [
-        "getInstance",
-        "getStringList",
-        "toSet"
-      ],
+      "floor": [],
       "contract": {
         "input": "()",
-        "output": "Future<void>",
-        "purity": "side-effecting",
-        "precond": [],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
-      "fn": "OnboardingProgressNotifier._persist",
-      "kind": "notifier-method",
-      "object": {
-        "signature": "() -> Future<void>",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key"
-          },
-          {
-            "kind": "field",
-            "name": "state"
-          }
-        ],
-        "writes": [],
-        "calls": [],
-        "calledBy": [
-          "OnboardingProgressNotifier.markSeen",
-          "OnboardingProgressNotifier.reset"
-        ],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "compute",
-            "detail": "prefs = await SharedPreferences.getInstance()"
-          },
-          {
-            "kind": "effect",
-            "detail": "await prefs.setStringList(_key, state.toList())"
-          }
-        ]
-      },
-      "floor": [
-        "getInstance",
-        "setStringList",
-        "toList"
-      ],
-      "contract": {
-        "input": "()",
-        "output": "Future<void>",
+        "output": "String",
         "purity": "pure",
         "precond": [],
         "postcond": [],
@@ -159,25 +89,14 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
           {
             "kind": "state",
             "name": "state"
           }
         ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
+        "calls": [],
         "calledBy": [],
         "gatedBy": []
       },
@@ -193,12 +112,13 @@
           },
           {
             "kind": "effect",
-            "detail": "_persist()"
+            "detail": "persistToPrefs()"
           }
         ]
       },
       "floor": [
-        "contains"
+        "contains",
+        "persistToPrefs"
       ],
       "contract": {
         "input": "(String hintId)",
@@ -268,25 +188,14 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "field",
-            "name": "_key",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
           {
             "kind": "state",
             "name": "state"
           }
         ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
+        "calls": [],
         "calledBy": [],
         "gatedBy": []
       },
@@ -302,11 +211,13 @@
           },
           {
             "kind": "effect",
-            "detail": "_persist()"
+            "detail": "persistToPrefs()"
           }
         ]
       },
-      "floor": [],
+      "floor": [
+        "persistToPrefs"
+      ],
       "contract": {
         "input": "()",
         "output": "void",
