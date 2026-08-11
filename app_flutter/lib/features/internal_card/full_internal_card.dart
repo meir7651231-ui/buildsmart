@@ -59,6 +59,8 @@ class FullInternalCard extends ConsumerStatefulWidget {
   const FullInternalCard({
     required this.product,
     this.initialRailSide = 0,
+    this.fillHeight = false,
+    this.onBack,
     super.key,
   });
 
@@ -70,6 +72,15 @@ class FullInternalCard extends ConsumerStatefulWidget {
 
   /// D4 — pre-open a side rail on first build (previews/tests): -1 left, +1 right.
   final int initialRailSide;
+
+  /// Full-screen mode — the card fills the whole screen (the hero image expands
+  /// to take the slack, the buy area pins near the bottom) instead of shrink-
+  /// wrapping. Off ⇒ the compact embedded card (home).
+  final bool fillHeight;
+
+  /// The top-bar → arrow goes back one screen. Null ⇒ the arrow is inert (the
+  /// embedded home card has no route to pop).
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<FullInternalCard> createState() => _FullInternalCardState();
@@ -131,6 +142,8 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
         specOpen: _specOpen,
         specTab: _specTab,
         railSide: _railSide,
+        fillHeight: widget.fillHeight,
+        onBack: widget.onBack,
         onStepVariant: _stepVariant,
         onPickUnit: _pickUnit,
         onToggleSpec: _toggleSpec,
@@ -148,12 +161,20 @@ class _CardView extends ConsumerWidget {
     required this.specOpen,
     required this.specTab,
     required this.railSide,
+    this.fillHeight = false,
+    this.onBack,
     this.onStepVariant,
     this.onPickUnit,
     this.onToggleSpec,
     this.onPickSpecTab,
     this.onSwipeImage,
   });
+
+  /// Full-screen mode — the hero area expands to fill the screen.
+  final bool fillHeight;
+
+  /// Back one screen (top-bar → arrow). Null ⇒ inert.
+  final VoidCallback? onBack;
 
   final LipskeyCatalogProduct product;
 
@@ -189,24 +210,29 @@ class _CardView extends ConsumerWidget {
     final settings = ref.watch(catalogSettingsProvider);
     final p = product;
 
+    // Image-first: the big product image is the hero; the 📋 clipboard swaps it
+    // for the spec panel in place (D15) — spec is never spilled.
+    final hero = specOpen
+        ? _specPanel(context, p, settings)
+        : (railSide != 0 ? _sideRail(context, p, railSide) : _bigImage(context, p));
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DecoratedBox(
         decoration: const BoxDecoration(color: _cCard),
         child: Column(
           key: const Key('fullInternalCard'),
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: fillHeight ? MainAxisSize.max : MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _topBar(context, p),
-            // Image-first: the big product image is the hero; the 📋 clipboard
-            // swaps it for the spec panel in place (D15) — spec is never spilled.
-            if (specOpen)
-              _specPanel(context, p, settings)
-            else if (railSide != 0)
-              _sideRail(context, p, railSide)
+            // Full-screen: the hero fills the slack (spec panel scrolls inside);
+            // embedded: it shrink-wraps.
+            if (fillHeight)
+              Expanded(
+                child: specOpen ? SingleChildScrollView(child: hero) : hero,
+              )
             else
-              _bigImage(context, p),
+              hero,
             _footer(p),
             _buyArea(context, ref, p, settings),
             // D6–D9/D14 — the line strip (circles + קו/בדיקה/השלם) appears ONLY
@@ -246,7 +272,18 @@ class _CardView extends ConsumerWidget {
               ),
             ),
             const Spacer(),
-            const Icon(Icons.arrow_forward, size: 22, color: _cAccent),
+            // → goes back one screen (full-screen route); inert & dimmed when
+            // embedded (no route to pop).
+            GestureDetector(
+              key: const Key('internalCardBack'),
+              behavior: HitTestBehavior.opaque,
+              onTap: onBack,
+              child: Icon(
+                Icons.arrow_forward,
+                size: 22,
+                color: onBack == null ? _cLine : _cAccent,
+              ),
+            ),
           ],
         ),
       ),
@@ -285,7 +322,8 @@ class _CardView extends ConsumerWidget {
               if (v != 0) onSwipeImage!(v < 0 ? -1 : 1);
             },
       child: Container(
-        height: 360,
+        // Full-screen: null height ⇒ fills the Expanded slack. Embedded: 360.
+        height: fillHeight ? null : 360,
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 4),
         decoration: BoxDecoration(
           color: _cImgBg,
@@ -325,7 +363,7 @@ class _CardView extends ConsumerWidget {
             },
       child: Container(
         key: const Key('internalCardRail'),
-        height: 236,
+        height: fillHeight ? null : 236,
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 4),
         decoration: BoxDecoration(
           color: _cImgBg,

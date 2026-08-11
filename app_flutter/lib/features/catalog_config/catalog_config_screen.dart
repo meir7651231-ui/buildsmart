@@ -199,22 +199,16 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           fullscreenDialog: true,
-          builder: (_) => Scaffold(
+          builder: (routeCtx) => Scaffold(
             backgroundColor: Colors.white,
-            appBar: AppBar(
-              backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFF232A33),
-              elevation: 0.5,
-              title: Text(
-                product.nameHe,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
-              ),
-            ),
-            // Full-screen: the card fills the width edge-to-edge (no windowed
-            // max-width), scrollable for its full height.
+            // No AppBar — the card owns its top bar (📋 · SKU · → back). It
+            // FILLS the screen edge-to-edge (fillHeight), and the → arrow pops
+            // back one screen.
             body: SafeArea(
-              child: SingleChildScrollView(
-                child: FullInternalCard(product: product),
+              child: FullInternalCard(
+                product: product,
+                fillHeight: true,
+                onBack: () => Navigator.of(routeCtx).maybePop(),
               ),
             ),
           ),
