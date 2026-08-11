@@ -138,14 +138,6 @@ class _ConfigCardState extends State<ConfigCard> {
   double _accV = 0;
   double _accH = 0;
 
-  /// The axis whose value was LAST changed (a wheel spin or an image drag). The
-  /// variant resolver resolves it FIRST so the just-moved axis WINS — dragging the
-  /// angle finds a variant with the new angle (keeping the diameter when such a
-  /// variant exists, else moving it) instead of the diameter-first greedy pinning
-  /// the variant so the photo never swaps (owner: "משיכה של התמונות" — every drag
-  /// direction must move a variant).
-  String? _lastAxis;
-
   @override
   void initState() {
     super.initState();
@@ -277,15 +269,11 @@ class _ConfigCardState extends State<ConfigCard> {
   /// only when the filter is non-empty, so the changed axis wins and an axis the
   /// product lacks is skipped. The first of the narrowed set. null ⇒ no family (a
   /// synthetic schema). This is what makes the photo + name SWAP on a drag.
-  LipskeyCatalogProduct? _variant() {
-    final ids = [for (final a in _usable.take(3)) a.id];
-    // Resolve the LAST-moved axis first so a drag on it always wins (the changed
-    // axis picks its variant); the rest keep their taxonomy order behind it.
-    final order = (_lastAxis != null && ids.contains(_lastAxis))
-        ? [_lastAxis!, for (final id in ids) if (id != _lastAxis) id]
-        : ids;
-    return variantByAxes(_familyChips, _selection, order);
-  }
+  LipskeyCatalogProduct? _variant() => variantByAxes(
+        _familyChips,
+        _selection,
+        [for (final a in _usable.take(3)) a.id],
+      );
 
   /// The centre image asset (plan D · never empty): the per-selection variant SKU
   /// wins (so the photo SWAPS on every pick), then the tapped tile image, then the
@@ -300,10 +288,8 @@ class _ConfigCardState extends State<ConfigCard> {
     return null;
   }
 
-  void _select(String id, String value) => setState(() {
-        _selection[id] = value;
-        _lastAxis = id; // the just-moved axis resolves first in _variant()
-      });
+  void _select(String id, String value) =>
+      setState(() => _selection[id] = value);
 
   /// Move [attr]'s selection by [dir] (clamped to the ladder ends).
   void _stepAxis(AttributeDef attr, int dir) {

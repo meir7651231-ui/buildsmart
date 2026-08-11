@@ -7,17 +7,12 @@
 
 const Map<String, String> kFittingImageOverrides = <String, String>{
   '64032300': 'assets/huliot/products/70051300_5.jpeg',
-  '92117042': 'assets/huliot/products/98417808_3.jpeg',
-  '92117043': 'assets/huliot/products/98417808_3.jpeg',
-  '92117044': 'assets/huliot/products/98417808_3.jpeg',
-  '92117045': 'assets/huliot/products/98417808_3.jpeg',
-  '92117046': 'assets/huliot/products/98417808_3.jpeg',
-  '92117047': 'assets/huliot/products/98417808_3.jpeg',
-  '92117048': 'assets/huliot/products/98417808_3.jpeg',
-  '92117049': 'assets/huliot/products/98417808_3.jpeg',
-  '92117050': 'assets/huliot/products/98417808_3.jpeg',
-  '92117051': 'assets/huliot/products/98417808_3.jpeg',
-  '92117109': 'assets/huliot/products/95270720_1.jpeg',
+  // REMOVED (wrong family): 92117042–92117051 ("ברך PPR 90°" elbows) had been
+  // mapped to 98417808_3.jpeg — the photo of "צווארון PPR 75" (a COLLAR), and
+  // 92117109 ("ברך PPR 45°") to 95270720_1.jpeg (a PIPE, "צינור PPR פייזר 75").
+  // Those wrong photos made a dragged elbow look like a different fitting (owner:
+  // "ערבוב בין ברכים מסעפים"). Dropping them lets each elbow fall back to its
+  // correct PPR-elbow image via `_pprImageFor` (`ppr_elbow_90.jpg` / `_45.jpg`).
   '992213601': 'assets/huliot/products/992113139_1.jpeg',
   '992213603': 'assets/huliot/products/992113139_1.jpeg',
   '992213609': 'assets/huliot/products/992113139_1.jpeg',

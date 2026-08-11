@@ -12,6 +12,8 @@
 
 import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProducts;
 import 'package:buildsmart/domain/trade_schema.dart';
+import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart'
+    show materialOf, typeGroupOf;
 import 'package:buildsmart/features/catalog_config/config_card.dart';
 import 'package:buildsmart/features/catalog_config/product_chips.dart'
     show prioritizedSchema;
@@ -381,10 +383,17 @@ void main() {
       // multi-variant type BOTH image drags re-resolve the variant → the full name
       // changes: ↕ cycles the 2nd config axis (angle), ↔ the 3rd or FALLS BACK to
       // קוטר. (Only physical config axes are dragged — never a descriptive filter.)
+      // A PPR ברך whose DN20 comes in BOTH 45° and 90° (so ↕ moves the angle within
+      // the seeded diameter), schema built with the same MATERIAL-scoped universe the
+      // screen uses — so the angle wheel carries only this material's angles.
       final berekh =
-          resolvedCatalogProducts.firstWhere((p) => p.sku == '213072');
+          resolvedCatalogProducts.firstWhere((p) => p.sku == '92117102');
+      final universe = [
+        for (final m in typeGroupOf(berekh, resolvedCatalogProducts))
+          if (materialOf(m) == materialOf(berekh)) m,
+      ];
       await tester.pumpWidget(
-        _staticHost(ConfigCard(schema: prioritizedSchema(berekh))),
+        _staticHost(ConfigCard(schema: prioritizedSchema(berekh, universe: universe))),
       );
       await tester.pumpAndSettle();
       String name() => tester.widget<Text>(_key('configFullName')).data ?? '';
