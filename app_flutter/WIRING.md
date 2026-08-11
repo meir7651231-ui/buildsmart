@@ -4012,3 +4012,6 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`state_loaded_guard_test` נשאר ירוק:** smart_cart איבד `set state(` → מדולג; `prefs_persisted.dart` מחזיק `set state(`+`SharedPreferences`+`bool _loaded` → guarded>0, אפס offenders.
 - **אימות:** 46 בדיקות ירוקות (כולל guard-test + מנוע-ההזמנות-המשותף) · analyze נקי.
 - **פתוח:** 5 מנועים נוספים עם הדפוס (orders/tasks/projects/sys_chat/persona) — 2 וריאנטים של setter; ממתין לצ'קפוינט לפני נגיעה בהם (ליבת-הכסף).
+
+### #ci-fix-vector-math — Matrix4.scaleByDouble → diagonal3Values (CI-unblock) (2026-08-11)
+תיקון-חוסם-CI: `full_internal_card.dart:1577` השתמש ב-`Matrix4.scaleByDouble(v,v,v,1)` — API שלא קיים ב-vector_math 2.1.4 (הגרסה שה-CI פותר, transitive). שגיאת-קומפילציה הפילה 237 בדיקות → כל ריצות protocol-enforce אדומות מזה שעות (901+), על כל קומיט (גם של הצי). הוחלף ב-`Matrix4.diagonal3Values(v,v,v)` — factory "scale matrix" זהה-התנהגות, **קיים ולא-deprecated בשתי הגרסאות** (2.1.4 וגם החדשה המקומית). analyze exit-0 · הבדיקה שנפלה (ai_hub_compute) ירוקה. הוכרע ע"י המשתמש לתקן (הקובץ של סשן-הצי, באג-חוסם-מוצר).

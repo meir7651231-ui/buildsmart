@@ -1573,8 +1573,7 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                         activeColor: _cAccent,
                         onChanged: (v) => setState(() {
                           _scale = v;
-                          _zoom.value = Matrix4.identity()
-                            ..scaleByDouble(v, v, v, 1);
+                          _zoom.value = Matrix4.diagonal3Values(v, v, v);
                         }),
                       ),
                     ),
