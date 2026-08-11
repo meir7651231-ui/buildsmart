@@ -57,6 +57,8 @@ const Color _cBody = Color(0xFF48505A);
 const Color _cHotBg = Color(0xFFFFF2EA);
 const Color _cHotBorder = Color(0xFFFFD6BD);
 const Color _cGreen = Color(0xFF1F9D57); // D9 "אשר · סה״כ" confirm button
+const Color _cHintBg = Color(0xFFE7F6EC); // green coaching-hint pill bg (e_2/e_3)
+const Color _cHintInk = Color(0xFF1E874B); // green coaching-hint text
 
 /// THE full internal card. Give it a [product]; it renders every section the
 /// engine can populate for that product, and a swipe on the name cycles the
@@ -302,6 +304,8 @@ class _CardView extends ConsumerWidget {
           mainAxisSize: fillHeight ? MainAxisSize.max : MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Green coaching-hint pill — full-screen card only (e_0/e_2/e_3).
+            if (fillHeight) _hintBanner(),
             _topBar(context, p),
             // Full-screen: the hero (image / spec panel / rail) fills the slack;
             // each scrolls internally when it needs to. Embedded: shrink-wraps.
@@ -313,6 +317,72 @@ class _CardView extends ConsumerWidget {
             _lineStrip(context, ref, p, settings),
           ],
         ),
+      ),
+    );
+  }
+
+  // ── green coaching-hint pill (e_0 · e_2 · e_3) ────────────────────────────────
+  /// The soft-green hint bar at the very top of the FULL-SCREEN card — verbatim
+  /// wording from the reference screens, swapped by state (hero · spec · rail).
+  /// Arrows are Material icons (the reference's ← / → glyphs tofu in Heebo) and
+  /// point the way the real card's own affordances do. Full-screen only, so the
+  /// embedded home card stays uncluttered.
+  Widget _hintBanner() {
+    final List<InlineSpan> spans;
+    if (specOpen) {
+      // e_3: "נגיעה ב📋 (לא קופץ) — …"
+      spans = const [
+        TextSpan(
+          text: 'נגיעה ב📋 (לא קופץ) — המפרט/תקן/אזהרה מחליף את התמונה '
+              'במקום · טאבים למעבר',
+        ),
+      ];
+    } else if (railSide != 0) {
+      // e_0: "משיכה ימינה → מה מתחבר לצד ימין" / "…שמאלה → …לצד שמאל"
+      final toRight = railSide > 0;
+      spans = [
+        TextSpan(text: 'משיכה ${toRight ? 'ימינה' : 'שמאלה'} '),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Icon(
+            toRight ? Icons.arrow_forward : Icons.arrow_back,
+            size: 13,
+            color: _cHintInk,
+          ),
+        ),
+        TextSpan(text: ' מה מתחבר לצד ${toRight ? 'ימין' : 'שמאל'}'),
+      ];
+    } else {
+      // e_2: "מפרט · → חזור · מק״ט מוטבע על התמונה · נגיעה=גלריה"
+      spans = const [
+        TextSpan(text: 'מפרט · '),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Icon(Icons.arrow_forward, size: 13, color: _cHintInk),
+        ),
+        TextSpan(text: ' חזור · מק״ט מוטבע על התמונה · נגיעה=גלריה'),
+      ];
+    }
+    return Container(
+      key: const Key('internalCardHintBanner'),
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: _cHintBg,
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Text.rich(
+        TextSpan(
+          style: const TextStyle(
+            color: _cHintInk,
+            fontSize: 11.5,
+            fontWeight: FontWeight.w600,
+            height: 1.25,
+          ),
+          children: spans,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
