@@ -125,10 +125,9 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
     setState(() => _current = fam[index]);
   }
 
-  /// D6 — the chosen sale unit (בודד / ארגז / משטח).
+  /// D6 — the chosen sale unit (בודד / ארגז / משטח). Swipe-selected on the buy
+  /// button (◀▶) — there is no visible unit-chip row.
   String _unit = 'בודד';
-
-  void _pickUnit(String u) => setState(() => _unit = u);
 
   /// D6 — how many of the selected unit to add (up/down swipe on the buy button).
   int _qty = 1;
@@ -176,7 +175,6 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
         onBack: widget.onBack,
         onStepVariant: _stepVariant,
         onPickVariant: _pickVariant,
-        onPickUnit: _pickUnit,
         qty: _qty,
         onCycleUnit: _stepUnit,
         onStepQty: _stepQty,
@@ -199,7 +197,6 @@ class _CardView extends ConsumerWidget {
     this.onBack,
     this.onStepVariant,
     this.onPickVariant,
-    this.onPickUnit,
     this.qty = 1,
     this.onCycleUnit,
     this.onStepQty,
@@ -230,9 +227,6 @@ class _CardView extends ConsumerWidget {
 
   /// D5 — jump to a specific variant by tapping its size dot (null ⇒ inert).
   final void Function(int index)? onPickVariant;
-
-  /// D6 — pick a sale unit (null ⇒ inert).
-  final void Function(String unit)? onPickUnit;
 
   /// D6 — quantity of the selected unit to add.
   final int qty;
@@ -1107,7 +1101,8 @@ class _CardView extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (units.length > 1) _unitSelector(units, selected),
+        // No visible unit chips — the unit is swipe-selected on the button
+        // itself (◀▶) and shown on it; the chips were redundant clutter.
         // D6 — the gesture hint: swipe ◀▶ to change unit, ▲▼ to change quantity.
         Padding(
           padding: const EdgeInsets.fromLTRB(13, 5, 13, 0),
@@ -1191,43 +1186,6 @@ class _CardView extends ConsumerWidget {
 
   /// D6 — the sale-unit chips (בודד · ארגז · משטח), shown only when the product
   /// carries more than one (R8 — no invented pack/pallet counts).
-  Widget _unitSelector(Map<String, int> units, String selected) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(13, 4, 13, 0),
-      child: Row(
-        children: [
-          for (final e in units.entries)
-            Padding(
-              padding: const EdgeInsets.only(left: 6),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onPickUnit == null ? null : () => onPickUnit!(e.key),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: e.key == selected ? _cAccent : _cImgBg,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: e.key == selected ? _cAccent : _cLine,
-                    ),
-                  ),
-                  child: Text(
-                    e.value == 1 ? e.key : '${e.key} · ${e.value}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: e.key == selected ? Colors.white : _cInk,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
   /// D6 — add the current variant to the smart cart: [qty] of [unitKey], each
   /// unit worth [mult] pieces ⇒ mult × qty pieces total. Toasts confirmation.
   void _addToCart(
