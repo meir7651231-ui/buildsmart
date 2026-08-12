@@ -59,6 +59,20 @@ Widget _host(Widget card) => MaterialApp(
 
 Finder _key(String k) => find.byKey(Key(k));
 
+/// The card's side selectors are FULL spinning [WheelPicker]s (owner "גלגל מלא",
+/// not tap-by-tap), so an off-centre value like '40' isn't laid out for a
+/// `tap(find.text)`. Spin the wheel exactly [steps] rows forward instead. The
+/// held pause before release drains the fling velocity, so `FixedExtentScroll-
+/// Physics` snaps to precisely the targeted index (deterministic).
+const double _kWheelRow = 36; // mirrors wheel_picker.dart _kItemExtent
+Future<void> _spinWheel(WidgetTester tester, Finder wheel, int steps) async {
+  final g = await tester.startGesture(tester.getCenter(wheel));
+  await g.moveBy(Offset(0, -_kWheelRow * steps));
+  await tester.pump(const Duration(milliseconds: 300)); // velocity → ~0
+  await g.up();
+  await tester.pumpAndSettle();
+}
+
 void main() {
   group('#catalog-config ConfigCard — image tap → onOpenDetails (internal sheet)', () {
     testWidgets(
@@ -114,10 +128,10 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('40')); // a non-default diameter
-      await tester.pump();
-      await tester.tap(find.text('3')); // qty 3
-      await tester.pump();
+      // diameter ['20','25','32','40','50']: spin the RIGHT wheel +3 → '40'.
+      await _spinWheel(tester, find.byType(ListWheelScrollView).first, 3);
+      // qty seeds at 1 (index 0): spin the LEFT wheel +2 → qty 3.
+      await _spinWheel(tester, find.byType(ListWheelScrollView).last, 2);
       await tester.tap(_key('configImageCenter'));
       await tester.pump();
 
