@@ -106,6 +106,9 @@ final chatRepositoryProvider = Provider<ChatRepository?>((ref) {
   if (fRest != null) {
     final fUid = ref.watch(currentUidProvider);
     if (fUid == null || fUid.isEmpty) return null; // אין זהות ⇒ אין צ׳אט
+    // צ׳אט = polling מהיר יותר (3ש') לתחושת-חיות; הודעות/שרשורים מתעדכנים תוך
+    // ~3ש' בלי רענון-ידני (‏REST אין לו long-poll אמיתי כמו ה-SDK).
+    const chatPoll = Duration(seconds: 3);
     final repo = FirebaseChatRepository(
       threadsSource: EdgeRestCollectionSource(
         'chatThreads',
@@ -113,12 +116,14 @@ final chatRepositoryProvider = Provider<ChatRepository?>((ref) {
         scopeField: 'participantUids',
         scopeValue: fUid,
         scopeOp: 'ARRAY_CONTAINS',
+        pollInterval: chatPoll,
       ),
       messagesSourceFor: (threadId) => EdgeRestCollectionSource(
         'chatMessages',
         fRest,
         scopeField: 'threadId',
         scopeValue: threadId,
+        pollInterval: chatPoll,
       ),
       messagesWriter: EdgeRestCollectionSource('chatMessages', fRest),
     )..attach();
