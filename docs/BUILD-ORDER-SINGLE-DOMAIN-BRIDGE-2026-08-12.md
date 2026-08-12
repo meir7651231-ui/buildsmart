@@ -10,7 +10,7 @@
 
 ---
 
-## שלב 1 · תמונות-הקטלוג → cdn.buildsmart-il.com (קטן, ערך מיידי)
+## שלב 1 · תמונות-הקטלוג → cdn.buildsmart-il.com — ✅ **באוויר 12.8 ‏(PR ‏#25, פריסה 00:26)**
 
 1. **בעלים (קליק ב-Cloudflare):** ‏R2 ← המחסן `buildsmart-images` ← ‏Settings
    ← ‏Custom Domains ← ‏Connect ← ‏`cdn.buildsmart-il.com` (קלאודפלייר מוסיף
@@ -21,6 +21,10 @@
    internal-card** — הקבצים חמים אצלו; להציע לו לבצע בעצמו כחלק מהסבב.
 3. **אימות:** האפליקציה נטענת עם תמונות; ‏r2.dev לא מופיע ב-Network.
 4. הרחבה לסנן: לבקש פתיחת `cdn.buildsmart-il.com` (תת-דומיין של מאושר — קל).
+
+## שלב 1.5 · קטלוג/קונפיג דרך הדומיין — ✅ **באוויר 12.8 ‏(PR ‏#26, פריסה 08:37)**
+
+הקבוע + 4 ה-workflows הוחלפו מ-firebaseapp.com לדומיין; ‏same-origin. מזג-אוויר: אומת נופל-רך (kWeather seed) — אין פעולה.
 
 ## שלב 2 · Firestore דרך הדומיין (הלב)
 
