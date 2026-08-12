@@ -71,8 +71,9 @@ class EdgeRestAuth {
 
   Future<EdgeAuthTokens> _passwordCall(
       String action, String email, String password) async {
-    final res = await send(
-      idtUri(action),
+    final uri = idtUri(action);
+    final res = await _safeSend(
+      uri,
       const {'Content-Type': 'application/json'},
       jsonEncode({
         'email': email,
@@ -81,19 +82,47 @@ class EdgeRestAuth {
       }),
     );
     final map = _decode(res.body);
-    if (res.status != 200) throw _mapError(map);
+    if (res.status != 200) throw _errorFor(res.status, map, uri);
     return _tokensFrom(map, fallbackEmail: email);
+  }
+
+  /// עוטף את השליחה: כשל-רשת/CORS (ה-fetch עצמו נכשל) ⇒ הודעה מובחנת — כך
+  /// "לא הגענו לשרת" (תת-דומיין לא מנותב ל-Worker) לא מתחזה ל"פרטים שגויים".
+  Future<({int status, String body})> _safeSend(
+      Uri url, Map<String, String> headers, String body) async {
+    try {
+      return await send(url, headers, body);
+    } on Object {
+      throw EdgeAuthException(
+        'לא הצלחנו להגיע לשרת ההתחברות (${url.host}). ודא שהתת-דומיין '
+        'מחובר ל-Worker בענן (Custom Domain).',
+        code: 'NETWORK',
+      );
+    }
+  }
+
+  /// בונה שגיאה לתשובת non-200: שגיאת-Firebase אמיתית ⇒ מיפוי; גוף שאינו
+  /// שגיאת-Firebase (404 "not found" של ה-Worker / דף-Cloudflare) ⇒ הודעה
+  /// שמצביעה על ניתוב-התת-דומיין, לא על "פרטים שגויים".
+  EdgeAuthException _errorFor(int status, Map<String, dynamic> map, Uri uri) {
+    if (map['error'] != null) return _mapError(map);
+    return EdgeAuthException(
+      'שרת ההתחברות החזיר שגיאה $status (${uri.host}) — כנראה התת-דומיין '
+      'אינו מנותב ל-Worker בענן.',
+      code: 'HTTP_$status',
+    );
   }
 
   /// רענון ה-idToken דרך securetoken (לפני פקיעה — שלב B קורא לזה).
   Future<EdgeAuthTokens> refresh(String refreshToken, String email) async {
-    final res = await send(
-      Uri.parse('$kEdgeTokenBase/token?key=$apiKey'),
+    final uri = Uri.parse('$kEdgeTokenBase/token?key=$apiKey');
+    final res = await _safeSend(
+      uri,
       const {'Content-Type': 'application/x-www-form-urlencoded'},
       'grant_type=refresh_token&refresh_token=$refreshToken',
     );
     final map = _decode(res.body);
-    if (res.status != 200) throw _mapError(map);
+    if (res.status != 200) throw _errorFor(res.status, map, uri);
     // securetoken מחזיר snake_case: id_token/refresh_token/user_id/expires_in
     return EdgeAuthTokens(
       idToken: (map['id_token'] ?? '').toString(),
