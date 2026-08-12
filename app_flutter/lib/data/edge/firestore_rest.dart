@@ -143,12 +143,15 @@ class FirestoreRest {
         'https://$host/v1/projects/$projectId/databases/(default)/documents:runQuery',
       );
 
-  /// מריץ שאילתה ממוקדת-שדה (`field == value`) על אוסף — הצורה שה-Rules של
-  /// לקוח-מסונן מאשרים (למשל הזמנות `contractorUid == uid`). מחזיר `{id, fields}`.
+  /// מריץ שאילתה ממוקדת-שדה על אוסף — הצורה שה-Rules של לקוח-מסונן מאשרים:
+  /// `field == value` (‏EQUAL · הזמנות `contractorUid==uid`) או `field` מכיל
+  /// את `value` (‏ARRAY_CONTAINS · צ׳אט `participantUids` מכיל uid). מחזיר
+  /// `{id, fields}`.
   Future<List<FirestoreRestDoc>> runQuery(
     String collectionId, {
     required String field,
     required String value,
+    String op = 'EQUAL',
   }) async {
     final body = jsonEncode({
       'structuredQuery': {
@@ -158,7 +161,7 @@ class FirestoreRest {
         'where': {
           'fieldFilter': {
             'field': {'fieldPath': field},
-            'op': 'EQUAL',
+            'op': op,
             'value': {'stringValue': value},
           },
         },

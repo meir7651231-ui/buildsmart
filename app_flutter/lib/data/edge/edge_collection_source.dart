@@ -19,16 +19,19 @@ class EdgeRestCollectionSource implements RemoteCollectionSource {
     this._rest, {
     this.scopeField,
     this.scopeValue,
+    this.scopeOp = 'EQUAL',
     this.pollInterval = const Duration(seconds: 6),
   });
 
   final String collectionPath;
   final FirestoreRest _rest;
 
-  /// שאילתה ממוקדת: `scopeField == scopeValue` (למשל `contractorUid == uid`).
-  /// null ⇒ קריאת-אוסף-מלאה (listDocs) — רק לאוספים שה-Rules מתירים.
+  /// שאילתה ממוקדת: `scopeField <scopeOp> scopeValue` (‏EQUAL — `contractorUid
+  /// == uid`; ARRAY_CONTAINS — `participantUids` מכיל uid). null ⇒ קריאת-אוסף-
+  /// מלאה (listDocs) — רק לאוספים שה-Rules מתירים.
   final String? scopeField;
   final String? scopeValue;
+  final String scopeOp;
   final Duration pollInterval;
 
   String _path(String id) => '$collectionPath/$id';
@@ -37,7 +40,8 @@ class EdgeRestCollectionSource implements RemoteCollectionSource {
     final field = scopeField;
     final value = scopeValue;
     final docs = (field != null && value != null)
-        ? await _rest.runQuery(collectionPath, field: field, value: value)
+        ? await _rest.runQuery(collectionPath,
+            field: field, value: value, op: scopeOp)
         : await _rest.listDocs(collectionPath);
     return docs
         .map((d) => RemoteDoc(d.id, d.fields))

@@ -4084,6 +4084,13 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`filtered_mode.dart`:** `applyFilteredModeValue(store, raw)` טהור (‏on: 1/true/on/yes · off: 0/false/off/no · null/לא-מוכר ⇒ בלי-שינוי, הבחירה שורדת) + `bootstrapFilteredModeFromUrl(store)`.
 - **`main.dart`:** קריאה **מיד אחרי `ensureInitialized`, לפני כל קריאת-ספק** — אותו localStorage שהספק קורא ⇒ נכנס-לתוקף בפריים-הראשון. חסר-פרמטר ⇒ ביט-זהה (הבחירה הקיימת). ‏main.dart 7 infos קדם-קיימים = 7 (אומת ב-stash).
 - **בדיקות (edge_filtered_mode_test — +1 קבוצה):** כל ערכי-ההדלקה/כיבוי · null/לא-מוכר לא-נוגעים. analyze 0 על edge/+הבדיקה.
+### #filtered-auth-D-chat — צ׳אט דרך הגשר (array-contains) (שלב D · חלק 2ב) (2026-08-12)
+משוב-שטח: הזמנות עובדות, הצ׳אט לא. חיווט הצ׳אט באותו דפוס REST-polling.
+- **`firestore_rest.dart` — `runQuery`:** נוסף `op` (ברירת-מחדל EQUAL) ⇒ תומך `ARRAY_CONTAINS` (‏`participantUids` מכיל uid — הצורה שה-Rules של שרשור-צ׳אט דורשים).
+- **`edge_collection_source.dart`:** נוסף `scopeOp` (מושחל ל-runQuery).
+- **`chat_repository.dart` — `chatRepositoryProvider`:** מצב-מסונן ⇒ `FirebaseChatRepository` עם `threadsSource`=EdgeRest(`participantUids` ARRAY_CONTAINS uid) · `messagesSourceFor(threadId)`=EdgeRest(`threadId`==id) · `messagesWriter`=EdgeRest(chatMessages). `attach`/`dispose` כרגיל. אין uid ⇒ null (כמו היום). כבוי ⇒ SDK (byte-identical).
+- **בדיקות (`edge_collection_source_test` +ARRAY_CONTAINS):** scopeOp מושחל ל-fieldFilter. analyze 0 · web build עבר.
+- **הערה — ניהול-לקוחות:** `managerCustomersProvider` **נגזר מההזמנות** (לא אוסף-נפרד) ⇒ המנהל (לא-מסונן) רואה את הלקוח מרגע שההזמנה נכתבה; אין פער-מסונן שם (ההתנהגות זהה לכל לקוח).
 ### #filtered-auth-D-reads — קריאות-נתונים דרך הגשר (REST-polling) + הזמנות (שלב D · חלק 2) (2026-08-12)
 סוגר את "מרדף החתול-ועכבר": כל קריאה שהלקוח-המסונן פוגע בה עוברת דרך הגשר, במקום לתקן כל שער בנפרד.
 - **`firestore_rest.dart`:** `runQuery(collection, field, value)` (POST `:runQuery` · structuredQuery ‏fieldFilter EQUAL — ההיקף שה-Rules מתירים ללקוח) + `listDocs(collection)` (GET · עמוד-ראשון) → `FirestoreRestDoc{id, fields}` (‏`name`→id מהסגמנט האחרון).
