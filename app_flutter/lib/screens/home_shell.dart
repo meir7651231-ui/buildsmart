@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:buildsmart/data/repositories/backend.dart'
     show kIntelLive, kUserSystem, useFirebaseBackend;
 import 'package:buildsmart/features/global_search/global_search.dart'
@@ -1803,6 +1805,10 @@ class _RoleStatusChip extends ConsumerWidget {
       );
       return;
     }
+    // 🌉 מצב-מסונן: ריענון-תפקיד-כפוי בכל הקשה — מושך idToken טרי (עם ה-custom-
+    // claim שהמנהל אישר) ⇒ הצ׳יפ מתעדכן ל"מאושר" בלי re-login. לא-מסונן: reloadRole
+    // מרענן ממילא את ה-claims (זהה-התנהגות; אין נזק).
+    unawaited(ref.read(authStateProvider.notifier).reloadRole());
     switch (state) {
       case RoleChipState.approved:
         showRolePicker(context);

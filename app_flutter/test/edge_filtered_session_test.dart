@@ -122,5 +122,28 @@ void main() {
       expect(() => g.sendOtp('+972500000000'), throwsA(isA<AuthGatewayException>()));
       g.dispose();
     });
+
+    test('idTokenClaims ⇒ מרענן-כפוי ומפענח את ה-role מה-JWT (אישור-המנהל)',
+        () async {
+      String jwt(String role) {
+        final payload = base64Url.encode(
+          utf8.encode(jsonEncode({'role': role, 'user_id': 'U'})),
+        );
+        return 'h.$payload.s';
+      }
+
+      final auth = _authThatReturns(
+        signIn: {'idToken': jwt('none'), 'refreshToken': 'RE', 'localId': 'U', 'expiresIn': '3600', 'email': 'a@b.com'},
+        refresh: {'id_token': jwt('contractor'), 'refresh_token': 'RE2', 'user_id': 'U', 'expires_in': '3600'},
+      );
+      final g = FilteredAuthGateway(
+        auth: auth,
+        session: FilteredSession(auth: auth, store: _MemStore(), now: () => t0),
+      );
+      await g.signInWithEmailPassword('a@b.com', 'pw');
+      final claims = await g.idTokenClaims(); // מרענן ⇒ מפענח את התפקיד המאושר
+      expect(claims['role'], 'contractor');
+      g.dispose();
+    });
   });
 }
