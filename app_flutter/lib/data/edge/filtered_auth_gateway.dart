@@ -7,6 +7,7 @@
 // טהור — אפס firebase/רשת ישירה; הכול דרך התפרים המוזרקים (Auth-REST + סשן).
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:buildsmart/data/edge/filtered_session.dart';
 import 'package:buildsmart/data/edge/rest_auth.dart';
@@ -83,8 +84,33 @@ class FilteredAuthGateway implements AuthGateway {
 
   @override
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) async {
-    // מצב-מסונן: אין קריאת-claims (הרול נאכף ע"י Rules על ה-idToken). ריק.
-    return <String, dynamic>{};
+    // 🌉 מצב-מסונן: ה-claims (כולל תפקיד שהמנהל אישר) יושבים ב-payload של ה-
+    // idToken (JWT). אישור-תפקיד = custom-claim בצד-השרת ⇒ נכנס ל-idToken רק
+    // אחרי רענון ⇒ תמיד מרעננים-כפוי (לא-הרסני) ואז מפענחים. כך הלקוח רואה
+    // "מאושר" ברענון-דף בלי re-login. כשל-רשת ⇒ מפענח את הטוקן הקיים.
+    final tok = await _session.forceRefreshIdToken();
+    if (tok == null || tok.isEmpty) return <String, dynamic>{};
+    return _decodeJwtClaims(tok);
+  }
+
+  /// מפענח את מטען ה-JWT (החלק האמצעי · base64url) ל-map של claims. שגיאה ⇒ ריק
+  /// (אף פעם לא זורק — כשל-פענוח = "בלי תפקיד", כמו signed-out).
+  static Map<String, dynamic> _decodeJwtClaims(String jwt) {
+    final parts = jwt.split('.');
+    if (parts.length != 3) return <String, dynamic>{};
+    var seg = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+    switch (seg.length % 4) {
+      case 2:
+        seg += '==';
+      case 3:
+        seg += '=';
+    }
+    try {
+      final decoded = jsonDecode(utf8.decode(base64.decode(seg)));
+      return decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
+    } on Object {
+      return <String, dynamic>{};
+    }
   }
 
   @override

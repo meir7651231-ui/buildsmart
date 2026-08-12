@@ -4084,6 +4084,12 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`filtered_mode.dart`:** `applyFilteredModeValue(store, raw)` טהור (‏on: 1/true/on/yes · off: 0/false/off/no · null/לא-מוכר ⇒ בלי-שינוי, הבחירה שורדת) + `bootstrapFilteredModeFromUrl(store)`.
 - **`main.dart`:** קריאה **מיד אחרי `ensureInitialized`, לפני כל קריאת-ספק** — אותו localStorage שהספק קורא ⇒ נכנס-לתוקף בפריים-הראשון. חסר-פרמטר ⇒ ביט-זהה (הבחירה הקיימת). ‏main.dart 7 infos קדם-קיימים = 7 (אומת ב-stash).
 - **בדיקות (edge_filtered_mode_test — +1 קבוצה):** כל ערכי-ההדלקה/כיבוי · null/לא-מוכר לא-נוגעים. analyze 0 על edge/+הבדיקה.
+### #filtered-auth-D-claims — הלקוח קורא את אישור-המנהל (idToken claims מפוענח) (2026-08-12)
+אימות-שטח: הרשמה+בקשה+אישור עבדו (הלקוח הופיע אצל המנהל כ"פעיל · קבלן"), אבל הלקוח נשאר "דרוש הרשמה" — "הוא לא קורא שאישרתי". השורש: `roleChipStateProvider` נשען על `hasServerRole` (מ-`idTokenClaims`), ו-`FilteredAuthGateway.idTokenClaims` החזיר `{}`.
+- **`filtered_auth_gateway.dart` — `idTokenClaims`:** אישור-תפקיד = custom-claim בצד-השרת שנכנס ל-idToken רק אחרי רענון ⇒ **מרענן-כפוי (לא-הרסני)** ואז מפענח את payload ה-JWT (base64url של החלק האמצעי). כשל-פענוח/רשת ⇒ `{}` (כמו signed-out, לא crash). `rolesFromClaims` קורא `claims['role']` ⇒ הצ׳יפ הופך ל"מאושר".
+- **`filtered_session.dart` — `forceRefreshIdToken`:** רענון-כפוי **לא-הרסני** (כשל-רשת ⇒ שומר את הטוקן הקיים, לא מנתק) — נפרד מ-`validIdToken` (שם כשל=ניקוי כי הטוקן פג).
+- **`home_shell.dart` — `_RoleStatusChip._onTap`:** הקשה על הצ׳יפ ⇒ `reloadRole()` (רענון-claims-כפוי) ⇒ הלקוח רואה "מאושר" בלי re-login. גם רענון-דף עובד (‏`_resolveUser` קורא `idTokenClaims` ⇒ force-refresh). לא-מסונן: `reloadRole` מרענן claims ממילא (זהה-התנהגות).
+- **בדיקות (`edge_filtered_session_test` +1):** signIn עם role='none' → refresh מחזיר role='contractor' → `idTokenClaims()['role']=='contractor'`. analyze 0 · web build עבר · 9 בדיקות-session ירוקות.
 ### #filtered-auth-D-writes — כתיבות-נתונים דרך הגשר: בקשת-הצטרפות + פרופיל (שלב D · חלק 1) (2026-08-12)
 אימות-שטח: הרשמה במצב-מסונן **הצליחה** (חשבון-אימייל נוצר דרך idt.), אבל בקשת-ההצטרפות לא הופיעה אצל המנהל — כי הכתיבה ל-Firestore בקו-מסונן עוברת ב-SDK **חסר-טוקן** ⇒ נדחית. חלק 1 מנתב את שתי הכתיבות שהלקוח פוגע בהן ראשונות דרך Firestore-REST.
 - **`firestore_rest.dart`:** נוסף `deleteDoc` (DELETE · 404=idempotent).

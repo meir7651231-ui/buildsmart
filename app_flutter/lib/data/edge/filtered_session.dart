@@ -77,6 +77,20 @@ class FilteredSession {
     }
   }
 
+  /// רענון-כפוי לא-הרסני — מביא idToken טרי (עם claims מעודכנים, כמו אישור-
+  /// תפקיד שהמנהל נתן) בלי לפקוע-סשן על כשל-רשת (מחזיר את הטוקן הקיים). נפרד
+  /// מ-[validIdToken] (שם כשל-רענון = ניקוי, כי הטוקן כבר פג ממילא).
+  Future<String?> forceRefreshIdToken() async {
+    if (!isSignedIn) return null;
+    try {
+      final t = await _auth.refresh(_refreshToken ?? '', _email ?? '');
+      if (t.idToken.isNotEmpty) adopt(t);
+    } on Object {
+      // כשל-רשת חולף ⇒ שומרים על הטוקן הקיים (לא מנתקים את המשתמש).
+    }
+    return _idToken;
+  }
+
   /// ניקוי הסשן (signOut / רענון-שנכשל).
   void clear() {
     _idToken = _refreshToken = _localId = _email = null;
