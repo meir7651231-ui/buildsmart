@@ -116,6 +116,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     if (!ok) setState(() => _codeRejected = true);
   }
 
+  /// Whether the email+password door is open on the welcome registration form:
+  /// the compile-time [kEmailPasswordAuth] OR the runtime 🌉 filtered-mode flag.
+  /// A filtered client (Netfree/Rimon) has no working phone-OTP (SMS touches
+  /// google hosts the filter blocks), so email+password through the edge proxy
+  /// is their ONLY way to register — the same rule as the login sheet.
+  bool get _emailAllowed =>
+      kEmailPasswordAuth || ref.read(filteredModeProvider);
+
   void _register() {
     // Contractor flow only — in role mode (cluster #85א) the registration
     // form is not built; board login goes through [_boardLogin].
@@ -157,13 +165,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // redundant with the `contactOk` gate in build(): this is the only line that
     // calls createUserWithEmailPassword, so it is the line that must be right
     // even if a future edit loosens the form validation above.
-    if (kEmailPasswordAuth && validEmail(contact)) {
+    if (_emailAllowed && validEmail(contact)) {
       try {
         await ref
             .read(authStateProvider.notifier)
             .createUserWithEmailPassword(contact, password);
       } on AuthGatewayException catch (e) {
-        if (mounted) showToast(context, hebrewAuthError(e.code));
+        // 🌉 מצב-מסונן: גשר-ה-REST נושא הודעת-עברית מוכנה (e.message) עם קוד
+        // בסגנון-REST (EMAIL_EXISTS) ש-hebrewAuthError לא ממפה ⇒ מציגים את
+        // ההודעה הישירה כשקיימת, אחרת ממפים את הקוד (נתיב ה-SDK הרגיל).
+        if (mounted) {
+          showToast(context, e.message ?? hebrewAuthError(e.code));
+        }
         return;
       } on Object catch (_) {
         if (mounted) showToast(context, hebrewAuthError('unknown'));
@@ -682,7 +695,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // account-minting branch below is never reached. (Lock 2 is inside
     // [_registerViaAuth] itself — one gate can be edited away by mistake; two
     // independent ones in different methods cannot be, silently.)
-    final contactOk = kEmailPasswordAuth
+    // 🌉 מצב-מסונן: אותה דלת-מייל כמו בחלון-הכניסה — מייל+סיסמה נפתחים גם דרך
+    // הדגל הריצתי, כי ללקוח-מסונן אין phone-OTP עובד. כבוי ⇒ ביט-זהה.
+    final emailAllowed = kEmailPasswordAuth || ref.watch(filteredModeProvider);
+    final contactOk = emailAllowed
         ? validIsraeliMobile(_contact.text) || validEmail(_contact.text)
         : validIsraeliMobile(_contact.text);
     // server-gate-auth — flag ON + an EMAIL contact mints a real account from
@@ -690,7 +706,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // PHONE contact routes to OTP (no password), and flag OFF never reads it —
     // so the demo CTA gate is byte-identical.
     final needsPassword =
-        kEmailPasswordAuth && useFirebaseBackend && validEmail(_contact.text);
+        emailAllowed && useFirebaseBackend && validEmail(_contact.text);
     final passwordOk = !needsPassword || _password.text.length >= 6;
     final valid =
         registrationValid(_name.text, _contact.text) && contactOk && passwordOk;
@@ -960,23 +976,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       // field in every respect — label, keyboard, autofill and
                       // error message.
                       HelpTarget(
-                        title: kEmailPasswordAuth ? 'טלפון או אימייל' : 'מספר טלפון',
-                        body: kEmailPasswordAuth
+                        title: emailAllowed ? 'טלפון או אימייל' : 'מספר טלפון',
+                        body: emailAllowed
                             ? 'פרטי הקשר שמזהים אותך כלקוח — לפיהם תזוהה '
                                 'בכניסה הבאה. כאן מקלידים מספר טלפון או כתובת מייל.'
                             : 'המספר שמזהה אותך. נשלח אליו קוד חד-פעמי ב-SMS, '
                                 'ואיתו נכנסים גם בפעם הבאה — בלי סיסמה לזכור.',
                         child: _field(
                           _contact,
-                          kEmailPasswordAuth ? 'טלפון או אימייל' : 'מספר טלפון נייד',
-                          kEmailPasswordAuth
+                          emailAllowed ? 'טלפון או אימייל' : 'מספר טלפון נייד',
+                          emailAllowed
                               ? Icons.alternate_email
                               : Icons.phone_iphone,
                           ltr: true,
-                          keyboardType: kEmailPasswordAuth
+                          keyboardType: emailAllowed
                               ? TextInputType.emailAddress
                               : TextInputType.phone,
-                          autofillHints: kEmailPasswordAuth
+                          autofillHints: emailAllowed
                               ? const [AutofillHints.email]
                               : const [AutofillHints.telephoneNumber],
                           textInputAction: needsPassword
@@ -986,7 +1002,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               needsPassword ? null : (valid ? _register : null),
                           errorText: _contact.text.trim().isEmpty || contactOk
                               ? null
-                              : kEmailPasswordAuth
+                              : emailAllowed
                                   ? 'מספר נייד או אימייל לא תקינים'
                                   : 'מספר נייד לא תקין',
                         ),
