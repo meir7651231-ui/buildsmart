@@ -138,4 +138,86 @@ class FirestoreRest {
       throw FirestoreRestException(res.status, res.body);
     }
   }
+
+  Uri _queryUri() => Uri.parse(
+        'https://$host/v1/projects/$projectId/databases/(default)/documents:runQuery',
+      );
+
+  /// מריץ שאילתה ממוקדת-שדה (`field == value`) על אוסף — הצורה שה-Rules של
+  /// לקוח-מסונן מאשרים (למשל הזמנות `contractorUid == uid`). מחזיר `{id, fields}`.
+  Future<List<FirestoreRestDoc>> runQuery(
+    String collectionId, {
+    required String field,
+    required String value,
+  }) async {
+    final body = jsonEncode({
+      'structuredQuery': {
+        'from': [
+          {'collectionId': collectionId},
+        ],
+        'where': {
+          'fieldFilter': {
+            'field': {'fieldPath': field},
+            'op': 'EQUAL',
+            'value': {'stringValue': value},
+          },
+        },
+      },
+    });
+    final res =
+        await request('POST', _queryUri(), _headers(await idToken()), body);
+    if (res.status != 200) throw FirestoreRestException(res.status, res.body);
+    return _docsFromRunQuery(res.body);
+  }
+
+  /// רשימת כל מסמכי-אוסף (GET) — לאוספים שה-Rules מתירים קריאה-מלאה. מחזיר
+  /// `{id, fields}` (עמוד ראשון · ‏pageSize).
+  Future<List<FirestoreRestDoc>> listDocs(
+    String collectionId, {
+    int pageSize = 300,
+  }) async {
+    final uri = Uri.parse(
+      'https://$host/v1/projects/$projectId/databases/(default)/documents/'
+      '$collectionId?pageSize=$pageSize',
+    );
+    final res = await request('GET', uri, _headers(await idToken()), null);
+    if (res.status == 404) return const [];
+    if (res.status != 200) throw FirestoreRestException(res.status, res.body);
+    final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final docs = (map['documents'] as List?) ?? const [];
+    return docs
+        .map((d) => _docFrom((d as Map).cast<String, dynamic>()))
+        .whereType<FirestoreRestDoc>()
+        .toList();
+  }
+
+  List<FirestoreRestDoc> _docsFromRunQuery(String body) {
+    final decoded = jsonDecode(body.isEmpty ? '[]' : body);
+    if (decoded is! List) return const [];
+    final out = <FirestoreRestDoc>[];
+    for (final row in decoded) {
+      if (row is Map && row['document'] is Map) {
+        final d = _docFrom((row['document'] as Map).cast<String, dynamic>());
+        if (d != null) out.add(d);
+      }
+    }
+    return out;
+  }
+
+  /// חילוץ `{id, fields}` ממסמך-REST (`name` = הנתיב המלא; ה-id = הסגמנט האחרון).
+  FirestoreRestDoc? _docFrom(Map<String, dynamic> doc) {
+    final name = (doc['name'] ?? '').toString();
+    if (name.isEmpty) return null;
+    final id = name.split('/').last;
+    final fields =
+        decodeFields((doc['fields'] as Map?)?.cast<String, dynamic>() ?? {});
+    return FirestoreRestDoc(id, fields);
+  }
+}
+
+/// מסמך-REST מפוענח — id + שדות (מקביל ל-RemoteDoc של שכבת-המאגרים).
+class FirestoreRestDoc {
+  const FirestoreRestDoc(this.id, this.fields);
+  final String id;
+  final Map<String, dynamic> fields;
 }

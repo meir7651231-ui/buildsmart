@@ -4084,6 +4084,14 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`filtered_mode.dart`:** `applyFilteredModeValue(store, raw)` טהור (‏on: 1/true/on/yes · off: 0/false/off/no · null/לא-מוכר ⇒ בלי-שינוי, הבחירה שורדת) + `bootstrapFilteredModeFromUrl(store)`.
 - **`main.dart`:** קריאה **מיד אחרי `ensureInitialized`, לפני כל קריאת-ספק** — אותו localStorage שהספק קורא ⇒ נכנס-לתוקף בפריים-הראשון. חסר-פרמטר ⇒ ביט-זהה (הבחירה הקיימת). ‏main.dart 7 infos קדם-קיימים = 7 (אומת ב-stash).
 - **בדיקות (edge_filtered_mode_test — +1 קבוצה):** כל ערכי-ההדלקה/כיבוי · null/לא-מוכר לא-נוגעים. analyze 0 על edge/+הבדיקה.
+### #filtered-auth-D-reads — קריאות-נתונים דרך הגשר (REST-polling) + הזמנות (שלב D · חלק 2) (2026-08-12)
+סוגר את "מרדף החתול-ועכבר": כל קריאה שהלקוח-המסונן פוגע בה עוברת דרך הגשר, במקום לתקן כל שער בנפרד.
+- **`firestore_rest.dart`:** `runQuery(collection, field, value)` (POST `:runQuery` · structuredQuery ‏fieldFilter EQUAL — ההיקף שה-Rules מתירים ללקוח) + `listDocs(collection)` (GET · עמוד-ראשון) → `FirestoreRestDoc{id, fields}` (‏`name`→id מהסגמנט האחרון).
+- **`edge_collection_source.dart`:** `snapshots` = **polling** (‏`pollInterval` ברירת-מחדל 6ש') — קריאה-מיידית ואז לולאה; scope ⇒ runQuery, אחרת listDocs; כשל ⇒ רשימה-ריקה (לא קריסה). `isScoped = scopeField!=null` (ריק-סקופ = empty כנה). set/delete כמקודם.
+- **`orders_local.dart` — `ordersRepositoryProvider`:** מצב-מסונן ⇒ `FirebaseOrdersRepository(source: EdgeRestCollectionSource('orders', scope contractorUid==uid))..attach()`. `placeOrder` ⇒ `set` (REST · לונדינג-אופטימי מהמנוע-המקומי) + snapshots-polling מסנכרן סטטוסים. כבוי ⇒ SDK (byte-identical).
+- **מדוע לא מאגר-המשתמשים:** סטטוס-הלקוח כבר מסופק מה-claim (`withServerRoleApproval`), אז אין צורך לקרוא `users/{uid}` (וממילא ה-Rules אוסרים על קבלן לרשום את כל האוסף).
+- **בדיקות (`edge_collection_source_test`, +scoped/listDocs):** snapshots-בלי-scope⇒GET-listDocs · snapshots-עם-scope⇒POST-`:runQuery`-ממוקד-שדה. analyze 0 · web build עבר.
+- **מגבלה ידועה:** ההיקף `contractorUid==uid` נכון לקבלן (המקרה הנבדק); store/courier (pool ∪ own · OR-query) = עידון עתידי. שאר-האוספים (צ׳אט וכו') יחווטו באותו דפוס לפי-הצורך.
 ### #filtered-auth-D-claims — הלקוח קורא את אישור-המנהל (idToken claims מפוענח) (2026-08-12)
 אימות-שטח: הרשמה+בקשה+אישור עבדו (הלקוח הופיע אצל המנהל כ"פעיל · קבלן"), אבל הלקוח נשאר "דרוש הרשמה" — "הוא לא קורא שאישרתי". השורש: `roleChipStateProvider` נשען על `hasServerRole` (מ-`idTokenClaims`), ו-`FilteredAuthGateway.idTokenClaims` החזיר `{}`.
 - **`filtered_auth_gateway.dart` — `idTokenClaims`:** אישור-תפקיד = custom-claim בצד-השרת שנכנס ל-idToken רק אחרי רענון ⇒ **מרענן-כפוי (לא-הרסני)** ואז מפענח את payload ה-JWT (base64url של החלק האמצעי). כשל-פענוח/רשת ⇒ `{}` (כמו signed-out, לא crash). `rolesFromClaims` קורא `claims['role']` ⇒ הצ׳יפ הופך ל"מאושר".

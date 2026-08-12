@@ -46,9 +46,31 @@ void main() {
     expect(calls.single.method, 'DELETE');
   });
 
-  test('snapshots ⇒ זרם-ריק · isScoped=false (כתיבה-בלבד בשלב זה)', () async {
+  test('snapshots בלי scope ⇒ polling ל-listDocs (GET) · isScoped=false',
+      () async {
     final src = EdgeRestCollectionSource('roleRequests', rest());
     expect(src.isScoped, isFalse);
-    expect(await src.snapshots().toList(), isEmpty);
+    expect(await src.snapshots().first, isEmpty); // listDocs ריק (fake '{}')
+    expect(calls.first.method, 'GET');
+    expect(calls.first.url.path, contains('/documents/roleRequests'));
+  });
+
+  test('snapshots עם scope ⇒ runQuery (POST :runQuery) ממוקד-שדה · isScoped',
+      () async {
+    final src = EdgeRestCollectionSource(
+      'orders',
+      rest(),
+      scopeField: 'contractorUid',
+      scopeValue: 'U',
+    );
+    expect(src.isScoped, isTrue);
+    await src.snapshots().first;
+    expect(calls.first.method, 'POST');
+    expect(calls.first.url.path, contains(':runQuery'));
+    final q = (jsonDecode(calls.first.body!) as Map)['structuredQuery'] as Map;
+    expect((q['from'] as List).single, {'collectionId': 'orders'});
+    final ff = (q['where'] as Map)['fieldFilter'] as Map;
+    expect((ff['field'] as Map)['fieldPath'], 'contractorUid');
+    expect((ff['value'] as Map)['stringValue'], 'U');
   });
 }
