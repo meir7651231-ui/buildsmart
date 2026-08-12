@@ -29,8 +29,9 @@ import { FieldValue } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
+import { mayApproveUsers } from "./approveUsers";
 import { writeAudit } from "./audit";
-import { callerRoles, db, REGION } from "./common";
+import { callerRoles, db, isOwnerEmail, REGION } from "./common";
 
 /// GDPR cascade — sever the deleted [uid]'s personal LINK from multi-party docs
 /// (the records stay for the OTHER parties; only the uid reference is scrubbed).
@@ -267,13 +268,22 @@ async function purgeIntelForSubject(
   return counts;
 }
 
-export const deleteAccount = onCall({ region: REGION }, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Sign-in required.");
-  }
-  const uid = request.auth.uid;
-  const roles = callerRoles(request.auth.token);
-
+/// GDPR right-to-erasure CORE — the complete, best-effort wipe of one [uid],
+/// callable-agnostic so BOTH the self-service `deleteAccount` and the manager-
+/// driven `deleteUser` share ONE erasure path: the uid-keyed personal docs (users/
+/// diag), the multi-party reference cascade, the customer-intelligence layer, the
+/// Auth record itself (Admin SDK — bypasses recent-login), and the 'account.delete'
+/// audit row. [actor] names WHO triggered it (self-delete passes the subject's own
+/// uid; `deleteUser` passes the manager's); the erased [uid] is ALWAYS the audit
+/// target. Returns the per-target tallies for the caller's own audit/telemetry.
+export async function eraseUserCompletely(
+  uid: string,
+  actor: { actorUid: string; actorRole: string | null }
+): Promise<{
+  existed: Record<string, boolean>;
+  scrubbed: Record<string, number>;
+  intelPurged: Record<string, number>;
+}> {
   // 1 · purge the uid-keyed personal docs (see SCOPE above). Best-effort per
   //     doc: a missing/failed doc never aborts the rest of the erasure.
   const refs = [
@@ -308,14 +318,129 @@ export const deleteAccount = onCall({ region: REGION }, async (request) => {
   //      (app_flutter/.../erasure.dart · erasure_completeness_test.dart).
   const intelPurged = await purgeIntelForSubject(uid);
 
-  // 2 · delete the Auth record itself (Admin SDK — bypasses recent-login).
-  await getAuth().deleteUser(uid);
+  // 2 · delete the Auth record itself (Admin SDK — bypasses recent-login). A
+  //     target whose Auth record is ALREADY GONE (the primary manager use case:
+  //     orphaned Firestore docs left after a console-side auth delete) is treated
+  //     as success — the docs above are already purged; ANY OTHER error re-throws.
+  //     The self path can't hit this: a signed-in caller always has an Auth record.
+  try {
+    await getAuth().deleteUser(uid);
+  } catch (e) {
+    if ((e as { code?: string }).code !== "auth/user-not-found") throw e;
+    logger.info("eraseUserCompletely: auth record already absent", { uid });
+  }
   logger.info("deleteAccount: erased", { uid, existed, scrubbed, intelPurged });
 
   await writeAudit({
     action: "account.delete",
     source: "deleteAccount",
+    actorUid: actor.actorUid,
+    actorRole: actor.actorRole,
+    target: `users/${uid}`,
+    before: existed,
+    after: { scrubbed, intelPurged },
+    ok: true,
+  });
+
+  return { existed, scrubbed, intelPurged };
+}
+
+export const deleteAccount = onCall({ region: REGION }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Sign-in required.");
+  }
+  const uid = request.auth.uid;
+  const roles = callerRoles(request.auth.token);
+
+  // SELF-erasure: the caller can only erase their OWN account (request.auth.uid —
+  // no uid argument). The complete GDPR wipe lives in the shared
+  // `eraseUserCompletely`; here the actor IS the subject.
+  await eraseUserCompletely(uid, {
     actorUid: uid,
+    actorRole: roles.join(",") || null,
+  });
+
+  return { ok: true };
+});
+
+/**
+ * deleteUser — a manager/admin erases ANOTHER user's account by uid (region
+ * REGION, matching `kAuthFunctionsRegion` in the app). The privileged twin of
+ * `deleteAccount`: the SAME complete GDPR wipe (`eraseUserCompletely`), but the
+ * caller and the erased subject differ.
+ *
+ *   data: { uid: string }   — the account to erase (never the caller's own).
+ *   auth: the caller must hold `manager` or `admin` (else permission-denied).
+ *
+ * Guards (all MANDATORY): manager/admin only (a denied attempt is audit-logged);
+ * a non-empty uid; NOT the caller's own uid (self-erasure is `deleteAccount`,
+ * which needs no manager claim); and the app OWNER is NEVER deletable (owner-guard
+ * by verified email). A target whose Auth record is already gone still purges its
+ * residual docs.
+ */
+export const deleteUser = onCall({ region: REGION }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Sign-in required.");
+  }
+  const callerUid = request.auth.uid;
+  const roles = callerRoles(request.auth.token);
+
+  // AUTHORIZE: manager/admin only — the same account-activation tier as
+  // `approveUsers`. A denied attempt is audit-logged (the privilege-escalation
+  // trail precedent).
+  if (!mayApproveUsers(roles)) {
+    await writeAudit({
+      action: "user.delete",
+      source: "deleteUser",
+      actorUid: callerUid,
+      actorRole: roles.join(",") || null,
+      target: "users/*",
+      before: null,
+      after: null,
+      ok: false,
+      reason: "manager-or-admin-required",
+    });
+    throw new HttpsError(
+      "permission-denied",
+      "Only a manager or admin may delete a user."
+    );
+  }
+
+  const data = (request.data ?? {}) as { uid?: unknown };
+  const uid = String(data.uid ?? "").trim();
+  if (!uid) {
+    throw new HttpsError("invalid-argument", "uid (string) is required.");
+  }
+  if (uid === callerUid) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Use deleteAccount to erase your own account."
+    );
+  }
+
+  // OWNER-GUARD (MANDATORY): the app OWNER is NEVER deletable. Resolve the target's
+  // Auth record by uid and refuse if its verified email is the owner's. A missing
+  // Auth record (user-not-found) means the account itself is already gone — fall
+  // through to purge any residual docs; ANY OTHER lookup failure must NOT silently
+  // bypass this guard, so it re-throws.
+  try {
+    const u = await getAuth().getUser(uid);
+    if (isOwnerEmail({ token: { email: u.email } })) {
+      throw new HttpsError("permission-denied", "Cannot delete the owner.");
+    }
+  } catch (e) {
+    if (e instanceof HttpsError) throw e;
+    if ((e as { code?: unknown }).code !== "auth/user-not-found") throw e;
+  }
+
+  const { existed, scrubbed, intelPurged } = await eraseUserCompletely(uid, {
+    actorUid: callerUid,
+    actorRole: roles.join(",") || null,
+  });
+  await writeAudit({
+    action: "user.delete",
+    source: "deleteUser",
+    actorUid: callerUid,
     actorRole: roles.join(",") || null,
     target: `users/${uid}`,
     before: existed,

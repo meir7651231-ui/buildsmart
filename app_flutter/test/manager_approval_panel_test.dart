@@ -5,7 +5,8 @@
 // The server authorizes the callable; these are the client's checklist mechanics.
 
 import 'package:buildsmart/state/directory.dart';
-import 'package:buildsmart/state/role_requests.dart' show userApproverProvider;
+import 'package:buildsmart/state/role_requests.dart'
+    show userApproverProvider, userDeleterProvider;
 import 'package:buildsmart/state/sys_chat.dart' show BsRole;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -91,6 +92,13 @@ void main() {
       final c = ProviderContainer();
       addTearDown(c.dispose);
       expect(c.read(userApproverProvider), isNull);
+    });
+
+    test('userDeleterProvider OFF (Firebase-free) ⇒ null — no delete affordance '
+        'off, and the destructive server call is unreachable', () {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      expect(c.read(userDeleterProvider), isNull);
     });
   });
 }
