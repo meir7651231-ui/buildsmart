@@ -33,9 +33,11 @@
 // files this one sits between.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/edge/edge_collection_source.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
-import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
+import 'package:buildsmart/state/auth_state.dart'
+    show currentUidProvider, filteredFirestoreProvider;
 import 'package:buildsmart/state/sys_chat.dart' show BsRole;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,6 +125,11 @@ class DirectoryEntry {
 /// whole-collection: the rules allow every signed-in non-anonymous user to read
 /// `directory`, so no scope is needed (unlike the participant-scoped chat listen).
 final directorySourceProvider = Provider<RemoteCollectionSource?>((ref) {
+  // 🌉 מצב-מסונן: המילון דרך REST (הגשר) — ה-SDK בקו-מסונן חסר-טוקן ⇒ ה-listen
+  // נדחה בשקט והרשימה ריקה ("אין עדיין משתמשים"). זה בדיוק המקור ש-usersLookup
+  // כבר משתמש בו (הוכח עובד באבחון: manager→1, contractor→23). כבוי ⇒ SDK.
+  final rest = ref.watch(filteredFirestoreProvider);
+  if (rest != null) return EdgeRestCollectionSource('directory', rest);
   if (!useFirebaseBackend) return null;
   // BOUNDED (stage-2 scale rule 4 — boundedness conformance): cap the people
   // listen at 500 rows (a picker, not a feed; a search/pagination is the follow-up
