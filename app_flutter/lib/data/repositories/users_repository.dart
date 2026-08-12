@@ -29,6 +29,7 @@
 
 import 'package:buildsmart/data/board_accounts_local.dart' show isOwnerEmail;
 import 'package:buildsmart/data/bs_user.dart';
+import 'package:buildsmart/data/edge/filtered_mode.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/state/auth_state.dart';
@@ -226,8 +227,20 @@ final currentUserProvider = Provider<BsUser?>((ref) {
   // signal — the `users/{uid}` DOC may not carry an email (ensureUser writes it
   // only when the seed had one; a phone/other-path registration leaves it blank),
   // so keying only on the doc email missed the owner. Pass the auth email too.
-  final authEmail = ref.watch(authStateProvider).user?.email;
-  return withOwnerApproval(repo.currentUser(), authEmail);
+  final auth = ref.watch(authStateProvider);
+  final authEmail = auth.user?.email;
+  var u = withOwnerApproval(repo.currentUser(), authEmail);
+  // 🌉 מצב-מסונן: תפקיד-שרת מה-claim ⇒ active (השער לא זורק חזרה להרשמה).
+  // מגודר במצב-מסונן ⇒ לא-מסונן ביט-זהה (שם ה-doc נקרא ומספק את הסטטוס האמיתי).
+  if (ref.watch(filteredModeProvider)) {
+    u = withServerRoleApproval(
+      u,
+      uid: auth.user?.uid,
+      roles: auth.roles,
+      email: authEmail,
+    );
+  }
+  return u;
 });
 
 /// The OWNER (verified email) is inherently approved — the bootstrap admin.
@@ -245,6 +258,36 @@ BsUser? withOwnerApproval(BsUser? user, [String? authEmail]) {
       user.status == UserStatus.pending &&
       (isOwnerEmail(user.email) || isOwnerEmail(authEmail))) {
     return user.copyWith(status: UserStatus.active);
+  }
+  return user;
+}
+
+/// 🌉 מצב-מסונן — אישור-תפקיד = custom-claim ב-idToken (נקרא בלי Firestore).
+/// בקו-מסונן ה-doc של `users/{uid}` לא-נקרא (אין live-snapshot) ⇒ הסטטוס נשאר
+/// null/pending והשערים (הזמנה וכו') זורקים חזרה להרשמה — למרות שהמנהל אישר.
+/// כאן: יש **תפקיד-שרת** (מה-claim) ⇒ המשתמש פעיל: מסנתז active כשה-doc חסר,
+/// או משדרג pending→active. אין תפקיד ⇒ ללא-שינוי (זהה-התנהגות). טהור.
+BsUser? withServerRoleApproval(
+  BsUser? user, {
+  required String? uid,
+  required List<String> roles,
+  String? email,
+}) {
+  if (roles.isEmpty || uid == null || uid.isEmpty) return user;
+  final role = roles.first;
+  if (user == null) {
+    return BsUser(
+      uid: uid,
+      email: email,
+      role: role,
+      status: UserStatus.active,
+    );
+  }
+  if (user.status == UserStatus.pending) {
+    return user.copyWith(
+      status: UserStatus.active,
+      role: user.role.isEmpty ? role : user.role,
+    );
   }
   return user;
 }
