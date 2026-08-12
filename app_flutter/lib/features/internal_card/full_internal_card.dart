@@ -633,9 +633,20 @@ class _CardView extends ConsumerWidget {
   Widget _footer(LipskeyCatalogProduct p) {
     final dims = p.dims ?? const <String, dynamic>{};
     final dn = (dims['DN'] ?? '').toString();
+    // Angle (e.g. "90°") — elbows/tees carry it in the name; couplers/pipes do
+    // not, so a no-match is simply omitted (never fabricated). Mirrors e_2's
+    // "90° · 50 מ״מ · …" ordering.
+    final angleMatch = RegExp(r'(\d+)\s*°').firstMatch(p.nameHe);
+    final angle = angleMatch != null ? '${angleMatch.group(1)}°' : '';
+    // The colour slot: the product's declared colour when it has one (e_2 shows
+    // "שחור"); otherwise the brand keeps the slot. SmartLock carries no colour,
+    // so we show "חוליות" rather than invent one.
+    final colorOrBrand =
+        (p.color != null && p.color!.isNotEmpty) ? p.color! : p.brand;
     final sub = <String>[
+      if (angle.isNotEmpty) angle,
       if (dn.isNotEmpty) '$dn מ״מ',
-      if (p.brand.isNotEmpty) p.brand,
+      if (colorOrBrand.isNotEmpty) colorOrBrand,
     ].join(' · ');
     final hasVariants = variantSiblingsOf(p).length >= 2;
     // D5 — a horizontal drag ANYWHERE on the name block steps the size (bigger

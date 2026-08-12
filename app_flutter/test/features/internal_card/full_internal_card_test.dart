@@ -36,6 +36,10 @@ void main() {
     expect(find.byKey(const Key('internalCardImage')), findsOneWidget);
     expect(find.byKey(const Key('internalCardBuy')), findsOneWidget);
 
+    // Subtitle leads with the angle (e_2: "90° · 50 מ״מ · …"); the elbow hero's
+    // 90° is its real data (nameHe/dims), not a fabricated field.
+    expect(find.textContaining('90° · 50 מ״מ'), findsOneWidget);
+
     // D15 — the spec is HIDDEN behind 📋 (not spilled): closed by default.
     expect(find.byKey(const Key('internalCardSpecPanel')), findsNothing);
     expect(find.text('מפרט הנדסי'), findsNothing);
