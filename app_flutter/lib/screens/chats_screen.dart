@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:buildsmart/data/edge/filtered_mode.dart'
-    show filteredModeProvider;
 import 'package:buildsmart/data/repositories/users_lookup.dart'
     show usersLookupProvider;
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -862,7 +860,6 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
                       children: [
                         const _SearchBar(),
                         _FilterChipsRow(audience: widget.audience),
-                        const _ChatDiagButton(),
                       ],
                     )
                     : const SizedBox.shrink(),
@@ -1107,82 +1104,6 @@ class _Pill extends StatelessWidget {
       ),
     );
   }
-}
-
-// ─── #chat-diag — TEMPORARY field diagnostic (filtered-mode only) ────────────
-// Surfaces, ON the filtered client's own screen, the exact runtime state that
-// decides whether a client↔manager dm thread can form: my uid, what the
-// `directory` resolves per role (is a manager even findable?), and every thread
-// I currently see with its participantUids. Read back → the next fix is grounded,
-// not guessed. REMOVE once the chat delivery is confirmed end-to-end.
-class _ChatDiagButton extends ConsumerWidget {
-  const _ChatDiagButton();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // #chat-diag — show for ANY signed-in user on the live backend (not only the
-    // filtered client), so the MANAGER's device can run it too and we can compare
-    // the two sides' thread ids (catch a manager-side duplicate thread). The
-    // `filtered:` line inside the dialog still says which device is which.
-    final uid = ref.watch(currentUidProvider);
-    if (uid == null || uid.isEmpty) return const SizedBox.shrink();
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton.icon(
-        onPressed: () => unawaited(_showChatDiag(context, ref)),
-        icon: const Text('🔧', style: TextStyle(fontSize: 14)),
-        label: const Text('אבחון צ׳אט',
-            style: TextStyle(fontSize: 12, color: Color(0xFF888888))),
-      ),
-    );
-  }
-}
-
-Future<void> _showChatDiag(BuildContext context, WidgetRef ref) async {
-  String s6(String u) => u.length > 6 ? u.substring(0, 6) : u;
-  final myUid = ref.read(currentUidProvider);
-  final lookup = ref.read(usersLookupProvider);
-  final buf = StringBuffer()
-    ..writeln('my uid: ${myUid ?? "(none)"}')
-    ..writeln('filtered: ${ref.read(filteredModeProvider)}')
-    ..writeln('lookup: ${lookup != null ? "yes" : "null"}');
-  for (final role in const ['manager', 'store', 'courier', 'contractor']) {
-    List<String> us;
-    try {
-      us = lookup == null ? const [] : await lookup.uidsByRole(role);
-    } on Object catch (e) {
-      us = ['ERR:$e'];
-    }
-    buf.writeln('$role → ${us.length}: ${us.map(s6).join(",")}');
-  }
-  final threads = ref.read(chatEngineProvider);
-  buf.writeln('threads (${threads.length}):');
-  for (final t in threads) {
-    buf.writeln('• ${t.id}'
-        ' | roles=${t.participants.map((r) => r.name).join("/")}'
-        ' | uids=${t.participantUids.map(s6).join(",")}'
-        ' | msgs=${t.messages.length}');
-  }
-  if (!context.mounted) return;
-  await showDialog<void>(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: const Text('🔧 אבחון צ׳אט'),
-      content: SingleChildScrollView(
-        child: SelectableText(
-          buf.toString(),
-          textDirection: TextDirection.ltr,
-          style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('סגור'),
-        ),
-      ],
-    ),
-  );
 }
 
 // ─── thread list ──────────────────────────────────────────────────────────────
