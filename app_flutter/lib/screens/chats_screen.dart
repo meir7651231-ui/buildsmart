@@ -1120,7 +1120,12 @@ class _ChatDiagButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(filteredModeProvider)) return const SizedBox.shrink();
+    // #chat-diag — show for ANY signed-in user on the live backend (not only the
+    // filtered client), so the MANAGER's device can run it too and we can compare
+    // the two sides' thread ids (catch a manager-side duplicate thread). The
+    // `filtered:` line inside the dialog still says which device is which.
+    final uid = ref.watch(currentUidProvider);
+    if (uid == null || uid.isEmpty) return const SizedBox.shrink();
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton.icon(
