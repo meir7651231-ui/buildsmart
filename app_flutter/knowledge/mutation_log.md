@@ -2078,3 +2078,9 @@
 - **אימות (בהיעדר טסט-functions — תקדים deleteAccount):** `tsc --noEmit` נקי · byte-verify: `isOwnerEmail({token:{email}})` object-arg נוכח (הטעות ש-fixer תפס: bare-string היה מחזיר תמיד false → הבעלים מחיק) · `mayApproveUsers` (×2) · סובלנות `auth/user-not-found` (×2). self-path של deleteAccount אושר זהה-בייטים.
 - **client OFF-null:** `userDeleterProvider` → null ללא-backend (טסט חדש, מראה userApproverProvider) → הכפתור-ההרסני בלתי-נגיש כבוי. **mutation-verify פורמלי לא בוצע:** הבטיחות היחידה-הקריטית היא צד-שרת (אין טסט-functions, כתקדים deleteAccount); ה-supervisor מאמת שער+שומרים. הטסט-OFF-null עצמו לא-קטסטרופלי.
 - **טרם:** deploy (functions auto על push) → הבעלים מוחק את 6-הזבל בכפתור.
+
+## #user-delete-complete — 6 delete-gaps wired (2026-08-12)
+- **הנכס:** מחיקת-משתמש חייבת לנקות את כל דאטת-המשתמש בשרת. אודיט (40 אוספים) מצא 7 גַּפים.
+- **הפעולה:** הרחבת `eraseUserCompletely` (additive) — roleRequests/_claudeRate/_publishRate (DELETE) · material_requests/orders-PII/projects (SCRUB) · analyticsEvents (DELETE). 6/7.
+- **אימות:** functions `tsc` נקי · byte-verify כל-6 · `eraseUserCompletely` נקרא 3× (def+self+manager) + owner-guard×1 → המסלולים ללא-שינוי.
+- **צ'אט (7/7) נדחה:** `chatThreads.names` = string בודד → אנונימיזציה-בטוחה דורשת שינוי-סכמה (per-uid map), מקופל ל-#2. (הימנעות-מניחוש נכונה: לא לתייג-מחדש את השורד בטעות.)

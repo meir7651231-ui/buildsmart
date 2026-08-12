@@ -4124,3 +4124,11 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **שרת (`functions/src/deleteAccount.ts`):** חילוץ `eraseUserCompletely(uid, actor)` (הליבה: users/diag purge + multi-party scrub + intel purge + Auth-delete + audit) — `deleteAccount` (self) קורא לו, **התנהגות זהה-בייטים**. נוסף `deleteUser` callable (מנהל→יעד): הרשאת-מנהל (`mayApproveUsers`) · **owner-guard** (`getUser`→`isOwnerEmail({token:{email}})` — object-arg, קריטי) · no-self · **סובלנות ל-`auth/user-not-found`** (מנקה יתומים שה-Auth שלהם כבר נמחק). מיוצא ב-index.ts.
 - **לקוח:** `userDeleterProvider`/`UserDeleter` (role_requests.dart, מראה `userApproverProvider`, OFF-null) → callable `deleteUser({uid})`. כפתור **🗑️ מחק** ב-`_CustomerActionRow` (אדום/הרסני, `confirmDestructive`, gated `uid.isNotEmpty`). owner-hide נשען על שער-השרת (אין email בשורה) + השורה-של-הבעלים ממילא מוחרגת מה-directory.
 - **directory מתנקה אוטומטית** דרך cascade של `onUserDocWritten` על מחיקת users-doc. אימות: functions `tsc` נקי · client analyze 0 · 59 טסטים ירוקים (כולל userDeleterProvider OFF-null + OFF-path ללא-רגרסיה).
+
+### #user-delete-complete — השלמת מחיקה ל-100% בשרת (2026-08-12)
+אודיט-שלמות (40 אוספים) מצא ש-`eraseUserCompletely` פספס אוספים. הורחב — **additive בלבד**, שני המסלולים (self `deleteAccount` + manager `deleteUser`) מקבלים את המחיקה המלאה; owner-guard ללא-שינוי:
+- **DELETE uid-keyed:** `roleRequests/{uid}` · `_claudeRate/{uid}` · `_publishRate/{uid}`.
+- **SCRUB:** `material_requests.{workerUid,workerName,username}` · `orders.{contractorId,customerPhone,customerEmail}` (במעבר-contractorUid) · `projects.{contractorId,members[]}` (forward-ready) · `analyticsEvents` where `uid` (DELETE, dormant).
+- **קישורים רב-צדדיים** (orders-uids/chat/customers) נשארים מנותקים כמקודם (נכון — רשומה משותפת נשמרת).
+- **פתוח (→#2):** אנונימיזציית-`chatThreads` — `names` הוא string בודד (לא per-uid map) → אי-אפשר לאנונימיזציה-בטוחה בשרת בלי שינוי-סכמה. מקופל למיגרציה.
+- אימות: functions `tsc` נקי · byte-verify 6/6 · self-path + owner-guard ללא-שינוי.

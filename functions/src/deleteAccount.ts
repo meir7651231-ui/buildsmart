@@ -83,14 +83,53 @@ async function purgeMultiPartyReferences(
   // remains for the other parties + manager/admin; the personal link is gone).
   await scrub("orders", "contractorUid", {
     contractorUid: FieldValue.delete(),
+    // The deleted user was the order's PLACER (contractorUid == uid), so their
+    // residual BUYER PII is scrubbed in the SAME update: the display who
+    // (contractorId) plus the order card's 📞/💬 contact fields
+    // (customerPhone/customerEmail). The order + its numbers stay for the
+    // store/courier/manager. (storeUid/courierUid below are the OTHER parties'
+    // links — NOT this buyer's PII — so those two passes stay unchanged.)
+    contractorId: FieldValue.delete(),
+    customerPhone: FieldValue.delete(),
+    customerEmail: FieldValue.delete(),
   });
   await scrub("orders", "storeUid", { storeUid: FieldValue.delete() });
   await scrub("orders", "courierUid", { courierUid: FieldValue.delete() });
+  // material_requests — sever the WORKER link the deleted user held (workerUid ==
+  // uid) AND their name PII in the SAME update: workerName (the Hebrew display
+  // name) + username (the worker's own board username / scope key). Both belong to
+  // the deleted worker; the request items/status/note stay for the addressed
+  // contractor (employerId is the OTHER party — untouched).
+  await scrub("material_requests", "workerUid", {
+    workerUid: FieldValue.delete(),
+    workerName: FieldValue.delete(),
+    username: FieldValue.delete(),
+  });
   // chatMessages — sever authorship (the message text stays in the thread).
   await scrub("chatMessages", "fromUid", { fromUid: FieldValue.delete() });
   // customers — sever ownership (forward-ready: ownerId not yet written → no-op).
   await scrub("customers", "ownerId", { ownerId: FieldValue.delete() });
+  // projects — sever the deleted user's OWNERSHIP (contractorId) AND MEMBERSHIP
+  // (members array), mirroring customers.ownerId + chatThreads.participantUids.
+  // Forward-ready: neither field is written by the app yet → no-op today; the
+  // project record stays for its other members.
+  await scrub("projects", "contractorId", {
+    contractorId: FieldValue.delete(),
+  });
+  await scrub(
+    "projects",
+    "members",
+    { members: FieldValue.arrayRemove(uid) },
+    { arrayContains: true },
+  );
   // chatThreads — drop the uid from the membership array (thread stays for peers).
+  // NOTE (name anonymisation deliberately NOT done): the schema's `names` is a
+  // SINGLE per-thread display string (chat_firebase `toDoc` writes `'names':
+  // t.name`), NOT a per-uid map — a DM thread stores ONE name (the other party's,
+  // set at creation), so there is no per-uid slot to overwrite with the "deleted
+  // user" literal without risking relabelling the SURVIVING peer. Per-uid name
+  // replacement is therefore infeasible on this shape (flagged to the audit owner);
+  // `lastMsg` is retained like message bodies. Only the uid membership link goes.
   await scrub(
     "chatThreads",
     "participantUids",
@@ -118,6 +157,9 @@ async function purgeMultiPartyReferences(
 ///                    NEVER serializes a displayName, R1-4 — the events are deleted
 ///                    above, so this matches zero docs today; the forward-ready hook
 ///                    mirrors the `customers.ownerId` no-op precedent)
+///   • analyticsEvents — where the `uid` FIELD == uid (create-as-self, NEVER an
+///                    anon key, so uid-ONLY not the actor_key set; forward-ready:
+///                    the analytics sink is dormant today — no-op now)
 ///   • actorStitch/{uid} — the mapping doc itself, LAST (a mid-sweep failure leaves
 ///                    the anon→uid join intact for a retry)
 /// Best-effort + paginated exactly like `purgeMultiPartyReferences`: one failure
@@ -249,7 +291,36 @@ async function purgeIntelForSubject(
     }
   }
 
-  // 5 · actorStitch/{uid} — the mapping doc itself, LAST (a mid-sweep failure leaves
+  // 5 · analyticsEvents — the WRITE-ONLY event stream (Studio Pillar-5) is create-
+  //     AS-SELF (`uid == auth.uid`, NEVER an anon key — the Step-65 rule), so a
+  //     single `uid == uid` delete is COMPLETE (no actor_key chunking needed).
+  //     Paginated + best-effort, mirroring `purgeByActorKey`'s shape (deleting, not
+  //     scrubbing) but keyed on the doc's `uid` field. Forward-ready: the analytics
+  //     sink is DORMANT today (analytics_repository.dart — null sink, no server
+  //     write), so this matches ZERO docs until it is wired (the `sessions` no-op
+  //     precedent above).
+  try {
+    for (let round = 0; round < maxRounds; round++) {
+      const snap = await fs
+        .collection("analyticsEvents")
+        .where("uid", "==", uid)
+        .limit(batchSize)
+        .get();
+      if (snap.empty) break;
+      const batch = fs.batch();
+      for (const doc of snap.docs) batch.delete(doc.ref);
+      await batch.commit();
+      counts["analyticsEvents"] = (counts["analyticsEvents"] ?? 0) + snap.size;
+      if (snap.size < batchSize) break; // last page
+    }
+  } catch (e) {
+    logger.error("deleteAccount: analyticsEvents sweep failed", {
+      uid,
+      error: String(e),
+    });
+  }
+
+  // 6 · actorStitch/{uid} — the mapping doc itself, LAST (a mid-sweep failure leaves
   //     the anon→uid join intact for a retry).
   try {
     const ref = fs.collection("actorStitch").doc(uid);
@@ -289,6 +360,13 @@ export async function eraseUserCompletely(
   const refs = [
     db().collection("users").doc(uid),
     db().collection("diag").doc(uid),
+    // Other uid-KEYED personal docs (doc-id == uid), same best-effort delete: the
+    // pending role-request the user filed (roleRequests/{uid}), and the two
+    // server-only per-uid rate-limit counters (_claudeRate/{uid} ·
+    // _publishRate/{uid}). A missing doc is a no-op, exactly like users/diag above.
+    db().collection("roleRequests").doc(uid),
+    db().collection("_claudeRate").doc(uid),
+    db().collection("_publishRate").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(
