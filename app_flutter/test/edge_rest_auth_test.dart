@@ -76,6 +76,36 @@ void main() {
     expect(await hebrewFor('SOMETHING_NEW'), contains('נכשלה')); // ברירת-מחדל, לא crash
   });
 
+  test('כשל-רשת (fetch נכשל) ⇒ שגיאת NETWORK מובחנת, לא "פרטים שגויים"', () async {
+    final auth = EdgeRestAuth(
+      apiKey: apiKey,
+      send: (url, headers, body) async => throw Exception('SocketException'),
+    );
+    try {
+      await auth.signUp('a@b.com', 'pw123456');
+      fail('expected throw');
+    } on EdgeAuthException catch (e) {
+      expect(e.code, 'NETWORK');
+      expect(e.hebrew, contains('לא הצלחנו להגיע'));
+      expect(e.hebrew, contains('idt.buildsmart-il.com')); // מצביע על התת-דומיין
+    }
+  });
+
+  test('non-200 בלי שגיאת-Firebase (404 של ה-Worker) ⇒ HTTP_ ניתוב, לא crash',
+      () async {
+    final auth = EdgeRestAuth(
+      apiKey: apiKey,
+      send: (url, headers, body) async => (status: 404, body: 'not found'),
+    );
+    try {
+      await auth.signUp('a@b.com', 'pw123456');
+      fail('expected throw');
+    } on EdgeAuthException catch (e) {
+      expect(e.code, 'HTTP_404');
+      expect(e.hebrew, contains('אינו מנותב ל-Worker'));
+    }
+  });
+
   test('גוף-JSON כולל returnSecureToken', () async {
     String? sentBody;
     final auth = EdgeRestAuth(
