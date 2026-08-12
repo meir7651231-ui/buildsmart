@@ -9,8 +9,8 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kProjectsKey↝` · `_seed` · `_seedActiveId` · `persist↝`
-- **writes:** `field:_loaded↝` · `io:prefs.setString↝` · `state:state`
+- **reads:** `_seed` · `_seedActiveId`
+- **writes:** `state:state`
 - **calls:** _none_
 - **called-by:** _none_
 - **gated-by:** _none_

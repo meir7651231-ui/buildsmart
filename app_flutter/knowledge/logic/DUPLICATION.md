@@ -24,8 +24,17 @@
 >   `_loaded` latch → `mixin PersistOnWrite<T>`. `state_loaded_guard_test` נשאר
 >   ירוק. 46 בדיקות ירוקות. **5 מנועים נוספים (orders/tasks/projects/sys_chat/
 >   persona) — ליבת-הכסף, 2 וריאנטים — ממתינים לצ'קפוינט.**
-> - **slice 4b — orders_engine ✅** (מסלול-הכסף · 382 בדיקות · אותה תבנית מוכחת). נותרו tasks/projects/sys_chat/persona.
-> - הבא: 4 המנועים הנותרים → slice 5 (HR — variant, בזהירות).
+> - **slice 4b — orders_engine ✅ + projects_engine ✅** (מסלול-הכסף · אותה תבנית
+>   `PersistOnWrite<T>` מוכחת · 42 בדיקות + `state_loaded_guard_test` ירוקים).
+>   ה-IR מוכיח שמירת-התנהגות: כל mutator עדיין `writes state:state`; תופעת-הלוואי
+>   של השמירה עברה מ-inline-לכל-אטום ל-`set state` המשותף במיקסין (בדיוק החתימה
+>   הצפויה). נותרו tasks/sys_chat/persona.
+> - **3 המנועים הנותרים (`tasks_engine` · `sys_chat` · `persona_fulfillment`) —
+>   וריאנטים אמיתיים → נשמרים כפי-שהם (כלל-בטיחות 3.4).** ה-`_load` שלהם קורא את
+>   `_loaded` בשומרים-מורכבים או כותב `super.state` מספר פעמים — לא מתאים למיקסין
+>   הפשוט; ה-invariant עדיין נאכף ע"י `state_loaded_guard_test`.
+> - **slice 5 (HR — `worker_certs/trainings/forms/vacation`) — וריאנטים** (טביעת
+>   `_load` שונה, לא בייט-זהה) → מתועדים כחריגים, לא נדחפים בכוח.
 
 
 
@@ -69,13 +78,15 @@ worker_certs · worker_forms · worker_trainings
 
 > ⚠️ זו הסיבה ש"פונקציה אחת" נאיבית לא תעבוד — צריך codec מוזרק.
 
-### 2.3 הסֶטֶר `state=` — **הכי מסוכן** (hard-case #6, משוכפל 6 פעמים)
+### 2.3 הסֶטֶר `state=` — **הכי מסוכן** (hard-case #6, היה משוכפל 6 פעמים)
 ```
-orders_engine · persona_fulfillment · projects_engine · smart_cart · sys_chat · tasks_engine
+✅ smart_cart · ✅ orders_engine · ✅ projects_engine   → PersistOnWrite<T>
+⏸️ tasks_engine · sys_chat · persona_fulfillment        → וריאנטים, נשמרים כפי-שהם
 ```
 גוף זהה: `_loaded = true · super.state = value · _persist()`.
-**הכלל הקריטי "שמור-תמיד-אחרי-שינוי" משוכפל 6 פעמים.** אם מתקנים באחד ושוכחים
-באחר — נוצר באג "המצב לא נשמר" שקשה לאתר.
+**הכלל הקריטי "שמור-תמיד-אחרי-שינוי" רוכז ל`mixin PersistOnWrite<T>` ב-3 המנועים
+המתאימים** — כבר אי-אפשר "לשכוח" אותו בהם. 3 הנותרים הם וריאנטים אמיתיים (§3.4)
+וה-invariant בהם נאכף ע"י `state_loaded_guard_test`.
 
 ### 2.4 `update(f)` — 5 מודולי-הגדרות
 ```

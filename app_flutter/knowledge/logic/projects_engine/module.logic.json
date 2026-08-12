@@ -1,7 +1,7 @@
 {
   "module": "projects_engine",
   "source": "lib/state/projects_engine.dart",
-  "atomCount": 12,
+  "atomCount": 11,
   "atoms": [
     {
       "fn": "LiveProject.copyWith",
@@ -195,28 +195,9 @@
           {
             "kind": "const",
             "name": "kProjectsKey"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
-        "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded"
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
+        "writes": [],
         "calls": [],
         "calledBy": [],
         "gatedBy": []
@@ -230,12 +211,14 @@
         "getInstance",
         "getString",
         "jsonDecode",
+        "markLoaded",
+        "seedIfUnloaded",
         "toInt"
       ],
       "contract": {
         "input": "()",
         "output": "Future<void>",
-        "purity": "side-effecting",
+        "purity": "pure",
         "precond": [],
         "postcond": [],
         "invariants": [],
@@ -243,7 +226,7 @@
       }
     },
     {
-      "fn": "ProjectsNotifier._persist",
+      "fn": "ProjectsNotifier.persistState",
       "kind": "notifier-method",
       "object": {
         "signature": "() -> Future<void>",
@@ -271,9 +254,7 @@
           }
         ],
         "calls": [],
-        "calledBy": [
-          "ProjectsNotifier.state="
-        ],
+        "calledBy": [],
         "gatedBy": []
       },
       "behaviour": {
@@ -303,77 +284,6 @@
       }
     },
     {
-      "fn": "ProjectsNotifier.state=",
-      "kind": "setter",
-      "object": {
-        "signature": "set (ProjectsState value) -> void",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "const",
-            "name": "kProjectsKey",
-            "transitive": true
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
-          }
-        ],
-        "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded"
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
-        "calledBy": [],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "effect",
-            "detail": "_loaded = true"
-          },
-          {
-            "kind": "effect",
-            "detail": "super.state = value"
-          },
-          {
-            "kind": "effect",
-            "detail": "_persist()"
-          }
-        ]
-      },
-      "floor": [],
-      "contract": {
-        "input": "(ProjectsState value)",
-        "output": "void",
-        "purity": "side-effecting",
-        "precond": [],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
       "fn": "ProjectsNotifier.switchProject",
       "kind": "notifier-method",
       "object": {
@@ -381,29 +291,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "const",
-            "name": "kProjectsKey",
-            "transitive": true
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -463,29 +352,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "const",
-            "name": "kProjectsKey",
-            "transitive": true
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -535,29 +403,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "const",
-            "name": "kProjectsKey",
-            "transitive": true
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -617,29 +464,8 @@
         "constants": []
       },
       "connections": {
-        "reads": [
-          {
-            "kind": "const",
-            "name": "kProjectsKey",
-            "transitive": true
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
-          }
-        ],
+        "reads": [],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -680,35 +506,15 @@
       "connections": {
         "reads": [
           {
-            "kind": "const",
-            "name": "kProjectsKey",
-            "transitive": true
-          },
-          {
             "kind": "field",
             "name": "_seed"
           },
           {
             "kind": "field",
             "name": "_seedActiveId"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"

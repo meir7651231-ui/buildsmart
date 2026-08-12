@@ -4036,3 +4036,11 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - `state_loaded_guard_test` ירוק (orders_engine איבד `set state(` → מדולג; prefs_persisted מחזיק את השומר).
 - **אימות: 382 בדיקות ירוקות** (40 קבצי-הזמנות: contractor_checkout · sys_orders · manager · worker_approval + guard) · analyze נקי.
 - נותרו 3+1 מנועים (tasks/projects/sys_chat/persona — טביעת-אצבע שנייה `5e808acf`, לבדיקה פר-מנוע).
+
+### #dedup-slice-4b-projects — projects_engine → PersistOnWrite (hard-case #6, money core) (2026-08-12)
+המשך slice-4b על מנוע-הליבה השני. `projects_engine` (רשימת-האתרים החיה + cart-per-project) — אותה טביעת-אצבע של setter → PersistOnWrite<ProjectsState>.
+- מחק `bool _loaded` + `set state`; `_persist`→`@override persistState` (שומר את `if(!persist)return`); `_load` נכתב מחדש עם `markLoaded`+`seedIfUnloaded` (זהה-התנהגות ב-4 מסלולי-הטעינה: not-loaded+nonempty→seed · not-loaded+empty→latch · loaded→skip-seed+latch · corrupt→latch).
+- `switchProject`/`editProject`/`addProject`/`stashActiveCart`/`resetToSeed` ללא-שינוי (עדיין עוברים ב-set-state של המיקסין).
+- **הוכחת שמירת-התנהגות (המפרק):** re-sweep → כל mutator עדיין `writes state:state`; ההבדל היחיד ב-IR הוא שתופעת-הלוואי `io:prefs.setString`+`field:_loaded` עברה מ-inline-לכל-אטום ל-`set state` המשותף (אטום `state=` נעלם מהמחלקה, `_persist`→`persist-state`). זו בדיוק החתימה הצפויה של הרפקטור.
+- **אימות: 42 בדיקות + `state_loaded_guard_test` ירוקים** · analyze נקי.
+- נותרו 3 מנועי-וריאנט (tasks/sys_chat/persona) — נשמרים כפי-שהם (כלל-בטיחות §3.4).

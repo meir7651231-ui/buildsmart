@@ -20,6 +20,7 @@ import 'dart:convert';
 
 import 'package:buildsmart/data/projects.dart';
 import 'package:buildsmart/data/repositories/site_local.dart';
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -133,7 +134,8 @@ class ProjectsState {
 
 const String kProjectsKey = 'bs.projects.v1';
 
-class ProjectsNotifier extends StateNotifier<ProjectsState> {
+class ProjectsNotifier extends StateNotifier<ProjectsState>
+    with PersistOnWrite<ProjectsState> {
   /// [seed] is the genesis project list the engine starts from (and
   /// `resetToSeed` restores); [activeId] is the project active at seed time.
   /// Both default to the verbatim consts ([kProjects] / [kActiveProjectId]) so
@@ -164,37 +166,38 @@ class ProjectsNotifier extends StateNotifier<ProjectsState> {
   final List<Project> _seed;
   final String _seedActiveId;
 
-  bool _loaded = false;
+  // The `_loaded` load-clobber latch + the auto-persist `set state` invariant
+  // come from PersistOnWrite; this engine keeps its own persistState + _load.
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(kProjectsKey);
       if (raw == null || raw.isEmpty) {
-        _loaded = true;
+        markLoaded();
         return;
       }
       final m = jsonDecode(raw) as Map<String, dynamic>;
-      if (!_loaded) {
-        final list = [
-          for (final p in (m['projects'] as List? ?? const []))
-            LiveProject.fromJson(p as Map<String, dynamic>),
-        ];
-        if (list.isNotEmpty) {
-          super.state = ProjectsState(
-            projects: list,
-            activeId: m['activeId'] as String? ?? list.first.id,
-            seq: (m['seq'] as num?)?.toInt() ?? list.length + 1,
-          );
-        }
-        _loaded = true;
+      final list = [
+        for (final p in (m['projects'] as List? ?? const []))
+          LiveProject.fromJson(p as Map<String, dynamic>),
+      ];
+      if (list.isNotEmpty) {
+        seedIfUnloaded(ProjectsState(
+          projects: list,
+          activeId: m['activeId'] as String? ?? list.first.id,
+          seq: (m['seq'] as num?)?.toInt() ?? list.length + 1,
+        ));
+      } else {
+        markLoaded();
       }
     } on Object catch (_) {
-      _loaded = true; // corrupt payload — keep the seed
+      markLoaded(); // corrupt payload — keep the seed
     }
   }
 
-  Future<void> _persist() async {
+  @override
+  Future<void> persistState() async {
     if (!persist) return;
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -207,13 +210,6 @@ class ProjectsNotifier extends StateNotifier<ProjectsState> {
         }),
       );
     } on Object catch (_) {}
-  }
-
-  @override
-  set state(ProjectsState value) {
-    _loaded = true;
-    super.state = value;
-    _persist();
   }
 
   /// switchProject (proto :7584) — make [id] active. Before switching, the

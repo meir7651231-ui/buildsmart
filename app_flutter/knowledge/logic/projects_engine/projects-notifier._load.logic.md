@@ -9,8 +9,8 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kProjectsKey` · `persist↝`
-- **writes:** `field:_loaded` · `io:prefs.setString↝` · `state:state`
+- **reads:** `kProjectsKey`
+- **writes:** _none_
 - **calls:** _none_
 - **called-by:** _none_
 - **gated-by:** _none_
@@ -19,10 +19,10 @@
 ## התנהגות · behaviour (algorithm)
 
 ## floor
-- `ProjectsState` · `fromJson` · `getInstance` · `getString` · `jsonDecode` · `toInt`
+- `ProjectsState` · `fromJson` · `getInstance` · `getString` · `jsonDecode` · `markLoaded` · `seedIfUnloaded` · `toInt`
 
 ## חוזה · contract
 - **input:** `()`
 - **output:** `Future<void>`
-- **purity:** side-effecting
+- **purity:** pure
 - **throws:** _none_
