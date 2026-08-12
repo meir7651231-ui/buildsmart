@@ -26,10 +26,13 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
-import 'package:buildsmart/features/fittings/engine/grid_cell.dart'
-    show GridCell;
 import 'package:buildsmart/features/fittings/engine/models.dart' show RunElement;
-import 'package:buildsmart/features/fittings/ui/line_3d.dart' show Line3DView;
+// `Family` collides with Riverpod's provider `Family`, so the engine enums come
+// in under a prefix (used only by the gallery-3D route builder).
+import 'package:buildsmart/features/fittings/engine/models.dart' as fm
+    show Dir, Family;
+import 'package:buildsmart/features/fittings/render/product_line_3d.dart'
+    show ProductLine3D;
 import 'package:buildsmart/features/fittings/ui/sudoku_grid.dart'
     show SudokuGrid, runElementFor;
 import 'package:buildsmart/logic/install_kit.dart';
@@ -54,6 +57,8 @@ const Color _cBody = Color(0xFF48505A);
 const Color _cHotBg = Color(0xFFFFF2EA);
 const Color _cHotBorder = Color(0xFFFFD6BD);
 const Color _cGreen = Color(0xFF1F9D57); // D9 "אשר · סה״כ" confirm button
+const Color _cHintBg = Color(0xFFE7F6EC); // green coaching-hint pill bg (e_2/e_3)
+const Color _cHintInk = Color(0xFF1E874B); // green coaching-hint text
 
 /// THE full internal card. Give it a [product]; it renders every section the
 /// engine can populate for that product, and a swipe on the name cycles the
@@ -299,6 +304,8 @@ class _CardView extends ConsumerWidget {
           mainAxisSize: fillHeight ? MainAxisSize.max : MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Green coaching-hint pill — full-screen card only (e_0/e_2/e_3).
+            if (fillHeight) _hintBanner(),
             _topBar(context, p),
             // Full-screen: the hero (image / spec panel / rail) fills the slack;
             // each scrolls internally when it needs to. Embedded: shrink-wraps.
@@ -310,6 +317,72 @@ class _CardView extends ConsumerWidget {
             _lineStrip(context, ref, p, settings),
           ],
         ),
+      ),
+    );
+  }
+
+  // ── green coaching-hint pill (e_0 · e_2 · e_3) ────────────────────────────────
+  /// The soft-green hint bar at the very top of the FULL-SCREEN card — verbatim
+  /// wording from the reference screens, swapped by state (hero · spec · rail).
+  /// Arrows are Material icons (the reference's ← / → glyphs tofu in Heebo) and
+  /// point the way the real card's own affordances do. Full-screen only, so the
+  /// embedded home card stays uncluttered.
+  Widget _hintBanner() {
+    final List<InlineSpan> spans;
+    if (specOpen) {
+      // e_3: "נגיעה ב📋 (לא קופץ) — …"
+      spans = const [
+        TextSpan(
+          text: 'נגיעה ב📋 (לא קופץ) — המפרט/תקן/אזהרה מחליף את התמונה '
+              'במקום · טאבים למעבר',
+        ),
+      ];
+    } else if (railSide != 0) {
+      // e_0: "משיכה ימינה → מה מתחבר לצד ימין" / "…שמאלה → …לצד שמאל"
+      final toRight = railSide > 0;
+      spans = [
+        TextSpan(text: 'משיכה ${toRight ? 'ימינה' : 'שמאלה'} '),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Icon(
+            toRight ? Icons.arrow_forward : Icons.arrow_back,
+            size: 13,
+            color: _cHintInk,
+          ),
+        ),
+        TextSpan(text: ' מה מתחבר לצד ${toRight ? 'ימין' : 'שמאל'}'),
+      ];
+    } else {
+      // e_2: "מפרט · → חזור · מק״ט מוטבע על התמונה · נגיעה=גלריה"
+      spans = const [
+        TextSpan(text: 'מפרט · '),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Icon(Icons.arrow_forward, size: 13, color: _cHintInk),
+        ),
+        TextSpan(text: ' חזור · מק״ט מוטבע על התמונה · נגיעה=גלריה'),
+      ];
+    }
+    return Container(
+      key: const Key('internalCardHintBanner'),
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: _cHintBg,
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Text.rich(
+        TextSpan(
+          style: const TextStyle(
+            color: _cHintInk,
+            fontSize: 11.5,
+            fontWeight: FontWeight.w600,
+            height: 1.25,
+          ),
+          children: spans,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -1393,21 +1466,37 @@ class _CardView extends ConsumerWidget {
   }
 }
 
-/// A small seeded 3D line for the gallery's תלת-ממד page: the product itself +
-/// its first two real mates (one branching into depth). Empty ⇒ untyped product.
-List<GridCell> _galleryThreeDCells(LipskeyCatalogProduct p) {
+/// The gallery's תלת-ממד page: THIS product, welded into a complete connected
+/// run. The product leads (its routing revealed so an elbow/tee shows its
+/// turn/branch instead of hiding inline) and its real compatible mates close the
+/// line — the assembler adds the transition-pipes + end-stubs. A terminator
+/// (plug) trails the mates so it caps a real run rather than an empty stub.
+/// Empty ⇒ untyped product ⇒ the caller shows the emoji.
+List<RunElement> _galleryThreeDRoute(LipskeyCatalogProduct p) {
   final seed = runElementFor(p);
   if (seed == null) return const [];
+  final star = _revealRouting(seed);
   final mates = [
-    for (final m in compatibleProductsFor(p).take(2)) runElementFor(m),
-  ].whereType<RunElement>().toList();
-  final cells = <GridCell>[GridCell(0, 0, 0, seed)];
-  const dirs = [(1, 0, 0), (0, 0, 1)];
-  for (var i = 0; i < mates.length && i < dirs.length; i++) {
-    cells.add(GridCell(dirs[i].$1, dirs[i].$2, dirs[i].$3, mates[i]));
-  }
-  return cells;
+    for (final m in compatibleProductsFor(p).take(2))
+      if (runElementFor(m) case final RunElement e) e,
+  ];
+  // A plug terminates the assembler ⇒ put it last so the mates render first.
+  return star.family == fm.Family.plug ? [...mates, star] : [star, ...mates];
 }
+
+/// Re-stamp a bending fitting so its geometry reads in the static gallery view:
+/// an elbow/tee/saddle laid out inline (`Dir.right`) hides its turn behind the
+/// pipe. Point it UP and the 90°/branch becomes unmistakable. Straight families
+/// (coupler · reducer · valve · adapter · plug · collar) are unchanged.
+RunElement _revealRouting(RunElement e) => switch (e.family) {
+      fm.Family.elbow90 ||
+      fm.Family.elbow45 ||
+      fm.Family.miteredElbow ||
+      fm.Family.tee ||
+      fm.Family.saddle =>
+        RunElement(e.family, e.od, dir: fm.Dir.up, od2: e.od2),
+      _ => e,
+    };
 
 /// D3 — the tap-image gallery: a full-screen dark pager over the product
 /// image(s), the spec diagram(s), and a seeded 3D page — each pinch/slider-
@@ -1491,9 +1580,9 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                 itemBuilder: (context, i) {
                   // The extra last page is the seeded 3D view (תלת-ממד).
                   if (i >= widget.images.length) {
-                    final cells = _galleryThreeDCells(widget.product);
+                    final route = _galleryThreeDRoute(widget.product);
                     return Center(
-                      child: cells.isEmpty
+                      child: route.isEmpty
                           ? Text(widget.product.typeEmoji,
                               style: const TextStyle(fontSize: 96))
                           : Container(
@@ -1503,7 +1592,7 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(18),
                               ),
-                              child: Line3DView(cells: cells, height: 320),
+                              child: ProductLine3D(route: route),
                             ),
                     );
                   }
@@ -1577,8 +1666,7 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                         activeColor: _cAccent,
                         onChanged: (v) => setState(() {
                           _scale = v;
-                          _zoom.value = Matrix4.identity()
-                            ..scaleByDouble(v, v, v, 1);
+                          _zoom.value = Matrix4.diagonal3Values(v, v, v);
                         }),
                       ),
                     ),

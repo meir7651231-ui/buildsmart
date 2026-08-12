@@ -204,6 +204,37 @@ void main() {
     expect(find.byKey(const Key('internalCardSpecPanel')), findsOneWidget);
   });
 
+  testWidgets('green coaching hint banner shows full-screen, hidden embedded',
+      (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    // Full-screen (e_0/e_2/e_3) ⇒ the hint banner is present.
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FullInternalCard(product: hero, fillHeight: true),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('internalCardHintBanner')), findsOneWidget);
+    // Embedded home card (default) ⇒ no banner, so it stays uncluttered.
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: FullInternalCard(product: hero),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('internalCardHintBanner')), findsNothing);
+  });
+
   testWidgets('tapping the highlighted line circle removes it (screen 2)',
       (tester) async {
     tester.view.physicalSize = const Size(430, 1400);
