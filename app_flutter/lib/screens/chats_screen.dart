@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/users_lookup.dart'
+    show usersLookupProvider;
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbChatsArchiveNodes;
@@ -781,10 +783,15 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   /// pop (defensive — it is already null). If the thread vanished between the
   /// chip render and the tap, we simply reset and stay on the list (edge-crash
   /// safety: no push for a missing thread).
-  void _openChatById(String id) {
+  Future<void> _openChatById(String id) async {
     // Null the trigger first so a second tap on the same conversation re-sets
     // it and re-fires — and so a vanished thread leaves no stale id behind.
     ref.read(updatesChatOpenProvider.notifier).state = null;
+    // #chat-dm-reroute — a seed role-thread chip (e.g. "תמיכה") opens on the real
+    // dm-<uids> thread with the counterpart, same as `_ThreadRow.onTap`; the id is
+    // unchanged for the bot/dm/ambiguous/offline/signed-out cases.
+    id = await rerouteThreadToDm(ref, id, widget.persona);
+    if (!mounted) return;
     final threads = ref.read(chatEngineProvider);
     final match = threads.where((t) => t.id == id);
     if (match.isEmpty) return; // thread deleted after the chip rendered
@@ -823,7 +830,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     // the real `_ChatPage` push here (the keyboard never touches the private
     // route) and immediately nulls the provider so a repeat tap re-fires.
     ref.listen<String?>(updatesChatOpenProvider, (_, id) {
-      if (id != null) _openChatById(id);
+      if (id != null) unawaited(_openChatById(id));
     });
     // A TAPPED NOTIFICATION, which is the case the listener above cannot serve.
     // `ref.listen` fires on a CHANGE, and every push route sets the thread id
@@ -835,7 +842,9 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     // clears as it reads, so a later notification for the same conversation
     // still re-opens it.
     final fromPush = consumePendingThread(ref);
-    if (fromPush != null) afterThisFrame(() => _openChatById(fromPush));
+    if (fromPush != null) {
+      afterThisFrame(() => unawaited(_openChatById(fromPush)));
+    }
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1268,19 +1277,32 @@ class _ThreadRow extends ConsumerWidget {
     final arrowColor = missed ? BsTokens.brand : const Color(0xFF4CAF50);
 
     return InkWell(
-      onTap:
-          () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder:
-                  (_) => _ChatPage(
-                    view: (
-                      thread: thread,
-                      threadId: view.threadId,
-                      persona: view.persona,
-                    ),
-                  ),
+      onTap: () async {
+        // #chat-dm-reroute — a seed role-thread with a single real counterpart
+        // (e.g. "תמיכה" → the one manager) opens on the deterministic dm-<uids>
+        // thread instead, so BOTH sides can read AND write (a shared seed thread
+        // can't hold two plain users — see [rerouteThreadToDm]). Returns the same
+        // id (byte-identical push) for the bot/dm/ambiguous/offline/signed-out
+        // cases, so the demo + test behaviour is unchanged.
+        final targetId =
+            await rerouteThreadToDm(ref, view.threadId, view.persona);
+        if (!context.mounted) return;
+        if (targetId != view.threadId) {
+          openChatThread(context, ref, targetId, persona: view.persona);
+          return;
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => _ChatPage(
+              view: (
+                thread: thread,
+                threadId: view.threadId,
+                persona: view.persona,
+              ),
             ),
           ),
+        );
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
@@ -1461,6 +1483,67 @@ void openNewChatWith(
             view: (thread: thread, threadId: null, persona: BsRole.contractor),
           ),
     ),
+  );
+}
+
+/// #chat-dm-reroute — the SINGLE "other side" role of a seed thread for the
+/// reading [persona], or null when there is no single real counterpart: the bot
+/// thread, a per-user dm thread (empty role [ChatThread.participants]), or an
+/// ambiguous multi-party thread (>1 non-self role). Pure ⇒ ratchet-tested.
+///
+/// It exists because a shared SEED role-thread (`th-contractor-manager`, …) can
+/// hold at most ONE plain contractor: `ensureParticipantUids` stamps
+/// participantUids ONCE, and a plain contractor (no role claim) can't re-stamp an
+/// already-stamped thread (chatThreads rule). So a real conversation between two
+/// plain users over a seed thread silently loses the second party — this maps the
+/// seed thread to its counterpart role so the tap can reroute onto a real
+/// dm-<uids> thread that lists BOTH uids from creation (create rule passes both).
+BsRole? chatCounterpartRole(List<BsRole> participants, BsRole persona) {
+  final others =
+      participants.where((r) => r != persona && r != BsRole.bot).toList();
+  return others.length == 1 ? others.first : null;
+}
+
+/// #chat-dm-reroute — resolve the thread id to ACTUALLY open for [threadId].
+///
+/// For a signed-in REAL user tapping a seed role-thread whose counterpart is a
+/// SINGLE real person (e.g. the one manager behind "תמיכה"), this creates-or-gets
+/// the deterministic `dm-<sorted uids>` thread with BOTH uids and returns ITS id —
+/// so the conversation lands on a thread the Firestore rules let both sides read
+/// AND write (the seed thread can't, see [chatCounterpartRole]). The manager's own
+/// control-center flow builds the SAME id (`createOrGetThread([managerUid,
+/// clientUid])`), so the two sides converge on one thread.
+///
+/// Returns [threadId] UNCHANGED — so the demo/offline/test paths stay
+/// byte-identical — whenever it can't reroute: no signed-in uid, no directory
+/// (Firebase-free), a bot/dm/ambiguous thread, or a counterpart that resolves to
+/// none or MORE than one uid (a "which store?" case is left on the seed thread).
+Future<String> rerouteThreadToDm(
+  WidgetRef ref,
+  String threadId,
+  BsRole persona,
+) async {
+  final myUid = ref.read(currentUidProvider);
+  if (myUid == null || myUid.isEmpty) return threadId; // signed-out/demo/test
+  final matches = ref.read(chatEngineProvider).where((t) => t.id == threadId);
+  if (matches.isEmpty) return threadId;
+  final t = matches.first;
+  final counterpart = chatCounterpartRole(t.participants, persona);
+  if (counterpart == null) return threadId; // bot / dm / ambiguous
+  final lookup = ref.read(usersLookupProvider);
+  if (lookup == null) return threadId; // Firebase-free
+  List<String> uids;
+  try {
+    uids = await lookup.uidsByRole(counterpart.name);
+  } on Object catch (_) {
+    return threadId; // directory unavailable — keep the seed thread (no regression)
+  }
+  final peers = uids.where((u) => u.isNotEmpty && u != myUid).toList();
+  if (peers.length != 1) return threadId; // none / ambiguous ⇒ keep seed thread
+  return ref.read(chatEngineProvider.notifier).createOrGetThread(
+    [myUid, peers.first],
+    name: t.name,
+    avatar: t.avatar,
   );
 }
 
