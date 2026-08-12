@@ -16,12 +16,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/edge/edge_collection_source.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
     show FirestoreCollectionSource;
 import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/data/repositories/orders_repository.dart';
 import 'package:buildsmart/state/auth_state.dart'
-    show currentOrgIdProvider, currentUidProvider, roleProvider;
+    show
+        currentOrgIdProvider,
+        currentUidProvider,
+        filteredFirestoreProvider,
+        roleProvider;
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'
     show CollectionReference, Filter, Query;
@@ -153,6 +158,23 @@ class LocalOrdersRepository implements OrdersRepository {
 /// [LocalOrdersRepository] is used, so tests never touch Firestore. Both satisfy
 /// the same sync [OrdersRepository] contract → providers + UI are unchanged.
 final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
+  // 🌉 מצב-מסונן (שלב D · חלק 2): הזמנות עוברות דרך Firestore-REST — כתיבה
+  // (placeOrder ⇒ set) + קריאה (snapshots ב-polling, ממוקד `contractorUid==uid`
+  // — ההיקף שה-Rules מתירים ללקוח). מחליף את מקור-ה-SDK חסר-הטוקן בקו-מסונן.
+  final rest = ref.watch(filteredFirestoreProvider);
+  if (rest != null) {
+    final uid = ref.watch(currentUidProvider);
+    final repo = FirebaseOrdersRepository(
+      source: EdgeRestCollectionSource(
+        'orders',
+        rest,
+        scopeField: 'contractorUid',
+        scopeValue: uid ?? '__no_uid__',
+      ),
+    )..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
   if (useFirebaseBackend) {
     // A5 — UID-SCOPED listen (behind `kUidScopedQueries`, default OFF). With the
     // flag OFF the source is constructed with NO scope → the WHOLE-collection
