@@ -4051,6 +4051,12 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`main.dart`:** ‏`FirebaseFirestore.settings` — כש-kEdgeProxy דלוק: `host: kEdgeFsHost, sslEnabled: true`; כבוי: כמו היום (ביט-זהה).
 - **אימות:** ‏analyze 0-errors · ‏edge_proxy_test (off-by-default + host נקי).
 - **נותר לבעלים:** להוסיף ל-Worker תת-דומיין `fs.buildsmart-il.com` (Custom Domain), ואז build עם `--dart-define=EDGE_PROXY=true` לבדיקה על קו-מסונן. ⚠️ התנהגות WebChannel של Firestore-Web דרך proxy = אימות-שטח (לא ניתן לבדיקה מקומית).
+
+### #filtered-auth-A — לקוח-REST של Auth דרך המתווך (מצב-מסונן שלב A) (2026-08-12)
+הכרעת-בעלים "מייל+סיסמה דרך הקישור שלי". ליעוס: `edge-proxy/FILTERED-MODE-BUILD-ORDER.md`. ממצא: ‏flutterfire `useAuthEmulator` כופה http ⇒ אין הפניית Auth-SDK ⇒ מצב-מסונן = שכבת-REST (Auth+נתונים) דרך המתווך.
+- **`lib/data/edge/rest_auth.dart`:** ‏`EdgeRestAuth` — signInWithPassword/signUp ⇒ `idt.buildsmart-il.com`, refresh ⇒ `token.buildsmart-il.com`; ‏Sender מוזרק (בלי רשת), מיפוי-שגיאות עברי. **דורמנטי** — עוד לא מחווט לספק.
+- **בדיקות:** ‏edge_rest_auth_test — פונה-למתווך-לא-לגוגל · snake_case ברענון · כל-שגיאה-ממופה · returnSecureToken. ‏analyze 0.
+- **הבא:** שלב B (סשן+רענון) · C (FilteredAuthGateway) · D (Firestore-REST) · E (UI מצב-מסונן) · F (אימות-שטח).
 ### #user-delete — מחיקת-משתמש מכל-מקום (🗑️ במרכז) (2026-08-11)
 כפתור-מחיקה שמוחק משתמש מ**כל המערכות** (SSOT: `knowledge/SSOT-delete-user.md`), לבקשת-הבעלים. נבנה על תשתית-ה-GDPR הקיימת (`deleteAccount.ts`):
 - **שרת (`functions/src/deleteAccount.ts`):** חילוץ `eraseUserCompletely(uid, actor)` (הליבה: users/diag purge + multi-party scrub + intel purge + Auth-delete + audit) — `deleteAccount` (self) קורא לו, **התנהגות זהה-בייטים**. נוסף `deleteUser` callable (מנהל→יעד): הרשאת-מנהל (`mayApproveUsers`) · **owner-guard** (`getUser`→`isOwnerEmail({token:{email}})` — object-arg, קריטי) · no-self · **סובלנות ל-`auth/user-not-found`** (מנקה יתומים שה-Auth שלהם כבר נמחק). מיוצא ב-index.ts.
