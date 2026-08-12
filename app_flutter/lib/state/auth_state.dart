@@ -38,6 +38,11 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/data/edge/edge_http.dart';
+import 'package:buildsmart/data/edge/filtered_auth_gateway.dart';
+import 'package:buildsmart/data/edge/filtered_mode.dart';
+import 'package:buildsmart/data/edge/filtered_session.dart';
+import 'package:buildsmart/data/edge/rest_auth.dart';
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
@@ -778,6 +783,24 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
 /// the S2/S3 repository providers use (bottom of orders_local.dart). Tests
 /// override this with a hand-rolled fake.
 final authGatewayProvider = Provider<AuthGateway?>((ref) {
+  // 🌉 מצב-מסונן (opt-in, פר-מכשיר): לקוח על קו-מסונן (נטפרי/רימון) לא יכול
+  // לגעת ב-identitytoolkit/securetoken של גוגל. כשהדגל דלוק — גשר-Auth ב-REST
+  // דרך המתווך (`idt.`/`token.buildsmart-il.com`) במקום firebase_auth. הדגל
+  // ברירת-מחדל כבוי ⇒ native/VM/כל-לקוח-רגיל = הנתיב הישן, ביט-זהה.
+  if (ref.watch(filteredModeProvider)) {
+    // ה-apiKey הוא ה-web-key הציבורי — כבר ב-bundle (Firebase.initializeApp
+    // מקומי, בלי רשת), אין סוד חדש. אין נגיעה ב-FirebaseAuth.instance.
+    final apiKey = Firebase.apps.isNotEmpty ? Firebase.app().options.apiKey : '';
+    final auth = EdgeRestAuth(apiKey: apiKey, send: makeEdgeHttpSend());
+    return FilteredAuthGateway(
+      auth: auth,
+      session: FilteredSession(
+        auth: auth,
+        store: ref.watch(edgeKvStoreProvider),
+        now: DateTime.now,
+      ),
+    );
+  }
   // Auth availability is DECOUPLED from the data-backend flag: the gateway is
   // live whenever Firebase is initialised (main() calls initializeApp on web +
   // mobile), so the manager's "Sign in with Google" works on the demo build
