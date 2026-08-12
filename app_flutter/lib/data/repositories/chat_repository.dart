@@ -160,10 +160,24 @@ final chatRepositoryProvider = Provider<ChatRepository?>((ref) {
   // the base whole-collection listen, BYTE-IDENTICAL to before this fix.
   final RemoteCollectionSource Function(String threadId)? messagesSourceFor =
       scoped
+          // #chat-msg-noindex — NO `.orderBy('ts')` here. `where('threadId'==id)`
+          // + `orderBy('ts')` needs a COMPOSITE index (threadId+ts); when that
+          // index is not deployed the SDK query fails FAILED_PRECONDITION and the
+          // guarded listener swallows it → the non-filtered side (manager) saw
+          // ZERO messages on a thread the filtered client had 36 in (the filtered
+          // client reads via REST runQuery with NO orderBy, so it needs no index —
+          // hence the asymmetry). A pure equality query needs only the automatic
+          // single-field index, so it ALWAYS works with no deploy. Chronological
+          // order is restored client-side by `_ChatMessagesRepo.sortBy` (ts asc),
+          // which already runs on every snapshot — so dropping orderBy is
+          // display-neutral. limit(500) without an order returns docs in doc-id
+          // order (`m-<micros>-<role>` ≈ chronological); a thread with ≤500 msgs
+          // (≈ all) loads in full and sortBy re-orders. Newest-500 windowing for
+          // huge threads is the later, index-backed initiative.
           ? (threadId) => FirestoreCollectionSource(
                 'chatMessages',
                 scope: (c) => c.where('threadId', isEqualTo: threadId),
-                bound: (q) => q.orderBy('ts', descending: true).limit(500),
+                bound: (q) => q.limit(500),
               )
           : null;
   final repo = FirebaseChatRepository(
