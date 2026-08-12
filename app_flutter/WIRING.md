@@ -4051,3 +4051,9 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`main.dart`:** ‏`FirebaseFirestore.settings` — כש-kEdgeProxy דלוק: `host: kEdgeFsHost, sslEnabled: true`; כבוי: כמו היום (ביט-זהה).
 - **אימות:** ‏analyze 0-errors · ‏edge_proxy_test (off-by-default + host נקי).
 - **נותר לבעלים:** להוסיף ל-Worker תת-דומיין `fs.buildsmart-il.com` (Custom Domain), ואז build עם `--dart-define=EDGE_PROXY=true` לבדיקה על קו-מסונן. ⚠️ התנהגות WebChannel של Firestore-Web דרך proxy = אימות-שטח (לא ניתן לבדיקה מקומית).
+
+### #filtered-auth-A — לקוח-REST של Auth דרך המתווך (מצב-מסונן שלב A) (2026-08-12)
+הכרעת-בעלים "מייל+סיסמה דרך הקישור שלי". ליעוס: `edge-proxy/FILTERED-MODE-BUILD-ORDER.md`. ממצא: ‏flutterfire `useAuthEmulator` כופה http ⇒ אין הפניית Auth-SDK ⇒ מצב-מסונן = שכבת-REST (Auth+נתונים) דרך המתווך.
+- **`lib/data/edge/rest_auth.dart`:** ‏`EdgeRestAuth` — signInWithPassword/signUp ⇒ `idt.buildsmart-il.com`, refresh ⇒ `token.buildsmart-il.com`; ‏Sender מוזרק (בלי רשת), מיפוי-שגיאות עברי. **דורמנטי** — עוד לא מחווט לספק.
+- **בדיקות:** ‏edge_rest_auth_test — פונה-למתווך-לא-לגוגל · snake_case ברענון · כל-שגיאה-ממופה · returnSecureToken. ‏analyze 0.
+- **הבא:** שלב B (סשן+רענון) · C (FilteredAuthGateway) · D (Firestore-REST) · E (UI מצב-מסונן) · F (אימות-שטח).
