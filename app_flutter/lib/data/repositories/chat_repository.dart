@@ -28,9 +28,11 @@
 
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/chat_firebase.dart';
+import 'package:buildsmart/data/edge/edge_collection_source.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
     show FirestoreCollectionSource, RemoteCollectionSource;
-import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
+import 'package:buildsmart/state/auth_state.dart'
+    show currentUidProvider, filteredFirestoreProvider;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,6 +99,32 @@ abstract class ChatRepository implements Listenable {
 /// would only add a dead delegation layer.)
 final chatRepositoryProvider = Provider<ChatRepository?>((ref) {
   if (!useFirebaseBackend) return null;
+  // 🌉 מצב-מסונן (שלב D · חלק 2): צ׳אט דרך Firestore-REST — שרשורים ממוקדים
+  // `participantUids array-contains uid` (ARRAY_CONTAINS) + הודעות פר-שרשור
+  // `threadId == id`; שליחה = כתיבת chatMessages דרך הגשר. קריאה ב-polling.
+  final fRest = ref.watch(filteredFirestoreProvider);
+  if (fRest != null) {
+    final fUid = ref.watch(currentUidProvider);
+    if (fUid == null || fUid.isEmpty) return null; // אין זהות ⇒ אין צ׳אט
+    final repo = FirebaseChatRepository(
+      threadsSource: EdgeRestCollectionSource(
+        'chatThreads',
+        fRest,
+        scopeField: 'participantUids',
+        scopeValue: fUid,
+        scopeOp: 'ARRAY_CONTAINS',
+      ),
+      messagesSourceFor: (threadId) => EdgeRestCollectionSource(
+        'chatMessages',
+        fRest,
+        scopeField: 'threadId',
+        scopeValue: threadId,
+      ),
+      messagesWriter: EdgeRestCollectionSource('chatMessages', fRest),
+    )..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
   // A14 — UID-SCOPED `chatThreads` listen (behind `kUidScopedQueries`, default
   // OFF), mirroring `ordersRepositoryProvider`. The whole-collection chatThreads
   // listen is DENIED doc-by-doc by the participant-scoped rule (RULES ARE NOT

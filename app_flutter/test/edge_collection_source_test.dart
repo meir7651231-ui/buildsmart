@@ -73,4 +73,19 @@ void main() {
     expect((ff['field'] as Map)['fieldPath'], 'contractorUid');
     expect((ff['value'] as Map)['stringValue'], 'U');
   });
+
+  test('scopeOp ARRAY_CONTAINS (צ׳אט participantUids מכיל uid)', () async {
+    final src = EdgeRestCollectionSource(
+      'chatThreads',
+      rest(),
+      scopeField: 'participantUids',
+      scopeValue: 'U',
+      scopeOp: 'ARRAY_CONTAINS',
+    );
+    await src.snapshots().first;
+    final q = (jsonDecode(calls.first.body!) as Map)['structuredQuery'] as Map;
+    final ff = (q['where'] as Map)['fieldFilter'] as Map;
+    expect(ff['op'], 'ARRAY_CONTAINS');
+    expect((ff['field'] as Map)['fieldPath'], 'participantUids');
+  });
 }
