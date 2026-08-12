@@ -20,6 +20,7 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/data/edge/filtered_mode.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/feature_flags.dart' show kEmailPasswordAuth;
@@ -238,12 +239,22 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     }
   }
 
+  /// Whether the email+password door is open. The compile-time
+  /// [kEmailPasswordAuth] (the owner's "Google+SMS only" build) OR the runtime
+  /// 🌉 filtered-mode flag — a client on a filtered line (Netfree/Rimon) has NO
+  /// working Google/SMS (both touch several google.com hosts the filter blocks),
+  /// so email+password through the edge proxy is their ONE door. When filtered
+  /// mode is on the gateway is already the REST bridge (authGatewayProvider), so
+  /// these password calls go to `idt.buildsmart-il.com`, never googleapis.
+  bool get _emailAllowed =>
+      kEmailPasswordAuth || ref.read(filteredModeProvider);
+
   Future<void> _emailLogin() async {
     // LOCK 2 of 2 — the two calls that actually hand a password to Firebase are
     // guarded here, not only where the button is drawn. A UI-only gate is
     // undone by anyone who later adds another entry point; these two lines are
     // the ones that matter.
-    if (!kEmailPasswordAuth) return;
+    if (!_emailAllowed) return;
     final email = _email.text.trim();
     final password = _password.text;
     if (email.isEmpty || password.isEmpty) {
@@ -272,7 +283,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   /// like sign-in; the honest errors (`email-already-in-use` / `weak-password`)
   /// are Hebrew-toasted.
   Future<void> _emailCreate() async {
-    if (!kEmailPasswordAuth) return; // LOCK 2 of 2 — see [_emailLogin]
+    if (!_emailAllowed) return; // LOCK 2 of 2 — see [_emailLogin]
     final email = _email.text.trim();
     final password = _password.text;
     if (email.isEmpty || password.isEmpty) {
@@ -323,7 +334,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   /// `user-not-found` is folded into success); only real failures
   /// (invalid-email / network / too-many) surface in Hebrew. Needs an email.
   Future<void> _resetPassword() async {
-    if (!kEmailPasswordAuth) return; // no passwords ⇒ nothing to reset
+    if (!_emailAllowed) return; // no passwords ⇒ nothing to reset
     final email = _email.text.trim();
     if (email.isEmpty) {
       showToast(context, 'הזן אימייל לאיפוס הסיסמה');
@@ -392,6 +403,13 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       }
     });
 
+    // 🌉 מצב-מסונן: לקוח על קו-מסונן אין לו גוגל/SMS עובדים ⇒ המסך מציג רק
+    // מייל+סיסמה. הצעד-האפקטיבי נכפה ל-email (טלפון/קוד לא-נגישים), והחלטת-
+    // הבעלים "מייל+סיסמה דרך הקישור שלי" גוברת על LOCK 3 (הפאנל נכנס לבנדל —
+    // מחיר מכוון; לקוח לא-מסונן עדיין לא רואה אותו, כי הדגל כבוי בברירת-מחדל).
+    final filtered = ref.watch(filteredModeProvider);
+    final step = filtered ? _LoginStep.email : _step;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BsTokens.space4,
@@ -426,7 +444,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
             ),
             const SizedBox(height: 2),
             Text(
-              switch (_step) {
+              switch (step) {
                 _LoginStep.phone => 'נשלח לך קוד אימות חד-פעמי ב-SMS',
                 _LoginStep.code => 'הקוד נשלח אל $_sentTo · תקף לכ-2 דקות',
                 _LoginStep.email => _emailCreateMode
@@ -436,21 +454,18 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
               style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
             const SizedBox(height: BsTokens.space4),
-            ...switch (_step) {
+            ...switch (step) {
               _LoginStep.phone => _phonePane(),
               _LoginStep.code => _codePane(),
-              // LOCK 3 of 3 — the one that makes the pane ABSENT rather than
-              // merely unreachable. Locks 1 and 2 mean no code path can set
-              // [_step] to `email`, but dart2js cannot prove that (it is runtime
-              // state), so `_emailPane` and every string in it still shipped in
-              // the bundle. With this const branch the compiler folds the arm
-              // away, the method becomes unreferenced, and it is tree-shaken out
-              // — verified by searching the deployed main.dart.js. It also means
-              // a future edit that somehow reaches this state renders the phone
-              // pane instead of a working password form.
+              // LOCK 3 — folds `_emailPane` out of the bundle when email is off
+              // AND filtered mode is off (the compile-time part stays const so
+              // the shipped no-filter build is byte-identical). In filtered mode
+              // the runtime OR keeps the pane live — the owner's "email+password
+              // through my link" decision, the ONE door a filtered line has.
               _LoginStep.email =>
-                kEmailPasswordAuth ? _emailPane() : _phonePane(),
+                (kEmailPasswordAuth || filtered) ? _emailPane() : _phonePane(),
             },
+            _filteredModeToggle(filtered),
           ],
         ),
       ),
@@ -700,24 +715,60 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
               ),
             ),
           ),
-        // composite-hide: hiding this element drops the whole button.
-        CfgVisible(
-          'login_sheet.t06',
-          child: TextButton(
-            onPressed: _busy
-                ? null
-                : () => setState(() => _step = _LoginStep.phone),
-            child: CfgText(
-              'login_sheet.t06',
-              'חזרה לכניסה עם טלפון',
-              style: TextStyle(
-                color: BsTokens.mutedLight,
-                fontWeight: FontWeight.w600,
+        // "חזרה לכניסה עם טלפון" — hidden in filtered mode: the phone/SMS door
+        // is unreachable there (SMS touches google hosts the filter blocks), so
+        // offering it would dead-end the user.
+        if (!ref.read(filteredModeProvider))
+          // composite-hide: hiding this element drops the whole button.
+          CfgVisible(
+            'login_sheet.t06',
+            child: TextButton(
+              onPressed: _busy
+                  ? null
+                  : () => setState(() => _step = _LoginStep.phone),
+              child: CfgText(
+                'login_sheet.t06',
+                'חזרה לכניסה עם טלפון',
+                style: TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
-        ),
       ];
+
+  /// 🌉 המתג "אני על אינטרנט מסונן" — תחתית מסך-הכניסה. לקוח על נטפרי/רימון
+  /// מדליק אותו פעם-אחת: מרגע זה גשר-ה-Auth עובר ל-REST דרך הדומיין המאושר
+  /// (‏authGatewayProvider) והמסך מציג רק מייל+סיסמה. פר-מכשיר, מתמיד. כבוי =
+  /// המסך הרגיל (גוגל/SMS) — ביט-זהה להיום.
+  Widget _filteredModeToggle(bool filtered) {
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space2),
+      child: TextButton.icon(
+        onPressed: _busy
+            ? null
+            : () => ref
+                .read(filteredModeProvider.notifier)
+                .setEnabled(on: !filtered),
+        icon: Icon(
+          filtered ? Icons.shield : Icons.shield_outlined,
+          size: 18,
+          color: filtered ? BsTokens.brandDark : BsTokens.mutedLight,
+        ),
+        label: Text(
+          filtered
+              ? '✓ מצב אינטרנט מסונן פעיל — כניסה במייל וסיסמה'
+              : 'אני על אינטרנט מסונן (נטפרי/רימון)',
+          style: TextStyle(
+            color: filtered ? BsTokens.brandDark : BsTokens.mutedLight,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
 
   /// Brand FilledButton (the pod-sheet idiom) with the loading state: while
   /// [_busy] the button is disabled and shows a small white spinner.
