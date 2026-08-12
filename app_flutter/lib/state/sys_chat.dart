@@ -167,6 +167,30 @@ class ChatMessage {
   }
 }
 
+/// #chat-identity (uid-based mine/theirs) — is message [m] "MINE" for the person
+/// reading the thread? The reader is the auth [readerUid]; the display [persona]
+/// is only the LEGACY fallback.
+///
+/// THE BUG THIS FIXES: attribution keyed on `fromRole == persona` treats ONE
+/// person as TWO whenever they act from two boards. A manager who answers a
+/// client from the CONTRACTOR board sends `fromRole: contractor`; from the
+/// MANAGER board he sends `fromRole: manager`. Reading the same thread his two
+/// lines then land on OPPOSITE sides — and worse, his contractor-board line is
+/// indistinguishable from the REAL contractor client's (both `contractor`), so
+/// the client sees the manager's reply rendered as the client's OWN message.
+///
+/// THE FIX: when the message carries a real sender uid AND the reader's uid is
+/// known, "mine" is `fromUid == readerUid` — ONE PERSON, every board. Only when a
+/// uid is missing (the seed + every legacy/local/demo message, the signed-out /
+/// Firebase-free path, the whole test suite) do we fall back to the role compare,
+/// so that path stays BYTE-IDENTICAL (zero regression).
+bool chatMessageIsMine(ChatMessage m, BsRole persona, String? readerUid) {
+  if (m.fromUid.isNotEmpty && readerUid != null && readerUid.isNotEmpty) {
+    return m.fromUid == readerUid;
+  }
+  return m.fromRole == persona;
+}
+
 /// A conversation between [participants] (2 personas, or [BsRole.bot] for the
 /// chatbot thread). [threadsFor] keys off [participants] for isolation.
 class ChatThread {
