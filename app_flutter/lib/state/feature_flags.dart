@@ -92,6 +92,22 @@ const bool kSmartInputDemo =
 const bool kAppKbOnly =
     bool.fromEnvironment('APP_KB_ONLY', defaultValue: kProfileAppKbOnly);
 
+/// 🌉 EDGE_PROXY (12.8) — route Firestore (and later Auth/Functions) through the
+/// approved custom domain so a filtered network (Netfree etc.) only ever sees
+/// `*.buildsmart-il.com`, never `*.googleapis.com`. A Cloudflare Worker on
+/// [kEdgeFsHost] forwards to firestore.googleapis.com behind the scenes.
+///
+/// Default OFF ⇒ the SDK's official host ⇒ shipped build BYTE-IDENTICAL to today
+/// (zero regression, same invariant as every flag above). Flip ON at build time
+/// AFTER the Worker + the `fs.` custom domain are deployed:
+///   flutter build web --release --dart-define=EDGE_PROXY=true
+const bool kEdgeProxy = bool.fromEnvironment('EDGE_PROXY');
+
+/// The approved-domain host the Firestore SDK points at when [kEdgeProxy] is ON.
+/// A hostname (no path) — the Firestore `Settings.host` contract; the Worker
+/// routes this subdomain to firestore.googleapis.com.
+const String kEdgeFsHost = 'fs.buildsmart-il.com';
+
 /// Whether the app offers EMAIL + PASSWORD sign-in at all.
 ///
 /// ⚠️ THIS FLAG IS INVERTED relative to every other flag in this file. The

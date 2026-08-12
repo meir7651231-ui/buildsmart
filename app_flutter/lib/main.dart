@@ -17,7 +17,8 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/company_catalog_store.dart'
     show hydrateCompanyCatalog;
-import 'package:buildsmart/state/feature_flags.dart' show kAppKbOnly;
+import 'package:buildsmart/state/feature_flags.dart'
+    show kAppKbOnly, kEdgeFsHost, kEdgeProxy;
 import 'package:buildsmart/state/intel/intel_bus.dart' show intelBusProvider;
 import 'package:buildsmart/state/intel/screen_view.dart' show IntelRouteObserver;
 import 'package:buildsmart/state/intel/session_tracker.dart'
@@ -170,8 +171,18 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ).timeout(const Duration(seconds: 8));
-    FirebaseFirestore.instance.settings =
-        const Settings(persistenceEnabled: true);
+    // 🌉 מתווך-הקצה (EDGE_PROXY, 12.8): בקו-מסונן, Firestore עובר דרך תת-דומיין
+    // של הדומיין המאושר (fs.buildsmart-il.com) — Cloudflare Worker מעביר ל-
+    // firestore.googleapis.com מאחורי-הקלעים; הסנן רואה רק את הדומיין שלך.
+    // הדגל כבוי כברירת-מחדל ⇒ ה-host הרשמי, פריסה ביט-זהה להיום. הפעלה בזמן-
+    // build: --dart-define=EDGE_PROXY=true (אחרי פריסת ה-Worker + תת-הדומיין).
+    FirebaseFirestore.instance.settings = kEdgeProxy
+        ? const Settings(
+            persistenceEnabled: true,
+            host: kEdgeFsHost,
+            sslEnabled: true,
+          )
+        : const Settings(persistenceEnabled: true);
   } catch (_) {
     // non-fatal: app runs on the local repositories until Firebase is back
   }
