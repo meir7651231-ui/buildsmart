@@ -42,7 +42,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/edge/edge_collection_source.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/state/auth_state.dart' show filteredFirestoreProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -148,6 +150,17 @@ class UsersLookup {
 /// same `users` collection. A7 only EXPOSES this — A4/A8 wire it in next.
 /// Tests override this (or construct [UsersLookup] directly) with a fake source.
 final usersLookupProvider = Provider<UsersLookup?>((ref) {
+  // 🌉 מצב-מסונן (שלב D · חלק 2): המילון (directory) דרך הגשר — כך הלקוח מפענח
+  // את ה-uid של הצד-השני ובונה את **אותו** dmThreadId (uids-ממוינים) כמו המנהל,
+  // במקום שרשור-כפול. ‏users חסום ל-Rules של קבלן ⇒ REST מחזיר ריק (לא-נורא;
+  // המילון הוא מקור-הפענוח). כבוי ⇒ SDK (byte-identical).
+  final rest = ref.watch(filteredFirestoreProvider);
+  if (rest != null) {
+    return UsersLookup(
+      EdgeRestCollectionSource('users', rest),
+      directorySource: EdgeRestCollectionSource('directory', rest),
+    );
+  }
   if (useFirebaseBackend) {
     return UsersLookup(
       FirestoreCollectionSource('users'),
