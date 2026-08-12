@@ -188,7 +188,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         resend ? 'קוד חדש נשלח ב-SMS 📱' : 'קוד אימות נשלח ב-SMS 📱',
       );
     } on AuthGatewayException catch (e) {
-      _fail(hebrewAuthError(e.code));
+      _fail(e.message ?? hebrewAuthError(e.code));
     } on Object catch (_) {
       _fail(hebrewAuthError('unknown'));
     }
@@ -233,7 +233,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       // Success lands on authStateChanges → the ref.listen below pops us.
       if (mounted) setState(() => _busy = false);
     } on AuthGatewayException catch (e) {
-      _fail(hebrewAuthError(e.code));
+      _fail(e.message ?? hebrewAuthError(e.code));
     } on Object catch (_) {
       _fail(hebrewAuthError('unknown'));
     }
@@ -272,7 +272,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           .signInWithEmailPassword(email, password);
       if (mounted) setState(() => _busy = false);
     } on AuthGatewayException catch (e) {
-      _fail(hebrewAuthError(e.code));
+      _fail(e.message ?? hebrewAuthError(e.code));
     } on Object catch (_) {
       _fail(hebrewAuthError('unknown'));
     }
@@ -322,7 +322,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       if (mounted) setState(() => _busy = false);
     } on AuthGatewayException catch (e) {
       _justCreated = false;
-      _fail(hebrewAuthError(e.code));
+      _fail(e.message ?? hebrewAuthError(e.code));
     } on Object catch (_) {
       _justCreated = false;
       _fail(hebrewAuthError('unknown'));
@@ -349,7 +349,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       await ref.read(authStateProvider.notifier).resetPassword(email);
     } on AuthGatewayException catch (e) {
       if (e.code != 'user-not-found') {
-        _fail(hebrewAuthError(e.code));
+        _fail(e.message ?? hebrewAuthError(e.code));
         return;
       }
     } on Object catch (_) {
@@ -496,7 +496,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       if (user == null) return;
       // Success lands on authStateChanges → the ref.listen below pops the sheet.
     } on AuthGatewayException catch (e) {
-      _fail(hebrewAuthError(e.code));
+      _fail(e.message ?? hebrewAuthError(e.code));
     } on Object catch (_) {
       _fail('כניסת Google נכשלה — נסה שוב');
     }
