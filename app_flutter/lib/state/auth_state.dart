@@ -38,10 +38,12 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/data/edge/edge_collection_source.dart';
 import 'package:buildsmart/data/edge/edge_http.dart';
 import 'package:buildsmart/data/edge/filtered_auth_gateway.dart';
 import 'package:buildsmart/data/edge/filtered_mode.dart';
 import 'package:buildsmart/data/edge/filtered_session.dart';
+import 'package:buildsmart/data/edge/firestore_rest.dart';
 import 'package:buildsmart/data/edge/rest_auth.dart';
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
@@ -813,6 +815,28 @@ final authGatewayProvider = Provider<AuthGateway?>((ref) {
   return null;
 });
 
+/// 🌉 מצב-מסונן · שלב D — לקוח Firestore-REST משותף לשכבת-הנתונים. non-null רק
+/// כשמצב-מסונן דלוק ו-Firebase אותחל (בשביל apiKey/projectId — ה-web-key
+/// הציבורי, אין נגיעה ב-FirebaseAuth.instance). ה-idToken נמשך מהסשן המתמיד
+/// (אותו localStorage שהגשר כותב) — `restore` לפני כל שליפה מבטיח שטוקן שנקלט
+/// אחרי-כניסה נראה כאן. null ⇒ שכבת-הנתונים נשארת על ה-SDK (ביט-זהה להיום).
+final filteredFirestoreProvider = Provider<FirestoreRest?>((ref) {
+  if (!ref.watch(filteredModeProvider)) return null;
+  if (Firebase.apps.isEmpty) return null;
+  final opts = Firebase.app().options;
+  final store = ref.watch(edgeKvStoreProvider);
+  final auth = EdgeRestAuth(apiKey: opts.apiKey, send: makeEdgeHttpSend());
+  final session = FilteredSession(auth: auth, store: store, now: DateTime.now);
+  return FirestoreRest(
+    projectId: opts.projectId,
+    request: makeEdgeHttpRequest(),
+    idToken: () async {
+      session.restore(); // קליטת טוקן טרי מ-localStorage (כניסה אחרי-בנייה)
+      return session.validIdToken();
+    },
+  );
+});
+
 /// S1.4 — the current user + server roles + `_loaded` guard. Without Firebase
 /// (tests / sandbox): born loaded + signed-out → zero regression.
 final authStateProvider =
@@ -900,6 +924,10 @@ final roleSwitchLockedProvider = Provider<bool>((ref) {
 /// `orgId`/`status` — server/callable/admin-only), and the write is a merge so
 /// it never clobbers `fcmToken`/role.
 final usersProfileWriterProvider = Provider<RemoteCollectionSource?>((ref) {
+  // 🌉 מצב-מסונן (שלב D): מירור-הפרופיל ל-users/{uid} עובר דרך Firestore-REST
+  // (fs. עם ה-idToken) — כך הלקוח-המסונן מופיע אצל המנהל. כבוי ⇒ הנתיב הישן.
+  final rest = ref.watch(filteredFirestoreProvider);
+  if (rest != null) return EdgeRestCollectionSource('users', rest);
   if (useFirebaseBackend) return FirestoreCollectionSource('users');
   return null;
 });

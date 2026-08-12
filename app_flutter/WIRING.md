@@ -4084,6 +4084,14 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`filtered_mode.dart`:** `applyFilteredModeValue(store, raw)` טהור (‏on: 1/true/on/yes · off: 0/false/off/no · null/לא-מוכר ⇒ בלי-שינוי, הבחירה שורדת) + `bootstrapFilteredModeFromUrl(store)`.
 - **`main.dart`:** קריאה **מיד אחרי `ensureInitialized`, לפני כל קריאת-ספק** — אותו localStorage שהספק קורא ⇒ נכנס-לתוקף בפריים-הראשון. חסר-פרמטר ⇒ ביט-זהה (הבחירה הקיימת). ‏main.dart 7 infos קדם-קיימים = 7 (אומת ב-stash).
 - **בדיקות (edge_filtered_mode_test — +1 קבוצה):** כל ערכי-ההדלקה/כיבוי · null/לא-מוכר לא-נוגעים. analyze 0 על edge/+הבדיקה.
+### #filtered-auth-D-writes — כתיבות-נתונים דרך הגשר: בקשת-הצטרפות + פרופיל (שלב D · חלק 1) (2026-08-12)
+אימות-שטח: הרשמה במצב-מסונן **הצליחה** (חשבון-אימייל נוצר דרך idt.), אבל בקשת-ההצטרפות לא הופיעה אצל המנהל — כי הכתיבה ל-Firestore בקו-מסונן עוברת ב-SDK **חסר-טוקן** ⇒ נדחית. חלק 1 מנתב את שתי הכתיבות שהלקוח פוגע בהן ראשונות דרך Firestore-REST.
+- **`firestore_rest.dart`:** נוסף `deleteDoc` (DELETE · 404=idempotent).
+- **`edge_collection_source.dart`:** `EdgeRestCollectionSource implements RemoteCollectionSource` — `set`⇒PATCH · `delete`⇒DELETE דרך `fs.buildsmart-il.com` עם ה-idToken. `snapshots`⇒זרם-ריק · `isScoped=false` (**כתיבה-בלבד** בשלב זה; קריאה-חיה/polling = חלק הבא).
+- **`auth_state.dart` — `filteredFirestoreProvider`:** ‏`FirestoreRest` משותף (apiKey/projectId מ-`Firebase.app().options`; ה-idToken מהסשן המתמיד, `restore` לפני כל שליפה ⇒ טוקן שנקלט אחרי-כניסה נראה). non-null רק במצב-מסונן.
+- **swap:** `roleRequestWriterProvider` (role_requests) + `usersProfileWriterProvider` (auth_state) ⇒ מצב-מסונן ⇒ `EdgeRestCollectionSource`; כבוי ⇒ `FirestoreCollectionSource` (ביט-זהה).
+- **בדיקות (`edge_collection_source_test`, 4 · `edge_firestore_rest_test`, +deleteDoc):** set⇒PATCH-לנתיב-נכון · delete⇒DELETE · 404-idempotent · snapshots-ריק. analyze 0 · web build עבר.
+- **הבא (D · חלק 2):** קריאות-נתונים (snapshots) דרך REST-polling — שאר המאגרים (קטלוג/הזמנות/צ׳אט) שהלקוח קורא. כרגע רק הכתיבות של ההצטרפות/פרופיל מנותבות.
 ### #filtered-auth-D-core — לקוח Firestore-REST דרך המתווך (שלב D · יסוד · דורמנטי) (2026-08-12)
 היסוד הנבדק לטעינת-הנתונים בקו-מסונן: קריאות/כתיבות Firestore ב-REST דרך `fs.buildsmart-il.com` עם `Authorization: Bearer {idToken}` (מ-FilteredSession). **דורמנטי** — עדיין אף מאגר לא צורך אותו (byte-identical).
 - **`lib/data/edge/firestore_rest.dart`:** קידוד/פענוח `values-typed` טהורים (`encodeValue`/`decodeValue`/`encodeFields`/`decodeFields` — string/int-כמחרוזת/double/bool/null/timestamp/array/map מקונן) + `FirestoreRest{getDoc(path)→null-על-404, setDoc(path,data)→PATCH}`; ה-HTTP ומקור-הטוקן מוזרקים (טהור, בלי רשת אמיתית). `FirestoreRestException(status,body)`.

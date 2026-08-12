@@ -129,4 +129,13 @@ class FirestoreRest {
     );
     if (res.status != 200) throw FirestoreRestException(res.status, res.body);
   }
+
+  /// מוחק מסמך. ‏404 (כבר לא-קיים) נחשב הצלחה (idempotent — כמו delete של ה-SDK).
+  Future<void> deleteDoc(String path) async {
+    final res =
+        await request('DELETE', _docUri(path), _headers(await idToken()), null);
+    if (res.status != 200 && res.status != 404) {
+      throw FirestoreRestException(res.status, res.body);
+    }
+  }
 }

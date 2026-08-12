@@ -11,6 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/bs_user.dart' show UserStatus;
+import 'package:buildsmart/data/edge/edge_collection_source.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/data/repositories/users_repository.dart'
@@ -37,6 +38,10 @@ const List<String> kRequestableRoles = [
 /// `useFirebaseBackend` gate every repo/`usersProfileWriterProvider` uses.
 /// Tests override this with a fake [RemoteCollectionSource].
 final roleRequestWriterProvider = Provider<RemoteCollectionSource?>((ref) {
+  // 🌉 מצב-מסונן (שלב D): הכתיבה עוברת דרך Firestore-REST (fs.buildsmart-il.com
+  // עם ה-idToken) במקום ה-SDK חסר-הטוקן בקו-מסונן. כבוי ⇒ הנתיב הישן.
+  final rest = ref.watch(filteredFirestoreProvider);
+  if (rest != null) return EdgeRestCollectionSource('roleRequests', rest);
   if (useFirebaseBackend) return FirestoreCollectionSource('roleRequests');
   return null;
 });
