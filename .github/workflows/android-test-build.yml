@@ -93,7 +93,7 @@ jobs:
             --dart-define=PLAIN_DIVE=true \
             --dart-define=STUDIO_SHARED_SYNC=true \
             --dart-define=AXIS_DIVE=true \
-            --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com \
+            --dart-define=CATALOG_BASE_URL=https://buildsmart-il.com \
             --dart-define=STORE_COMPARISON_UI=true \
             ${{ vars.STUDIO_DART_DEFINES }}
 

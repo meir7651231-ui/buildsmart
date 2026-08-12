@@ -154,7 +154,7 @@ void main() {
       ]) {
         expect(b[f], isTrue, reason: '$f is ON in the buildsmart profile');
       }
-      expect(b['CATALOG_BASE_URL'], 'https://buildsmart-b0b78.firebaseapp.com');
+      expect(b['CATALOG_BASE_URL'], 'https://buildsmart-il.com');
       expect(b['IMAGE_BASE_URL'], 'https://cdn.buildsmart-il.com');
     });
 

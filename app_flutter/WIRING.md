@@ -4021,3 +4021,10 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **אימות:** ‏app_profile_flags + deep_audit ירוקים מקומית; ה-URL הישן `pub-…r2.dev` נשאר פעיל ב-Cloudflare כגיבוי-מעבר.
 ### #ci-fix-vector-math — Matrix4.scaleByDouble → diagonal3Values (CI-unblock) (2026-08-11)
 תיקון-חוסם-CI: `full_internal_card.dart:1577` השתמש ב-`Matrix4.scaleByDouble(v,v,v,1)` — API שלא קיים ב-vector_math 2.1.4 (הגרסה שה-CI פותר, transitive). שגיאת-קומפילציה הפילה 237 בדיקות → כל ריצות protocol-enforce אדומות מזה שעות (901+), על כל קומיט (גם של הצי). הוחלף ב-`Matrix4.diagonal3Values(v,v,v)` — factory "scale matrix" זהה-התנהגות, **קיים ולא-deprecated בשתי הגרסאות** (2.1.4 וגם החדשה המקומית). analyze exit-0 · הבדיקה שנפלה (ai_hub_compute) ירוקה. הוכרע ע"י המשתמש לתקן (הקובץ של סשן-הצי, באג-חוסם-מוצר).
+
+### #catalog-domain — קטלוג/קונפיג דרך buildsmart-il.com (2026-08-12)
+שורה 2 של גשר-הדומיין (`docs/BUILD-ORDER-SINGLE-DOMAIN-BRIDGE-2026-08-12.md`): ‏`CATALOG_BASE_URL` הצביע על `buildsmart-b0b78.firebaseapp.com` — hostname גוגלי חסום-בסננים של **אותו** אתר-Hosting שמגיש את `buildsmart-il.com`. הוחלף לשם המאושר — אותו שרת, אותו תוכן; ברשת הקריאות הופכות same-origin (בלי CORS).
+- **`lib/state/app_profile.dart`:** ‏`kProfileCatalogBaseUrl` + מראה-המטריצה.
+- **4 workflows** ‏(firebase-hosting · web-deploy · android-test-build · firebase-preview-backend): הדגל המפורש `--dart-define=CATALOG_BASE_URL=…` הוחלף.
+- **לא הוחלף:** ‏`firebase_options.dart` ‏(authDomain — תצורת-SDK של Auth, לא כתובת-קריאות).
+- **אימות:** ‏app_profile_flags ירוק על 3.44.

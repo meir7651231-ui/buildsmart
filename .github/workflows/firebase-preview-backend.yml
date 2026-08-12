@@ -74,7 +74,7 @@ jobs:
           --dart-define=STUDIO_SHARED_SYNC=true
           ${{ vars.STUDIO_DART_DEFINES }}
           --dart-define=USE_FIREBASE_BACKEND=true
-          --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com
+          --dart-define=CATALOG_BASE_URL=https://buildsmart-il.com
           --dart-define=STORE_COMPARISON_UI=true
           --dart-define=UID_SCOPED_QUERIES=true
           --dart-define=SERVER_CALLABLES=true

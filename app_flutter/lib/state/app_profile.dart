@@ -84,7 +84,7 @@ const bool kProfileStudioSharedSync = _bs;
 /// buildsmart profile; empty (server catalog OFF, gate_123 load-bearing)
 /// otherwise.
 const String kProfileCatalogBaseUrl =
-    _bs ? 'https://buildsmart-b0b78.firebaseapp.com' : '';
+    _bs ? 'https://buildsmart-il.com' : '';
 
 /// Image CDN base — the buildsmart R2 bucket for demo+buildsmart, served via
 /// the approved custom domain (12.8: filtered-network fix — kosher filters
@@ -138,7 +138,7 @@ Map<String, Object> profileDefaultsFor(String profile) {
     'SMART_INPUT': ux,
     'APP_KB_ONLY': ux,
     'STUDIO_SHARED_SYNC': bs,
-    'CATALOG_BASE_URL': bs ? 'https://buildsmart-b0b78.firebaseapp.com' : '',
+    'CATALOG_BASE_URL': bs ? 'https://buildsmart-il.com' : '',
     'IMAGE_BASE_URL': (clean || c2) ? '' : 'https://cdn.buildsmart-il.com',
   };
 }
