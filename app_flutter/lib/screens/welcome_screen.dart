@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/board_accounts_local.dart';
+import 'package:buildsmart/data/edge/filtered_mode.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
@@ -262,6 +263,37 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// create-account), and once [authStateProvider] reports a signed-in user,
   /// finish via [_finishAfterAuth]. A cancelled sheet (still signed-out) leaves
   /// the user on the welcome screen to retry.
+  /// 🌉 שבב מצב-מסונן — גלוי על מסך-הפתיחה. לקוח על אינטרנט מסונן (נטפרי/רימון)
+  /// מדליק אותו ⇒ ההתחברות עוברת ל-REST דרך הדומיין המאושר בלבד (מייל+סיסמה).
+  /// כבוי = ברירת-מחדל, ביט-זהה. מצב-הדגל מוצג במפורש (לא רק בחלון-הכניסה).
+  Widget _filteredModeChip() {
+    final on = ref.watch(filteredModeProvider);
+    return Align(
+      child: TextButton.icon(
+        onPressed: _busy
+            ? null
+            : () => ref
+                .read(filteredModeProvider.notifier)
+                .setEnabled(on: !on),
+        icon: Icon(
+          on ? Icons.shield : Icons.shield_outlined,
+          size: 18,
+          color: on ? BsTokens.brandDark : BsTokens.mutedLight,
+        ),
+        label: Text(
+          on
+              ? '✓ אינטרנט מסונן פעיל — כניסה במייל וסיסמה'
+              : 'אני על אינטרנט מסונן (נטפרי/רימון)',
+          style: TextStyle(
+            color: on ? BsTokens.brandDark : BsTokens.mutedLight,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _enterViaAuth() async {
     await showLoginSheet(context);
     if (!mounted) return;
@@ -854,6 +886,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: BsTokens.space3),
+                      // 🌉 מצב-מסונן — גלוי על המסך הראשון (לא קבור בחלון-הכניסה),
+                      // כדי שלקוח על נטפרי/רימון ימצא אותו מיד.
+                      _filteredModeChip(),
                       const SizedBox(height: BsTokens.space4),
                       const Row(
                         children: [
