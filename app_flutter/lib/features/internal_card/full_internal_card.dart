@@ -544,21 +544,24 @@ class _CardView extends ConsumerWidget {
                 ),
               ),
             ),
-            // Header label.
-            Positioned(
-              top: 8,
-              left: 8,
-              right: 8,
-              child: Text(
-                '🔗 $label · החלק ↔',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
-                  color: _cAccent,
+            // Header label — shown ONLY on the embedded card. On the full-screen
+            // card the green hint banner already says "מה מתחבר לצד …", so this
+            // inner header would be redundant (e_0 shows only the top banner).
+            if (!fillHeight)
+              Positioned(
+                top: 8,
+                left: 8,
+                right: 8,
+                child: Text(
+                  '🔗 $label · החלק ↔',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    color: _cAccent,
+                  ),
                 ),
               ),
-            ),
             // The vertical rail of round icon-chips along the active edge.
             Positioned(
               top: 30,

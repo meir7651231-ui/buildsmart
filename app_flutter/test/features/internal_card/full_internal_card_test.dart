@@ -354,6 +354,44 @@ void main() {
     expect(find.textContaining('מתחבר לצד שמאל'), findsOneWidget);
   });
 
+  testWidgets('rail inner header is hidden full-screen (banner covers it), '
+      'shown embedded', (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    // Full-screen: the green banner already carries "מה מתחבר לצד …", so the
+    // rail's own inner header is suppressed (no redundancy — matches e_0).
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FullInternalCard(
+              product: hero,
+              fillHeight: true,
+              initialRailSide: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('internalCardRail')), findsOneWidget);
+    expect(find.byKey(const Key('internalCardHintBanner')), findsOneWidget);
+    expect(find.textContaining('החלק ↔'), findsNothing);
+    // Embedded: no banner ⇒ the inner header stays as the sole hint.
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: FullInternalCard(product: hero, initialRailSide: 1),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('החלק ↔'), findsOneWidget);
+  });
+
   test('compatibleProductsForEnd is truly per-end — the two ends differ (D4)',
       () {
     // A product whose two physical ends accept different fittings.
