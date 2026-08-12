@@ -796,6 +796,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // 🌉 מצב-מסונן — ראש-המסך, מעל ההרשמה וההתחברות גם יחד,
+                      // כדי שלקוח על נטפרי/רימון יראה אותו לפני שהוא נרשם.
+                      _filteredModeChip(),
+                      const SizedBox(height: BsTokens.space3),
                       // Cluster #85א — role mode: the sheet IS the
                       // existing-customer login (registration is
                       // contractor-only). Contractor children below are
@@ -886,10 +890,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: BsTokens.space3),
-                      // 🌉 מצב-מסונן — גלוי על המסך הראשון (לא קבור בחלון-הכניסה),
-                      // כדי שלקוח על נטפרי/רימון ימצא אותו מיד.
-                      _filteredModeChip(),
                       const SizedBox(height: BsTokens.space4),
                       const Row(
                         children: [
