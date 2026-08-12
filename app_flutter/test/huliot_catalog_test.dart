@@ -76,7 +76,7 @@ void main() {
   });
 
   group('owner image overrides (existing products) — LIVE in v1', () {
-    test('784 overrides (512 huliot + 248 lipski + 24 fitting) LIVE in v1', () {
+    test('773 overrides (512 huliot + 248 lipski + 13 fitting) LIVE in v1', () {
       expect(kHuliotImageOverrides.length, 512);
       expect(kLipskiImageOverrides.length, 248);
       // the maps are pairwise disjoint. Fitting only fills SKUs with NO earlier
@@ -131,8 +131,11 @@ void main() {
       expect(lp.brand, isNotEmpty);
     });
 
-    test('24 fitting overrides fill net-new SKUs (owner picks still win)', () {
-      expect(kFittingImageOverrides.length, 24);
+    test('13 fitting overrides fill net-new SKUs (owner picks still win)', () {
+      // Was 24; the wrong-family elbow overrides (92117042–51 + 92117109, mapped
+      // to collar/pipe photos) were deliberately dropped so each elbow falls back
+      // to its correct PPR-elbow image — see fitting_image_overrides.dart.
+      expect(kFittingImageOverrides.length, 13);
       final fSku = kFittingImageOverrides.keys.first;
       final fp = kCatalogProducts.firstWhere((e) => e.sku == fSku);
       // the fitting image is live on the product...

@@ -79,6 +79,13 @@ const Set<String> kArmingLayer = {
   // product card. `features/internal_card/` is tree-shaken until armed (the home
   // stays byte-identical); armed live via --dart-define on the deploy builds.
   'INTERNAL_CARD',
+  // EDGE_PROXY (12.8) — route Firestore through the approved custom domain so a
+  // filtered network never sees *.googleapis.com. Default-OFF ⇒ byte-identical to
+  // the SDK's official host; flipped ON at build time ONLY after the Cloudflare
+  // Worker + `fs.` domain are deployed, per-flag rollback = drop the define — the
+  // backend-coordinated arming shape (USE_FIREBASE_BACKEND / CATALOG_SERVER_SEARCH),
+  // never profile-owned.
+  'EDGE_PROXY',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must
