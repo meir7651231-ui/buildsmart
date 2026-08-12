@@ -86,12 +86,14 @@ const bool kProfileStudioSharedSync = _bs;
 const String kProfileCatalogBaseUrl =
     _bs ? 'https://buildsmart-b0b78.firebaseapp.com' : '';
 
-/// Image CDN base — the buildsmart R2 bucket for demo+buildsmart (today's
-/// value, byte-identical); empty on clean (a generic app bundles its assets
-/// until a company CDN is configured).
-const String kProfileImageBaseUrl = (_clean || _c2)
-    ? ''
-    : 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev';
+/// Image CDN base — the buildsmart R2 bucket for demo+buildsmart, served via
+/// the approved custom domain (12.8: filtered-network fix — kosher filters
+/// block the shared `pub-…r2.dev` host; `cdn.buildsmart-il.com` is a
+/// subdomain of the already-approved business domain). Same bucket, same
+/// keys — only the public hostname changed. Empty on clean (a generic app
+/// bundles its assets until a company CDN is configured).
+const String kProfileImageBaseUrl =
+    (_clean || _c2) ? '' : 'https://cdn.buildsmart-il.com';
 
 // ── content gates (owner directive 2026-07-25 · empty-shell clean) ───────────
 
@@ -137,9 +139,7 @@ Map<String, Object> profileDefaultsFor(String profile) {
     'APP_KB_ONLY': ux,
     'STUDIO_SHARED_SYNC': bs,
     'CATALOG_BASE_URL': bs ? 'https://buildsmart-b0b78.firebaseapp.com' : '',
-    'IMAGE_BASE_URL': (clean || c2)
-        ? ''
-        : 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev',
+    'IMAGE_BASE_URL': (clean || c2) ? '' : 'https://cdn.buildsmart-il.com',
   };
 }
 

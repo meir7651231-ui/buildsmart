@@ -4008,3 +4008,10 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`state_loaded_guard_test` נשאר ירוק:** smart_cart איבד `set state(` → מדולג; `prefs_persisted.dart` מחזיק `set state(`+`SharedPreferences`+`bool _loaded` → guarded>0, אפס offenders.
 - **אימות:** 46 בדיקות ירוקות (כולל guard-test + מנוע-ההזמנות-המשותף) · analyze נקי.
 - **פתוח:** 5 מנועים נוספים עם הדפוס (orders/tasks/projects/sys_chat/persona) — 2 וריאנטים של setter; ממתין לצ'קפוינט לפני נגיעה בהם (ליבת-הכסף).
+
+### #cdn-domain — תמונות-הקטלוג דרך cdn.buildsmart-il.com (2026-08-12)
+תיקון-סינון (שלב 1 של `docs/BUILD-ORDER-SINGLE-DOMAIN-BRIDGE-2026-08-12.md`): סינוני-רשת (נטפרי וכו') חוסמים את הדומיין השיתופי `pub-…r2.dev` גם כשהדומיין העסקי מאושר. חובר Custom Domain באותו חשבון Cloudflare — אותו מחסן, אותם מפתחות, hostname ציבורי חדש.
+- **`lib/state/app_profile.dart`:** ‏`kProfileImageBaseUrl` ⇒ ‏`https://cdn.buildsmart-il.com` (מקור-יחיד; ‏`kImageBaseUrl` ב-product_images נגזר ממנו, וגם ה-publicUrl של ההעלאות — `{kImageBaseUrl}/{key}`).
+- **`test/app_profile_flags_test.dart`:** ‏3 הצמדות-המטריצה עודכנו לכתובת החדשה.
+- **`lib/data/repositories/upload_functions.dart`:** הערת-תיעוד בלבד.
+- **אימות:** ‏app_profile_flags + deep_audit ירוקים מקומית; ה-URL הישן `pub-…r2.dev` נשאר פעיל ב-Cloudflare כגיבוי-מעבר.

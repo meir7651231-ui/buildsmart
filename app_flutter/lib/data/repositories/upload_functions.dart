@@ -15,7 +15,7 @@
 //     — `url` is the presigned PUT URL (expires in 10 min); `key` is the
 //     server-owned object key. There is NO public-URL field on the wire: the
 //     PUBLIC URL is composed client-side as `{kImageBaseUrl}/{key}` — the SAME
-//     R2 public base (`https://pub-…r2.dev`) the catalog images already serve
+//     R2 public base (`https://cdn.buildsmart-il.com`) the catalog images serve
 //     from ([kImageBaseUrl] in data/product_images.dart). The upload itself is a
 //     plain HTTP `PUT` of the bytes to `url` with that exact `Content-Type`.
 //
