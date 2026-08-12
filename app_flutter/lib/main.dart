@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:buildsmart/config/app_brand.dart' show AppBrand;
 import 'package:buildsmart/config/org_config.dart' show kOrgCompanyJson;
+import 'package:buildsmart/data/edge/edge_kv.dart' show makeEdgeKvStore;
+import 'package:buildsmart/data/edge/filtered_mode.dart'
+    show bootstrapFilteredModeFromUrl;
 import 'package:buildsmart/data/family_specs.dart';
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
@@ -158,6 +161,11 @@ void installCrashlyticsHandlers({
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 🌉 בוטסטרפ מצב-מסונן מה-URL — לפני כל קריאת-ספק. קישור `?filtered=1`
+  // (או `#filtered`) מדליק מצב-מסונן אוטומטית, כך שהבעלים שולח ללקוח על קו-
+  // מסונן (נטפרי/רימון) קישור אחד — בלי לחפש כפתור. חסר ⇒ הבחירה הקיימת
+  // נשמרת; native/VM: no-op. אותו localStorage שהספק קורא ⇒ נכנס-לתוקף מיד.
+  bootstrapFilteredModeFromUrl(makeEdgeKvStore());
   // S0.4 — wire Firebase (web). initializeApp must precede any Firestore/Auth
   // use; Firestore offline-persistence keeps the S2 sync cache-pattern fast.
   // This runs only in the real entrypoint (main), never in tests, so the

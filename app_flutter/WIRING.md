@@ -4078,6 +4078,12 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`_filteredModeToggle`** — TextButton בתחתית המסך: ‏`filteredModeProvider.notifier.setEnabled` ⇒ החלפת-גשר ריאקטיבית (‏authGatewayProvider) + רענון-המסך. פעיל = 🛡 + "✓ מצב אינטרנט מסונן פעיל".
 - **בדיקות (`login_sheet_filtered_test.dart`, 2 ירוקות · פאמפ-ישיר בלי-מודאל ⇒ עוקף את shader-הריצוד):** דלוק ⇒ מייל+סיסמה · אין גוגל/טלפון · מתג-פעיל. כבוי ⇒ מסך-טלפון · אין מייל · מתג-כבוי. אפס-דיף-analyze על הקובץ (16 infos קדם-קיימים = 16, אומת ב-stash).
 - **הבא:** שלב D (Firestore-REST repos) — הנתונים אחרי-הכניסה. **תלוי-בעלים:** להדליק את ספק Email/Password ב-Firebase Console (אחרת `accounts:signUp` נדחה — הנעילה האמיתית היא בשרת, לא בלקוח). *(עודכן 12.8: הבעלים אישר "כבר דולק".)*
+### #filtered-auth-url-bootstrap — קישור `?filtered=1` מדליק מצב-מסונן אוטומטית (2026-08-12)
+פתרון-ה"קישור-בלבד": הבעלים שולח ללקוח-מסונן **קישור אחד** (`buildsmart-il.com/?filtered=1`) והמצב נדלק לבד — בלי לחפש את המתג בתחתית מסך-הכניסה (משוב-בעלים "אני לא רואה כפתור מצב סינון").
+- **`edge_kv_web.dart`:** `readFilteredUrlParam()` — קורא `?filtered=<v>` (או `#filtered`) מ-`window.location`. stub/VM ⇒ null.
+- **`filtered_mode.dart`:** `applyFilteredModeValue(store, raw)` טהור (‏on: 1/true/on/yes · off: 0/false/off/no · null/לא-מוכר ⇒ בלי-שינוי, הבחירה שורדת) + `bootstrapFilteredModeFromUrl(store)`.
+- **`main.dart`:** קריאה **מיד אחרי `ensureInitialized`, לפני כל קריאת-ספק** — אותו localStorage שהספק קורא ⇒ נכנס-לתוקף בפריים-הראשון. חסר-פרמטר ⇒ ביט-זהה (הבחירה הקיימת). ‏main.dart 7 infos קדם-קיימים = 7 (אומת ב-stash).
+- **בדיקות (edge_filtered_mode_test — +1 קבוצה):** כל ערכי-ההדלקה/כיבוי · null/לא-מוכר לא-נוגעים. analyze 0 על edge/+הבדיקה.
 ### #filtered-auth-D-core — לקוח Firestore-REST דרך המתווך (שלב D · יסוד · דורמנטי) (2026-08-12)
 היסוד הנבדק לטעינת-הנתונים בקו-מסונן: קריאות/כתיבות Firestore ב-REST דרך `fs.buildsmart-il.com` עם `Authorization: Bearer {idToken}` (מ-FilteredSession). **דורמנטי** — עדיין אף מאגר לא צורך אותו (byte-identical).
 - **`lib/data/edge/firestore_rest.dart`:** קידוד/פענוח `values-typed` טהורים (`encodeValue`/`decodeValue`/`encodeFields`/`decodeFields` — string/int-כמחרוזת/double/bool/null/timestamp/array/map מקונן) + `FirestoreRest{getDoc(path)→null-על-404, setDoc(path,data)→PATCH}`; ה-HTTP ומקור-הטוקן מוזרקים (טהור, בלי רשת אמיתית). `FirestoreRestException(status,body)`.

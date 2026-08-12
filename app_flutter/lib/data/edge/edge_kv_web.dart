@@ -18,3 +18,16 @@ class _LocalStorageKv implements EdgeKvStore {
 
 /// יוצר אחסון פר-פלטפורמה. web: ‏localStorage אמיתי (מתמיד בין ריצות).
 EdgeKvStore makeEdgeKvStore() => _LocalStorageKv();
+
+/// קורא את פרמטר `filtered` מה-URL (web): `?filtered=1` / `#filtered`.
+/// מחזיר את הערך הגולמי (למשל '1'/'off'), או null אם לא-צוין.
+String? readFilteredUrlParam() {
+  final loc = web.window.location;
+  final search = loc.search;
+  final query = search.startsWith('?') ? search.substring(1) : search;
+  final v = Uri.splitQueryString(query)['filtered'];
+  if (v != null && v.isNotEmpty) return v.toLowerCase();
+  // גם `#filtered` בלבד (בלי query) מדליק — נוח לקישור-hash.
+  if (loc.hash.toLowerCase().contains('filtered')) return 'on';
+  return null;
+}
