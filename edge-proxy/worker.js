@@ -49,15 +49,25 @@ export default {
     }
 
     const url = new URL(request.url);
-    const seg = url.pathname.split('/').filter(Boolean); // ['fs', 'v1', ...]
-    const prefix = seg[0];
-    const targetHost = ROUTES[prefix];
+
+    // שני מצבי-ניתוב, שניהם allowlist:
+    // (א) תת-דומיין: fs.buildsmart-il.com ⇒ ROUTES['fs'], הנתיב עובר כמות-שהוא.
+    //     זה המצב ש-SDK-ים דורשים (Settings.host = hostname נקי, בלי path).
+    // (ב) prefix בנתיב: api.buildsmart-il.com/fs/... ⇒ ROUTES['fs'] (בדיקות/ידני).
+    const label = url.hostname.split('.')[0]; // 'fs' מ-fs.buildsmart-il.com
+    let targetHost = ROUTES[label];
+    let rest;
+    if (targetHost) {
+      rest = url.pathname; // תת-דומיין ⇒ הנתיב המלא עובר כמות-שהוא
+    } else {
+      const seg = url.pathname.split('/').filter(Boolean); // ['fs', 'v1', ...]
+      targetHost = ROUTES[seg[0]];
+      rest = '/' + seg.slice(1).join('/');
+    }
     if (!targetHost) {
       return new Response('not found', { status: 404, headers: CORS });
     }
 
-    // בונים את כתובת-היעד: מסירים את ה-prefix, שומרים את שאר הנתיב + query
-    const rest = '/' + seg.slice(1).join('/');
     const upstream = new URL('https://' + targetHost + rest + url.search);
 
     // מעבירים את הבקשה כמות-שהיא (method, headers, body). ה-Host מתעדכן ל-upstream

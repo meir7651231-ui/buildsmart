@@ -31,9 +31,11 @@
 
 כבוי ⇒ פריסה **ביט-זהה להיום** (אפס רגרסיה). דלוק ⇒ כל שירות מופנה למתווך:
 
-- **Firestore:** `FirebaseFirestore.instance.settings = Settings(host:
-  'api.buildsmart-il.com/fs', sslEnabled: true, webExperimentalForceLongPolling: true)`
-  — long-polling כי הוא HTTPS פשוט שהמתווך מעביר נקי (streams/gRPC שבירים דרך proxy).
+- **Firestore:** `Settings(host: 'fs.buildsmart-il.com', sslEnabled: true)` —
+  **תת-דומיין** (ה-SDK דורש hostname נקי בלי path). מוסיפים ל-Worker עוד
+  Custom Domain: `fs.buildsmart-il.com` (וכשמגיעים ל-Auth/Functions: `idt.` /
+  `token.` / `fn.`). המתווך מנתב לפי תת-הדומיין (מצב א׳). מחווט מאחורי דגל
+  `EDGE_PROXY` (feature_flags.dart) — כבוי כברירת-מחדל = ביט-זהה להיום.
 - **Auth:** החלפת שכבת-הרשת של email/password ל-Identity-Toolkit REST מול
   `…/idt/…` (buildsmart משתמש רק ב-email/password ⇒ בר-החלפה). ניהול-סשן
   עצמאי; ה-idToken נשלח ל-Firestore-proxy.
