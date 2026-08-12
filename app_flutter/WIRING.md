@@ -4028,3 +4028,11 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **4 workflows** ‏(firebase-hosting · web-deploy · android-test-build · firebase-preview-backend): הדגל המפורש `--dart-define=CATALOG_BASE_URL=…` הוחלף.
 - **לא הוחלף:** ‏`firebase_options.dart` ‏(authDomain — תצורת-SDK של Auth, לא כתובת-קריאות).
 - **אימות:** ‏app_profile_flags ירוק על 3.44.
+
+### #dedup-slice-4b-orders — orders_engine → PersistOnWrite (hard-case #6, money core) (2026-08-11)
+המשך slice-4 על מנוע-הליבה. `orders_engine` (מסלול-ההזמנות/כסף) — אותה טביעת-אצבע של setter כמו smart_cart (מאומת) → PersistOnWrite.
+- מחק `bool _loaded` + `set state`; `_persist`→`persistState` (שומר את `if(!persist)return`); `_load` קורא `markLoaded`×3 + `seedIfUnloaded`.
+- `bindRemote`/`_refreshFromRemote`/`dispose` ללא-שינוי (עדיין עוברים ב-set-state של המיקסין).
+- `state_loaded_guard_test` ירוק (orders_engine איבד `set state(` → מדולג; prefs_persisted מחזיק את השומר).
+- **אימות: 382 בדיקות ירוקות** (40 קבצי-הזמנות: contractor_checkout · sys_orders · manager · worker_approval + guard) · analyze נקי.
+- נותרו 3+1 מנועים (tasks/projects/sys_chat/persona — טביעת-אצבע שנייה `5e808acf`, לבדיקה פר-מנוע).

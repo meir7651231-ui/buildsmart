@@ -24,7 +24,8 @@
 >   `_loaded` latch → `mixin PersistOnWrite<T>`. `state_loaded_guard_test` נשאר
 >   ירוק. 46 בדיקות ירוקות. **5 מנועים נוספים (orders/tasks/projects/sys_chat/
 >   persona) — ליבת-הכסף, 2 וריאנטים — ממתינים לצ'קפוינט.**
-> - הבא בתור: slice 4b (5 המנועים — בזהירות, פר-מנוע) → slice 5 (HR-records).
+> - **slice 4b — orders_engine ✅** (מסלול-הכסף · 382 בדיקות · אותה תבנית מוכחת). נותרו tasks/projects/sys_chat/persona.
+> - הבא: 4 המנועים הנותרים → slice 5 (HR — variant, בזהירות).
 
 
 

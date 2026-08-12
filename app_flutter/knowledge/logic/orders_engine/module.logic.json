@@ -1,7 +1,7 @@
 {
   "module": "orders_engine",
-  "source": "lib/state/orders_engine.dart",
-  "atomCount": 19,
+  "source": "/home/user/buildsmart/app_flutter/lib/state/orders_engine.dart",
+  "atomCount": 18,
   "caches": [
     "kOrdersEngineSeed"
   ],
@@ -405,31 +405,11 @@
       "connections": {
         "reads": [
           {
-            "kind": "const",
-            "name": "kOrdersEngineKey",
-            "transitive": true
-          },
-          {
             "kind": "field",
             "name": "_remote"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -529,28 +509,9 @@
           {
             "kind": "const",
             "name": "kOrdersEngineKey"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
-        "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded"
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
+        "writes": [],
         "calls": [],
         "calledBy": [],
         "gatedBy": []
@@ -564,12 +525,14 @@
         "fromJson",
         "getInstance",
         "getString",
-        "jsonDecode"
+        "jsonDecode",
+        "markLoaded",
+        "seedIfUnloaded"
       ],
       "contract": {
         "input": "()",
         "output": "Future<void>",
-        "purity": "side-effecting",
+        "purity": "pure",
         "precond": [],
         "postcond": [],
         "invariants": [],
@@ -577,7 +540,7 @@
       }
     },
     {
-      "fn": "OrdersEngineNotifier._persist",
+      "fn": "OrdersEngineNotifier.persistState",
       "kind": "notifier-method",
       "object": {
         "signature": "() -> Future<void>",
@@ -605,9 +568,7 @@
           }
         ],
         "calls": [],
-        "calledBy": [
-          "OrdersEngineNotifier.state="
-        ],
+        "calledBy": [],
         "gatedBy": []
       },
       "behaviour": {
@@ -633,77 +594,6 @@
         "precond": [
           "if !persist → return (void)"
         ],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
-      "fn": "OrdersEngineNotifier.state=",
-      "kind": "setter",
-      "object": {
-        "signature": "set (List<Order> value) -> void",
-        "constants": []
-      },
-      "connections": {
-        "reads": [
-          {
-            "kind": "const",
-            "name": "kOrdersEngineKey",
-            "transitive": true
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
-          }
-        ],
-        "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded"
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
-          {
-            "kind": "state",
-            "name": "state"
-          }
-        ],
-        "calls": [
-          {
-            "name": "_persist",
-            "module": true
-          }
-        ],
-        "calledBy": [],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
-          {
-            "kind": "effect",
-            "detail": "_loaded = true"
-          },
-          {
-            "kind": "effect",
-            "detail": "super.state = value"
-          },
-          {
-            "kind": "effect",
-            "detail": "_persist()"
-          }
-        ]
-      },
-      "floor": [],
-      "contract": {
-        "input": "(List<Order> value)",
-        "output": "void",
-        "purity": "side-effecting",
-        "precond": [],
         "postcond": [],
         "invariants": [],
         "throws": []
@@ -789,31 +679,11 @@
             "name": "kManagerOrderFlow"
           },
           {
-            "kind": "const",
-            "name": "kOrdersEngineKey",
-            "transitive": true
-          },
-          {
             "kind": "field",
             "name": "_remote"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -1024,31 +894,11 @@
             "name": "kManagerOrderFlow"
           },
           {
-            "kind": "const",
-            "name": "kOrdersEngineKey",
-            "transitive": true
-          },
-          {
             "kind": "field",
             "name": "_remote"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -1122,31 +972,11 @@
       "connections": {
         "reads": [
           {
-            "kind": "const",
-            "name": "kOrdersEngineKey",
-            "transitive": true
-          },
-          {
             "kind": "field",
             "name": "_remote"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -1221,31 +1051,11 @@
       "connections": {
         "reads": [
           {
-            "kind": "const",
-            "name": "kOrdersEngineKey",
-            "transitive": true
-          },
-          {
             "kind": "field",
             "name": "_remote"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"
@@ -1320,35 +1130,15 @@
       "connections": {
         "reads": [
           {
-            "kind": "const",
-            "name": "kOrdersEngineKey",
-            "transitive": true
-          },
-          {
             "kind": "field",
             "name": "_remote"
           },
           {
             "kind": "field",
             "name": "_seed"
-          },
-          {
-            "kind": "field",
-            "name": "persist",
-            "transitive": true
           }
         ],
         "writes": [
-          {
-            "kind": "field",
-            "name": "_loaded",
-            "transitive": true
-          },
-          {
-            "kind": "io",
-            "name": "prefs.setString",
-            "transitive": true
-          },
           {
             "kind": "state",
             "name": "state"

@@ -20,6 +20,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -292,7 +293,8 @@ final List<Order> kOrdersEngineSeed = List<Order>.unmodifiable(
 /// key shape; the legacy localStorage key was `buildsmart:sharedOrders`).
 const String kOrdersEngineKey = 'bs.orders.v1';
 
-class OrdersEngineNotifier extends StateNotifier<List<Order>> {
+class OrdersEngineNotifier extends StateNotifier<List<Order>>
+    with PersistOnWrite<List<Order>> {
   /// [seed] is the genesis order list the engine starts from (and `resetToSeed`
   /// restores). It defaults to [kOrdersEngineSeed] so direct construction stays
   /// byte-identical; the `ordersEngineProvider` injects it THROUGH the orders
@@ -337,9 +339,8 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// with construction whether the seed came from the const or the repository.
   final List<Order> _seed;
 
-  /// True once any mutation has been applied (or _load completes).
-  /// Guards against _load clobbering a mutation that arrived before prefs.
-  bool _loaded = false;
+  // The `_loaded` load-clobber latch + the auto-persist `set state` invariant
+  // come from PersistOnWrite; this engine keeps its own persistState + _load.
 
   /// S4.4 — the bound Firestore-backed orders repository, or null on the local
   /// path (no Firebase → the engine itself stays the store, byte-identical).
@@ -396,7 +397,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(kOrdersEngineKey);
       if (raw == null || raw.isEmpty) {
-        _loaded = true;
+        markLoaded();
         return;
       }
       final entries = jsonDecode(raw) as List<dynamic>;
@@ -412,20 +413,18 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
       }
       if (entries.isNotEmpty && list.isEmpty) {
         // Every entry was corrupt — keep the seed (same as a corrupt payload).
-        _loaded = true;
+        markLoaded();
         return;
       }
-      if (!_loaded) {
-        super.state = list; // bypass re-persisting the value we just loaded
-        _loaded = true;
-      }
+      seedIfUnloaded(list);
     } on Object catch (_) {
       // Corrupt/old payload — keep the seed.
-      _loaded = true;
+      markLoaded();
     }
   }
 
-  Future<void> _persist() async {
+  @override
+  Future<void> persistState() async {
     if (!persist) return;
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -434,14 +433,6 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
         jsonEncode(state.map((o) => o.toJson()).toList()),
       );
     } on Object catch (_) {}
-  }
-
-  // Persist on every state change (the cart pattern).
-  @override
-  set state(List<Order> value) {
-    _loaded = true; // mutation happened — block any pending _load
-    super.state = value;
-    _persist();
   }
 
   /// Next `BS-####` id — one above the current max BS-number (the legacy ids
