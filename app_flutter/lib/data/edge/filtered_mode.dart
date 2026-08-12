@@ -24,6 +24,33 @@ void writeFilteredMode(EdgeKvStore store, {required bool on}) {
   }
 }
 
+const Set<String> _kOnVals = {'1', 'true', 'on', 'yes'};
+const Set<String> _kOffVals = {'0', 'false', 'off', 'no'};
+
+/// מחיל ערך-גולמי (מ-URL) על הדגל — טהור, לבדיקות. `null`/לא-מוכר ⇒ לא-נוגע
+/// (הבחירה הקיימת שורדת). מחזיר את המצב שהוחל (או null אם לא-שונה).
+bool? applyFilteredModeValue(EdgeKvStore store, String? raw) {
+  if (raw == null) return null;
+  final v = raw.toLowerCase();
+  if (_kOnVals.contains(v)) {
+    writeFilteredMode(store, on: true);
+    return true;
+  }
+  if (_kOffVals.contains(v)) {
+    writeFilteredMode(store, on: false);
+    return false;
+  }
+  return null; // ערך לא-מוכר ⇒ בלי-שינוי
+}
+
+/// 🌉 בוטסטרפ מצב-מסונן מה-URL — נקרא ב-main לפני runApp. קישור `?filtered=1`
+/// (או `#filtered`) מדליק מצב-מסונן אוטומטית, כך שהבעלים שולח ללקוח-מסונן
+/// **קישור אחד** ולא צריך למצוא כפתור. `?filtered=off` מכבה. חסר ⇒ הבחירה
+/// הקיימת נשמרת. native/VM: no-op (אין URL).
+void bootstrapFilteredModeFromUrl(EdgeKvStore store) {
+  applyFilteredModeValue(store, readFilteredUrlParam());
+}
+
 /// אחסון-המפתח-ערך הפר-פלטפורמתי (web: localStorage · native/VM: זיכרון).
 /// ספק יחיד ⇒ הדגל וסשן-ה-Auth חולקים את אותו אחסון.
 final edgeKvStoreProvider = Provider<EdgeKvStore>((ref) => makeEdgeKvStore());

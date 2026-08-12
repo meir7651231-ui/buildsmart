@@ -18,3 +18,6 @@ class _MemoryKv implements EdgeKvStore {
 
 /// יוצר אחסון פר-פלטפורמה. native/VM: מפה-בזיכרון (מצב-מסונן לא-נתמך שם).
 EdgeKvStore makeEdgeKvStore() => _MemoryKv();
+
+/// קורא פרמטר-URL (web בלבד). native/VM: אין URL ⇒ null.
+String? readFilteredUrlParam() => null;

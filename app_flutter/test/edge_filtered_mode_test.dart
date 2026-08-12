@@ -30,6 +30,30 @@ void main() {
     });
   });
 
+  group('מצב-מסונן — בוטסטרפ מ-URL (applyFilteredModeValue)', () {
+    test('ערכי-הדלקה מדליקים · ערכי-כיבוי מכבים · null/לא-מוכר לא-נוגעים', () {
+      final s = _MemStore();
+      // הדלקה בכל צורה:
+      for (final v in ['1', 'true', 'on', 'yes', 'ON', 'Yes']) {
+        s.remove(kFilteredModeKey);
+        expect(applyFilteredModeValue(s, v), isTrue, reason: v);
+        expect(readFilteredMode(s), isTrue, reason: v);
+      }
+      // כיבוי:
+      for (final v in ['0', 'false', 'off', 'no']) {
+        s.write(kFilteredModeKey, '1');
+        expect(applyFilteredModeValue(s, v), isFalse, reason: v);
+        expect(readFilteredMode(s), isFalse, reason: v);
+      }
+      // null / לא-מוכר ⇒ בלי-שינוי (הבחירה הקיימת שורדת):
+      s.write(kFilteredModeKey, '1');
+      expect(applyFilteredModeValue(s, null), isNull);
+      expect(readFilteredMode(s), isTrue);
+      expect(applyFilteredModeValue(s, 'maybe'), isNull);
+      expect(readFilteredMode(s), isTrue);
+    });
+  });
+
   group('מצב-מסונן — החלפת-גשר ב-authGatewayProvider', () {
     test('כבוי (ברירת-מחדל · Firebase-free) ⇒ גשר null, ביט-זהה להיום', () {
       final c = ProviderContainer(
