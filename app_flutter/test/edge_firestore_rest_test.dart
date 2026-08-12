@@ -79,7 +79,8 @@ void main() {
       expect(await c.getDoc('users/missing'), isNull);
     });
 
-    test('setDoc — PATCH עם שדות מקודדים', () async {
+    test('setDoc — PATCH עם שדות מקודדים + updateMask (מיזוג, לא דריסה)',
+        () async {
       final c = client();
       await c.setDoc('users/u1', {'displayName': 'רון', 'age': 30});
       expect(calls.single.method, 'PATCH');
@@ -88,6 +89,10 @@ void main() {
         'displayName': {'stringValue': 'רון'},
         'age': {'integerValue': '30'},
       });
+      // updateMask מונה בדיוק את השדות הנשלחים ⇒ מיזוג (שדות אחרים נשמרים),
+      // כמו set(merge:true) של ה-SDK — מונע דריסת participantUids בעדכון-שרשור.
+      final mask = calls.single.url.queryParametersAll['updateMask.fieldPaths'];
+      expect(mask, containsAll(<String>['displayName', 'age']));
     });
 
     test('סטטוס-שגיאה ⇒ FirestoreRestException', () async {
