@@ -4013,5 +4013,11 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **אימות:** 46 בדיקות ירוקות (כולל guard-test + מנוע-ההזמנות-המשותף) · analyze נקי.
 - **פתוח:** 5 מנועים נוספים עם הדפוס (orders/tasks/projects/sys_chat/persona) — 2 וריאנטים של setter; ממתין לצ'קפוינט לפני נגיעה בהם (ליבת-הכסף).
 
+### #cdn-domain — תמונות-הקטלוג דרך cdn.buildsmart-il.com (2026-08-12)
+תיקון-סינון (שלב 1 של `docs/BUILD-ORDER-SINGLE-DOMAIN-BRIDGE-2026-08-12.md`): סינוני-רשת (נטפרי וכו') חוסמים את הדומיין השיתופי `pub-…r2.dev` גם כשהדומיין העסקי מאושר. חובר Custom Domain באותו חשבון Cloudflare — אותו מחסן, אותם מפתחות, hostname ציבורי חדש.
+- **`lib/state/app_profile.dart`:** ‏`kProfileImageBaseUrl` ⇒ ‏`https://cdn.buildsmart-il.com` (מקור-יחיד; ‏`kImageBaseUrl` ב-product_images נגזר ממנו, וגם ה-publicUrl של ההעלאות — `{kImageBaseUrl}/{key}`).
+- **`test/app_profile_flags_test.dart`:** ‏3 הצמדות-המטריצה עודכנו לכתובת החדשה.
+- **`lib/data/repositories/upload_functions.dart`:** הערת-תיעוד בלבד.
+- **אימות:** ‏app_profile_flags + deep_audit ירוקים מקומית; ה-URL הישן `pub-…r2.dev` נשאר פעיל ב-Cloudflare כגיבוי-מעבר.
 ### #ci-fix-vector-math — Matrix4.scaleByDouble → diagonal3Values (CI-unblock) (2026-08-11)
 תיקון-חוסם-CI: `full_internal_card.dart:1577` השתמש ב-`Matrix4.scaleByDouble(v,v,v,1)` — API שלא קיים ב-vector_math 2.1.4 (הגרסה שה-CI פותר, transitive). שגיאת-קומפילציה הפילה 237 בדיקות → כל ריצות protocol-enforce אדומות מזה שעות (901+), על כל קומיט (גם של הצי). הוחלף ב-`Matrix4.diagonal3Values(v,v,v)` — factory "scale matrix" זהה-התנהגות, **קיים ולא-deprecated בשתי הגרסאות** (2.1.4 וגם החדשה המקומית). analyze exit-0 · הבדיקה שנפלה (ai_hub_compute) ירוקה. הוכרע ע"י המשתמש לתקן (הקובץ של סשן-הצי, באג-חוסם-מוצר).

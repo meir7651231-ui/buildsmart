@@ -123,9 +123,9 @@ void main() {
       expect(kProfileStudioSharedSync, isFalse);
       expect(kProfileCatalogBaseUrl, '',
           reason: 'empty is load-bearing (gate_123): server catalog OFF');
-      expect(kProfileImageBaseUrl,
-          'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev',
-          reason: 'demo keeps today\'s CDN — byte-identical');
+      expect(kProfileImageBaseUrl, 'https://cdn.buildsmart-il.com',
+          reason: 'demo serves the CDN via the approved custom domain (12.8 '
+              'filtered-network fix — same bucket, new public hostname)');
     });
   });
 
@@ -134,8 +134,7 @@ void main() {
       final d = profileDefaultsFor('demo');
       expect(d.values.whereType<bool>().any((v) => v), isFalse);
       expect(d['CATALOG_BASE_URL'], '');
-      expect(d['IMAGE_BASE_URL'],
-          'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev');
+      expect(d['IMAGE_BASE_URL'], 'https://cdn.buildsmart-il.com');
     });
 
     test('buildsmart column: the live-web define-set (workflow parity)', () {
@@ -156,8 +155,7 @@ void main() {
         expect(b[f], isTrue, reason: '$f is ON in the buildsmart profile');
       }
       expect(b['CATALOG_BASE_URL'], 'https://buildsmart-b0b78.firebaseapp.com');
-      expect(b['IMAGE_BASE_URL'],
-          'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev');
+      expect(b['IMAGE_BASE_URL'], 'https://cdn.buildsmart-il.com');
     });
 
     test('clean column: capabilities ON, company values EMPTY', () {
