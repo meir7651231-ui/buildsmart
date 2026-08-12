@@ -6,12 +6,18 @@
 >   `EnumPrefsPersisted<T>` (`lib/state/prefs_persisted.dart`). ה-`set`/`persist`
 >   המשוכפלים ×3 → מקום אחד. 3 בדיקות ייעודיות ירוקות (defaults · שמירה על-פני
 >   notifier חדש · no-op אידמפוטנטי). analyze נקי.
-> - **slice 2 — 5 מודולי-ההגדרות ⛔ חסום (הכרעת-בעלים).** `app/catalog/chat/notif/
->   store_settings` מוגנים ע"י **Gate 25** בשער-הפרוטוקול (`שער 25: משותף עם
->   Preact — אסור לגעת`). הם חלק מחוזה ה-parity Flutter↔Preact ולא ניתן לפרק אותם
->   באופן חד-צדדי. **דילגתי, כיבדתי את השער** — הדדופ שלהם דורש override מפורש של
->   Gate 25 מהבעלים. (הכפילות מתועדת; הפתרון `JsonPrefsPersisted` מוכן אם/כאשר
->   יאושר.)
+> - **slice 2 — 5 מודולי-ההגדרות ⏭️ דולג לצמיתות (הכרעת-בעלים סופית, 2026-08-12).**
+>   `app/catalog/chat/notif/store_settings` מוגנים ע"י **Gate 25**
+>   (`.githooks/pre-commit:264` — err קשה על כל שינוי-תוכן ב-5 הקבצים).
+>   **הסיבה האמיתית (נחקרה):** 5 הקבצים קוראים/כותבים את **אותו מפתח
+>   `bs.settings.v1` באותו מבנה-JSON** כמו אפליקציית ה-**Preact החיה בפרודקשן**
+>   (`app_settings.dart:7-10` + `STATE_OVERVIEW.md:60`). זה מכוון: ב-cutover
+>   הגדרות-המשתמש עוברות איתו. שינוי מבנה-ה-JSON בצד Flutter → אובדן-הגדרות-שקט
+>   בפרודקשן (contract drift · R6). השער **עיוור-בכוונה** — חוסם כל שינוי כי אינו
+>   מבחין בין "שיניתי JSON" (מסוכן) ל"פירקתי `update()`" (בטוח); קו-אדום גורף עדיף
+>   על שיפוט-פר-commit כשהמחיר-אם-טועים הוא פרודקשן. **הכרעת-הבעלים: לדלג.**
+>   הדדופ כאן = ~15 שורות בלבד מול סיכון-פרודקשן + עקיפת-שער-חרוט → יחס עלות/תועלת
+>   שלילי, ונגד "לא לשבור כלום". זהו **חריג-לגיטימי**, לא כישלון-דדופ.
 > - **slice 3a — 4 מודולי Set-list ✅ בוצע.** `comparison_set` · `stage_progress`
 >   · `hidden_catalog_sections` · `onboarding_progress` עברו למיקסין
 >   `StringSetPrefsPersisted` (getStringList→toSet / setStringList). **−20 שורות**,
