@@ -119,11 +119,22 @@ class FirestoreRest {
     return decodeFields((map['fields'] as Map?)?.cast<String, dynamic>() ?? {});
   }
 
-  /// כותב/מחליף מסמך (PATCH ללא field-mask ⇒ מציב את כל השדות שנשלחו).
+  /// כותב מסמך ב-**מיזוג** (‏set merge:true של ה-SDK): PATCH עם `updateMask`
+  /// המונה את השדות הנשלחים ⇒ רק הם מתעדכנים, השאר נשמרים. **קריטי:** PATCH
+  /// בלי updateMask *דורס את כל המסמך* (מוחק שדות שלא נשלחו) — כך עדכון-כותרת-
+  /// שרשור מהלקוח היה מוחק את `participantUids` ושובר את שאילתת-המנהל. עם המסך
+  /// המיזוג זהה-סמנטית ל-`_col.doc(id).set(data, SetOptions(merge:true))`.
   Future<void> setDoc(String path, Map<String, Object?> data) async {
+    final mask = data.keys
+        .map((k) => 'updateMask.fieldPaths=${Uri.encodeQueryComponent(k)}')
+        .join('&');
+    final base = _docUri(path);
+    final uri = mask.isEmpty
+        ? base
+        : Uri.parse('$base${base.query.isEmpty ? '?' : '&'}$mask');
     final res = await request(
       'PATCH',
-      _docUri(path),
+      uri,
       _headers(await idToken()),
       jsonEncode({'fields': encodeFields(data)}),
     );
