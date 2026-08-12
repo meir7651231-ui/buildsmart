@@ -151,9 +151,12 @@ bool _visibleToAudience(ChatThread t, BsRole persona, String audience,
 /// page can render real messages and `send` as the right role.
 typedef _ThreadView = ({_Thread thread, String threadId, BsRole persona});
 
-_Direction _directionFor(ChatThread t, BsRole persona) {
+/// #chat-identity — the last message's direction, keyed on the READER's [uid]
+/// (one person, every board) with the legacy role compare as the fallback. See
+/// [chatMessageIsMine] (sys_chat.dart) for the bug this closes.
+_Direction _directionFor(ChatThread t, BsRole persona, {String? uid}) {
   if (t.messages.isEmpty) return _Direction.outgoing;
-  return t.messages.last.fromRole == persona
+  return chatMessageIsMine(t.messages.last, persona, uid)
       ? _Direction.outgoing
       : _Direction.incoming;
 }
@@ -172,11 +175,12 @@ String _hhmm(DateTime ts) =>
 /// Real per-chat unread: incoming messages (not from the reading persona)
 /// whose timestamp is newer than the thread's persisted lastReadAt
 /// (0 = never opened → all incoming messages count).
-int _unreadCount(ChatThread t, BsRole persona, int lastReadMs) =>
+int _unreadCount(ChatThread t, BsRole persona, int lastReadMs, {String? uid}) =>
     t.messages
         .where(
           (m) =>
-              m.fromRole != persona && m.ts.millisecondsSinceEpoch > lastReadMs,
+              !chatMessageIsMine(m, persona, uid) &&
+              m.ts.millisecondsSinceEpoch > lastReadMs,
         )
         .length;
 
@@ -192,7 +196,12 @@ String _displayNameFor(ChatThread t, BsRole persona) =>
         : t.name;
 
 /// Build the legacy `_Thread` record + the engine handle for [persona].
-_ThreadView _viewOf(ChatThread t, BsRole persona, Map<String, int> lastRead) {
+///
+/// #chat-identity — [uid] (the reader's auth.uid) makes direction + unread key on
+/// the PERSON, not the board (see [chatMessageIsMine]). Optional + null-default so
+/// every caller/test without an identity stays byte-identical to today.
+_ThreadView _viewOf(ChatThread t, BsRole persona, Map<String, int> lastRead,
+    {String? uid}) {
   final last = t.messages.isNotEmpty ? t.messages.last : null;
   return (
     threadId: t.id,
@@ -203,9 +212,9 @@ _ThreadView _viewOf(ChatThread t, BsRole persona, Map<String, int> lastRead) {
       name: _displayNameFor(t, persona),
       subtitle: last?.text ?? '',
       time: last != null ? _hhmm(last.ts) : '',
-      direction: _directionFor(t, persona),
+      direction: _directionFor(t, persona, uid: uid),
       isBot: t.isBot,
-      unread: _unreadCount(t, persona, lastRead[t.id] ?? 0),
+      unread: _unreadCount(t, persona, lastRead[t.id] ?? 0, uid: uid),
       isOnline: t.isBot,
       category: _categoryFor(t),
     ),
@@ -274,7 +283,7 @@ final visibleThreadsProvider = Provider<List<ThreadLite>>((ref) {
               _visibleToAudience(t, persona, audience, uid: uid) &&
               (audienceChip == null || audienceChip.matches(t)),
         ))
-      _viewOf(t, persona, lastRead),
+      _viewOf(t, persona, lastRead, uid: uid),
   ];
 
   return [
@@ -780,7 +789,8 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     final match = threads.where((t) => t.id == id);
     if (match.isEmpty) return; // thread deleted after the chip rendered
     final lastRead = ref.read(chatLastReadProvider);
-    final view = _viewOf(match.first, widget.persona, lastRead);
+    final view = _viewOf(match.first, widget.persona, lastRead,
+        uid: ref.read(currentUidProvider));
     Navigator.of(context)
         .push(
           MaterialPageRoute<void>(
@@ -1128,7 +1138,7 @@ class _ThreadList extends ConsumerWidget {
                 _visibleToAudience(t, persona, audience, uid: uid) &&
                 (audienceChip == null || audienceChip.matches(t)),
           ))
-        _viewOf(t, persona, lastRead),
+        _viewOf(t, persona, lastRead, uid: uid),
     ];
 
     final threads =
@@ -1474,7 +1484,8 @@ void openChatThread(
 }) {
   final match = ref.read(chatEngineProvider).where((t) => t.id == threadId);
   if (match.isEmpty) return;
-  final view = _viewOf(match.first, persona, ref.read(chatLastReadProvider));
+  final view = _viewOf(match.first, persona, ref.read(chatLastReadProvider),
+      uid: ref.read(currentUidProvider));
   Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder:
@@ -1583,18 +1594,25 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
   }
 
   /// The messages to render: from the shared engine thread for an engine-backed
-  /// page (mapped to the legacy `_Message` shape, `isMe = fromRole == persona`),
-  /// or the session-local list for a detached chat. Honors "מחיקת היסטוריה".
+  /// page (mapped to the legacy `_Message` shape), or the session-local list for
+  /// a detached chat. Honors "מחיקת היסטוריה".
+  ///
+  /// #chat-identity — "mine vs theirs" is keyed on the READER's auth.uid
+  /// ([chatMessageIsMine]) so ONE person is one person on every board: a manager
+  /// answering from the contractor board is no longer conflated with the real
+  /// contractor client (both were `fromRole: contractor`). Falls back to the role
+  /// compare when a uid is missing (seed/legacy/local/signed-out) — byte-identical.
   List<_Message> _engineMessages() {
     if (ref.watch(chatHistoryClearedProvider)) return const [];
     final threads = ref.watch(chatEngineProvider);
     final match = threads.where((t) => t.id == _threadId);
     if (match.isEmpty) return const [];
+    final myUid = ref.watch(currentUidProvider);
     return [
       for (final m in match.first.messages)
         (
           text: m.text,
-          isMe: m.fromRole == _persona,
+          isMe: chatMessageIsMine(m, _persona, myUid),
           time: _hhmm(m.ts),
           // #chat-delivery-status — the honest per-message status (set by the
           // engine/repo: pending → sent/failed on the write, delivered on a
