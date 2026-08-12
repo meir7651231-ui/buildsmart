@@ -4044,3 +4044,10 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **הוכחת שמירת-התנהגות (המפרק):** re-sweep → כל mutator עדיין `writes state:state`; ההבדל היחיד ב-IR הוא שתופעת-הלוואי `io:prefs.setString`+`field:_loaded` עברה מ-inline-לכל-אטום ל-`set state` המשותף (אטום `state=` נעלם מהמחלקה, `_persist`→`persist-state`). זו בדיוק החתימה הצפויה של הרפקטור.
 - **אימות: 42 בדיקות + `state_loaded_guard_test` ירוקים** · analyze נקי.
 - נותרו 3 מנועי-וריאנט (tasks/sys_chat/persona) — נשמרים כפי-שהם (כלל-בטיחות §3.4).
+
+### #edge-firestore — Firestore דרך הדומיין המאושר (EDGE_PROXY, 12.8)
+שלב 2 של גשר-הדומיין (`docs/BUILD-ORDER-SINGLE-DOMAIN-BRIDGE`, הכרעת-בעלים "רק הקישור שלי"). ה-Worker `bs-edge` (`edge-proxy/`) חי ואומת בפרודקשן: `api.buildsmart-il.com/fs/` מגיע ל-firestore.googleapis.com; `/test` ⇒ 404 (allowlist).
+- **`state/feature_flags.dart`:** `kEdgeProxy` (‏`bool.fromEnvironment('EDGE_PROXY')`, ברירת-מחדל **off**) + `kEdgeFsHost = 'fs.buildsmart-il.com'` (hostname נקי — חוזה Settings.host).
+- **`main.dart`:** ‏`FirebaseFirestore.settings` — כש-kEdgeProxy דלוק: `host: kEdgeFsHost, sslEnabled: true`; כבוי: כמו היום (ביט-זהה).
+- **אימות:** ‏analyze 0-errors · ‏edge_proxy_test (off-by-default + host נקי).
+- **נותר לבעלים:** להוסיף ל-Worker תת-דומיין `fs.buildsmart-il.com` (Custom Domain), ואז build עם `--dart-define=EDGE_PROXY=true` לבדיקה על קו-מסונן. ⚠️ התנהגות WebChannel של Firestore-Web דרך proxy = אימות-שטח (לא ניתן לבדיקה מקומית).
