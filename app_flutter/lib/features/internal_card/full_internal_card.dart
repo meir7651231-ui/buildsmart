@@ -31,8 +31,12 @@ import 'package:buildsmart/features/fittings/engine/models.dart' show RunElement
 // in under a prefix (used only by the gallery-3D route builder).
 import 'package:buildsmart/features/fittings/engine/models.dart' as fm
     show Dir, Family;
+import 'package:buildsmart/features/fittings/fitting_flags.dart'
+    show kFittingEngineIntel;
 import 'package:buildsmart/features/fittings/render/product_line_3d.dart'
     show ProductLine3D;
+import 'package:buildsmart/features/fittings/render/route_preview.dart'
+    show FittingPreview3d, kStageBackground;
 import 'package:buildsmart/features/fittings/ui/sudoku_grid.dart'
     show SudokuGrid, runElementFor;
 import 'package:buildsmart/logic/install_kit.dart';
@@ -1545,6 +1549,35 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
         curve: Curves.easeOut,
       );
 
+  /// 🧊 Open the interactive line-builder 3D full-screen (drag-rotate / pinch-
+  /// zoom) over the SAME connected [route] the gallery panel shows. Only reached
+  /// when `kFittingEngineIntel` is armed (the tap is not wired otherwise).
+  void _openLine3d(List<RunElement> route) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (ctx) => Scaffold(
+          backgroundColor: kStageBackground,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Positioned.fill(child: FittingPreview3d(route: route)),
+                Positioned(
+                  top: 4,
+                  left: 4,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   /// A side-jump chip (מפרט / תלת-ממד) on the gallery edge.
   Widget _galleryThumb(String emoji, String label, VoidCallback onTap) {
     return GestureDetector(
@@ -1595,19 +1628,46 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                   // The extra last page is the seeded 3D view (תלת-ממד).
                   if (i >= widget.images.length) {
                     final route = _galleryThreeDRoute(widget.product);
+                    if (route.isEmpty) {
+                      return Center(
+                        child: Text(widget.product.typeEmoji,
+                            style: const TextStyle(fontSize: 96)),
+                      );
+                    }
+                    final panel = Container(
+                      margin: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: ProductLine3D(route: route),
+                    );
+                    // 🧊 line-builder (kFittingEngineIntel): the static gallery
+                    // panel stays as-is when the intel layer is OFF (byte-
+                    // identical); when ARMED, a tap opens the full interactive
+                    // 3D (drag-rotate · pinch-zoom) of the SAME connected run.
+                    if (!kFittingEngineIntel) return Center(child: panel);
                     return Center(
-                      child: route.isEmpty
-                          ? Text(widget.product.typeEmoji,
-                              style: const TextStyle(fontSize: 96))
-                          : Container(
-                              margin: const EdgeInsets.all(24),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(18),
+                      child: GestureDetector(
+                        onTap: () => _openLine3d(route),
+                        child: Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            panel,
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 44),
+                              child: Text(
+                                'הקש לסיבוב · הגדלה',
+                                style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600),
                               ),
-                              child: ProductLine3D(route: route),
                             ),
+                          ],
+                        ),
+                      ),
                     );
                   }
                   return InteractiveViewer(
