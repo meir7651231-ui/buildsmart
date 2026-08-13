@@ -63,7 +63,9 @@ class _TasksGanttSheet extends ConsumerWidget {
     final tasks = (session != null && session.role == BoardRole.worker)
         ? [
             for (final t in all)
-              if (t.worker == workerIndexForSession(session)) t
+              if (workerOwnsTask(
+                  t, workerIndexForSession(session), session.uid))
+                t
           ]
         : [
             for (final t in all)

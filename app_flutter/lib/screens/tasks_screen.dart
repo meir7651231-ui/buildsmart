@@ -20,7 +20,12 @@ import 'package:buildsmart/screens/keyboard_tool_tree.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/services/task_photo.dart';
+import 'package:buildsmart/data/repositories/backend.dart'
+    show kTasksServer, useFirebaseBackend;
+import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
+import 'package:buildsmart/state/directory.dart'
+    show DirectoryEntry, directoryProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -43,6 +48,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// so `kWorkers[i]` would throw a RangeError. Clamp out-of-range indices to the
 /// first worker label instead of crashing the whole board.
 String _wk(int i) => kWorkers[(i >= 0 && i < kWorkers.length) ? i : 0];
+
+/// Wave T3 (2c) — the contractor's AUTHORING identity, used both to STAMP a new
+/// task's `employerId` and to SCOPE the contractor's own queues. ON (kTasksServer
+/// + a real signed-in contractor) it is the REAL contractor uid — so the worker's
+/// `assignedWorkerUid`-scoped query, the `employerId`-scoped contractor query, and
+/// the 6-state rules all resolve to one identity. OFF (the default) it stays the
+/// demo constant [kDemoContractorId], byte-identical to the pre-T3 single-device
+/// demo. A task with an EMPTY employerId (the verbatim seed) still matches the
+/// contractor's queue tolerance (`|| employerId.isEmpty`) on both paths.
+String authoringEmployerId(WidgetRef ref) =>
+    (kTasksServer && useFirebaseBackend)
+        ? (ref.read(currentUidProvider) ?? kDemoContractorId)
+        : kDemoContractorId;
 
 /// Open the משימות screen — the wire target for `openTasks`.
 void openTasks(BuildContext context) =>
@@ -239,7 +257,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         // DEMO-SEED: unstamped seeds (employerId '') belong to the single demo
         // contractor → show them too. SERVER-SWAP: the real backend filters by
         // the session contractor uid (all tasks stamped; '' won't occur).
-        if (t.employerId == kDemoContractorId || t.employerId.isEmpty) t
+        if (t.employerId == authoringEmployerId(ref) || t.employerId.isEmpty) t
     ];
     if (pending.isEmpty) return const [];
     return [
@@ -292,7 +310,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       for (final t in ref.watch(pendingProposalsProvider))
         // DEMO-SEED: unstamped seeds count as the demo contractor's (SERVER-SWAP:
         // real backend filters by session contractor uid; '' won't occur).
-        if (t.employerId == kDemoContractorId || t.employerId.isEmpty) t
+        if (t.employerId == authoringEmployerId(ref) || t.employerId.isEmpty) t
     ];
     if (proposals.isEmpty) return const [];
     return [
@@ -443,6 +461,62 @@ class _WorkerPick extends StatelessWidget {
           ),
         ],
       ]),
+    );
+  }
+}
+
+/// Wave T3 (2c) — the SERVER worker picker: chips of the REAL registered workers
+/// (`directory` role==worker), selection keyed by uid. Shown only when the
+/// directory yields workers (ON + registered people); OFF it never renders (the
+/// demo [_WorkerPick] does). A [Wrap] (not a fixed Row) so any number of workers
+/// flows without overflow.
+class _DirWorkerPick extends StatelessWidget {
+  const _DirWorkerPick({
+    required this.workers,
+    required this.selectedUid,
+    required this.onSelect,
+  });
+  final List<DirectoryEntry> workers;
+  final String selectedUid;
+  final void Function(String uid) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space3),
+      child: Wrap(
+        spacing: BsTokens.space2,
+        runSpacing: BsTokens.space2,
+        children: [
+          for (final w in workers)
+            Material(
+              color: w.uid == selectedUid
+                  ? BsTokens.brandDark
+                  : BsTokens.cardLight,
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: () => onSelect(w.uid),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: BsTokens.space3,
+                    horizontal: BsTokens.space4,
+                  ),
+                  child: Text(
+                    w.displayName,
+                    style: TextStyle(
+                      color: w.uid == selectedUid
+                          ? bsOnAccent(context)
+                          : BsTokens.inkLight,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -1243,6 +1317,12 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
       text: (widget.edit?.days ?? 1).toString());
   late int _worker = widget.edit?.worker ?? widget.initialWorker;
 
+  /// Wave T3 (2c) — the REAL uid of the picked worker (from the directory picker
+  /// on the server path). Empty on OFF / the demo `kWorkers` int-index picker, so
+  /// createTask/assignTask stamp nothing (write-when-non-empty) and the demo path
+  /// stays byte-identical. Preloaded from the edited task's stamp.
+  late String _workerUid = widget.edit?.assignedWorkerUid ?? '';
+
   // 📅 GANTT anchor (Wave G2b) — the optional planned start date for the
   // timeline. Preloaded from the edited task (null = unscheduled, the create
   // default). Just a nullable DateTime in State — no controller to dispose.
@@ -1290,10 +1370,12 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
           // and the contractor didn't pick one (keeps it unscheduled).
           scheduledStart: _scheduledStart);
       // Re-assign only when the picked worker actually changed (keeps the
-      // overlay byte-stable otherwise). The server-ready uid stays the demo
-      // fallback — the int index is the addressing today.
-      if (_worker != widget.edit!.worker) {
-        notifier.assignTask(id, worker: _worker);
+      // overlay byte-stable otherwise). Wave T3 (2c): also stamp the picked
+      // worker's REAL uid (write-when-non-empty) so the server-scoped worker
+      // query resolves; OFF _workerUid is '' → the int index is the addressing.
+      if (_worker != widget.edit!.worker ||
+          _workerUid != (widget.edit!.assignedWorkerUid)) {
+        notifier.assignTask(id, worker: _worker, assignedWorkerUid: _workerUid);
       }
       Navigator.of(context).pop();
       showToast(context, 'המשימה עודכנה ✓');
@@ -1304,10 +1386,12 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
         days: safeDays,
         steps: steps,
         worker: _worker,
-        // SERVER-SWAP: the single-device demo has one contractor → stamp the
-        // demo employer id (kDemoContractorId). When the backend lands this is
-        // the real contractor uid from the session/auth claim.
-        employerId: kDemoContractorId,
+        // Wave T3 (2c) — stamp the picked worker's REAL uid (write-when-non-empty;
+        // '' on the demo int-picker path → byte-identical) so the worker's scoped
+        // server query sees the task.
+        assignedWorkerUid: _workerUid,
+        // Wave T3 (2c) — the real contractor uid ON, else the demo constant.
+        employerId: authoringEmployerId(ref),
         // 📅 GANTT (Wave G2b) — additive: the picked start date lands the task
         // on the timeline; null (no pick) keeps today's unscheduled behavior.
         scheduledStart: _scheduledStart,
@@ -1444,10 +1528,36 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
               ),
               const SizedBox(height: BsTokens.space3),
               const _SecH('שיוך לעובד'),
-              _WorkerPick(
-                selected: _worker,
-                onSelect: (i) => setState(() => _worker = i),
-              ),
+              // Wave T3 (2c) — ON (kTasksServer) with registered workers in the
+              // directory: pick a REAL worker (stamps their uid). OFF / no
+              // registered worker: the demo kWorkers int picker, byte-identical.
+              Builder(builder: (_) {
+                final List<DirectoryEntry> dirWorkers = kTasksServer
+                    ? [
+                        for (final e
+                            in ref.watch(directoryProvider).asData?.value ??
+                                const <DirectoryEntry>[])
+                          if (e.role == BsRole.worker) e
+                      ]
+                    : const <DirectoryEntry>[];
+                if (dirWorkers.isNotEmpty) {
+                  return _DirWorkerPick(
+                    workers: dirWorkers,
+                    selectedUid: _workerUid,
+                    onSelect: (uid) => setState(() {
+                      _workerUid = uid;
+                      _worker = 0; // uid is the server addressing; index unused
+                    }),
+                  );
+                }
+                return _WorkerPick(
+                  selected: _worker,
+                  onSelect: (i) => setState(() {
+                    _worker = i;
+                    _workerUid = ''; // demo int addressing → no uid stamp
+                  }),
+                );
+              }),
               const SizedBox(height: BsTokens.space4),
               _PrimaryBtn(
                 key: const ValueKey('author-save'),

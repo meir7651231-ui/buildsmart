@@ -4309,6 +4309,14 @@ Wave T3 — המאגר האחרון והגדול. **שלב-היסוד** (dormant
 - **`tasks_firebase.dart` (חדש):** `FirebaseTasksRepository extends FirestoreCachedRepo<TaskItem>` מעל אוסף `tasks`. `toDoc = TaskItem.toJson()..remove('id')` · `fromDoc = tryFromJson({...doc.data, id:int.parse(doc.id)})` (int id ⇄ string doc-id) · `idOf=id.toString()` · `seed=buildTasksSeed()` · `sortBy` id-עולה · `onFirstSnapshotEmpty→pushCacheToRemote` · `all()=cached()`. **מיחזור הסריאליזציה של המודל** ⇒ byte-fidelity לoverlay המקומי.
 - **`tasks_engine.dart`:** נחשף `buildTasksSeed()` (wrapper ציבורי מעל `_seedTasks()`) — ה-repo נולד-זרוע ממנו.
 - **אימות:** analyze 0 · `tasks_firebase_test` (9 — round-trip של seed + runtime-מלא כל-שדה · cache-born-seeded · upsert/removeById · דחיית doc פגום) + stage2 (exempt: unscoped=god/manager, party-scoped=bounded). **mutation-verify** (הזרקת-id ב-fromDoc → RED round-trip → GREEN).
+### #taskT3-2bc — worker-identity plumbing: read int→uid + contractor picker→directory (2026-08-13)
+increment 2 חלק ב'+ג' — הגירת מודל-הזהות של הלוח, dormant מאחורי `kTasksServer` (OFF byte-identical).
+- **2b (read):** helper טהור `workerOwnsTask(t, index, uid)` = `t.worker==index || (uid≠'' && t.assignedWorkerUid==uid)`. 7 משטחי-עובד (worker_task_board · worker_app_screen×2 · worker_reports_tab×3 · worker_report_drilldowns×4 · worker_profile · tasks_gantt · defects) עברו אליו, uid מ-boardAuth. OFF (uid ריק) שקול-בייט.
+- **2c (authoring):** `authoringEmployerId(ref)` (ON=currentUid · OFF=kDemoContractorId). `_TaskAuthorSheet` — `_workerUid` state + בורר-directory `_DirWorkerPick` (role==worker, בחירה לפי uid) גדור kTasksServer, אחרת `kWorkers` int (byte-identical). createTask/assignTask חותמים assignedWorkerUid+employerId אמיתיים. read-scopes (tasks_screen ×2 + defects `_openDefect`/scope) → authoringEmployerId.
+- **הסגירה:** קבלן חותם uid-עובד → שאילתת-העובד (`assignedWorkerUid==uid`) + `workerOwnsTask` רואים את המשימה למרות index-דמו 0.
+- **אימות:** analyze 0 · worker_owns_task_test (2, mutation-verified) + tasks_cross_party_closure_test (3) · **52+16 טסטי-משימות/authoring קיימים ירוקים (אפס-רגרסיה מקומי)** · visual_log (picker גדור-דגל, live-verify).
+- **⚠️ נותר:** 2d — worker_notifs uid-addressed · 2e — הדלקת `TASKS_SERVER` ב-3 ה-workflows.
+
 ### #taskT3-2a — server infra: flag · scoped provider · engine bind · rules (2026-08-13)
 increment 2 חלק א' — שכבת-השרת, **dormant מאחורי `kTasksServer` (OFF כברירת-מחדל)**. OFF ⇒ provider null ⇒ המנוע לא מקושר ⇒ מסלול int-worker byte-identical.
 - **`backend.dart`:** דגל `kTasksServer = bool.fromEnvironment('TASKS_SERVER')` (נפרד מ-kUserDataServer — הפעלתו מהגרת גם את מודל-הזהות).

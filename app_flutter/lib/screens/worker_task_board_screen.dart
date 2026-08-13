@@ -79,7 +79,10 @@ class WorkerTaskBoardScreen extends ConsumerWidget {
     // The logged worker's tasks (LIVE), sorted by id for a stable order inside
     // each group (the engine list is already id-seeded; this keeps it stable
     // through runtime status changes).
-    final mine = ref.watch(tasksProvider).where((t) => t.worker == worker).toList()
+    final mine = ref
+        .watch(tasksProvider)
+        .where((t) => workerOwnsTask(t, worker, session.uid))
+        .toList()
       ..sort((a, b) => a.id.compareTo(b.id));
 
     return Directionality(

@@ -2199,3 +2199,13 @@
 - **אבטחה (הקריטי):** כלל-update לעובד מגביל status ל-{active,rejected,review} → **עובד לא יכול לחתום done בעצמו** (אין self-approval); assignedWorkerUid נשאר-עצמי; employerId write-once/קפוא. god-read רק isManager.
 - **אימות:** analyze 0 · tasks_realtime_bind (3: DOWN/UP/no-self-approve) + tasks_firebase 9 · **52 טסטי-משימות קיימים ירוקים (אפס-רגרסיה)** · stage2.
 - **mutation-verify (בוצע):** גיבוי → מוטציה ב-`_commit`: `if (r != null)` → `if (false && r != null)` (הרג ניתוב-ה-repo) → RED בטסט-ה-UP (createTask לא נחת ב-repo.all) → שחזור (RESTORED-IDENTICAL, המוטציה הוסרה) → GREEN 3/3.
+
+## #taskT3-2b — worker-surface identity read (int→uid, OR-tolerant) (2026-08-13)
+- **הנכס:** 7 משטחי-עובד עברו ל-`workerOwnsTask(t, index, uid)` (predicate טהור: `t.worker==index || (uid≠'' && t.assignedWorkerUid==uid)`). OFF (uid ריק) שקול-בייט. uid נשלף מ-boardAuth בכל אתר.
+- **אימות:** worker_owns_task_test (2) + scope/worker_app ירוקים · analyze 0 · visual_log (אין שינוי חזותי OFF).
+- **mutation-verify (בוצע):** ענף-ה-uid → `false && …` → RED בטסט 'admits uid-assigned despite mismatched index' → שחזור → GREEN.
+
+## #taskT3-2c — contractor authoring: picker→directory + real-uid stamping (2026-08-13)
+- **הנכס:** סגירת-הלולאה החוצה-צדדית. `_TaskAuthorSheet` — בורר-directory (role==worker, בחירה לפי uid) גדור kTasksServer + `_workerUid` state + `authoringEmployerId(ref)` (ON=currentUid, OFF=kDemoContractorId). createTask/assignTask חותמים assignedWorkerUid+employerId אמיתיים. read-scopes (tasks_screen ×2 + defects) עוברים ל-authoringEmployerId. OFF byte-identical (compile-const tree-shaken + '').
+- **אימות:** tasks_cross_party_closure_test (3) + 16 טסטי-authoring/defects קיימים ירוקים · analyze 0 · visual_log (picker גדור-דגל, live-verify).
+- **mutation-context:** ה-predicate workerOwnsTask כבר mutation-verified (2b); חתימת createTask/assignTask היא קוד-מנוע Wave-T1 קיים+נבדק. טסט-הסגירה הוא שומר-האינטגרציה.

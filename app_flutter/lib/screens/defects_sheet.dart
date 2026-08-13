@@ -30,6 +30,7 @@
 import 'package:buildsmart/data/persona_data.dart' show kTaskStatusLabel;
 import 'package:buildsmart/screens/worker_profile_screen.dart'
     show workerIndexForSession;
+import 'package:buildsmart/screens/tasks_screen.dart' show authoringEmployerId;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -94,10 +95,17 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
     final defects = ref.watch(defectsProvider);
     final workerIndex = session == null ? null : workerIndexForSession(session);
     final scoped = isContractor
-        ? [for (final d in defects) if (d.employerId == kDemoContractorId) d]
+        ? [
+            for (final d in defects)
+              if (d.employerId == authoringEmployerId(ref) ||
+                  d.employerId.isEmpty)
+                d
+          ]
         : [
             for (final d in defects)
-              if (workerIndex != null && d.worker == workerIndex) d
+              if (workerIndex != null &&
+                  workerOwnsTask(d, workerIndex, session?.uid ?? ''))
+                d
           ];
 
     return Directionality(
@@ -252,7 +260,10 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
           // same kDemoContractorId the task author uses), NOT session.employerId
           // (which is '' for a manager → the defect would vanish from the
           // contractor's own employer-scoped list). SERVER-SWAP: real uid.
-          employerId: kDemoContractorId,
+          // Wave T3 (2c) — the real contractor uid ON, else the demo constant
+          // (mirrors the task author sheet). A contractor-opened defect starts
+          // unassigned; they reassign it (with the directory picker) from the board.
+          employerId: authoringEmployerId(ref),
         );
     Navigator.of(context).pop();
     showToast(context, 'הליקוי נפתח 🔧');

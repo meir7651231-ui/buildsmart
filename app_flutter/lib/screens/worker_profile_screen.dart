@@ -98,8 +98,10 @@ class WorkerProfileScreen extends ConsumerWidget {
     final worker = workerIndexForSession(session);
     // Honest stats — derived LIVE from the worker's own tasks, no invented
     // numbers (#66: the logged worker sees only their own tasks everywhere).
-    final mine =
-        ref.watch(tasksProvider).where((t) => t.worker == worker).toList();
+    final mine = ref
+        .watch(tasksProvider)
+        .where((t) => workerOwnsTask(t, worker, session.uid))
+        .toList();
     final done = mine.where((t) => t.status == 'done').length;
     final inReview = mine.where((t) => t.status == 'review').length;
     final rejected = mine.where((t) => t.status == 'rejected').length;

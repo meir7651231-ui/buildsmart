@@ -294,6 +294,18 @@ List<TaskItem> _seedTasks() => [
         ),
     ];
 
+/// Wave T3 (increment 2) — does task [t] belong to the worker viewing the board?
+/// OR-TOLERANT by the uid economy: the demo `int worker` index OR the real
+/// `assignedWorkerUid`. With [workerUid] empty (OFF / a demo/seed session, whose
+/// `board.uid` is '') this is EXACTLY `t.worker == workerIndex` — byte-identical
+/// to the pre-T3 filter. Once `kTasksServer` scopes the repo to
+/// `assignedWorkerUid == uid`, a contractor-assigned task (whose demo `worker`
+/// index may be the 0 default) still shows because its uid matches. Pure ⇒
+/// unit-tested; the single predicate every worker surface filters through.
+bool workerOwnsTask(TaskItem t, int workerIndex, String workerUid) =>
+    t.worker == workerIndex ||
+    (workerUid.isNotEmpty && t.assignedWorkerUid == workerUid);
+
 /// PUBLIC accessor for the verbatim §6 seed (Wave T3) — the Firebase tasks repo
 /// (`data/repositories/tasks_firebase.dart`) is BORN with this so the cache is
 /// non-empty before the first Firestore snapshot (identical genesis to the local

@@ -20,6 +20,7 @@
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/screens/worker_reports_tab.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/org_gates.dart' show orgTermNow;
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -202,8 +203,11 @@ Future<void> showFirstPassDrilldown(
   WidgetRef ref, {
   required int worker,
 }) {
-  final mine =
-      ref.read(tasksProvider).where((t) => t.worker == worker).toList();
+  final wuid = ref.read(boardAuthProvider)?.uid ?? '';
+  final mine = ref
+      .read(tasksProvider)
+      .where((t) => workerOwnsTask(t, worker, wuid))
+      .toList();
   final everRejected = ref.read(taskRejectionLogProvider);
   final submitted = mine
       .where((t) =>
@@ -299,8 +303,11 @@ Future<void> showStreakDrilldown(
   WidgetRef ref, {
   required int worker,
 }) {
-  final mine =
-      ref.read(tasksProvider).where((t) => t.worker == worker).toList();
+  final wuid = ref.read(boardAuthProvider)?.uid ?? '';
+  final mine = ref
+      .read(tasksProvider)
+      .where((t) => workerOwnsTask(t, worker, wuid))
+      .toList();
 
   // The set of calendar days this worker has any clock stamp on (mirrors the
   // tab's streak computation).
@@ -374,8 +381,11 @@ Future<void> showWeekDayDrilldown(
   required int worker,
   required DateTime day,
 }) {
-  final mine =
-      ref.read(tasksProvider).where((t) => t.worker == worker).toList();
+  final wuid = ref.read(boardAuthProvider)?.uid ?? '';
+  final mine = ref
+      .read(tasksProvider)
+      .where((t) => workerOwnsTask(t, worker, wuid))
+      .toList();
   final clock = ref.read(taskClockProvider).asData?.value ??
       const <int, TaskClockEntry>{};
   bool onDay(DateTime? ts) =>
@@ -496,9 +506,11 @@ Future<void> showAreaDrilldown(
   required int worker,
   required String area,
 }) {
+  final wuid = ref.read(boardAuthProvider)?.uid ?? '';
   final tasks = ref
       .read(tasksProvider)
-      .where((t) => t.worker == worker && taskWorkArea(t.name) == area)
+      .where((t) =>
+          workerOwnsTask(t, worker, wuid) && taskWorkArea(t.name) == area)
       .toList();
 
   return _showReportSheet(

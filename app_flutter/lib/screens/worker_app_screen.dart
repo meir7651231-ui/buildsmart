@@ -373,12 +373,16 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
   /// Live tasks of the logged worker whose status is in [statuses] — the bucket
   /// filter (current = active|rejected · queue = pending · submitted =
   /// review|done).
-  List<TaskItem> _bucket(List<TaskItem> all, Set<String> statuses) =>
-      all
-          .where(
-            (t) => t.worker == widget.worker && statuses.contains(t.status),
-          )
-          .toList();
+  List<TaskItem> _bucket(List<TaskItem> all, Set<String> statuses) {
+    final uid = ref.read(boardAuthProvider)?.uid ?? '';
+    return all
+        .where(
+          (t) =>
+              workerOwnsTask(t, widget.worker, uid) &&
+              statuses.contains(t.status),
+        )
+        .toList();
+  }
 
   bool get _selectedIsToday {
     final now = DateTime.now();
@@ -390,7 +394,9 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
   @override
   Widget build(BuildContext context) {
     final all = ref.watch(tasksProvider);
-    final mine = all.where((t) => t.worker == widget.worker).toList();
+    final uid = ref.watch(boardAuthProvider)?.uid ?? '';
+    final mine =
+        all.where((t) => workerOwnsTask(t, widget.worker, uid)).toList();
 
     final current = _bucket(all, {'active', 'rejected'});
     final queue = _bucket(all, {'pending'});

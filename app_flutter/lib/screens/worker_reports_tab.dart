@@ -40,6 +40,7 @@ import 'package:buildsmart/logic/calendar_days.dart';
 import 'package:buildsmart/screens/daily_report_screen.dart'
     show DailyReportScreen;
 import 'package:buildsmart/screens/worker_report_drilldowns.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -253,8 +254,11 @@ class WorkerReportsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mine =
-        ref.watch(tasksProvider).where((t) => t.worker == worker).toList();
+    final wuid = ref.watch(boardAuthProvider)?.uid ?? '';
+    final mine = ref
+        .watch(tasksProvider)
+        .where((t) => workerOwnsTask(t, worker, wuid))
+        .toList();
     final clock =
         ref.watch(taskClockProvider).asData?.value ??
         const <int, TaskClockEntry>{};
@@ -713,8 +717,11 @@ class WorkerReportsTab extends ConsumerWidget {
   /// admits worker-audience threads he participates in (`_visibleToAudience`,
   /// chats_screen.dart), where the thread renders as 'עובד — רן'.
   void _sendDailyReport(BuildContext context, WidgetRef ref) {
-    final mine =
-        ref.read(tasksProvider).where((t) => t.worker == worker).toList();
+    final wuid = ref.read(boardAuthProvider)?.uid ?? '';
+    final mine = ref
+        .read(tasksProvider)
+        .where((t) => workerOwnsTask(t, worker, wuid))
+        .toList();
     int count(String s) => mine.where((t) => t.status == s).length;
     final done = count('done');
     final review = count('review');
@@ -749,8 +756,11 @@ class WorkerReportsTab extends ConsumerWidget {
   /// #ai-daily-report — open the AI narrator over the SAME live status counts the
   /// chat report uses (the numbers are the engine's; Claude only phrases them).
   void _openAiDailyReport(BuildContext context, WidgetRef ref) {
-    final mine =
-        ref.read(tasksProvider).where((t) => t.worker == worker).toList();
+    final wuid = ref.read(boardAuthProvider)?.uid ?? '';
+    final mine = ref
+        .read(tasksProvider)
+        .where((t) => workerOwnsTask(t, worker, wuid))
+        .toList();
     int count(String s) => mine.where((t) => t.status == s).length;
     Navigator.of(context).push(DailyReportScreen.route(
       title: 'דוח-יום — ${workerShortName(worker)}',
