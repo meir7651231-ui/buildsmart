@@ -22,6 +22,7 @@ import 'dart:convert';
 
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/tasks_firebase.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
@@ -525,10 +526,9 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
   void _patch(int id, TaskItem Function(TaskItem) f) {
     final idx = state.indexWhere((t) => t.id == id);
     if (idx < 0) return;
-    state = [
-      for (var i = 0; i < state.length; i++)
-        if (i == idx) f(state[i]) else state[i],
-    ];
+    // Route the patched task through _commit so a bound repo (Wave T3) gets the
+    // write; unbound this is the same local replace-by-id as before.
+    _commit(f(state[idx]));
   }
 
   /// WORKER attaches a proof photo — `taskUpload` (proto :8147). [photo] is
@@ -714,7 +714,14 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
     } on Object catch (_) {}
   }
 
-  void resetToSeed() => state = _seedTasks();
+  void resetToSeed() {
+    final r = _remote;
+    if (r != null) {
+      r.replaceAll(buildTasksSeed()); // whole-cache optimistic replace + reseed
+      return;
+    }
+    state = _seedTasks();
+  }
 
   // ───────────────────────────────────────────────────────────────────────
   // CONTRACTOR AUTHORING (Wave T2a, ADDITIVE) — the employer creates / edits /
@@ -748,8 +755,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1);
     final emp = employerId.trim();
     final uid = assignedWorkerUid.trim();
-    state = [
-      ...state,
+    _commit(
       TaskItem(
         id: id,
         name: name,
@@ -771,7 +777,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         location: location,
         severity: severity,
       ),
-    ];
+    );
     return id;
   }
 
@@ -809,8 +815,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1);
     final emp = employerId.trim();
     final uid = assignedWorkerUid.trim();
-    state = [
-      ...state,
+    _commit(
       TaskItem(
         id: id,
         name: name,
@@ -835,7 +840,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         location: location,
         severity: severity,
       ),
-    ];
+    );
     return id;
   }
 
@@ -979,25 +984,67 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
   /// engine stays the byte-identical store until then. Typed `dynamic` so no
   /// Firebase symbol is imported here.
   void bindRemote(dynamic repo) {
-    /* SERVER-SWAP: Wave T3 fills via FirebaseTasksRepository, mirror
-       orders_engine.bindRemote (bind-once + addListener(_refreshFromRemote)). */
-    if (_remote != null) return; // bind once (provider-lifetime)
+    // Wave T3 — mirror `orders_engine.bindRemote`: bind-once per repo, RE-BIND on
+    // a uid-driven repo rebuild (detach the old listener first), immediate refresh
+    // so the engine re-aligns with the new cache from t0. `repo` is typed `dynamic`
+    // (no Firebase symbol imported here); it exposes ChangeNotifier
+    // addListener/removeListener + a synchronous `all()` (FirebaseTasksRepository).
+    if (identical(_remote, repo)) return; // same repo — no-op
+    _remote?.removeListener(_refreshFromRemote);
     _remote = repo;
+    repo.addListener(_refreshFromRemote);
     _refreshFromRemote();
   }
 
-  /// SERVER-SWAP seam (Wave T1): rebuild engine state from the bound remote's
-  /// SYNC snapshot — mirrors `orders_engine.dart:_refreshFromRemote`. No-op
-  /// while unbound ([_remote] null, the local/demo path); Wave T3 fills the body
-  /// (`state = _remote.all();`) so a store-side change lands live in the engine.
+  /// Wave T3 — rebuild engine state from the bound remote's SYNC snapshot
+  /// (mirrors `orders_engine._refreshFromRemote`). No-op while unbound
+  /// ([_remote] null, the local/demo path). The public `state` setter persists
+  /// (write-behind) exactly as on the local path.
   void _refreshFromRemote() {
-    if (_remote == null) return;
-    /* SERVER-SWAP: Wave T3 — state = _remote.all() (public setter → persist). */
+    final r = _remote;
+    if (r == null) return;
+    state = (r.all() as List<TaskItem>);
+  }
+
+  /// Wave T3 — commit ONE task (a create or a patched existing) to the store:
+  /// bound → the repo's optimistic `upsert` (cache + background Firestore write +
+  /// notifyListeners → [_refreshFromRemote] mirrors it back); unbound → the local
+  /// list (replace-by-id, or append for a new id). Unifies [_patch] and the
+  /// create/propose appends so BOTH honour the bound repo. Side-effects
+  /// (rewards / worker bell / the W3 order-fold) stay in the callers — they fire
+  /// regardless of the store, exactly as before.
+  void _commit(TaskItem next) {
+    final r = _remote;
+    if (r != null) {
+      r.upsert(next);
+      return;
+    }
+    final idx = state.indexWhere((t) => t.id == next.id);
+    state = idx < 0
+        ? [...state, next]
+        : [for (var i = 0; i < state.length; i++) i == idx ? next : state[i]];
+  }
+
+  @override
+  void dispose() {
+    _remote?.removeListener(_refreshFromRemote);
+    super.dispose();
   }
 }
 
-final tasksProvider = StateNotifierProvider<TasksNotifier, List<TaskItem>>(
-    (ref) => TasksNotifier(ref: ref));
+final tasksProvider = StateNotifierProvider<TasksNotifier, List<TaskItem>>((ref) {
+  final n = TasksNotifier(ref: ref);
+  // Wave T3 — bind the engine to the role-scoped Firestore tasks repo when the
+  // provider yields one (kTasksServer ON + a real party); RE-BIND on a uid-driven
+  // rebuild (mirrors the orders provider's ref.listen). OFF (the default) the
+  // repo is null → never bound → the local int-worker store, byte-identical.
+  final repo = ref.watch(tasksRepositoryProvider);
+  if (repo != null) n.bindRemote(repo);
+  ref.listen<FirebaseTasksRepository?>(tasksRepositoryProvider, (_, next) {
+    if (next != null) n.bindRemote(next);
+  });
+  return n;
+});
 
 /// Tasks awaiting the manager's approval (`review`), in id order — the manager
 /// "📸 ממתין לאישור שלך" bucket, derived LIVE off [tasksProvider].

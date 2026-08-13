@@ -2193,3 +2193,9 @@
 - **אימות:** `tasks_firebase_test` 9 (round-trip seed + runtime-מלא כל-שדה · cache-born-seeded · upsert/removeById→all() · דחיית doc פגום). analyze 0. stage2 exempt (god/party-scoped). buildTasksSeed נחשף ב-tasks_engine.
 - **mutation-verify (בוצע):** גיבוי → מוטציה ב-fromDoc: `{...doc.data, 'id': id}` → `{...doc.data}` (הסרת הזרקת-id) → tryFromJson null → throw → RED בשני ה-round-trips → שחזור (RESTORED-IDENTICAL) → GREEN 6/6.
 - **increment 2 (מתועד ב-WIRING · לא נכלל):** scoped-provider 3-תפקידים · 6-state cross-party rules · composite indexes · bindRemote/refresh/dispose · ניתוב 13 mutators דרך upsert · UID-plumbing ב-UI-האוthoring. חיווט חלקי שובר את הלולאה ⇒ increment אינטגרלי אחד.
+
+## #taskT3-2a — server infra (flag · scoped provider · engine bind · 6-state rules) (2026-08-13)
+- **הנכס:** שכבת-השרת של מנוע-המשימות, dormant מאחורי `kTasksServer` (OFF default → provider null → לא-מקושר → int-worker byte-identical). scoped-provider 3-תפקידים · bindRemote/refresh/dispose/`_commit` (bound→upsert else local) · rules cross-party 6-state · deleteAccount scrub-ניתוק.
+- **אבטחה (הקריטי):** כלל-update לעובד מגביל status ל-{active,rejected,review} → **עובד לא יכול לחתום done בעצמו** (אין self-approval); assignedWorkerUid נשאר-עצמי; employerId write-once/קפוא. god-read רק isManager.
+- **אימות:** analyze 0 · tasks_realtime_bind (3: DOWN/UP/no-self-approve) + tasks_firebase 9 · **52 טסטי-משימות קיימים ירוקים (אפס-רגרסיה)** · stage2.
+- **mutation-verify (בוצע):** גיבוי → מוטציה ב-`_commit`: `if (r != null)` → `if (false && r != null)` (הרג ניתוב-ה-repo) → RED בטסט-ה-UP (createTask לא נחת ב-repo.all) → שחזור (RESTORED-IDENTICAL, המוטציה הוסרה) → GREEN 3/3.

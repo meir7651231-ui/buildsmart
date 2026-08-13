@@ -33,8 +33,15 @@
 // local store). The class is proven in isolation by `tasks_firebase_test.dart`.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/state/auth_state.dart'
+    show currentUidProvider, roleProvider;
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'
+    show CollectionReference, Query;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The Firestore document-id field-map mapper lives inline here (not on the model)
 /// so the legacy [TaskItem] stays untouched — the drop-in is preserved.
@@ -100,3 +107,53 @@ class FirebaseTasksRepository extends FirestoreCachedRepo<TaskItem> {
   /// `state = _remote.all()` copies into the engine (mirrors `orders.all()`).
   List<TaskItem> all() => cached();
 }
+
+/// The §6 tasks repository — ROLE-SCOPED so each party's Firestore listen matches
+/// exactly what the security rules prove (mirrors `ordersRepositoryProvider`):
+///   • WORKER board session → `assignedWorkerUid == uid` (their own tasks);
+///   • MANAGER (a real manager role) → UNSCOPED, the god view;
+///   • CONTRACTOR (main app, `roleProvider` null) with a real uid →
+///     `employerId == uid` (the tasks they employ);
+///   • store / courier / demo / no-uid → null → the engine stays the LOCAL store.
+///
+/// GATED + DORMANT: returns null unless `kTasksServer && useFirebaseBackend`, so
+/// with the flag OFF (the default) the Firestore branch is dead code (tree-shaken)
+/// and `TasksNotifier.bindRemote` is never called — the int-worker demo path,
+/// byte-identical. `tasksProvider` (tasks_engine.dart) watches this and binds.
+final tasksRepositoryProvider = Provider<FirebaseTasksRepository?>((ref) {
+  if (!(kTasksServer && useFirebaseBackend)) return null;
+
+  FirebaseTasksRepository build(
+    Query<Map<String, dynamic>> Function(
+            CollectionReference<Map<String, dynamic>>)?
+        scope,
+  ) {
+    final repo = FirebaseTasksRepository(
+      source: FirestoreCollectionSource('tasks', scope: scope),
+    )..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
+
+  // WORKER board session → their own assigned tasks. board.uid IS the Firebase
+  // Auth uid (board_auth.dart) — a demo/seed session (uid '') stays local.
+  final board = ref.watch(boardAuthProvider);
+  if (board != null &&
+      board.role == BoardRole.worker &&
+      !board.demo &&
+      board.uid.isNotEmpty) {
+    final wuid = board.uid;
+    return build((c) => c.where('assignedWorkerUid', isEqualTo: wuid));
+  }
+
+  // MANAGER → the unscoped god view (the rules gate the whole-collection read on
+  // the manager claim); CONTRACTOR → their own employed tasks.
+  final role = ref.watch(roleProvider); // null = contractor / main app
+  if (role == 'manager') return build(null);
+  final uid = ref.watch(currentUidProvider);
+  if (role == null && uid != null && uid.isNotEmpty) {
+    return build((c) => c.where('employerId', isEqualTo: uid));
+  }
+
+  return null; // store / courier / demo / no-uid → local store
+});

@@ -340,3 +340,18 @@ const bool kUserSystem = bool.fromEnvironment('USER_SYSTEM');
 /// once the `carts` rules are live (a later staged step):
 ///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=USER_DATA_SERVER=true
 const bool kUserDataServer = bool.fromEnvironment('USER_DATA_SERVER');
+
+/// Wave T3 — the CROSS-PARTY §6 tasks board (`state/tasks_engine.dart`) goes
+/// server-backed (`tasks/{taskId}`, `data/repositories/tasks_firebase.dart`).
+/// DELIBERATELY SEPARATE from [kUserDataServer]: tasks are not a per-user data
+/// store but a shared cross-party board whose activation ALSO migrates the
+/// worker IDENTITY model (the demo `int worker` index → the real
+/// `assignedWorkerUid` from `directory/{uid}`, across the worker board + the
+/// contractor's authoring picker). That is a bigger, board-touching change, so
+/// it rides its OWN flag and flips only once the whole loop (repo · role-scoped
+/// provider · 6-state rules · engine bind · uid plumbing · worker-surface uid
+/// filter) is complete and verified. OFF (the default) → the provider's Firestore
+/// branch is dead code (tree-shaken) and the engine stays the byte-identical
+/// local store — the int-worker demo path, unchanged. Flip on at build time:
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=TASKS_SERVER=true
+const bool kTasksServer = bool.fromEnvironment('TASKS_SERVER');

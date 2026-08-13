@@ -105,6 +105,19 @@ async function purgeMultiPartyReferences(
     workerName: FieldValue.delete(),
     username: FieldValue.delete(),
   });
+  // tasks (Wave T3 · cross-party §6 board) — sever whichever party-link the
+  // deleted user held, DISCONNECT not delete (the task is shared, like orders):
+  //   • assignedWorkerUid == uid → the deleted WORKER: scrub their assignment +
+  //     their proof-photo/note PII in the SAME update; the task + its steps stay
+  //     for the employing contractor, reassignable.
+  //   • employerId == uid → the deleted CONTRACTOR: scrub their employer link;
+  //     the worker's task/work stays (mirrors orders.contractorUid).
+  await scrub("tasks", "assignedWorkerUid", {
+    assignedWorkerUid: FieldValue.delete(),
+    photo: FieldValue.delete(),
+    note: FieldValue.delete(),
+  });
+  await scrub("tasks", "employerId", { employerId: FieldValue.delete() });
   // chatMessages — sever authorship (the message text stays in the thread).
   await scrub("chatMessages", "fromUid", { fromUid: FieldValue.delete() });
   // customers — sever ownership (forward-ready: ownerId not yet written → no-op).

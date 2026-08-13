@@ -839,6 +839,62 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // tasks/{taskId} — the CROSS-PARTY §6 board (Wave T3, behind kTasksServer).
+    // Keyed by the int task id (as a string). Three parties, each proven by a
+    // field on the doc: the WORKER (`assignedWorkerUid == me`), the employing
+    // CONTRACTOR (`employerId == me`), or a MANAGER (claim). Field names mirror
+    // `TaskItem.toJson`.
+    //   • read   — the assigned worker, the employer, or a manager (no worker
+    //     sees another worker's board; the role-scoped query matches this).
+    //   • create — the CONTRACTOR mints a `pending` task they employ
+    //     (employerId == me), OR a WORKER PROPOSES a `proposed` task for
+    //     THEMSELF (assignedWorkerUid == me). No pre-`done` smuggling.
+    //   • update — the WORKER on the task may only move it within
+    //     {active,rejected,review} (their submit + fixes) and can NEVER set
+    //     `done`/`proposed`/reassign → NO SELF-APPROVAL; `assignedWorkerUid`
+    //     stays self, `employerId` is write-once. The EMPLOYER/MANAGER decide
+    //     (any status: approve→done, reject→rejected, approveProposal→active,
+    //     (re)assign) with `employerId` frozen so a decide can't re-owner it.
+    //   • delete — never from a client (erasure is server-side, by query).
+    match /tasks/{taskId} {
+      function tWorker(r) {
+        return r.get('assignedWorkerUid', '') == request.auth.uid
+            && r.get('assignedWorkerUid', '') != '';
+      }
+      function tEmployer(r) {
+        return r.get('employerId', '') == request.auth.uid
+            && r.get('employerId', '') != '';
+      }
+      allow read: if isSignedIn()
+          && (tWorker(resource.data) || tEmployer(resource.data) || isManager());
+      allow create: if isSignedIn()
+          && ((request.resource.data.get('employerId', '') == request.auth.uid
+                  && request.resource.data.get('status', '') == 'pending')
+              || (request.resource.data.get('assignedWorkerUid', '')
+                      == request.auth.uid
+                  && request.resource.data.get('status', '') == 'proposed'));
+      allow update: if isSignedIn()
+          && (
+            // WORKER on the task — own runtime transitions ONLY. Cannot self-
+            // approve (status confined to active/rejected/review), cannot steal
+            // the assignment (stays self), employerId write-once (set when '').
+            (tWorker(resource.data)
+                && request.resource.data.get('assignedWorkerUid', '')
+                    == request.auth.uid
+                && request.resource.data.get('status', '')
+                    in ['active', 'rejected', 'review']
+                && (request.resource.data.get('employerId', '')
+                        == resource.data.get('employerId', '')
+                    || resource.data.get('employerId', '') == ''))
+            // EMPLOYER / MANAGER — the decisions (any status), employerId frozen
+            // so a decide can't re-owner the row.
+            || ((tEmployer(resource.data) || isManager())
+                && request.resource.data.get('employerId', '')
+                    == resource.data.get('employerId', ''))
+          );
+      allow delete: if false;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,
