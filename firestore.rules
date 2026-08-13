@@ -895,6 +895,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // workerNotifs/{uid} — the SERVER-GENERATED worker bell feed (Wave T3 · 2d)
+    // `{ items: [{id,emoji,title,body,ts,read}], updatedAt }`. WRITTEN BY THE
+    // onTaskStatusChanged trigger (Admin SDK, bypasses these rules) so a
+    // contractor's approve reaches the worker WITHOUT a cross-party client write.
+    // SELF-ONLY for clients: the owner READS their feed and marks-read / clears
+    // it (an update/clear of their OWN doc). No client can write ANOTHER user's
+    // feed (no cross-party notification spam); no client create is needed (the
+    // trigger seeds the doc). delete: server-side on account erasure.
+    match /workerNotifs/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,

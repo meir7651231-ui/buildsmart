@@ -6,6 +6,8 @@
 
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/notif_settings.dart';
+import 'package:buildsmart/data/repositories/worker_notifs_repository.dart'
+    show workerNotifsRepositoryProvider, workerNotifsServerProvider;
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -112,6 +114,12 @@ class _WorkerNotifsSheet extends ConsumerWidget {
             : null;
     final notifs = ref.watch(currentWorkerNotifsProvider);
     final unread = notifs.where((n) => !n.read).length;
+    // Wave T3 (2d) — the SERVER task-bell feed + its repo (null OFF). A read/clear
+    // of a SERVER bell writes to `workerNotifs/{uid}`; a LOCAL (HR) bell stays on
+    // the local notifier. OFF both are null/empty → only the local path runs.
+    final serverNotifs =
+        ref.watch(workerNotifsServerProvider).asData?.value ?? const <WorkerNotif>[];
+    final notifsRepo = ref.watch(workerNotifsRepositoryProvider);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -196,9 +204,12 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                             onPressed:
                                 username == null
                                     ? null
-                                    : () => ref
-                                        .read(workerNotifsProvider.notifier)
-                                        .markAllRead(username),
+                                    : () {
+                                        ref
+                                            .read(workerNotifsProvider.notifier)
+                                            .markAllRead(username);
+                                        notifsRepo?.markAllRead(serverNotifs);
+                                      },
                             child: const CfgText(
                               'worker_notifs_sheet.t03',
                               'סמן הכל כנקרא',
@@ -230,6 +241,7 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                                     ref
                                         .read(workerNotifsProvider.notifier)
                                         .clear(username);
+                                    notifsRepo?.clear();
                                   },
                           child: const CfgText(
                             'worker_notifs_sheet.t04',
@@ -251,9 +263,17 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                         onTap:
                             username == null || n.read
                                 ? null
-                                : () => ref
-                                    .read(workerNotifsProvider.notifier)
-                                    .markRead(username, n.id),
+                                : () {
+                                    // route by source: a SERVER bell → the repo;
+                                    // a LOCAL (HR) bell → the local notifier.
+                                    if (serverNotifs.any((x) => x.id == n.id)) {
+                                      notifsRepo?.markRead(serverNotifs, n.id);
+                                    } else {
+                                      ref
+                                          .read(workerNotifsProvider.notifier)
+                                          .markRead(username, n.id);
+                                    }
+                                  },
                       ),
                   ],
                   const SizedBox(height: BsTokens.space4),

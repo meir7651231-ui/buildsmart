@@ -2209,3 +2209,8 @@
 - **הנכס:** סגירת-הלולאה החוצה-צדדית. `_TaskAuthorSheet` — בורר-directory (role==worker, בחירה לפי uid) גדור kTasksServer + `_workerUid` state + `authoringEmployerId(ref)` (ON=currentUid, OFF=kDemoContractorId). createTask/assignTask חותמים assignedWorkerUid+employerId אמיתיים. read-scopes (tasks_screen ×2 + defects) עוברים ל-authoringEmployerId. OFF byte-identical (compile-const tree-shaken + '').
 - **אימות:** tasks_cross_party_closure_test (3) + 16 טסטי-authoring/defects קיימים ירוקים · analyze 0 · visual_log (picker גדור-דגל, live-verify).
 - **mutation-context:** ה-predicate workerOwnsTask כבר mutation-verified (2b); חתימת createTask/assignTask היא קוד-מנוע Wave-T1 קיים+נבדק. טסט-הסגירה הוא שומר-האינטגרציה.
+
+## #taskT3-2d — worker_notifs server trigger (uid-keyed bell) (2026-08-13)
+- **הנכס:** פעמון-העובד לשרת. טריגר `onTaskStatusChanged` כותב `workerNotifs/{assignedWorkerUid}` (Admin SDK, אין כתיבת-לקוח חוצה-צדדית). reader ממזג server(task,uid)∪local(HR,username). rule self-only. reader OFF byte-identical (server ריק→local).
+- **אימות:** worker_notifs_repository_test (3: OFF-null · decode · markRead/All/clear) + 10 טסטי-notifs קיימים ירוקים · analyze 0.
+- **mutation-verify (בוצע):** markRead `n.id==id ? copyWith(read:true) : n` → `n` (no-op) → RED → שחזור → GREEN 3/3.

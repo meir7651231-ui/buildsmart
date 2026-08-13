@@ -4334,3 +4334,13 @@ increment 2 חלק א' — שכבת-השרת, **dormant מאחורי `kTasksServ
 - **`courier_reports_tab.dart`** (reader `courierClockProvider`) + **3 call-sites** (`courier_dashboard_screen`/`courier_delivery_detail_sheet`/`persona_pod_sheet`) מעבירים `repo: ref.read(courierClockRepositoryProvider)`. אין שינוי חזותי (visual_log).
 - **`firestore.rules`:** `courierClock/{uid}` self-only. **`deleteAccount.ts`:** ref. **`stage2`:** exempt.
 - **אימות:** analyze 0 · repo-test 5/5 + stage2 ירוקים · golden מחודש · mutation-verify (RED `+4 -1`→GREEN 5/5).
+
+### #taskT3-2d — worker_notifs → server trigger (בל-עובד חוצה-צדדי, uid-keyed) (2026-08-13)
+increment 2 חלק ד' — פעמון-העובד מהגר לשרת, dormant מאחורי `kTasksServer`. הבעיה שנפתרת: `addForWorker(int)` ממפה לשמות-דמו (kWorkerUsernames) → עובד-אמיתי לא מקבל בלים. הטריגר uid-keyed מתקן.
+- **`functions/src/taskNotifs.ts` (חדש):** `onTaskStatusChanged` (onDocumentUpdated על tasks/{taskId}) — מעבר-סטטוס חוצה-עובד (→done ✅ · →rejected 🔁 · proposed→active ✅ · pending→active 📋) מוסיף בל ל-`workerNotifs/{assignedWorkerUid}` (transaction, cap 50, אותו shape כמו `WorkerNotif.toJson`). מראה `onOrderStageChanged`. **Admin SDK** ⇒ אין כתיבת-לקוח חוצה-צדדית.
+- **`firestore.rules`:** `workerNotifs/{uid}` **self-only** (לקוח קורא/markRead/clear את שלו; הטריגר עוקף). **`deleteAccount.ts`:** ref.
+- **`worker_notifs_repository.dart` (חדש):** `workerNotifsServerProvider` (StreamProvider, gated worker אמיתי) + markRead/markAllRead/clear (read-modify-write items).
+- **`worker_notifs.dart`:** `currentWorkerNotifsProvider` על ON **ממזג** server task-bells (uid) ∪ local (HR username-keyed, `addNotification`) — id-ים לא חופפים, מיון newest-first. OFF (server ריק) → local, byte-identical.
+- **`worker_notifs_sheet.dart`:** markRead מנתב לפי-מקור (server→repo · local→notifier); markAllRead/clear → שניהם. **`stage2`:** exempt.
+- **אימות:** analyze 0 · worker_notifs_repository_test (3, mutation-verified markRead) + **10 טסטי-worker_notifs קיימים ירוקים (OFF byte-identical)** · functions build בשער.
+- **⚠️ נשאר:** הדלקת `TASKS_SERVER` ב-3 workflows (אישור-בעלים — הפעלה חיה).

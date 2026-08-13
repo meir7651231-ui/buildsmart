@@ -458,6 +458,9 @@ export async function eraseUserCompletely(
     // courierClock/{uid} — the courier's own delivery-clock side-map (local→
     // server migration, kUserDataServer). doc-id == uid → wiped like the others.
     db().collection("courierClock").doc(uid),
+    // workerNotifs/{uid} — the worker's own server-generated bell feed (Wave T3
+    // · 2d). doc-id == uid → wiped like the others (their own notifications).
+    db().collection("workerNotifs").doc(uid),
     // storeProfiles/{uid} + storeCerts/{uid} — the store's own business profile
     // and business-certificate wallet (local→server, kUserDataServer). doc-id ==
     // uid → wiped like the others.

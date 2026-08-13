@@ -33,7 +33,8 @@
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).
 
 **נדחה — parity-frozen עם Preact (שער 25):** `app_settings · catalog_settings · chat_settings · store_settings` (4). **`notif_settings` הוסר מהרשימה (2026-08-13) ועלה לשרת** — Preact פרש (buildsmart-il.com = Flutter בלבד, אישור-בעלים מפורש), ואין קובץ notif ב-`app/src`, אז נעילת-ה-parity הייתה מיושנת. שאר-4 קפואים עד cutover מלא.
-**נדחה (board-username-keyed, לא uid):** worker_notifs · rewards — צריך board→uid. **לא-דאטה:** board_accounts (Auth+claims) · board_auth session (מקומי-בכוונה).
+**~~נדחה~~ ✅ worker_notifs — הועבר (2026-08-13, Wave T3 · 2d):** טריגר-שרת `onTaskStatusChanged` כותב `workerNotifs/{assignedWorkerUid}` (uid-keyed — פותר את board-username→uid דרך חתימת-ה-uid ב-2c); reader ממזג server(task)∪local(HR); rule self-only; dormant מאחורי kTasksServer.
+**נדחה (board-username-keyed, לא uid):** rewards — צריך board→uid. **לא-דאטה:** board_accounts (Auth+claims) · board_auth session (מקומי-בכוונה).
 
 ## שלבים לכל חנות
 1. **rule** `<coll>/{uid}` self-only (מראה diag/{uid}). subcollection = match נפרד (rules לא יורשים).

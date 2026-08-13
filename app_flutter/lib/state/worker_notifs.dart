@@ -16,6 +16,8 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/worker_notifs_repository.dart'
+    show workerNotifsServerProvider;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -241,7 +243,17 @@ final currentWorkerNotifsProvider = Provider<List<WorkerNotif>>((ref) {
   if (!boardFeedEnabled(ref.watch(notifSettingsProvider), BoardRole.worker)) {
     return const [];
   }
-  return ref.watch(workerNotifsProvider)[s.username] ?? const [];
+  final local = ref.watch(workerNotifsProvider)[s.username] ?? const [];
+  // Wave T3 (2d) — ON: the SERVER feed carries the TASK bells (uid-keyed, so a
+  // real registered worker actually receives them; the local `addForWorker` maps
+  // the int index to DEMO usernames and would miss a real worker). MERGE it with
+  // the local feed (which still carries the username-keyed NON-task bells, e.g.
+  // the HR vacation/training decisions posted by `addNotification`). The two
+  // sources never share an id, so a plain union — newest-first — is correct. OFF
+  // (server empty) → return the local list unchanged, byte-identical.
+  final server = ref.watch(workerNotifsServerProvider).asData?.value ?? const [];
+  if (server.isEmpty) return local;
+  return [...server, ...local]..sort((a, b) => b.ts.compareTo(a.ts));
 });
 
 /// Unread count for the bell badge on the worker board AppBar.
