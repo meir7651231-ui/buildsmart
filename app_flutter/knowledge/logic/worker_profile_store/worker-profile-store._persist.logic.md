@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kWorkerProfileKey` · `persist` · `state`
+- **reads:** `kWorkerProfileKey` · `persist` · `repo` · `state`
 - **writes:** `io:prefs.setString`
 - **calls:** _none_
 - **called-by:** `WorkerProfileStore.save`
@@ -17,10 +17,12 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — r = repo
+- **branch** — if r != null
 - **precond** — if !persist → return true
 
 ## floor
-- `getInstance` · `jsonEncode` · `setString` · `toJson`
+- `WorkerProfile` · `getInstance` · `jsonEncode` · `save` · `setString` · `toJson`
 
 ## חוזה · contract
 - **input:** `()`

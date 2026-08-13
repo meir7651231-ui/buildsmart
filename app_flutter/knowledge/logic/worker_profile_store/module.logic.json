@@ -127,6 +127,10 @@
             "name": "_userTouched"
           },
           {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
             "kind": "global",
             "name": "mounted"
           }
@@ -142,14 +146,24 @@
         "gatedBy": []
       },
       "behaviour": {
-        "steps": []
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
       },
       "floor": [
         "cast",
         "fromJson",
         "getInstance",
         "getString",
-        "jsonDecode"
+        "jsonDecode",
+        "load"
       ],
       "contract": {
         "input": "()",
@@ -180,6 +194,10 @@
           },
           {
             "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
             "name": "state"
           }
         ],
@@ -198,14 +216,24 @@
       "behaviour": {
         "steps": [
           {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
             "kind": "precond",
             "detail": "if !persist → return true"
           }
         ]
       },
       "floor": [
+        "WorkerProfile",
         "getInstance",
         "jsonEncode",
+        "save",
         "setString",
         "toJson"
       ],
@@ -238,6 +266,11 @@
           {
             "kind": "field",
             "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "repo",
             "transitive": true
           },
           {

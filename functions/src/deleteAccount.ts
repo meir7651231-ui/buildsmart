@@ -397,6 +397,9 @@ export async function eraseUserCompletely(
     // workerForms/{uid} — the worker's own digital forms (101 + sick-notes,
     // local→server migration, kUserDataServer). doc-id == uid → wiped like others.
     db().collection("workerForms").doc(uid),
+    // workerProfiles/{uid} — the worker's own editable board profile (local→server
+    // migration, kUserDataServer). doc-id == uid → wiped like the others.
+    db().collection("workerProfiles").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

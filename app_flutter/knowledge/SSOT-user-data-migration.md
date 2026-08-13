@@ -21,6 +21,7 @@
 | worker_certs (תעודות-עובד) | `workerCerts/{workerUid}` (`{certs,employerId,updatedAt}`) | ✅ **חי · end-to-end** (repo · rule דו-צדדי · employerCertsProvider bounded · deletion · test · golden) |
 | worker_trainings (הדרכות-עובד) | `workerTrainings/{workerUid}` (`{trainings,employerId,updatedAt}`) | ✅ **חי · end-to-end** (repo · rule דו-צדדי · employerTrainingsProvider bounded · deletion · test · golden · **DEMO-SEED מדולג בשרת**) |
 | worker_forms (טפסי-עובד: 101+מחלה) | `workerForms/{uid}` (`{forms,sick,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** carts-shape · deletion · test · golden · **לא דו-צדדי** — הטופס מגיע לקבלן דרך צ'אט) |
+| worker_profile_store (פרופיל-עובד) | `workerProfiles/{uid}` (`{…profile,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** · deletion · test · golden · map→doc-יחיד לפי uid, PII של הבעלים בלבד) |
 | chatThreads (מחיקה) | authorship+membership מנותקים | ✅ **הוכרע** (2026-08-13 · אישור-בעלים "א"): מחיקה מנתקת fromUid+participantUids+profile; שארית תווית-השם → רפורם-הזהות המקביל, **לא פריט עצמאי** |
 
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).

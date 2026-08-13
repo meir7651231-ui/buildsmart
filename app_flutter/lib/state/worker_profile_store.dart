@@ -18,6 +18,7 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/worker_profile_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -127,7 +128,7 @@ class WorkerProfile {
 }
 
 class WorkerProfileStore extends StateNotifier<Map<String, WorkerProfile>> {
-  WorkerProfileStore({this.persist = true}) : super(const {}) {
+  WorkerProfileStore({this.persist = true, this.repo}) : super(const {}) {
     if (persist) _load();
   }
 
@@ -135,11 +136,34 @@ class WorkerProfileStore extends StateNotifier<Map<String, WorkerProfile>> {
   /// in-memory behavior can be asserted in isolation (the engines' pattern).
   final bool persist;
 
+  /// The server store for THIS worker's own profile (`workerProfiles/{uid}`)
+  /// when USER_DATA_SERVER is on for a real signed-in worker; null (the default)
+  /// ⇒ the SharedPreferences path, byte-identical. Injected by
+  /// [workerProfileProvider]. Single-doc + self-only: the loaded profile is
+  /// re-keyed by the uid, and since `session.username == uid` for a real worker
+  /// the UI read `map[session.username]` still resolves.
+  final WorkerProfileRepository? repo;
+
   /// One-shot guard (the board_auth idiom, ticket #24): once [save] has
   /// written state, a late async `_load()` becomes non-destructive.
   bool _userTouched = false;
 
   Future<void> _load() async {
+    final r = repo;
+    if (r != null) {
+      // Server path (USER_DATA_SERVER): this worker's profile lives at
+      // `workerProfiles/{uid}`, re-keyed by the uid so `map[session.username]`
+      // (== map[uid] for a real worker) resolves. Absent ⇒ keep the empty map
+      // (every field falls back honestly, exactly like the local raw == null).
+      try {
+        final p = await r.load();
+        if (!mounted || _userTouched || p == null) return;
+        state = {r.uid: p};
+      } on Object catch (_) {
+        // Absent/unreadable — keep the empty map.
+      }
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       if (!mounted) return;
@@ -164,6 +188,17 @@ class WorkerProfileStore extends StateNotifier<Map<String, WorkerProfile>> {
   /// most commonly the web localStorage quota rejecting a too-large photo
   /// data-URL. Honest: the caller must NOT pretend the profile was saved.
   Future<bool> _persist() async {
+    final r = repo;
+    if (r != null) {
+      // Server path: mirror THIS worker's profile to `workerProfiles/{uid}`.
+      // Firestore has no localStorage photo-quota, so the write is optimistic —
+      // return true (a rare server failure is swallowed, never rolls back the
+      // UI; the forms/certs migrations take the same optimistic stance).
+      try {
+        await r.save(state[r.uid] ?? const WorkerProfile());
+      } on Object catch (_) {}
+      return true;
+    }
     if (!persist) return true; // tests: in-memory only, nothing can fail
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -197,5 +232,5 @@ class WorkerProfileStore extends StateNotifier<Map<String, WorkerProfile>> {
 /// back to `const WorkerProfile()` when absent.
 final workerProfileProvider =
     StateNotifierProvider<WorkerProfileStore, Map<String, WorkerProfile>>(
-  (ref) => WorkerProfileStore(),
+  (ref) => WorkerProfileStore(repo: ref.watch(workerProfileRepositoryProvider)),
 );

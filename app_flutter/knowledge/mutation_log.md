@@ -2151,3 +2151,9 @@
 - **אימות:** `worker_forms_repository_test` — OFF-null + round-trip (forms+sick כולל signature/declared/PII שורדים) + no-doc→empty + per-entry-tolerant (שורה פסולה מדולגת, sick לא-רשימה→ריק). worker_forms_v2 12 + stage2 ירוקים. analyze 0.
 - **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp) → מוטציה ב-`load`: `return WorkerFormsState.fromJson(d.data)` → `return const WorkerFormsState()` → RED בשני טסטי round-trip → שחזור (RESTORED-IDENTICAL) → GREEN 4/4.
 - **אבטחה:** כלל self-only `workerForms/{uid}` — קריאה+כתיבה רק הבעלים (`request.auth.uid == uid`, תבנית carts/draftQuotes). טפסים מכילים PII (ת.ז, חתימה) → אין קריאת-מעסיק (הקבלן מקבל דרך צ'אט).
+
+## #hr-profile-worker — worker_profile_store → workerProfiles/{uid} (single-doc, self-only, OFF-safe) (2026-08-13)
+- **הנכס:** מאגר-HR חמישי (פרופיל-לוח עובד: שם/טלפון/התמחות/תמונה/#104 ת.ז/כתובת/איש-קשר-חירום). המקומי הוא map של username→profile, אבל כל קריאה היא `map[session.username]` — רק פרופיל העובד הנוכחי (אף פרסונה לא קוראת פרופיל של עובד אחר). ל-Firebase-worker `session.username == uid` → **single-doc** `workerProfiles/{uid}`, ה-notifier ממפתח-מחדש לפי uid. אפס-רגרסיה כבוי.
+- **אימות:** `worker_profile_repository_test` — OFF-null + round-trip (כל שדות ה-#104 PII שורדים) + no-doc→null + scope-לפי-uid (doc אחר מדולג). analyze 0 (2 info comment_references/sort_constructors_first **קיימים-מראש**, אומת ב-git stash על הקובץ הנקי). worker_profile consumers + stage2 ירוקים.
+- **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp) → מוטציה ב-`load`: `return WorkerProfile.fromJson(d.data)` → `return null` → RED בטסט round-trip (`+3 -1`) → שחזור (RESTORED-IDENTICAL) → GREEN 4/4.
+- **אבטחה:** כלל self-only `workerProfiles/{uid}` — קריאה+כתיבה רק הבעלים (תבנית carts). פרופיל מכיל PII (ת.ז/טלפון/כתובת/איש-קשר) → רק הבעלים.

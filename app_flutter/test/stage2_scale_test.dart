@@ -145,6 +145,7 @@ void main() {
       'lib/data/repositories/worker_certs_repository.dart', // self-doc scoped (workerCerts/{workerUid} single doc — the worker's own wallet; employer roster query is bounded)
       'lib/data/repositories/worker_trainings_repository.dart', // self-doc scoped (workerTrainings/{workerUid} single doc — the worker's own log; employer roster query is bounded)
       'lib/data/repositories/worker_forms_repository.dart', // self-doc scoped (workerForms/{uid} single doc — the worker's own 101+sick-notes; SELF-ONLY, no employer query — forms reach the contractor via chat)
+      'lib/data/repositories/worker_profile_repository.dart', // self-doc scoped (workerProfiles/{uid} single doc — the worker's own board profile; SELF-ONLY, no employer query)
       'lib/data/repositories/chat_repository.dart', // threads participant-scoped
       'lib/data/repositories/chat_firebase.dart', // messages BOUNDED → checked below
       'lib/data/repositories/material_requests_firebase.dart', // BOUNDED → checked below

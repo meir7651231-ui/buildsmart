@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kWorkerProfileKey` · `_userTouched` · `mounted`
+- **reads:** `kWorkerProfileKey` · `_userTouched` · `repo` · `mounted`
 - **writes:** `state:state`
 - **calls:** _none_
 - **called-by:** _none_
@@ -17,9 +17,11 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — r = repo
+- **branch** — if r != null
 
 ## floor
-- `cast` · `fromJson` · `getInstance` · `getString` · `jsonDecode`
+- `cast` · `fromJson` · `getInstance` · `getString` · `jsonDecode` · `load`
 
 ## חוזה · contract
 - **input:** `()`

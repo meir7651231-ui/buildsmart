@@ -4258,3 +4258,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`worker_forms.dart`:** repo מוזרק; `_load`/`_persist` מנתבים (server _persist מחזיר true אופטימי). courierFormsProvider נשאר מקומי (בלי repo).
 - **`firestore.rules`:** `workerForms/{uid}` — **self-only** (`read,write: request.auth.uid==uid`, תבנית carts) · טפסים PII (ת.ז/חתימה) → רק הבעלים. **`deleteAccount.ts`:** `workerForms/{uid}` ב-refs. **`stage2`:** exempt.
 - **אימות:** analyze 0 · repo-test 4/4 + worker_forms_v2 12/stage2 ירוקים · golden מחודש · mutation-verify (RED→GREEN 4/4).
+
+### #hr-profile-worker — פרופיל-עובד → workerProfiles/{uid} (single-doc · self-only) (2026-08-13)
+מאגר-HR חמישי — **single-doc + self-only**. המקומי map username→profile, אבל כל קריאה `[session.username]` (רק הפרופיל של העצמי); ל-Firebase-worker `username==uid` → doc יחיד. `kUserDataServer` OFF ⇒ byte-identical.
+- **`worker_profile_repository.dart` (חדש):** load/save של WorkerProfile ל-`workerProfiles/{uid}`=`{…profile,updatedAt}` (single-doc scoped documentId==uid, תבנית worker_forms).
+- **`worker_profile_store.dart`:** repo מוזרק; `_load` ממפתח-מחדש `state={uid: profile}` (absent→map ריק, fallback כן); `_persist` כותב `state[uid]` אופטימי.
+- **`firestore.rules`:** `workerProfiles/{uid}` — **self-only** (PII: ת.ז/טלפון/כתובת/חירום). **`deleteAccount.ts`:** `workerProfiles/{uid}` ב-refs. **`stage2`:** exempt.
+- **אימות:** analyze 0 (2 info קיימים-מראש) · repo-test 4/4 + stage2 ירוקים · golden מחודש · mutation-verify (RED `+3 -1`→GREEN 4/4).
