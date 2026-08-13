@@ -4168,3 +4168,9 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - `notif_settings_repository.dart` (חדש): `NotifSettingsRepository` (load/save ל-`notifSettings/{uid}` = בלוב-ה-`toJson`+`updatedAt`, RemoteCollectionSource scoped-uid) + `notifSettingsRepositoryProvider` (מראה carts).
 - `notif_settings.dart`: notifier מנתב `_load`/`_persist`/`reset` ל-repo כשקיים, אחרת SharedPreferences. `firestore.rules`: `notifSettings/{uid}` self-only. `deleteAccount.ts`: `notifSettings/{uid}` ב-refs. `stage2_scale` exempt. `.githooks/pre-commit` שער-25: 5→4 קבצים.
 - אימות: analyze 0 · notif_settings_repository_test 3/3 (null-provider + round-trip bool/int/enum + no-doc→null) · mutation-verify (load→null → RED → שחזור → GREEN) · functions tsc נקי.
+### #user-data-drafts — מיגרציית טיוטות-ההצעה מקומי→שרת (2026-08-13)
+גל-א׳ slice (self-only נקי, תבנית saved_projects verbatim). אותו דגל `kUserDataServer` (OFF-default) → OFF ⇒ SharedPreferences byte-identical.
+- **`draft_quotes_repository.dart` (חדש):** `DraftQuotesRepository` (load/save ל-`draftQuotes/{uid}` = דוק-בודד `{quotes:[…],updatedAt}` דרך RemoteCollectionSource scoped-uid) + `draftQuotesRepositoryProvider` (repo רק תחת kUserDataServer && useFirebaseBackend && uid && !anon — מראה carts/savedProjects).
+- **`draft_quote.dart`:** הוסר mixin `JsonListPrefsPersisted`; notifier מנתב `_load`/`_persist` ל-repo כשקיים (`List.of`, latch `_loaded` + `set state` guard), אחרת SharedPreferences ללא-שינוי. save/remove/clear → `_persist`.
+- **`firestore.rules`:** `draftQuotes/{uid}` self-only. **`deleteAccount.ts`:** `draftQuotes/{uid}` ב-refs → נמחק במחיקת-משתמש.
+- **אימות:** analyze 0 errors · draft_quotes_repository_test 3/3 (OFF-null + round-trip + no-doc→empty) + draft_quote_test 6/6 (רגרסיה) ירוקים · functions tsc.

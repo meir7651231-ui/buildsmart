@@ -376,6 +376,9 @@ export async function eraseUserCompletely(
     // notifSettings/{uid} — the user's notification-settings blob (local→server
     // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
     db().collection("notifSettings").doc(uid),
+    // draftQuotes/{uid} — the user's saved quote drafts (local→server migration,
+    // kUserDataServer). Wiped like the other uid-keyed personal docs.
+    db().collection("draftQuotes").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

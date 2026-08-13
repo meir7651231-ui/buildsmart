@@ -9,20 +9,22 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `_key`
-- **writes:** `state:state`
+- **reads:** `_key` · `_repo`
+- **writes:** `field:_loaded` · `state:state`
 - **calls:** _none_
 - **called-by:** _none_
 - **gated-by:** _none_
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — repo = _repo
+- **branch** — if repo != null
 - **compute** — prefs = await SharedPreferences.getInstance()
 - **compute** — raw = prefs.getString(_key)
-- **branch** — if raw != null
+- **branch** — if raw == null
 
 ## floor
-- `fromJson` · `getInstance` · `getString` · `jsonDecode` · `map` · `toList`
+- `fromJson` · `getInstance` · `getString` · `jsonDecode` · `load` · `map` · `of` · `toList`
 
 ## חוזה · contract
 - **input:** `()`

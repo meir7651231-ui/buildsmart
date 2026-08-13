@@ -1,6 +1,6 @@
 {
   "module": "draft_quote",
-  "source": "/home/user/buildsmart/app_flutter/lib/state/draft_quote.dart",
+  "source": "lib/state/draft_quote.dart",
   "atomCount": 8,
   "atoms": [
     {
@@ -56,10 +56,56 @@
       }
     },
     {
-      "fn": "DraftQuoteNotifier.persistKey",
-      "kind": "getter",
+      "fn": "DraftQuoteNotifier.state=",
+      "kind": "setter",
       "object": {
-        "signature": "get () -> String",
+        "signature": "set (List<DraftQuote> value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<DraftQuote> value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "DraftQuoteNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
         "constants": []
       },
       "connections": {
@@ -67,9 +113,22 @@
           {
             "kind": "field",
             "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "_repo"
           }
         ],
-        "writes": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
         "calls": [],
         "calledBy": [],
         "gatedBy": []
@@ -77,16 +136,41 @@
       "behaviour": {
         "steps": [
           {
-            "kind": "formula",
-            "detail": "_key"
+            "kind": "compute",
+            "detail": "repo = _repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if repo != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(_key)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw == null"
           }
         ]
       },
-      "floor": [],
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "load",
+        "map",
+        "of",
+        "toList"
+      ],
       "contract": {
         "input": "()",
-        "output": "String",
-        "purity": "pure",
+        "output": "Future<void>",
+        "purity": "side-effecting",
         "precond": [],
         "postcond": [],
         "invariants": [],
@@ -94,69 +178,66 @@
       }
     },
     {
-      "fn": "DraftQuoteNotifier.decodeElement",
+      "fn": "DraftQuoteNotifier._persist",
       "kind": "notifier-method",
       "object": {
-        "signature": "(Map<String, dynamic> json) -> DraftQuote",
+        "signature": "() -> Future<void>",
         "constants": []
       },
       "connections": {
-        "reads": [],
-        "writes": [],
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "_repo"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
         "calls": [],
-        "calledBy": [],
+        "calledBy": [
+          "DraftQuoteNotifier.clear",
+          "DraftQuoteNotifier.remove",
+          "DraftQuoteNotifier.save"
+        ],
         "gatedBy": []
       },
       "behaviour": {
         "steps": [
           {
-            "kind": "formula",
-            "detail": "DraftQuote.fromJson(json)"
-          }
-        ]
-      },
-      "floor": [
-        "fromJson"
-      ],
-      "contract": {
-        "input": "(Map<String, dynamic> json)",
-        "output": "DraftQuote",
-        "purity": "pure",
-        "precond": [],
-        "postcond": [],
-        "invariants": [],
-        "throws": []
-      }
-    },
-    {
-      "fn": "DraftQuoteNotifier.encodeElement",
-      "kind": "notifier-method",
-      "object": {
-        "signature": "(DraftQuote element) -> Map<String, dynamic>",
-        "constants": []
-      },
-      "connections": {
-        "reads": [],
-        "writes": [],
-        "calls": [],
-        "calledBy": [],
-        "gatedBy": []
-      },
-      "behaviour": {
-        "steps": [
+            "kind": "compute",
+            "detail": "repo = _repo"
+          },
           {
-            "kind": "formula",
-            "detail": "element.toJson()"
+            "kind": "branch",
+            "detail": "if repo != null"
           }
         ]
       },
       "floor": [
-        "toJson"
+        "getInstance",
+        "jsonEncode",
+        "map",
+        "save",
+        "setString",
+        "toJson",
+        "toList"
       ],
       "contract": {
-        "input": "(DraftQuote element)",
-        "output": "Map<String, dynamic>",
-        "purity": "pure",
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
         "precond": [],
         "postcond": [],
         "invariants": [],
@@ -174,16 +255,41 @@
         "reads": [
           {
             "kind": "field",
+            "name": "_key",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
+            "transitive": true
+          },
+          {
+            "kind": "field",
             "name": "maxEntries"
           }
         ],
         "writes": [
           {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
             "kind": "state",
             "name": "state"
           }
         ],
-        "calls": [],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
         "calledBy": [],
         "gatedBy": []
       },
@@ -215,7 +321,7 @@
           },
           {
             "kind": "effect",
-            "detail": "persistToPrefs()"
+            "detail": "_persist()"
           },
           {
             "kind": "return",
@@ -226,7 +332,6 @@
       "floor": [
         "DraftQuote",
         "now",
-        "persistToPrefs",
         "sublist",
         "toList",
         "where"
@@ -249,14 +354,40 @@
         "constants": []
       },
       "connections": {
-        "reads": [],
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
+            "transitive": true
+          }
+        ],
         "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
           {
             "kind": "state",
             "name": "state"
           }
         ],
-        "calls": [],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
         "calledBy": [],
         "gatedBy": []
       },
@@ -276,12 +407,11 @@
           },
           {
             "kind": "effect",
-            "detail": "persistToPrefs()"
+            "detail": "_persist()"
           }
         ]
       },
       "floor": [
-        "persistToPrefs",
         "toList",
         "where"
       ],
@@ -305,14 +435,40 @@
         "constants": []
       },
       "connections": {
-        "reads": [],
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
+            "transitive": true
+          }
+        ],
         "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
           {
             "kind": "state",
             "name": "state"
           }
         ],
-        "calls": [],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
         "calledBy": [],
         "gatedBy": []
       },
@@ -328,13 +484,11 @@
           },
           {
             "kind": "effect",
-            "detail": "persistToPrefs()"
+            "detail": "_persist()"
           }
         ]
       },
-      "floor": [
-        "persistToPrefs"
-      ],
+      "floor": [],
       "contract": {
         "input": "()",
         "output": "void",

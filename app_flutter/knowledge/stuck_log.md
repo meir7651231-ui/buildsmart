@@ -1897,3 +1897,15 @@ RULE: ערך-enum או דגל-fromEnvironment חדש מעדכן בו-זמנית 
 ### ג — כלל המניעה
 ANTIPATTERN: הוספת helper חדש ב-lib בלי לצרף באותו commit רשומת mutation_log עם תקלות-מוזרקות ובדיקה שתופסת אותן
 RULE: כל commit שמוסיף helper מצרף באותו commit רשומת mutation_log (תקלה-מוזרקת→בדיקה-שנכשלת) ובדיקת-יחידה לפונקציה החדשה, לפני ה-commit הראשון
+
+## slice-מיגרציה חדש נחסם: FirestoreCollectionSource לא-רשום ב-stage2 exempt (שער 32→44/102) ב-retry (2026-08-13)
+
+### א — הבעיה
+ה-commit של `draft_quotes_repository` (מיגרציית טיוטות מקומי→שרת) נחסם ע"י שער 32: `stage2_scale_test` — boundedness conformance סורק כל call-site של `FirestoreCollectionSource` ודורש שיהיה bound או ב-exemptFiles. ה-call-site החדש (`draftQuotes`, self-doc scoped) לא נוסף לרשימת-הפטור → הבדיקה נכשלה, ובעקבותיה 44 (mutation_log) + 102 (retry).
+
+### ב — הפתרון
+הוספת הנתיב לרשימת ה-exemptFiles ב-`test/stage2_scale_test.dart` (self-doc scoped, מראה carts/saved_projects) + רשומת mutation_log + רשומת stuck_log זו. stage2_scale 6/6 ירוק.
+
+### ג — כלל המניעה
+ANTIPATTERN: הוספת repository חדש עם FirestoreCollectionSource single-doc בלי לרשום את הנתיב ב-stage2_scale_test exemptFiles באותו commit
+RULE: כל slice-מיגרציה שמוסיף repository עם FirestoreCollectionSource מוסיף באותו commit את נתיב-הקובץ ל-exemptFiles ב-stage2_scale_test, לצד rule+deletion+test+mutation_log

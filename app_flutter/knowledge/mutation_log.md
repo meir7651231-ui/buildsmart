@@ -2101,3 +2101,8 @@
 - **אימות:** `notif_settings_repository_test` — null-provider (בלי backend → SharedPreferences) + round-trip (bool/int/enum שורדים) + no-doc→null (שומר defaults). analyze 0 · functions tsc נקי · stage2_scale (exempt) + app_profile_flags ירוקים.
 - **mutation-verify (בוצע בפועל):** גיבוי (cp) → מוטציה ב-`load`: `return NotifSettings.fromJson(d.data)` → `return null` → RED בטסט round-trip ("decodes the settings back") → שחזור (0 markers) → GREEN 3/3. הטסט בעל-שיניים.
 - **טרם:** צ'אט (עבודה מקבילה חיה). שאר-4 קבצי-הגדרות עדיין קפואים בשער-25.
+## #user-data-drafts — draft_quote → draftQuotes/{uid} (OFF-safe) (2026-08-13)
+- **הנכס:** מיגרציה מקומי→שרת (גל-א׳, store נקי). אפס-רגרסיה כבוי + round-trip נכון דלוק.
+- **אימות:** `draft_quotes_repository_test` — OFF-null (draftQuotesRepositoryProvider→null → SharedPreferences) + round-trip (save→load דרך fake-source; id/label/text/savedAt שורדים) + no-doc→empty. analyze 0 · draft_quote_test 6/6 (רגרסיה) · functions tsc.
+- **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp, לא git) → מוטציה ב-`load`: `return _quotesOf(d.data)` → `return const <DraftQuote>[]` → `flutter test` נכשל RED בטסט ה-round-trip ("decodes the quotes back") → שחזור (`_quotesOf(d.data)` חזר) → GREEN 3/3. הטסט בעל-שיניים.
+- **טרם:** המשך גל-א׳ (comparison_set/customers_store/trades_store/...) + גל-ב׳ HR.

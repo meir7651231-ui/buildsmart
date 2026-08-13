@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `_key` · `state`
+- **reads:** `_key` · `_repo` · `state`
 - **writes:** `io:prefs.setString`
 - **calls:** _none_
 - **called-by:** `DraftQuoteNotifier.clear` · `DraftQuoteNotifier.remove` · `DraftQuoteNotifier.save`
@@ -17,11 +17,11 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
-- **compute** — prefs = await SharedPreferences.getInstance()
-- **effect** — await prefs.setString(_key, jsonEncode(state.map((e) => e.toJson()).toList()))
+- **compute** — repo = _repo
+- **branch** — if repo != null
 
 ## floor
-- `getInstance` · `jsonEncode` · `map` · `setString` · `toJson` · `toList`
+- `getInstance` · `jsonEncode` · `map` · `save` · `setString` · `toJson` · `toList`
 
 ## חוזה · contract
 - **input:** `()`
