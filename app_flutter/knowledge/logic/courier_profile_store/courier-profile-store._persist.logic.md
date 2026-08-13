@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kCourierProfileKey` · `debugPersistOverride` · `persist` · `state`
+- **reads:** `kCourierProfileKey` · `debugPersistOverride` · `persist` · `repo` · `state`
 - **writes:** `io:prefs.setString`
 - **calls:** _none_
 - **called-by:** `CourierProfileStore.save`
@@ -19,10 +19,12 @@
 ## התנהגות · behaviour (algorithm)
 - **compute** — override = debugPersistOverride
 - **precond** — if override != null → return override()
+- **compute** — r = repo
+- **branch** — if r != null
 - **precond** — if !persist → return true
 
 ## floor
-- `getInstance` · `jsonEncode` · `override` · `setString` · `toJson`
+- `CourierProfile` · `getInstance` · `jsonEncode` · `override` · `save` · `setString` · `toJson`
 
 ## חוזה · contract
 - **input:** `()`

@@ -23,6 +23,7 @@
 | worker_forms (טפסי-עובד: 101+מחלה) | `workerForms/{uid}` (`{forms,sick,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** carts-shape · deletion · test · golden · **לא דו-צדדי** — הטופס מגיע לקבלן דרך צ'אט) |
 | worker_profile_store (פרופיל-עובד) | `workerProfiles/{uid}` (`{…profile,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** · deletion · test · golden · map→doc-יחיד לפי uid, PII של הבעלים בלבד) |
 | courier_hr (נוכחות/תעודות/טפסי-שליח) | `courier{Attendance,Certs,Forms}/{uid}` | ✅ **חי** (מיחזור מחלקות ה-worker · 3 providers role==courier · 3 כללי **self-only** · deletion · test · השליח מדווח לחנות בצ'אט → אין roster) |
+| courier_profile_store (פרופיל-שליח) | `courierProfiles/{uid}` (`{…profile,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** · deletion · test · golden · תאום worker_profile) |
 | chatThreads (מחיקה) | authorship+membership מנותקים | ✅ **הוכרע** (2026-08-13 · אישור-בעלים "א"): מחיקה מנתקת fromUid+participantUids+profile; שארית תווית-השם → רפורם-הזהות המקביל, **לא פריט עצמאי** |
 
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).

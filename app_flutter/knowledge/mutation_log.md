@@ -2163,3 +2163,9 @@
 - **אימות:** `courier_hr_repository_test` — 3× OFF-null (courier{Attendance,Certs,Forms}RepositoryProvider) + 3× round-trip courier-scoped דרך המחלקות הממוחזרות. courier_hr 12 + stage2 (ה-call-sites בקבצי-repo כבר-exempt) ירוקים. analyze 0.
 - **mutation-verify (בוצע בפועל):** גיבוי-קובץ → מוטציה ב-`WorkerCertsRepository.loadMine`: `_certsOf(d.data)` → `const <WorkerCert>[]` → RED בטסט courier-certs round-trip (`+3 -1`) → שחזור → GREEN 4/4. (מחלקות ה-repo כבר mutation-verified בפרוסות ה-worker; ה-קוד החדש הוא providers בלבד, dead-OFF, עם כיסוי OFF-null.)
 - **אבטחה:** 3 כללי self-only `courier{Attendance,Certs,Forms}/{uid}` (`request.auth.uid==uid`). `employerId` רוכב על הכתיבה (forward-ready ל-store-roster עתידי) אבל אין ענף-כלל שנותן קריאה ל-non-owner עדיין.
+
+## #hr-profile-courier — courier_profile_store → courierProfiles/{uid} (single-doc, self-only, OFF-safe) (2026-08-13)
+- **הנכס:** מאגר-HR שביעי — פרופיל-לוח השליח (שם/טלפון/סוג-רכב-מועדף/תמונה), התאום courier של worker_profile. map username→profile, קריאה `map[session.username]`; ל-Firebase-courier `username==uid` → **single-doc** `courierProfiles/{uid}`. אפס-רגרסיה כבוי.
+- **אימות:** `courier_profile_repository_test` — OFF-null + round-trip (כל השדות; `preferredHaul` id תקין שורד) + no-doc→null + haul-פסול→'' (normalizeHaul, לא מומצא). analyze 0 (3 info comment_references/sort_constructors_first **קיימים-מראש** על מחלקת CourierProfile, אומת ב-stash). courier_profile_store 12 ירוקים.
+- **mutation-verify (בוצע בפועל):** גיבוי → מוטציה ב-`load`: `return CourierProfile.fromJson(d.data)` → `return null` → RED round-trip → שחזור (RESTORED-IDENTICAL) → GREEN 4/4.
+- **אבטחה:** כלל self-only `courierProfiles/{uid}` — קריאה+כתיבה רק הבעלים (PII: טלפון).

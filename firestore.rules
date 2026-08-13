@@ -777,6 +777,15 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // courierProfiles/{uid} — the courier's own editable board profile
+    // { displayName, phone, preferredHaul, photo, updatedAt } (local→server
+    // migration behind kUserDataServer). SINGLE-DOC + SELF-ONLY (the worker
+    // Profiles twin): no persona reads another courier's profile here; PII (phone)
+    // → only the owner reads/writes.
+    match /courierProfiles/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,

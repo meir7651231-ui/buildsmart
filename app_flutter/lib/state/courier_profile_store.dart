@@ -28,6 +28,7 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/courier_profile_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart' show kVehicleRank;
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,13 +104,21 @@ class CourierProfile {
 }
 
 class CourierProfileStore extends StateNotifier<Map<String, CourierProfile>> {
-  CourierProfileStore({this.persist = true}) : super(const {}) {
+  CourierProfileStore({this.persist = true, this.repo}) : super(const {}) {
     if (persist) _load();
   }
 
   /// When false (tests), SharedPreferences is skipped entirely so the
   /// in-memory behavior can be asserted in isolation (the engines' pattern).
   final bool persist;
+
+  /// The server store for THIS courier's own profile (`courierProfiles/{uid}`)
+  /// when USER_DATA_SERVER is on for a real signed-in courier; null (the default)
+  /// ⇒ the SharedPreferences path, byte-identical. Injected by
+  /// [courierProfileProvider]. Single-doc + self-only: the loaded profile is
+  /// re-keyed by the uid, and since `session.username == uid` for a real courier
+  /// the UI read `map[session.username]` still resolves.
+  final CourierProfileRepository? repo;
 
   /// Test seam (F-9): when set, [_persist] delegates here instead of touching
   /// SharedPreferences — return `false` to exercise the REAL rollback path
@@ -122,6 +131,21 @@ class CourierProfileStore extends StateNotifier<Map<String, CourierProfile>> {
   bool _userTouched = false;
 
   Future<void> _load() async {
+    final r = repo;
+    if (r != null) {
+      // Server path (USER_DATA_SERVER): this courier's profile lives at
+      // `courierProfiles/{uid}`, re-keyed by the uid so `map[session.username]`
+      // (== map[uid] for a real courier) resolves. Absent ⇒ keep the empty map
+      // (every field falls back honestly, exactly like the local raw == null).
+      try {
+        final p = await r.load();
+        if (!mounted || _userTouched || p == null) return;
+        state = {r.uid: p};
+      } on Object catch (_) {
+        // Absent/unreadable — keep the empty map.
+      }
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(kCourierProfileKey);
@@ -147,6 +171,17 @@ class CourierProfileStore extends StateNotifier<Map<String, CourierProfile>> {
   Future<bool> _persist() async {
     final override = debugPersistOverride;
     if (override != null) return override();
+    final r = repo;
+    if (r != null) {
+      // Server path: mirror THIS courier's profile to `courierProfiles/{uid}`.
+      // Firestore has no localStorage photo-quota, so the write is optimistic —
+      // return true (a rare server failure is swallowed, never rolls back the
+      // UI; the worker_profile migration takes the same optimistic stance).
+      try {
+        await r.save(state[r.uid] ?? const CourierProfile());
+      } on Object catch (_) {}
+      return true;
+    }
     if (!persist) return true; // tests: in-memory only, nothing can fail
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -187,5 +222,6 @@ class CourierProfileStore extends StateNotifier<Map<String, CourierProfile>> {
 /// `ref.watch(courierProfileProvider.select((m) => m[session.username] ?? const CourierProfile()))`.
 final courierProfileProvider =
     StateNotifierProvider<CourierProfileStore, Map<String, CourierProfile>>(
-  (ref) => CourierProfileStore(),
+  (ref) =>
+      CourierProfileStore(repo: ref.watch(courierProfileRepositoryProvider)),
 );

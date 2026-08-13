@@ -406,6 +406,9 @@ export async function eraseUserCompletely(
     db().collection("courierAttendance").doc(uid),
     db().collection("courierCerts").doc(uid),
     db().collection("courierForms").doc(uid),
+    // courierProfiles/{uid} — the courier's own editable board profile (local→
+    // server migration, kUserDataServer). doc-id == uid → wiped like the others.
+    db().collection("courierProfiles").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

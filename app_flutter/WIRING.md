@@ -4272,3 +4272,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`courier_hr.dart`:** 3 ה-providers מזריקים `repo: ref.watch(courier*RepositoryProvider)` ( import של 3 קבצי-repo). courierFormsProvider כבר לא local — עכשיו gated לשרת.
 - **`firestore.rules`:** 3 כללי **self-only** `courier{Attendance,Certs,Forms}/{uid}`. **`deleteAccount.ts`:** 3 refs. golden: courier_hr אין (providers-only, אין logic-module).
 - **אימות:** analyze 0 · courier_hr_repository 6 (3 OFF-null + 3 round-trip) + courier_hr 12 + stage2 ירוקים · mutation-verify (RED `+3 -1`→GREEN).
+
+### #hr-profile-courier — פרופיל-שליח → courierProfiles/{uid} (single-doc · self-only) (2026-08-13)
+מאגר-HR שביעי — התאום courier של worker_profile (map→doc-יחיד לפי uid, self-only). `kUserDataServer` OFF ⇒ byte-identical.
+- **`courier_profile_repository.dart` (חדש):** load/save CourierProfile ל-`courierProfiles/{uid}`=`{…profile,updatedAt}` (single-doc scoped documentId==uid).
+- **`courier_profile_store.dart`:** repo מוזרק (שומר `debugPersistOverride`); `_load` ממפתח-מחדש `{uid: profile}`; `_persist` כותב `state[uid]` אופטימי.
+- **`firestore.rules`:** `courierProfiles/{uid}` self-only. **`deleteAccount.ts`:** ref. **`stage2`:** exempt.
+- **אימות:** analyze 0 (3 info קיימים-מראש) · repo-test 4/4 + courier_profile_store 12 ירוקים · golden מחודש · mutation-verify (RED→GREEN 4/4).
