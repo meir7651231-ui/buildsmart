@@ -22,11 +22,11 @@
 ## שלבים לכל חנות
 1. **rule** `<coll>/{uid}` self-only (מראה diag/{uid}). subcollection = match נפרד (rules לא יורשים).
 2. **repo** (מראה users_repository) + provider-switch (OFF→null→מקומי).
-3. **migration hook** (Phase 3): ב-ON הראשון, העלאה חד-פעמית של הדאטה-המקומית לשרת (hook: `user_system_sync.onRegisteredLogin`), עם דגל-מקומי `bs.migrated.<uid>` (חד-פעמי). **טרם — לפני flip.**
+3. **~~migration hook~~ — בוטל.** ההעברה-החד-פעמית תוכננה לשמר דאטה-מקומית קיימת. **הבעלים אישר: אין משתמשים פעילים** (מאושר גם בהערת web-deploy.yml: *"No active users yet ⇒ safe live validation"*), אז אין דאטה-מקומית-אמיתית לשמר → הצעד הזה **מיותר ונמחק**. flip ישיר.
 4. **deletion:** single-doc → ל-`refs[]` ב-eraseUserCompletely; subcollection → `recursiveDelete(users/{uid})`.
 
 ## סכמת-צ'אט (Phase 4 — פותח את אנונימיזציית-המחיקה)
 `chat_firebase.dart` `toDoc/fromDoc`: `names` = `String` בודד → map `{uid:name}`. `fromDoc` סובלני לשתי הצורות (legacy String נשאר). `ChatThread.name` נשאר ה-display המפוענח (הצד-השני) → קוראי chats_screen ללא-שינוי. אז ב-deleteAccount: הרחבת ה-chatThreads scrub ל-`names.${uid}` FieldValue.delete (מוחק רק את המשתמש-שנמחק, משאיר את השורד).
 
-## 🔴 דחיפה
-כל commit OFF-safe (הדגל כבוי → אפס-שינוי-חי). דחיפה על "תדחוף". flip-הדגל = צעד-launch נפרד אחרי seed-migration.
+## 🔴 דחיפה / הדלקה חיה
+**הדגל `USER_DATA_SERVER` הודלק** (2026-08-13, דירקטיבת-הבעלים: *"אין דמו/מקומי — אמיתי וחי ודלוק לשרת, או שלא בונים"*). מנגנון: `--dart-define=USER_DATA_SERVER=true` בשלושת build-ה-workflows (`web-deploy.yml` · `firebase-hosting.yml` — הזוג המתחרה על הערוץ-החי, זהים · `android-test-build.yml`). **בדחיפה:** עגלה + פרויקטים הופכים server-backed חיים למשתמש-מחובר-אמיתי (guest-אנונימי נשאר מקומי — אין לו uid). rollback = הסרת ה-3 defines. seed-migration בוטל (אין משתמשים פעילים). דחיפה על "תדחוף".
