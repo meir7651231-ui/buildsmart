@@ -367,6 +367,9 @@ export async function eraseUserCompletely(
     db().collection("roleRequests").doc(uid),
     db().collection("_claudeRate").doc(uid),
     db().collection("_publishRate").doc(uid),
+    // carts/{uid} — the user's single active smart-cart (local→server migration,
+    // kUserDataServer). Wiped like the other uid-keyed personal docs above.
+    db().collection("carts").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

@@ -4132,3 +4132,9 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **קישורים רב-צדדיים** (orders-uids/chat/customers) נשארים מנותקים כמקודם (נכון — רשומה משותפת נשמרת).
 - **פתוח (→#2):** אנונימיזציית-`chatThreads` — `names` הוא string בודד (לא per-uid map) → אי-אפשר לאנונימיזציה-בטוחה בשרת בלי שינוי-סכמה. מקופל למיגרציה.
 - אימות: functions `tsc` נקי · byte-verify 6/6 · self-path + owner-guard ללא-שינוי.
+
+### #user-data-cart — מיגרציית-העגלה הראשונה מקומי→שרת (2026-08-12)
+הראשונה מ-#2 (SSOT: `knowledge/SSOT-user-data-migration.md`). דגל חדש `kUserDataServer` (OFF-default) → OFF ⇒ SharedPreferences byte-identical.
+- `backend.dart`: `kUserDataServer`. `carts_repository.dart` (חדש): `CartsRepository` (load/save ל-`carts/{uid}` דרך RemoteCollectionSource scoped-uid) + `cartsRepositoryProvider` (repo רק תחת kUserDataServer && useFirebaseBackend && uid && !anon).
+- `smart_cart.dart`: notifier מנתב persist/load ל-repo כשקיים, אחרת SharedPreferences ללא-שינוי. `firestore.rules`: `carts/{uid}` self-only. `deleteAccount.ts`: `carts/{uid}` ב-refs → נמחק במחיקת-משתמש.
+- אימות: analyze 0 · 19 cart-tests ירוקים (OFF-null + round-trip + רגרסיה) · functions tsc נקי. **פתוח:** seed-migration לפני flip.

@@ -135,6 +135,7 @@ void main() {
       'lib/data/repositories/stock_local.dart', // same tiny stock listen as stock_firebase above — a documented-exemption omission from afd824a5 (stage3); the local sibling was never listed, so this deterministic offender sat masked under the known-failing budget for months (2026-07-27 audit)
       'lib/data/repositories/site_firebase.dart', // tasks BOUNDED; stage tiny → checked below
       'lib/data/repositories/users_repository.dart', // self-doc scoped
+      'lib/data/repositories/carts_repository.dart', // self-doc scoped (single doc, documentId==uid — the users_repository shape: one 0-or-1 doc read, not a growing listen)
       'lib/data/repositories/chat_repository.dart', // threads participant-scoped
       'lib/data/repositories/chat_firebase.dart', // messages BOUNDED → checked below
       'lib/data/repositories/material_requests_firebase.dart', // BOUNDED → checked below

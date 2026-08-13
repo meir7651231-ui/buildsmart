@@ -316,3 +316,27 @@ const bool kIntelLive = bool.fromEnvironment('INTEL_LIVE');
 /// server + rules are live (a later staged step):
 ///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=USER_SYSTEM=true
 const bool kUserSystem = bool.fromEnvironment('USER_SYSTEM');
+
+// ── Per-user data stores (local→server migration) ────────────────────────────
+// The FIRST migrated store is the smart cart → `carts/{uid}`. DORMANT — born
+// INERT with NO live consumer under the flag, the same zero-regression invariant
+// as [kUserSystem] / [kIntelLive].
+
+/// USER_DATA_SERVER — master switch for the local→server MIGRATION of the
+/// per-user data stores (the FIRST being the smart cart → `carts/{uid}`).
+/// Default OFF: every migrated store keeps its exact SharedPreferences path, so
+/// flipping this flag is the ONLY thing that changes WHERE a user's data lives —
+/// with it OFF the build is BYTE-IDENTICAL to today (the same zero-regression
+/// invariant as [kUserSystem] / [kUidScopedQueries] / [kUseFirebaseBackendFlag]).
+///
+/// Deliberately SEPARATE from [kUserSystem]: that flag owns the `users/{uid}`
+/// IDENTITY doc, this one owns the per-user DATA stores, so cart/… migration can
+/// activate INDEPENDENTLY of the identity layer (one flag = one behaviour).
+/// `cartsRepositoryProvider` (carts_repository.dart) also ANDs this with
+/// [useFirebaseBackend] and a NON-anonymous uid, so it can never touch Firestore
+/// offline / in the Firebase-free test suite (the SharedPreferences path is the
+/// OFF path) and the anonymous catalog guest stays local. With the flag OFF the
+/// provider's Firestore branch is dead code → tree-shaken. Flip on at build time
+/// once the `carts` rules are live (a later staged step):
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=USER_DATA_SERVER=true
+const bool kUserDataServer = bool.fromEnvironment('USER_DATA_SERVER');

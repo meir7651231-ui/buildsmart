@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/carts_repository.dart';
 import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,9 +97,14 @@ class SmartCartLine {
 
 class SmartCartNotifier extends StateNotifier<List<SmartCartLine>>
     with PersistOnWrite<List<SmartCartLine>> {
-  SmartCartNotifier() : super(const []) {
+  SmartCartNotifier([this._carts]) : super(const []) {
     _load();
   }
+
+  /// The server store for the active cart (`carts/{uid}`) when USER_DATA_SERVER
+  /// is on for a real signed-in user; null (the default) ⇒ the SharedPreferences
+  /// path below, byte-identical to before. Injected by [smartCartProvider].
+  final CartsRepository? _carts;
 
   static const _prefsKey = 'bs.smart-cart.v1';
 
@@ -106,6 +112,17 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>>
   // provided by PersistOnWrite; this engine keeps its own persistState + _load.
 
   Future<void> _load() async {
+    final carts = _carts;
+    if (carts != null) {
+      // Server path (USER_DATA_SERVER): the active cart lives at `carts/{uid}`.
+      try {
+        seedIfUnloaded(await carts.load(carts.currentUid));
+      } catch (_) {
+        // Absent/unreadable — start empty (the corrupt-payload latch below).
+        markLoaded();
+      }
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_prefsKey);
@@ -125,6 +142,14 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>>
 
   @override
   Future<void> persistState() async {
+    final carts = _carts;
+    if (carts != null) {
+      // Server path (USER_DATA_SERVER): mirror the whole cart to `carts/{uid}`.
+      try {
+        await carts.save(carts.currentUid, state);
+      } catch (_) {}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -195,5 +220,8 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>>
 
 final smartCartProvider =
     StateNotifierProvider<SmartCartNotifier, List<SmartCartLine>>(
-  (_) => SmartCartNotifier(),
+  // Injects the server store (`carts/{uid}`) when USER_DATA_SERVER is on for a
+  // real signed-in user; null (the default) ⇒ the SharedPreferences path,
+  // byte-identical to before (the provider value stays null → no rebuild).
+  (ref) => SmartCartNotifier(ref.watch(cartsRepositoryProvider)),
 );

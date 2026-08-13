@@ -36,6 +36,30 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-08-12 · הגירה #2 (carts/{uid}) — קומיט נחסם, אבחון-שגוי של הכשל דרך פלט-✗ מפורט
+
+### א — הבעיה
+קומיט הגירת-הסל (store 1/4 של #2: `carts/{uid}` מאחורי `USER_DATA_SERVER` OFF-default)
+נחסם פעמיים. באבחון הראשון קראתי את שורות ה-`✗` המפורטות (אדומות, verbose) ופירשתי
+אותן כאילו זה כשל-קטלוג של `ברז→מחסום` — red-herring. עצרתי, ff'תי לבייס, הרצתי בדיקות
+קטלוג (עברו — הטעיה). רק אחרי retry שני, קריאת סעיף **"בדיקות שנכשלו (שמות)"** חשפה את
+שלושת הכשלים האמיתיים: (1) `stage2_scale_test` — ה-`FirestoreCollectionSource('carts', scope:…)`
+החדש שלי בלי `bound:` ולא ברשימת-הפטור → נתפס ב-sweep הboundedness; (2) `app_profile_flags_test`
+— ה-`bool.fromEnvironment('USER_DATA_SERVER')` החדש שלי לא סווג לאף שכבה סגורה; (3)
+`intel_sink_test` — flaky, עבר ב-re-run.
+
+### ב — הפתרון
+קראתי את סעיף ה-**שמות**, לא את פלט ה-✗. הוספתי את `carts_repository.dart` ל-`exemptFiles`
+ב-`stage2_scale_test` (self-doc scoped — קריאת 0-או-1 דוק לפי documentId==uid, צורת
+users_repository, לא listen גדֵל), והוספתי `'USER_DATA_SERVER'` ל-`kArmingLayer` ב-
+`app_profile_flags_test` (arming layer owner-staged, per-flag rollback = הסרת ה-define —
+צורת USER_SYSTEM). intel_sink — re-run בלבד.
+
+### ג — כלל המניעה
+ANTIPATTERN: הוספת מקור-קולקשן-רימוט חדש או דגל-קומפילציה חדש בלי לרשמו באותו קומיט בשתי הרשימות-הסגורות של בדיקות-הקונפורמנס — רשימת-הפטור של בדיקת-הגבולים ורשימת-סיווג-שכבת-הדגל — ואבחון החסימה שנובעת מכך לפי פלט-הבדיקות-המפורט במקום לפי סעיף שמות-הכושלים
+RULE: כשקומיט נחסם — קרא קודם את סעיף "בדיקות שנכשלו (שמות)" ורק אותו; פלט ה-✗ המפורט הוא רעש שמפתה לאבחון-שגוי (לקח #39: אבחן ב-100% לפני פתרון). כל FirestoreCollectionSource חדש חייב bound או שורת-פטור מתועדת ב-stage2_scale; כל bool.fromEnvironment חדש חייב סיווג ל-kArmingLayer או ל-kProfileOwned ב-app_profile_flags — שניהם באותו commit.
+NOTE: האנטי-פטרן פרוזה בעברית ולא regex-קוד במכוון — FirestoreCollectionSource ו-fromEnvironment לגיטימיים בעשרות קבצים, אז regex-רחב היה false-positive שחוסם קומיטים תמימים; בדיקות-הקונפורמנס עצמן (stage2_scale · app_profile_flags) הן השער ההתנהגותי, וזה מה שהאנטי-פטרן-פרוזה מפנה אליו.
+
 ## 2026-06-14 · שער 32 — tripwire של apple-readiness נשבר על fill לגיטימי של נחיל-אחר
 
 ### א — הבעיה

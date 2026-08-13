@@ -86,6 +86,13 @@ const Set<String> kArmingLayer = {
   // backend-coordinated arming shape (USE_FIREBASE_BACKEND / CATALOG_SERVER_SEARCH),
   // never profile-owned.
   'EDGE_PROXY',
+  // USER_DATA_SERVER (#2 local→server migration) — arms the uid-scoped Firestore
+  // stores for per-user local data (carts/{uid} first; savedProjects/notifSettings
+  // to follow) + the chat per-uid names schema. Default-OFF ⇒ byte-identical: every
+  // store keeps its SharedPreferences path until armed. Owner-staged, per-flag
+  // rollback = drop the define — the USER_SYSTEM / backend-coordinated arming
+  // shape, never profile-owned (the `carts_repository` seam is tree-shaken OFF).
+  'USER_DATA_SERVER',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must

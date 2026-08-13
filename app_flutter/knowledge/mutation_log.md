@@ -2084,3 +2084,8 @@
 - **הפעולה:** הרחבת `eraseUserCompletely` (additive) — roleRequests/_claudeRate/_publishRate (DELETE) · material_requests/orders-PII/projects (SCRUB) · analyticsEvents (DELETE). 6/7.
 - **אימות:** functions `tsc` נקי · byte-verify כל-6 · `eraseUserCompletely` נקרא 3× (def+self+manager) + owner-guard×1 → המסלולים ללא-שינוי.
 - **צ'אט (7/7) נדחה:** `chatThreads.names` = string בודד → אנונימיזציה-בטוחה דורשת שינוי-סכמה (per-uid map), מקופל ל-#2. (הימנעות-מניחוש נכונה: לא לתייג-מחדש את השורד בטעות.)
+
+## #user-data-cart — smart_cart → carts/{uid} (OFF-safe) (2026-08-12)
+- **הנכס:** מיגרציה מקומי→שרת #1. אפס-רגרסיה כבוי + round-trip נכון דלוק.
+- **אימות:** `carts_repository_test` — OFF-null (cartsRepositoryProvider→null → SharedPreferences) + round-trip (save→load דרך fake-source). analyze 0 · 19 cart-tests ירוקים · functions tsc נקי.
+- **טרם:** seed-migration + flip + saved_projects/notif_settings/צ'אט.
