@@ -33,6 +33,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 bool get useOrgConfigLive =>
     kOrgConfigLive && kOrgConfigFlag && Firebase.apps.isNotEmpty;
 
+/// The wizard may PUBLISH whenever the org-config system is ARMED
+/// ([kOrgConfigFlag]) and Firebase is up — the WRITE does NOT need the live-READ
+/// flag ([kOrgConfigLive]). So a build that consumes the config can also push it;
+/// the owner's save reaches the server even where the live subscription is off.
+/// (The server rules still gate the write to the owner — a non-owner is denied.)
+bool get canPublishOrgConfig => kOrgConfigFlag && Firebase.apps.isNotEmpty;
+
 /// Test seam: override with a fake [OrgConfigDocPort] to drive the adopt logic
 /// Firebase-free. Live builds resolve the real Firestore adapter.
 final orgConfigDocPortProvider = Provider<OrgConfigDocPort>(

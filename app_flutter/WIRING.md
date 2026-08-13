@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #org-config-publish-decouple — 📤 הפרסום מנותק מהדגל-החי — 2026-08-13
+`_save` באשף מפרסם עכשיו לפי `canPublishOrgConfig` (`kOrgConfigFlag && Firebase.apps.isNotEmpty`) במקום `useOrgConfigLive` — הכתיבה **לא דורשת** את דגל-הקריאה-החי (`ORG_CONFIG_LIVE`). כך "שמור" מפרסם בכל build חמוש-`ORG_CONFIG` שבו Firebase למעלה + הבעלים מחובר, גם אם המנוי-החי כבוי. אבחון-שדה הראה בדיוק את הפער: בעלים ✅ + כתיבה-לשרת ✅ אבל `ORG_CONFIG_LIVE` ❌ → הפרסום לא נקרא. (כללי-השרת עדיין חוסמים כתיבה למי-שאינו-בעלים.) האבחון מפריד עכשיו "פרסום מופעל" (`canPublishOrgConfig`) מ"מנוי-חי" (`useOrgConfigLive`).
+
 ## #org-config-diag — 🔍 כפתור אבחון-סנכרון באשף — 2026-08-13
 `screens/org_config_diag.dart` (חדש) + כפתור באשף: בדיקה חיה **למה שינוי לא מגיע למשתמשים אחרים**. `runOrgConfigDiagnostic(configJson)` בודק בשרשרת: Firebase מאותחל? · `ORG_CONFIG`/`ORG_CONFIG_LIVE` חמושים (`useOrgConfigLive`)? · מחובר + בעלים (`kOwnerEmails`)? · **round-trip אמיתי** — כותב ל-`orgConfigLive/current` וקורא חזרה מ-`Source.server` ומאמת שהגיע. חושף את מלכודת "נשמר ופורסם אבל 404": עם persistence `set()` מצליח מקומית בעוד השרת דוחה ברקע (הרשאת-בעלים). כפתור "🔍 אבחון סנכרון" ליד "שמור והפעל" → דיאלוג עם הדוח. כלי-בעלים, לא מגודר.
 

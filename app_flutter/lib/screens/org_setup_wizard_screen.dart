@@ -54,7 +54,8 @@ import 'package:buildsmart/screens/studio/panes/history_pane.dart'
     show HistoryPane;
 import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider;
-import 'package:buildsmart/state/org_config_live.dart' show useOrgConfigLive;
+import 'package:buildsmart/state/org_config_live.dart'
+    show canPublishOrgConfig;
 import 'package:buildsmart/state/org_config_sink_firebase.dart'
     show FirestoreOrgConfigDocPort, publishOrgConfig;
 import 'package:buildsmart/state/org_config_store.dart'
@@ -301,7 +302,7 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     final ok = await persistOrgConfig(_draft);
     // Reach EVERYONE: publish to the shared server doc (owner-gated, best-effort).
     // When the live lane is off this is a no-op ⇒ the note stays byte-identical.
-    final published = useOrgConfigLive
+    final published = canPublishOrgConfig
         ? await publishOrgConfig(
             const FirestoreOrgConfigDocPort(), encodeOrgConfig(_draft))
         : null;

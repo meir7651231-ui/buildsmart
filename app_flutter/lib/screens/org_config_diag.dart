@@ -19,7 +19,8 @@
 import 'package:buildsmart/config/org_config.dart'
     show kOrgConfigFlag, kOrgConfigLive;
 import 'package:buildsmart/data/board_accounts_local.dart' show kOwnerEmails;
-import 'package:buildsmart/state/org_config_live.dart' show useOrgConfigLive;
+import 'package:buildsmart/state/org_config_live.dart'
+    show canPublishOrgConfig, useOrgConfigLive;
 import 'package:buildsmart/state/org_config_sink_firebase.dart'
     show kOrgConfigLiveCollection, kOrgConfigLiveDocId, kOrgConfigLiveField;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -36,9 +37,12 @@ Future<List<String>> runOrgConfigDiagnostic(String configJson) async {
   out.add(fbUp ? '✅ Firebase מאותחל' : '❌ Firebase לא מאותחל בכלל');
   out.add('${kOrgConfigFlag ? '✅' : '❌'} דגל ORG_CONFIG (חמוש)');
   out.add('${kOrgConfigLive ? '✅' : '❌'} דגל ORG_CONFIG_LIVE');
+  out.add(canPublishOrgConfig
+      ? '✅ פרסום מופעל — "שמור" יפרסם לשרת'
+      : '❌ פרסום כבוי — ORG_CONFIG לא חמוש');
   out.add(useOrgConfigLive
-      ? '✅ סנכרון-חי פעיל — הפרסום נקרא'
-      : '❌ סנכרון-חי כבוי — הפרסום לא נקרא (build ישן/לא-חמוש)');
+      ? '✅ מנוי-חי פעיל — תקבל שינויים מאחרים חי'
+      : '⚠️ מנוי-חי כבוי — לא תקבל שינויי-אחרים חי (build ללא ORG_CONFIG_LIVE)');
 
   String? email;
   try {
