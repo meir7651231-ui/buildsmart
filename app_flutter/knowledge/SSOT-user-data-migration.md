@@ -16,7 +16,7 @@
 | draft_quote (טיוטות-הצעה) | `draftQuotes/{uid}` (single doc `{quotes:[…],updatedAt}`) | ✅ **חי** (draft_quotes_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
 | comparison_set (השוואות) | `comparisonSets/{uid}` (single doc `{keys:[…],updatedAt}`) | ✅ **חי** (comparison_sets_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
 | customers_store (CRM אישי) | `savedCustomers/{uid}` (single doc `{customers:[…],updatedAt}`) | ✅ **חי** (saved_customers_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
-| chatThreads.names | `String` → `{uid:name}` map | ⏳ (פותח אנונימיזציית-מחיקה; עבודת-צ'אט מקבילה חיה — להמתין) |
+| chatThreads (מחיקה) | authorship+membership מנותקים | ✅ **הוכרע** (2026-08-13 · אישור-בעלים "א"): מחיקה מנתקת fromUid+participantUids+profile; שארית תווית-השם → רפורם-הזהות המקביל, **לא פריט עצמאי** |
 
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).
 
@@ -29,8 +29,11 @@
 3. **~~migration hook~~ — בוטל.** ההעברה-החד-פעמית תוכננה לשמר דאטה-מקומית קיימת. **הבעלים אישר: אין משתמשים פעילים** (מאושר גם בהערת web-deploy.yml: *"No active users yet ⇒ safe live validation"*), אז אין דאטה-מקומית-אמיתית לשמר → הצעד הזה **מיותר ונמחק**. flip ישיר.
 4. **deletion:** single-doc → ל-`refs[]` ב-eraseUserCompletely; subcollection → `recursiveDelete(users/{uid})`.
 
-## סכמת-צ'אט (Phase 4 — פותח את אנונימיזציית-המחיקה)
-`chat_firebase.dart` `toDoc/fromDoc`: `names` = `String` בודד → map `{uid:name}`. `fromDoc` סובלני לשתי הצורות (legacy String נשאר). `ChatThread.name` נשאר ה-display המפוענח (הצד-השני) → קוראי chats_screen ללא-שינוי. אז ב-deleteAccount: הרחבת ה-chatThreads scrub ל-`names.${uid}` FieldValue.delete (מוחק רק את המשתמש-שנמחק, משאיר את השורד).
+## סכמת-צ'אט (Phase 4) — הוכרע: לא-עצמאי, נסמך על רפורם-הזהות (2026-08-13 · אישור-בעלים "א")
+**מצב-המחיקה (מאומת בקוד):** `chatMessages.fromUid` נמחק (authorship), `chatThreads.participantUids` arrayRemove (membership), `users/{uid}` נמחק (profile). המהות מנותקת. השארית היחידה: `chatThreads.names` = מחרוזת-תצוגה **בודדת** (שם-הצד-השני, נשמרת ביצירה) — שהצד-השני ממילא מכיר.
+**למה לא לתקן עצמאית:** (1) **לא-עמיד** — הלקוח כותב מחדש את `names` מהמטמון בכל כתיבת-שרשור; (2) **שביר** — התאמת-שם מפספסת rename; (3) **תיקון-עמיד = שכבת-הצגת-השם בלקוח** (map פר-uid / directory-lookup) — בדיוק מה שרפורם-הזהות המקביל (uid-A · PR#48 chatMessageIsMine · participantUids/fromUid) משכתב עכשיו. כשפענוח-השם יעבור ל-uid→directory, השארית תיסגר **מעצמה** (users doc של הנמחק מחוק → השם נעלם).
+**⛔ לא לפתוח מחדש כפריט-מיגרציה עצמאי** — לא לשנות `names`→map בנפרד (יתנגש עם רפורם-הזהות ויתייתר). המשך-הטיפול שייך לרפורם-הזהות.
+> **התבנית המקורית (היסטורי, בוטלה):** ~~`names` String→map + `fromDoc` סובלני + deleteAccount scrub `names.${uid}`~~ — נזנחה לטובת directory-lookup ברפורם-הזהות.
 
 ## 🔴 דחיפה / הדלקה חיה
 **הדגל `USER_DATA_SERVER` הודלק** (2026-08-13, דירקטיבת-הבעלים: *"אין דמו/מקומי — אמיתי וחי ודלוק לשרת, או שלא בונים"*). מנגנון: `--dart-define=USER_DATA_SERVER=true` בשלושת build-ה-workflows (`web-deploy.yml` · `firebase-hosting.yml` — הזוג המתחרה על הערוץ-החי, זהים · `android-test-build.yml`). **בדחיפה:** עגלה + פרויקטים הופכים server-backed חיים למשתמש-מחובר-אמיתי (guest-אנונימי נשאר מקומי — אין לו uid). rollback = הסרת ה-3 defines. seed-migration בוטל (אין משתמשים פעילים). דחיפה על "תדחוף".
