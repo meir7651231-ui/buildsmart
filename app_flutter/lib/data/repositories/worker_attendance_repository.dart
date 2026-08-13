@@ -21,8 +21,9 @@
 // (non-demo) signed-in WORKER uid; otherwise null. With [kUserDataServer]
 // const-false (every normal build) the branch is dead code → tree-shaken, the
 // notifier keeps its verbatim SharedPreferences (`bs.worker-attendance.v1`) path
-// → the OFF build is BYTE-IDENTICAL. The courier reuse (a separate ledger key)
-// stays local — it passes no repo.
+// → the OFF build is BYTE-IDENTICAL. The COURIER reuse now has its OWN server
+// twin too — [courierAttendanceRepositoryProvider] (self-only, `courierAttendance`
+// collection) at the bottom of this file; still null (local) on the OFF build.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/repositories/backend.dart';
@@ -142,6 +143,37 @@ final workerAttendanceRepositoryProvider =
       final uid = session.uid;
       final source = FirestoreCollectionSource(
         'workerAttendance',
+        scope: (c) => c.where(FieldPath.documentId, isEqualTo: uid),
+      );
+      return WorkerAttendanceRepository(
+        source,
+        currentUid: uid,
+        employerId: session.employerId,
+      );
+    }
+  }
+  return null;
+});
+
+/// The COURIER attendance repository provider — the SAME [WorkerAttendanceRepository]
+/// class (the shape is identical), keyed on the courier's own uid at the SEPARATE
+/// `courierAttendance/{uid}` collection. Gated on a real (non-demo) signed-in
+/// COURIER; null on the OFF path (byte-identical → the SharedPreferences
+/// `bs.courier-attendance.v1` ledger). SELF-ONLY on the server: the courier
+/// reports monthly attendance to the store through CHAT, so there is no
+/// store-roster query — `employerId` still rides the write (forward-ready for a
+/// future store roster) but no consumer reads it yet.
+final courierAttendanceRepositoryProvider =
+    Provider<WorkerAttendanceRepository?>((ref) {
+  if (kUserDataServer && useFirebaseBackend) {
+    final session = ref.watch(boardAuthProvider);
+    if (session != null &&
+        session.role == BoardRole.courier &&
+        !session.demo &&
+        session.uid.isNotEmpty) {
+      final uid = session.uid;
+      final source = FirestoreCollectionSource(
+        'courierAttendance',
         scope: (c) => c.where(FieldPath.documentId, isEqualTo: uid),
       );
       return WorkerAttendanceRepository(

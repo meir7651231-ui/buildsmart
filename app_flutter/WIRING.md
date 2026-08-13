@@ -4265,3 +4265,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`worker_profile_store.dart`:** repo מוזרק; `_load` ממפתח-מחדש `state={uid: profile}` (absent→map ריק, fallback כן); `_persist` כותב `state[uid]` אופטימי.
 - **`firestore.rules`:** `workerProfiles/{uid}` — **self-only** (PII: ת.ז/טלפון/כתובת/חירום). **`deleteAccount.ts`:** `workerProfiles/{uid}` ב-refs. **`stage2`:** exempt.
 - **אימות:** analyze 0 (2 info קיימים-מראש) · repo-test 4/4 + stage2 ירוקים · golden מחודש · mutation-verify (RED `+3 -1`→GREEN 4/4).
+
+### #hr-courier-ledgers — נוכחות/תעודות/טפסי-שליח → courier{Attendance,Certs,Forms}/{uid} (2026-08-13)
+מאגרי-HR של השליח — **מיחזור מחלקות** (אותן WorkerAttendance/Certs/FormsRepository, providers חדשים role==courier, collections `courier*`). **SELF-ONLY** (השליח מדווח לחנות בצ'אט). `kUserDataServer` OFF ⇒ byte-identical (3 providers → null).
+- **`worker_{attendance,certs,forms}_repository.dart`:** נוסף בכל אחד `courier*RepositoryProvider` — מגדר role==courier+non-demo+uid, בונה FirestoreCollectionSource על `courier*` scoped documentId==uid, מחזיר את אותה מחלקת-repo. (ה-call-sites בקבצים ה-כבר-exempt → stage2 ללא שינוי.)
+- **`courier_hr.dart`:** 3 ה-providers מזריקים `repo: ref.watch(courier*RepositoryProvider)` ( import של 3 קבצי-repo). courierFormsProvider כבר לא local — עכשיו gated לשרת.
+- **`firestore.rules`:** 3 כללי **self-only** `courier{Attendance,Certs,Forms}/{uid}`. **`deleteAccount.ts`:** 3 refs. golden: courier_hr אין (providers-only, אין logic-module).
+- **אימות:** analyze 0 · courier_hr_repository 6 (3 OFF-null + 3 round-trip) + courier_hr 12 + stage2 ירוקים · mutation-verify (RED `+3 -1`→GREEN).

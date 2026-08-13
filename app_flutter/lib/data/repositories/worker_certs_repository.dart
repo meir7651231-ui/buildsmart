@@ -12,7 +12,8 @@
 // GATED + DORMANT (byte-identity): [workerCertsRepositoryProvider] returns this
 // repo ONLY under `kUserDataServer && useFirebaseBackend` for a real (non-demo)
 // signed-in WORKER uid; otherwise null (SharedPreferences path, byte-identical).
-// The courier reuse (a separate wallet key) stays local — it passes no repo.
+// The COURIER reuse now has its OWN server twin — [courierCertsRepositoryProvider]
+// (self-only, `courierCerts` collection) at the bottom of this file; null on OFF.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/repositories/backend.dart';
@@ -114,4 +115,32 @@ final employerCertsProvider =
     bound: (q) => q.limit(500),
   );
   return source.snapshots().map(WorkerCertsRepository.flattenEmployerDocs);
+});
+
+/// The COURIER certificate repository provider — the SAME [WorkerCertsRepository]
+/// class, keyed on the courier's own uid at the SEPARATE `courierCerts/{uid}`
+/// collection (the driver-certificate wallet: license/insurance/vehicle). Gated
+/// on a real (non-demo) signed-in COURIER; null on the OFF path (byte-identical →
+/// the `bs.courier-certs.v1` wallet). SELF-ONLY on the server (no store-roster
+/// consumer; `employerId` rides the write forward-ready).
+final courierCertsRepositoryProvider = Provider<WorkerCertsRepository?>((ref) {
+  if (kUserDataServer && useFirebaseBackend) {
+    final session = ref.watch(boardAuthProvider);
+    if (session != null &&
+        session.role == BoardRole.courier &&
+        !session.demo &&
+        session.uid.isNotEmpty) {
+      final uid = session.uid;
+      final source = FirestoreCollectionSource(
+        'courierCerts',
+        scope: (c) => c.where(FieldPath.documentId, isEqualTo: uid),
+      );
+      return WorkerCertsRepository(
+        source,
+        currentUid: uid,
+        employerId: session.employerId,
+      );
+    }
+  }
+  return null;
 });

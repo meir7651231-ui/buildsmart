@@ -12,8 +12,9 @@
 // GATED + DORMANT (byte-identity): [workerFormsRepositoryProvider] returns this
 // repo ONLY under `kUserDataServer && useFirebaseBackend` for a real (non-demo)
 // signed-in WORKER uid; otherwise null (SharedPreferences path, byte-identical).
-// The courier reuse (courierFormsProvider, a separate key) passes no repo → it
-// stays local, exactly like the certs/trainings courier reuse.
+// The COURIER reuse (courierFormsProvider) now has its OWN server twin —
+// [courierFormsRepositoryProvider] (`courierForms` collection) at the bottom of
+// this file; still null (local) on the OFF build.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/repositories/backend.dart';
@@ -73,6 +74,29 @@ final workerFormsRepositoryProvider = Provider<WorkerFormsRepository?>((ref) {
       final uid = session.uid;
       final source = FirestoreCollectionSource(
         'workerForms',
+        scope: (c) => c.where(FieldPath.documentId, isEqualTo: uid),
+      );
+      return WorkerFormsRepository(source, currentUid: uid);
+    }
+  }
+  return null;
+});
+
+/// The COURIER forms repository provider — the SAME [WorkerFormsRepository] class
+/// (single-doc, self-only), keyed on the courier's own uid at the SEPARATE
+/// `courierForms/{uid}` collection. Gated on a real (non-demo) signed-in COURIER;
+/// null on the OFF path (byte-identical → the `bs.courier-forms.v1` store). The
+/// 101 reaches the store through CHAT (as for the worker) → no employer query.
+final courierFormsRepositoryProvider = Provider<WorkerFormsRepository?>((ref) {
+  if (kUserDataServer && useFirebaseBackend) {
+    final session = ref.watch(boardAuthProvider);
+    if (session != null &&
+        session.role == BoardRole.courier &&
+        !session.demo &&
+        session.uid.isNotEmpty) {
+      final uid = session.uid;
+      final source = FirestoreCollectionSource(
+        'courierForms',
         scope: (c) => c.where(FieldPath.documentId, isEqualTo: uid),
       );
       return WorkerFormsRepository(source, currentUid: uid);

@@ -22,6 +22,9 @@
 // storage keys are courier-scoped; the provider surfaces stay identical to
 // the worker's.
 
+import 'package:buildsmart/data/repositories/worker_attendance_repository.dart';
+import 'package:buildsmart/data/repositories/worker_certs_repository.dart';
+import 'package:buildsmart/data/repositories/worker_forms_repository.dart';
 import 'package:buildsmart/state/worker_attendance.dart';
 import 'package:buildsmart/state/worker_certs.dart';
 import 'package:buildsmart/state/worker_forms.dart';
@@ -75,7 +78,10 @@ const String kCourierAttendanceReportThreadId = 'th-store-courier-pickups';
 /// attendanceTotal helpers only.
 final courierAttendanceProvider =
     StateNotifierProvider<WorkerAttendanceNotifier, List<AttendanceDay>>(
-  (ref) => WorkerAttendanceNotifier(storageKey: kCourierAttendanceKey),
+  (ref) => WorkerAttendanceNotifier(
+    storageKey: kCourierAttendanceKey,
+    repo: ref.watch(courierAttendanceRepositoryProvider),
+  ),
 );
 
 /// The courier forms store (#86.3) — 101 forms per year + sick-note uploads,
@@ -83,12 +89,18 @@ final courierAttendanceProvider =
 /// vacationRequestsProvider (role: 'courier'), not here.
 final courierFormsProvider =
     StateNotifierProvider<WorkerFormsNotifier, WorkerFormsState>(
-  (ref) => WorkerFormsNotifier(storageKey: kCourierFormsKey),
+  (ref) => WorkerFormsNotifier(
+    storageKey: kCourierFormsKey,
+    repo: ref.watch(courierFormsRepositoryProvider),
+  ),
 );
 
 /// The courier driver-certificate wallet (#86.4) — persisted under
 /// [kCourierCertsKey]; expiry traffic-light via [WorkerCert.statusAt] as-is.
 final courierCertsProvider =
     StateNotifierProvider<WorkerCertsNotifier, List<WorkerCert>>(
-  (ref) => WorkerCertsNotifier(storageKey: kCourierCertsKey),
+  (ref) => WorkerCertsNotifier(
+    storageKey: kCourierCertsKey,
+    repo: ref.watch(courierCertsRepositoryProvider),
+  ),
 );

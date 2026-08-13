@@ -400,6 +400,12 @@ export async function eraseUserCompletely(
     // workerProfiles/{uid} — the worker's own editable board profile (local→server
     // migration, kUserDataServer). doc-id == uid → wiped like the others.
     db().collection("workerProfiles").doc(uid),
+    // courier{Attendance,Certs,Forms}/{uid} — the COURIER's own HR ledgers, the
+    // courier-keyed twins of the worker* stores (local→server, kUserDataServer).
+    // doc-id == uid → wiped like the others.
+    db().collection("courierAttendance").doc(uid),
+    db().collection("courierCerts").doc(uid),
+    db().collection("courierForms").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

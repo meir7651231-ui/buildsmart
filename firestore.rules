@@ -760,6 +760,23 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // courierAttendance/{uid} · courierCerts/{uid} · courierForms/{uid} — the
+    // COURIER's own HR ledgers (attendance / driver-cert wallet / 101+sick-notes),
+    // the courier-keyed twins of the worker* stores (local→server migration behind
+    // kUserDataServer). SELF-ONLY: the courier reports to the store through CHAT,
+    // so there is no store-roster query — only the owner reads/writes their own
+    // doc. (`employerId` still rides the attendance/cert write, forward-ready for a
+    // future store roster, but no rule branch grants a non-owner read yet.)
+    match /courierAttendance/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /courierCerts/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /courierForms/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,
