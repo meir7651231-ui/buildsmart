@@ -45,6 +45,15 @@ const bool kOrgConfigFlag = bool.fromEnvironment('ORG_CONFIG');
 /// (ההידרציה לא רצה לא-חמושה) — מסווג passthrough בסריקת-הדגלים.
 const String kOrgCompanyJson = String.fromEnvironment('ORG_CONFIG_JSON');
 
+/// V7 — the LIVE company lane: instead of a deploy-baked [kOrgCompanyJson], the
+/// company config streams from one owner-writable Firestore doc
+/// (`orgConfigLive/current`, state/org_config_sink_firebase.dart) so the owner's
+/// setup-wizard publish reaches EVERY client live — the same proven shape as the
+/// Studio shared-sync (`studioConfigLive`). Gated by `--dart-define=
+/// ORG_CONFIG_LIVE=true` AND armed by [kOrgConfigFlag]; OFF ⇒ no subscription ⇒
+/// byte-identical. See state/org_config_live.dart for the gate + adopt wiring.
+const bool kOrgConfigLive = bool.fromEnvironment('ORG_CONFIG_LIVE');
+
 /// The owner-prefs persistence key the V2 loader reads/writes (the
 /// `bs.<domain>.v1` key family — trades_store's `bs.trades.v1`). Unused in
 /// V1: reserving the name now is what keeps the V2 loader a pure addition.

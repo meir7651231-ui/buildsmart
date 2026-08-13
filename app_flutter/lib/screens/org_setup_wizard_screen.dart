@@ -51,6 +51,9 @@ import 'package:buildsmart/screens/studio/panes/history_pane.dart'
     show HistoryPane;
 import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider;
+import 'package:buildsmart/state/org_config_live.dart' show useOrgConfigLive;
+import 'package:buildsmart/state/org_config_sink_firebase.dart'
+    show FirestoreOrgConfigDocPort, publishOrgConfig;
 import 'package:buildsmart/state/org_config_store.dart'
     show orgConfigProvider, persistOrgConfig;
 import 'package:buildsmart/state/screen_sections.dart'
@@ -256,12 +259,22 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     setState(() => _saving = true);
     ref.read(orgConfigProvider.notifier).state = _draft;
     final ok = await persistOrgConfig(_draft);
+    // Reach EVERYONE: publish to the shared server doc (owner-gated, best-effort).
+    // When the live lane is off this is a no-op ⇒ the note stays byte-identical.
+    final published = useOrgConfigLive
+        ? await publishOrgConfig(
+            const FirestoreOrgConfigDocPort(), encodeOrgConfig(_draft))
+        : null;
     if (!mounted) return;
     setState(() {
       _saving = false;
-      _note = ok
-          ? '✅ נשמר ופעיל בכל האפליקציה'
-          : '⚠️ פעיל עכשיו — אך השמירה נכשלה ולא תשרוד ריסטארט';
+      _note = !ok
+          ? '⚠️ פעיל עכשיו — אך השמירה נכשלה ולא תשרוד ריסטארט'
+          : switch (published) {
+              true => '✅ נשמר ופורסם — פעיל אצל כל המשתמשים',
+              false => '✅ נשמר מקומית — הפרסום לכולם לא עבר (כתיבה לבעלים בלבד)',
+              null => '✅ נשמר ופעיל בכל האפליקציה',
+            };
     });
   }
 

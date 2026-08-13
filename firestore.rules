@@ -894,6 +894,19 @@ service cloud.firestore {
       allow write: if isOwnerEmail();
     }
 
+    // `orgConfigLive/current` mirrors the owner's PUBLISHED org config (the setup
+    // wizard → app_flutter/lib/state/org_config_sink_firebase.dart, gated by the
+    // ORG_CONFIG_LIVE build flag). SAME contract as studioConfigLive above: PUBLIC
+    // read — the org shape (which screens/modules/labels are on) is non-sensitive
+    // UI config every client (incl. the pre-auth catalog visitor) needs to render;
+    // WRITE is OWNER-ONLY via isOwnerEmail() (the un-spoofable Google email), so
+    // only the owner can publish an org config that reaches ALL users. No Cloud
+    // Function — the self-contained path, exactly like studioConfigLive.
+    match /orgConfigLive/{docId} {
+      allow read: if true;
+      allow write: if isOwnerEmail();
+    }
+
     // ═════════════════════════════════════════════════════════════════════════
     // catalog-to-server (SPEC-catalog-to-server · C0.4 / C5.3) — the migrated data
     // families + the multi-store INVENTORY. Every collection gets an explicit rule

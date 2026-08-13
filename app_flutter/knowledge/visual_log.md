@@ -4,6 +4,11 @@
 
 ---
 
+## #org-config-live-sync — 🌐 אשף-ההקמה: פרסום-לשרת + הודעת-סטטוס (מגודר · off-live) — 2026-08-13
+**שינוי:** `org_setup_wizard_screen.dart` — `_save()` בלבד (לא layout): אחרי ה-persist המקומי, כשהדגל `useOrgConfigLive` דלוק, גם **מפרסם את ההגדרה לשרת** (`publishOrgConfig`), וההודעה `_note` הפכה ל-`switch` על tri-state ("✅ נשמר ופורסם — פעיל אצל כל המשתמשים" / "✅ נשמר מקומית — הפרסום לכולם לא עבר (כתיבה לבעלים בלבד)"). **מגודר `useOrgConfigLive` (= `kOrgConfigLive && kOrgConfigFlag && Firebase` — OFF בכל build/בדיקה) ⇒ `published==null` ⇒ ההודעה נשארת "✅ נשמר ופעיל בכל האפליקציה" הקיימת ⇒ byte-identical — אפס שינוי-UI חי.** אין שינוי ב-layout/widgets/FAB — רק נתיב-שמירה + מחרוזת-הודעה כבויה.
+**אימות:** (א) **byte-identical כבוי** — כל הבדיקות define-less (הדגל OFF) ⇒ ה-`_save` פוגע בענף `published==null` המחזיר את ההודעה הישנה; הסוויטה המלאה עברה בשער ללא-שינוי. (ב) **נתיב-הכתיבה** — `org_config_sink_firebase_test` (4/4): publishOrgConfig כותב/מסיר/בולע-שגיאה. (ג) **אבטחה** — `rules_test/org_config.test.js` (10 · רק-הבעלים כותב). `flutter analyze` 0 · הסוויטה + build web עברו בשער-ה-pre-commit.
+**שקיפות:** eye-check נטיב חי של שלוש-ההודעות (הבעלים מפרסם ורואה "פעיל אצל כל המשתמשים") — על ה-build החי אחרי הדלקת הדגל.
+
 ## #catalog-config-details-fix — 🔗 כפתור "📄 פרטים" + פתיחת הגיליון-הפנימי — 2026-08-06
 **שינוי-UI:** `config_card.dart` — כפתור **"📄 פרטים"** חדש (full-width · מילוי-כתום-רך · טקסט-כתום-מודגש) מתחת לתמונה/גלגלים, מעל שורת הוסף-לסל/בנה-קו. פותח את `LipskeyProductSheet` (הזוג חיצוני↔פנימי); גם tap על התמונה עובר אותו נתיב.
 **אימות:** `config_card_open_details_real_test` — הנתיב האמיתי (לא mock) פותח את הגיליון (image-tap + כפתור) על טייל שבו variantForSelection=null; RED לפני, GREEN אחרי; mutation-verified (שבירת ה-fallback/הכפתור ⇒ אדום). 82 catalog_config + 32 רגרסיה (favorite_tile/product_journey/card_interactions/sheet) ירוקים · analyze נקי.

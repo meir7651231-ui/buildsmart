@@ -30,6 +30,8 @@ import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
     show keyboardScreenToolsProvider;
 import 'package:buildsmart/state/onboarding_gate.dart';
+import 'package:buildsmart/state/org_config_live.dart'
+    show orgConfigLiveProvider;
 import 'package:buildsmart/state/org_config_store.dart'
     show hydrateOrgConfig, orgConfigProvider;
 import 'package:buildsmart/state/org_gates.dart' show orgTerm;
@@ -529,6 +531,11 @@ class BuildSmartApp extends ConsumerWidget {
     // follows auth (sign-in → users/{uid}.fcmToken · refresh → re-write ·
     // sign-out → clear) and foreground pushes toast. Inert without Firebase.
     ref.watch(pushControllerProvider);
+    // Arm the org-config LIVE lane (providers are lazy): subscribe to the shared
+    // `orgConfigLive/current` doc so the owner's setup-wizard publish reaches this
+    // client live. Inert — returns without subscribing — unless ORG_CONFIG_LIVE is
+    // armed AND Firebase is initialised, so it is a no-op in today's builds/tests.
+    ref.watch(orgConfigLiveProvider);
     // The web arm of the same tap. When no tab is open the service worker
     // cannot postMessage into a page that does not exist, so it launches one
     // with `?thread=` in the url; this is where that is picked up. Read ONCE

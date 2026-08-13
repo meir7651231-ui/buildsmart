@@ -1,5 +1,16 @@
 # WIRING CONTRACT — app_flutter
 
+## #org-config-live-sync — 🌐 אשף-ההקמה מגיע לכל המשתמשים · סנכרון-שרת חי (בעלים-מפרסם · מגודר) — 2026-08-13
+אשף-ההקמה שמר עד היום **מקומית בלבד** (`persistOrgConfig`→SharedPreferences) ⇒ הגדרת-מנהל לא שינתה כלום לאף אחד אחר. הפרוסה מחווטת את **ערוץ-ה-`companyJson` השמור** מקצה-לקצה, במירור-מדויק של הסנכרון-המשותף המוכח של ה-Studio (`studioConfigLive`): הבעלים מפרסם את הגדרת-האשף ל**מסמך-שרת אחד ניתן-לכתיבה-ע"י-הבעלים** (`orgConfigLive/current`), וכל קליינט קורא אותו **חי** דרך מנוי שמזין את `resolveOrgConfig` ⇒ בחירת-הבעלים פעילה אצל כל המשתמשים.
+- **`org_config_sink_firebase.dart` (חדש):** ה-sink לכתיבה — `publishOrgConfig(port, json)` (best-effort · לעולם לא זורק · ריק⇒remove); Firebase-free-testable דרך תפר `OrgConfigDocPort`.
+- **`org_config_live.dart` (חדש):** מנוי-חי → `orgConfigProvider`; ה-override המקומי של הבעלים עדיין **מנצח** לפי קדימות `resolveOrgConfig` הקפואה (owner→company→default). `useOrgConfigLive = kOrgConfigLive && kOrgConfigFlag && Firebase.apps.isNotEmpty`.
+- **דגל `kOrgConfigLive`** (`ORG_CONFIG_LIVE`), חמוש ע"י `ORG_CONFIG`; OFF ⇒ אין מנוי ⇒ **byte-identical** (כל חבילת-הבדיקות define-less).
+- **`org_setup_wizard_screen.dart` — `_save`:** אחרי ה-persist המקומי גם **מפרסם לשרת** + מדווח ביושר אם הגיע לכולם (switch על tri-state).
+- **`main.dart`:** מזיין את הנתיב ב-`ref.watch(orgConfigLiveProvider)` אחד (כמו `pushController`).
+- **`firestore.rules`:** בלוק `orgConfigLive/{docId}` — קריאה **פומבית**, כתיבה **לבעלים-בלבד** דרך `isOwnerEmail()` (**העתק-מדויק** של כלל `studioConfigLive` החי-והנבדק).
+- **🔑 בדיקות:** `org_config_sink_firebase_test.dart` (4/4 · נתיב-הכתיבה) + `rules_test/org_config.test.js` (10 · רק-הבעלים כותב · manager/admin עם מייל-שגוי נחסם · כולם קוראים).
+- **🔒 keystone:** דגל OFF ⇒ אין I/O ⇒ byte-identical. מודל **בעלים→כולם** (סקופ per-org של `orgId` עדיין לא מחווט app-side — `setOrg` לא נקרא — אז לא נבנה עליו).
+
 ## #fittings-render-productline3d — 🧊 ה-3D-האמיתי מחווט לעמוד-הגלריה של הכרטיס-הפנימי (מגודר) — 2026-08-12
 `lib/features/fittings/render/product_line_3d.dart` (מגודר `kFittingEngine3d` · טהור-widget) — `ProductLine3D(route)` = render **סטטי** (בלי מחוות · לא מתנגש עם PageView/זום של הגלריה) של רצף-אביזרים דרך ה-`RoutePainter` שלי: הצנרת המרותכת האמיתית (PP-R ירוק · צינור אפור · פליז · ברק ספקולרי), מסגור-אוטומטי מ-bbox, זווית-ברירת-מחדל. **✅ מחווט** — עמוד-ה-3D של הכרטיס-הפנימי (`full_internal_card.dart`, `_InternalCardGallery`) החליף `Line3DView(cells:…)` (קוביות-איזומטריות) → `ProductLine3D(route:…)`; הרצף נבנה ב-`_galleryThreeDRoute` (המוצר + עד 2 אחים-תואמים דרך `runElementFor`/`compatibleProductsFor`). **🔒 keystone:** נטען רק דרך `features/internal_card/` המגודר (`INTERNAL_CARD`) ⇒ tree-shaken בבנייה הדמו ⇒ byte-identical. smoke (`product_line_3d_test`): CustomPaint לרצף · אפס-GestureDetector · רצף-ריק→תיבה-בטוחה. אינטראקציה-מלאה = `FittingPreview3d`.
 
