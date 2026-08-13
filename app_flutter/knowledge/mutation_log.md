@@ -2121,3 +2121,9 @@
 - **הנכס:** הזרמת קישור עובד→מעסיק מה-claim (`setEmployer`) דרך AuthSnapshot לסשן-העובד. אפס-רגרסיה (בלי-claim → null → '' כמו קודם).
 - **אימות:** `employer_claim_test` 5/5 (null/empty/non-string→null · trimmed uid · AuthSnapshot default null) + auth/board 178 ירוקים · analyze 0.
 - **mutation-verify (בוצע):** `employerIdFromClaims` → `return null` → RED בטסט "non-empty claim → uid" → שחזור → GREEN 5/5.
+
+## #hr-attendance-worker — worker_attendance → workerAttendance/{uid} (slice A, OFF-safe) (2026-08-13)
+- **הנכס:** מאגר-HR ראשון (צד-העובד). העובד כותב `workerAttendance/{uid}` = `{days,employerId,updatedAt}`; קורא את שלו. אפס-רגרסיה כבוי (courier reuse ללא repo → מקומי).
+- **אימות:** `worker_attendance_repository_test` — OFF-null + round-trip (days+employerId+GPS+worked שורדים) + no-doc→empty + per-entry-tolerant. analyze 0 · worker_attendance 44 + stage2 6 ירוקים.
+- **mutation-verify (בוצע):** `loadMine`: `_daysOf(d.data)` → `const []` → RED round-trip → שחזור → GREEN 4/4.
+- **אבטחה:** כלל דו-צדדי — כתיבה self + `employerId==claim` (עובד לא מזייף מעסיק); קריאה self/employer/manager (לא isSignedIn — GPS רגיש).

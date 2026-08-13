@@ -4220,3 +4220,12 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`board_auth.dart`:** `boardSessionFromAuthSnapshot` שורה-153-לשעבר-TODO → `employerId: (worker/courier) ? snap.employerId ?? '' : ''`. עכשiד עובד-שהוקצה-לו-מעסיק נושא את uid-הקבלן בסשן.
 - **אימות:** analyze 0 · employer_claim_test 5/5 + 178 auth/board ירוקים · goldens (auth_state+board_auth) חודשו · mutation-verify (RED→GREEN).
 - **הבא:** הגירת מאגר-HR ראשון (נוכחות) — העובד כותב `workerAttendance/{uid}` עם `employerId`, המעסיק קורא `where employerId==me`.
+
+### #hr-attendance-worker — נוכחות-עובד → workerAttendance/{uid} (slice A · צד-העובד) (2026-08-13)
+מאגר-HR ראשון לשרת, דו-צדדי. דגל `kUserDataServer` (OFF-default) → OFF ⇒ byte-identical (courier reuse נשאר מקומי — repo=null).
+- **`worker_attendance_repository.dart` (חדש):** `WorkerAttendanceRepository.loadMine/saveMine` ל-`workerAttendance/{workerUid}` = `{days,employerId,updatedAt}` (employerId מוטבע לשאילתת-המעסיק הבאה) + provider (repo רק תחת kUserDataServer && backend && worker && !demo && uid).
+- **`worker_attendance.dart`:** הוזרק `repo`; `_load`/`_persist` מנתבים ל-loadMine/saveMine כשקיים (guard `_userTouched` נשמר), אחרת SharedPreferences ללא-שינוי.
+- **`firestore.rules`:** `workerAttendance/{workerUid}` — קריאה self/employer(`resource.employerId==uid`)/manager · **כתיבה self + `employerId==token.employerId`** (עובד לא מזייף מעסיק). GPS רגיש → כלל-קריאה מחמיר (לא isSignedIn).
+- **`deleteAccount.ts`:** `workerAttendance/{uid}` ב-refs. **`stage2_scale_test`:** exempt.
+- **אימות:** analyze 0 · repo-test 4/4 + 44 attendance/courier/stage2 ירוקים · golden מחודש · mutation-verify (RED→GREEN).
+- **slice B הבא:** שאילתת-המעסיק (`attendanceForEmployer` → `where employerId==session.uid`) + חיווט `contractor_attendance_sheet`.

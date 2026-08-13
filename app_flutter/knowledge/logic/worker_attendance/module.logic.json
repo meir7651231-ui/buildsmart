@@ -1,6 +1,6 @@
 {
   "module": "worker_attendance",
-  "source": "../../../app_flutter/lib/state/worker_attendance.dart",
+  "source": "lib/state/worker_attendance.dart",
   "atomCount": 15,
   "atoms": [
     {
@@ -537,6 +537,10 @@
           },
           {
             "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
             "name": "storageKey"
           },
           {
@@ -556,6 +560,14 @@
       },
       "behaviour": {
         "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
           {
             "kind": "compute",
             "detail": "prefs = await SharedPreferences.getInstance()"
@@ -578,6 +590,7 @@
         "getInstance",
         "getString",
         "jsonDecode",
+        "loadMine",
         "tryFromJson"
       ],
       "contract": {
@@ -604,6 +617,10 @@
         "reads": [
           {
             "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
             "name": "state"
           },
           {
@@ -625,11 +642,21 @@
         "gatedBy": []
       },
       "behaviour": {
-        "steps": []
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
       },
       "floor": [
         "getInstance",
         "jsonEncode",
+        "saveMine",
         "setString",
         "toJson"
       ],
@@ -713,6 +740,11 @@
       },
       "connections": {
         "reads": [
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
           {
             "kind": "field",
             "name": "storageKey",
@@ -808,6 +840,11 @@
       },
       "connections": {
         "reads": [
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
           {
             "kind": "field",
             "name": "storageKey",

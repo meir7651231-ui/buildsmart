@@ -16,6 +16,8 @@
 | draft_quote (טיוטות-הצעה) | `draftQuotes/{uid}` (single doc `{quotes:[…],updatedAt}`) | ✅ **חי** (draft_quotes_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
 | comparison_set (השוואות) | `comparisonSets/{uid}` (single doc `{keys:[…],updatedAt}`) | ✅ **חי** (comparison_sets_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
 | customers_store (CRM אישי) | `savedCustomers/{uid}` (single doc `{customers:[…],updatedAt}`) | ✅ **חי** (saved_customers_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
+| **גל-ב׳ HR (דו-צדדי · דורש board→uid+employer):** תשתית ✅ — `setEmployer` callable + `employerId` claim→session | — | ✅ **חי** |
+| worker_attendance (נוכחות-עובד) | `workerAttendance/{workerUid}` (`{days,employerId,updatedAt}`) | ✅ **חי · slice A (צד-עובד)** (repo · rule דו-צדדי · deletion · test · stage2 · golden). slice B (שאילתת-מעסיק) הבא |
 | chatThreads (מחיקה) | authorship+membership מנותקים | ✅ **הוכרע** (2026-08-13 · אישור-בעלים "א"): מחיקה מנתקת fromUid+participantUids+profile; שארית תווית-השם → רפורם-הזהות המקביל, **לא פריט עצמאי** |
 
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).

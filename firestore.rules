@@ -685,6 +685,26 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // workerAttendance/{workerUid} — a worker's own attendance ledger
+    // { days, employerId, updatedAt } (local→server migration behind
+    // kUserDataServer). TWO-SIDED HR: the WORKER writes/reads their OWN doc; their
+    // EMPLOYER (the doc's employerId equals the reader) and a manager may READ it
+    // — the employer roster query (`where employerId == me`) is the next slice.
+    // WRITE is self-only AND the doc's employerId must equal the worker's real
+    // `employerId` claim (minted by setEmployer), so a worker cannot stamp a fake
+    // employer to expose their ledger to an arbitrary uid. Location (GPS) rows
+    // make the strict read-scope essential — never the permissive isSignedIn().
+    match /workerAttendance/{workerUid} {
+      allow read: if isSignedIn()
+          && (request.auth.uid == workerUid
+              || resource.data.employerId == request.auth.uid
+              || isManager());
+      allow write: if isSignedIn()
+          && request.auth.uid == workerUid
+          && request.resource.data.get('employerId', '')
+              == request.auth.token.get('employerId', '');
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,

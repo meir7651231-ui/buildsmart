@@ -385,6 +385,9 @@ export async function eraseUserCompletely(
     // savedCustomers/{uid} — the user's personal saved-customers CRM (local→server
     // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
     db().collection("savedCustomers").doc(uid),
+    // workerAttendance/{uid} — the worker's own attendance ledger (local→server
+    // migration, kUserDataServer). doc-id == workerUid → wiped like the others.
+    db().collection("workerAttendance").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

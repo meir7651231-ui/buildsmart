@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/worker_attendance_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -179,7 +180,7 @@ List<AttendanceDay> clockedInNow(
     ];
 
 class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
-  WorkerAttendanceNotifier({this.storageKey = kWorkerAttendanceKey})
+  WorkerAttendanceNotifier({this.storageKey = kWorkerAttendanceKey, this.repo})
       : super(const []) {
     _load();
   }
@@ -190,11 +191,31 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
   /// otherwise leak attendance across boards).
   final String storageKey;
 
+  /// The server store for THIS worker's own ledger (`workerAttendance/{uid}`)
+  /// when USER_DATA_SERVER is on for a real signed-in worker; null (the default,
+  /// and always for the courier reuse) ⇒ the SharedPreferences path below,
+  /// byte-identical to before. Injected by [workerAttendanceProvider].
+  final WorkerAttendanceRepository? repo;
+
   /// One-shot guard (the board_auth idiom): once a clock-in/out has written
   /// state, a late `_load()` becomes non-destructive.
   bool _userTouched = false;
 
   Future<void> _load() async {
+    final r = repo;
+    if (r != null) {
+      // Server path (USER_DATA_SERVER): this worker's ledger lives at
+      // `workerAttendance/{uid}`. The _userTouched guard still blocks a load
+      // from clobbering a clock-in that landed before the read resolved.
+      try {
+        final list = await r.loadMine();
+        if (!mounted || _userTouched) return;
+        state = list;
+      } on Object catch (_) {
+        // Absent/unreadable — keep the empty ledger.
+      }
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     final raw = prefs.getString(storageKey);
@@ -217,6 +238,15 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
   /// JSON (never add heavy fields — no photos in the ledger). SERVER-SWAP:
   /// the server's attendance ledger replaces this full-rewrite persistence.
   Future<void> _persist() async {
+    final r = repo;
+    if (r != null) {
+      // Server path: mirror this worker's WHOLE ledger to `workerAttendance/{uid}`
+      // (a worker only ever clocks themself, so `state` is their rows).
+      try {
+        await r.saveMine(state);
+      } on Object catch (_) {}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -293,7 +323,9 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
 /// the logged username (the worker sees only his own rows, #66).
 final workerAttendanceProvider =
     StateNotifierProvider<WorkerAttendanceNotifier, List<AttendanceDay>>(
-  (ref) => WorkerAttendanceNotifier(),
+  (ref) => WorkerAttendanceNotifier(
+    repo: ref.watch(workerAttendanceRepositoryProvider),
+  ),
 );
 
 /// The CONTRACTOR's roster — every WORKER attendance record (worker store
