@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `_key` · `state`
+- **reads:** `_key` · `_repo` · `state`
 - **writes:** _none_
 - **calls:** _none_
 - **called-by:** `ComparisonSetNotifier.add` · `ComparisonSetNotifier.clear` · `ComparisonSetNotifier.remove`
@@ -17,11 +17,11 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
-- **compute** — prefs = await SharedPreferences.getInstance()
-- **effect** — await prefs.setStringList(_key, state.toList())
+- **compute** — repo = _repo
+- **branch** — if repo != null
 
 ## floor
-- `getInstance` · `setStringList` · `toList`
+- `getInstance` · `save` · `setStringList` · `toList`
 
 ## חוזה · contract
 - **input:** `()`

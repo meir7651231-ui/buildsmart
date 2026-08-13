@@ -2106,3 +2106,8 @@
 - **אימות:** `draft_quotes_repository_test` — OFF-null (draftQuotesRepositoryProvider→null → SharedPreferences) + round-trip (save→load דרך fake-source; id/label/text/savedAt שורדים) + no-doc→empty. analyze 0 · draft_quote_test 6/6 (רגרסיה) · functions tsc.
 - **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp, לא git) → מוטציה ב-`load`: `return _quotesOf(d.data)` → `return const <DraftQuote>[]` → `flutter test` נכשל RED בטסט ה-round-trip ("decodes the quotes back") → שחזור (`_quotesOf(d.data)` חזר) → GREEN 3/3. הטסט בעל-שיניים.
 - **טרם:** המשך גל-א׳ (comparison_set/customers_store/trades_store/...) + גל-ב׳ HR.
+
+## #user-data-compare — comparison_set → comparisonSets/{uid} (OFF-safe) (2026-08-13)
+- **הנכס:** מיגרציה מקומי→שרת (גל-א׳, Set<String> נקי). אפס-רגרסיה כבוי + round-trip נכון דלוק.
+- **אימות:** `comparison_sets_repository_test` — OFF-null + round-trip (save→load דרך fake-source; הסֶט שורד) + no-doc→empty + non-string→empty. analyze 0 · comparison-consumers + stage2 ירוקים · functions tsc.
+- **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp) → מוטציה ב-`load`: `return _keysOf(d.data)` → `return const <String>{}` → RED בטסט round-trip → שחזור (`_keysOf` חזר) → GREEN 4/4.

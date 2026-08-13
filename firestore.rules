@@ -660,6 +660,12 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // comparisonSets/{uid} — the user's side-by-side compare set (local→server
+    // migration behind kUserDataServer). Self-only, doc-id == auth.uid (mirrors draftQuotes).
+    match /comparisonSets/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,

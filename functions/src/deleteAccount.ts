@@ -379,6 +379,9 @@ export async function eraseUserCompletely(
     // draftQuotes/{uid} — the user's saved quote drafts (local→server migration,
     // kUserDataServer). Wiped like the other uid-keyed personal docs.
     db().collection("draftQuotes").doc(uid),
+    // comparisonSets/{uid} — the user's side-by-side compare set (local→server
+    // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
+    db().collection("comparisonSets").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

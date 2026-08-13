@@ -4174,3 +4174,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`draft_quote.dart`:** הוסר mixin `JsonListPrefsPersisted`; notifier מנתב `_load`/`_persist` ל-repo כשקיים (`List.of`, latch `_loaded` + `set state` guard), אחרת SharedPreferences ללא-שינוי. save/remove/clear → `_persist`.
 - **`firestore.rules`:** `draftQuotes/{uid}` self-only. **`deleteAccount.ts`:** `draftQuotes/{uid}` ב-refs → נמחק במחיקת-משתמש.
 - **אימות:** analyze 0 errors · draft_quotes_repository_test 3/3 (OFF-null + round-trip + no-doc→empty) + draft_quote_test 6/6 (רגרסיה) ירוקים · functions tsc.
+
+### #user-data-compare — מיגרציית סֶט-ההשוואה מקומי→שרת (2026-08-13)
+גל-א׳ slice (Set<String> נקי, תבנית draft_quotes verbatim). דגל `kUserDataServer` (OFF-default) → OFF ⇒ SharedPreferences byte-identical.
+- **`comparison_sets_repository.dart` (חדש):** `ComparisonSetsRepository` (load/save Set ל-`comparisonSets/{uid}` = `{keys:[…],updatedAt}`) + provider (repo רק תחת kUserDataServer && backend && uid && !anon).
+- **`comparison_set.dart`:** הוסר mixin `StringSetPrefsPersisted`; notifier מנתב `_load`/`_persist` ל-repo כשקיים (latch `_loaded` + set-state guard), אחרת getStringList/setStringList ללא-שינוי.
+- **`firestore.rules`:** `comparisonSets/{uid}` self-only. **`deleteAccount.ts`:** ב-refs. **`stage2_scale_test`:** exempt (self-doc scoped).
+- **אימות:** analyze 0 · comparison_sets_repository_test 4/4 + stage2 6/6 · golden מחודש · mutation-verify (RED→GREEN).
