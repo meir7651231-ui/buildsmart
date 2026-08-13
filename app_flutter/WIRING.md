@@ -4303,3 +4303,11 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`firestore.rules`:** `vacationRequests/{reqId}` — create רק המגיש+pending · read מגיש/מעסיק/מנהל · update רק מעסיק/מנהל + `username`/`employerId` קפואים (אין self-approval) · delete=false. **`deleteAccount.ts`:** `purgeOwnedVacationRequests` (delete `where username==uid`, paginated).
 - **`stage2`:** ללא שינוי (כל 3 ה-sources עם bound:).
 - **אימות:** analyze 0 · repo-test 4/4 + vacation/contractor_vacation_approval/hr_decide_once/stage2 (51) ירוקים · golden מחודש · mutation-verify (RED→GREEN 4/4).
+
+### #hr-courier-clock — שעון-משלוחים → courierClock/{uid} (single-doc · self-only) (2026-08-13)
+מאגר-HR עשירי — שעון-המשלוחים של השליח (מדידת best-effort). ה-writer הוא **free-function** (לא notifier), אז ה-repo הושחל דרך נקודות-ה-advance וה-reader. `kUserDataServer` OFF ⇒ byte-identical.
+- **`courier_clock_repository.dart` (חדש):** load/save של מפת-השעון ל-`courierClock/{uid}`=`{entries,updatedAt}` (self-only, role==courier).
+- **`courier_clock.dart`:** חולץ `stampClockEntry` (stamp טהור write-once, משותף למקומי+שרת); `stampCourierClock(..., repo:)` — ענף-שרת read-modify-write, אחרת SharedPreferences.
+- **`courier_reports_tab.dart`** (reader `courierClockProvider`) + **3 call-sites** (`courier_dashboard_screen`/`courier_delivery_detail_sheet`/`persona_pod_sheet`) מעבירים `repo: ref.read(courierClockRepositoryProvider)`. אין שינוי חזותי (visual_log).
+- **`firestore.rules`:** `courierClock/{uid}` self-only. **`deleteAccount.ts`:** ref. **`stage2`:** exempt.
+- **אימות:** analyze 0 · repo-test 5/5 + stage2 ירוקים · golden מחודש · mutation-verify (RED `+4 -1`→GREEN 5/5).

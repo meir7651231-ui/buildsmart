@@ -1,13 +1,74 @@
 {
   "module": "courier_clock",
   "source": "/home/user/buildsmart/app_flutter/lib/state/courier_clock.dart",
-  "atomCount": 1,
+  "atomCount": 2,
   "atoms": [
+    {
+      "fn": "stampClockEntry",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic> map, String orderId, {required bool pickedUp, required bool delivered}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "from"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "stampCourierClock"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "entry = map[orderId] is Map ? Map<String, dynamic>.from(map[orderId] as Map) : <String, dynamic>{}"
+          },
+          {
+            "kind": "compute",
+            "detail": "now = DateTime.now().toIso8601String()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if pickedUp && DateTime.tryParse('${entry['pickedUpAt']}') == null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if delivered && DateTime.tryParse('${entry['deliveredAt']}') == null"
+          },
+          {
+            "kind": "effect",
+            "detail": "map[orderId] = entry"
+          }
+        ]
+      },
+      "floor": [
+        "Map",
+        "now",
+        "toIso8601String",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> map, String orderId, {required bool pickedUp, required bool delivered})",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
     {
       "fn": "stampCourierClock",
       "kind": "top-level-function",
       "object": {
-        "signature": "(String orderId, {bool pickedUp = false, bool delivered = false}) -> Future<void>",
+        "signature": "(String orderId, {bool pickedUp = false, bool delivered = false, CourierClockRepository? repo}) -> Future<void>",
         "constants": []
       },
       "connections": {
@@ -18,7 +79,8 @@
           },
           {
             "kind": "global",
-            "name": "from"
+            "name": "from",
+            "transitive": true
           }
         ],
         "writes": [
@@ -27,7 +89,12 @@
             "name": "prefs.setString"
           }
         ],
-        "calls": [],
+        "calls": [
+          {
+            "name": "stampClockEntry",
+            "module": true
+          }
+        ],
         "calledBy": [],
         "gatedBy": []
       },
@@ -36,22 +103,24 @@
           {
             "kind": "precond",
             "detail": "if !pickedUp && !delivered → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if repo != null"
           }
         ]
       },
       "floor": [
-        "Map",
         "getInstance",
         "getString",
         "jsonDecode",
         "jsonEncode",
-        "now",
-        "setString",
-        "toIso8601String",
-        "tryParse"
+        "load",
+        "save",
+        "setString"
       ],
       "contract": {
-        "input": "(String orderId, {bool pickedUp = false, bool delivered = false})",
+        "input": "(String orderId, {bool pickedUp = false, bool delivered = false, CourierClockRepository? repo})",
         "output": "Future<void>",
         "purity": "side-effecting",
         "precond": [

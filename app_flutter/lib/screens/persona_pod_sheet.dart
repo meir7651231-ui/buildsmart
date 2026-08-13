@@ -29,6 +29,7 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/data/repositories/courier_clock_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/courier_dashboard_screen.dart'
     show kCourierDeliveryCoins;
@@ -342,7 +343,11 @@ class PersonaPodSheet extends ConsumerWidget {
                   // F-10: stamp the delivery clock BEFORE the advance — the
                   // order mutation is exactly what triggers the reports-tab
                   // re-read, so the stamp is already on disk by then.
-                  await stampCourierClock(order.id, delivered: true);
+                  await stampCourierClock(
+                    order.id,
+                    delivered: true,
+                    repo: ref.read(courierClockRepositoryProvider),
+                  );
                   if (!context.mounted) return;
                   ref
                       .read(sysOrdersProvider.notifier)

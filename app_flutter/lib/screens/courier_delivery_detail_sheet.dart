@@ -10,6 +10,7 @@
 // עם שורת-אמת שחותמות הזמן יחוברו עם חיבור השרת.
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
+import 'package:buildsmart/data/repositories/courier_clock_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/courier_dashboard_screen.dart'
     show kCourierDeliveryCoins;
@@ -402,6 +403,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
       order.id,
       pickedUp: wasPickup,
       delivered: wasTransit,
+      repo: ref.read(courierClockRepositoryProvider),
     );
     if (!context.mounted) return;
     ref.read(sysOrdersProvider.notifier).courierAdvance(order.id);

@@ -26,6 +26,7 @@
 | courier_profile_store (פרופיל-שליח) | `courierProfiles/{uid}` (`{…profile,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** · deletion · test · golden · תאום worker_profile) |
 | store_profile_store (פרופיל-עסק + תעודות-עסק) | `storeProfiles/{uid}` + `storeCerts/{uid}` | ✅ **חי** (repo single-doc + מיחזור WorkerCerts · rule **self-only** ×2 · deletion · test · golden · legacy-seed מדולג בשרת) |
 | vacation_requests (בקשות-חופשה) **cross-party** | `vacationRequests/{requestId}` (per-doc) | ✅ **חי** (repo submit/decide · rule cross-party: create-עצמי-pending · update רק מעסיק/מנהל + keys קפואים · read מגיש/מעסיק/מנהל · deletion by-query · test · golden · mutation-verify) |
+| courier_clock (שעון-משלוחים) | `courierClock/{uid}` (`{entries,updatedAt}`) | ✅ **חי** (repo single-doc · free-function writer עם repo מושחל · rule **self-only** · deletion · test · golden · אין שינוי חזותי) |
 | chatThreads (מחיקה) | authorship+membership מנותקים | ✅ **הוכרע** (2026-08-13 · אישור-בעלים "א"): מחיקה מנתקת fromUid+participantUids+profile; שארית תווית-השם → רפורם-הזהות המקביל, **לא פריט עצמאי** |
 
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).

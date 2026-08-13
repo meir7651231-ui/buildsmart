@@ -148,6 +148,7 @@ void main() {
       'lib/data/repositories/worker_profile_repository.dart', // self-doc scoped (workerProfiles/{uid} single doc — the worker's own board profile; SELF-ONLY, no employer query)
       'lib/data/repositories/courier_profile_repository.dart', // self-doc scoped (courierProfiles/{uid} single doc — the courier's own board profile; SELF-ONLY, no employer query)
       'lib/data/repositories/store_profile_repository.dart', // self-doc scoped (storeProfiles/{uid} single doc — the store's own business profile; SELF-ONLY, no roster query)
+      'lib/data/repositories/courier_clock_repository.dart', // self-doc scoped (courierClock/{uid} single doc — the courier's own delivery-clock map; SELF-ONLY, no roster query)
       'lib/data/repositories/chat_repository.dart', // threads participant-scoped
       'lib/data/repositories/chat_firebase.dart', // messages BOUNDED → checked below
       'lib/data/repositories/material_requests_firebase.dart', // BOUNDED → checked below

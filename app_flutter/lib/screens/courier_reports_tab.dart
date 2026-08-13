@@ -43,6 +43,7 @@ import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/data/repositories/courier_clock_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/logic/calendar_days.dart';
 import 'package:buildsmart/screens/daily_report_screen.dart'
@@ -111,10 +112,19 @@ final courierClockProvider = FutureProvider<Map<String, CourierClockEntry>>((
 ) async {
   ref.watch(sysOrdersProvider); // any order mutation → re-read the side-map
   try {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(kCourierClockKey);
-    if (raw == null || raw.isEmpty) return const {};
-    final m = jsonDecode(raw) as Map<String, dynamic>;
+    // Server path (USER_DATA_SERVER on for a real courier): the clock lives at
+    // courierClock/{uid}; OFF (repo null — the default) reads the verbatim
+    // SharedPreferences side-map, byte-identical.
+    final repo = ref.watch(courierClockRepositoryProvider);
+    final Map<String, dynamic> m;
+    if (repo != null) {
+      m = await repo.load();
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(kCourierClockKey);
+      if (raw == null || raw.isEmpty) return const {};
+      m = jsonDecode(raw) as Map<String, dynamic>;
+    }
     final out = <String, CourierClockEntry>{};
     m.forEach((id, v) {
       if (v is! Map) return;

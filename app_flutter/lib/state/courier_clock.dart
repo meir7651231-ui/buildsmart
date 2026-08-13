@@ -23,6 +23,7 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/courier_clock_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// `bs.courier-clock.v1` — kept private to avoid clashing with the reader's
@@ -30,23 +31,62 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// string values MUST stay identical).
 const String _kCourierClockKey = 'bs.courier-clock.v1';
 
+/// Apply the write-once stamp for [orderId] onto the in-memory clock [map]:
+/// `pickedUp` sets `pickedUpAt`, `delivered` sets `deliveredAt`. An already-valid
+/// stamp is PRESERVED (a double call can never falsify the first honest wall-clock
+/// capture), and every OTHER field the entry carries is kept untouched. Pure —
+/// the SharedPreferences and the server path share it, so both stamp identically.
+void stampClockEntry(
+  Map<String, dynamic> map,
+  String orderId, {
+  required bool pickedUp,
+  required bool delivered,
+}) {
+  final entry = map[orderId] is Map
+      ? Map<String, dynamic>.from(map[orderId] as Map)
+      : <String, dynamic>{};
+  final now = DateTime.now().toIso8601String();
+  if (pickedUp && DateTime.tryParse('${entry['pickedUpAt']}') == null) {
+    entry['pickedUpAt'] = now;
+  }
+  if (delivered && DateTime.tryParse('${entry['deliveredAt']}') == null) {
+    entry['deliveredAt'] = now;
+  }
+  // NOTE: 'attempts' is intentionally NOT stamped — no re-attempt flow exists;
+  // the reader defaults absent to 1 (F-10 ADJUST).
+  map[orderId] = entry;
+}
+
 /// Stamp the delivery clock for [orderId]: `pickedUp: true` writes
 /// `pickedUpAt` (pickup→transit), `delivered: true` writes `deliveredAt`
-/// (transit→delivered). Read-modify-write on `bs.courier-clock.v1`.
+/// (transit→delivered). Read-modify-write.
 ///
-/// Each stamp is write-once: an already-valid stamp is preserved, so a
-/// double call can never falsify the first honest wall-clock capture
-/// (the stage machine never revisits a stage anyway).
+/// SERVER path ([repo] non-null, USER_DATA_SERVER on for a real courier):
+/// read-modify-write `courierClock/{uid}`. OFF path (repo null — the default,
+/// byte-identical): read-modify-write `bs.courier-clock.v1` in SharedPreferences.
 ///
-/// Best-effort by design: a storage failure (e.g. web localStorage quota)
-/// must never break the delivery advance itself — the reports then honestly
-/// show the entry as unmeasured, exactly like the pre-clock era.
+/// Each stamp is write-once (see [stampClockEntry]). Best-effort by design: a
+/// storage/server failure must NEVER break the delivery advance itself — the
+/// reports then honestly show the entry as unmeasured, exactly like the
+/// pre-clock era.
 Future<void> stampCourierClock(
   String orderId, {
   bool pickedUp = false,
   bool delivered = false,
+  CourierClockRepository? repo,
 }) async {
   if (!pickedUp && !delivered) return; // nothing to stamp
+  if (repo != null) {
+    // Server path: read-modify-write the courier's own courierClock/{uid} doc.
+    try {
+      final map = await repo.load();
+      stampClockEntry(map, orderId, pickedUp: pickedUp, delivered: delivered);
+      await repo.save(map);
+    } on Object catch (_) {
+      // Swallowed by design — best-effort measurement (see the doc comment).
+    }
+    return;
+  }
   try {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_kCourierClockKey);
@@ -61,21 +101,7 @@ Future<void> stampCourierClock(
       // repairs the key for the stamps from here on.
       map = <String, dynamic>{};
     }
-    // Preserve whatever the entry already carries (stamps written by the
-    // other advance points, a future attempts field) — only add our stamp.
-    final entry = map[orderId] is Map
-        ? Map<String, dynamic>.from(map[orderId] as Map)
-        : <String, dynamic>{};
-    final now = DateTime.now().toIso8601String();
-    if (pickedUp && DateTime.tryParse('${entry['pickedUpAt']}') == null) {
-      entry['pickedUpAt'] = now;
-    }
-    if (delivered && DateTime.tryParse('${entry['deliveredAt']}') == null) {
-      entry['deliveredAt'] = now;
-    }
-    // NOTE: 'attempts' is intentionally NOT stamped — no re-attempt flow
-    // exists; the reader defaults absent to 1 (F-10 ADJUST).
-    map[orderId] = entry;
+    stampClockEntry(map, orderId, pickedUp: pickedUp, delivered: delivered);
     await prefs.setString(_kCourierClockKey, jsonEncode(map));
   } on Object catch (_) {
     // Swallowed by design — see the doc comment (best-effort measurement).

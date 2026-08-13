@@ -786,6 +786,15 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // courierClock/{uid} — the courier's own delivery-clock side-map
+    // { entries: { orderId: { pickedUpAt, deliveredAt, attempts } }, updatedAt }
+    // (local→server migration behind kUserDataServer). SELF-ONLY: a best-effort
+    // MEASUREMENT read back only in the courier's own reports tab (the store gets
+    // the monthly report via CHAT) — only the owner reads/writes their own doc.
+    match /courierClock/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // storeProfiles/{uid} · storeCerts/{uid} — the STORE's own business profile
     // { businessName, phone, address, businessId, logo, updatedAt } and its
     // business-certificate wallet (license/insurance), local→server migration

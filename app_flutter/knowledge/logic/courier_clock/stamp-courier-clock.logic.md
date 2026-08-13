@@ -5,25 +5,26 @@
 
 ## עצם · object
 - **kind:** top-level-function
-- **signature:** `(String orderId, {bool pickedUp = false, bool delivered = false}) -> Future<void>`
+- **signature:** `(String orderId, {bool pickedUp = false, bool delivered = false, CourierClockRepository? repo}) -> Future<void>`
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `_kCourierClockKey` · `from`
+- **reads:** `_kCourierClockKey` · `from↝`
 - **writes:** `io:prefs.setString`
-- **calls:** _none_
+- **calls:** `stampClockEntry`
 - **called-by:** _none_
 - **gated-by:** _none_
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
 - **precond** — if !pickedUp && !delivered → return (void)
+- **branch** — if repo != null
 
 ## floor
-- `Map` · `getInstance` · `getString` · `jsonDecode` · `jsonEncode` · `now` · `setString` · `toIso8601String` · `tryParse`
+- `getInstance` · `getString` · `jsonDecode` · `jsonEncode` · `load` · `save` · `setString`
 
 ## חוזה · contract
-- **input:** `(String orderId, {bool pickedUp = false, bool delivered = false})`
+- **input:** `(String orderId, {bool pickedUp = false, bool delivered = false, CourierClockRepository? repo})`
 - **output:** `Future<void>`
 - **purity:** side-effecting
 - **precond:**

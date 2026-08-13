@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
+import 'package:buildsmart/data/repositories/courier_clock_repository.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart'
     show visibleOrderIdsProvider;
 import 'package:buildsmart/data/supplier_data.dart';
@@ -816,8 +817,11 @@ class _CourierDashboardScreenState
     // F-10 — ה-writer של bs.courier-clock.v1: חותמת-שעון ברגעי ה-advance
     // האמיתיים דרך ה-helper המשותף (פורמט תואם-בייט לקורא בדוחות-השליח).
     // attempts לא נחתם — אין זרימת ניסיון-חוזר אמיתית.
-    if (movedToTransit) await stampCourierClock(o.id, pickedUp: true);
-    if (delivered) await stampCourierClock(o.id, delivered: true);
+    final clockRepo = ref.read(courierClockRepositoryProvider);
+    if (movedToTransit) {
+      await stampCourierClock(o.id, pickedUp: true, repo: clockRepo);
+    }
+    if (delivered) await stampCourierClock(o.id, delivered: true, repo: clockRepo);
     if (!mounted) return;
 
     if (!delivered) {
