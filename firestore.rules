@@ -121,6 +121,18 @@ service cloud.firestore {
       return hasRole('manager') || isAdmin();
     }
 
+    /// HR read-scope: the signed-in caller is the EMPLOYER of [workerUid] — the
+    /// `users/{workerUid}.employerId` mirror (server-assigned by the setEmployer
+    /// callable, self-write-frozen) equals the caller's uid. This is the ONE
+    /// proof future worker-HR read rules use to let a contractor read THEIR
+    /// workers' docs (attendance/certs/…) without exposing them to anyone else.
+    /// Referenced by no match block yet — adding it changes no existing rule.
+    function isEmployerOf(workerUid) {
+      return isSignedIn()
+          && get(/databases/$(database)/documents/users/$(workerUid))
+                .data.get('employerId', '') == request.auth.uid;
+    }
+
     /// The app OWNER, by verified email — the authority ROOT of the Studio
     /// publish-to-all path. Mirrors, verbatim value, functions/src/common.ts
     /// `isOwnerEmail` (OWNER_EMAIL) and the app's kOwnerEmails
@@ -204,13 +216,13 @@ service cloud.firestore {
       allow create: if isAdmin()
           || (isSignedIn() && request.auth.uid == uid
               && !request.resource.data.keys()
-                  .hasAny(['role', 'roles', 'storeUid', 'orgId'])
+                  .hasAny(['role', 'roles', 'storeUid', 'orgId', 'employerId'])
               && request.resource.data.get('status', 'pending') == 'pending');
       allow update: if isAdmin()
           || (isSignedIn() && request.auth.uid == uid
               && !request.resource.data.diff(resource.data)
                   .affectedKeys()
-                  .hasAny(['role', 'roles', 'storeUid', 'orgId', 'status']));
+                  .hasAny(['role', 'roles', 'storeUid', 'orgId', 'status', 'employerId']));
       allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
     }
 

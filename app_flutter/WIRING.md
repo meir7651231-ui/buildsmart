@@ -4198,3 +4198,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`customers_store.dart`:** הוזרק `_repo`; `_load`/`_persist` מנתבים ל-repo כשקיים (`set state` write-behind נשמר, latch `_loaded`), אחרת SharedPreferences ללא-שינוי.
 - **`firestore.rules`:** `savedCustomers/{uid}` self-only. **`deleteAccount.ts`:** ב-refs. **`stage2_scale_test`:** exempt.
 - **אימות:** analyze 0 · saved_customers_repository_test 4/4 + stage2 6/6 · golden מחודש · mutation-verify (RED→GREEN).
+
+### #hr-enable-employer-link — קישור עובד→מעסיק בשרת (setEmployer) (2026-08-13)
+תשתית-פתיחה ל-HR-לשרת: כדי לשים נתוני-עובד בשרת עם כלל בטוח *"עובד כותב · רק המעסיק/מנהל קורא"*, השרת חייב לדעת מי המעסיק של העובד. היום `boardSessionFromAuthSnapshot` משאיר `employerId:''` ("אין claim עדיין"). זה בונה את ה-claim.
+- **`functions/src/setEmployer.ts` (חדש):** callable admin-only (mirror של `setOrg`) — `{uid, employerUid}` → כותב claim `employerId` + מראה `users/{uid}.employerId` (או revoke). audit-logged. ליבה טהורה `setEmployerCore.ts` (`parseSetEmployerInput`) + `setEmployer.test.ts` (10/10: assign/revoke/self-employer-guard/path-safety). ייצוא ב-index.ts.
+- **`firestore.rules`:** `employerId` נוסף לרשימת-ההקפאה של `users/{uid}` (self-write frozen — רק ה-callable/Admin כותב). helper חדש `isEmployerOf(workerUid)` (get על doc-העובד — הקישור לקריאות-HR עתידיות; לא-נצרך עדיין).
+- **אימות:** ליבה 10/10 (`ts-node`); ה-wrapper משכפל setOrg verbatim (tsc מקומי חסום-deps — כמו כל functions בסביבה; מאומת ב-CI). אפס-שינוי-Dart → זרימות קיימות byte-identical.
+- **הבא:** הזרמת `employerId` מהמסמך לסשן (`boardSessionFromAuthSnapshot` שורה 153 TODO) + הגירת מאגר-HR ראשון (נוכחות) עם כלל `isEmployerOf`.

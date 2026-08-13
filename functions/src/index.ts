@@ -206,6 +206,7 @@ export {
 } from "./push";
 export { getUploadUrl } from "./r2";
 export { onUserDocWritten } from "./directory";
+export { setEmployer } from "./setEmployer";
 export {
   onUserCreatedQueueApproval,
   reviewRoleRequest,
