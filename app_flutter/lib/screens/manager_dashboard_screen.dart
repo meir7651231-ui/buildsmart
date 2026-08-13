@@ -42,11 +42,10 @@ import 'package:buildsmart/screens/keyboard_tool_tree.dart'
 import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
-import 'package:buildsmart/screens/org_setup_wizard_screen.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/studio/studio_entry.dart';
 import 'package:buildsmart/screens/studio_screen.dart';
-import 'package:buildsmart/screens/trade_builder/trade_builder_home.dart';
+import 'package:buildsmart/screens/trade_builder/system_setup_host_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 // #85ב/#23 — the SHARED proof-photo renderer (one renderer for both sides
 // of the approval: the worker sheet and this dashboard).
@@ -90,8 +89,6 @@ import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
-import 'package:buildsmart/state/trade_builder_flags.dart'
-    show kTradeBuilderFlag;
 import 'package:buildsmart/state/vacation_requests.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
@@ -4549,47 +4546,31 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
           const SizedBox(height: BsTokens.space3),
         ],
 
-        // 7. 🏗️ בונה ענפים (Pillar-2 · step 44) — the OWNER-GATED authoring
-        // entry. A collection-`if` on [featureFlagsProvider] (kTradeBuilderFlag,
-        // default OFF — absent from prefs AND `_forcedOnFlags`), so with the
-        // flag off the entry is ABSENT from the widget tree and the ניהול tab
-        // is byte-identical to before; the ONLY path in is the owner-staged
-        // `enable('kTradeBuilder')`. Reuses the same [_ManageSection] card
-        // idiom as every entry above, but as a NAVIGATION tile (`open: false`,
-        // no accordion body): tapping the header pushes the trade-builder home.
-        if (ref.watch(featureFlagsProvider).contains(kTradeBuilderFlag)) ...[
-          const SizedBox(height: BsTokens.space3),
-          _ManageSection(
-            sectionKey: 'tradeBuilder',
-            titleCfgId: 'manager.manage.tradeBuilder.title',
-            emoji: '🏗️',
-            title: 'בונה ענפים',
-            sub: 'בניית ענף חדש — קטגוריות, מוצרים וחוקים',
-            open: false,
-            onTap: () =>
-                Navigator.of(context).push(TradeBuilderHomeScreen.route()),
-            child: const SizedBox.shrink(),
-          ),
-        ],
-
-        // 8. 🔌 אשף הקמת חברה (giant-system V5) — the org-config authoring
-        // entry. A collection-`if` on the COMPILE-CONST [kOrgConfigFlag]
-        // (ships OFF — `--dart-define=ORG_CONFIG=true` arms it), so every
-        // define-less build drops the entry at compile time and the ניהול tab
-        // stays byte-identical (out of the pinned manager tests' way). Same
-        // NAVIGATION-tile idiom as בונה ענפים above (`open: false`, no
-        // accordion body): tapping the header pushes the setup wizard.
+        // 7. 🔌 הקמת המערכת (Pillar-2 + giant-system V5) — the UNIFIED
+        // manager-only setup entry. One place, two phases: FIRST build the
+        // trade (categories/products/rules), THEN configure the org
+        // (vertical/modules/terms/screens) — "קודם מקימים מערכת ואז מגדירים
+        // אותה". A collection-`if` on the COMPILE-CONST [kOrgConfigFlag] (ships
+        // OFF — `--dart-define=ORG_CONFIG=true` arms it), so every define-less
+        // build drops the entry at compile time and the ניהול tab stays
+        // byte-identical (out of the pinned manager tests' way); the tile only
+        // appears when ORG_CONFIG is armed, which is exactly when phase-2's
+        // config persists. Same NAVIGATION-tile idiom (`open: false`, no
+        // accordion body): tapping the header pushes the two-phase host, which
+        // constructs the trade-builder screen DIRECTLY (it does not self-gate),
+        // so `kTradeBuilder` stays owner-staged-OFF and its pinned tests are
+        // untouched.
         if (kOrgConfigFlag) ...[
           const SizedBox(height: BsTokens.space3),
           _ManageSection(
-            sectionKey: 'orgWizard',
-            titleCfgId: 'manager.manage.orgWizard.title',
+            sectionKey: 'systemSetup',
+            titleCfgId: 'manager.manage.systemSetup.title',
             emoji: '🔌',
-            title: 'אשף הקמת חברה',
-            sub: 'הרכבת חברה — ורטיקל, מודולים ומונחים',
+            title: 'הקמת המערכת',
+            sub: 'בניית ענף חדש והגדרת החברה — הכל במקום אחד',
             open: false,
             onTap: () =>
-                Navigator.of(context).push(OrgSetupWizardScreen.route()),
+                Navigator.of(context).push(SystemSetupHostScreen.route()),
             child: const SizedBox.shrink(),
           ),
         ],

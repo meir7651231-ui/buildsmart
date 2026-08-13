@@ -46,7 +46,13 @@ const int _kWizardTotal = 6;
 
 /// 🏗️ בונה ענפים — the trade-builder home (Pillar-2 · step 44, wizard step 1).
 class TradeBuilderHomeScreen extends ConsumerWidget {
-  const TradeBuilderHomeScreen({super.key});
+  const TradeBuilderHomeScreen({super.key, this.onContinue});
+
+  /// Optional "advance to the next setup phase" callback. Null (the default) on
+  /// the standalone route ⇒ the screen is byte-identical to before. When the
+  /// unified `SystemSetupHostScreen` provides it, a "המשך להגדרת החברה" button
+  /// appears in the bottom bar so the manager can move on to the org wizard.
+  final VoidCallback? onContinue;
 
   static Route<void> route() => MaterialPageRoute<void>(
         builder: (_) => const TradeBuilderHomeScreen(),
@@ -112,10 +118,35 @@ class TradeBuilderHomeScreen extends ConsumerWidget {
                 BsTokens.space4,
                 BsTokens.space4,
               ),
-              child: _AddTradeButton(
-                onTap: () =>
-                    Navigator.of(context).push(TradeDefineStepScreen.route()),
-              ),
+              // Standalone route (onContinue == null) ⇒ byte-identical: just the
+              // pinned add-action. Inside the unified setup host (onContinue set)
+              // ⇒ a second "המשך להגדרת החברה" button advances to the org wizard.
+              child: onContinue == null
+                  ? _AddTradeButton(
+                      onTap: () => Navigator.of(context)
+                          .push(TradeDefineStepScreen.route()),
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _AddTradeButton(
+                          onTap: () => Navigator.of(context)
+                              .push(TradeDefineStepScreen.route()),
+                        ),
+                        const SizedBox(height: BsTokens.space2),
+                        Semantics(
+                          button: true,
+                          label: 'המשך להגדרת החברה',
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: onContinue,
+                              child: const Text('המשך להגדרת החברה ←'),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
         ),
