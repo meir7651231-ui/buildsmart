@@ -14,6 +14,12 @@ dependencies:
   camera_web: ^0.3.5
 
   cupertino_icons: ^1.0.8
+
+  # SHA-256 for the owner-set access-lock password hash — the literal password is
+  # never persisted, only its hash (the org-config doc is public-read). Promoted
+  # from transitive (firebase pulls it); `any` like intl, resolved on both SDK pins.
+  crypto: any
+
   flutter:
     sdk: flutter
   flutter_localizations:

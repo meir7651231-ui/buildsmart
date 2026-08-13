@@ -70,6 +70,7 @@ class OrgConfig {
     this.modules = const {},
     this.features = const {},
     this.terms = const {},
+    this.accessPasswordHash = '',
   });
 
   /// The org's stable machine handle ('' = the unbranded default build).
@@ -96,6 +97,12 @@ class OrgConfig {
   /// Vocabulary overrides by term key (''/absent = the built-in wording) —
   /// see [termOf].
   final Map<String, String> terms;
+
+  /// SHA-256 hash of the owner-set access password ('' = no lock). NEVER the
+  /// literal password (config/access_lock.dart hashes it before it is stored,
+  /// since this rides the public-read org-config doc). Enforced by
+  /// [AccessLockGate] when [kAccessLock] is armed.
+  final String accessPasswordHash;
 }
 
 /// The unbranded all-on default: EMPTY maps + absent=on ⇒ every module and
@@ -136,6 +143,7 @@ OrgConfig? decodeOrgConfig(String raw) {
     modules: _boolMapField(root['modules']),
     features: _boolMapField(root['features']),
     terms: _stringMapField(root['terms']),
+    accessPasswordHash: _stringField(root['pwHash']),
   );
 }
 
@@ -151,6 +159,7 @@ String encodeOrgConfig(OrgConfig c) => jsonEncode(<String, dynamic>{
       if (c.modules.isNotEmpty) 'modules': c.modules,
       if (c.features.isNotEmpty) 'features': c.features,
       if (c.terms.isNotEmpty) 'terms': c.terms,
+      if (c.accessPasswordHash.isNotEmpty) 'pwHash': c.accessPasswordHash,
     });
 
 /// The TOTAL layer resolver — never null, never throws. The OWNER layer

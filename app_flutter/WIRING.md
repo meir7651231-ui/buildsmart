@@ -1,5 +1,15 @@
 # WIRING CONTRACT — app_flutter
 
+## #access-lock — 🔒 נעילת-סיסמה של הבעלים · מסך-מנהל → כל הקליינטים (מגודר) — 2026-08-13
+נעילת-גישה שהבעלים קובע: שדה-סיסמה באשף-ההקמה (מסך-מנהל) → נשמר כ-**SHA-256 hash בלבד** על `OrgConfig.accessPasswordHash` → רוכב על org-config-live לכל קליינט → `AccessLockGate` חוסם את האפליקציה עד שמקישים את הסיסמה. ריק = אין נעילה.
+- **`config/access_lock.dart` (חדש):** דגל `kAccessLock` (`ACCESS_LOCK`, חמוש ע"י `ORG_CONFIG`) · `hashAccessPassword(plain)` (SHA-256 hex · ריק/רווח⇒'' · salt `bs.access.v1`) · `accessPasswordMatches(hash,entered)`. חבילת `crypto` הועלתה ל-direct dep (`any`, כמו intl).
+- **`OrgConfig.accessPasswordHash`** (`config/org_config.dart`) + encode/decode (key `pwHash` · omit-empty). `_rebuild` באשף מעביר carry-through — עריכת-שדה-אחר **לא מוחקת** את הסיסמה.
+- **`screens/access_lock_gate.dart` (חדש):** `AccessLockGate(child)` — קורא `orgConfigProvider.accessPasswordHash`; ריק/כבר-נפתח-מקומית⇒child; אחרת מסך-נעילה (שדה-obscure + "כניסה"). נכון⇒persist ל-prefs (`kAccessUnlockedKey`, ממופתח לפי ה-hash ⇒ rotation נועל-מחדש)+child; שגוי⇒"סיסמה שגויה".
+- **`main.dart`:** `home: kAccessLock ? AccessLockGate(child: OnboardingGate()) : OnboardingGate()` — מגודר ⇒ OFF tree-shakes ⇒ byte-identical.
+- **אשף `_save`:** ה-hash מתפרסם דרך נתיב-ה-publish הקיים (org-config-live) ⇒ מגיע לכל הקליינטים.
+- **🔑 בדיקות:** `access_lock_test.dart` (hash · match · config round-trip · gate widget: ריק⇒child · שגוי⇒נעול · נכון⇒נפתח).
+- **🔒 keystone:** `kAccessLock` OFF ⇒ passthrough ⇒ byte-identical. נעילת-**גישה** רכה (client-side · hash בקונפיג ציבורי) — לא אימות-פר-משתמש.
+
 ## #org-config-live-sync — 🌐 אשף-ההקמה מגיע לכל המשתמשים · סנכרון-שרת חי (בעלים-מפרסם · מגודר) — 2026-08-13
 אשף-ההקמה שמר עד היום **מקומית בלבד** (`persistOrgConfig`→SharedPreferences) ⇒ הגדרת-מנהל לא שינתה כלום לאף אחד אחר. הפרוסה מחווטת את **ערוץ-ה-`companyJson` השמור** מקצה-לקצה, במירור-מדויק של הסנכרון-המשותף המוכח של ה-Studio (`studioConfigLive`): הבעלים מפרסם את הגדרת-האשף ל**מסמך-שרת אחד ניתן-לכתיבה-ע"י-הבעלים** (`orgConfigLive/current`), וכל קליינט קורא אותו **חי** דרך מנוי שמזין את `resolveOrgConfig` ⇒ בחירת-הבעלים פעילה אצל כל המשתמשים.
 - **`org_config_sink_firebase.dart` (חדש):** ה-sink לכתיבה — `publishOrgConfig(port, json)` (best-effort · לעולם לא זורק · ריק⇒remove); Firebase-free-testable דרך תפר `OrgConfigDocPort`.

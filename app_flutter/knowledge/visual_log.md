@@ -4,6 +4,12 @@
 
 ---
 
+## #access-lock — 🔒 מסך-נעילה + שדה-סיסמה באשף (מגודר · off-live) — 2026-08-13
+**שינוי-UI:** (1) `access_lock_gate.dart` (חדש) — מסך-נעילה: אייקון-מנעול + "הזן סיסמת גישה" + שדה-obscure + כפתור "כניסה" + errorText "סיסמה שגויה". (2) `org_setup_wizard_screen` — סקציה "🔒 נעילת גישה" (שורת-סטטוס 🔓/🔒 + שדה-סיסמה obscure) אחרי שם-החברה. (3) `main.dart` — עוטף את ה-home ב-`AccessLockGate` מגודר `kAccessLock`.
+**מגודר `kAccessLock` (OFF בכל build/בדיקה) ⇒ ה-`home` ternary מתקפל ל-`const OnboardingGate()` ⇒ מסך-הנעילה tree-shaken ⇒ byte-identical — אפס שינוי-UI חי.** שדה-האשף מופיע רק כשהאשף פתוח (מסך מגודר/persona-מנהל ממילא).
+**אימות:** (א) **byte-identical כבוי** — `kAccessLock` OFF ⇒ ה-ternary מתקפל ל-OnboardingGate; הסוויטה המלאה עוברת ללא-שינוי. (ב) **התנהגות** — `access_lock_test` (gate widget): hash-ריק⇒child (אין נעילה) · hash-מוגדר+שגויה⇒נעול · נכונה⇒נפתח+persist; + hash/match/round-trip. `flutter analyze` 0.
+**שקיפות:** eye-check נטיב חי של מסך-הנעילה + השדה-באשף — על ה-build החי אחרי הדלקת הדגל.
+
 ## #org-config-live-sync — 🌐 אשף-ההקמה: פרסום-לשרת + הודעת-סטטוס (מגודר · off-live) — 2026-08-13
 **שינוי:** `org_setup_wizard_screen.dart` — `_save()` בלבד (לא layout): אחרי ה-persist המקומי, כשהדגל `useOrgConfigLive` דלוק, גם **מפרסם את ההגדרה לשרת** (`publishOrgConfig`), וההודעה `_note` הפכה ל-`switch` על tri-state ("✅ נשמר ופורסם — פעיל אצל כל המשתמשים" / "✅ נשמר מקומית — הפרסום לכולם לא עבר (כתיבה לבעלים בלבד)"). **מגודר `useOrgConfigLive` (= `kOrgConfigLive && kOrgConfigFlag && Firebase` — OFF בכל build/בדיקה) ⇒ `published==null` ⇒ ההודעה נשארת "✅ נשמר ופעיל בכל האפליקציה" הקיימת ⇒ byte-identical — אפס שינוי-UI חי.** אין שינוי ב-layout/widgets/FAB — רק נתיב-שמירה + מחרוזת-הודעה כבויה.
 **אימות:** (א) **byte-identical כבוי** — כל הבדיקות define-less (הדגל OFF) ⇒ ה-`_save` פוגע בענף `published==null` המחזיר את ההודעה הישנה; הסוויטה המלאה עברה בשער ללא-שינוי. (ב) **נתיב-הכתיבה** — `org_config_sink_firebase_test` (4/4): publishOrgConfig כותב/מסיר/בולע-שגיאה. (ג) **אבטחה** — `rules_test/org_config.test.js` (10 · רק-הבעלים כותב). `flutter analyze` 0 · הסוויטה + build web עברו בשער-ה-pre-commit.

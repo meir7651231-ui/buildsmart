@@ -22,6 +22,7 @@
 
 import 'dart:math' as math;
 
+import 'package:buildsmart/config/access_lock.dart' show hashAccessPassword;
 import 'package:buildsmart/config/org_config.dart'
     show
         OrgConfig,
@@ -190,6 +191,7 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     Map<String, bool>? modules,
     Map<String, bool>? features,
     Map<String, String>? terms,
+    String? accessPasswordHash,
   }) =>
       OrgConfig(
         slug: _draft.slug,
@@ -198,7 +200,17 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
         features: features ?? _draft.features,
         modules: modules ?? _draft.modules,
         terms: terms ?? _draft.terms,
+        // Carry-through by default — an edit to any OTHER field must never wipe
+        // the owner's access-lock password.
+        accessPasswordHash: accessPasswordHash ?? _draft.accessPasswordHash,
       );
+
+  /// 🔒 נעילת גישה — הבעלים מקליד סיסמה; נשמר ה-HASH בלבד (לא הטקסט). ריק ⇒ אין
+  /// נעילה. משתלב ב-`_save` הקיים (persist + publish) כמו כל עריכת-טיוטה.
+  void _setAccessPassword(String plain) {
+    setState(() =>
+        _draft = _rebuild(accessPasswordHash: hashAccessPassword(plain)));
+  }
 
   /// כתיבת ה-.text של בקרי-המונחים מהטיוטה — אחרי החלת-חבילה (שמוחקת מונחים),
   /// ייבוא ואיפוס. עדכון-controller אינו יורה onChanged, אז אין לולאה.
@@ -875,6 +887,22 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                 decoration: _dec('שם החברה'),
                 onChanged: (v) =>
                     setState(() => _draft = _rebuild(orgName: v.trim())),
+              ),
+              const SizedBox(height: BsTokens.space5),
+              _sectionTitle('🔒 נעילת גישה'),
+              Text(
+                _draft.accessPasswordHash.isEmpty
+                    ? '🔓 אין נעילה — כל אחד נכנס. הקלד סיסמה כדי לחסום.'
+                    : '🔒 נעילה פעילה — צריך את הסיסמה כדי להיכנס.',
+                style: const TextStyle(color: BsTokens.inkLight, fontSize: 12),
+              ),
+              const SizedBox(height: BsTokens.space4),
+              TextField(
+                obscureText: true,
+                style:
+                    const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+                decoration: _dec('סיסמה (ריק = ללא נעילה)'),
+                onChanged: _setAccessPassword,
               ),
               const SizedBox(height: BsTokens.space5),
               _sectionTitle('בחר ורטיקל (נקודת-פתיחה)'),

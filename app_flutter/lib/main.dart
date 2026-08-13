@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:buildsmart/config/access_lock.dart' show kAccessLock;
 import 'package:buildsmart/config/app_brand.dart' show AppBrand;
 import 'package:buildsmart/config/org_config.dart' show kOrgCompanyJson;
 import 'package:buildsmart/data/edge/edge_kv.dart' show makeEdgeKvStore;
@@ -12,6 +13,7 @@ import 'package:buildsmart/data/repositories/catalog_paged.dart'
     show useServerCatalog;
 import 'package:buildsmart/features/fittings/fitting_flags.dart';
 import 'package:buildsmart/firebase_options.dart';
+import 'package:buildsmart/screens/access_lock_gate.dart' show AccessLockGate;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
@@ -731,7 +733,9 @@ class BuildSmartApp extends ConsumerWidget {
           ),
         );
       },
-      home: const OnboardingGate(),
+      home: kAccessLock
+          ? const AccessLockGate(child: OnboardingGate())
+          : const OnboardingGate(),
     );
   }
 }
