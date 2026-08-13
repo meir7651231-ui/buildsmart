@@ -666,6 +666,13 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // savedCustomers/{uid} — the user's personal saved-customers CRM (local→server
+    // migration behind kUserDataServer; distinct from the shared `customers` domain).
+    // Self-only, doc-id == auth.uid (mirrors comparisonSets).
+    match /savedCustomers/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,

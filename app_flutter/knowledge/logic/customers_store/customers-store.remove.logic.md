@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kSavedCustomersKey↝`
+- **reads:** `kSavedCustomersKey↝` · `_repo↝`
 - **writes:** `field:_loaded↝` · `io:prefs.setString↝` · `state:state`
 - **calls:** _none_
 - **called-by:** _none_

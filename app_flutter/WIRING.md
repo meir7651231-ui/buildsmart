@@ -4181,3 +4181,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`comparison_set.dart`:** הוסר mixin `StringSetPrefsPersisted`; notifier מנתב `_load`/`_persist` ל-repo כשקיים (latch `_loaded` + set-state guard), אחרת getStringList/setStringList ללא-שינוי.
 - **`firestore.rules`:** `comparisonSets/{uid}` self-only. **`deleteAccount.ts`:** ב-refs. **`stage2_scale_test`:** exempt (self-doc scoped).
 - **אימות:** analyze 0 · comparison_sets_repository_test 4/4 + stage2 6/6 · golden מחודש · mutation-verify (RED→GREEN).
+
+### #user-data-customers — מיגרציית ה-CRM האישי מקומי→שרת (2026-08-13)
+גל-א׳ slice (List<SavedCustomer> נקי · CRM per-owner). דגל `kUserDataServer` (OFF-default) → OFF ⇒ SharedPreferences byte-identical.
+- **`saved_customers_repository.dart` (חדש):** `SavedCustomersRepository` (load/save ל-`savedCustomers/{uid}` = `{customers:[…],updatedAt}` · per-entry tolerant · **נבדל מאוסף `customers` המשותף**) + provider (repo רק תחת kUserDataServer && backend && uid && !anon).
+- **`customers_store.dart`:** הוזרק `_repo`; `_load`/`_persist` מנתבים ל-repo כשקיים (`set state` write-behind נשמר, latch `_loaded`), אחרת SharedPreferences ללא-שינוי.
+- **`firestore.rules`:** `savedCustomers/{uid}` self-only. **`deleteAccount.ts`:** ב-refs. **`stage2_scale_test`:** exempt.
+- **אימות:** analyze 0 · saved_customers_repository_test 4/4 + stage2 6/6 · golden מחודש · mutation-verify (RED→GREEN).

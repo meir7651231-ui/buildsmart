@@ -2111,3 +2111,8 @@
 - **הנכס:** מיגרציה מקומי→שרת (גל-א׳, Set<String> נקי). אפס-רגרסיה כבוי + round-trip נכון דלוק.
 - **אימות:** `comparison_sets_repository_test` — OFF-null + round-trip (save→load דרך fake-source; הסֶט שורד) + no-doc→empty + non-string→empty. analyze 0 · comparison-consumers + stage2 ירוקים · functions tsc.
 - **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp) → מוטציה ב-`load`: `return _keysOf(d.data)` → `return const <String>{}` → RED בטסט round-trip → שחזור (`_keysOf` חזר) → GREEN 4/4.
+
+## #user-data-customers — customers_store → savedCustomers/{uid} (OFF-safe) (2026-08-13)
+- **הנכס:** מיגרציה מקומי→שרת (גל-א׳, CRM אישי List<SavedCustomer>). אפס-רגרסיה כבוי + round-trip נכון דלוק.
+- **אימות:** `saved_customers_repository_test` — OFF-null + round-trip (כל השדות שורדים) + no-doc→empty + per-entry-tolerant (שורה פסולה מדולגת). analyze 0 · customers_store consumers + stage2 ירוקים.
+- **mutation-verify (בוצע):** מוטציה ב-`load`: `_customersOf(d.data)` → `const []` → RED round-trip → שחזור → GREEN 4/4.

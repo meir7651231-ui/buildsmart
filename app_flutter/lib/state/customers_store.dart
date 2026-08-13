@@ -14,6 +14,7 @@
 
 import 'dart:convert' show jsonDecode, jsonEncode;
 
+import 'package:buildsmart/data/repositories/saved_customers_repository.dart';
 import 'package:buildsmart/logic/input_validators.dart' show normalizePhone;
 import 'package:buildsmart/logic/text_normalize.dart' show normName;
 import 'package:flutter/foundation.dart' show debugPrint;
@@ -132,9 +133,14 @@ SavedCustomer? customerForName(List<SavedCustomer> list, String displayName) {
 }
 
 class CustomersStore extends StateNotifier<List<SavedCustomer>> {
-  CustomersStore() : super(const []) {
+  CustomersStore([this._repo]) : super(const []) {
     _load();
   }
+
+  /// The server store for the CRM (`savedCustomers/{uid}`) when USER_DATA_SERVER
+  /// is on for a real signed-in user; null (the default) ⇒ the SharedPreferences
+  /// path below, byte-identical to before. Injected by [savedCustomersProvider].
+  final SavedCustomersRepository? _repo;
 
   bool _loaded = false;
 
@@ -146,6 +152,18 @@ class CustomersStore extends StateNotifier<List<SavedCustomer>> {
   }
 
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path (USER_DATA_SERVER): the CRM lives at `savedCustomers/{uid}`.
+      try {
+        final list = await repo.load(repo.currentUid);
+        if (_loaded) return; // a write raced us — never clobber it
+        super.state = list; // bypass setter so load never re-persists
+      } on Object catch (e) {
+        debugPrint('CustomersStore: server load failed (ignored): $e');
+      }
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       if (_loaded) return; // a write raced us — never clobber it
@@ -166,6 +184,16 @@ class CustomersStore extends StateNotifier<List<SavedCustomer>> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: mirror the whole CRM to `savedCustomers/{uid}`.
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (e) {
+        debugPrint('CustomersStore: server persist failed (ignored): $e');
+      }
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -196,7 +224,7 @@ class CustomersStore extends StateNotifier<List<SavedCustomer>> {
 
 final savedCustomersProvider =
     StateNotifierProvider<CustomersStore, List<SavedCustomer>>(
-        (ref) => CustomersStore());
+        (ref) => CustomersStore(ref.watch(savedCustomersRepositoryProvider)));
 
 /// The saved entity matching a display name (the by-name order join), or null.
 final savedCustomerForProvider = Provider.family<SavedCustomer?, String>(

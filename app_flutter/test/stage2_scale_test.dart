@@ -140,6 +140,7 @@ void main() {
       'lib/data/repositories/notif_settings_repository.dart', // self-doc scoped (single doc, documentId==uid — the carts_repository shape)
       'lib/data/repositories/draft_quotes_repository.dart', // self-doc scoped (single doc, documentId==uid — the saved_projects_repository shape)
       'lib/data/repositories/comparison_sets_repository.dart', // self-doc scoped (single doc, documentId==uid — the draft_quotes_repository shape)
+      'lib/data/repositories/saved_customers_repository.dart', // self-doc scoped (single doc, documentId==uid — the comparison_sets_repository shape)
       'lib/data/repositories/chat_repository.dart', // threads participant-scoped
       'lib/data/repositories/chat_firebase.dart', // messages BOUNDED → checked below
       'lib/data/repositories/material_requests_firebase.dart', // BOUNDED → checked below

@@ -15,6 +15,7 @@
 | notif_settings | `notifSettings/{uid}` (single doc = toJson) | ✅ **חי** (repo · rule · deletion-ref · test; שער-25 הוסר) |
 | draft_quote (טיוטות-הצעה) | `draftQuotes/{uid}` (single doc `{quotes:[…],updatedAt}`) | ✅ **חי** (draft_quotes_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
 | comparison_set (השוואות) | `comparisonSets/{uid}` (single doc `{keys:[…],updatedAt}`) | ✅ **חי** (comparison_sets_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
+| customers_store (CRM אישי) | `savedCustomers/{uid}` (single doc `{customers:[…],updatedAt}`) | ✅ **חי** (saved_customers_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
 | chatThreads.names | `String` → `{uid:name}` map | ⏳ (פותח אנונימיזציית-מחיקה; עבודת-צ'אט מקבילה חיה — להמתין) |
 
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).

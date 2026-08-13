@@ -349,6 +349,11 @@
             "kind": "const",
             "name": "kSavedCustomersKey",
             "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
+            "transitive": true
           }
         ],
         "writes": [
@@ -414,6 +419,10 @@
           {
             "kind": "const",
             "name": "kSavedCustomersKey"
+          },
+          {
+            "kind": "field",
+            "name": "_repo"
           }
         ],
         "writes": [
@@ -437,7 +446,16 @@
         "gatedBy": []
       },
       "behaviour": {
-        "steps": []
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "repo = _repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if repo != null"
+          }
+        ]
       },
       "floor": [
         "add",
@@ -445,6 +463,7 @@
         "getInstance",
         "getString",
         "jsonDecode",
+        "load",
         "tryFromJson"
       ],
       "contract": {
@@ -472,6 +491,10 @@
           },
           {
             "kind": "field",
+            "name": "_repo"
+          },
+          {
+            "kind": "field",
             "name": "state"
           }
         ],
@@ -488,12 +511,22 @@
         "gatedBy": []
       },
       "behaviour": {
-        "steps": []
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "repo = _repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if repo != null"
+          }
+        ]
       },
       "floor": [
         "debugPrint",
         "getInstance",
         "jsonEncode",
+        "save",
         "setString",
         "toJson"
       ],
@@ -519,6 +552,11 @@
           {
             "kind": "const",
             "name": "kSavedCustomersKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
             "transitive": true
           }
         ],
@@ -578,6 +616,11 @@
           {
             "kind": "const",
             "name": "kSavedCustomersKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
             "transitive": true
           }
         ],
@@ -655,6 +698,11 @@
           {
             "kind": "const",
             "name": "kSavedCustomersKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
             "transitive": true
           }
         ],

@@ -382,6 +382,9 @@ export async function eraseUserCompletely(
     // comparisonSets/{uid} — the user's side-by-side compare set (local→server
     // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
     db().collection("comparisonSets").doc(uid),
+    // savedCustomers/{uid} — the user's personal saved-customers CRM (local→server
+    // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
+    db().collection("savedCustomers").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kSavedCustomersKey`
+- **reads:** `kSavedCustomersKey` · `_repo`
 - **writes:** `field:_loaded↝` · `io:prefs.setString↝` · `state:state`
 - **calls:** _none_
 - **called-by:** _none_
@@ -17,9 +17,11 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — repo = _repo
+- **branch** — if repo != null
 
 ## floor
-- `add` · `debugPrint` · `getInstance` · `getString` · `jsonDecode` · `tryFromJson`
+- `add` · `debugPrint` · `getInstance` · `getString` · `jsonDecode` · `load` · `tryFromJson`
 
 ## חוזה · contract
 - **input:** `()`
