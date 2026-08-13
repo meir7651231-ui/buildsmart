@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/worker_forms_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -261,7 +262,7 @@ class WorkerFormsState {
 }
 
 class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
-  WorkerFormsNotifier({this.storageKey = kWorkerFormsKey})
+  WorkerFormsNotifier({this.storageKey = kWorkerFormsKey, this.repo})
       : super(const WorkerFormsState()) {
     _load();
   }
@@ -271,6 +272,13 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
   /// two roles never share forms (the shared `demo` username would otherwise
   /// leak forms across boards).
   final String storageKey;
+
+  /// The server store for THIS worker's own forms (`workerForms/{uid}`) when
+  /// USER_DATA_SERVER is on for a real signed-in worker; null (the default, and
+  /// always for the courier reuse) ⇒ the SharedPreferences path, byte-identical.
+  /// Injected by [workerFormsProvider]. Single-doc + self-scoped: forms reach
+  /// the contractor via CHAT, so there is no employer-side read here.
+  final WorkerFormsRepository? repo;
 
   /// One-shot guard (the board_auth idiom): once a save has written state, a
   /// late `_load()` becomes non-destructive.
@@ -283,6 +291,20 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
   int _seq = 0;
 
   Future<void> _load() async {
+    final r = repo;
+    if (r != null) {
+      // Server path (USER_DATA_SERVER): this worker's forms live at
+      // `workerForms/{uid}`. The _userTouched guard still blocks a load from
+      // clobbering a save that landed before the read resolved.
+      try {
+        final decoded = await r.load();
+        if (!mounted || _userTouched) return;
+        state = decoded;
+      } on Object catch (_) {
+        // Absent/unreadable — keep the empty store.
+      }
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     final raw = prefs.getString(storageKey);
@@ -301,6 +323,18 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
   /// commonly the web localStorage quota rejecting a too-large sick-note
   /// photo data-URL. Honest: callers must NOT pretend the data was saved.
   Future<bool> _persist() async {
+    final r = repo;
+    if (r != null) {
+      // Server path: mirror this worker's WHOLE forms state to
+      // `workerForms/{uid}`. Firestore has no localStorage photo-quota, so the
+      // write is optimistic — return true (a rare server failure is swallowed,
+      // never rolls back the UI; the certs/trainings migrations take the same
+      // optimistic stance).
+      try {
+        await r.save(state);
+      } on Object catch (_) {}
+      return true;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       return await prefs.setString(storageKey, jsonEncode(state.toJson()));
@@ -380,5 +414,5 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
 /// The worker forms store — 101 forms per year + sick-note uploads.
 final workerFormsProvider =
     StateNotifierProvider<WorkerFormsNotifier, WorkerFormsState>(
-  (ref) => WorkerFormsNotifier(),
+  (ref) => WorkerFormsNotifier(repo: ref.watch(workerFormsRepositoryProvider)),
 );

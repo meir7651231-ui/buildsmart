@@ -741,6 +741,16 @@ service cloud.firestore {
               == request.auth.token.get('employerId', '');
     }
 
+    // workerForms/{uid} — a worker's own digital forms { forms (101), sick,
+    // updatedAt } (local→server migration behind kUserDataServer). SINGLE-DOC +
+    // SELF-ONLY (the carts/draftQuotes/savedProjects shape) — NOT two-sided:
+    // the 101 form reaches the contractor through the CHAT engine, not a roster
+    // read, so there is no employer branch. Forms carry PII (ת.ז, signature) →
+    // only the owner reads/writes their own doc.
+    match /workerForms/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,

@@ -4251,3 +4251,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`worker_trainings.dart`:** repo מוזרק; `_load`/`_persist` מנתבים (server _persist מחזיר true אופטימי). **ענף-השרת ב-`_load` מדלג על ה-DEMO-SEED** — ארנק-שרת של עובד אמיתי מתחיל ריק (זרעי-הדמו affordance מקומי בלבד). `trainingsForEmployer` ענף-שרת (`employerTrainingsProvider(session.uid)`), אחרת reversed-local verbatim.
 - **`firestore.rules`:** `workerTrainings/{workerUid}` — כלל דו-צדדי זהה ל-workerCerts (תעודות-הדרכה PII → קריאה מחמירה). **`deleteAccount.ts`:** `workerTrainings/{uid}` ב-refs. **`stage2`:** exempt.
 - **אימות:** analyze 0 · repo-test 5/5 + worker_trainings 14 (כולל DEMO-SEED)/stage2 ירוקים · golden מחודש · mutation-verify (RED `+4 -1`→GREEN 5/5).
+
+### #hr-forms-worker — טפסי-עובד → workerForms/{uid} (single-doc · self-only) (2026-08-13)
+מאגר-HR רביעי — **single-doc + self-only** (לא דו-צדדי): הטופס-101 מגיע לקבלן דרך ה-CHAT, לא שאילתת-roster, אז אין ענף-מעסיק. `kUserDataServer` OFF ⇒ byte-identical (courier reuse local).
+- **`worker_forms_repository.dart` (חדש):** load/save של WorkerFormsState שלם ל-`workerForms/{workerUid}`=`{forms,sick,updatedAt}` (תבנית draftQuotes/carts, single-doc scoped documentId==uid).
+- **`worker_forms.dart`:** repo מוזרק; `_load`/`_persist` מנתבים (server _persist מחזיר true אופטימי). courierFormsProvider נשאר מקומי (בלי repo).
+- **`firestore.rules`:** `workerForms/{uid}` — **self-only** (`read,write: request.auth.uid==uid`, תבנית carts) · טפסים PII (ת.ז/חתימה) → רק הבעלים. **`deleteAccount.ts`:** `workerForms/{uid}` ב-refs. **`stage2`:** exempt.
+- **אימות:** analyze 0 · repo-test 4/4 + worker_forms_v2 12/stage2 ירוקים · golden מחודש · mutation-verify (RED→GREEN 4/4).

@@ -2145,3 +2145,9 @@
 - **אימות:** `worker_trainings_repository_test` — OFF-null + round-trip (trainings+employerId שורדים) + no-doc→empty + flatten רב-עובדים + doc-פסול→ריק. worker_trainings 14 (כולל DEMO-SEED) + stage2 ירוקים. analyze 0 (info comment_references `[employerUid]` קיים-מראש זהה ל-certs).
 - **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp) → מוטציה ב-`loadMine`: `return _trainingsOf(d.data)` → `return const <WorkerTraining>[]` → RED בטסט round-trip (`+4 -1`) → שחזור (RESTORED-IDENTICAL) → GREEN 5/5.
 - **אבטחה:** כלל דו-צדדי זהה לתעודות/נוכחות — כתיבה self+`employerId==claim` (עובד לא מזייף מעסיק); קריאה self/employer/manager (תעודות-הדרכה PII → מחמיר, לא isSignedIn).
+
+## #hr-forms-worker — worker_forms → workerForms/{uid} (single-doc, self-only, OFF-safe) (2026-08-13)
+- **הנכס:** מאגר-HR רביעי (טפסים דיגיטליים: טופס-101 + אישורי-מחלה). **single-doc + self-only** — לא דו-צדדי: הטופס מגיע לקבלן דרך ה-CHAT, לא שאילתת-roster, אז אין ענף-מעסיק. `workerForms/{uid}` = `{forms, sick, updatedAt}` (WorkerFormsState שלם). אפס-רגרסיה כבוי (courier reuse → local).
+- **אימות:** `worker_forms_repository_test` — OFF-null + round-trip (forms+sick כולל signature/declared/PII שורדים) + no-doc→empty + per-entry-tolerant (שורה פסולה מדולגת, sick לא-רשימה→ריק). worker_forms_v2 12 + stage2 ירוקים. analyze 0.
+- **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp) → מוטציה ב-`load`: `return WorkerFormsState.fromJson(d.data)` → `return const WorkerFormsState()` → RED בשני טסטי round-trip → שחזור (RESTORED-IDENTICAL) → GREEN 4/4.
+- **אבטחה:** כלל self-only `workerForms/{uid}` — קריאה+כתיבה רק הבעלים (`request.auth.uid == uid`, תבנית carts/draftQuotes). טפסים מכילים PII (ת.ז, חתימה) → אין קריאת-מעסיק (הקבלן מקבל דרך צ'אט).

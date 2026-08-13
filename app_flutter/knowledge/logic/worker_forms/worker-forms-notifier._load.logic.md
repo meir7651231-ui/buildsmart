@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `_userTouched` · `storageKey` · `mounted`
+- **reads:** `_userTouched` · `repo` · `storageKey` · `mounted`
 - **writes:** `state:state`
 - **calls:** _none_
 - **called-by:** _none_
@@ -17,13 +17,15 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — r = repo
+- **branch** — if r != null
 - **compute** — prefs = await SharedPreferences.getInstance()
 - **precond** — if !mounted → return (void)
 - **compute** — raw = prefs.getString(storageKey)
 - **precond** — if raw == null || _userTouched → return (void)
 
 ## floor
-- `fromJson` · `getInstance` · `getString` · `jsonDecode`
+- `fromJson` · `getInstance` · `getString` · `jsonDecode` · `load`
 
 ## חוזה · contract
 - **input:** `()`

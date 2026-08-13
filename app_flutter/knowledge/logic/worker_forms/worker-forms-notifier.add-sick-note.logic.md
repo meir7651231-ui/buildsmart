@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `_seq` · `storageKey↝` · `mounted`
+- **reads:** `_seq` · `repo↝` · `storageKey↝` · `mounted`
 - **writes:** `field:_userTouched` · `io:prefs.setString↝` · `state:state`
 - **calls:** `_persist`
 - **called-by:** _none_
