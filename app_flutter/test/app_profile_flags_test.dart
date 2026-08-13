@@ -93,6 +93,15 @@ const Set<String> kArmingLayer = {
   // rollback = drop the define — the USER_SYSTEM / backend-coordinated arming
   // shape, never profile-owned (the `carts_repository` seam is tree-shaken OFF).
   'USER_DATA_SERVER',
+  // ORG_CONFIG_LIVE (giant-system) — arms the live OrgConfig subscription (the
+  // client tracks published config changes). Gated by ORG_CONFIG; default-OFF ⇒
+  // no subscription = byte-identical. Owner-staged twin of ORG_CONFIG, per-flag
+  // rollback = drop the define — the backend-coordinated arming shape.
+  'ORG_CONFIG_LIVE',
+  // ACCESS_LOCK — arms the owner-set password gate (no open access without the
+  // owner's password). Default-OFF ⇒ byte-identical (open access as today),
+  // owner-staged, per-flag rollback = drop the define — the arming shape.
+  'ACCESS_LOCK',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must

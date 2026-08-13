@@ -55,9 +55,12 @@ void main() {
     final rules = File('../firestore.rules').readAsStringSync();
 
     test('users self-writes cannot mint privilege (freeze list intact)', () {
+      // The update-freeze list is the no-self-privilege gate: a user may never
+      // self-write role/roles/storeUid/orgId/status — and now also employerId
+      // (the setEmployer callable is the only path to an employer link).
       expect(
         rules,
-        contains("['role', 'roles', 'storeUid', 'orgId', 'status']"),
+        contains("['role', 'roles', 'storeUid', 'orgId', 'status', 'employerId']"),
         reason: 'the users update-freeze list is the no-self-privilege gate',
       );
     });
@@ -103,14 +106,28 @@ void main() {
       expect(tail, contains('if false'));
     });
 
-    test('exactly ONE public read exists and it is studioConfigLive', () {
-      final matches = 'allow read: if true;'.allMatches(rules).toList();
-      expect(matches, hasLength(1),
-          reason: 'a second public read = a new leak surface');
-      final block = rules.indexOf('match /studioConfigLive/');
-      expect(block, isNot(-1));
-      expect(matches.single.start, greaterThan(block),
-          reason: 'the sole public read belongs to the published-config doc');
+    test('the ONLY public reads are the published-config docs '
+        '(studioConfigLive + orgConfigLive)', () {
+      // Two public reads exist by design — both are owner-write-only published
+      // config docs that clients read live (studioConfigLive · orgConfigLive,
+      // the giant-system per-org live config). ANY OTHER `allow read: if true;`
+      // is a new leak surface and must fail here.
+      final matches = 'allow read: if true;'.allMatches(rules).length;
+      expect(matches, 2, reason: 'a third public read = a new leak surface');
+      // each public read must sit immediately inside its config-doc block: the
+      // first `allow read: if true;` after the block declaration is that block's.
+      for (final block in ['studioConfigLive', 'orgConfigLive']) {
+        final decl = rules.indexOf('match /$block/');
+        expect(decl, isNot(-1), reason: '$block block exists');
+        final declEnd = decl + 'match /$block/'.length;
+        final read = rules.indexOf('allow read: if true;', declEnd);
+        expect(read, isNot(-1), reason: '$block carries the public read');
+        // the public read belongs to THIS block — no OTHER `match /` opens
+        // between the block declaration and its public read.
+        final between = rules.substring(declEnd, read);
+        expect(between.contains('match /'), isFalse,
+            reason: 'the public read for $block sits inside its own block');
+      }
     });
   });
 
