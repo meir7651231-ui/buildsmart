@@ -409,6 +409,11 @@ export async function eraseUserCompletely(
     // courierProfiles/{uid} — the courier's own editable board profile (local→
     // server migration, kUserDataServer). doc-id == uid → wiped like the others.
     db().collection("courierProfiles").doc(uid),
+    // storeProfiles/{uid} + storeCerts/{uid} — the store's own business profile
+    // and business-certificate wallet (local→server, kUserDataServer). doc-id ==
+    // uid → wiped like the others.
+    db().collection("storeProfiles").doc(uid),
+    db().collection("storeCerts").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

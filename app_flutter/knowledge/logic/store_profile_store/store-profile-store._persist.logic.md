@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kStoreProfileKey` · `debugPersistOverride` · `persist` · `state`
+- **reads:** `kStoreProfileKey` · `debugPersistOverride` · `persist` · `repo` · `state`
 - **writes:** `io:prefs.setString`
 - **calls:** _none_
 - **called-by:** `StoreProfileStore.save`
@@ -18,10 +18,12 @@
 
 ## התנהגות · behaviour (algorithm)
 - **precond** — if debugPersistOverride != null → return debugPersistOverride!()
+- **compute** — r = repo
+- **branch** — if r != null
 - **precond** — if !persist → return true
 
 ## floor
-- `getInstance` · `jsonEncode` · `setString` · `toJson`
+- `StoreProfile` · `getInstance` · `jsonEncode` · `save` · `setString` · `toJson`
 
 ## חוזה · contract
 - **input:** `()`

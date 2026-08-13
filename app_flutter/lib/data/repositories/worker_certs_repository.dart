@@ -144,3 +144,31 @@ final courierCertsRepositoryProvider = Provider<WorkerCertsRepository?>((ref) {
   }
   return null;
 });
+
+/// The STORE business-certificate repository provider — the SAME
+/// [WorkerCertsRepository] class, keyed on the store's own uid at the SEPARATE
+/// `storeCerts/{uid}` collection (the business-license/insurance wallet). Gated
+/// on a real (non-demo) signed-in STORE; null on the OFF path (byte-identical →
+/// the `bs.store-certs.v1` wallet). SELF-ONLY on the server (a store's own
+/// business certs; no roster consumer — `employerId` is '' for a store session).
+final storeCertsRepositoryProvider = Provider<WorkerCertsRepository?>((ref) {
+  if (kUserDataServer && useFirebaseBackend) {
+    final session = ref.watch(boardAuthProvider);
+    if (session != null &&
+        session.role == BoardRole.store &&
+        !session.demo &&
+        session.uid.isNotEmpty) {
+      final uid = session.uid;
+      final source = FirestoreCollectionSource(
+        'storeCerts',
+        scope: (c) => c.where(FieldPath.documentId, isEqualTo: uid),
+      );
+      return WorkerCertsRepository(
+        source,
+        currentUid: uid,
+        employerId: session.employerId,
+      );
+    }
+  }
+  return null;
+});

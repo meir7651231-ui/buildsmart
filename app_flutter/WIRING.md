@@ -4279,3 +4279,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`courier_profile_store.dart`:** repo מוזרק (שומר `debugPersistOverride`); `_load` ממפתח-מחדש `{uid: profile}`; `_persist` כותב `state[uid]` אופטימי.
 - **`firestore.rules`:** `courierProfiles/{uid}` self-only. **`deleteAccount.ts`:** ref. **`stage2`:** exempt.
 - **אימות:** analyze 0 (3 info קיימים-מראש) · repo-test 4/4 + courier_profile_store 12 ירוקים · golden מחודש · mutation-verify (RED→GREEN 4/4).
+
+### #hr-profile-store — פרופיל-עסק + תעודות-עסק → storeProfiles/{uid} + storeCerts/{uid} (2026-08-13)
+מאגר-HR שמיני — פרופיל-עסק של הספק (single-doc) + ארנק-תעודות-עסק (מיחזור WorkerCertsRepository). `kUserDataServer` OFF ⇒ byte-identical.
+- **`store_profile_repository.dart` (חדש):** load/save StoreProfile ל-`storeProfiles/{uid}` (מפתחות legacy name/bid). **`worker_certs_repository.dart`:** נוסף `storeCertsRepositoryProvider` (role==store, `storeCerts/{uid}`, exempt כבר).
+- **`store_profile_store.dart`:** 2 repos מוזרקים (שומר `debugPersistOverride`); server `_load` **מדלג על ה-legacy-global seed** (F-18.3 local-only), ממפתח-מחדש `{uid: profile}`; `_persist` אופטימי.
+- **`firestore.rules`:** `storeProfiles/{uid}` + `storeCerts/{uid}` self-only. **`deleteAccount.ts`:** 2 refs. **`stage2`:** store_profile exempt.
+- **אימות:** analyze 0 (2 info קיימים-מראש) · repo-test 3/3 (2 OFF-null + round-trip) + store_profile_store 14 ירוקים · golden מחודש · mutation-verify (RED `+2 -1`→GREEN).

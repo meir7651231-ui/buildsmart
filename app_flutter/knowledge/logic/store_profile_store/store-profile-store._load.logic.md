@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kLegacySupplierSettingsKey↝` · `kStoreProfileKey` · `_userTouched` · `mounted`
+- **reads:** `kLegacySupplierSettingsKey↝` · `kStoreProfileKey` · `_userTouched` · `repo` · `mounted`
 - **writes:** `state:state`
 - **calls:** `_readLegacy`
 - **called-by:** _none_
@@ -17,9 +17,11 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — r = repo
+- **branch** — if r != null
 
 ## floor
-- `cast` · `containsKey` · `fromJson` · `getInstance` · `getString` · `jsonDecode`
+- `cast` · `containsKey` · `fromJson` · `getInstance` · `getString` · `jsonDecode` · `load`
 
 ## חוזה · contract
 - **input:** `()`

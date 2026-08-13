@@ -2169,3 +2169,9 @@
 - **אימות:** `courier_profile_repository_test` — OFF-null + round-trip (כל השדות; `preferredHaul` id תקין שורד) + no-doc→null + haul-פסול→'' (normalizeHaul, לא מומצא). analyze 0 (3 info comment_references/sort_constructors_first **קיימים-מראש** על מחלקת CourierProfile, אומת ב-stash). courier_profile_store 12 ירוקים.
 - **mutation-verify (בוצע בפועל):** גיבוי → מוטציה ב-`load`: `return CourierProfile.fromJson(d.data)` → `return null` → RED round-trip → שחזור (RESTORED-IDENTICAL) → GREEN 4/4.
 - **אבטחה:** כלל self-only `courierProfiles/{uid}` — קריאה+כתיבה רק הבעלים (PII: טלפון).
+
+## #hr-profile-store — store_profile_store → storeProfiles/{uid} + storeCerts/{uid} (single-doc, self-only, OFF-safe) (2026-08-13)
+- **הנכס:** מאגר-HR שמיני — פרופיל-עסק של הספק (שם-עסק/טלפון/כתובת/ח.פ./לוגו) + ארנק-תעודות-עסק. map username→profile, קריאה `map[session.username]`; ל-Firebase-store `username==uid` → **single-doc** `storeProfiles/{uid}`. storeCerts ממחזר WorkerCertsRepository ל-`storeCerts/{uid}`. **ה-legacy-global seed (F-18.3) מדולג בשרת** — store אמיתי מתחיל מה-doc שלו. אפס-רגרסיה כבוי (2 providers → null).
+- **אימות:** `store_profile_repository_test` — 2× OFF-null (storeProfile+storeCerts) + round-trip (מפתחות legacy name/bid רוכבים; כל השדות שורדים) + no-doc→null (בלי legacy-seed). analyze 0 (2 info comment_references/sort_constructors_first **קיימים-מראש**). store_profile_store 14 ירוקים.
+- **mutation-verify (בוצע בפועל):** גיבוי → מוטציה ב-`load`: `return StoreProfile.fromJson(d.data)` → `return null` → RED round-trip (`+2 -1`) → שחזור (RESTORED-IDENTICAL) → GREEN 3/3.
+- **אבטחה:** 2 כללי self-only `storeProfiles/{uid}` + `storeCerts/{uid}` — רק הבעלים (ח.פ./תעודות-עסק PII).

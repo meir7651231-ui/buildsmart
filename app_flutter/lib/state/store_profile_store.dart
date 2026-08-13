@@ -34,6 +34,8 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/board_accounts_local.dart';
+import 'package:buildsmart/data/repositories/store_profile_repository.dart';
+import 'package:buildsmart/data/repositories/worker_certs_repository.dart';
 import 'package:buildsmart/state/board_auth.dart' show BoardRole;
 import 'package:buildsmart/state/worker_certs.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -69,7 +71,10 @@ const List<String> kStoreCertPresets = ['רישיון עסק', 'ביטוח עס�
 /// [kStoreCertsKey]; expiry traffic-light via [WorkerCert.statusAt] as-is.
 final storeCertsProvider =
     StateNotifierProvider<WorkerCertsNotifier, List<WorkerCert>>(
-  (ref) => WorkerCertsNotifier(storageKey: kStoreCertsKey),
+  (ref) => WorkerCertsNotifier(
+    storageKey: kStoreCertsKey,
+    repo: ref.watch(storeCertsRepositoryProvider),
+  ),
 );
 
 // ─── business profile model ──────────────────────────────────────────────────
@@ -144,13 +149,21 @@ class StoreProfile {
 // ─── store ───────────────────────────────────────────────────────────────────
 
 class StoreProfileStore extends StateNotifier<Map<String, StoreProfile>> {
-  StoreProfileStore({this.persist = true}) : super(const {}) {
+  StoreProfileStore({this.persist = true, this.repo}) : super(const {}) {
     if (persist) _load();
   }
 
   /// When false (tests), SharedPreferences is skipped entirely so the
   /// in-memory behavior can be asserted in isolation (the engines' pattern).
   final bool persist;
+
+  /// The server store for THIS store's own business profile (`storeProfiles/{uid}`)
+  /// when USER_DATA_SERVER is on for a real signed-in store; null (the default) ⇒
+  /// the SharedPreferences path, byte-identical. Injected by [storeProfileProvider].
+  /// Single-doc + self-only: the loaded profile is re-keyed by the uid (since
+  /// `session.username == uid` for a real store). The legacy-global (F-18.3) seed
+  /// is SKIPPED on the server path — a real store starts from its own server doc.
+  final StoreProfileRepository? repo;
 
   /// One-shot guard (the board_auth idiom, ticket #24): once [save] has
   /// written state, a late async `_load()` becomes non-destructive.
@@ -170,6 +183,22 @@ class StoreProfileStore extends StateNotifier<Map<String, StoreProfile>> {
       ];
 
   Future<void> _load() async {
+    final r = repo;
+    if (r != null) {
+      // Server path (USER_DATA_SERVER): this store's profile lives at
+      // `storeProfiles/{uid}`, re-keyed by the uid so `map[session.username]`
+      // (== map[uid] for a real store) resolves. NO legacy-global seed — a real
+      // store starts from its own server doc (the F-18.3 device migration is a
+      // local-only affordance). Absent ⇒ keep the empty map (honest fallback).
+      try {
+        final p = await r.load();
+        if (!mounted || _userTouched || p == null) return;
+        state = {r.uid: p};
+      } on Object catch (_) {
+        // Absent/unreadable — keep the empty map.
+      }
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       if (!mounted) return;
@@ -227,6 +256,17 @@ class StoreProfileStore extends StateNotifier<Map<String, StoreProfile>> {
   /// data-URL. Honest: the caller must NOT pretend the profile was saved.
   Future<bool> _persist() async {
     if (debugPersistOverride != null) return debugPersistOverride!();
+    final r = repo;
+    if (r != null) {
+      // Server path: mirror THIS store's business profile to `storeProfiles/{uid}`.
+      // Firestore has no localStorage logo-quota, so the write is optimistic —
+      // return true (a rare server failure is swallowed, never rolls back the UI;
+      // the worker/courier_profile migrations take the same optimistic stance).
+      try {
+        await r.save(state[r.uid] ?? const StoreProfile());
+      } on Object catch (_) {}
+      return true;
+    }
     if (!persist) return true; // tests: in-memory only, nothing can fail
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -263,5 +303,5 @@ class StoreProfileStore extends StateNotifier<Map<String, StoreProfile>> {
 /// usernames' records.
 final storeProfileProvider =
     StateNotifierProvider<StoreProfileStore, Map<String, StoreProfile>>(
-  (ref) => StoreProfileStore(),
+  (ref) => StoreProfileStore(repo: ref.watch(storeProfileRepositoryProvider)),
 );

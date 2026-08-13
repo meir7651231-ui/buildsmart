@@ -786,6 +786,18 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // storeProfiles/{uid} · storeCerts/{uid} — the STORE's own business profile
+    // { businessName, phone, address, businessId, logo, updatedAt } and its
+    // business-certificate wallet (license/insurance), local→server migration
+    // behind kUserDataServer. SINGLE-DOC (profile) / self-doc (certs) + SELF-ONLY:
+    // only the owner reads/writes their own business data (ח.פ., certs are PII).
+    match /storeProfiles/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /storeCerts/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,
