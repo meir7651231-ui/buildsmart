@@ -97,6 +97,8 @@ jobs:
             --dart-define=STORE_COMPARISON_UI=true \
             --dart-define=INTERNAL_CARD=true \
             --dart-define=USER_DATA_SERVER=true \
+            --dart-define=ORG_CONFIG=true \
+            --dart-define=ORG_CONFIG_LIVE=true \
             ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Upload backend-ON APK artifact
