@@ -409,6 +409,10 @@
             "name": "_userTouched"
           },
           {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
             "kind": "global",
             "name": "mounted"
           }
@@ -425,6 +429,14 @@
       },
       "behaviour": {
         "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
           {
             "kind": "compute",
             "detail": "prefs = await SharedPreferences.getInstance()"
@@ -447,6 +459,7 @@
         "getInstance",
         "getString",
         "jsonDecode",
+        "loadScoped",
         "tryFromJson"
       ],
       "contract": {
@@ -529,6 +542,10 @@
           {
             "kind": "field",
             "name": "_seq"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
           }
         ],
         "writes": [
@@ -574,8 +591,12 @@
             "detail": "state = [...state, r]"
           },
           {
-            "kind": "effect",
-            "detail": "_persist()"
+            "kind": "compute",
+            "detail": "repo0 = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if repo0 != null"
           },
           {
             "kind": "return",
@@ -586,6 +607,7 @@
       "floor": [
         "VacationRequest",
         "now",
+        "submit",
         "trim"
       ],
       "contract": {
@@ -614,6 +636,11 @@
           {
             "kind": "const",
             "name": "kVacationPending",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "repo",
             "transitive": true
           }
         ],
@@ -674,6 +701,11 @@
           {
             "kind": "const",
             "name": "kVacationRejected"
+          },
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
           }
         ],
         "writes": [
@@ -733,6 +765,10 @@
             "kind": "const",
             "name": "kVacationRequestsKey",
             "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "repo"
           }
         ],
         "writes": [
@@ -773,12 +809,20 @@
             "detail": "_userTouched = true"
           },
           {
+            "kind": "compute",
+            "detail": "decidedTs = DateTime.now()"
+          },
+          {
             "kind": "effect",
             "detail": "state = [for (final r in state) if (r.id == id && r.status == kVacationPending) r.copyWit…"
           },
           {
-            "kind": "effect",
-            "detail": "_persist()"
+            "kind": "compute",
+            "detail": "repo0 = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if repo0 != null"
           },
           {
             "kind": "return",
@@ -789,6 +833,7 @@
       "floor": [
         "any",
         "copyWith",
+        "decide",
         "now"
       ],
       "contract": {

@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kVacationRequestsKey↝` · `_seq`
+- **reads:** `kVacationRequestsKey↝` · `_seq` · `repo`
 - **writes:** `field:_userTouched` · `io:prefs.setString↝` · `state:state`
 - **calls:** `_persist`
 - **called-by:** _none_
@@ -21,11 +21,12 @@
 - **effect** — _seq++
 - **compute** — r = VacationRequest(id: 'vac-${DateTime.now().microsecondsSinceEpoch}-$_seq', username: usern…
 - **effect** — state = [...state, r]
-- **effect** — _persist()
+- **compute** — repo0 = repo
+- **branch** — if repo0 != null
 - **return** — r
 
 ## floor
-- `VacationRequest` · `now` · `trim`
+- `VacationRequest` · `now` · `submit` · `trim`
 
 ## חוזה · contract
 - **input:** `({required String username, required String workerName, required DateTime from, required DateTime to, required String reason, String role = 'worker', String employerId = '', String signature = '', bool declared = false})`

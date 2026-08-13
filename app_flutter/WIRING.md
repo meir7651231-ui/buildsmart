@@ -4295,3 +4295,11 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`store_profile_store.dart`:** 2 repos מוזרקים (שומר `debugPersistOverride`); server `_load` **מדלג על ה-legacy-global seed** (F-18.3 local-only), ממפתח-מחדש `{uid: profile}`; `_persist` אופטימי.
 - **`firestore.rules`:** `storeProfiles/{uid}` + `storeCerts/{uid}` self-only. **`deleteAccount.ts`:** 2 refs. **`stage2`:** store_profile exempt.
 - **אימות:** analyze 0 (2 info קיימים-מראש) · repo-test 3/3 (2 OFF-null + round-trip) + store_profile_store 14 ירוקים · golden מחודש · mutation-verify (RED `+2 -1`→GREEN).
+
+### #hr-vacation-cross-party — בקשות-חופשה → vacationRequests/{requestId} (CROSS-PARTY) (2026-08-13)
+מאגר-HR תשיעי — **הראשון cross-party**: עובד/שליח מגיש, מנהל/קבלן מאשר. דוק per-request (לא לפי-uid). `kUserDataServer` OFF ⇒ byte-identical.
+- **`vacation_requests_repository.dart` (חדש):** `loadScoped`/`submit`(create)/`decide`(merge status) על `vacationRequests/{reqId}`. `vacationRequestsRepositoryProvider` scoped-לפי-role (worker/courier `where username==uid` bound 200 · manager הכל bound 500) + `employerVacationProvider` (`where employerId==uid` bound 500).
+- **`vacation_requests.dart`:** repo מוזרק; `_load`→loadScoped; `submit`→repo.submit; `_decide`→repo.decide (decidedTs נלכד); `requestsForEmployer` ענף-שרת (employerVacationProvider(boardAuth.uid), תבנית certsForEmployer).
+- **`firestore.rules`:** `vacationRequests/{reqId}` — create רק המגיש+pending · read מגיש/מעסיק/מנהל · update רק מעסיק/מנהל + `username`/`employerId` קפואים (אין self-approval) · delete=false. **`deleteAccount.ts`:** `purgeOwnedVacationRequests` (delete `where username==uid`, paginated).
+- **`stage2`:** ללא שינוי (כל 3 ה-sources עם bound:).
+- **אימות:** analyze 0 · repo-test 4/4 + vacation/contractor_vacation_approval/hr_decide_once/stage2 (51) ירוקים · golden מחודש · mutation-verify (RED→GREEN 4/4).

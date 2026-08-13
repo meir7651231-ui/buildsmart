@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kVacationPending↝` · `kVacationRejected`
+- **reads:** `kVacationPending↝` · `kVacationRejected` · `repo↝`
 - **writes:** `field:_userTouched↝` · `state:state↝`
 - **calls:** `_decide`
 - **called-by:** _none_

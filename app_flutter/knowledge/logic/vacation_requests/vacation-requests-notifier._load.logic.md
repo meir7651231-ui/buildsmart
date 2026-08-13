@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kVacationRequestsKey` · `_userTouched` · `mounted`
+- **reads:** `kVacationRequestsKey` · `_userTouched` · `repo` · `mounted`
 - **writes:** `state:state`
 - **calls:** _none_
 - **called-by:** _none_
@@ -17,13 +17,15 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — r = repo
+- **branch** — if r != null
 - **compute** — prefs = await SharedPreferences.getInstance()
 - **precond** — if !mounted → return (void)
 - **compute** — raw = prefs.getString(kVacationRequestsKey)
 - **precond** — if raw == null || _userTouched → return (void)
 
 ## floor
-- `getInstance` · `getString` · `jsonDecode` · `tryFromJson`
+- `getInstance` · `getString` · `jsonDecode` · `loadScoped` · `tryFromJson`
 
 ## חוזה · contract
 - **input:** `()`

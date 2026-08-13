@@ -798,6 +798,38 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // vacationRequests/{requestId} — the CROSS-PARTY HR queue (local→server
+    // migration behind kUserDataServer). A worker/courier SUBMITS their own
+    // request; the employing contractor (doc's employerId == me) or a manager
+    // DECIDES it (status flip). Keyed by requestId (NOT uid) because a DIFFERENT
+    // party writes the decision than created the row. `username` holds the
+    // requester's uid on the server path (the notifier writes session.uid).
+    //   • create — only the requester, only a PENDING row for THEMSELF (no
+    //     pre-decided smuggling, no filing under someone else's uid).
+    //   • read   — the requester, their employer, or a manager (no one else sees
+    //     another worker's leave/PII).
+    //   • update — ONLY the employer or a manager (the decision). The requester
+    //     can NEVER update → no self-approval. `username`/`employerId` are frozen
+    //     so a decide can't re-owner the row.
+    //   • delete — never from a client (GDPR erasure is server-side, by query).
+    match /vacationRequests/{requestId} {
+      allow read: if isSignedIn()
+          && (resource.data.get('username', '') == request.auth.uid
+              || resource.data.get('employerId', '') == request.auth.uid
+              || isManager());
+      allow create: if isSignedIn()
+          && request.resource.data.get('username', '') == request.auth.uid
+          && request.resource.data.get('status', '') == 'pending';
+      allow update: if isSignedIn()
+          && (resource.data.get('employerId', '') == request.auth.uid
+              || isManager())
+          && request.resource.data.get('username', '')
+              == resource.data.get('username', '')
+          && request.resource.data.get('employerId', '')
+              == resource.data.get('employerId', '');
+      allow delete: if false;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,

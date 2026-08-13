@@ -140,6 +140,38 @@ async function purgeMultiPartyReferences(
   return counts;
 }
 
+/// GDPR erasure of the deleted [uid]'s OWN vacation requests. Unlike the
+/// uid-keyed personal docs (deleted by ref above), `vacationRequests` are keyed
+/// by requestId and carry `username == uid` (the server-path owner key), so they
+/// are erased by QUERY. Each request is SOLELY the requester's HR data, so the
+/// whole doc is deleted (not a field scrub). Paginated + best-effort (a failure
+/// never aborts the rest of the deletion). Returns the delete count for the audit.
+async function purgeOwnedVacationRequests(uid: string): Promise<number> {
+  const fs = db();
+  let total = 0;
+  try {
+    for (let round = 0; round < 25; round++) {
+      const snap = await fs
+        .collection("vacationRequests")
+        .where("username", "==", uid)
+        .limit(400)
+        .get();
+      if (snap.empty) break;
+      const batch = fs.batch();
+      for (const d of snap.docs) batch.delete(d.ref);
+      await batch.commit();
+      total += snap.size;
+      if (snap.size < 400) break; // last page
+    }
+  } catch (e) {
+    logger.error("deleteAccount: vacationRequests purge failed", {
+      uid,
+      error: String(e),
+    });
+  }
+  return total;
+}
+
 /// GDPR erasure of the CUSTOMER-INTELLIGENCE layer for [uid] (Studio Pillar-3) —
 /// the server-side twin of the PURE Dart plan `eraseSubject`
 /// (app_flutter/lib/state/intel/erasure.dart). The Dart plan is the TESTABLE spec
@@ -354,6 +386,7 @@ export async function eraseUserCompletely(
   existed: Record<string, boolean>;
   scrubbed: Record<string, number>;
   intelPurged: Record<string, number>;
+  vacationDeleted: number;
 }> {
   // 1 · purge the uid-keyed personal docs (see SCOPE above). Best-effort per
   //     doc: a missing/failed doc never aborts the rest of the erasure.
@@ -436,6 +469,10 @@ export async function eraseUserCompletely(
   //      customers); the records stay for the other parties, only the link goes.
   const scrubbed = await purgeMultiPartyReferences(uid);
 
+  // 1b² · vacationRequests — the requester's OWN HR rows, keyed by requestId
+  //       (username == uid). Deleted whole by query (not a field scrub).
+  const vacationDeleted = await purgeOwnedVacationRequests(uid);
+
   // 1c · GDPR erasure — sweep the CUSTOMER-INTELLIGENCE layer (Studio Pillar-3) for
   //      this uid + its stitched anon keys: intelEvents / presence / sessions /
   //      actorStitch + displayName reset. Multi-key + best-effort; the IDENTICAL
@@ -454,7 +491,13 @@ export async function eraseUserCompletely(
     if ((e as { code?: string }).code !== "auth/user-not-found") throw e;
     logger.info("eraseUserCompletely: auth record already absent", { uid });
   }
-  logger.info("deleteAccount: erased", { uid, existed, scrubbed, intelPurged });
+  logger.info("deleteAccount: erased", {
+    uid,
+    existed,
+    scrubbed,
+    intelPurged,
+    vacationDeleted,
+  });
 
   await writeAudit({
     action: "account.delete",
@@ -463,11 +506,11 @@ export async function eraseUserCompletely(
     actorRole: actor.actorRole,
     target: `users/${uid}`,
     before: existed,
-    after: { scrubbed, intelPurged },
+    after: { scrubbed, intelPurged, vacationDeleted },
     ok: true,
   });
 
-  return { existed, scrubbed, intelPurged };
+  return { existed, scrubbed, intelPurged, vacationDeleted };
 }
 
 export const deleteAccount = onCall({ region: REGION }, async (request) => {
@@ -558,10 +601,11 @@ export const deleteUser = onCall({ region: REGION }, async (request) => {
     if ((e as { code?: unknown }).code !== "auth/user-not-found") throw e;
   }
 
-  const { existed, scrubbed, intelPurged } = await eraseUserCompletely(uid, {
-    actorUid: callerUid,
-    actorRole: roles.join(",") || null,
-  });
+  const { existed, scrubbed, intelPurged, vacationDeleted } =
+    await eraseUserCompletely(uid, {
+      actorUid: callerUid,
+      actorRole: roles.join(",") || null,
+    });
   await writeAudit({
     action: "user.delete",
     source: "deleteUser",
@@ -569,7 +613,7 @@ export const deleteUser = onCall({ region: REGION }, async (request) => {
     actorRole: roles.join(",") || null,
     target: `users/${uid}`,
     before: existed,
-    after: { scrubbed, intelPurged },
+    after: { scrubbed, intelPurged, vacationDeleted },
     ok: true,
   });
 

@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/repositories/vacation_requests_repository.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -171,9 +174,19 @@ class VacationRequest {
 }
 
 class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
-  VacationRequestsNotifier() : super(const []) {
+  VacationRequestsNotifier({this.repo}) : super(const []) {
     _load();
   }
+
+  /// The server store for the shared queue (`vacationRequests/{requestId}`) when
+  /// USER_DATA_SERVER is on for a real signed-in board session; null (the
+  /// default) ⇒ the SharedPreferences path, byte-identical. Injected by
+  /// [vacationRequestsProvider], scoped to the session role (own queue for a
+  /// worker/courier, the whole queue for a manager — see the repo provider).
+  /// CROSS-PARTY: submit CREATES a doc, decide UPDATES it; the firestore rule
+  /// guarantees a worker can only create their own pending request and never
+  /// self-approve.
+  final VacationRequestsRepository? repo;
 
   /// One-shot guard (the board_auth idiom): once a submit/decision has written
   /// state, a late `_load()` becomes non-destructive.
@@ -185,6 +198,21 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
   int _seq = 0;
 
   Future<void> _load() async {
+    final r = repo;
+    if (r != null) {
+      // Server path (USER_DATA_SERVER): load the session-scoped slice of the
+      // shared queue (own for a worker/courier, all for a manager). The
+      // _userTouched guard still blocks a load from clobbering a submit/decision
+      // that landed before the read resolved.
+      try {
+        final list = await r.loadScoped();
+        if (!mounted || _userTouched) return;
+        state = list;
+      } on Object catch (_) {
+        // Absent/unreadable — keep the empty queue.
+      }
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     final raw = prefs.getString(kVacationRequestsKey);
@@ -244,7 +272,12 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
       declared: declared,
     );
     state = [...state, r];
-    _persist();
+    final repo0 = repo;
+    if (repo0 != null) {
+      repo0.submit(r); // server: create vacationRequests/{r.id}
+    } else {
+      _persist();
+    }
     return r;
   }
 
@@ -266,14 +299,21 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
       return false;
     }
     _userTouched = true;
+    final decidedTs = DateTime.now();
     state = [
       for (final r in state)
         if (r.id == id && r.status == kVacationPending)
-          r.copyWith(status: status, decidedTs: DateTime.now())
+          r.copyWith(status: status, decidedTs: decidedTs)
         else
           r,
     ];
-    _persist();
+    final repo0 = repo;
+    if (repo0 != null) {
+      // server: MANAGER/EMPLOYER merges the status flip onto the request doc.
+      repo0.decide(id, status, decidedTs);
+    } else {
+      _persist();
+    }
     return true;
   }
 }
@@ -282,7 +322,8 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
 /// manager board decides (approve/reject), both watch the same list.
 final vacationRequestsProvider =
     StateNotifierProvider<VacationRequestsNotifier, List<VacationRequest>>(
-  (ref) => VacationRequestsNotifier(),
+  (ref) =>
+      VacationRequestsNotifier(repo: ref.watch(vacationRequestsRepositoryProvider)),
 );
 
 /// The CONTRACTOR's HR queue — every WORKER vacation request that names this
@@ -293,6 +334,22 @@ final vacationRequestsProvider =
 /// `approve`/`reject`, so the requester's own list flips live.
 final requestsForEmployer =
     Provider.family<List<VacationRequest>, String>((ref, employerId) {
+  // Server path (USER_DATA_SERVER): the LIVE employer-scoped query
+  // `vacationRequests where employerId == the current contractor's uid` (the
+  // certsForEmployer pattern). Dead code (tree-shaken) when kUserDataServer
+  // const-false → the OFF filter below is byte-identical. Reads the cached
+  // stream value (empty until the first snapshot).
+  if (kUserDataServer && useFirebaseBackend) {
+    final myUid = ref.watch(boardAuthProvider)?.uid ?? '';
+    if (myUid.isNotEmpty) {
+      return [
+        for (final r
+            in (ref.watch(employerVacationProvider(myUid)).valueOrNull ??
+                const <VacationRequest>[]).reversed)
+          if (r.role == 'worker') r,
+      ];
+    }
+  }
   final all = ref.watch(vacationRequestsProvider);
   // Newest-first, DETERMINISTIC: iterate the insertion-ordered list in reverse
   // (last-submitted = newest). Avoids the createdTs-tie instability when two

@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kVacationPending` · `kVacationRequestsKey↝`
+- **reads:** `kVacationPending` · `kVacationRequestsKey↝` · `repo`
 - **writes:** `field:_userTouched` · `io:prefs.setString↝` · `state:state`
 - **calls:** `_persist`
 - **called-by:** `VacationRequestsNotifier.approve` · `VacationRequestsNotifier.reject`
@@ -19,12 +19,14 @@
 ## התנהגות · behaviour (algorithm)
 - **precond** — if !state.any((r) => r.id == id && r.status == kVacationPending) → return false
 - **effect** — _userTouched = true
+- **compute** — decidedTs = DateTime.now()
 - **effect** — state = [for (final r in state) if (r.id == id && r.status == kVacationPending) r.copyWit…
-- **effect** — _persist()
+- **compute** — repo0 = repo
+- **branch** — if repo0 != null
 - **return** — true
 
 ## floor
-- `any` · `copyWith` · `now`
+- `any` · `copyWith` · `decide` · `now`
 
 ## חוזה · contract
 - **input:** `(String id, String status)`
