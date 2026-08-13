@@ -4,6 +4,12 @@
 
 ---
 
+## #kb-letters-first — ⌨️ המקלדת נפתחת על האותיות (ברירת-מחדל) — 2026-08-13
+**שינוי-UI (חי · לא מגודר — בקשת-בעלים מפורשת):** `floating_card_keyboard.dart` — `_typing` ברירת-מחדל שונתה `false→true`. עכשיו כל פתיחה של המקלדת **מובילה עם האותיות (הקלדה)**, מוכן להקליד, במקום מראה-הכלים/mirror. ▦/⚙️ עדיין עוברים לכלים.
+**למה בטוח + נכון:** ה-`_GlobalKeyboardOverlay` מכניס/מסיר את המקלדת בכל פתיחה ⇒ ה-State נוצר-מחדש ⇒ ברירת-המחדל חלה בכל פתיחה. `kFinderFront` (`FINDER_FRONT`) כבוי בכל build ⇒ אין finder-lead שדורס. שורה 666: `if (_typing)` מפרק את context-base ומציג את האותיות.
+**אימות:** keyboard tests ירוקים (generated + card_keyboard + word_keyboard) · "empty/whitespace keeps the opening surface" עובר · `flutter analyze` 0.
+**שקיפות:** eye-check חי — פותחים את ה-FAB של המקלדת ⇒ אותיות עבריות מוכנות להקלדה, לא כלים.
+
 ## #access-lock-universal — 🔒 קיר-הסיסמה בכל build (כולל האתר הציבורי) — 2026-08-13
 **שינוי-UI:** `access_lock_gate.dart` — אותו מסך-נעילה, אך עכשיו קורא את ה-hash מהמסמך הציבורי (fetch) ⇒ חוסם ב**כל build** (חנות/web/בדיקה), לא רק בבדיקה. `ACCESS_LOCK=true` נוסף ל-`android-package` + `web-deploy`. **⚠️ האתר הציבורי `buildsmart-il.com` יציג קיר-סיסמה לכל מבקר** (החלטת-בעלים מפורשת "נעול הכל").
 **מגודר `kAccessLock` (OFF ⇒ ה-`home` ternary מתקפל ⇒ byte-identical).** עם הדגל דלוק וללא-סיסמה-שהוגדרה ⇒ ה-fetch מחזיר '' ⇒ passthrough (אין נעילה עד שקובעים סיסמה).

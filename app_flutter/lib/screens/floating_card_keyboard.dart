@@ -242,7 +242,12 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   /// this mode, which suppresses the ambient live-mirror context base so the
   /// alphabet (the letter keys) shows. Tapping the ▦ grid or ⚙️ gear toggle
   /// leaves it, returning to the tab's contextual navigation tools.
-  bool _typing = false;
+  // DEFAULT true — LEAD with the letters (typing) on every open, ready to type
+  // (owner default). The keyboard is rebuilt on each open (_GlobalKeyboardOverlay
+  // inserts/removes it), so this initial value is what every open lands on; the
+  // ▦ grid / ⚙️ gear then switch to the tools. kFinderFront is off in every build,
+  // so nothing overrides this lead.
+  bool _typing = true;
 
   /// FIND-MODE — when true, the keyboard body is replaced by [FindKeyboardPanel]
   /// (the in-keyboard product-finder). Entered by the 'מאתר' tool; the panel's

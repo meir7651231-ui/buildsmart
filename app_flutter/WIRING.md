@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #kb-letters-first — ⌨️ המקלדת פותחת על האותיות (ברירת-מחדל) — 2026-08-13
+`floating_card_keyboard.dart` — `_typing` ברירת-מחדל `false→true`: כל פתיחה של המקלדת מובילה עם **האותיות (הקלדה)**, מוכן להקליד, במקום מראה-הכלים. ה-overlay מכניס/מסיר את המקלדת בכל פתיחה ⇒ ברירת-המחדל חלה תמיד; `kFinderFront` כבוי בכל build ⇒ אין override; `if (_typing)` (שורה ~666) מציג את האותיות. ▦/⚙️ עוברים לכלים. שינוי חי (בקשת-בעלים), לא מגודר. בדיקות-מקלדת ירוקות.
+
 ## #access-lock-universal — 🔒 הנעילה חוסמת בכל build (קריאה-עצמית ציבורית) — 2026-08-13
 נעילת-הגישה עברה מ"רק ב-build-הבדיקה" ל-**כל build**: `AccessLockGate` קורא את ה-hash ישירות מהמסמך הציבורי `orgConfigLive/current` ב-HTTPS פשוט (`fetchAccessPasswordHash`), בלי תלות ב-Firebase SDK / דגלי-שרת. עדיפות: fetch → cache מקומי → orgConfigProvider (live).
 - **`config/access_lock.dart`:** `fetchAccessPasswordHash()` — GET ל-`kAccessConfigDocUrl` (Firestore REST public · project buildsmart-b0b78) → `fields.json.stringValue` → `decodeOrgConfig` → hash. '' = אין נעילה · null = לא-ידוע (נופל ל-cache). + `kAccessCachedHashKey`.
