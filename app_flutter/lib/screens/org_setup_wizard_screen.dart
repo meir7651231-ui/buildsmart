@@ -46,6 +46,8 @@ import 'package:buildsmart/config/screen_registry.dart'
     show ManagedScreen, kManagedScreens, kScreensRootKey, keyboardLayoutKey;
 import 'package:buildsmart/config/vertical_packs.dart'
     show applyVerticalPack, kVerticalPacks;
+import 'package:buildsmart/screens/org_config_diag.dart'
+    show runOrgConfigDiagnostic;
 import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
     show FindReplacePane;
 import 'package:buildsmart/screens/studio/panes/history_pane.dart'
@@ -262,6 +264,32 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
       next.remove('element.$id');
     }
     setState(() => _draft = _rebuild(features: next));
+  }
+
+  /// 🔍 אבחון סנכרון — בדיקה חיה: למה שינוי לא מגיע למשתמשים אחרים. מריץ את
+  /// [runOrgConfigDiagnostic] (Firebase? דגלים? מחובר-כבעלים? כתיבה-לשרת עם
+  /// אימות-חוזר) ומציג את התוצאה. הצעד האחרון גם מפרסם — תוצאה ירוקה = חי לכולם.
+  Future<void> _runDiag() async {
+    final lines = await runOrgConfigDiagnostic(encodeOrgConfig(_draft));
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('🔍 אבחון סנכרון'),
+        content: SingleChildScrollView(
+          child: Text(
+            lines.join('\n'),
+            style: const TextStyle(fontSize: 13, height: 1.6),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('סגור'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// שמור והפעל — LIVE קודם (ה-provider), persist אחר-כך; כישלון-אחסון מדווח
@@ -978,6 +1006,16 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                   onPressed: _openScreenManager,
                   icon: const Text('🖥️', style: TextStyle(fontSize: 15)),
                   label: const Text('ניהול מסכים (סדר · הסתר)'),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space2),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const Key('org-config-diag'),
+                  onPressed: _runDiag,
+                  icon: const Text('🔍', style: TextStyle(fontSize: 15)),
+                  label: const Text('אבחון סנכרון (למה לא מגיע לאחרים)'),
                 ),
               ),
               const SizedBox(height: BsTokens.space2),

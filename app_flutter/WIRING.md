@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #org-config-diag — 🔍 כפתור אבחון-סנכרון באשף — 2026-08-13
+`screens/org_config_diag.dart` (חדש) + כפתור באשף: בדיקה חיה **למה שינוי לא מגיע למשתמשים אחרים**. `runOrgConfigDiagnostic(configJson)` בודק בשרשרת: Firebase מאותחל? · `ORG_CONFIG`/`ORG_CONFIG_LIVE` חמושים (`useOrgConfigLive`)? · מחובר + בעלים (`kOwnerEmails`)? · **round-trip אמיתי** — כותב ל-`orgConfigLive/current` וקורא חזרה מ-`Source.server` ומאמת שהגיע. חושף את מלכודת "נשמר ופורסם אבל 404": עם persistence `set()` מצליח מקומית בעוד השרת דוחה ברקע (הרשאת-בעלים). כפתור "🔍 אבחון סנכרון" ליד "שמור והפעל" → דיאלוג עם הדוח. כלי-בעלים, לא מגודר.
+
 ## #kb-letters-first — ⌨️ המקלדת פותחת על האותיות (ברירת-מחדל) — 2026-08-13
 `floating_card_keyboard.dart` — `_typing` ברירת-מחדל `false→true`: כל פתיחה של המקלדת מובילה עם **האותיות (הקלדה)**, מוכן להקליד, במקום מראה-הכלים. ה-overlay מכניס/מסיר את המקלדת בכל פתיחה ⇒ ברירת-המחדל חלה תמיד; `kFinderFront` כבוי בכל build ⇒ אין override; `if (_typing)` (שורה ~666) מציג את האותיות. ▦/⚙️ עוברים לכלים. שינוי חי (בקשת-בעלים), לא מגודר. בדיקות-מקלדת ירוקות.
 
