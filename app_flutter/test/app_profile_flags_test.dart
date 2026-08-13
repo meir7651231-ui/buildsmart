@@ -102,6 +102,11 @@ const Set<String> kArmingLayer = {
   // owner's password). Default-OFF ⇒ byte-identical (open access as today),
   // owner-staged, per-flag rollback = drop the define — the arming shape.
   'ACCESS_LOCK',
+  // TASKS_SERVER (tasks local→server migration) — arms the uid-scoped Firestore
+  // store for tasks (tasks/{id}). Default-OFF ⇒ byte-identical: tasks keep their
+  // SharedPreferences path until armed. Owner-staged, per-flag rollback = drop
+  // the define — the USER_DATA_SERVER / backend-coordinated arming shape.
+  'TASKS_SERVER',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must
