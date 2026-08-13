@@ -99,6 +99,7 @@ jobs:
             --dart-define=USER_DATA_SERVER=true \
             --dart-define=ORG_CONFIG=true \
             --dart-define=ORG_CONFIG_LIVE=true \
+            --dart-define=ACCESS_LOCK=true \
             ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Upload backend-ON APK artifact
