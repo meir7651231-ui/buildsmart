@@ -4304,6 +4304,13 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`stage2`:** ללא שינוי (כל 3 ה-sources עם bound:).
 - **אימות:** analyze 0 · repo-test 4/4 + vacation/contractor_vacation_approval/hr_decide_once/stage2 (51) ירוקים · golden מחודש · mutation-verify (RED→GREEN 4/4).
 
+### #taskT3-foundation — FirebaseTasksRepository (מנוע-המשימות → שרת · שלב-יסוד) (2026-08-13)
+Wave T3 — המאגר האחרון והגדול. **שלב-היסוד** (dormant · gate-green · אפס-חיווט): מחלקת ה-repo המוכחת בבידוד.
+- **`tasks_firebase.dart` (חדש):** `FirebaseTasksRepository extends FirestoreCachedRepo<TaskItem>` מעל אוסף `tasks`. `toDoc = TaskItem.toJson()..remove('id')` · `fromDoc = tryFromJson({...doc.data, id:int.parse(doc.id)})` (int id ⇄ string doc-id) · `idOf=id.toString()` · `seed=buildTasksSeed()` · `sortBy` id-עולה · `onFirstSnapshotEmpty→pushCacheToRemote` · `all()=cached()`. **מיחזור הסריאליזציה של המודל** ⇒ byte-fidelity לoverlay המקומי.
+- **`tasks_engine.dart`:** נחשף `buildTasksSeed()` (wrapper ציבורי מעל `_seedTasks()`) — ה-repo נולד-זרוע ממנו.
+- **אימות:** analyze 0 · `tasks_firebase_test` (9 — round-trip של seed + runtime-מלא כל-שדה · cache-born-seeded · upsert/removeById · דחיית doc פגום) + stage2 (exempt: unscoped=god/manager, party-scoped=bounded). **mutation-verify** (הזרקת-id ב-fromDoc → RED round-trip → GREEN).
+- **⚠️ שלב-החיווט הבא (increment 2, לא נכלל — דורש טיפול cross-party זהיר):** provider ממודר-לפי-תפקיד (`_tasksScopeFor`: עובד→`assignedWorkerUid==uid` · קבלן→`employerId==uid` · מנהל→god) + מילוי `bindRemote/_refreshFromRemote/dispose` + ניתוב 13 ה-mutators דרך `_remote.upsert` + **כללי-שרת ל-6-מצבי-המחזור** (create עצמי · worker מעדכן own status/steps · קבלן/מנהל approve/reject) + composite indexes + deleteAccount by-query + **השחלת-uid אמיתי ב-UI-האוthoring** (createTask חייב לחתום את uid-העובד כדי שהשאילתה-הממודרת של העובד תראה אותו). חיווט חלקי שובר את הלולאה החוצה-צדדית ⇒ increment אחד אינטגרלי.
+
 ### #hr-courier-clock — שעון-משלוחים → courierClock/{uid} (single-doc · self-only) (2026-08-13)
 מאגר-HR עשירי — שעון-המשלוחים של השליח (מדידת best-effort). ה-writer הוא **free-function** (לא notifier), אז ה-repo הושחל דרך נקודות-ה-advance וה-reader. `kUserDataServer` OFF ⇒ byte-identical.
 - **`courier_clock_repository.dart` (חדש):** load/save של מפת-השעון ל-`courierClock/{uid}`=`{entries,updatedAt}` (self-only, role==courier).

@@ -134,6 +134,7 @@ void main() {
       'lib/data/repositories/stock_firebase.dart', // tiny
       'lib/data/repositories/stock_local.dart', // same tiny stock listen as stock_firebase above — a documented-exemption omission from afd824a5 (stage3); the local sibling was never listed, so this deterministic offender sat masked under the known-failing budget for months (2026-07-27 audit)
       'lib/data/repositories/site_firebase.dart', // tasks BOUNDED; stage tiny → checked below
+      'lib/data/repositories/tasks_firebase.dart', // §6 tasks (Wave T3) — the default unscoped source is the manager/god view; the worker/contractor listen is party-scoped (assignedWorkerUid/employerId==uid) and small, like orders
       'lib/data/repositories/users_repository.dart', // self-doc scoped
       'lib/data/repositories/carts_repository.dart', // self-doc scoped (single doc, documentId==uid — the users_repository shape: one 0-or-1 doc read, not a growing listen)
       'lib/data/repositories/saved_projects_repository.dart', // self-doc scoped (single doc, documentId==uid — the carts_repository shape)

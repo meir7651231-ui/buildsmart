@@ -293,6 +293,13 @@ List<TaskItem> _seedTasks() => [
         ),
     ];
 
+/// PUBLIC accessor for the verbatim §6 seed (Wave T3) — the Firebase tasks repo
+/// (`data/repositories/tasks_firebase.dart`) is BORN with this so the cache is
+/// non-empty before the first Firestore snapshot (identical genesis to the local
+/// engine), and a fresh backend is seeded from it. Returns a fresh list each call
+/// (the seed is runtime-built from `kPersonaTasks`, not a const).
+List<TaskItem> buildTasksSeed() => _seedTasks();
+
 const String kTasksScreenKey = 'bs.tasks-screen.v1';
 
 /// Wave A1 — FULL records of RUNTIME-created tasks (non-seed ids), so a

@@ -2187,3 +2187,9 @@
 - **אימות:** `courier_clock_repository_test` — OFF-null + round-trip (map תחת entries) + no-doc→empty + **stampClockEntry write-once** (חותמת קיימת נשמרת, שדה חדש נוסף בלי לדרוס). analyze 0. golden מחודש (path-convention אבסולוטי כמו הקיים; atom חדש stampClockEntry). visual_log — 4 קבצי-UI, אין שינוי חזותי (data-path בלבד).
 - **mutation-verify (בוצע בפועל):** גיבוי → מוטציה ב-`load`: `raw is Map ? Map.from(raw) : {}` → `{}` → RED round-trip (`+4 -1`) → שחזור (RESTORED-IDENTICAL) → GREEN 5/5.
 - **אבטחה:** כלל self-only `courierClock/{uid}` — מדידה של הבעלים בלבד (החנות מקבלת דוח בצ'אט, לא roster).
+
+## #taskT3-foundation — FirebaseTasksRepository (מנוע-המשימות → שרת, שלב-יסוד) (2026-08-13)
+- **הנכס:** המאגר האחרון והגדול — מנוע-המשימות המאוחד (§6, `tasks_engine.dart`, 1065 שורות, 6-state, cross-party). שלב-היסוד: מחלקת ה-repo המוכחת בבידוד, dormant (אין provider/חיווט → OFF+ON byte-identical). `FirebaseTasksRepository extends FirestoreCachedRepo<TaskItem>` · toDoc/fromDoc **מיחזור `TaskItem.toJson/tryFromJson`** (int id ⇄ string doc-id) · seed=`buildTasksSeed()` · sortBy id-עולה · onFirstSnapshotEmpty→pushCacheToRemote · all().
+- **אימות:** `tasks_firebase_test` 9 (round-trip seed + runtime-מלא כל-שדה · cache-born-seeded · upsert/removeById→all() · דחיית doc פגום). analyze 0. stage2 exempt (god/party-scoped). buildTasksSeed נחשף ב-tasks_engine.
+- **mutation-verify (בוצע):** גיבוי → מוטציה ב-fromDoc: `{...doc.data, 'id': id}` → `{...doc.data}` (הסרת הזרקת-id) → tryFromJson null → throw → RED בשני ה-round-trips → שחזור (RESTORED-IDENTICAL) → GREEN 6/6.
+- **increment 2 (מתועד ב-WIRING · לא נכלל):** scoped-provider 3-תפקידים · 6-state cross-party rules · composite indexes · bindRemote/refresh/dispose · ניתוב 13 mutators דרך upsert · UID-plumbing ב-UI-האוthoring. חיווט חלקי שובר את הלולאה ⇒ increment אינטגרלי אחד.
