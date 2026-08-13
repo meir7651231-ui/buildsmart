@@ -4,6 +4,12 @@
 
 ---
 
+## #access-lock-universal — 🔒 קיר-הסיסמה בכל build (כולל האתר הציבורי) — 2026-08-13
+**שינוי-UI:** `access_lock_gate.dart` — אותו מסך-נעילה, אך עכשיו קורא את ה-hash מהמסמך הציבורי (fetch) ⇒ חוסם ב**כל build** (חנות/web/בדיקה), לא רק בבדיקה. `ACCESS_LOCK=true` נוסף ל-`android-package` + `web-deploy`. **⚠️ האתר הציבורי `buildsmart-il.com` יציג קיר-סיסמה לכל מבקר** (החלטת-בעלים מפורשת "נעול הכל").
+**מגודר `kAccessLock` (OFF ⇒ ה-`home` ternary מתקפל ⇒ byte-identical).** עם הדגל דלוק וללא-סיסמה-שהוגדרה ⇒ ה-fetch מחזיר '' ⇒ passthrough (אין נעילה עד שקובעים סיסמה).
+**אימות:** `access_lock_test` **7/7** (hash · match · round-trip · gate: ריק⇒פתוח · שגוי⇒נעול · נכון⇒נפתח — דרך `accessHashFetchProvider`). `flutter analyze` 0 errors.
+**שקיפות:** eye-check נטיב חי — הבעלים קובע סיסמה, וכל build (כולל האתר) חוסם עד שמקישים אותה.
+
 ## #access-lock — 🔒 מסך-נעילה + שדה-סיסמה באשף (מגודר · off-live) — 2026-08-13
 **שינוי-UI:** (1) `access_lock_gate.dart` (חדש) — מסך-נעילה: אייקון-מנעול + "הזן סיסמת גישה" + שדה-obscure + כפתור "כניסה" + errorText "סיסמה שגויה". (2) `org_setup_wizard_screen` — סקציה "🔒 נעילת גישה" (שורת-סטטוס 🔓/🔒 + שדה-סיסמה obscure) אחרי שם-החברה. (3) `main.dart` — עוטף את ה-home ב-`AccessLockGate` מגודר `kAccessLock`.
 **מגודר `kAccessLock` (OFF בכל build/בדיקה) ⇒ ה-`home` ternary מתקפל ל-`const OnboardingGate()` ⇒ מסך-הנעילה tree-shaken ⇒ byte-identical — אפס שינוי-UI חי.** שדה-האשף מופיע רק כשהאשף פתוח (מסך מגודר/persona-מנהל ממילא).

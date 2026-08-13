@@ -1,5 +1,13 @@
 # WIRING CONTRACT — app_flutter
 
+## #access-lock-universal — 🔒 הנעילה חוסמת בכל build (קריאה-עצמית ציבורית) — 2026-08-13
+נעילת-הגישה עברה מ"רק ב-build-הבדיקה" ל-**כל build**: `AccessLockGate` קורא את ה-hash ישירות מהמסמך הציבורי `orgConfigLive/current` ב-HTTPS פשוט (`fetchAccessPasswordHash`), בלי תלות ב-Firebase SDK / דגלי-שרת. עדיפות: fetch → cache מקומי → orgConfigProvider (live).
+- **`config/access_lock.dart`:** `fetchAccessPasswordHash()` — GET ל-`kAccessConfigDocUrl` (Firestore REST public · project buildsmart-b0b78) → `fields.json.stringValue` → `decodeOrgConfig` → hash. '' = אין נעילה · null = לא-ידוע (נופל ל-cache). + `kAccessCachedHashKey`.
+- **`screens/access_lock_gate.dart`:** `accessHashFetchProvider` (FutureProvider · overridable בבדיקות); effective = fetched ?? cached ?? provider; fail-open **רק** למכשיר-שמעולם-לא-התחבר (cache ⇒ fail-closed).
+- **workflows:** `ACCESS_LOCK=true` נוסף ל-`android-package` (AAB+APK) + `web-deploy` (בנוסף ל-`android-test-build` הקיים) ⇒ דלוק ב-חנות + web + בדיקה.
+- **🔑 בדיקות:** `access_lock_test` (7/7) — ה-gate מוזרק דרך `accessHashFetchProvider`.
+- **⚠️ web:** `buildsmart-il.com` הופך **פרטי** — קיר-סיסמה לכל מבקר (החלטת-בעלים "נעול הכל").
+
 ## #access-lock — 🔒 נעילת-סיסמה של הבעלים · מסך-מנהל → כל הקליינטים (מגודר) — 2026-08-13
 נעילת-גישה שהבעלים קובע: שדה-סיסמה באשף-ההקמה (מסך-מנהל) → נשמר כ-**SHA-256 hash בלבד** על `OrgConfig.accessPasswordHash` → רוכב על org-config-live לכל קליינט → `AccessLockGate` חוסם את האפליקציה עד שמקישים את הסיסמה. ריק = אין נעילה.
 - **`config/access_lock.dart` (חדש):** דגל `kAccessLock` (`ACCESS_LOCK`, חמוש ע"י `ORG_CONFIG`) · `hashAccessPassword(plain)` (SHA-256 hex · ריק/רווח⇒'' · salt `bs.access.v1`) · `accessPasswordMatches(hash,entered)`. חבילת `crypto` הועלתה ל-direct dep (`any`, כמו intl).

@@ -77,7 +77,14 @@ void main() {
     Future<void> pumpGate(WidgetTester t, OrgConfig cfg) async {
       await t.pumpWidget(
         ProviderScope(
-          overrides: [orgConfigProvider.overrideWith((ref) => cfg)],
+          overrides: [
+            orgConfigProvider.overrideWith((ref) => cfg),
+            // The gate now reads the hash from the public fetch first — stub it
+            // so the widget test never touches the network.
+            accessHashFetchProvider.overrideWith(
+              (ref) => Future<String?>.value(cfg.accessPasswordHash),
+            ),
+          ],
           child: const MaterialApp(
             home: AccessLockGate(child: Text('APP')),
           ),
