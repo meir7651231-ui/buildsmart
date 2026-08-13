@@ -4229,3 +4229,11 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`deleteAccount.ts`:** `workerAttendance/{uid}` ב-refs. **`stage2_scale_test`:** exempt.
 - **אימות:** analyze 0 · repo-test 4/4 + 44 attendance/courier/stage2 ירוקים · golden מחודש · mutation-verify (RED→GREEN).
 - **slice B הבא:** שאילתת-המעסיק (`attendanceForEmployer` → `where employerId==session.uid`) + חיווט `contractor_attendance_sheet`.
+
+### #hr-attendance-employer — נוכחות slice B: שאילתת-המעסיק (end-to-end) (2026-08-13)
+משלים את הנוכחות: העובד כותב את שלו (slice A), עכשiד המעסיק קורא את כל העובדים שלו.
+- **`worker_attendance_repository.dart`:** `flattenEmployerDocs` (static · משטח snapshot-מעסיק) + `employerAttendanceProvider` (StreamProvider.family · `where employerId==uid` · **`bound: limit(500)`** — stage-2).
+- **`worker_attendance.dart`:** `attendanceForEmployer` — ענף-שרת (`kUserDataServer && backend` → `employerAttendanceProvider(session.uid).valueOrNull`), אחרת סינון-מקומי verbatim. imports: backend + board_auth.
+- **הכלל:** ללא-שינוי — ענף-המעסיק (`resource.employerId==uid`) כבר נוסף ב-slice A. `contractor_attendance_sheet` ללא-שינוי (עדיין `List` סינכרוני).
+- **אימות:** analyze 0 · flatten 2 + 38 attendance/contractor/stage2 ירוקים · golden מחודש · mutation-verify (RED→GREEN).
+- **נוכחות-עובד = end-to-end בשרת.** הבא: שאר מאגרי-HR (תעודות/הכשרות/חופשות/טפסים) באותה תבנית.

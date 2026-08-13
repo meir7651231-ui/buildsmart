@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/worker_attendance_repository.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -336,6 +338,22 @@ final workerAttendanceProvider =
 /// timestamp-tie instability; pair with [clockedInNow] for the live list.
 final attendanceForEmployer =
     Provider.family<List<AttendanceDay>, String>((ref, employerId) {
+  // Server path (USER_DATA_SERVER): the roster is the LIVE employer-scoped
+  // query `workerAttendance where employerId == the current contractor's uid`
+  // (each worker writes their OWN doc; the rule's employer branch lets the
+  // contractor read them). The passed [employerId] is the local demo id — on the
+  // server the contractor's own uid is the truth, so it is used instead. Reads
+  // the cached stream value (empty until the first snapshot). With
+  // kUserDataServer const-false this whole branch is dead code → tree-shaken →
+  // the OFF path below is byte-identical.
+  if (kUserDataServer && useFirebaseBackend) {
+    final myUid = ref.watch(boardAuthProvider)?.uid ?? '';
+    if (myUid.isNotEmpty) {
+      return ref.watch(employerAttendanceProvider(myUid)).valueOrNull ??
+          const [];
+    }
+  }
+  // OFF path (verbatim): filter the device-local ledger by the passed employer.
   final all = ref.watch(workerAttendanceProvider);
   return [for (final d in all) if (d.employerId == employerId) d];
 });

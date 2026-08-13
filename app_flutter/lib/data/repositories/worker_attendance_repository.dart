@@ -95,7 +95,33 @@ class WorkerAttendanceRepository {
     }
     return out;
   }
+
+  /// slice B — decode + FLATTEN one employer-scoped `workerAttendance` snapshot
+  /// (each doc is one worker's ledger) into a single day list for the roster
+  /// view. Pure/static so the stream provider and tests share it.
+  static List<AttendanceDay> flattenEmployerDocs(List<RemoteDoc> docs) => [
+        for (final d in docs) ..._daysOf(d.data),
+      ];
 }
+
+/// slice B — the EMPLOYER roster stream: every `workerAttendance` doc whose
+/// `employerId` equals [employerUid] (the contractor's own uid), flattened to a
+/// day list. BOUNDED (`limit(500)`) so the listen is capped (stage-2 rule 4).
+/// The read is proven by the `workerAttendance` rule's employer branch
+/// (`resource.data.employerId == request.auth.uid`). `attendanceForEmployer`
+/// reads its cached value on the server path; on the OFF path (kUserDataServer
+/// const-false) this provider is never watched → byte-identical.
+final employerAttendanceProvider =
+    StreamProvider.family<List<AttendanceDay>, String>((ref, employerUid) {
+  final source = FirestoreCollectionSource(
+    'workerAttendance',
+    scope: (c) => c.where('employerId', isEqualTo: employerUid),
+    bound: (q) => q.limit(500),
+  );
+  return source
+      .snapshots()
+      .map(WorkerAttendanceRepository.flattenEmployerDocs);
+});
 
 /// The worker-attendance repository provider — the server-migration seam the
 /// worker's [workerAttendanceProvider] routes its persist/load through. Returns

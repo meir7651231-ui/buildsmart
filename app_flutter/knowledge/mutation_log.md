@@ -2127,3 +2127,9 @@
 - **אימות:** `worker_attendance_repository_test` — OFF-null + round-trip (days+employerId+GPS+worked שורדים) + no-doc→empty + per-entry-tolerant. analyze 0 · worker_attendance 44 + stage2 6 ירוקים.
 - **mutation-verify (בוצע):** `loadMine`: `_daysOf(d.data)` → `const []` → RED round-trip → שחזור → GREEN 4/4.
 - **אבטחה:** כלל דו-צדדי — כתיבה self + `employerId==claim` (עובד לא מזייף מעסיק); קריאה self/employer/manager (לא isSignedIn — GPS רגיש).
+
+## #hr-attendance-employer — worker attendance slice B (employer roster query) (2026-08-13)
+- **הנכס:** צד-המעסיק. `attendanceForEmployer` בענף-שרת קורא שאילתה חיה `workerAttendance where employerId==session.uid` (bounded 500), משטח את ימי כל העובדים. OFF byte-identical (dead branch).
+- **אימות:** `flattenEmployerDocs` — flatten רב-עובדים + doc-ללא-days→ריק. contractor_attendance_sheet + 38 tests + stage2 (bound: → passes) ירוקים. analyze 0.
+- **mutation-verify (בוצע):** `flattenEmployerDocs` → `const []` → RED בטסט "flattens MANY workers" → שחזור → GREEN 6/6.
+- **אבטחה:** נשען על ענף-המעסיק שכבר בכלל (slice A): `resource.employerId==request.auth.uid`. אין שינוי-כלל.

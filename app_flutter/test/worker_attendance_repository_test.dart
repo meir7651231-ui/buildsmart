@@ -107,4 +107,35 @@ void main() {
       expect(back.single.username, 'ok');
     });
   });
+
+  group('#hr slice B — flattenEmployerDocs (the employer roster flatten)', () {
+    test('flattens MANY workers\' docs into one day list', () {
+      final docs = [
+        const RemoteDoc('w-1', {
+          'employerId': 'contractor-9',
+          'days': [
+            {'username': 'w-1', 'date': '2026-08-13'},
+            {'username': 'w-1', 'date': '2026-08-12'},
+          ],
+        }),
+        const RemoteDoc('w-2', {
+          'employerId': 'contractor-9',
+          'days': [
+            {'username': 'w-2', 'date': '2026-08-13'},
+          ],
+        }),
+      ];
+      final flat = WorkerAttendanceRepository.flattenEmployerDocs(docs);
+      expect(flat.length, 3); // 2 + 1 workers' days merged
+      expect(flat.map((d) => d.username).toSet(), {'w-1', 'w-2'});
+    });
+
+    test('a doc with no/invalid days contributes nothing (never throws)', () {
+      final flat = WorkerAttendanceRepository.flattenEmployerDocs(const [
+        RemoteDoc('w-1', {'employerId': 'c-9'}), // no days key
+        RemoteDoc('w-2', {'days': 'not-a-list'}), // wrong type
+      ]);
+      expect(flat, isEmpty);
+    });
+  });
 }
