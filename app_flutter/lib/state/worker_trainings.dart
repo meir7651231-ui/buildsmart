@@ -1,6 +1,8 @@
 import 'dart:convert';
 
-import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
+import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/repositories/worker_trainings_repository.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -165,7 +167,8 @@ List<WorkerTraining> demoSeedTrainings() => [
     ];
 
 class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
-  WorkerTrainingsNotifier({this.storageKey = kWorkerTrainingsKey, this.persist = true})
+  WorkerTrainingsNotifier(
+      {this.storageKey = kWorkerTrainingsKey, this.persist = true, this.repo})
       : super(const []) {
     if (persist) _load();
   }
@@ -178,6 +181,14 @@ class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
   /// A `persist:false` notifier starts EMPTY (no demo seed) — drive it with
   /// [add]/[remove] directly, or call [debugSeedDemo] to load the demo rows.
   final bool persist;
+
+  /// The server store for THIS worker's own log (`workerTrainings/{uid}`) when
+  /// USER_DATA_SERVER is on for a real signed-in worker; null (the default) ⇒
+  /// the SharedPreferences path, byte-identical. Injected by
+  /// [workerTrainingsProvider]. On the server path the DEMO-SEED is SKIPPED — a
+  /// real worker's server wallet starts empty (the demo rows are a local-only
+  /// affordance, never fabricated onto the backend).
+  final WorkerTrainingsRepository? repo;
 
   /// Test seam (F-9): when set, [_persist] delegates here instead of touching
   /// SharedPreferences — return `false` to exercise the REAL rollback path
@@ -195,6 +206,22 @@ class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
   int _seq = 0;
 
   Future<void> _load() async {
+    final r = repo;
+    if (r != null) {
+      // Server path (USER_DATA_SERVER): this worker's log lives at
+      // `workerTrainings/{uid}`. NO demo seed — a real worker starts with an
+      // empty server wallet (the demo rows are a local-only affordance). The
+      // _userTouched guard still blocks a load from clobbering an add that
+      // landed before the read resolved.
+      try {
+        final list = await r.loadMine();
+        if (!mounted || _userTouched) return;
+        state = list;
+      } on Object catch (_) {
+        // Absent/unreadable — keep the empty log.
+      }
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (!mounted || _userTouched) return;
     final raw = prefs.getString(storageKey);
@@ -232,6 +259,17 @@ class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
   Future<bool> _persist() async {
     final override = debugPersistOverride;
     if (override != null) return override();
+    final r = repo;
+    if (r != null) {
+      // Server path: mirror this worker's WHOLE log to `workerTrainings/{uid}`.
+      // Firestore has no localStorage doc-quota, so the write is optimistic —
+      // return true (a rare server failure is swallowed, never rolls back the
+      // UI; the attendance/certs migrations take the same optimistic stance).
+      try {
+        await r.saveMine(state);
+      } on Object catch (_) {}
+      return true;
+    }
     if (!persist) return true; // tests: in-memory only, nothing can fail
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -353,13 +391,24 @@ class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
 /// The safety-training log — screens filter by the logged username (#66).
 final workerTrainingsProvider =
     StateNotifierProvider<WorkerTrainingsNotifier, List<WorkerTraining>>(
-  (ref) => WorkerTrainingsNotifier(),
+  (ref) =>
+      WorkerTrainingsNotifier(repo: ref.watch(workerTrainingsRepositoryProvider)),
 );
 
 /// The CONTRACTOR's view of their workers' trainings — newest-first.
 /// Pending ones are the approve/reject queue; decisions flip the worker's
 /// own list live (shared provider).
 final trainingsForEmployer = Provider.family<List<WorkerTraining>, String>((ref, employerId) {
+  // Server path (USER_DATA_SERVER): the LIVE employer-scoped query
+  // `workerTrainings where employerId == the current contractor's uid`. Dead
+  // code (tree-shaken) when kUserDataServer const-false → OFF path below is
+  // byte-identical. Reads the cached stream value (empty until first snapshot).
+  if (kUserDataServer && useFirebaseBackend) {
+    final myUid = ref.watch(boardAuthProvider)?.uid ?? '';
+    if (myUid.isNotEmpty) {
+      return ref.watch(employerTrainingsProvider(myUid)).valueOrNull ?? const [];
+    }
+  }
   final all = ref.watch(workerTrainingsProvider);
   return [for (final t in all.reversed) if (t.employerId == employerId) t];
 });

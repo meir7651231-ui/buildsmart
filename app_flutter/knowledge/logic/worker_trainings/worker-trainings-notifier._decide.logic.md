@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kTrainingPending` · `debugPersistOverride↝` · `persist↝` · `storageKey↝`
+- **reads:** `kTrainingPending` · `debugPersistOverride↝` · `persist↝` · `repo↝` · `storageKey↝`
 - **writes:** `field:_userTouched` · `io:prefs.setString↝` · `state:state`
 - **calls:** `_persist`
 - **called-by:** `WorkerTrainingsNotifier.approve` · `WorkerTrainingsNotifier.reject`

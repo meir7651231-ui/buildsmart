@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `kDemoContractorId↝` · `kTrainingDemoUser↝` · `debugPersistOverride↝` · `persist↝` · `storageKey` · `mounted`
+- **reads:** `kDemoContractorId↝` · `kTrainingDemoUser↝` · `debugPersistOverride↝` · `persist↝` · `repo` · `storageKey` · `mounted`
 - **writes:** `field:_userTouched` · `io:prefs.setString↝` · `state:state`
 - **calls:** `demoSeedTrainings` · `_persist`
 - **called-by:** _none_
@@ -17,13 +17,15 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — r = repo
+- **branch** — if r != null
 - **compute** — prefs = await SharedPreferences.getInstance()
 - **precond** — if !mounted || _userTouched → return (void)
 - **compute** — raw = prefs.getString(storageKey)
 - **branch** — if raw == null
 
 ## floor
-- `getInstance` · `getString` · `jsonDecode` · `tryFromJson`
+- `getInstance` · `getString` · `jsonDecode` · `loadMine` · `tryFromJson`
 
 ## חוזה · contract
 - **input:** `()`

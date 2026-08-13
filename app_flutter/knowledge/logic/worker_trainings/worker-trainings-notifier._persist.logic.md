@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `debugPersistOverride` · `persist` · `state` · `storageKey`
+- **reads:** `debugPersistOverride` · `persist` · `repo` · `state` · `storageKey`
 - **writes:** `io:prefs.setString`
 - **calls:** _none_
 - **called-by:** `WorkerTrainingsNotifier._decide` · `WorkerTrainingsNotifier._load` · `WorkerTrainingsNotifier.add` · `WorkerTrainingsNotifier.attachDoc` · `WorkerTrainingsNotifier.remove` · `WorkerTrainingsNotifier.sendForApproval`
@@ -19,10 +19,12 @@
 ## התנהגות · behaviour (algorithm)
 - **compute** — override = debugPersistOverride
 - **precond** — if override != null → return override()
+- **compute** — r = repo
+- **branch** — if r != null
 - **precond** — if !persist → return true
 
 ## floor
-- `getInstance` · `jsonEncode` · `override` · `setString` · `toJson`
+- `getInstance` · `jsonEncode` · `override` · `saveMine` · `setString` · `toJson`
 
 ## חוזה · contract
 - **input:** `()`

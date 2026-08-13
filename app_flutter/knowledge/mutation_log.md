@@ -2139,3 +2139,9 @@
 - **אימות:** `worker_certs_repository_test` — OFF-null + round-trip (certs+employerId שורדים) + no-doc→empty + flatten רב-עובדים. analyze 0 · worker_certs/contractor_hr + stage2 ירוקים.
 - **mutation-verify (בוצע):** `loadMine`: `_certsOf` → `const []` → RED round-trip → שחזור → GREEN 5/5.
 - **אבטחה:** כלל דו-צדדי זהה לנוכחות — כתיבה self+`employerId==claim`; קריאה self/employer/manager (תמונות-תעודה PII → מחמיר).
+
+## #hr-trainings-worker — worker_trainings → workerTrainings/{uid} end-to-end (2026-08-13)
+- **הנכס:** מאגר-HR שלישי (יומן-הדרכות-בטיחות), דו-צדדי, תבנית-התעודות verbatim. עובד מעלה `workerTrainings/{uid}` = `{trainings,employerId,updatedAt}`; המעסיק קורא `where employerId==me` (bounded 500). אפס-רגרסיה כבוי. **ה-DEMO-SEED (demoSeedTrainings) לא רוכב על ענף-השרת** — ארנק-שרת של עובד אמיתי מתחיל ריק; הזרעים הם affordance מקומי בלבד, לא נתוני-שרת מזויפים.
+- **אימות:** `worker_trainings_repository_test` — OFF-null + round-trip (trainings+employerId שורדים) + no-doc→empty + flatten רב-עובדים + doc-פסול→ריק. worker_trainings 14 (כולל DEMO-SEED) + stage2 ירוקים. analyze 0 (info comment_references `[employerUid]` קיים-מראש זהה ל-certs).
+- **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp) → מוטציה ב-`loadMine`: `return _trainingsOf(d.data)` → `return const <WorkerTraining>[]` → RED בטסט round-trip (`+4 -1`) → שחזור (RESTORED-IDENTICAL) → GREEN 5/5.
+- **אבטחה:** כלל דו-צדדי זהה לתעודות/נוכחות — כתיבה self+`employerId==claim` (עובד לא מזייף מעסיק); קריאה self/employer/manager (תעודות-הדרכה PII → מחמיר, לא isSignedIn).

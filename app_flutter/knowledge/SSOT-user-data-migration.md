@@ -19,6 +19,7 @@
 | **גל-ב׳ HR (דו-צדדי · דורש board→uid+employer):** תשתית ✅ — `setEmployer` callable + `employerId` claim→session | — | ✅ **חי** |
 | worker_attendance (נוכחות-עובד) | `workerAttendance/{workerUid}` (`{days,employerId,updatedAt}`) | ✅ **חי · end-to-end (slice A צד-עובד + slice B שאילתת-מעסיק)** (repo · rule דו-צדדי · employerAttendanceProvider bounded · deletion · test · golden) |
 | worker_certs (תעודות-עובד) | `workerCerts/{workerUid}` (`{certs,employerId,updatedAt}`) | ✅ **חי · end-to-end** (repo · rule דו-צדדי · employerCertsProvider bounded · deletion · test · golden) |
+| worker_trainings (הדרכות-עובד) | `workerTrainings/{workerUid}` (`{trainings,employerId,updatedAt}`) | ✅ **חי · end-to-end** (repo · rule דו-צדדי · employerTrainingsProvider bounded · deletion · test · golden · **DEMO-SEED מדולג בשרת**) |
 | chatThreads (מחיקה) | authorship+membership מנותקים | ✅ **הוכרע** (2026-08-13 · אישור-בעלים "א"): מחיקה מנתקת fromUid+participantUids+profile; שארית תווית-השם → רפורם-הזהות המקביל, **לא פריט עצמאי** |
 
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).

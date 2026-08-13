@@ -4244,3 +4244,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`worker_certs.dart`:** repo מוזרק; `_load`/`_persist` מנתבים (server _persist מחזיר true אופטימי — Firestore בלי quota); `certsForEmployer` ענף-שרת (`employerCertsProvider(session.uid)`), אחרת reversed-local verbatim.
 - **`firestore.rules`:** `workerCerts/{workerUid}` — כלל דו-צדדי זהה ל-workerAttendance. **`deleteAccount.ts`:** `workerCerts/{uid}` ב-refs. **`stage2`:** exempt.
 - **אימות:** analyze 0 · repo-test 5/5 + certs/contractor_hr/stage2 ירוקים · golden מחודש · mutation-verify (RED→GREEN).
+
+### #hr-trainings-worker — הדרכות-בטיחות-עובד → workerTrainings/{uid} end-to-end (2026-08-13)
+מאגר-HR שלישי, שכפול verbatim של תבנית-התעודות (worker-write + employer-read). `kUserDataServer` OFF ⇒ byte-identical.
+- **`worker_trainings_repository.dart` (חדש):** loadMine/saveMine `workerTrainings/{workerUid}`=`{trainings,employerId,updatedAt}` + flattenEmployerDocs + `employerTrainingsProvider` (bounded 500).
+- **`worker_trainings.dart`:** repo מוזרק; `_load`/`_persist` מנתבים (server _persist מחזיר true אופטימי). **ענף-השרת ב-`_load` מדלג על ה-DEMO-SEED** — ארנק-שרת של עובד אמיתי מתחיל ריק (זרעי-הדמו affordance מקומי בלבד). `trainingsForEmployer` ענף-שרת (`employerTrainingsProvider(session.uid)`), אחרת reversed-local verbatim.
+- **`firestore.rules`:** `workerTrainings/{workerUid}` — כלל דו-צדדי זהה ל-workerCerts (תעודות-הדרכה PII → קריאה מחמירה). **`deleteAccount.ts`:** `workerTrainings/{uid}` ב-refs. **`stage2`:** exempt.
+- **אימות:** analyze 0 · repo-test 5/5 + worker_trainings 14 (כולל DEMO-SEED)/stage2 ירוקים · golden מחודש · mutation-verify (RED `+4 -1`→GREEN 5/5).

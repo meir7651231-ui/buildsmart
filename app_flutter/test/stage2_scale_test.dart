@@ -143,6 +143,7 @@ void main() {
       'lib/data/repositories/saved_customers_repository.dart', // self-doc scoped (single doc, documentId==uid — the comparison_sets_repository shape)
       'lib/data/repositories/worker_attendance_repository.dart', // self-doc scoped (workerAttendance/{workerUid} single doc — the worker's own ledger; employer roster query lands next slice)
       'lib/data/repositories/worker_certs_repository.dart', // self-doc scoped (workerCerts/{workerUid} single doc — the worker's own wallet; employer roster query is bounded)
+      'lib/data/repositories/worker_trainings_repository.dart', // self-doc scoped (workerTrainings/{workerUid} single doc — the worker's own log; employer roster query is bounded)
       'lib/data/repositories/chat_repository.dart', // threads participant-scoped
       'lib/data/repositories/chat_firebase.dart', // messages BOUNDED → checked below
       'lib/data/repositories/material_requests_firebase.dart', // BOUNDED → checked below
