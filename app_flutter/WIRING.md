@@ -4205,3 +4205,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **`firestore.rules`:** `employerId` נוסף לרשימת-ההקפאה של `users/{uid}` (self-write frozen — רק ה-callable/Admin כותב). helper חדש `isEmployerOf(workerUid)` (get על doc-העובד — הקישור לקריאות-HR עתידיות; לא-נצרך עדיין).
 - **אימות:** ליבה 10/10 (`ts-node`); ה-wrapper משכפל setOrg verbatim (tsc מקומי חסום-deps — כמו כל functions בסביבה; מאומת ב-CI). אפס-שינוי-Dart → זרימות קיימות byte-identical.
 - **הבא:** הזרמת `employerId` מהמסמך לסשן (`boardSessionFromAuthSnapshot` שורה 153 TODO) + הגירת מאגר-HR ראשון (נוכחות) עם כלל `isEmployerOf`.
+
+### #hr-employer-claim-session — employerId מה-claim לסשן-העובד (2026-08-13)
+משלים את צנרת-הקישור: הסשן-המקביל בנה את `session.uid`; זה מזרים את `employerId`.
+- **`auth_state.dart`:** helper חדש `employerIdFromClaims` (mirror `orgIdFromClaims`) + שדה `AuthSnapshot.employerId` + פענוח ב-`_onAuthEvent` (לצד orgId). additive, null-default.
+- **`board_auth.dart`:** `boardSessionFromAuthSnapshot` שורה-153-לשעבר-TODO → `employerId: (worker/courier) ? snap.employerId ?? '' : ''`. עכשiד עובד-שהוקצה-לו-מעסיק נושא את uid-הקבלן בסשן.
+- **אימות:** analyze 0 · employer_claim_test 5/5 + 178 auth/board ירוקים · goldens (auth_state+board_auth) חודשו · mutation-verify (RED→GREEN).
+- **הבא:** הגירת מאגר-HR ראשון (נוכחות) — העובד כותב `workerAttendance/{uid}` עם `employerId`, המעסיק קורא `where employerId==me`.

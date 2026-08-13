@@ -145,12 +145,14 @@ BoardSession? boardSessionFromAuthSnapshot(AuthSnapshot snap) {
       displayName:
           (name != null && name.isNotEmpty) ? name : kBoardDemoNames[role]!,
       uid: user.uid,
-      // SERVER-SWAP (Wave 0): the employer link comes from an employer/
-      // contractor custom claim once the backend assigns one. AuthSnapshot's
-      // `roles` today are persona-id role claims only (rolesFromClaims) — there
-      // is NO employer/contractor-id claim yet — so this stays '' on the
-      // Firebase path until that claim exists; flip to the claim value here.
-      employerId: '',
+      // The employer link comes from the `employerId` custom claim minted by the
+      // setEmployer callable (admin-only) and carried on AuthSnapshot. A worker
+      // whose employer has been assigned gets their contractor uid here; a
+      // worker with no assignment yet (or a store/manager) stays '' — the same
+      // honest empty as the seed path. Only worker/courier carry an employer.
+      employerId: (role == BoardRole.worker || role == BoardRole.courier)
+          ? (snap.employerId ?? '')
+          : '',
     );
   }
   return null;

@@ -1,7 +1,7 @@
 {
   "module": "auth_state",
   "source": "lib/state/auth_state.dart",
-  "atomCount": 41,
+  "atomCount": 42,
   "atoms": [
     {
       "fn": "rolesFromClaims",
@@ -101,6 +101,63 @@
           {
             "kind": "compute",
             "detail": "value = claims['orgId']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if value is! String → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "trimmed = value.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "trimmed.isEmpty ? null : trimmed"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic>? claims)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if claims == null || claims.isEmpty → return null",
+          "if value is! String → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "claims == null || claims.isEmpty · value is! String · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "employerIdFromClaims",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic>? claims) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AuthStateNotifier._onAuthEvent"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if claims == null || claims.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "value = claims['employerId']"
           },
           {
             "kind": "precond",
@@ -1342,6 +1399,10 @@
           {
             "name": "orgIdFromClaims",
             "module": true
+          },
+          {
+            "name": "employerIdFromClaims",
+            "module": true
           }
         ],
         "calledBy": [],
@@ -1378,12 +1439,16 @@
             "detail": "orgId = "
           },
           {
+            "kind": "compute",
+            "detail": "employerId = "
+          },
+          {
             "kind": "precond",
             "detail": "if !mounted || gen != _gen → return (void)"
           },
           {
             "kind": "effect",
-            "detail": "state = AuthSnapshot(user: user, roles: roles, orgId: orgId, loaded: true)"
+            "detail": "state = AuthSnapshot(user: user, roles: roles, orgId: orgId, employerId: employerId, load…"
           }
         ]
       },

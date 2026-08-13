@@ -2116,3 +2116,8 @@
 - **הנכס:** מיגרציה מקומי→שרת (גל-א׳, CRM אישי List<SavedCustomer>). אפס-רגרסיה כבוי + round-trip נכון דלוק.
 - **אימות:** `saved_customers_repository_test` — OFF-null + round-trip (כל השדות שורדים) + no-doc→empty + per-entry-tolerant (שורה פסולה מדולגת). analyze 0 · customers_store consumers + stage2 ירוקים.
 - **mutation-verify (בוצע):** מוטציה ב-`load`: `_customersOf(d.data)` → `const []` → RED round-trip → שחזור → GREEN 4/4.
+
+## #hr-employer-claim-session — employerId claim → board session (2026-08-13)
+- **הנכס:** הזרמת קישור עובד→מעסיק מה-claim (`setEmployer`) דרך AuthSnapshot לסשן-העובד. אפס-רגרסיה (בלי-claim → null → '' כמו קודם).
+- **אימות:** `employer_claim_test` 5/5 (null/empty/non-string→null · trimmed uid · AuthSnapshot default null) + auth/board 178 ירוקים · analyze 0.
+- **mutation-verify (בוצע):** `employerIdFromClaims` → `return null` → RED בטסט "non-empty claim → uid" → שחזור → GREEN 5/5.

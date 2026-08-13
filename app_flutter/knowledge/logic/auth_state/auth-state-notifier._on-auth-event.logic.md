@@ -11,7 +11,7 @@
 ## חיבורים · connections
 - **reads:** `kPersonas↝` · `_gateway` · `_gen` · `_onIdentityCleared↝` · `mounted`
 - **writes:** `state:state`
-- **calls:** `_clearIdentityCache` · `rolesFromClaims` · `orgIdFromClaims`
+- **calls:** `_clearIdentityCache` · `rolesFromClaims` · `orgIdFromClaims` · `employerIdFromClaims`
 - **called-by:** _none_
 - **gated-by:** _none_
   <br/>(`↝` = reached transitively, through a call)
@@ -24,8 +24,9 @@
 - **effect** — state = AuthSnapshot(user: user)
 - **init** — roles = const <String>[]
 - **compute** — orgId = 
+- **compute** — employerId = 
 - **precond** — if !mounted || gen != _gen → return (void)
-- **effect** — state = AuthSnapshot(user: user, roles: roles, orgId: orgId, loaded: true)
+- **effect** — state = AuthSnapshot(user: user, roles: roles, orgId: orgId, employerId: employerId, load…
 
 ## floor
 - `AuthSnapshot` · `debugPrint` · `idTokenClaims`

@@ -526,6 +526,19 @@ String? orgIdFromClaims(Map<String, dynamic>? claims) {
   return trimmed.isEmpty ? null : trimmed;
 }
 
+/// Parse the `employerId` custom claim (the worker→employer link minted by the
+/// `setEmployer` callable) out of a claims map — the contractor uid that
+/// employs this worker. Null when signed out, claim-less, or Firebase-free.
+/// Mirrors [orgIdFromClaims] verbatim; carried on [AuthSnapshot.employerId] so
+/// `boardSessionFromAuthSnapshot` can populate a worker session's employer link.
+String? employerIdFromClaims(Map<String, dynamic>? claims) {
+  if (claims == null || claims.isEmpty) return null;
+  final value = claims['employerId'];
+  if (value is! String) return null;
+  final trimmed = value.trim();
+  return trimmed.isEmpty ? null : trimmed;
+}
+
 /// The auth state every surface reads: user + server roles + the
 /// `_loaded`-guard flag.
 @immutable
@@ -534,6 +547,7 @@ class AuthSnapshot {
     this.user,
     this.roles = const [],
     this.orgId,
+    this.employerId,
     this.loaded = false,
   });
 
@@ -549,6 +563,13 @@ class AuthSnapshot {
   /// until an admin runs setOrg (no consumer flips behavior;
   /// ORG_SCOPED_QUERIES lands later).
   final String? orgId;
+
+  /// The worker→employer link from the `employerId` custom claim
+  /// ([employerIdFromClaims]) — the contractor uid minted by the setEmployer
+  /// callable; null when signed out, claim-less, or Firebase-free.
+  /// `boardSessionFromAuthSnapshot` reads it into a worker session's employerId
+  /// so worker-HR reads can prove "the reader is this worker's employer".
+  final String? employerId;
 
   /// The `_loaded` guard (§S1 DoD): true once the FIRST auth event has fully
   /// resolved (user + claims) — or immediately when there is no gateway
@@ -650,17 +671,25 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     state = AuthSnapshot(user: user);
     var roles = const <String>[];
     String? orgId; // stage-3.3 St2 — carried alongside roles, inert downstream
+    String? employerId; // worker→employer link (setEmployer claim)
     try {
       final claims = await _gateway!.idTokenClaims();
       roles = rolesFromClaims(claims);
       orgId = orgIdFromClaims(claims);
+      employerId = employerIdFromClaims(claims);
     } on Object catch (e) {
       // Claims failure (offline token refresh, etc.) — roles stay empty
       // (signed-out role behavior), never thrown into the UI.
       debugPrint('AuthStateNotifier: claims fetch failed (roles empty): $e');
     }
     if (!mounted || gen != _gen) return; // stale — a newer event won
-    state = AuthSnapshot(user: user, roles: roles, orgId: orgId, loaded: true);
+    state = AuthSnapshot(
+      user: user,
+      roles: roles,
+      orgId: orgId,
+      employerId: employerId,
+      loaded: true,
+    );
   }
 
   AuthGateway _required() {
