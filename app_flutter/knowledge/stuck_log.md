@@ -36,6 +36,28 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-08-13 · הגירה #2 · notif_settings חסום שער 25 (Preact-frozen) — נדחה, לא נכפה
+
+### א — הבעיה
+בניתי את מלוא מיגרציית notif_settings (store 2/4 של #2: `notifSettings/{uid}` מאחורי
+`USER_DATA_SERVER`) — repo · notifier-wiring · rule · deletion-ref · test · mutation-verify —
+והקומיט נחסם בשער-מהיר: `❌ [שער 25] נגעת ב-notif_settings.dart → משותף עם Preact — אסור לגעת`.
+5 קבצי-ההגדרות ב-lib/state (app_settings · catalog_settings · chat_settings · notif_settings ·
+store_settings) קפואים verbatim-shared עם ה-Preact החי; ה-notifier/provider חיים בתוך הקובץ-הקפוא,
+אז אין seam-הזרקה נקי בלי לגעת בו. בזבזתי בניית-store שלמה על יעד לא-כשיר.
+
+### ב — הפתרון
+לא כפיתי (external-mirror hack היה סותר את תבנית-ה-repo הנקייה ואת כוונת-ה-parity). החזרתי את כל
+שינויי-notif ל-cart-commit state (`git checkout HEAD` + `rm` ל-2 הקבצים החדשים), תיעדתי ב-SSOT את
+notif_settings כ-"נדחה — parity-frozen עם Preact (שער 25)" עד cutover, והמשכתי ל-saved_projects
+(לא-קפוא) — ה-store הבא התקף, יעד דוק-בודד `savedProjects/{uid}`.
+
+### ג — כלל המניעה
+ANTIPATTERN: תכנון או בניית מיגרציית מקומי לשרת לקובץ הגדרות תחת תיקיית lib state בלי לבדוק קודם את רשימת הקבצים הקפואים המשותפים verbatim עם Preact שבשער עשרים וחמש, ואז בזבוז בניית store שלמה שנחסמת בקומיט
+RULE: לפני מיגרציה של קובץ lib/state כלשהו — בדוק את לולאת שער-25 ב-.githooks/pre-commit; אם הקובץ
+ברשימת ה-Preact-shared (app_settings/catalog_settings/chat_settings/notif_settings/store_settings)
+הוא קפוא ⇒ דחה עד cutover, אל תבנה. smart_cart/saved_projects לא-קפואים.
+
 ## 2026-08-12 · הגירה #2 (carts/{uid}) — קומיט נחסם, אבחון-שגוי של הכשל דרך פלט-✗ מפורט
 
 ### א — הבעיה

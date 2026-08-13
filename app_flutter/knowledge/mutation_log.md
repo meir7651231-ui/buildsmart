@@ -2089,3 +2089,9 @@
 - **הנכס:** מיגרציה מקומי→שרת #1. אפס-רגרסיה כבוי + round-trip נכון דלוק.
 - **אימות:** `carts_repository_test` — OFF-null (cartsRepositoryProvider→null → SharedPreferences) + round-trip (save→load דרך fake-source). analyze 0 · 19 cart-tests ירוקים · functions tsc נקי.
 - **טרם:** seed-migration + flip + saved_projects/notif_settings/צ'אט.
+
+## #user-data-projects — saved_projects → savedProjects/{uid} (OFF-safe) (2026-08-13)
+- **הנכס:** מיגרציה מקומי→שרת #2 (store 2/4 שנשלח; notif_settings נדחה — parity-frozen שער 25). אפס-רגרסיה כבוי + round-trip נכון דלוק.
+- **אימות:** `saved_projects_repository_test` — OFF-null (savedProjectsRepositoryProvider→null → SharedPreferences) + round-trip (save→load דרך fake-source; id/name/anchorSkus/branchSkus/tempC/accessories/savedAt שורדים) + no-doc→empty. analyze 0 · functions tsc נקי · stage2_scale (exempt self-doc) + app_profile_flags (USER_DATA_SERVER כבר מסווג מ-#1) ירוקים.
+- **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp, לא git) → מוטציה ב-`load`: `return _projectsOf(d.data)` → `return const <SavedProject>[]` → `flutter test` נכשל RED בטסט ה-round-trip ("decodes the projects back" · back.length==0) → שחזור (0 MUTATION markers) → GREEN 3/3. הטסט בעל-שיניים.
+- **טרם:** seed-migration + flip + צ'אט. notif_settings — עד cutover מ-Preact.

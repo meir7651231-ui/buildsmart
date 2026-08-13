@@ -11,10 +11,12 @@
 | חנות | יעד-שרת | סטטוס |
 |---|---|---|
 | smart_cart (עגלה) | `carts/{uid}` (single doc `{lines,updatedAt}`) | ✅ **בוצע** (carts_repository.dart · rule · deletion-ref · test) |
-| saved_projects | `users/{uid}/savedProjects/{id}` (subcollection) | ⏳ הבא |
-| notif_settings | `notifSettings/{uid}` (single doc = toJson) | ⏳ הבא |
+| saved_projects | `savedProjects/{uid}` (single doc `{projects:[…],updatedAt}`) | ⏳ הבא |
 | chatThreads.names | `String` → `{uid:name}` map | ⏳ (פותח אנונימיזציית-מחיקה) |
 
+> **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).
+
+**נדחה — parity-frozen עם Preact (שער 25, לא ניתן לגעת):** `notif_settings` (+ app_settings · catalog_settings · chat_settings · store_settings). 5 קבצי-ההגדרות ב-`lib/state/` **verbatim-shared** עם ה-Preact החי; מיגרציה ל-Firestore הייתה מבדילה אותם מ-localStorage של Preact ושוברת parity. ה-notifier/provider חיים בתוך הקובץ-הקפוא ⇒ אין seam-הזרקה נקי בלי לגעת בו. מיגרציה רק אחרי cutover מ-Preact.
 **נדחה (board-username-keyed, לא uid):** worker_notifs · rewards — צריך board→uid. **לא-דאטה:** board_accounts (Auth+claims) · board_auth session (מקומי-בכוונה).
 
 ## שלבים לכל חנות

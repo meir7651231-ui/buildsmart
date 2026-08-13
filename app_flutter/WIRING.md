@@ -4138,3 +4138,9 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - `backend.dart`: `kUserDataServer`. `carts_repository.dart` (חדש): `CartsRepository` (load/save ל-`carts/{uid}` דרך RemoteCollectionSource scoped-uid) + `cartsRepositoryProvider` (repo רק תחת kUserDataServer && useFirebaseBackend && uid && !anon).
 - `smart_cart.dart`: notifier מנתב persist/load ל-repo כשקיים, אחרת SharedPreferences ללא-שינוי. `firestore.rules`: `carts/{uid}` self-only. `deleteAccount.ts`: `carts/{uid}` ב-refs → נמחק במחיקת-משתמש.
 - אימות: analyze 0 · 19 cart-tests ירוקים (OFF-null + round-trip + רגרסיה) · functions tsc נקי. **פתוח:** seed-migration לפני flip.
+
+### #user-data-projects — מיגרציית השמירות-עיצוב מקומי→שרת (2026-08-13)
+השנייה שנשלחה מ-#2 (store 2/4 · SSOT). **notif_settings נדחה — parity-frozen עם Preact (שער 25).** אותו דגל `kUserDataServer` (OFF-default) → OFF ⇒ SharedPreferences byte-identical.
+- `saved_projects_repository.dart` (חדש): `SavedProjectsRepository` (load/save ל-`savedProjects/{uid}` = דוק-בודד `{projects:[…],updatedAt}`, דרך RemoteCollectionSource scoped-uid) + `savedProjectsRepositoryProvider` (repo רק תחת kUserDataServer && useFirebaseBackend && uid && !anon — מראה carts). **דוק-בודד ולא subcollection:** ה-notifier שומר את כל הרשימה בכל שינוי.
+- `saved_projects.dart`: notifier מנתב `_load`/`_persist` ל-repo כשקיים (`List.of`→sortable, latch `_loaded` נשמר), אחרת SharedPreferences ללא-שינוי. `firestore.rules`: `savedProjects/{uid}` self-only. `deleteAccount.ts`: `savedProjects/{uid}` ב-refs → נמחק במחיקת-משתמש. `stage2_scale` exempt (self-doc scoped).
+- אימות: analyze 0 · saved_projects_repository_test 3/3 (OFF-null + round-trip + no-doc→empty) · mutation-verify (load-decode→[] → RED → שחזור → GREEN) · functions tsc נקי. **פתוח:** seed-migration לפני flip.

@@ -370,6 +370,9 @@ export async function eraseUserCompletely(
     // carts/{uid} — the user's single active smart-cart (local→server migration,
     // kUserDataServer). Wiped like the other uid-keyed personal docs above.
     db().collection("carts").doc(uid),
+    // savedProjects/{uid} — the user's saved install-studio projects (local→server
+    // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
+    db().collection("savedProjects").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

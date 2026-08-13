@@ -645,6 +645,12 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // savedProjects/{uid} — the user's saved install-studio projects (local→server
+    // migration behind kUserDataServer). Self-only, doc-id == auth.uid (mirrors carts).
+    match /savedProjects/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
     //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
     // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,
