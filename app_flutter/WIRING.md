@@ -4237,3 +4237,10 @@ notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-i
 - **הכלל:** ללא-שינוי — ענף-המעסיק (`resource.employerId==uid`) כבר נוסף ב-slice A. `contractor_attendance_sheet` ללא-שינוי (עדיין `List` סינכרוני).
 - **אימות:** analyze 0 · flatten 2 + 38 attendance/contractor/stage2 ירוקים · golden מחודש · mutation-verify (RED→GREEN).
 - **נוכחות-עובד = end-to-end בשרת.** הבא: שאר מאגרי-HR (תעודות/הכשרות/חופשות/טפסים) באותה תבנית.
+
+### #hr-certs-worker — תעודות-עובד → workerCerts/{uid} end-to-end (2026-08-13)
+מאגר-HR שני, שכפול verbatim של תבנית-הנוכחות (worker-write + employer-read). `kUserDataServer` OFF ⇒ byte-identical (courier reuse local).
+- **`worker_certs_repository.dart` (חדש):** loadMine/saveMine `workerCerts/{workerUid}`=`{certs,employerId,updatedAt}` + flattenEmployerDocs + `employerCertsProvider` (bounded 500).
+- **`worker_certs.dart`:** repo מוזרק; `_load`/`_persist` מנתבים (server _persist מחזיר true אופטימי — Firestore בלי quota); `certsForEmployer` ענף-שרת (`employerCertsProvider(session.uid)`), אחרת reversed-local verbatim.
+- **`firestore.rules`:** `workerCerts/{workerUid}` — כלל דו-צדדי זהה ל-workerAttendance. **`deleteAccount.ts`:** `workerCerts/{uid}` ב-refs. **`stage2`:** exempt.
+- **אימות:** analyze 0 · repo-test 5/5 + certs/contractor_hr/stage2 ירוקים · golden מחודש · mutation-verify (RED→GREEN).

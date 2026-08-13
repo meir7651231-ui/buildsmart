@@ -9,7 +9,7 @@
 - **constants:** _none_
 
 ## חיבורים · connections
-- **reads:** `state` · `storageKey`
+- **reads:** `repo` · `state` · `storageKey`
 - **writes:** `io:prefs.setString`
 - **calls:** _none_
 - **called-by:** `WorkerCertsNotifier.add` · `WorkerCertsNotifier.remove`
@@ -17,9 +17,11 @@
   <br/>(`↝` = reached transitively, through a call)
 
 ## התנהגות · behaviour (algorithm)
+- **compute** — r = repo
+- **branch** — if r != null
 
 ## floor
-- `getInstance` · `jsonEncode` · `setString` · `toJson`
+- `getInstance` · `jsonEncode` · `saveMine` · `setString` · `toJson`
 
 ## חוזה · contract
 - **input:** `()`

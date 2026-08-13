@@ -232,6 +232,10 @@
           },
           {
             "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
             "name": "storageKey"
           },
           {
@@ -251,6 +255,14 @@
       },
       "behaviour": {
         "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
           {
             "kind": "compute",
             "detail": "prefs = await SharedPreferences.getInstance()"
@@ -273,6 +285,7 @@
         "getInstance",
         "getString",
         "jsonDecode",
+        "loadMine",
         "tryFromJson"
       ],
       "contract": {
@@ -299,6 +312,10 @@
         "reads": [
           {
             "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
             "name": "state"
           },
           {
@@ -320,11 +337,21 @@
         "gatedBy": []
       },
       "behaviour": {
-        "steps": []
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
       },
       "floor": [
         "getInstance",
         "jsonEncode",
+        "saveMine",
         "setString",
         "toJson"
       ],
@@ -350,6 +377,11 @@
           {
             "kind": "field",
             "name": "_seq"
+          },
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
           },
           {
             "kind": "field",
@@ -441,6 +473,11 @@
       },
       "connections": {
         "reads": [
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
           {
             "kind": "field",
             "name": "storageKey",

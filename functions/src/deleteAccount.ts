@@ -388,6 +388,9 @@ export async function eraseUserCompletely(
     // workerAttendance/{uid} — the worker's own attendance ledger (local→server
     // migration, kUserDataServer). doc-id == workerUid → wiped like the others.
     db().collection("workerAttendance").doc(uid),
+    // workerCerts/{uid} — the worker's own certificate wallet (local→server
+    // migration, kUserDataServer). doc-id == workerUid → wiped like the others.
+    db().collection("workerCerts").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

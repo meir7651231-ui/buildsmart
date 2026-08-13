@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/repositories/worker_certs_repository.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -108,7 +111,8 @@ class WorkerCert {
 }
 
 class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
-  WorkerCertsNotifier({this.storageKey = kWorkerCertsKey}) : super(const []) {
+  WorkerCertsNotifier({this.storageKey = kWorkerCertsKey, this.repo})
+      : super(const []) {
     _load();
   }
 
@@ -117,6 +121,12 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
   /// two roles never share a wallet (the shared `demo` username would
   /// otherwise leak certificates across boards).
   final String storageKey;
+
+  /// The server store for THIS worker's own wallet (`workerCerts/{uid}`) when
+  /// USER_DATA_SERVER is on for a real signed-in worker; null (the default, and
+  /// always for the courier reuse) ⇒ the SharedPreferences path, byte-identical.
+  /// Injected by [workerCertsProvider].
+  final WorkerCertsRepository? repo;
 
   /// One-shot guard (the board_auth idiom): once an add/remove has written
   /// state, a late `_load()` becomes non-destructive.
@@ -129,6 +139,20 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
   int _seq = 0;
 
   Future<void> _load() async {
+    final r = repo;
+    if (r != null) {
+      // Server path (USER_DATA_SERVER): this worker's wallet lives at
+      // `workerCerts/{uid}`. The _userTouched guard still blocks a load from
+      // clobbering an add that landed before the read resolved.
+      try {
+        final list = await r.loadMine();
+        if (!mounted || _userTouched) return;
+        state = list;
+      } on Object catch (_) {
+        // Absent/unreadable — keep the empty wallet.
+      }
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     final raw = prefs.getString(storageKey);
@@ -149,6 +173,17 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
   /// commonly the web localStorage quota rejecting a too-large certificate
   /// photo data-URL. Honest: callers must NOT pretend the cert was saved.
   Future<bool> _persist() async {
+    final r = repo;
+    if (r != null) {
+      // Server path: mirror this worker's WHOLE wallet to `workerCerts/{uid}`.
+      // Firestore has no localStorage photo-quota, so the write is optimistic —
+      // return true (a rare server failure is swallowed, never rolls back the
+      // UI; the other migrations take the same optimistic stance).
+      try {
+        await r.saveMine(state);
+      } on Object catch (_) {}
+      return true;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       return await prefs.setString(
@@ -207,7 +242,7 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
 /// The certificate wallet — screens filter by the logged username (#66).
 final workerCertsProvider =
     StateNotifierProvider<WorkerCertsNotifier, List<WorkerCert>>(
-  (ref) => WorkerCertsNotifier(),
+  (ref) => WorkerCertsNotifier(repo: ref.watch(workerCertsRepositoryProvider)),
 );
 
 /// The CONTRACTOR's view of their workers' certifications — every cert that
@@ -216,6 +251,16 @@ final workerCertsProvider =
 /// instability). Read-only — the contractor does not edit worker certs.
 /// Reuses [WorkerCert.statusAt] for the expiry traffic-light.
 final certsForEmployer = Provider.family<List<WorkerCert>, String>((ref, employerId) {
+  // Server path (USER_DATA_SERVER): the LIVE employer-scoped query
+  // `workerCerts where employerId == the current contractor's uid`. Dead code
+  // (tree-shaken) when kUserDataServer const-false → OFF path below is
+  // byte-identical. Reads the cached stream value (empty until first snapshot).
+  if (kUserDataServer && useFirebaseBackend) {
+    final myUid = ref.watch(boardAuthProvider)?.uid ?? '';
+    if (myUid.isNotEmpty) {
+      return ref.watch(employerCertsProvider(myUid)).valueOrNull ?? const [];
+    }
+  }
   final all = ref.watch(workerCertsProvider);
   return [for (final c in all.reversed) if (c.employerId == employerId) c];
 });

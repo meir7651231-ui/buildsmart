@@ -2133,3 +2133,9 @@
 - **אימות:** `flattenEmployerDocs` — flatten רב-עובדים + doc-ללא-days→ריק. contractor_attendance_sheet + 38 tests + stage2 (bound: → passes) ירוקים. analyze 0.
 - **mutation-verify (בוצע):** `flattenEmployerDocs` → `const []` → RED בטסט "flattens MANY workers" → שחזור → GREEN 6/6.
 - **אבטחה:** נשען על ענף-המעסיק שכבר בכלל (slice A): `resource.employerId==request.auth.uid`. אין שינוי-כלל.
+
+## #hr-certs-worker — worker_certs → workerCerts/{uid} end-to-end (2026-08-13)
+- **הנכס:** מאגר-HR שני (תעודות/הסמכות), דו-צדדי, תבנית-הנוכחות verbatim. עובד מעלה `workerCerts/{uid}`; המעסיק קורא `where employerId==me`. אפס-רגרסיה כבוי (courier reuse → local).
+- **אימות:** `worker_certs_repository_test` — OFF-null + round-trip (certs+employerId שורדים) + no-doc→empty + flatten רב-עובדים. analyze 0 · worker_certs/contractor_hr + stage2 ירוקים.
+- **mutation-verify (בוצע):** `loadMine`: `_certsOf` → `const []` → RED round-trip → שחזור → GREEN 5/5.
+- **אבטחה:** כלל דו-צדדי זהה לנוכחות — כתיבה self+`employerId==claim`; קריאה self/employer/manager (תמונות-תעודה PII → מחמיר).
