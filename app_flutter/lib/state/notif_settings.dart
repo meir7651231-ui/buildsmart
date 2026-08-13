@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/notif_settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -494,11 +495,25 @@ void playInAppNotifFeedback(NotifSettings s) {
 }
 
 class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
-  NotifSettingsNotifier() : super(NotifSettings.defaults) {
+  NotifSettingsNotifier([this._repo]) : super(NotifSettings.defaults) {
     unawaited(_load());
   }
 
+  /// The server store for the settings blob (`notifSettings/{uid}`) when
+  /// USER_DATA_SERVER is on for a real signed-in user; null (the default) ⇒ the
+  /// SharedPreferences path below. Injected by [notifSettingsProvider].
+  final NotifSettingsRepository? _repo;
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path (USER_DATA_SERVER): the settings live at `notifSettings/{uid}`.
+      // Absent doc ⇒ null ⇒ keep [NotifSettings.defaults] (mirrors the local
+      // `raw == null` → return; the repo never throws).
+      final s = await repo.load(repo.currentUid);
+      if (s != null) state = s;
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -509,6 +524,14 @@ class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: mirror the whole settings blob to `notifSettings/{uid}`.
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
@@ -531,6 +554,15 @@ class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
 
   Future<void> reset() async {
     state = NotifSettings.defaults;
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: reset = persist the defaults blob to `notifSettings/{uid}`
+      // (the local path removes the key; both yield defaults on next load).
+      try {
+        await repo.save(repo.currentUid, NotifSettings.defaults);
+      } on Object catch (_) {/* ignore */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kStorageKey);
@@ -540,5 +572,7 @@ class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
 
 final notifSettingsProvider =
     StateNotifierProvider<NotifSettingsNotifier, NotifSettings>(
-  (_) => NotifSettingsNotifier(),
+  // Injects the server store (`notifSettings/{uid}`) when USER_DATA_SERVER is on
+  // for a real signed-in user; null (the default) ⇒ the SharedPreferences path.
+  (ref) => NotifSettingsNotifier(ref.watch(notifSettingsRepositoryProvider)),
 );

@@ -4162,3 +4162,9 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`manager_dashboard_screen.dart`:** 2 האריחים (kTradeBuilder-gated + kOrgConfig-gated) → אריח אחד "🔌 הקמת המערכת" gated `kOrgConfigFlag` (compile-const, חי בפרודקשן · כבוי בבדיקות → tab byte-identical). הוסרו imports של org_setup_wizard + trade_builder_home + kTradeBuilderFlag; נוסף host.
 - **kTradeBuilder נשאר כבוי** — ה-host בונה את מסך-הבונה ישירות (לא self-gate), אז הבדיקות-הנעוצות (`trade_builder_home_test`/`trade_builder_flags_test`) לא נגעו.
 - **אימות:** analyze 0 errors · 63 בדיקות-נעוצות (trade_builder_home·org_setup_wizard·trade_builder_flags·manager_dashboard) + 3 בדיקות-host חדשות ירוקות · mutation-verify (שבירת-מעבר→אדום→שחזור→ירוק).
+
+### #user-data-notif — מיגרציית הגדרות-ההתראות מקומי→שרת · שער-25 הוסר (2026-08-13)
+notif_settings **יצא מהקפאת שער-25** (Preact פרש → buildsmart-il.com = Flutter בלבד, אישור-בעלים; אין קובץ notif ב-`app/src`). הוק-האכיפה עודכן (הסרת notif מהלולאה, מגובה `.allow_protocol_edit`). עלה **חי** (`USER_DATA_SERVER` דלוק).
+- `notif_settings_repository.dart` (חדש): `NotifSettingsRepository` (load/save ל-`notifSettings/{uid}` = בלוב-ה-`toJson`+`updatedAt`, RemoteCollectionSource scoped-uid) + `notifSettingsRepositoryProvider` (מראה carts).
+- `notif_settings.dart`: notifier מנתב `_load`/`_persist`/`reset` ל-repo כשקיים, אחרת SharedPreferences. `firestore.rules`: `notifSettings/{uid}` self-only. `deleteAccount.ts`: `notifSettings/{uid}` ב-refs. `stage2_scale` exempt. `.githooks/pre-commit` שער-25: 5→4 קבצים.
+- אימות: analyze 0 · notif_settings_repository_test 3/3 (null-provider + round-trip bool/int/enum + no-doc→null) · mutation-verify (load→null → RED → שחזור → GREEN) · functions tsc נקי.

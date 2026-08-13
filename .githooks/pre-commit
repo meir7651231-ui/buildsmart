@@ -262,7 +262,10 @@ if [[ -n "$STAGED_LIB" ]]; then
 fi
 
 # שער 25: לא לגעת ב-Preact-shared
-for shared in app_settings catalog_settings chat_settings notif_settings store_settings; do
+# notif_settings הוסר מהרשימה (2026-08-13): Preact פרש (buildsmart-il.com = Flutter בלבד,
+# אישור-בעלים מפורש), ואין קובץ notif ב-app/src — נעילת-ה-parity מיושנת. הותר למיגרציית #2
+# (notifSettings/{uid} · USER_DATA_SERVER דלוק). שאר-4 נשארים קפואים עד cutover מלא.
+for shared in app_settings catalog_settings chat_settings store_settings; do
     if git diff --cached lib/state/${shared}.dart 2>/dev/null | grep -q "^[+-][^+-]"; then
         err "25" "נגעת ב-$shared.dart" "$shared משותף עם Preact — אסור לגעת"
     fi

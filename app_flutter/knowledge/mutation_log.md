@@ -2095,3 +2095,9 @@
 - **אימות:** `saved_projects_repository_test` — OFF-null (savedProjectsRepositoryProvider→null → SharedPreferences) + round-trip (save→load דרך fake-source; id/name/anchorSkus/branchSkus/tempC/accessories/savedAt שורדים) + no-doc→empty. analyze 0 · functions tsc נקי · stage2_scale (exempt self-doc) + app_profile_flags (USER_DATA_SERVER כבר מסווג מ-#1) ירוקים.
 - **mutation-verify (בוצע בפועל):** גיבוי-קובץ (cp, לא git) → מוטציה ב-`load`: `return _projectsOf(d.data)` → `return const <SavedProject>[]` → `flutter test` נכשל RED בטסט ה-round-trip ("decodes the projects back" · back.length==0) → שחזור (0 MUTATION markers) → GREEN 3/3. הטסט בעל-שיניים.
 - **טרם:** seed-migration + flip + צ'אט. notif_settings — עד cutover מ-Preact.
+
+## #user-data-notif — notif_settings → notifSettings/{uid} · שער-25 הוסר (חי) (2026-08-13)
+- **הנכס:** מיגרציה מקומי→שרת. notif יצא מקפאת-שער-25 (Preact פרש, אישור-בעלים "כן"; הוק עודכן עם `.allow_protocol_edit`). עלה חי (USER_DATA_SERVER דלוק).
+- **אימות:** `notif_settings_repository_test` — null-provider (בלי backend → SharedPreferences) + round-trip (bool/int/enum שורדים) + no-doc→null (שומר defaults). analyze 0 · functions tsc נקי · stage2_scale (exempt) + app_profile_flags ירוקים.
+- **mutation-verify (בוצע בפועל):** גיבוי (cp) → מוטציה ב-`load`: `return NotifSettings.fromJson(d.data)` → `return null` → RED בטסט round-trip ("decodes the settings back") → שחזור (0 markers) → GREEN 3/3. הטסט בעל-שיניים.
+- **טרם:** צ'אט (עבודה מקבילה חיה). שאר-4 קבצי-הגדרות עדיין קפואים בשער-25.

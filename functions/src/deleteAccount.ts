@@ -373,6 +373,9 @@ export async function eraseUserCompletely(
     // savedProjects/{uid} — the user's saved install-studio projects (local→server
     // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
     db().collection("savedProjects").doc(uid),
+    // notifSettings/{uid} — the user's notification-settings blob (local→server
+    // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
+    db().collection("notifSettings").doc(uid),
   ];
   const existed: Record<string, boolean> = {};
   await Promise.all(

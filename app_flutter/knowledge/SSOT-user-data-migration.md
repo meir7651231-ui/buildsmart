@@ -10,13 +10,14 @@
 ## חנויות ה-increment (צ'אט + 3 נקיות)
 | חנות | יעד-שרת | סטטוס |
 |---|---|---|
-| smart_cart (עגלה) | `carts/{uid}` (single doc `{lines,updatedAt}`) | ✅ **בוצע** (carts_repository.dart · rule · deletion-ref · test) |
-| saved_projects | `savedProjects/{uid}` (single doc `{projects:[…],updatedAt}`) | ⏳ הבא |
-| chatThreads.names | `String` → `{uid:name}` map | ⏳ (פותח אנונימיזציית-מחיקה) |
+| smart_cart (עגלה) | `carts/{uid}` (single doc `{lines,updatedAt}`) | ✅ **חי** (repo · rule · deletion-ref · test · USER_DATA_SERVER דלוק) |
+| saved_projects | `savedProjects/{uid}` (single doc `{projects:[…],updatedAt}`) | ✅ **חי** (repo · rule · deletion-ref · test) |
+| notif_settings | `notifSettings/{uid}` (single doc = toJson) | ✅ **חי** (repo · rule · deletion-ref · test; שער-25 הוסר) |
+| chatThreads.names | `String` → `{uid:name}` map | ⏳ (פותח אנונימיזציית-מחיקה; עבודת-צ'אט מקבילה חיה — להמתין) |
 
 > **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).
 
-**נדחה — parity-frozen עם Preact (שער 25, לא ניתן לגעת):** `notif_settings` (+ app_settings · catalog_settings · chat_settings · store_settings). 5 קבצי-ההגדרות ב-`lib/state/` **verbatim-shared** עם ה-Preact החי; מיגרציה ל-Firestore הייתה מבדילה אותם מ-localStorage של Preact ושוברת parity. ה-notifier/provider חיים בתוך הקובץ-הקפוא ⇒ אין seam-הזרקה נקי בלי לגעת בו. מיגרציה רק אחרי cutover מ-Preact.
+**נדחה — parity-frozen עם Preact (שער 25):** `app_settings · catalog_settings · chat_settings · store_settings` (4). **`notif_settings` הוסר מהרשימה (2026-08-13) ועלה לשרת** — Preact פרש (buildsmart-il.com = Flutter בלבד, אישור-בעלים מפורש), ואין קובץ notif ב-`app/src`, אז נעילת-ה-parity הייתה מיושנת. שאר-4 קפואים עד cutover מלא.
 **נדחה (board-username-keyed, לא uid):** worker_notifs · rewards — צריך board→uid. **לא-דאטה:** board_accounts (Auth+claims) · board_auth session (מקומי-בכוונה).
 
 ## שלבים לכל חנות

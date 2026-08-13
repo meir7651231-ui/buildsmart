@@ -55,8 +55,8 @@ notif_settings כ-"נדחה — parity-frozen עם Preact (שער 25)" עד cuto
 ### ג — כלל המניעה
 ANTIPATTERN: תכנון או בניית מיגרציית מקומי לשרת לקובץ הגדרות תחת תיקיית lib state בלי לבדוק קודם את רשימת הקבצים הקפואים המשותפים verbatim עם Preact שבשער עשרים וחמש, ואז בזבוז בניית store שלמה שנחסמת בקומיט
 RULE: לפני מיגרציה של קובץ lib/state כלשהו — בדוק את לולאת שער-25 ב-.githooks/pre-commit; אם הקובץ
-ברשימת ה-Preact-shared (app_settings/catalog_settings/chat_settings/notif_settings/store_settings)
-הוא קפוא ⇒ דחה עד cutover, אל תבנה. smart_cart/saved_projects לא-קפואים.
+ברשימת ה-Preact-shared (app_settings/catalog_settings/chat_settings/store_settings) הוא קפוא ⇒ דחה
+עד cutover, אל תבנה. smart_cart/saved_projects/notif_settings לא-קפואים (notif הוסר 2026-08-13 — Preact פרש).
 
 ## 2026-08-12 · הגירה #2 (carts/{uid}) — קומיט נחסם, אבחון-שגוי של הכשל דרך פלט-✗ מפורט
 
