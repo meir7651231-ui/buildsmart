@@ -48,5 +48,8 @@
 **⛔ לא לפתוח מחדש כפריט-מיגרציה עצמאי** — לא לשנות `names`→map בנפרד (יתנגש עם רפורם-הזהות ויתייתר). המשך-הטיפול שייך לרפורם-הזהות.
 > **התבנית המקורית (היסטורי, בוטלה):** ~~`names` String→map + `fromDoc` סובלני + deleteAccount scrub `names.${uid}`~~ — נזנחה לטובת directory-lookup ברפורם-הזהות.
 
+## 🟢 TASKS_SERVER הודלק (Wave T3 · הפעלה חיה · 2026-08-14)
+`--dart-define=TASKS_SERVER=true` נוסף ל-3 build-workflows (web-deploy · firebase-hosting · android-test-build), ליד `USER_DATA_SERVER`. **תנאי-סף אומתו לפני:** (1) הכללים חיים — `firebase-deploy` #124 ירוק אחרי תיקון-הסוגר ב-notifSettings (סדר-פריסה בטוח: rules לפני הדגל) · (2) `USE_FIREBASE_BACKEND=true` בבנייה החיה → הדגל מפעיל · (3) `isManager()` כבר מפעיל god-views חיים (orders/customers) → ה-manager-god-view של tasks בטוח. **מה להשגיח (rollback = מחיקת 3 ה-defines):** לוח-המנהל (god-view) · שהעובד-הרשום רואה משימות שהוקצו-לו-לפי-uid · שבורר-הקבלן טעון מה-directory. הלוח החוצה-צדדי כעת חי: קבלן→עובד→אישור דרך `tasks/{taskId}`, פעמון דרך `onTaskStatusChanged`.
+
 ## 🔴 דחיפה / הדלקה חיה
 **הדגל `USER_DATA_SERVER` הודלק** (2026-08-13, דירקטיבת-הבעלים: *"אין דמו/מקומי — אמיתי וחי ודלוק לשרת, או שלא בונים"*). מנגנון: `--dart-define=USER_DATA_SERVER=true` בשלושת build-ה-workflows (`web-deploy.yml` · `firebase-hosting.yml` — הזוג המתחרה על הערוץ-החי, זהים · `android-test-build.yml`). **בדחיפה:** עגלה + פרויקטים הופכים server-backed חיים למשתמש-מחובר-אמיתי (guest-אנונימי נשאר מקומי — אין לו uid). rollback = הסרת ה-3 defines. seed-migration בוטל (אין משתמשים פעילים). דחיפה על "תדחוף".

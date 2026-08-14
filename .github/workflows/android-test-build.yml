@@ -97,6 +97,7 @@ jobs:
             --dart-define=STORE_COMPARISON_UI=true \
             --dart-define=INTERNAL_CARD=true \
             --dart-define=USER_DATA_SERVER=true \
+            --dart-define=TASKS_SERVER=true \
             --dart-define=ORG_CONFIG=true \
             --dart-define=ORG_CONFIG_LIVE=true \
             --dart-define=ACCESS_LOCK=true \
