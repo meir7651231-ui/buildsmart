@@ -2214,3 +2214,8 @@
 - **הנכס:** פעמון-העובד לשרת. טריגר `onTaskStatusChanged` כותב `workerNotifs/{assignedWorkerUid}` (Admin SDK, אין כתיבת-לקוח חוצה-צדדית). reader ממזג server(task,uid)∪local(HR,username). rule self-only. reader OFF byte-identical (server ריק→local).
 - **אימות:** worker_notifs_repository_test (3: OFF-null · decode · markRead/All/clear) + 10 טסטי-notifs קיימים ירוקים · analyze 0.
 - **mutation-verify (בוצע):** markRead `n.id==id ? copyWith(read:true) : n` → `n` (no-op) → RED → שחזור → GREEN 3/3.
+
+## #rewards — private rewards overlay → server (rewards/{uid}, self-only) (2026-08-14)
+- **הנכס:** overlay `{coins,claimedChallengeIds}` → `rewards/{uid}` (uid במקום username — פותר board→uid; leaderboard נגזר-מקומי). repo + notifier (_applyOverlay/_overlayMap חולצו) + rule + deleteAccount + stage2. dormant מאחורי kUserDataServer.
+- **אימות:** rewards_repository_test (3) + rewards_per_user/t3_ghi קיימים ירוקים · analyze 0.
+- **mutation-verify (בוצע):** repo `load`: `if (d.id == uid)` → `if (false)` → RED round-trip → שחזור → GREEN.

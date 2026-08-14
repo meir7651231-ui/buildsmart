@@ -21,6 +21,7 @@
 import 'dart:convert';
 
 import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
+import 'package:buildsmart/data/repositories/rewards_repository.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -224,8 +225,9 @@ class RewardsState {
 }
 
 class RewardsNotifier extends StateNotifier<RewardsState> {
-  RewardsNotifier({this.persist = true, this.username = ''})
-      : super(const RewardsState(
+  RewardsNotifier({this.persist = true, this.username = '', RewardsRepository? repo})
+      : _repo = repo,
+        super(const RewardsState(
           coins: kBuildCoinsSeed,
           challenges: kMonthlyChallengesSeed,
           leaderboard: kLeaderboardSeed,
@@ -235,6 +237,10 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
 
   /// When false (tests), skip SharedPreferences entirely (engine pattern).
   final bool persist;
+
+  /// The server store (`rewards/{uid}`) when USER_DATA_SERVER is on for a real
+  /// signed-in user; null ⇒ the per-username SharedPreferences path below.
+  final RewardsRepository? _repo;
 
   /// #99 — the logged board username. BuildCoins/progress are PRIVATE per user:
   /// the persisted overlay is keyed by username (empty ⇒ the legacy global key,
@@ -253,26 +259,40 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   /// Re-apply the persisted `{coins, claimedChallengeIds}` overlay (#9) onto
   /// the verbatim seed — resilient to seed edits (a renamed/added challenge
   /// simply has no overlay entry). A corrupt payload keeps the seed.
+  /// Apply the persisted `{coins, claimedChallengeIds}` overlay [m] onto the seed
+  /// (shared by the server + SharedPreferences load paths). A late-load guard: a
+  /// user mutation that already ran wins.
+  void _applyOverlay(Map<String, dynamic> m) {
+    if (_userTouched) return;
+    final coins = (m['coins'] as num?)?.toInt() ?? kBuildCoinsSeed;
+    final claimed = <String>{
+      for (final id in (m['claimedChallengeIds'] as List? ?? const []))
+        if (id is String) id,
+    };
+    state = state.copyWith(
+      coins: coins,
+      challenges: [
+        for (final c in kMonthlyChallengesSeed)
+          if (!claimed.contains(c.id)) c,
+      ],
+      leaderboard: _syncMe(coins),
+    );
+  }
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: the overlay lives at `rewards/{uid}`. Absent ⇒ keep the seed
+      // (mirrors the local `raw == null` → return; the repo never throws).
+      final m = await repo.load(repo.currentUid);
+      if (m != null) _applyOverlay(m);
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_storageKey);
       if (raw == null || raw.isEmpty || _userTouched) return;
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      if (_userTouched) return;
-      final coins = (m['coins'] as num?)?.toInt() ?? kBuildCoinsSeed;
-      final claimed = <String>{
-        for (final id in (m['claimedChallengeIds'] as List? ?? const []))
-          if (id is String) id,
-      };
-      state = state.copyWith(
-        coins: coins,
-        challenges: [
-          for (final c in kMonthlyChallengesSeed)
-            if (!claimed.contains(c.id)) c,
-        ],
-        leaderboard: _syncMe(coins),
-      );
+      _applyOverlay(jsonDecode(raw) as Map<String, dynamic>);
     } on Object catch (_) {
       // corrupt/legacy payload — keep the verbatim seed
     }
@@ -280,21 +300,32 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
 
   /// Persist the compact overlay: the live coin balance + which seed
   /// challenges were claimed (derived — claimed = seed ids no longer live).
+  /// The compact overlay written by both persist paths: the live balance + which
+  /// seed challenges were claimed (derived — claimed = seed ids no longer live).
+  Map<String, dynamic> _overlayMap() {
+    final live = {for (final c in state.challenges) c.id};
+    return {
+      'coins': state.coins,
+      'claimedChallengeIds': [
+        for (final c in kMonthlyChallengesSeed)
+          if (!live.contains(c.id)) c.id,
+      ],
+    };
+  }
+
   Future<void> _persist() async {
     if (!persist) return;
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: mirror the compact overlay to `rewards/{uid}`.
+      try {
+        await repo.save(repo.currentUid, _overlayMap());
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
-      final live = {for (final c in state.challenges) c.id};
-      await prefs.setString(
-        _storageKey,
-        jsonEncode({
-          'coins': state.coins,
-          'claimedChallengeIds': [
-            for (final c in kMonthlyChallengesSeed)
-              if (!live.contains(c.id)) c.id,
-          ],
-        }),
-      );
+      await prefs.setString(_storageKey, jsonEncode(_overlayMap()));
     } on Object catch (_) {}
   }
 
@@ -359,5 +390,11 @@ final rewardsProvider =
   // leaderboard stays a shared general board. Watching the session rebuilds the
   // notifier on login/switch, so each user loads exactly their own balance.
   final username = ref.watch(boardAuthProvider)?.username ?? '';
-  return RewardsNotifier(username: username);
+  // Server path (USER_DATA_SERVER on for a real signed-in user): the private
+  // overlay lives at `rewards/{uid}`; null ⇒ the per-username SharedPreferences
+  // path, byte-identical.
+  return RewardsNotifier(
+    username: username,
+    repo: ref.watch(rewardsRepositoryProvider),
+  );
 });

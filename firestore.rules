@@ -669,6 +669,14 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // rewards/{uid} — the user's PRIVATE rewards overlay { coins,
+    // claimedChallengeIds } (local→server migration behind kUserDataServer; the
+    // board-username→uid deferral resolved by keying on the uid). Self-only — the
+    // leaderboard is a DERIVED local view, so nothing cross-party lives here.
+    match /rewards/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // draftQuotes/{uid} — the user's saved quote drafts (local→server migration
     // behind kUserDataServer). Self-only, doc-id == auth.uid (mirrors savedProjects).
     match /draftQuotes/{uid} {

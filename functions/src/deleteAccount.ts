@@ -422,6 +422,9 @@ export async function eraseUserCompletely(
     // notifSettings/{uid} — the user's notification-settings blob (local→server
     // migration, kUserDataServer). Wiped like the other uid-keyed personal docs.
     db().collection("notifSettings").doc(uid),
+    // rewards/{uid} — the user's private rewards overlay (coins / claimed
+    // challenges; local->server migration). doc-id == uid -> wiped.
+    db().collection("rewards").doc(uid),
     // draftQuotes/{uid} — the user's saved quote drafts (local→server migration,
     // kUserDataServer). Wiped like the other uid-keyed personal docs.
     db().collection("draftQuotes").doc(uid),

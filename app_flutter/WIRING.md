@@ -4344,3 +4344,11 @@ increment 2 חלק ד' — פעמון-העובד מהגר לשרת, dormant מא
 - **`worker_notifs_sheet.dart`:** markRead מנתב לפי-מקור (server→repo · local→notifier); markAllRead/clear → שניהם. **`stage2`:** exempt.
 - **אימות:** analyze 0 · worker_notifs_repository_test (3, mutation-verified markRead) + **10 טסטי-worker_notifs קיימים ירוקים (OFF byte-identical)** · functions build בשער.
 - **⚠️ נשאר:** הדלקת `TASKS_SERVER` ב-3 workflows (אישור-בעלים — הפעלה חיה).
+
+### #rewards — private rewards overlay → server (rewards/{uid}, self-only) (2026-08-14)
+המיגרציה הפתוחה האחרונה שאינה חסומת-Gate-25. ה-overlay הפרטי `{coins, claimedChallengeIds}` עובר לשרת, dormant מאחורי `kUserDataServer` (דלוק→חי). פותר את board-username→uid: OFF keyed-by-username (prefs), ON keyed-by-uid (`rewards/{uid}`). leaderboard נשאר נגזר-מקומי (`_syncMe`).
+- **`rewards_repository.dart` (חדש):** single-doc `rewards/{uid}` load/save של ה-overlay-map, gated `kUserDataServer && useFirebaseBackend` + uid לא-אנונימי.
+- **`rewards_state.dart`:** notifier מקבל `repo`; חולץ `_applyOverlay`/`_overlayMap` (משותפים לשני המסלולים); `_load`/`_persist` מסתעפים ל-repo אחרת prefs. provider מזריק `ref.watch(rewardsRepositoryProvider)`.
+- **rules:** `rewards/{uid}` self-only. **deleteAccount:** ref. **stage2:** exempt.
+- **אימות:** analyze 0 · rewards_repository_test (3: OFF-null · round-trip · absent-null) mutation-verified · rewards_per_user + t3_ghi_rewards קיימים ירוקים (אפס-רגרסיה).
+> ⚠️ **4 ההגדרות (app/catalog/chat/store) נותרו פתוחות אך חסומות ב-Gate 25** (parity-freeze בהוק — דורש אישור-בעלים להסרה, כמו notif_settings).

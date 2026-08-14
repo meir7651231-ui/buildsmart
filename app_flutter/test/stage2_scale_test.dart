@@ -139,6 +139,7 @@ void main() {
       'lib/data/repositories/carts_repository.dart', // self-doc scoped (single doc, documentId==uid — the users_repository shape: one 0-or-1 doc read, not a growing listen)
       'lib/data/repositories/saved_projects_repository.dart', // self-doc scoped (single doc, documentId==uid — the carts_repository shape)
       'lib/data/repositories/notif_settings_repository.dart', // self-doc scoped (single doc, documentId==uid — the carts_repository shape)
+      'lib/data/repositories/rewards_repository.dart', // self-doc scoped (rewards/{uid} single doc — the private coins overlay; the notif_settings shape)
       'lib/data/repositories/draft_quotes_repository.dart', // self-doc scoped (single doc, documentId==uid — the saved_projects_repository shape)
       'lib/data/repositories/comparison_sets_repository.dart', // self-doc scoped (single doc, documentId==uid — the draft_quotes_repository shape)
       'lib/data/repositories/saved_customers_repository.dart', // self-doc scoped (single doc, documentId==uid — the comparison_sets_repository shape)
