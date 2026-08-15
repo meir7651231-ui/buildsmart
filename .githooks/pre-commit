@@ -327,9 +327,13 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
         err "32" "baseline-phantom: known-failing=$KNOWN_FAIL אך known_failing.txt מפרט $KF_LISTED שמות" "פרט את שמות הבדיקות ב-known_failing.txt, או הגדר known-failing: 0"
     fi
     if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "Some tests failed"; then
-        # flutter compact output: "XX:XX +888 -16: Some tests failed." — חלץ את -N
-        # תיקון באג #32: pattern הקודם "[0-9]+ ✗" לא מוצא דבר ב-compact mode
-        FAIL_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+ -[0-9]+:" | grep -oE -- "-[0-9]+" | grep -oE "[0-9]+" | tail -1)
+        # flutter compact output: "XX:XX +888 -16: Some tests failed." — חלץ את -N.
+        # תיקון באג #32: pattern הקודם "[0-9]+ ✗" לא מוצא דבר ב-compact mode.
+        # תיקון 2026-08-15 (אישור-בעלים): כשיש בדיקות-skipped הסיכום הוא
+        # "+6015 ~12 -1:" — ה-`~N` בין ה-+N ל-(-N) שבר את "\+[0-9]+ -[0-9]+:"
+        # (ציפה לצמידות) → FAIL_COUNT=0 → כשל-אמת חמק כל עוד יש skips (תמיד).
+        # הוספת segment-skip אופציונלי `(~[0-9]+ )?` תופסת את שני המקרים.
+        FAIL_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+ (~[0-9]+ )?-[0-9]+:" | grep -oE -- "-[0-9]+" | grep -oE "[0-9]+" | tail -1)
         FAIL_COUNT=${FAIL_COUNT:-0}
         if [[ "$FAIL_COUNT" -gt "$KNOWN_FAIL" ]]; then
             # הדפס אילו בדיקות נכשלו בשמן — שהסוכן לא ייתקע "לא יודע מה נכשל"
