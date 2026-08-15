@@ -84,10 +84,21 @@ void main() {
   });
 
   // The catalog repo files this row owns: catalog_*.dart under the repo dir.
+  //
+  // EXEMPT — `catalog_settings_repository.dart`: it is the per-user catalog-VIEW
+  // SETTINGS blob (`catalogSettings/{uid}`, a single doc = `CatalogSettings.toJson`
+  // — sort / price-units / filter prefs), NOT the 1,877-product catalog DATA. It
+  // legitimately rides the user-data migration (#2) to Firestore alongside
+  // app/chat/store settings; S3.K guards the product CATALOG against per-open DB
+  // cost, and a one-doc-per-user settings write is not that. It only matches the
+  // `catalog_` domain prefix — hence this explicit carve-out, keeping the guard on
+  // the real catalog-data repos (`catalog_repository.dart` / `catalog_local.dart`).
+  const settingsExempt = 'catalog_settings_repository.dart';
   List<File> catalogRepoFiles() => [
         for (final e in repoDir.listSync())
           if (e is File &&
               e.uri.pathSegments.last.startsWith('catalog_') &&
+              e.uri.pathSegments.last != settingsExempt &&
               e.path.endsWith('.dart'))
             e,
       ];
