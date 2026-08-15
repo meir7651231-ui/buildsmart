@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:buildsmart/logic/money_format.dart' show groupThousands;
+import 'package:buildsmart/data/repositories/catalog_settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -367,11 +368,21 @@ T _enum<T extends Enum>(Object? raw, List<T> values, T fallback) {
 }
 
 class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
-  CatalogSettingsNotifier() : super(CatalogSettings.defaults) {
+  CatalogSettingsNotifier([this._repo]) : super(CatalogSettings.defaults) {
     unawaited(_load());
   }
 
+  /// Server store (`catalogSettings/{uid}`) when USER_DATA_SERVER is on for a real
+  /// signed-in user; null ⇒ the SharedPreferences path.
+  final CatalogSettingsRepository? _repo;
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      final s = await repo.load(repo.currentUid);
+      if (s != null) state = s;
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -382,6 +393,13 @@ class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
@@ -395,6 +413,13 @@ class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
 
   Future<void> reset() async {
     state = CatalogSettings.defaults;
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, CatalogSettings.defaults);
+      } on Object catch (_) {/* ignore */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kStorageKey);
@@ -404,7 +429,7 @@ class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
 
 final catalogSettingsProvider =
     StateNotifierProvider<CatalogSettingsNotifier, CatalogSettings>(
-  (_) => CatalogSettingsNotifier(),
+  (ref) => CatalogSettingsNotifier(ref.watch(catalogSettingsRepositoryProvider)),
 );
 
 /// Live, in-session product sort for the catalog list. SEEDED (one-shot, via

@@ -2219,3 +2219,8 @@
 - **הנכס:** overlay `{coins,claimedChallengeIds}` → `rewards/{uid}` (uid במקום username — פותר board→uid; leaderboard נגזר-מקומי). repo + notifier (_applyOverlay/_overlayMap חולצו) + rule + deleteAccount + stage2. dormant מאחורי kUserDataServer.
 - **אימות:** rewards_repository_test (3) + rewards_per_user/t3_ghi קיימים ירוקים · analyze 0.
 - **mutation-verify (בוצע):** repo `load`: `if (d.id == uid)` → `if (false)` → RED round-trip → שחזור → GREEN.
+
+## #settings-4 — app/catalog/chat/store settings → server (self-only) (2026-08-14)
+- **הנכס:** 4 בלובי-הגדרות אחרונים (יצאו מ-parity-freeze; **שער 25 בהוק הוסר — אישור-בעלים מפורש**). כל אחד repo single-doc `<coll>/{uid}` (מיחזור notif_settings) + notifier _load/_persist/reset מסתעף + rule self-only + deleteAccount ref + stage2 exempt. dormant מאחורי kUserDataServer.
+- **אימות:** settings_repositories_test (10) + 61 טסטי-הגדרות קיימים ירוקים · analyze 0.
+- **mutation-verify (בוצע):** app_settings `load`: `if (d.id == uid)` → `if (false)` → RED ב-round-trips → שחזור → GREEN.

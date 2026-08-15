@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/app_settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -295,11 +296,23 @@ BsSessionTimeout _intToTimeout(Object? raw) {
 
 /// Notifier that persists every change to SharedPreferences.
 class AppSettingsNotifier extends StateNotifier<AppSettings> {
-  AppSettingsNotifier() : super(AppSettings.defaults) {
+  AppSettingsNotifier([this._repo]) : super(AppSettings.defaults) {
     unawaited(_load());
   }
 
+  /// The server store (`appSettings/{uid}`) when USER_DATA_SERVER is on for a real
+  /// signed-in user; null (the default) ⇒ the SharedPreferences path below.
+  final AppSettingsRepository? _repo;
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: the settings live at `appSettings/{uid}`. Absent ⇒ keep
+      // defaults (mirrors the local `raw == null` → return; the repo never throws).
+      final s = await repo.load(repo.currentUid);
+      if (s != null) state = s;
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -312,6 +325,13 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
@@ -327,6 +347,13 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> reset() async {
     state = AppSettings.defaults;
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, AppSettings.defaults);
+      } on Object catch (_) {/* ignore */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kStorageKey);
@@ -336,5 +363,5 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
 final appSettingsProvider =
     StateNotifierProvider<AppSettingsNotifier, AppSettings>(
-  (_) => AppSettingsNotifier(),
+  (ref) => AppSettingsNotifier(ref.watch(appSettingsRepositoryProvider)),
 );

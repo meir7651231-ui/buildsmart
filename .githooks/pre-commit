@@ -261,15 +261,11 @@ if [[ -n "$STAGED_LIB" ]]; then
     # ידנית של שורה משותפת. שערים 11/12 אוכפים את הסנכרון version.g.dart↔STATUS.
 fi
 
-# שער 25: לא לגעת ב-Preact-shared
-# notif_settings הוסר מהרשימה (2026-08-13): Preact פרש (buildsmart-il.com = Flutter בלבד,
-# אישור-בעלים מפורש), ואין קובץ notif ב-app/src — נעילת-ה-parity מיושנת. הותר למיגרציית #2
-# (notifSettings/{uid} · USER_DATA_SERVER דלוק). שאר-4 נשארים קפואים עד cutover מלא.
-for shared in app_settings catalog_settings chat_settings store_settings; do
-    if git diff --cached lib/state/${shared}.dart 2>/dev/null | grep -q "^[+-][^+-]"; then
-        err "25" "נגעת ב-$shared.dart" "$shared משותף עם Preact — אסור לגעת"
-    fi
-done
+# שער 25 (הוסר 2026-08-14 · אישור-בעלים מפורש meir7651231@gmail.com): נעילת-ה-Preact-parity
+# הוסרה במלואה. notif_settings שוחרר 2026-08-13; ארבעת הנותרים (app/catalog/chat/store_settings)
+# שוחררו 2026-08-14 — Preact פרש (buildsmart-il.com = Flutter בלבד), אין הקבצים ב-app/src,
+# והם עוברים למיגרציית #2 (<coll>/{uid} · USER_DATA_SERVER · dormant מאחורי kUserDataServer).
+# אין עוד קבצים קפואים — הלולאה שחסמה אותם הוסרה.
 
 # שער 26-28: שמות קבצים תקינים (תיקון באג #14 — רק ב-test/ בלבד)
 BAD_TEST=$(git diff --cached --name-only | grep -E "^app_flutter/test/.*_tests\.dart$" | head -1)

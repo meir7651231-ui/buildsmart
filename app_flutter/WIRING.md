@@ -4351,4 +4351,10 @@ increment 2 חלק ד' — פעמון-העובד מהגר לשרת, dormant מא
 - **`rewards_state.dart`:** notifier מקבל `repo`; חולץ `_applyOverlay`/`_overlayMap` (משותפים לשני המסלולים); `_load`/`_persist` מסתעפים ל-repo אחרת prefs. provider מזריק `ref.watch(rewardsRepositoryProvider)`.
 - **rules:** `rewards/{uid}` self-only. **deleteAccount:** ref. **stage2:** exempt.
 - **אימות:** analyze 0 · rewards_repository_test (3: OFF-null · round-trip · absent-null) mutation-verified · rewards_per_user + t3_ghi_rewards קיימים ירוקים (אפס-רגרסיה).
-> ⚠️ **4 ההגדרות (app/catalog/chat/store) נותרו פתוחות אך חסומות ב-Gate 25** (parity-freeze בהוק — דורש אישור-בעלים להסרה, כמו notif_settings).
+### #settings-4 — app/catalog/chat/store settings → server (self-only) (2026-08-14)
+4 בלובי-ההגדרות האחרונים יצאו מ-parity-freeze (Preact פרש) והועברו לשרת, dormant מאחורי `kUserDataServer`. **שער 25 בהוק (`.githooks/pre-commit`) הוסר במלואו — אישור-בעלים מפורש** (meir7651231@gmail.com). כל אחד מראה notif_settings:
+- **repos חדשים:** `{app,catalog,chat,store}_settings_repository.dart` — single-doc `<coll>/{uid}`, load/save של `<T>.toJson`, gated `kUserDataServer && useFirebaseBackend` + uid לא-אנונימי.
+- **notifiers:** constructor `([this._repo])`, `_load`/`_persist`/`reset` מסתעפים ל-repo (server) אחרת SharedPreferences (byte-identical). providers מזריקים `ref.watch(<s>SettingsRepositoryProvider)`.
+- **rules:** `appSettings/catalogSettings/chatSettings/storeSettings /{uid}` self-only. **deleteAccount:** 4 refs. **stage2:** 4 exempt.
+- **אימות:** analyze 0 · settings_repositories_test (10: OFF-null ×4 + round-trip ×4 + absent-null) mutation-verified · 61 טסטי-הגדרות קיימים ירוקים (אפס-רגרסיה).
+> ✅ עם זה, **כל מיגרציית-#2 הושלמה** — אין עוד חנות-משתמש מקומית פתוחה.

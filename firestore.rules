@@ -669,6 +669,23 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // appSettings / catalogSettings / chatSettings / storeSettings {uid} — the four
+    // per-user settings blobs (local→server migration behind kUserDataServer, out of
+    // the שער-25 Preact-freeze once Preact retired). Self-only, doc-id == auth.uid
+    // (mirrors notifSettings/carts).
+    match /appSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /catalogSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /chatSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /storeSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     // rewards/{uid} — the user's PRIVATE rewards overlay { coins,
     // claimedChallengeIds } (local→server migration behind kUserDataServer; the
     // board-username→uid deferral resolved by keying on the uid). Self-only — the
