@@ -2236,3 +2236,8 @@
 - **התיקון:** פרמטר `loop` ל-`buildTreeInstallation` → מושחל ל-`_autoAddCompliance(loop: loop)`; caller `install_studio_screen:1254` מעביר `loop: _loop`.
 - **אימות:** auto_compliance_test 11 (loop:true → 4 פריטי-בטיחות נוכחים) + 12 (loop:false → נעדרים). analyze 0.
 - **mutation-verify (בוצע):** הסרת `loop: loop` מהקריאה ב-tree (מעוגן ל-`final added` כדי לא לפגוע בקריאה הליניארית) → test 11 RED (+11 -1) → שחזור → GREEN (12/12).
+
+## #polish-run3-tail — FX grouping + unit-on-variant-swap (2026-08-15)
+- **הרקע:** מתוך 5 באגי-run3 ה"בטוחים", **2 כבר-תוקנו** (cart-dup → setQtyForKey · PPR-weld → pprWeldDn דו-מפתחי, test-pinned), **1 by-design** (budget blank-category = proto). נותרו 2 אמיתיים:
+- **FX (`finance_hub_sheets`):** `fxGroupAmount`/`fxGroupInt` חולצו ל-top-level ציבורי; החלק-השבור עכשיו מקבץ את החלק-השלם. **mutation-verify (בוצע):** שחזור ה-`return v.toString()` → `fx_group_test` RED (+1 -1) → שחזור → GREEN (3/3).
+- **unit-swap (`lipskey_product_sheet._switchByChip`):** `_unit=single` נוסף (עקביות עם 3 resets קיימים). P3 חד-שורתי; אומת ע"י product_sheet_strips_test ירוק (אפס-רגרסיה) — ללא טסט-ייעודי (widget-state פרטי, disproportionate ל-P3).

@@ -704,6 +704,10 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
       _openPickerKey = null;
       _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
       _activeStage = null;
+      // Reset the unit selector to the new variant's default: pack/pallet
+      // quantities (qtyPack/qtyPallet) are per-product, so a leftover 'ארגז'
+      // from the previous variant misrepresents the freshly-selected one.
+      _unit = _Unit.single;
     });
   }
 

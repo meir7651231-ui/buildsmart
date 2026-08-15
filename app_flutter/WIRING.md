@@ -4364,3 +4364,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #install-recirc-safety — תיקון-בטיחות במנוע ההתקנה (2026-08-15)
 באג-נכונות HIGH (POLISH run-3): `buildTreeInstallation` (מסלול מחלק+ענפים) לא העביר `loop` ל-`_autoAddCompliance` ואף לא החזיק פרמטר כזה — אז עיצוב **מחזור-מים-חמים על מחלק** איבד בשקט את כל קבוצת-הבטיחות של הלולאה (ברז-ניתוק 3 · אל-חזור · ברז-איזון · מפריד-אוויר · דגימת-לגיונלה). המסלול הליניארי כבר העביר `loop` תקין; ה-UI כבר החזיק toggle `_loop`. **התיקון:** פרמטר `loop` ל-`buildTreeInstallation` → `_autoAddCompliance(loop: loop)`; caller `install_studio_screen:1254` מעביר `loop: _loop`. אומת: auto_compliance_test 11/12 · mutation-verified · analyze 0.
+
+### #polish-run3-tail — 2 תיקוני-run3 קטנים (2026-08-15)
+סקירת 5 באגי-run3 ה"בטוחים" גילתה ש-**3 כבר נסגרו** (cart-dup → setQtyForKey · PPR-weld → pprWeldDn · budget blank-cat = by-design). 2 שנותרו תוקנו: **FX grouping** (`finance_hub_sheets` — `fxGroupAmount`/`fxGroupInt` top-level ציבורי, מקבץ חלק-שלם בקלט שברי · `fx_group_test` mutation-verified) · **unit-on-swap** (`lipskey_product_sheet._switchByChip` מאפס `_unit=single`, עקבי עם ה-resets הקיימים). analyze 0 · אפס-רגרסיה.

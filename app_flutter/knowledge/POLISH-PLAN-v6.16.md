@@ -330,13 +330,13 @@ crash: **0 קריסות** (tryParse+guards · 25 jsonDecode ב-try/catch) · כ�
 | באג | file:line | חומ׳ |
 |---|---|---|
 | ~~`buildTreeInstallation` בלי `loop` → **מים-חמים-במחזור על מניפולד מאבד את כל פריטי-הבטיחות**~~ ✅ **תוקן 2026-08-15**: `buildTreeInstallation` קיבל פרמטר `loop` שמושחל ל-`_autoAddCompliance` (מראה את המסלול הליניארי), וה-caller (`install_studio_screen:1254`) מעביר `loop: _loop`. טסטים 11-12 ב-`auto_compliance_test` (present-when-loop / absent-when-not) · mutation-verified | `install_engine:1499/1619` | ~~HIGH~~ ✅ |
-| `+` quick-add **מכפיל שורת-עגלה** (append, מתעלם מ-`inCart`) | `lipskey_products:1350` | P2 |
-| טבלת-ריתוך PPR ממופתחת על מפתח שגוי → **תזמון-ריתוך נעלם** לרוב ה-PPR | `lipskey_product_sheet:2106` | P2 |
-| `+הוסף` תקציב **מחייב קטגוריה-ריקה יתומה** | `budget_screen:236` | MED |
+| ~~`+` quick-add **מכפיל שורת-עגלה**~~ ✅ **כבר תוקן** (2026-08 · שני מסלולי-ה-add משתמשים ב-`setQtyForKey` idempotent, מתועד בקוד W5) | `lipskey_products` | ~~P2~~ ✅ |
+| ~~טבלת-ריתוך PPR על מפתח שגוי~~ ✅ **כבר תוקן** (`pprWeldDn` תומך גם ב-'קוטר חיצוני' וגם 'dn נומינלי', pinned ב-`ppr_weld_dn_test`) | `lipskey_product_sheet` | ~~P2~~ ✅ |
+| `+הוסף` תקציב יוצר קטגוריה-ריקה — **by-design** (proto `addBudgetCategory:7254` דוחף blank → נערך/נמחק; מוצג "קטגוריה חדשה"). לא-באג. | `budget_screen` | ⏭️ |
 | toggle **"התראות תקציב" כותב `typePriceDrops`** (תווית שגויה) | `catalog_settings:192` | MED |
 | `onRoad` סופר pickup+transit (proto=transit) → **"בדרך" מנופח** | `courier_dashboard:47` | MED |
-| יחידה (ארגז/משטח) **נשמרת בהחלפת-variant** | `lipskey_product_sheet:342` | P3 |
-| FX calc מאבד thousands-grouping בקלט שברי | `finance_hub_sheets:1526` | LOW |
+| ~~יחידה (ארגז/משטח) **נשמרת בהחלפת-variant**~~ ✅ **תוקן 2026-08-15**: `_switchByChip` מאפס `_unit=single` (כמו שאר ה-resets באותה מתודה) | `lipskey_product_sheet:701` | ~~P3~~ ✅ |
+| ~~FX calc מאבד thousands-grouping בקלט שברי~~ ✅ **תוקן 2026-08-15**: `fxGroupAmount` מקבץ את החלק-השלם ושומר את השבר · `fx_group_test` mutation-verified | `finance_hub_sheets:1682` | ~~LOW~~ ✅ |
 
 ### ✅ הפרכות (validation תפסה false-positives של ריצה-2)
 - **manager double-push** — מופרך (DR2: InkWell פנימי זוכה ב-gesture-arena · modal-barrier).

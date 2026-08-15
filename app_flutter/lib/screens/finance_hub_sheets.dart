@@ -1654,6 +1654,32 @@ void _openFx(BuildContext context) {
   );
 }
 
+/// Group an integer with thousands commas (proto updateFXCalc toLocaleString).
+/// Top-level + public so `fx_group_test` can pin it directly.
+String fxGroupInt(int v) {
+  final neg = v < 0;
+  final d = v.abs().toString();
+  final buf = StringBuffer();
+  for (var i = 0; i < d.length; i++) {
+    if (i > 0 && (d.length - i) % 3 == 0) buf.write(',');
+    buf.write(d[i]);
+  }
+  return '${neg ? '-' : ''}$buf';
+}
+
+/// Group the INTEGER PART of a possibly-fractional amount, preserving the
+/// fractional tail. Fractional inputs used to lose grouping entirely
+/// (`v.toString()` → "1234567.5"); now the integer part is grouped
+/// ("1,234,567.5") like the integer case.
+String fxGroupAmount(double v) {
+  final abs = v.abs();
+  if (abs == abs.roundToDouble()) return fxGroupInt(v.round());
+  final s = abs.toString(); // e.g. "1234567.5"
+  final dot = s.indexOf('.');
+  final intPart = int.tryParse(s.substring(0, dot)) ?? 0;
+  return '${v < 0 ? '-' : ''}${fxGroupInt(intPart)}${s.substring(dot)}';
+}
+
 class _FxCalc extends StatefulWidget {
   const _FxCalc();
   @override
@@ -1676,25 +1702,7 @@ class _FxCalcState extends State<_FxCalc> {
     final amt = double.tryParse(_ctl.text.trim()) ?? 0;
     final rate = _fxRatesToShow()[_cur] ?? 1;
     final ils = (amt * rate).round();
-    return '${_group(amt)} $_cur = ₪${_groupInt(ils)}';
-  }
-
-  static String _group(double v) {
-    // toLocaleString — group integer part with commas, drop trailing .0.
-    final isInt = v == v.roundToDouble();
-    if (isInt) return _groupInt(v.round());
-    return v.toString();
-  }
-
-  static String _groupInt(int v) {
-    final neg = v < 0;
-    final d = v.abs().toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < d.length; i++) {
-      if (i > 0 && (d.length - i) % 3 == 0) buf.write(',');
-      buf.write(d[i]);
-    }
-    return '${neg ? '-' : ''}$buf';
+    return '${fxGroupAmount(amt)} $_cur = ₪${fxGroupInt(ils)}';
   }
 
   @override
