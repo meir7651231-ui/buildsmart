@@ -2224,3 +2224,9 @@
 - **הנכס:** 4 בלובי-הגדרות אחרונים (יצאו מ-parity-freeze; **שער 25 בהוק הוסר — אישור-בעלים מפורש**). כל אחד repo single-doc `<coll>/{uid}` (מיחזור notif_settings) + notifier _load/_persist/reset מסתעף + rule self-only + deleteAccount ref + stage2 exempt. dormant מאחורי kUserDataServer.
 - **אימות:** settings_repositories_test (10) + 61 טסטי-הגדרות קיימים ירוקים · analyze 0.
 - **mutation-verify (בוצע):** app_settings `load`: `if (d.id == uid)` → `if (false)` → RED ב-round-trips → שחזור → GREEN.
+
+## #tasks-rules-dup — הסרת match-block כפול-ורופף על tasks (תיקון-אבטחה) (2026-08-15)
+- **הבאג:** `firestore.rules` הכיל **שני** `match /tasks/{taskId}` — הישן-הרופף (Wave-T1: `read: if isSignedIn()`, `write: if worker||manager`) והחדש-ההדוק (Wave-T3 cross-party 6-state). Firestore **מאחד (OR)** בלוקים על אותו path → הרופף ביטל בשקט את ההדוק: כל signed-in קרא כל משימה, כל worker/manager כתב כל משימה (עוקף cross-party isolation + no-self-approval + employerId-write-once).
+- **התיקון:** הוסר הבלוק הרופף (567-570); ההדוק (887) נשאר יחיד+מוסמך.
+- **אימות:** `grep 'match /tasks/{taskId} {'` = 1 בלוק · 26 טסטי-tasks (cross-party closure/scope/approval/proposal/realtime-bind/firebase) ירוקים · gate.
+- **increment-2 = סגור:** 3-role providers + bindRemote + write-path _commit→upsert + טסטים — כולם כבר קיימים; זה היה הפער האמיתי היחיד.

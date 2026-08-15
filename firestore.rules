@@ -561,13 +561,13 @@ service cloud.firestore {
       allow delete: if isManager();
     }
 
-    // tasks — the worker↔manager flow: worker submits for review
-    // (active/rejected→review), manager approves/rejects; both ride `status`
-    // updates over the same docs.
-    match /tasks/{taskId} {
-      allow read: if isSignedIn();
-      allow write: if hasRole('worker') || isManager();
-    }
+    // tasks/{taskId} — the CROSS-PARTY §6 board rules live BELOW (Wave T3, the
+    // tight worker/employer/manager block). This loose Wave-T1 placeholder was
+    // REMOVED (2026-08-15): two match blocks for the SAME path are OR'd by
+    // Firestore, so it silently defeated the tight block — any signed-in user
+    // could read EVERY task, and any worker/manager could write ANY task, undoing
+    // the cross-party isolation + the no-self-approval / employerId-write-once
+    // guards. The single authoritative block is `match /tasks/{taskId}` further down.
 
     // material_requests — the worker material-request queue: worker files a
     // request, the reviewing board advances `status`

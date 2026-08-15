@@ -4358,3 +4358,6 @@ increment 2 חלק ד' — פעמון-העובד מהגר לשרת, dormant מא
 - **rules:** `appSettings/catalogSettings/chatSettings/storeSettings /{uid}` self-only. **deleteAccount:** 4 refs. **stage2:** 4 exempt.
 - **אימות:** analyze 0 · settings_repositories_test (10: OFF-null ×4 + round-trip ×4 + absent-null) mutation-verified · 61 טסטי-הגדרות קיימים ירוקים (אפס-רגרסיה).
 > ✅ עם זה, **כל מיגרציית-#2 הושלמה** — אין עוד חנות-משתמש מקומית פתוחה.
+
+### #tasks-rules-dup — תיקון-אבטחה: match-block כפול על tasks (2026-08-15)
+increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers · bindRemote bind-once+re-bind · write-path `_commit`→`upsert`→toDoc · חבילת-טסטים רב-צדדית). הפער האמיתי היחיד: **`firestore.rules` הכיל שני `match /tasks/{taskId}`** — הישן-הרופף (Wave-T1) והחדש-ההדוק (Wave-T3). Firestore OR על אותו path ⇒ הרופף ביטל בשקט את ההדוק (כל signed-in קרא הכל, כל worker/manager כתב הכל). **הוסר הבלוק הרופף** — ההדוק נשאר יחיד. אומת: 1 בלוק · 26 טסטי-tasks ירוקים · indexes לא-נדרש (single-field equality). **increment-2 סגור.**
