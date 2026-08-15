@@ -4361,3 +4361,6 @@ increment 2 חלק ד' — פעמון-העובד מהגר לשרת, dormant מא
 
 ### #tasks-rules-dup — תיקון-אבטחה: match-block כפול על tasks (2026-08-15)
 increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers · bindRemote bind-once+re-bind · write-path `_commit`→`upsert`→toDoc · חבילת-טסטים רב-צדדית). הפער האמיתי היחיד: **`firestore.rules` הכיל שני `match /tasks/{taskId}`** — הישן-הרופף (Wave-T1) והחדש-ההדוק (Wave-T3). Firestore OR על אותו path ⇒ הרופף ביטל בשקט את ההדוק (כל signed-in קרא הכל, כל worker/manager כתב הכל). **הוסר הבלוק הרופף** — ההדוק נשאר יחיד. אומת: 1 בלוק · 26 טסטי-tasks ירוקים · indexes לא-נדרש (single-field equality). **increment-2 סגור.**
+
+### #install-recirc-safety — תיקון-בטיחות במנוע ההתקנה (2026-08-15)
+באג-נכונות HIGH (POLISH run-3): `buildTreeInstallation` (מסלול מחלק+ענפים) לא העביר `loop` ל-`_autoAddCompliance` ואף לא החזיק פרמטר כזה — אז עיצוב **מחזור-מים-חמים על מחלק** איבד בשקט את כל קבוצת-הבטיחות של הלולאה (ברז-ניתוק 3 · אל-חזור · ברז-איזון · מפריד-אוויר · דגימת-לגיונלה). המסלול הליניארי כבר העביר `loop` תקין; ה-UI כבר החזיק toggle `_loop`. **התיקון:** פרמטר `loop` ל-`buildTreeInstallation` → `_autoAddCompliance(loop: loop)`; caller `install_studio_screen:1254` מעביר `loop: _loop`. אומת: auto_compliance_test 11/12 · mutation-verified · analyze 0.

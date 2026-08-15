@@ -329,7 +329,7 @@ crash: **0 קריסות** (tryParse+guards · 25 jsonDecode ב-try/catch) · כ�
 ### 🟠 באגים אמיתיים חדשים (ריצה-3, CONFIRMED)
 | באג | file:line | חומ׳ |
 |---|---|---|
-| `buildTreeInstallation` בלי `loop` → **מים-חמים-במחזור על מניפולד מאבד את כל פריטי-הבטיחות** (check/balancing/air-vent/לגיונלה/2 ברזים) + אין רגל-חזרה | `install_engine:1378/1505` | **HIGH (בטיחות)** |
+| ~~`buildTreeInstallation` בלי `loop` → **מים-חמים-במחזור על מניפולד מאבד את כל פריטי-הבטיחות**~~ ✅ **תוקן 2026-08-15**: `buildTreeInstallation` קיבל פרמטר `loop` שמושחל ל-`_autoAddCompliance` (מראה את המסלול הליניארי), וה-caller (`install_studio_screen:1254`) מעביר `loop: _loop`. טסטים 11-12 ב-`auto_compliance_test` (present-when-loop / absent-when-not) · mutation-verified | `install_engine:1499/1619` | ~~HIGH~~ ✅ |
 | `+` quick-add **מכפיל שורת-עגלה** (append, מתעלם מ-`inCart`) | `lipskey_products:1350` | P2 |
 | טבלת-ריתוך PPR ממופתחת על מפתח שגוי → **תזמון-ריתוך נעלם** לרוב ה-PPR | `lipskey_product_sheet:2106` | P2 |
 | `+הוסף` תקציב **מחייב קטגוריה-ריקה יתומה** | `budget_screen:236` | MED |

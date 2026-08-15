@@ -1252,7 +1252,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       branches = branchTargets.where((t) => t.sku != fixedChain[mi].sku).length;
       outlets = manifoldOutlets(fixedChain[mi]);
       plan = buildTreeInstallation(trunk, branchTargets,
-          tempC: temp, accessories: acc, autoCompliance: true);
+          tempC: temp, accessories: acc, autoCompliance: true, loop: _loop);
     } else {
       plan = buildInstallation([...fixedChain],
           tempC: temp, accessories: acc, loop: _loop, autoCompliance: true);

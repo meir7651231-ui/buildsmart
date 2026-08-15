@@ -2230,3 +2230,9 @@
 - **התיקון:** הוסר הבלוק הרופף (567-570); ההדוק (887) נשאר יחיד+מוסמך.
 - **אימות:** `grep 'match /tasks/{taskId} {'` = 1 בלוק · 26 טסטי-tasks (cross-party closure/scope/approval/proposal/realtime-bind/firebase) ירוקים · gate.
 - **increment-2 = סגור:** 3-role providers + bindRemote + write-path _commit→upsert + טסטים — כולם כבר קיימים; זה היה הפער האמיתי היחיד.
+
+## #install-recirc-safety — buildTreeInstallation איבד פריטי-בטיחות במחזור (HIGH · POLISH run-3) (2026-08-15)
+- **הבאג:** `buildTreeInstallation` קרא ל-`_autoAddCompliance(items, qty, tempC)` **בלי `loop`** (ברירת-מחדל false), ואף לא היה לו פרמטר `loop`. עיצוב מחזור-מים-חמים (loop) על מחלק+ענפים איבד בשקט את **כל קבוצת-הבטיחות של הלולאה**: ברז-ניתוק שלישי · אל-חזור (HW-CHECK-15) · ברז-איזון (HW-BALANCE-15) · מפריד-אוויר (HW-AIRVENT) · נקודת-דגימת-לגיונלה (HW-SAMPLE). המסלול הליניארי (`buildInstallation`) העביר `loop` תקין; ה-tree לא. ה-UI כבר החזיק toggle `_loop` ("מחזור מים חמים").
+- **התיקון:** פרמטר `loop` ל-`buildTreeInstallation` → מושחל ל-`_autoAddCompliance(loop: loop)`; caller `install_studio_screen:1254` מעביר `loop: _loop`.
+- **אימות:** auto_compliance_test 11 (loop:true → 4 פריטי-בטיחות נוכחים) + 12 (loop:false → נעדרים). analyze 0.
+- **mutation-verify (בוצע):** הסרת `loop: loop` מהקריאה ב-tree (מעוגן ל-`final added` כדי לא לפגוע בקריאה הליניארית) → test 11 RED (+11 -1) → שחזור → GREEN (12/12).

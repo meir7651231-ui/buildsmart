@@ -1496,6 +1496,7 @@ InstallationPlan buildTreeInstallation(
   int tempC = 20,
   Set<String> accessories = const {},
   bool autoCompliance = false,
+  bool loop = false,
 }) {
   final items = <LipskeyCatalogProduct>[];
   final qty = <String, int>{};
@@ -1616,7 +1617,12 @@ InstallationPlan buildTreeInstallation(
   // assigned to the "בטיחות" zone rather than appearing outside all zones.
   if (autoCompliance && items.isNotEmpty) {
     final skusBefore = qty.keys.toSet();
-    _autoAddCompliance(items, qty, tempC);
+    // Thread `loop` through so a recirculation-loop tree (a hot-water ring feeding
+    // a manifold) gets its loop-only safety group — 3rd isolation valve, check
+    // valve, balancing valve, air vent, Legionella sampling point. Without it the
+    // tree path silently dropped ALL of these (the linear buildInstallation passes
+    // loop; buildTreeInstallation used to default it to false).
+    _autoAddCompliance(items, qty, tempC, loop: loop);
     final added = qty.keys.toSet().difference(skusBefore);
     if (added.isNotEmpty) {
       zones['בטיחות'] = added.toList();
