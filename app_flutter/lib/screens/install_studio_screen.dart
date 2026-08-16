@@ -55,7 +55,7 @@ const _mute = Color(0xFF888888); // secondary text
 const _supply = Color(0xFF0284C7); // blue — water supply
 const _drain = Color(0xFFD97706); // amber — drainage
 const _fixture = Color(0xFF7C3AED); // violet — fixtures (the bridge)
-const _accent = Color(0xFFFF7A18); // brand orange — primary action
+const _accent = BsTokens.brand; // brand orange — primary action
 const _ok = Color(0xFF16A34A); // green — success / "all good"
 
 // Close (X) for the studio bottom-sheets — matches the app's product-sheet

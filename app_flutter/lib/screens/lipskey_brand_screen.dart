@@ -386,7 +386,7 @@ class _CategoryCard extends StatelessWidget {
                           ),
                           child: Text('${products.length} מוצרים',
                               style: const TextStyle(
-                                  color: Color(0xFFFF7A18),
+                                  color: BsTokens.brand,
                                   fontSize: 11)),
                         ),
                 ],

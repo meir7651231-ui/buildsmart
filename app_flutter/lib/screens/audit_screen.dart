@@ -213,7 +213,7 @@ class _AuditScreenState extends State<AuditScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _running ? null : _run,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF7A18),
+                    backgroundColor: BsTokens.brand,
                     foregroundColor: const Color(0xFFFFFFFF),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
@@ -369,13 +369,13 @@ class _AuditScreenState extends State<AuditScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF7A18).withOpacity(0.10),
+                      color: BsTokens.brand.withOpacity(0.10),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '${p.typeEmoji} ${p.productType ?? "?"}',
                       style: const TextStyle(
-                          color: Color(0xFFFF7A18),
+                          color: BsTokens.brand,
                           fontSize: 9,
                           fontWeight: FontWeight.w700),
                     ),

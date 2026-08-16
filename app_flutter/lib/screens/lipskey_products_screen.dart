@@ -395,7 +395,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
   final LipskeyCatalogProduct product;
   final List<LipskeyCatalogProduct> products;
 
-  static const _brand = Color(0xFFFF7A18);
+  static const _brand = BsTokens.brand;
   static const _ok = Color(0xFF1F8A4C);
 
   String get _key => 'lip:${product.sku}';
@@ -611,7 +611,7 @@ class _StepBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const brand = Color(0xFFFF7A18);
+    const brand = BsTokens.brand;
     final label = icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות';
     return Semantics(
       button: true,
@@ -746,7 +746,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   int? _hPickerIndex;
   String? _hPickerTitle;
 
-  static const _brand = Color(0xFFFF7A18);
+  static const _brand = BsTokens.brand;
   static const _teal = Color(0xFF3DD9B0);
   Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(0.45);
   Color get _line => Theme.of(context).colorScheme.outline.withOpacity(0.2);
@@ -2363,13 +2363,13 @@ class _HierarchyChipPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSize = RegExp(r'^["”]?\d|^\d').hasMatch(word);
     final bg = isOpen
-        ? const Color(0xFFFF7A18)
-        : (isSize ? const Color(0xFFFF7A18) : const Color(0xFFF1F1F4));
+        ? BsTokens.brand
+        : (isSize ? BsTokens.brand : const Color(0xFFF1F1F4));
     final fg = (isOpen || isSize) ? bsOnAccent(context) : const Color(0xFF1C1C1E);
     final border = isOpen
-        ? const Color(0xFFFF7A18)
+        ? BsTokens.brand
         : (isSize
-            ? const Color(0xFFFF7A18)
+            ? BsTokens.brand
             : const Color(0xFFE0E0E5));
     return GestureDetector(
       onTap: onTap,
@@ -2408,7 +2408,7 @@ class _AttrChip extends StatelessWidget {
   final void Function(String word, AttrKind kind)? onTap;
   final bool isOpen;
 
-  static const _orange = Color(0xFFFF7A18);
+  static const _orange = BsTokens.brand;
 
   /// Number of choices shown in the picker for [kind].
   /// Color picker deduplicates by base colour, so count distinct bases.

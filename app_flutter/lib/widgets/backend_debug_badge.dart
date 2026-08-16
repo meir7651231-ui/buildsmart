@@ -25,6 +25,7 @@
 // SAFE: every Firebase touch is guarded by [useFirebaseBackend]; on the demo
 // build (and the whole Firebase-free test suite) it only renders the red "demo"
 // chip and never resolves FirebaseAuth/Firestore. DELETE after go-live.
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart'
     show kOrdersContractorScopeField;
@@ -296,7 +297,7 @@ class _BackendDebugBadgeState extends State<BackendDebugBadge> {
                       child: ElevatedButton(
                         onPressed: _busy ? null : _testServer,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF7A18),
+                          backgroundColor: BsTokens.brand,
                           foregroundColor: Colors.white,
                         ),
                         child: Text(_busy ? 'בודק…' : '🔌 בדוק חיבור לשרת'),

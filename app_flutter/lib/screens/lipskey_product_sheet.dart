@@ -1240,7 +1240,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       width: double.infinity,
                       child: FilledButton.icon(
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF7A18),
+                          backgroundColor: BsTokens.brand,
                           foregroundColor: const Color(0xFF1A1200),
                           padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
@@ -1334,7 +1334,7 @@ class _QtyStepper extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
-        border: Border.all(color: const Color(0xFFFF7A18)),
+        border: Border.all(color: BsTokens.brand),
         borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.antiAlias,
@@ -1379,7 +1379,7 @@ class _UnitToggle extends StatelessWidget {
           onTap: enabled ? () => onChanged(u) : null,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 11),
-            color: sel ? const Color(0xFFFF7A18) : Colors.transparent,
+            color: sel ? BsTokens.brand : Colors.transparent,
             alignment: Alignment.center,
             child: Text(label,
                 style: TextStyle(
@@ -1702,7 +1702,7 @@ class _ProductSideState extends State<_ProductSide> {
                       padding:
                           const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF7A18),
+                        color: BsTokens.brand,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(
@@ -1861,7 +1861,7 @@ class _SpecSideState extends State<_SpecSide> {
                       padding:
                           const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF7A18),
+                        color: BsTokens.brand,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(

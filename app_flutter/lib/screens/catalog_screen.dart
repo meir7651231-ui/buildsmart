@@ -7033,9 +7033,9 @@ class _KindChip extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFFF7A18) : Colors.transparent,
+          color: selected ? BsTokens.brand : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: selected ? const Color(0xFFFF7A18) : Theme.of(context).colorScheme.outline.withOpacity(0.35), width: 1.2),
+          border: Border.all(color: selected ? BsTokens.brand : Theme.of(context).colorScheme.outline.withOpacity(0.35), width: 1.2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -7095,9 +7095,9 @@ class _AxisChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFF7A18) : Colors.transparent,
+          color: isSelected ? BsTokens.brand : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: isSelected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.35), width: 1.2),
+          border: Border.all(color: isSelected ? BsTokens.brand : cs.outline.withOpacity(0.35), width: 1.2),
         ),
         child: Text(label, style: TextStyle(color: isSelected ? bsOnAccent(context) : cs.onSurface, fontWeight: FontWeight.w700, fontSize: 12)),
       ),
@@ -7435,7 +7435,7 @@ class _FacetChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? const Color(0x22FF7A18) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.25), width: 1),
+          border: Border.all(color: isSelected ? BsTokens.brand : cs.outline.withOpacity(0.25), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -7474,7 +7474,7 @@ class _ValueChip extends ConsumerWidget {
         decoration: BoxDecoration(
           color: selected ? const Color(0x22FF7A18) : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.25), width: 1),
+          border: Border.all(color: selected ? BsTokens.brand : cs.outline.withOpacity(0.25), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

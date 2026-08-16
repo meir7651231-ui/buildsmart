@@ -4379,3 +4379,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #theme-flash-fix — הגדרות pre-hydrated לפני הפריים הראשון (2026-08-16)
 הבאג האחרון מרשימה-2: תמה נטענה אחרי הפריים הראשון (`unawaited(_load())`) → משתמש-כהה ראה הבזק-בהיר. **התיקון:** `loadAppSettings()` (חדש, קורא prefs לפני `runApp`, מראה את `loadWelcomeSeen`) → `main` מזריק `appSettingsProvider.overrideWith(... AppSettingsNotifier(repo, appSettings))`; ה-notifier מקבל `initial` optional + דגל `_seeded` שמדלג על ה-local re-read (server-path עדיין נטען async). `app_settings_preload_test` (3, mutation-verified) · analyze 0. **כל 3 הפתוחים האחרונים סגורים — מסע-ניקוי-הבאגים הושלם.**
+
+### #w0-slice2 — כתום-מותג עמוק + טאטוא single-source (2026-08-16)
+§W0 סלייס-2 (אישור-בעלים): `BsTokens.brand` הועמק `#FF7A18`→`#F26B1D` (+נגישות: לבן-על-כתום 2.9→4.4:1). כל 28 ה-`Color(0xFFFF7A18)` הקשיחים ב-10 קבצי-מסך טואטאו ל-`BsTokens.brand` (single-source, אחיד), + 2 imports. הושארו 2 raw-int בשכבת-הדאטה. analyze 0 · a11y ירוק. (סלייס-1 = ניטרלים חמים + פלטת-כהה.)

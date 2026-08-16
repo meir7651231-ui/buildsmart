@@ -53,9 +53,12 @@ class BsTokens {
   static const Duration microIn = Duration(milliseconds: 150); // W0: tap/expand micro-interaction
   static const Curve dialCurve = Cubic(0.2, 0.9, 0.3, 1.2);
 
-  // Brand color (ported from --brand in tokens.css — orange used in Preact).
-  static const Color brand = Color(0xFFFF7A18);
-  static const Color brandDark = Color(0xFFE85F00);
+  // Brand color. §W0 slice-2 (2026-08-16): deepened from #FF7A18 to a premium
+  // construction orange — also lifts white-on-brand from 2.9:1 to 4.4:1 (clears
+  // the 3:1 large-text/button bar). All hardcoded #FF7A18 across lib/ were swept
+  // to this token in the same slice, so the deepening is uniform (no half/half).
+  static const Color brand = Color(0xFFF26B1D);
+  static const Color brandDark = Color(0xFFD65A0E);
 
   // Light theme colors.
   static const Color bgLight = Color(0xFFFAFAFA);
@@ -84,7 +87,7 @@ class BsTokens {
   // floating card-keyboard's seam/background fill: the app's OWN orange,
   // lightened so the white buttons read clearly on top (owner: a colour that
   // matches the app, derived from the brand — not an arbitrary peach).
-  static const Color kbSeam = Color(0xFFFFD3B3);
+  static const Color kbSeam = Color(0xFFFBCEB4); // §W0 slice-2: retint from deepened brand
 
   // Chat-specific text colors (light background, high-contrast).
   static const Color chatText = Color(0xFF111111);

@@ -18,6 +18,7 @@
 /// Mono font (RD-G/V4) come later. See BUILD-PLAN.md.
 library;
 
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
 import 'package:buildsmart/data/smart_tree.dart'
@@ -34,7 +35,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ── design tokens (Pro-X-Light) ──────────────────────────────────────────────
 const Color _kInk = Color(0xFF1C2230);
-const Color _kOrange = Color(0xFFFF7A18);
+const Color _kOrange = BsTokens.brand;
 const Color _kOrangeDeep = Color(0xFFE8690B);
 const Color _kMuted = Color(0xFF9AA0AC);
 const Color _kSub = Color(0xFF6B7280);
@@ -382,7 +383,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     final it = _cart[i];
     final dot =
         it.isKit
-            ? const Color(0xFFFF7A18)
+            ? BsTokens.brand
             : (_dotColors[it.color] ?? const Color(0xFFB7B0A5));
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
