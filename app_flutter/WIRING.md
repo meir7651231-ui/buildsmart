@@ -4376,3 +4376,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #edit-sheet-guards + voice-guard (2026-08-16)
 3 הבאגים האחרונים מרשימה-2: **voice double-fire** (`ai_hub_screen` — דגל `_voiceBusy` מראה VoiceDictateButton + `onError` שהיה חסר) · **PopScope חכם** ל-2 גיליונות-עריכה נקיים (`projects._EditSheet` · `catalog._ItemPickerSheet`) עם דיאלוג "לבטל את השינויים?" כשיש dirty (מראה PopScope פרודקשן ב-`manager_screens_sheet`) · **`install_studio` describe** (inline/parent-state, מסך-מורכב) → הבחירה-הזהירה `enableDrag:false` בלבד. analyze 0 · 61 טסטים ירוקים. אין בדיקת-gesture ייעודית (מחוות על גיליונות פרטיים; דפוס-פרודקשן קיים). **רשימות-הבאגים (2) סגורות — כל הפריטים האמיתיים תוקנו.**
+
+### #theme-flash-fix — הגדרות pre-hydrated לפני הפריים הראשון (2026-08-16)
+הבאג האחרון מרשימה-2: תמה נטענה אחרי הפריים הראשון (`unawaited(_load())`) → משתמש-כהה ראה הבזק-בהיר. **התיקון:** `loadAppSettings()` (חדש, קורא prefs לפני `runApp`, מראה את `loadWelcomeSeen`) → `main` מזריק `appSettingsProvider.overrideWith(... AppSettingsNotifier(repo, appSettings))`; ה-notifier מקבל `initial` optional + דגל `_seeded` שמדלג על ה-local re-read (server-path עדיין נטען async). `app_settings_preload_test` (3, mutation-verified) · analyze 0. **כל 3 הפתוחים האחרונים סגורים — מסע-ניקוי-הבאגים הושלם.**

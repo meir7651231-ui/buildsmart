@@ -17,6 +17,7 @@ import 'package:buildsmart/screens/access_lock_gate.dart' show AccessLockGate;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
+import 'package:buildsmart/data/repositories/app_settings_repository.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -308,6 +309,10 @@ Future<void> main() async {
   final guestBrowsing = await loadGuestBrowsing();
   // Benzi #4: seed the one-time ship-to-prompt flag (absent → false → prompt).
   final shipToPrompted = await loadShipToPrompted();
+  // Theme-flash fix: hydrate app settings (theme/units/privacy) from prefs BEFORE
+  // the first frame, so a dark-theme user never sees a light flash. Seeds the
+  // notifier via the override below (a signed-in user's server value still loads).
+  final appSettings = await loadAppSettings();
   // Runtime-config layer hydrates FIRST (a future module gate over the catalog
   // overlay must see it; flag OFF ⇒ returns the default with zero I/O).
   final orgCfg = await hydrateOrgConfig(
@@ -324,6 +329,9 @@ Future<void> main() async {
         guestBrowsingProvider.overrideWith((ref) => guestBrowsing),
         shipToPromptedProvider.overrideWith((ref) => shipToPrompted),
         orgConfigProvider.overrideWith((ref) => orgCfg),
+        // Seed the settings notifier with the pre-hydrated value (theme-flash fix).
+        appSettingsProvider.overrideWith((ref) => AppSettingsNotifier(
+            ref.watch(appSettingsRepositoryProvider), appSettings)),
       ],
       child: const BuildSmartApp(),
     ),

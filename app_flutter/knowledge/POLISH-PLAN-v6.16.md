@@ -297,7 +297,7 @@
 | צ׳יפי-scope של חיפוש **הפוכים** | `catalog_screen:2003` | deep-read | MED | להחליף זרועות מוצרים↔קטגוריות |
 | **2 orphan refs → רשימה ריקה** | `catalog_tree:84` (`מאספים וקולטים`→`מאספי רצפה`) · `:438` (`אמבט ואגנית`→`ברזי אמבטיה`) | data | HIGH | category קיים |
 | **חיתוך-₪** בעגלה שמורה | `store_screen:2847` (`total~/qty`) | money | MED | לשמר unit-price |
-| **הבזק-תמה** cold-start | `main.dart:22` (settings ב-unawaited) | async | MED | `await` כמו welcomeSeen |
+| ~~**הבזק-תמה** cold-start~~ ✅ **תוקן 2026-08-16**: `loadAppSettings()` נטען לפני `runApp` + `appSettingsProvider` מוזרק seed (notifier `_seeded` מדלג על re-read מקומי; server עדיין נטען). `app_settings_preload_test` (3) mutation-verified | `main.dart` · `app_settings` | ~~MED~~ ✅ |
 | ~~**double-push** פותח 2 sheets~~ ✅ **מוקשח 2026-08-16**: `showLipskeyProductSheet` קיבל guard re-entrancy frame-scoped מרכזי (מכסה ~15 call-sites). ה-DR (:342-343) הפריך את ה-same-widget double-tap (gesture-arena+barrier), אבל ה-opener היה **ללא guard** — שתי פתיחות same-frame (למשל הקשה מהירה על 2 כרטיסים שונים לפני שה-barrier עולה) **מוכחות מערמות** (test אדום בלי ה-guard). frame-scoped reset ⇒ אין leak בין-טסטים | `lipskey_product_sheet:49` | nav | ~~HIGH~~ ✅ |
 | `_loop` מים-חמים נופל ב-manifold | `install_studio:778/938` | deep-read | P2 | thread `loop` ל-buildTree |
 | **textScaler דורס נגישות-OS** → W0-י | `main.dart:40` | dark | MED | clamp |

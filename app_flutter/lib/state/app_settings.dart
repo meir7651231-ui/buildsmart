@@ -296,13 +296,20 @@ BsSessionTimeout _intToTimeout(Object? raw) {
 
 /// Notifier that persists every change to SharedPreferences.
 class AppSettingsNotifier extends StateNotifier<AppSettings> {
-  AppSettingsNotifier([this._repo]) : super(AppSettings.defaults) {
+  AppSettingsNotifier([this._repo, AppSettings? initial])
+      : _seeded = initial != null,
+        super(initial ?? AppSettings.defaults) {
     unawaited(_load());
   }
 
   /// The server store (`appSettings/{uid}`) when USER_DATA_SERVER is on for a real
   /// signed-in user; null (the default) ⇒ the SharedPreferences path below.
   final AppSettingsRepository? _repo;
+
+  /// True when [main] pre-hydrated the initial value from prefs BEFORE the first
+  /// frame (theme-flash fix): the local re-read in [_load] is then skipped (we
+  /// already have it), but a signed-in user's SERVER value still loads.
+  final bool _seeded;
 
   Future<void> _load() async {
     final repo = _repo;
@@ -313,6 +320,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
       if (s != null) state = s;
       return;
     }
+    // Local path already hydrated before the first frame — nothing to re-read.
+    if (_seeded) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -365,3 +374,20 @@ final appSettingsProvider =
     StateNotifierProvider<AppSettingsNotifier, AppSettings>(
   (ref) => AppSettingsNotifier(ref.watch(appSettingsRepositoryProvider)),
 );
+
+/// Read the persisted [AppSettings] from SharedPreferences BEFORE the first frame
+/// — the theme-flash fix. [main] awaits this and seeds [appSettingsProvider] via an
+/// override, so a dark-theme user never renders a light frame first (the notifier
+/// otherwise starts at [AppSettings.defaults] and hydrates a frame later). Returns
+/// [AppSettings.defaults] when absent/corrupt. Mirrors the notifier's local load;
+/// the SERVER path (signed-in) still loads async as before.
+Future<AppSettings> loadAppSettings() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kStorageKey);
+    if (raw == null) return AppSettings.defaults;
+    return AppSettings.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+  } on Object catch (_) {
+    return AppSettings.defaults;
+  }
+}

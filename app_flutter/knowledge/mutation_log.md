@@ -2258,3 +2258,9 @@
 - **voice** (`ai_hub_screen._runVoice`): דגל `_voiceBusy` (מראה VoiceDictateButton הבדוק) + `onError` חדש. **PopScope חכם** (`projects._EditSheet` · `catalog._ItemPickerSheet`): dirty→confirmDestructive. **install_studio**: `enableDrag:false` זהיר (inline sheet).
 - **אימות:** analyze 0 · 61 טסטי projects/catalog/ai_hub/install_studio ירוקים.
 - **ללא mutation-verify:** אין טסט-ייעודי — UX-מחוות על גיליונות פרטיים (drive דרך המסך = כבד/שביר); הדפוס מראה PopScope פרודקשן קיים (`manager_screens_sheet`) + voice מראה את VoiceDictateButton הבדוק. הסתמכות על no-regression + השער-המלא.
+
+## #theme-flash-fix — pre-hydrate app settings (2026-08-16)
+- **הבאג:** `AppSettingsNotifier` מתחיל ב-defaults וטוען prefs async אחרי הפריים → הבזק-תמה למשתמש-כהה. `main` הזריק flags אחרים מראש אבל לא את ההגדרות.
+- **התיקון:** `loadAppSettings()` top-level (קורא `bs.settings.v1` לפני `runApp`) + constructor `initial` + `_seeded` (מדלג local re-read, server נטען). override ב-main.
+- **אימות:** `app_settings_preload_test` (3: seeded-state · load-persisted · load-defaults) · analyze 0 · settings tests ירוקים.
+- **mutation-verify (בוצע):** `super(initial ?? defaults)` → `super(defaults)` (מתעלם מ-seed) → RED (+2 -1) → שחזור → GREEN.
