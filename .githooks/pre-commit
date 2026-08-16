@@ -46,7 +46,7 @@ if [[ -n "${BUILDSMART_EMERGENCY_DISABLE:-}" ]]; then
         if [[ ${#EXPECTED} -ge 16 && "$GIVEN" == "$EXPECTED" ]]; then
             echo "⚠️  EMERGENCY DISABLE פעיל — פרוטוקול מושהה. רשום ב-stuck_log." >&2
             echo "[$(date -Iseconds)] EMERGENCY_DISABLE used — pre-commit bypassed" \
-                >> "$REPO_ROOT/.git/protocol_audit.log"
+                >> "$(git rev-parse --absolute-git-dir)/protocol_audit.log"
             exit 0
         fi
     fi

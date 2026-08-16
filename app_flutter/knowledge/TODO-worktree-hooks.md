@@ -1,7 +1,7 @@
 # TODO (חובה לטיפול) — hooks הפרוטוקול לא תואמים linked git worktree
 
 > נרשם לבקשת בעל-המוצר (2026-06-07): *"תרשום לך שצריך לטפל."*
-> סטטוס: **OPEN — חובה.** עד שיתוקן, commit/push מ-worktree דורש עקיפה.
+> סטטוס: **✅ CLOSED (2026-08-16, אישור-בעלים).** כל 4 תת-הבאגים תוקנו: #1 gen_version (הסשן ההוא) · #2 log-path (שורה 49 → `git rev-parse --absolute-git-dir`, 2026-08-16) · #3 שער-81 (כבר משתמש ב-hash מנורמל `HOOK_HEAD_N`/`HOOK_WORK_N`) · #4 pre-push (נפתר ע"י #1). הקריאות ל-`$REPO_ROOT/.git/hooks/*` (שורות 201/579) גדורות `-f` ומדלגות בחן ב-worktree (לא-fatal, לא-באג).
 
 ## הבעיה
 ה-hooks (`.githooks/pre-commit`, `.githooks/pre-push`) ו-`scripts/gen_version.sh`
