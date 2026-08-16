@@ -61,7 +61,9 @@ class BsTokens {
   static const Color bgLight = Color(0xFFFAFAFA);
   static const Color cardLight = Color(0xFFFFFFFF);
   static const Color inkLight = Color(0xFF1A1A1A);
-  static const Color mutedLight = Color(0xFF666666);
+  // §W0 slice-1 (2026-08-16): warm the muted grey (was #666666, a cold neutral)
+  // to a warm grey biased toward the brand orange — 5.8:1 on white (passes AA).
+  static const Color mutedLight = Color(0xFF6E655B);
 
   // W0 semantic status + surface tokens. success = bright #22C55E (chosen);
   // the rest promote the dominant existing hex (naming, not new values).
@@ -76,7 +78,7 @@ class BsTokens {
   static const Color dangerDark = Color(0xFFB91C1C);
   static const Color warnText = Color(0xFFB45309); // dark amber text
   static const Color warnBright = Color(0xFFF2A516); // bright amber badge
-  static const Color divider = Color(0xFFEEEEEE); // ×39 raw
+  static const Color divider = Color(0xFFE9E2D9); // §W0 slice-1: warm divider (was #EEEEEE cool)
   static const Color surfaceMid = Color(0xFFF5F5F5); // ×70 raw
   // Light tint of the brand orange (== brand #FF7A18 @ ~33% over white) — the
   // floating card-keyboard's seam/background fill: the app's OWN orange,
@@ -88,12 +90,15 @@ class BsTokens {
   static const Color chatText = Color(0xFF111111);
   static const Color chatTimestamp = Color(0xFF777777);
 
-  // Dark theme colors — still used by AppTheme.dark(), dial & toast. Restored
-  // after the light-mode transition removed them while consumers still ref them.
-  static const Color bgDark = Color(0xFF0E1116);
-  static const Color cardDark = Color(0xFF181D26);
-  static const Color inkDark = Color(0xFFF1F3F8);
-  static const Color mutedDark = Color(0xFF9AA3B2);
+  // Dark theme colors — still used by AppTheme.dark(), dial & toast.
+  // §W0 slice-1 (2026-08-16): warmed the whole dark palette from a COOL blue-black
+  // (#0E1116/#181D26/#F1F3F8/#9AA3B2) to a WARM industrial dark — easier on the
+  // eyes on-site and matching the brand's warmth. AA-verified: inkDark 16.4:1 on
+  // bgDark, mutedDark 7.3:1 on bgDark / 6.5:1 on cardDark.
+  static const Color bgDark = Color(0xFF141009);
+  static const Color cardDark = Color(0xFF1F1A13);
+  static const Color inkDark = Color(0xFFF4EEE4);
+  static const Color mutedDark = Color(0xFFA89E90);
 
   // Chain-diagram data-viz palette (material stripes + joint edges). Bound from
   // existing literals in chain_diagram.dart — token-equal · zero visual. P-1.
@@ -111,8 +116,10 @@ class BsTokens {
   static const Color chainDefault = Color(0xFF7C8AA5); // neutral fallback / SKU caption
   static const Color chainWarning = Color(0xFFEF4444); // bottleneck warning ring
 
-  // Light theme scaffold background (ported from app_theme.dart literal). P-1.
-  static const Color bgLightAlt = Color(0xFFF5F6FA);
+  // Light theme scaffold background (the app-wide light ground).
+  // §W0 slice-1 (2026-08-16): warm off-white paper (was #F5F6FA, a cool blue-grey)
+  // — the single most visible light-mode warm-up. Non-text ground, no AA concern.
+  static const Color bgLightAlt = Color(0xFFFAF8F5);
 
   // Shadow used for dial circles + label pills.
   static const List<BoxShadow> circleShadow = [
