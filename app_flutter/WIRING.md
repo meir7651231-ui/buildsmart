@@ -4367,3 +4367,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #polish-run3-tail — 2 תיקוני-run3 קטנים (2026-08-15)
 סקירת 5 באגי-run3 ה"בטוחים" גילתה ש-**3 כבר נסגרו** (cart-dup → setQtyForKey · PPR-weld → pprWeldDn · budget blank-cat = by-design). 2 שנותרו תוקנו: **FX grouping** (`finance_hub_sheets` — `fxGroupAmount`/`fxGroupInt` top-level ציבורי, מקבץ חלק-שלם בקלט שברי · `fx_group_test` mutation-verified) · **unit-on-swap** (`lipskey_product_sheet._switchByChip` מאפס `_unit=single`, עקבי עם ה-resets הקיימים). analyze 0 · אפס-רגרסיה.
+
+### #sheet-no-double-push — guard re-entrancy מרכזי (2026-08-16)
+מרשימת-הבאגים השנייה (caliber-בועות-הצ'אט, 10 באגים): טריאז' ע"י 3 סורקים גילה **6 כבר-תוקנו · 1 by-design · 1 (loop-manifold) תוקן קודם** → 4 אמיתיים. הראשון: `showLipskeyProductSheet` ללא guard → שתי פתיחות same-frame מערמות 2 sheets. נוסף guard frame-scoped מרכזי (~15 call-sites). test + mutation-verify. **נותרו 3:** PopScope לגיליונות-עריכה ×3 · voice double-fire (ai_hub) · הבזק-תמה cold-start.

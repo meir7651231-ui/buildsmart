@@ -46,6 +46,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Opens a SmartProduct-style bottom sheet for a Lipskey product.
 /// [categoryProducts] = all products in the same Lipskey category (for brand variants).
+/// Re-entrancy guard for [showLipskeyProductSheet]: two taps landing in the SAME
+/// frame (before the modal route finishes pushing and its barrier covers the
+/// trigger) would each fire and stack two identical product sheets. Set true on
+/// open, cleared on the NEXT frame (not on dismiss) — that is enough to swallow
+/// the same-frame duplicate, and a frame-scoped reset never persists (a
+/// dismiss-scoped flag could leak across widget tests or block a legitimate
+/// re-open). Central here ⇒ all ~15 call sites are covered by this one guard.
+bool _lipskeyProductSheetOpen = false;
+
 void showLipskeyProductSheet(
   BuildContext context,
   LipskeyCatalogProduct product,
@@ -53,6 +62,8 @@ void showLipskeyProductSheet(
   bool forceLive = false,
   List<LipskeyCatalogProduct> hopSeedForTest = const <LipskeyCatalogProduct>[],
 }) {
+  if (_lipskeyProductSheetOpen) return;
+  _lipskeyProductSheetOpen = true;
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -68,6 +79,8 @@ void showLipskeyProductSheet(
       hopSeedForTest: hopSeedForTest,
     ),
   );
+  WidgetsBinding.instance
+      .addPostFrameCallback((_) => _lipskeyProductSheetOpen = false);
 }
 
 /// Fullscreen pinch/zoom viewer for a product image or spec page.

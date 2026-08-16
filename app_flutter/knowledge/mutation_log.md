@@ -2241,3 +2241,8 @@
 - **הרקע:** מתוך 5 באגי-run3 ה"בטוחים", **2 כבר-תוקנו** (cart-dup → setQtyForKey · PPR-weld → pprWeldDn דו-מפתחי, test-pinned), **1 by-design** (budget blank-category = proto). נותרו 2 אמיתיים:
 - **FX (`finance_hub_sheets`):** `fxGroupAmount`/`fxGroupInt` חולצו ל-top-level ציבורי; החלק-השבור עכשיו מקבץ את החלק-השלם. **mutation-verify (בוצע):** שחזור ה-`return v.toString()` → `fx_group_test` RED (+1 -1) → שחזור → GREEN (3/3).
 - **unit-swap (`lipskey_product_sheet._switchByChip`):** `_unit=single` נוסף (עקביות עם 3 resets קיימים). P3 חד-שורתי; אומת ע"י product_sheet_strips_test ירוק (אפס-רגרסיה) — ללא טסט-ייעודי (widget-state פרטי, disproportionate ל-P3).
+
+## #sheet-no-double-push — guard re-entrancy לכרטיס-המוצר (2026-08-16)
+- **הבאג:** `showLipskeyProductSheet` (opener מרכזי, ~15 call-sites) ללא guard → שתי פתיחות same-frame מערמות 2 sheets. (ה-DR הפריך same-widget double-tap, אבל cross-card rapid-tap + opener-לא-שמור מוכחים מערמים.)
+- **התיקון:** guard `_lipskeyProductSheetOpen` frame-scoped (reset ב-post-frame, לא dismiss — מונע leak בין-טסטים).
+- **mutation-verify (בוצע):** הסרת ה-early-return → `lipskey_sheet_no_double_push_test` RED (+0 -1, 2 sheets) → שחזור → GREEN.
