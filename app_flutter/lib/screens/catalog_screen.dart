@@ -1187,6 +1187,8 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
   late String _label;
   late Set<String> _selected;
 
+  late final Set<String> _initial;
+
   @override
   void initState() {
     super.initState();
@@ -1194,6 +1196,23 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
     _selected = Set<String>.from(
       ref.read(catalogListItemsProvider)[_label] ?? <String>{},
     );
+    _initial = Set<String>.from(_selected);
+  }
+
+  // Unsaved when the checked set diverges from what was loaded — a back-swipe /
+  // drag-dismiss then CONFIRMS before discarding (PopScope in build).
+  bool get _dirty =>
+      _selected.length != _initial.length || !_selected.containsAll(_initial);
+
+  Future<void> _onPop(bool didPop, Object? result) async {
+    if (didPop) return;
+    final discard = await confirmDestructive(
+      context,
+      title: 'לבטל את השינויים?',
+      message: 'הבחירות שסימנת לא יישמרו.',
+      confirmLabel: 'בטל שינויים',
+    );
+    if (discard && mounted) Navigator.pop(context);
   }
 
   void _save() {
@@ -1274,7 +1293,10 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
+    return PopScope(
+      canPop: !_dirty,
+      onPopInvokedWithResult: _onPop,
+      child: DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.7,
       minChildSize: 0.4,
@@ -1420,6 +1442,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
         ],
+      ),
       ),
     );
   }

@@ -25,6 +25,7 @@ import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -553,6 +554,9 @@ class _EditSheetState extends ConsumerState<_EditSheet> {
   late final TextEditingController _name;
   late final TextEditingController _addr;
   late final TextEditingController _mgr;
+  // A field edit flips this so a back-swipe / drag-dismiss / scrim-tap CONFIRMS
+  // before discarding typed input (PopScope in build); a direct Save bypasses it.
+  bool _dirty = false;
 
   @override
   void initState() {
@@ -566,6 +570,28 @@ class _EditSheetState extends ConsumerState<_EditSheet> {
     _name = TextEditingController(text: p?.name ?? '');
     _addr = TextEditingController(text: p?.addr ?? '');
     _mgr = TextEditingController(text: p?.manager ?? '');
+    // Listen AFTER seeding initial text, so hydration doesn't mark dirty.
+    for (final c in [_name, _addr, _mgr]) {
+      c.addListener(_markDirty);
+    }
+  }
+
+  void _markDirty() {
+    if (!_dirty) setState(() => _dirty = true);
+  }
+
+  /// PopScope back / drag / scrim handler: with unsaved edits (canPop:false ⇒
+  /// didPop:false), confirm before discarding; on confirm, pop directly (a
+  /// direct pop bypasses PopScope's gate).
+  Future<void> _onPop(bool didPop, Object? result) async {
+    if (didPop) return;
+    final discard = await confirmDestructive(
+      context,
+      title: 'לבטל את השינויים?',
+      message: 'השינויים שהזנת לא יישמרו.',
+      confirmLabel: 'בטל שינויים',
+    );
+    if (discard && mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -579,7 +605,10 @@ class _EditSheetState extends ConsumerState<_EditSheet> {
   @override
   Widget build(BuildContext context) {
     final isNew = widget.projectId == null;
-    return Directionality(
+    return PopScope(
+      canPop: !_dirty,
+      onPopInvokedWithResult: _onPop,
+      child: Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
         padding: EdgeInsets.only(
@@ -641,6 +670,7 @@ class _EditSheetState extends ConsumerState<_EditSheet> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

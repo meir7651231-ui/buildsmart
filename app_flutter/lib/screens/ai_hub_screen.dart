@@ -56,6 +56,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 ///     invoice documents · a weather-forecast API · IoT equipment-hour sensors),
 ///     so they render a verbatim sample under an explicit "⚙️ בפרודקשן" note.
 ///
+/// True while a [AIHubScreen._runVoice] recognition session is active — guards the
+/// stateless-widget 🎙️ tile against overlapping listens (module-level because the
+/// dispatch is a `static` method). Mirrors VoiceDictateButton's `_listening`.
+bool _voiceBusy = false;
+
 /// WIRE: reached from the home menu-dial 🤖 leaf and the home AI-hub button —
 /// `Navigator.push(AIHubScreen.route())`. See the agent report's WIRE notes.
 class AIHubScreen extends ConsumerWidget {
@@ -146,17 +151,29 @@ class AIHubScreen extends ConsumerWidget {
   /// Mirrors catalog_screen.dart:1701-1716. `static` (uses only its
   /// [context]/[ref] args) so the build-once [_kbNodes] dispatch can reach it.
   static Future<void> _runVoice(BuildContext context, WidgetRef ref) async {
+    // Busy guard: this screen is a stateless ConsumerWidget, so a second 🎙️ tap
+    // while a session is already listening would start an OVERLAPPING recognition.
+    // Module-level flag (mirrors the tested VoiceDictateButton `_listening` guard);
+    // set before listen, cleared when the session ends (onFinal/onError) or fails
+    // to start (`!ok`).
+    if (_voiceBusy) return;
+    _voiceBusy = true;
     final messenger = ScaffoldMessenger.of(context);
     final ok = await VoiceService.instance.listen(
       onFinal: (t) {
+        _voiceBusy = false;
         if (t.isNotEmpty) {
           ref.read(searchQueryProvider.notifier).state = t;
           ref.read(mainTabProvider.notifier).state = 0;
           if (context.mounted) unawaited(Navigator.of(context).maybePop());
         }
       },
+      // Previously omitted → an errored session went unreported AND left no way to
+      // clear the guard. Clear on error so the button re-arms.
+      onError: (_) => _voiceBusy = false,
     );
     if (!ok) {
+      _voiceBusy = false;
       messenger.showSnackBar(
         const SnackBar(
           content: CfgText(

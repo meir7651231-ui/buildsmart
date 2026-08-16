@@ -2668,3 +2668,10 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **finance div-zero** (`_SubRow`): guard על allocated==0 (מונע crash `.round()` על NaN) — אותה שורה.
 - **`home_shell` `.select`**: פחות rebuilds ל-app-bar, אותו תוכן.
 **מדוע אין screenshot:** כולם משאב/perf/robustness — אין שינוי חזותי לרנדר. **מה כן אומת:** `product_image_cache_test` (2, mutation-verified) · 53 טסטי chain/finance/budget/cart ירוקים · analyze 0. **אימות חזותי — על האתר החי** (thumbnails חדים · דיאגרמת-שרשרת חלקה · reduce-motion מ-OS מכובד).
+
+## #edit-sheet-guards + voice-guard — מניעת-אובדן-קלט (2026-08-16)
+3 באגים אחרונים מרשימה-2:
+- **voice double-fire** (`ai_hub_screen`): דגל `_voiceBusy` (מראה את VoiceDictateButton הבדוק) חוסם הקשת-🎙️-שנייה בזמן האזנה; נוסף גם `onError` (קודם חסר → שגיאות נבלעו). **אין שינוי-פריסה.**
+- **PopScope חכם לגיליונות-עריכה** (`projects._EditSheet` — שם/כתובת/מנהל · `catalog._ItemPickerSheet` — בחירות): swipe/drag/back כשיש שינוי-לא-שמור → דיאלוג **"לבטל את השינויים?"** (`confirmDestructive`); נקי (לא-dirty) → סגירה רגילה; Save (pop ישיר) עוקף. מראה את ה-PopScope הקיים בפרודקשן (`manager_screens_sheet`).
+- **install_studio describe sheet** (inline, parent-state · מסך 6k-שורות): הבחירה-הזהירה — `enableDrag: false` חוסם את ה-drag-dismiss המקרי בלי retrofit-PopScope שביר. scrim-tap מכוון עדיין סוגר.
+**מדוע אין screenshot / בדיקת-gesture:** UX-מחוות על גיליונות פרטיים; הדפוס מראה קוד-פרודקשן קיים, analyze 0 · 61 טסטי projects/catalog/ai_hub/install_studio ירוקים (אפס-רגרסיה). **אימות חזותי — על האתר החי** (הקלד בגיליון-עריכה → החלק-לסגור → מופיע "לבטל את השינויים?" · הקשה-כפולה 🎙️ = האזנה אחת).

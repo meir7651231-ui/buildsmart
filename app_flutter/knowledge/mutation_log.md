@@ -2253,3 +2253,8 @@
 - **אימות:** product_image_cache_test (2) + 53 טסטי chain/finance/budget/cart קיימים ירוקים · analyze 0.
 - **mutation-verify (בוצע):** `productImage` — הסרת ה-`ResizeImage` wrap → cache-test RED (+1 -1) → שחזור → GREEN.
 - **מיושנים (לא נגעתי):** dialog-leaks §L8 · install_studio/catalog/store leaks · smart-sheet filter · manager-name drift · departments ListView · sheet overflow.
+
+## #edit-sheet-guards + voice-guard (2026-08-16)
+- **voice** (`ai_hub_screen._runVoice`): דגל `_voiceBusy` (מראה VoiceDictateButton הבדוק) + `onError` חדש. **PopScope חכם** (`projects._EditSheet` · `catalog._ItemPickerSheet`): dirty→confirmDestructive. **install_studio**: `enableDrag:false` זהיר (inline sheet).
+- **אימות:** analyze 0 · 61 טסטי projects/catalog/ai_hub/install_studio ירוקים.
+- **ללא mutation-verify:** אין טסט-ייעודי — UX-מחוות על גיליונות פרטיים (drive דרך המסך = כבד/שביר); הדפוס מראה PopScope פרודקשן קיים (`manager_screens_sheet`) + voice מראה את VoiceDictateButton הבדוק. הסתמכות על no-regression + השער-המלא.

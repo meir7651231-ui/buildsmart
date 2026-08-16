@@ -4373,3 +4373,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #polish-hardening-AB — 7 תיקוני-הקשחה (2026-08-16)
 טריאז' A+B (רשימות הקשחה 309 + W1) ע"י 3 סורקים: ~14 → **7 חיים, 7 מיושנים**. תוקנו: 6 דליפות `TextEditingController` (budget×5/site_hub×1, `.whenComplete(dispose)`) · `product_images` cacheWidth (+catalog 48px) · `chain_diagram` RepaintBoundary+shouldRepaint short-circuit · reduced-motion `|| mq.disableAnimations` · finance `_SubRow` div-zero guard · cart_lists debugPrint · `home_shell` `.select`. `product_image_cache_test` mutation-verified · 53 טסטים קיימים ירוקים · analyze 0. **עדיין פתוחים (UX/launch):** PopScope ×3 · voice double-fire · theme-flash.
+
+### #edit-sheet-guards + voice-guard (2026-08-16)
+3 הבאגים האחרונים מרשימה-2: **voice double-fire** (`ai_hub_screen` — דגל `_voiceBusy` מראה VoiceDictateButton + `onError` שהיה חסר) · **PopScope חכם** ל-2 גיליונות-עריכה נקיים (`projects._EditSheet` · `catalog._ItemPickerSheet`) עם דיאלוג "לבטל את השינויים?" כשיש dirty (מראה PopScope פרודקשן ב-`manager_screens_sheet`) · **`install_studio` describe** (inline/parent-state, מסך-מורכב) → הבחירה-הזהירה `enableDrag:false` בלבד. analyze 0 · 61 טסטים ירוקים. אין בדיקת-gesture ייעודית (מחוות על גיליונות פרטיים; דפוס-פרודקשן קיים). **רשימות-הבאגים (2) סגורות — כל הפריטים האמיתיים תוקנו.**

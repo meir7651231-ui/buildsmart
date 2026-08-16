@@ -737,6 +737,11 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
+      // This sheet holds a typed description (_describeCtrl) + a temp pick. It is
+      // an INLINE sheet (not a StatefulWidget) built off parent state, so instead
+      // of a fragile PopScope retrofit here we block the main accidental-loss
+      // vector — the drag-dismiss. A deliberate scrim-tap still closes it.
+      enableDrag: false,
       builder: (_) => Directionality(
         textDirection: TextDirection.rtl,
         child: Container(
