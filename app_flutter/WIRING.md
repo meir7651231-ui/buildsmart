@@ -4370,3 +4370,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #sheet-no-double-push — guard re-entrancy מרכזי (2026-08-16)
 מרשימת-הבאגים השנייה (caliber-בועות-הצ'אט, 10 באגים): טריאז' ע"י 3 סורקים גילה **6 כבר-תוקנו · 1 by-design · 1 (loop-manifold) תוקן קודם** → 4 אמיתיים. הראשון: `showLipskeyProductSheet` ללא guard → שתי פתיחות same-frame מערמות 2 sheets. נוסף guard frame-scoped מרכזי (~15 call-sites). test + mutation-verify. **נותרו 3:** PopScope לגיליונות-עריכה ×3 · voice double-fire (ai_hub) · הבזק-תמה cold-start.
+
+### #polish-hardening-AB — 7 תיקוני-הקשחה (2026-08-16)
+טריאז' A+B (רשימות הקשחה 309 + W1) ע"י 3 סורקים: ~14 → **7 חיים, 7 מיושנים**. תוקנו: 6 דליפות `TextEditingController` (budget×5/site_hub×1, `.whenComplete(dispose)`) · `product_images` cacheWidth (+catalog 48px) · `chain_diagram` RepaintBoundary+shouldRepaint short-circuit · reduced-motion `|| mq.disableAnimations` · finance `_SubRow` div-zero guard · cart_lists debugPrint · `home_shell` `.select`. `product_image_cache_test` mutation-verified · 53 טסטים קיימים ירוקים · analyze 0. **עדיין פתוחים (UX/launch):** PopScope ×3 · voice double-fire · theme-flash.

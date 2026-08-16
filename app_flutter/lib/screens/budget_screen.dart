@@ -498,7 +498,11 @@ class BudgetScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ).whenComplete(() {
+      totalCtl.dispose();
+      spentCtl.dispose();
+      costCtl.dispose();
+    });
   }
 
   void _adjust(BuildContext root, BuildContext sheet, WidgetRef ref,
@@ -597,7 +601,10 @@ class BudgetScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ).whenComplete(() {
+      nameCtl.dispose();
+      amtCtl.dispose();
+    });
   }
 }
 

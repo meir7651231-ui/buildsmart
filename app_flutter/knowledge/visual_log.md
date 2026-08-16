@@ -2658,3 +2658,13 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #sheet-no-double-push — guard re-entrancy לכרטיס-המוצר (2026-08-16)
 **שינוי:** `showLipskeyProductSheet` קיבל guard frame-scoped — שתי פתיחות same-frame (הקשה מהירה על 2 כרטיסים לפני שה-barrier עולה) לא מערמות עוד 2 sheets. **אין שינוי-פריסה:** אותו sheet, אותו תוכן — פשוט לא-כפול. גדר מרכזית ⇒ כל ~15 ה-call-sites מכוסים. **אומת:** `lipskey_sheet_no_double_push_test` (שתי פתיחות → sheet יחיד) mutation-verified · `product_sheet_strips_test` ירוק (אין leak של הגדר בין-טסטים — reset הוא frame-scoped, לא dismiss-scoped) · analyze 0. **אימות חזותי — על האתר החי** (הקשה כפולה-מהירה על מוצר פותחת sheet אחד).
+
+## #polish-hardening-AB — 7 תיקוני-הקשחה (שינוי-דאטה/state/perf · 2026-08-16)
+טריאז' A+B → 7 חיים. הנוגעים ב-UI (**אין שינוי-פריסה** בשום אחד):
+- **6 דליפות controller** (`budget_screen` ×5 · `site_hub_screen` ×1): `.whenComplete(() => ctrl.dispose())` על ה-showModal/showDialog — משאב-בלבד, אותה תצוגה.
+- **cacheWidth** (`product_images` + `catalog:6705` 48px→96): פענוח-תמונה קטן יותר, אותו פיקסל על המסך.
+- **`chain_diagram`**: RepaintBoundary + shouldRepaint short-circuit — perf, אותה דיאגרמה.
+- **reduced-motion** (`main.dart`): מכבד אות-OS בנוסף ל-toggle — אנימציות פחותות למי שביקש, לא שינוי-layout.
+- **finance div-zero** (`_SubRow`): guard על allocated==0 (מונע crash `.round()` על NaN) — אותה שורה.
+- **`home_shell` `.select`**: פחות rebuilds ל-app-bar, אותו תוכן.
+**מדוע אין screenshot:** כולם משאב/perf/robustness — אין שינוי חזותי לרנדר. **מה כן אומת:** `product_image_cache_test` (2, mutation-verified) · 53 טסטי chain/finance/budget/cart ירוקים · analyze 0. **אימות חזותי — על האתר החי** (thumbnails חדים · דיאגרמת-שרשרת חלקה · reduce-motion מ-OS מכובד).

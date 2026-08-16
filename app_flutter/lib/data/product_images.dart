@@ -120,10 +120,19 @@ Widget productImage(
   ImageErrorWidgetBuilder? errorBuilder,
   ImageFrameBuilder? frameBuilder,
   String? semanticLabel,
+  // Decode-size cap for thumbnails: a 48–96px catalog cell should NOT decode the
+  // full-resolution CDN/asset bytes into memory. When set, the provider is wrapped
+  // in [ResizeImage] so Flutter decodes at (about) the display size. Null ⇒ full
+  // resolution (hero/detail images).
+  int? cacheWidth,
+  int? cacheHeight,
 }) {
+  final provider = resolveProductImage(assetPath);
   return Image(
     key: key,
-    image: resolveProductImage(assetPath),
+    image: (cacheWidth == null && cacheHeight == null)
+        ? provider
+        : ResizeImage(provider, width: cacheWidth, height: cacheHeight),
     width: width,
     height: height,
     fit: fit,

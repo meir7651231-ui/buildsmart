@@ -713,7 +713,11 @@ class BuildSmartApp extends ConsumerWidget {
             // implicit animations everywhere (page transitions, switches,
             // AnimatedFoo) — the standard a11y signal. (The catalog flip already
             // honors reducedMotion separately; this generalises it.)
-            disableAnimations: catalogSettings.reducedMotion,
+            // OR in the OS signal (mq.disableAnimations) so a user who set
+            // reduce-motion at the OS level — but never flipped the in-app toggle
+            // — is still honored (the in-app toggle can only ADD, never clobber).
+            disableAnimations:
+                catalogSettings.reducedMotion || mq.disableAnimations,
           ),
           child: Directionality(
             textDirection: TextDirection.rtl,

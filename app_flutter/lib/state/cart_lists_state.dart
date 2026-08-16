@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -101,7 +102,9 @@ class CartListsNotifier extends StateNotifier<List<CartList>> {
         _loaded = true;
       }
     } catch (e) {
-      // Silently fail on malformed data
+      // Corrupt persisted payload — reset to empty, but LOG it: a silent reset
+      // would make a decode regression invisible in the field.
+      debugPrint('cart-lists: corrupt payload, resetting to empty: $e');
       _loaded = true;
     }
   }

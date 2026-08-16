@@ -663,7 +663,10 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
     // the all-on default keeps the bar byte-identical).
     final chatOn = modOn(ref, 'chat');
     // Registered user's first name → chip beside the logo (guest/demo → none).
-    final profile = ref.watch(userProfileProvider);
+    // .select the two fields used, so an unrelated profile edit (address /
+    // profession / businessId / contact) doesn't rebuild the whole app bar.
+    final profile = ref.watch(userProfileProvider
+        .select((p) => (registered: p.registered, name: p.name)));
     final firstName =
         profile.registered && profile.name.trim().isNotEmpty
             ? profile.name.trim().split(RegExp(r'\s+')).first

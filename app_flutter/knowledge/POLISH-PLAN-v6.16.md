@@ -308,6 +308,9 @@
 ### 🟢 הקשחות נוספות (מריצה-2)
 `voice בלי loading→double-fire` (`catalog:1698`/`ai_hub:58`, MED) · `cart_lists corrupt→ניקוי שקט` (`cart_lists_state:98`, +debugPrint) · `תמונות בלי cacheWidth` (`product_images:53`, P2) · `chain_diagram בלי boundary + O(n) shouldRepaint` (`51/238`, P3) · `editing-sheets בלי PopScope` (`projects_screen:454`·`catalog:1148`·`install_studio:1067`, swipe מאבד קלט) · `switch לא-ממצה stage→newOrder` (`sys_orders:26`, MED) · `smart-sheet initState לא מיישם filter` (`catalog:4310`, MED) · `watch בלי .select` (`home_shell:356`) · `departments eager ListView` (`358`) · `finance div-zero hardening` (`592`) · `dialog-controller leaks CONFIRMED` (store `1640/2762`·studio `1064/1266/1560`, §L8) · `שם-מנהל drift ×3 גם data-level` (§L6).
 
+### ✅ טריאז' A+B (2026-08-16) — ~14 פריטים → 7 חיים תוקנו, 7 מיושנים
+3 סורקים אימתו את רשימות-ההקשחה (309) + W1 (245). **תוקנו:** 6 דליפות TextEditingController (`budget_screen` ×5 · `site_hub_screen` ×1 → `.whenComplete(dispose)`) · `product_images` cacheWidth (+ `catalog:6705` 48px→96) · `chain_diagram` shouldRepaint short-circuit + RepaintBoundary · reduced-motion `|| mq.disableAnimations` (אות-OS) · finance div-zero guard (`_SubRow`) · cart_lists debugPrint · `home_shell` `.select`. **מיושנים/by-design (לא נגעתי):** דליפות-dialog §L8 · install_studio/catalog/store leaks · smart-sheet filter · manager-name drift §L6 · departments ListView · sheet overflow.
+
 ### ✅ אומת-חסין בעומק (הביטחון)
 crash: **0 קריסות** (tryParse+guards · 25 jsonDecode ב-try/catch) · כסף: VAT/total/qty/cheapest/budget/pressure/ROI/FX **נכונים** · async: mounted-guards בכל await · data: 923 SKU ייחודיים · persona-IDs עקביים · budget מדויק · EndType/enum ממצים · nav: IndexedStack + checkout-guards תקינים · perf: const-density גבוה · רשימות lazy+keyed · חיפוש memoized · empty/loading states רובם תקינים.
 

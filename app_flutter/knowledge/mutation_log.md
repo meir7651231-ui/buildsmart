@@ -2246,3 +2246,10 @@
 - **הבאג:** `showLipskeyProductSheet` (opener מרכזי, ~15 call-sites) ללא guard → שתי פתיחות same-frame מערמות 2 sheets. (ה-DR הפריך same-widget double-tap, אבל cross-card rapid-tap + opener-לא-שמור מוכחים מערמים.)
 - **התיקון:** guard `_lipskeyProductSheetOpen` frame-scoped (reset ב-post-frame, לא dismiss — מונע leak בין-טסטים).
 - **mutation-verify (בוצע):** הסרת ה-early-return → `lipskey_sheet_no_double_push_test` RED (+0 -1, 2 sheets) → שחזור → GREEN.
+
+## #polish-hardening-AB — 7 תיקוני-הקשחה מטריאז' A+B (2026-08-16)
+- **הרקע:** 3 סורקים אימתו ~14 פריטי-הקשחה (POLISH:309 + W1:245) → **7 חיים, 7 מיושנים**.
+- **תוקנו:** 6 דליפות controller (budget×5/site_hub×1) · cacheWidth (product_images+catalog) · chain_diagram (RepaintBoundary+short-circuit) · reduced-motion OR-OS · finance div-zero guard · cart_lists debugPrint · home_shell .select.
+- **אימות:** product_image_cache_test (2) + 53 טסטי chain/finance/budget/cart קיימים ירוקים · analyze 0.
+- **mutation-verify (בוצע):** `productImage` — הסרת ה-`ResizeImage` wrap → cache-test RED (+1 -1) → שחזור → GREEN.
+- **מיושנים (לא נגעתי):** dialog-leaks §L8 · install_studio/catalog/store leaks · smart-sheet filter · manager-name drift · departments ListView · sheet overflow.

@@ -6704,6 +6704,8 @@ class _FavProductRow extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8),
               child: productImage(product.imageAsset!,
                   width: 48, height: 48, fit: BoxFit.cover,
+                  // 48px cell → cap decode at 2× (retina) instead of full-res.
+                  cacheWidth: 96, cacheHeight: 96,
                   errorBuilder: (_, __, ___) => Text(product.typeEmoji,
                       style: const TextStyle(fontSize: 30))),
             )

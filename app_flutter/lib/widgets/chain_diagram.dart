@@ -48,12 +48,15 @@ class ChainDiagram extends StatelessWidget {
         child: SizedBox(
           width: width,
           height: height,
-          child: CustomPaint(
-            painter: _ChainPainter(
-              chain: chain,
-              bottleneckSku: bottleneckSku,
-              nodeSize: nodeSize,
-              gap: gap,
+          // Isolate the painter's repaints from the surrounding scroll view.
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _ChainPainter(
+                chain: chain,
+                bottleneckSku: bottleneckSku,
+                nodeSize: nodeSize,
+                gap: gap,
+              ),
             ),
           ),
         ),
@@ -235,8 +238,13 @@ class _ChainPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ChainPainter old) =>
-      old.chain.length != chain.length ||
-      List.generate(chain.length, (i) => old.chain[i].sku != chain[i].sku)
-          .any((x) => x);
+  bool shouldRepaint(covariant _ChainPainter old) {
+    if (old.chain.length != chain.length) return true;
+    // Short-circuit on the first differing SKU instead of allocating an
+    // n-length bool list every check (was List.generate(...).any(...)).
+    for (var i = 0; i < chain.length; i++) {
+      if (old.chain[i].sku != chain[i].sku) return true;
+    }
+    return false;
+  }
 }
