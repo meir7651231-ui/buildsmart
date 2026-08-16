@@ -1916,14 +1916,14 @@ class _StageRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: isActive
                 ? (stage.isFinal
-                    ? const Color(0xFF22C55E).withOpacity(0.12)
+                    ? BsTokens.success.withOpacity(0.12)
                     : const Color(0xFF3D5A80).withOpacity(0.2))
                 : const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isActive
                   ? (stage.isFinal
-                      ? const Color(0xFF22C55E).withOpacity(0.6)
+                      ? BsTokens.success.withOpacity(0.6)
                       : const Color(0xFF64FFDA).withOpacity(0.5))
                   : const Color(0xFFEEEEEE),
               width: 0.8,
@@ -1936,7 +1936,7 @@ class _StageRow extends StatelessWidget {
                 height: 28,
                 decoration: BoxDecoration(
                   color: stage.isFinal
-                      ? const Color(0xFF22C55E).withOpacity(0.2)
+                      ? BsTokens.success.withOpacity(0.2)
                       : const Color(0xFF3D5A80).withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
@@ -1944,7 +1944,7 @@ class _StageRow extends StatelessWidget {
                 child: Text('${index + 1}',
                     style: TextStyle(
                         color: stage.isFinal
-                            ? const Color(0xFF22C55E)
+                            ? BsTokens.success
                             : const Color(0xFF64FFDA),
                         fontSize: 12,
                         fontWeight: FontWeight.w700)),
@@ -2252,7 +2252,7 @@ class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
           emoji: '🛡',
           label: 'תקינות',
           value: '${_compliance.length} דרישות',
-          tint: const Color(0xFFEF4444),
+          tint: BsTokens.danger,
         ),
       if (_spec != null)
         _StripDef(
@@ -2276,7 +2276,7 @@ class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
             final base = formatCatalogPrice(priceFor(p)!, s, prefix: '~');
             return s.showUnitPrice ? '$base ליחידה' : base;
           }(),
-          tint: const Color(0xFF22C55E),
+          tint: BsTokens.success,
         ),
       if (p.brand == 'פולירול')
         _StripDef(
@@ -2620,7 +2620,7 @@ class _StripPanel extends StatelessWidget {
     final tagColor = switch (k.kind) {
       KitKind.tool => const Color(0xFF7FD0FF),
       KitKind.sealant => const Color(0xFF3DD9B0),
-      KitKind.safety => const Color(0xFFEF4444),
+      KitKind.safety => BsTokens.danger,
     };
     final tagLabel = switch (k.kind) {
       KitKind.tool => 'כלי',
@@ -2727,13 +2727,13 @@ class _StripPanel extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 5, vertical: 1),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444).withValues(alpha: 0.18),
+                    color: BsTokens.danger.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const CfgText(
                       'lipskey_product_sheet.must_badge_compliance', 'חובה',
                       style: TextStyle(
-                          color: Color(0xFFEF4444),
+                          color: BsTokens.danger,
                           fontSize: 9,
                           fontWeight: FontWeight.w800)),
                 ),

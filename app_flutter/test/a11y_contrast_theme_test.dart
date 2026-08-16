@@ -5,7 +5,7 @@
 // WCAG AA, while NORMAL mode stays byte-identical to the brand palette.
 //
 // Invariant under test:
-//   normal  → onAccent = white   , success = #22C55E  (default look unchanged)
+//   normal  → onAccent = white   , success = #1F9D57  (grounded green, §W0 slice-3)
 //   HC      → onAccent = #1A1A1A , success = #15803D  (passes WCAG AA)
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +17,7 @@ void main() {
       final ext =
           AppTheme.light(highContrast: false).extension<BsSemanticColors>()!;
       expect(ext.onAccent, const Color(0xFFFFFFFF), reason: 'white on accent');
-      expect(ext.success, const Color(0xFF22C55E), reason: 'brand green');
+      expect(ext.success, const Color(0xFF1F9D57), reason: 'brand green');
     });
 
     test('high-contrast darkens the unreachable foregrounds to AA', () {
@@ -60,7 +60,7 @@ void main() {
         }),
       ));
       expect(a, const Color(0xFFFFFFFF));
-      expect(s, const Color(0xFF22C55E));
+      expect(s, const Color(0xFF1F9D57));
     });
   });
 }

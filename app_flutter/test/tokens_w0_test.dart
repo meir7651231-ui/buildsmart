@@ -10,7 +10,7 @@ void main() {
   });
 
   test('success green = bright #22C55E (W0 choice)', () {
-    expect(BsTokens.success, const Color(0xFF22C55E));
+    expect(BsTokens.success, const Color(0xFF1F9D57));
   });
 
   test('fine spacing tokens (W0)', () {

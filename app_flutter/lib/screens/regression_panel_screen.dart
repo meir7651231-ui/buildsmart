@@ -111,8 +111,8 @@ class _SummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: ok
-              ? const Color(0xFF22C55E).withAlpha(120)
-              : const Color(0xFFEF4444).withAlpha(120),
+              ? BsTokens.success.withAlpha(120)
+              : BsTokens.danger.withAlpha(120),
         ),
       ),
       child: Column(
@@ -123,7 +123,7 @@ class _SummaryCard extends StatelessWidget {
                 ? '✅ כל הבדיקות עברו (${summary.passed}/${summary.total})'
                 : '❌ נמצאו ${summary.failed} כשלים',
             style: TextStyle(
-              color: ok ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+              color: ok ? BsTokens.success : BsTokens.danger,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -230,8 +230,8 @@ class _ResultCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: ok
-              ? const Color(0xFF22C55E).withAlpha(60)
-              : const Color(0xFFEF4444).withAlpha(120),
+              ? BsTokens.success.withAlpha(60)
+              : BsTokens.danger.withAlpha(120),
         ),
       ),
       child: Theme(
@@ -251,8 +251,8 @@ class _ResultCard extends StatelessWidget {
                 ok ? '✓' : '✗',
                 style: TextStyle(
                   color: ok
-                      ? const Color(0xFF22C55E)
-                      : const Color(0xFFEF4444),
+                      ? BsTokens.success
+                      : BsTokens.danger,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -289,8 +289,8 @@ class _ResultCard extends StatelessWidget {
                 '${total - failed}/$total',
                 style: TextStyle(
                   color: ok
-                      ? const Color(0xFF22C55E)
-                      : const Color(0xFFEF4444),
+                      ? BsTokens.success
+                      : BsTokens.danger,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -321,8 +321,8 @@ class _CheckRow extends StatelessWidget {
             check.pass ? '✓' : '✗',
             style: TextStyle(
               color: check.pass
-                  ? const Color(0xFF22C55E)
-                  : const Color(0xFFEF4444),
+                  ? BsTokens.success
+                  : BsTokens.danger,
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),
@@ -351,7 +351,7 @@ class _CheckRow extends StatelessWidget {
                   Text(
                     'ציפיתי: ${check.expected} · קיבלתי: ${check.got ?? "—"}',
                     style: const TextStyle(
-                      color: Color(0xFFEF4444),
+                      color: BsTokens.danger,
                       fontSize: 11,
                     ),
                   ),

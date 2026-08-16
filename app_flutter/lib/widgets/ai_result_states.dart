@@ -12,8 +12,9 @@ import 'package:flutter/material.dart';
 /// some screens spread several widgets), so it is intentionally NOT folded in.
 ///
 /// Folded fix (אודיט-נחיל גל-4): the failed-line color moved `danger`→`dangerDark`
-/// so it clears WCAG AA on the light card background (`danger` 0xFFEF4444 failed),
-/// in one place for all screens.
+/// so it clears WCAG AA on the light card background, in one place for all screens.
+/// (Historical: `danger` was #EF4444 = 3.2:1, failing; §W0 slice-3 deepened it to
+/// #CE3A32 = 4.9:1, now passing — but `dangerDark` is kept here for max legibility.)
 
 /// Backend-off rung: a muted hint that the smart phrasing needs a server.
 class AiOffState extends StatelessWidget {

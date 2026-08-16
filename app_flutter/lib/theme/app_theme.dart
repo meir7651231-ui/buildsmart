@@ -127,4 +127,4 @@ Color bsOnAccent(BuildContext context) =>
 /// Falls back to the brand green if the extension is absent.
 Color bsSuccess(BuildContext context) =>
     Theme.of(context).extension<BsSemanticColors>()?.success ??
-    const Color(0xFF22C55E);
+    BsTokens.success;

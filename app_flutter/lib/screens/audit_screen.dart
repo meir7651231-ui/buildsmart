@@ -190,7 +190,7 @@ class _AuditScreenState extends State<AuditScreen> {
                       decoration: BoxDecoration(
                         color: allOk
                             ? const Color(0xFF15803D).withOpacity(0.2)
-                            : const Color(0xFFEF4444).withOpacity(0.2),
+                            : BsTokens.danger.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -198,7 +198,7 @@ class _AuditScreenState extends State<AuditScreen> {
                         style: TextStyle(
                             color: allOk
                                 ? const Color(0xFF15803D)
-                                : const Color(0xFFEF4444),
+                                : BsTokens.danger,
                             fontWeight: FontWeight.w800,
                             fontSize: 13),
                       ),
@@ -272,7 +272,7 @@ class _AuditScreenState extends State<AuditScreen> {
   }
 
   Widget _buildRow(_ScenarioResult r) {
-    final color = r.ok ? const Color(0xFF15803D) : const Color(0xFFEF4444);
+    final color = r.ok ? const Color(0xFF15803D) : BsTokens.danger;
     final overBudget = r.dropBar > 1.0;
     return Container(
       padding: const EdgeInsets.all(12),
@@ -347,12 +347,12 @@ class _AuditScreenState extends State<AuditScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444).withOpacity(0.2),
+                  color: BsTokens.danger.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text('${r.criticalOpen} קריטי',
                     style: const TextStyle(
-                        color: Color(0xFFEF4444),
+                        color: BsTokens.danger,
                         fontSize: 10,
                         fontWeight: FontWeight.w800)),
               ),

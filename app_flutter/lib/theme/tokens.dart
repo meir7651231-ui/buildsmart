@@ -70,11 +70,18 @@ class BsTokens {
 
   // W0 semantic status + surface tokens. success = bright #22C55E (chosen);
   // the rest promote the dominant existing hex (naming, not new values).
-  static const Color success = Color(0xFF22C55E);
+  // §W0 slice-3 (2026-08-16): grounded green (was bright #22C55E). Deeper reads
+  // as more premium and lifts on-white contrast (2.2:1 → 3.5:1 for a fill/badge;
+  // text still uses successDark). Swept from hardcoded #22C55E across lib/.
+  static const Color success = Color(0xFF1F9D57);
   // Darker green for TEXT on a light background under high-contrast mode
   // (#22C55E-on-white is 2.28:1; this is ~5.0:1 — passes WCAG AA).
   static const Color successDark = Color(0xFF15803D);
-  static const Color danger = Color(0xFFEF4444); // == chainWarning; ×31 raw
+  // §W0 slice-3 (2026-08-16): grounded status red (was #EF4444). Now 4.9:1 on
+  // white — passes WCAG AA for text (was 3.2:1). Swept from hardcoded #EF4444.
+  // NOTE: danger (status) and chainWarning (data-viz alert) USED to share #EF4444;
+  // they now diverge deliberately — the viz keeps its brighter alert red below.
+  static const Color danger = Color(0xFFCE3A32);
   // Darker red for TEXT on a light/white card (the successDark pattern):
   // Colors.redAccent-on-white is 3.19:1 (fails WCAG AA 4.5:1 for 14-15px
   // text); this red-700 is ~6.5:1 — passes AA. Use for 'יציאה'/'הסר' labels.

@@ -3336,7 +3336,7 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
 
   @override
   Widget build(BuildContext context) {
-    const green = Color(0xFF22C55E);
+    const green = BsTokens.success;
     final query =
         ref.watch(smartTreeQueryProvider.select((q) => q.trim()));
     // T6.3: smart-tree products via the repository (same const data).
@@ -6364,7 +6364,7 @@ class _AccRow extends StatelessWidget {
                         width: 16,
                         height: 16,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF22C55E),
+                          color: BsTokens.success,
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: const Color(0xFFFFFFFF),

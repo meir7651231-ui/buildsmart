@@ -695,7 +695,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     final Color borderColor;
     final String label;
     if (temp >= 80) {
-      borderColor = const Color(0xFFEF4444); // red
+      borderColor = BsTokens.danger; // red
       label = 'חם מאוד';
     } else if (temp >= 60) {
       borderColor = const Color(0xFFF97316); // orange
@@ -732,7 +732,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     final opts = [
       (20, '❄️ קר', 'ברז, כיור, שירותים, גינה', _supply),
       (60, '🔥 חם', 'דוד שמש, דוד חשמלי, מחמם מיידי', const Color(0xFFF97316)),
-      (80, '🌡️ חם מאוד', 'מערכת ישנה או מסחרית, 80° ומעלה', const Color(0xFFEF4444)),
+      (80, '🌡️ חם מאוד', 'מערכת ישנה או מסחרית, 80° ומעלה', BsTokens.danger),
     ];
     showModalBottomSheet<void>(
       context: context,
@@ -1307,11 +1307,11 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           title: Row(children: [
             const Icon(Icons.warning_amber_rounded,
-                color: Color(0xFFEF4444), size: 22),
+                color: BsTokens.danger, size: 22),
             const SizedBox(width: 8),
             Text('$criticalCount בעיות בטיחות בקו',
                 style: const TextStyle(
-                    color: Color(0xFFEF4444),
+                    color: BsTokens.danger,
                     fontSize: 16,
                     fontWeight: FontWeight.w900)),
           ]),
@@ -1359,7 +1359,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF4444),
+                  backgroundColor: BsTokens.danger,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10))),
@@ -1537,7 +1537,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                                         value: 'delete',
                                         child: Text('מחק',
                                             style: TextStyle(
-                                                color: Color(0xFFEF4444)))),
+                                                color: BsTokens.danger))),
                                   ],
                                   onSelected: (v) async {
                                     if (v == 'delete') {
@@ -1811,7 +1811,7 @@ class _PipeLink extends StatelessWidget {
   final bool broken;
   @override
   Widget build(BuildContext context) {
-    final c = broken ? const Color(0xFFEF4444) : _accent;
+    final c = broken ? BsTokens.danger : _accent;
     return SizedBox(
       height: 30,
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -2188,13 +2188,13 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                               decoration: BoxDecoration(
                                 color: checkCritical == 0
                                     ? _accent.withOpacity(0.18)
-                                    : const Color(0xFFEF4444).withOpacity(0.18),
+                                    : BsTokens.danger.withOpacity(0.18),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 '$checkPassed/${checklist.length} ✓',
                                 style: TextStyle(
-                                  color: checkCritical == 0 ? _ok : const Color(0xFFEF4444),
+                                  color: checkCritical == 0 ? _ok : BsTokens.danger,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w900,
                                 ),
@@ -2204,7 +2204,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                               const SizedBox(width: 6),
                               Text('$checkCritical קריטי פתוח',
                                   style: const TextStyle(
-                                      color: Color(0xFFEF4444),
+                                      color: BsTokens.danger,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700)),
                             ],
@@ -2504,7 +2504,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                       .where((p) => !productSuitableForTemp(p, temp))
                       .toList();
                   if (unfit.isEmpty) return const SizedBox.shrink();
-                  const warn = Color(0xFFEF4444);
+                  const warn = BsTokens.danger;
                   return Container(
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
@@ -2799,7 +2799,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                                       KitKind.sealant =>
                                         _accent.withOpacity(0.18),
                                       KitKind.safety =>
-                                        const Color(0xFFEF4444).withOpacity(0.18),
+                                        BsTokens.danger.withOpacity(0.18),
                                     },
                                     borderRadius: BorderRadius.circular(4),
                                   ),
@@ -2814,7 +2814,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                                         KitKind.tool => _supply,
                                         KitKind.sealant => _accent,
                                         KitKind.safety =>
-                                          const Color(0xFFEF4444),
+                                          BsTokens.danger,
                                       },
                                       fontSize: 9,
                                       fontWeight: FontWeight.w800,
@@ -2909,7 +2909,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                       _severityBadge('קריטי',
                           checklist.where((c) =>
                               !c.satisfied && c.severity == CheckSeverity.critical).length,
-                          const Color(0xFFEF4444)),
+                          BsTokens.danger),
                       const SizedBox(width: 4),
                       _severityBadge('אזהרה',
                           checklist.where((c) =>
@@ -3033,7 +3033,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   /// guidance is plumbing-specific).
   Widget _authoredTempUnfitBanner(
       int temp, List<LipskeyCatalogProduct> unfit, _ActiveTradeConfig cfg) {
-    const warn = Color(0xFFEF4444);
+    const warn = BsTokens.danger;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       padding: const EdgeInsets.all(12),
@@ -3366,7 +3366,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     } else {
       switch (ch.severity) {
         case CheckSeverity.critical:
-          iconColor = const Color(0xFFEF4444);
+          iconColor = BsTokens.danger;
           icon = Icons.cancel;
         case CheckSeverity.warning:
           iconColor = _drain;
