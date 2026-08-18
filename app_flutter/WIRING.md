@@ -4385,3 +4385,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #w0-slice3 — זיקוק סטטוס + סיום §W0 (2026-08-16)
 `success`→#1F9D57 · `danger`→#CE3A32 (עובר AA לטקסט 4.9:1). טאטוא 14+33 קשיחים→טוקנים · `chainWarning` נשאר עצמאי (#EF4444). נעילות a11y+tokens_w0 עודכנו. **§W0 סגור** (3 סלייסים · single-source · AA). גלי-ליטוש L1–L10 פתוחים כעת (לא-חסומים).
+
+### #w0-followup-warm-hero — hero כתום + demo-pill חם (2026-08-18)
+משוב-בעלים חי ("כהה ובהיר מעורב" על מסך-הבית) → אובחן כ-2 שאריות-צבע קרות מ-§W0: כרטיס ה-hero `מסלול עבודה חכם` (`smart_home_screen.dart` — גרדיאנט טורקיז `#1F6F6B→#155350`) + גלולת `מצב דמו` (`connection_indicator.dart` — `chainSlate`). **תיקון:** hero→`BsTokens.brand/brandDark` · demo→`BsTokens.mutedLight` (טוקנים חמים קיימים, single-source). אומת ב-screenshot אמיתי מ-build web הרץ · analyze 0 · test ירוק.

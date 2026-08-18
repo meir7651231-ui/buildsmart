@@ -491,7 +491,7 @@ class _SmartTreeCard extends ConsumerWidget {
   }
 }
 
-// ─── מסלול עבודה חכם (project hero — coloured, fine in both themes) ───────────────
+// ─── מסלול עבודה חכם (project hero — brand-orange, warm in both themes) ──────────
 class _WorkPath extends ConsumerWidget {
   const _WorkPath();
 
@@ -508,8 +508,12 @@ class _WorkPath extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(BsTokens.space4),
             decoration: BoxDecoration(
+              // §W0-followup: was a COOL teal gradient (#1F6F6B→#155350, a
+              // pre-§W0 brand leftover) that read as a cold block on the warm
+              // light home. Retinted to the brand orange gradient — the hero now
+              // matches the app's warm identity; white text stays ≥4.4:1 on it.
               gradient: const LinearGradient(
-                colors: [Color(0xFF1F6F6B), Color(0xFF155350)],
+                colors: [BsTokens.brand, BsTokens.brandDark],
               ),
               borderRadius: BorderRadius.circular(cfgRadius(context)),
             ),

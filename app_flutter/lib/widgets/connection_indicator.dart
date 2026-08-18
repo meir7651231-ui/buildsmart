@@ -49,7 +49,9 @@ class ConnectionIndicator extends ConsumerWidget {
         label = '🔴 מנותק · פעולות לא יישמרו';
       case ConnectionStatus.demo:
         // Neutral grey — there is no real server to claim connection to.
-        bg = BsTokens.chainSlate;
+        // §W0-followup: warm grey (was chainSlate, a COOL blue-grey from the
+        // data-viz palette that clashed with the warm light theme).
+        bg = BsTokens.mutedLight;
         label = 'מצב דמו';
     }
 
