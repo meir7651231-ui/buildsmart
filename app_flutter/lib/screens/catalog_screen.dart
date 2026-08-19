@@ -788,7 +788,7 @@ void _openManageSheet(BuildContext context, WidgetRef ref) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -884,7 +884,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                 final isHidden = hidden.contains(s);
                 return ListTile(
                   key: ValueKey(s),
-                  tileColor: const Color(0xFFFFFFFF),
+                  tileColor: Theme.of(context).colorScheme.surface,
                   // Leading: icon matching section (dimmed when hidden)
                   leading: Icon(
                     _sectionIcon(s),
@@ -1023,7 +1023,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
     showDialog<void>(
       context: ctx,
       builder: (dCtx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(dCtx).colorScheme.surface,
         title: const CfgText('catalog_screen.t03',
           'רשימה חדשה',
           style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
@@ -1089,7 +1089,7 @@ void _showRenameDialog(
   showDialog<void>(
     context: ctx,
     builder: (dCtx) => AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(dCtx).colorScheme.surface,
       title: const CfgText('catalog_screen.t06',
         'שינוי שם הרשימה',
         style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
@@ -1163,7 +1163,7 @@ void _showItemPickerSheet(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -1229,7 +1229,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
     final newName = await showDialog<String>(
       context: context,
       builder: (dCtx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(dCtx).colorScheme.surface,
         title: const CfgText('catalog_screen.t09',
           'שינוי שם הרשימה',
           style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
@@ -1415,7 +1415,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                   controlAffinity: ListTileControlAffinity.leading,
                   activeColor: BsTokens.brand,
                   checkColor: Colors.white,
-                  tileColor: const Color(0xFFFFFFFF),
+                  tileColor: Theme.of(context).colorScheme.surface,
                   title: Row(
                     children: [
                       Text(
@@ -1639,7 +1639,7 @@ class _GlobalDiveTile extends ConsumerWidget {
       trailing: Container(
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -1693,7 +1693,7 @@ class _DiveEntryTile extends ConsumerWidget {
       trailing: Container(
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -1835,7 +1835,7 @@ class _SectionHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
       child: Row(
         children: [
@@ -2186,8 +2186,8 @@ class _CatalogRow extends ConsumerWidget {
             Container(
               width: 50,
               height: 50,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -2571,7 +2571,7 @@ class _FacetRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: BsTokens.brand, width: 1),
       ),
@@ -3070,7 +3070,7 @@ class _TreeCatRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: BsTokens.brand, width: 1),
       ),
@@ -3086,8 +3086,8 @@ class _TreeCatRow extends StatelessWidget {
                 Container(
                   width: 50,
                   height: 50,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F5F5),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -3229,8 +3229,8 @@ class _SmartTreeCatList extends ConsumerWidget {
                       Container(
                         width: 50,
                         height: 50,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF5F5F5),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -3301,7 +3301,7 @@ class _SmartTreeProductList extends ConsumerStatefulWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -3453,7 +3453,7 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: green, width: 1),
                 ),
@@ -3471,8 +3471,8 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                           Container(
                             width: 50,
                             height: 50,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF5F5F5),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
@@ -3551,7 +3551,7 @@ void openSmartProductSheet(BuildContext context, SmartProduct product) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -3849,7 +3849,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? BsTokens.brand.withAlpha(30) : const Color(0xFFF5F5F5),
+          color: selected ? BsTokens.brand.withAlpha(30) : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected ? BsTokens.brand : const Color(0xFFE0E0E0),
@@ -4210,8 +4210,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 Container(
                   width: 56,
                   height: 56,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F5F5),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -6112,7 +6112,7 @@ class _DiagramFlowState extends ConsumerState<_DiagramFlow>
       margin: const EdgeInsets.only(top: 16, bottom: 4),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6FA),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: const Color(0xFFE6E6EC)),
       ),
@@ -6348,8 +6348,8 @@ class _AccRow extends StatelessWidget {
                   Container(
                     width: 36,
                     height: 36,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF5F5F5),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -6530,7 +6530,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
   showDialog<void>(
     context: context,
     builder: (ctx) => Dialog(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(ctx).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360),
@@ -6545,8 +6545,8 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                   Container(
                     width: 56,
                     height: 56,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF5F5F5),
+                    decoration: BoxDecoration(
+                      color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -7593,7 +7593,7 @@ class _CompanyCatalogImportCard extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(12, 10, 12, 4),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: const Color(0xFFEEEEEE),

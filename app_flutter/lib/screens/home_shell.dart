@@ -436,7 +436,7 @@ class CartFab extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 constraints: const BoxConstraints(minWidth: 18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: BsTokens.brand, width: 1.5),
                 ),
@@ -511,7 +511,7 @@ class _CartChatBubble extends StatelessWidget {
           child: Container(
             constraints: const BoxConstraints(maxWidth: 250),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               // Chat-bubble shape: tail-corner (bottom-left, toward the FAB)
               // squared off, the rest rounded.
               borderRadius: const BorderRadius.only(
@@ -620,7 +620,7 @@ class _CartChatBubble extends StatelessWidget {
                   customBorder: const CircleBorder(),
                   child: Center(
                     child: Material(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       shape: const CircleBorder(
                         side: BorderSide(color: Color(0x22000000)),
                       ),
@@ -672,7 +672,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
             ? profile.name.trim().split(RegExp(r'\s+')).first
             : '';
     return AppBar(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: 4,
@@ -926,7 +926,7 @@ class _BottomNav extends ConsumerWidget {
       ),
     );
     return Material(
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 8,
       child: SafeArea(
         top: false,
@@ -1129,7 +1129,7 @@ class _ChatsMenuButton extends ConsumerWidget {
       case 'new_chat':
         showModalBottomSheet<void>(
           context: context,
-          backgroundColor: const Color(0xFFFFFFFF),
+          backgroundColor: Theme.of(context).colorScheme.surface,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -1163,7 +1163,7 @@ class _ChatsMenuButton extends ConsumerWidget {
 /// tree-shakes out on a normal build — byte-identical.
 void openNewChatSheet(BuildContext context) => showModalBottomSheet<void>(
   context: context,
-  backgroundColor: const Color(0xFFFFFFFF),
+  backgroundColor: Theme.of(context).colorScheme.surface,
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
   ),
@@ -1552,7 +1552,7 @@ class _NewChatSheet extends ConsumerWidget {
 void showProfileCard(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),

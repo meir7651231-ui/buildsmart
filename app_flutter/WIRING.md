@@ -4388,3 +4388,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #w0-followup-warm-hero — hero כתום + demo-pill חם (2026-08-18)
 משוב-בעלים חי ("כהה ובהיר מעורב" על מסך-הבית) → אובחן כ-2 שאריות-צבע קרות מ-§W0: כרטיס ה-hero `מסלול עבודה חכם` (`smart_home_screen.dart` — גרדיאנט טורקיז `#1F6F6B→#155350`) + גלולת `מצב דמו` (`connection_indicator.dart` — `chainSlate`). **תיקון:** hero→`BsTokens.brand/brandDark` · demo→`BsTokens.mutedLight` (טוקנים חמים קיימים, single-source). אומת ב-screenshot אמיתי מ-build web הרץ · analyze 0 · test ירוק.
+
+### #darkmode-wave1 — catalog_screen + home_shell theme-aware (2026-08-18)
+מצב-כהה "מעורבב" → אובחן ע"י מנוע-הפירוק-עם-צבעים (`tools/atom/decompose/bin/colors.dart` → `knowledge/colors/ATLAS.md`, 659 light-surface offenders). **גל 1:** 34 משטחים ב-`home_shell.dart`(8)+`catalog_screen.dart`(26) → `Theme.of(context).colorScheme.surface`/`surfaceContainerHighest` (const הוסר, context מאומת). אומת בצילום כהה (מחלקות+shell כהים) · analyze 0 · אטלס 659→625. גלים הבאים: store(27)·manager(30)·store_dashboard(20)... עד 0.

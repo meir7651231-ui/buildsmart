@@ -2691,3 +2691,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **גלולת "מצב דמו"** (`connection_indicator.dart`): `chainSlate` (כחלחל-קר מפלטת ה-data-viz).
 **התיקון:** hero → גרדיאנט **המותג** `BsTokens.brand→brandDark` (טקסט לבן נשאר ≥4.4:1) · demo-pill → `BsTokens.mutedLight` (אפור-חם). שניהם לטוקנים חמים **קיימים** (single-source, אפס-ערך-חדש).
 **אימות חזותי — screenshot אמיתי מהאפליקציה הרצה:** build web (`--no-web-resources-cdn`) + צילום headless של מסך-הבית → הכרטיס עכשיו כתום-מותג, הגלולה אפורה-חמה, המסך כולו חם-על-חם (v7.02 · build 9e0d955f-בסיס). `flutter analyze` 0 · `flutter test` ירוק מלא.
+
+## #darkmode-wave1 — catalog_screen + home_shell → theme-aware surfaces (2026-08-18)
+**רקע:** מצב-כהה היה "מעורבב" (חלק מהמסכים כהים, רוב בהירים) כי ~659 משטחים מקודדים צבע-בהיר קשיח מעל ה-Scaffold המתוכן. מנוע-הפירוק-עם-צבעים (`tools/atom/decompose/bin/colors.dart`) הפיק אטלס מדויק (`knowledge/colors/ATLAS.md`) — work-list + נעילת-רגרסיה.
+**גל 1 (data-driven, 2 fixers מקבילים):** 34 light-surfaces → תמה: `home_shell.dart` (8: app-bar · bottom-nav · בועות-צ'אט · sheets) + `catalog_screen.dart` (26: sheets · dialogs · tileColor · כרטיסים · avatar-circles). ההמרה: לבן→`colorScheme.surface` · אפור-בהיר→`surfaceContainerHighest`/`dividerColor` · const הוסר · context מאומת (context/ctx/dCtx). foreground (checkColor/טקסט) לא נגעו.
+**אימות חזותי — צילום אמיתי מ-build כהה:** טאב מחלקות + ה-shell כעת **כהים** (היו בהירים); מסך store (גל-2, לא תוקן) עדיין עם עיגולים לבנים — מוכיח מיקוד מדויק. `flutter analyze` 0 errors/warnings. **אטלס re-run: 659→625** (‎-34, בדיוק הגל; catalog+home_shell ירדו ל-0).
