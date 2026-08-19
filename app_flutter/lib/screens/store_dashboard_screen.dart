@@ -209,9 +209,9 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
@@ -316,7 +316,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         // tab), consistent with the app-bar; a custom Material+Row replaces
         // BottomNavigationBar, which can't carry a per-item HelpTarget.
         bottomNavigationBar: Material(
-          color: const Color(0xFFFFFFFF),
+          color: Theme.of(context).colorScheme.surface,
           elevation: 8,
           child: SafeArea(
             top: false,
@@ -914,7 +914,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             hintText: 'חיפוש לפי שם, מק"ט או קטגוריה...',
             isDense: true,
             filled: true,
-            fillColor: BsTokens.cardLight,
+            fillColor: Theme.of(context).colorScheme.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -1076,7 +1076,7 @@ void _showAddProductSheet(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -1225,7 +1225,7 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                 errorText: _nameError,
                 isDense: true,
                 filled: true,
-                fillColor: BsTokens.bgLight,
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(cfgRadius(context)),
                   borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -1247,7 +1247,7 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                 errorText: _skuError,
                 isDense: true,
                 filled: true,
-                fillColor: BsTokens.bgLight,
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(cfgRadius(context)),
                   borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -1624,9 +1624,9 @@ class _SupplierSettingsScreenState
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           leading: IconButton(
             tooltip: 'חזרה',
@@ -1882,7 +1882,7 @@ class _ProfileFieldState extends State<_ProfileField> {
           counterText: '',
           isDense: true,
           filled: true,
-          fillColor: BsTokens.cardLight,
+          fillColor: Theme.of(context).colorScheme.surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(cfgRadius(context)),
             borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -1917,7 +1917,7 @@ class _LogoPreview extends ConsumerWidget {
       height: 120,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
@@ -2029,9 +2029,9 @@ class _StoreNotifsSheet extends ConsumerWidget {
         expand: false,
         builder:
             (_, scroll) => Container(
-              decoration: const BoxDecoration(
-                color: BsTokens.cardLight,
-                borderRadius: BorderRadius.vertical(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(BsTokens.radiusCard),
                 ),
               ),
@@ -2176,7 +2176,10 @@ class _StoreNotifRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: notif.read ? BsTokens.cardLight : const Color(0xFFFFF8F2),
+      color:
+          notif.read
+              ? Theme.of(context).colorScheme.surface
+              : const Color(0xFFFFF8F2),
       borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
         borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -2287,8 +2290,8 @@ class _ActionCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
@@ -2343,7 +2346,7 @@ class _FlatCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -2370,7 +2373,7 @@ class _Stat extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 3),
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           boxShadow: const [
             BoxShadow(
@@ -2442,7 +2445,7 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: on ? BsTokens.brand : BsTokens.cardLight,
+      color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -2526,7 +2529,7 @@ class _StoreOrderCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
@@ -2733,7 +2736,7 @@ class _DeliveredCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
@@ -2926,7 +2929,7 @@ class _StockRow extends StatelessWidget {
           vertical: BsTokens.space3,
         ),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           boxShadow: const [
             BoxShadow(

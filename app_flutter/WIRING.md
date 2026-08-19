@@ -4391,3 +4391,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave1 — catalog_screen + home_shell theme-aware (2026-08-18)
 מצב-כהה "מעורבב" → אובחן ע"י מנוע-הפירוק-עם-צבעים (`tools/atom/decompose/bin/colors.dart` → `knowledge/colors/ATLAS.md`, 659 light-surface offenders). **גל 1:** 34 משטחים ב-`home_shell.dart`(8)+`catalog_screen.dart`(26) → `Theme.of(context).colorScheme.surface`/`surfaceContainerHighest` (const הוסר, context מאומת). אומת בצילום כהה (מחלקות+shell כהים) · analyze 0 · אטלס 659→625. גלים הבאים: store(27)·manager(30)·store_dashboard(20)... עד 0.
+
+### #darkmode-wave2 — store cluster theme-aware (2026-08-18)
+**גל 2:** 64 משטחים ב-`store_screen`(27)+`store_dashboard_screen`(20)+`store_profile_screen`(17) → `colorScheme.surface`/`scaffoldBackgroundColor` (כולל מיפוי `BsTokens.bgLight/cardLight`). analyze 0 · אטלס 625→561. מצטבר dark-mode: 659→561 (98 תוקנו). הבא: manager_dashboard(30)·chats(16)·org_setup(15)...

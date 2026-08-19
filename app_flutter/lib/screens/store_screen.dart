@@ -532,7 +532,7 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -747,7 +747,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
+      color: active ? BsTokens.brand : Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -776,7 +776,7 @@ class _QuickActionsRow extends ConsumerWidget {
   void _showSheet(BuildContext context, Widget sheet) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -879,8 +879,8 @@ class _QuickAction extends StatelessWidget {
               Container(
                 width: 62,
                 height: 62,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF5F5F5),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: Colors.black54, size: 28),
@@ -1127,7 +1127,7 @@ class _StoreListState extends ConsumerState<_StoreList> {
     final section = ref.watch(storeSectionProvider);
     return RefreshIndicator(
       color: BsTokens.brand,
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       onRefresh: _onRefresh,
       child: switch (section) {
         // ORG GATE — services reached while orders.services is OFF (stale
@@ -1318,7 +1318,7 @@ class _GridHubCard extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF),
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFF0F0F0)),
             ),
@@ -1435,7 +1435,7 @@ class _DismissibleStoreRow extends StatelessWidget {
         onFavToggle();
         return false;
       },
-      background: const ColoredBox(color: Color(0xFFFFFFFF)),
+      background: ColoredBox(color: Theme.of(context).colorScheme.surface),
       secondaryBackground: ColoredBox(
         color: Colors.pink.withValues(alpha: 0.15),
         child: Align(
@@ -1478,8 +1478,8 @@ class _StoreRow extends StatelessWidget {
                 Container(
                   width: 50,
                   height: 50,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F5F5),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -1825,7 +1825,7 @@ class _ProjectSelector extends ConsumerWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: const Color(0xFF444444)),
                     ),
@@ -1850,7 +1850,7 @@ class _ProjectSelector extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
             title: const CfgText(
               'store_screen.proj_add_dialog_title',
               'הוספת פרויקט',
@@ -1920,7 +1920,7 @@ class _ProjectChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
+          color: active ? BsTokens.brand : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -1949,7 +1949,7 @@ class _SmartCartRow extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: BsTokens.brand.withAlpha(60)),
       ),
@@ -2183,7 +2183,7 @@ class _CartItemRow extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -2246,7 +2246,7 @@ class _CartItemRow extends ConsumerWidget {
               const Spacer(),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -2342,7 +2342,7 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
     ),
@@ -2383,7 +2383,7 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
                 decoration: InputDecoration(
                   hintText: 'כתובת / אתר העבודה',
                   filled: true,
-                  fillColor: const Color(0xFFF5F5F5),
+                  fillColor: Theme.of(sheetCtx).colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -2550,7 +2550,7 @@ class _NotesField extends StatelessWidget {
             hintText: 'קומה / כניסה / שם האתר / הוראות לנהג...',
             hintStyle: const TextStyle(color: Color(0xFF666666)),
             filled: true,
-            fillColor: const Color(0xFFFFFFFF),
+            fillColor: Theme.of(context).colorScheme.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,
@@ -2587,7 +2587,7 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(14),
@@ -2718,7 +2718,7 @@ class _PaymentChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
+          color: active ? BsTokens.brand : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
           border: active ? null : Border.all(color: const Color(0xFF444444)),
         ),
@@ -2800,7 +2800,7 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
           context: context,
           builder:
               (ctx) => AlertDialog(
-                backgroundColor: const Color(0xFFFFFFFF),
+                backgroundColor: Theme.of(ctx).colorScheme.surface,
                 title: const CfgText(
                   'store_screen.large_order_title',
                   'אישור הזמנה גדולה',
@@ -2858,7 +2858,7 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -2928,7 +2928,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(14),
@@ -3198,7 +3198,7 @@ class _CartActionsRow extends ConsumerWidget {
       context: context,
       builder:
           (context) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
+            backgroundColor: Theme.of(context).colorScheme.surface,
             title: const CfgText(
               'store_screen.save_list_title',
               'שמור סל כרשימה',
@@ -3307,7 +3307,7 @@ class _CartActionsRow extends ConsumerWidget {
   static void _showSavedListsSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -3551,7 +3551,7 @@ class _ServicesGrid extends ConsumerWidget {
     }
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -3959,7 +3959,7 @@ class _OrderRow extends StatelessWidget {
           () => showModalBottomSheet<void>(
             context: context,
             isScrollControlled: true,
-            backgroundColor: const Color(0xFFFFFFFF),
+            backgroundColor: Theme.of(context).colorScheme.surface,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
@@ -3972,8 +3972,8 @@ class _OrderRow extends StatelessWidget {
             Container(
               width: 50,
               height: 50,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,

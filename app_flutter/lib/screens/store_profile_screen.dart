@@ -71,9 +71,9 @@ class StoreProfileScreen extends ConsumerWidget {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: CfgText(
             'store_profile_screen.appbar_title',
@@ -139,7 +139,7 @@ class StoreProfileBody extends ConsumerWidget {
         // ── פעולות ─────────────────────────────────────────────────────────
         Card(
           margin: EdgeInsets.zero,
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -224,7 +224,7 @@ class _StoreIdentityCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -403,7 +403,7 @@ class _StoreStatsCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -461,7 +461,7 @@ class _StoreStatsCard extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(BsTokens.space3),
             decoration: BoxDecoration(
-              color: BsTokens.bgLight,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFEDEDED)),
             ),
@@ -514,7 +514,7 @@ class _SStat extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 3),
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space2),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -568,7 +568,7 @@ class _StorePersonalAreaCard extends StatelessWidget {
       // Material מתחת ל-ListTiles — בלעדיו ה-ink נבלע וה-debug assertion של
       // Flutter ('ink splashes may be invisible') נזרק בבניית הטאב.
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -757,9 +757,9 @@ class _EditStoreProfileSheetState
         padding:
             EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
         child: Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.vertical(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
               top: Radius.circular(BsTokens.radiusCard),
             ),
           ),
@@ -974,9 +974,9 @@ class StoreCertsScreen extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: CfgText(
             'store_profile_screen.certs_screen_title',
@@ -1043,7 +1043,7 @@ class StoreCertsScreen extends ConsumerWidget {
 
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius:
@@ -1153,7 +1153,7 @@ class StoreCertsScreen extends ConsumerWidget {
                               label: p,
                               excludeSemantics: true,
                               child: Material(
-                                color: BsTokens.cardLight,
+                                color: Theme.of(ctx).colorScheme.surface,
                                 borderRadius:
                                     BorderRadius.circular(BsTokens.radiusPill),
                                 child: InkWell(
@@ -1212,7 +1212,7 @@ class StoreCertsScreen extends ConsumerWidget {
                       const SizedBox(height: BsTokens.space3),
                       // שורת בורר התוקף (≥48dp).
                       Material(
-                        color: BsTokens.bgLight,
+                        color: Theme.of(ctx).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
@@ -1258,7 +1258,7 @@ class StoreCertsScreen extends ConsumerWidget {
                       const SizedBox(height: BsTokens.space3),
                       // צילום אופציונלי דרך seam המצלמה.
                       Material(
-                        color: BsTokens.cardLight,
+                        color: Theme.of(ctx).colorScheme.surface,
                         borderRadius:
                             BorderRadius.circular(BsTokens.radiusPill),
                         child: InkWell(
@@ -1391,7 +1391,7 @@ class _StoreCertsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -1487,7 +1487,7 @@ class _StoreCertRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
