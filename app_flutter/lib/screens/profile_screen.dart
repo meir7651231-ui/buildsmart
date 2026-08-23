@@ -113,7 +113,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       builder: (ctx) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           title: CfgText(
             'profile_screen.t01',
             'מחיקת חשבון',
@@ -204,9 +204,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           foregroundColor: _ink,
           elevation: 0,
           title: CfgText(
@@ -264,7 +264,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     label: Text(trade),
                     selected: _profession == trade,
                     showCheckmark: true,
-                    backgroundColor: const Color(0xFFF0F0F0),
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                     selectedColor: const Color(0xFFFFF0E3),
                     labelStyle: TextStyle(
                       color: _profession == trade ? BsTokens.brandDark : _ink,
@@ -385,7 +385,7 @@ class _HeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEEEEEE)),
       ),
@@ -530,7 +530,7 @@ class _Field extends StatelessWidget {
             hintStyle: const TextStyle(color: BsTokens.mutedLight),
             errorText: errorText,
             filled: true,
-            fillColor: BsTokens.cardLight,
+            fillColor: Theme.of(context).colorScheme.surface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: BsTokens.space3,
               vertical: BsTokens.space3,
@@ -577,7 +577,7 @@ class _LinkRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
         borderRadius: BorderRadius.circular(cfgRadius(context)),

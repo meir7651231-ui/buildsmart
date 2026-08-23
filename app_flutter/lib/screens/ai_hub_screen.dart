@@ -258,7 +258,7 @@ class AIHubScreen extends ConsumerWidget {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: aiAppBar(context, '🤖 בינה מלאכותית'),
         floatingActionButton:
             cartHasItems ? const CartFab(popFirst: true) : null,
@@ -352,7 +352,7 @@ class _AIFeatureScreen extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: aiAppBar(context, '🤖 בינה מלאכותית'),
         floatingActionButton:
             cartHasItems ? const CartFab(popFirst: true) : null,
@@ -731,7 +731,7 @@ class _Analytics extends ConsumerWidget {
 // ════════════════════════════════════════════════════════════════════════════
 
 PreferredSizeWidget aiAppBar(BuildContext context, String title) => AppBar(
-  backgroundColor: BsTokens.cardLight,
+  backgroundColor: Theme.of(context).colorScheme.surface,
   elevation: 0,
   automaticallyImplyLeading: false,
   titleSpacing: BsTokens.space4,
@@ -809,7 +809,7 @@ class AiFinTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
         borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -862,7 +862,7 @@ class AiCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: BsTokens.space2),
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: overdue ? const Color(0xFFE57373) : const Color(0xFFEEEEEE),
@@ -946,7 +946,7 @@ class AiBar extends StatelessWidget {
       child: LinearProgressIndicator(
         value: pct / 100,
         minHeight: 8,
-        backgroundColor: const Color(0xFFEEEEEE),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         valueColor: AlwaysStoppedAnimation<Color>(
           danger ? const Color(0xFFE53935) : BsTokens.brand,
         ),
@@ -1020,7 +1020,7 @@ class AiServerNote extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
       ),
       child: Text(

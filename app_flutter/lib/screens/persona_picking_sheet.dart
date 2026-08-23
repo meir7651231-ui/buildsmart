@@ -40,7 +40,7 @@ void showPickingSheet(BuildContext context, String orderId) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -439,7 +439,7 @@ class PersonaPickingSheet extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -576,7 +576,7 @@ void showContractorMissingDecisionSheet(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -806,7 +806,7 @@ class _DecisionLine extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -933,7 +933,7 @@ class _PickLine extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -1096,7 +1096,7 @@ class _SplitControl extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: Column(

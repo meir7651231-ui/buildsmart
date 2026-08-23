@@ -4400,3 +4400,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave4 — 8 screens theme-aware (2026-08-18)
 **גל 4:** 72 משטחים ב-connection_rule_studio(11)·courier_profile(10)·worker_app(9)·lipskey_product_sheet(9)·worker_profile(9)·contractor_hr(8)·worker_forms(8)·courier_certs(8) → theme, 0 דולגו. analyze 0 · אטלס 447→375. מצטבר dark-mode 659→375 (284 תוקנו).
+
+### #darkmode-wave5 — 8 screens theme-aware (2026-08-23)
+**גל 5:** 56 משטחים ב-accessory_rule_editor(8)·ai_hub(7)·product_authoring(7)·courier_forms(7)·worker_employer_stock(7)·attribute_schema_editor(7)·profile_screen(7)·persona_picking_sheet(6) → theme. 1 offender ב-persona_picking_sheet:777 דולג (`_decisionRow` בלי context — context-threading בהמשך). analyze 0 errors · אטלס 375→319. מצטבר dark-mode 659→319 (340 תוקנו).

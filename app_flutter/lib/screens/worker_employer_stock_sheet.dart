@@ -105,7 +105,7 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
           Container(
             padding: const EdgeInsets.all(BsTokens.space4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F6FA),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
             ),
             child: Column(
@@ -219,10 +219,10 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(BsTokens.radiusCard)),
           ),
           child: ListView(
             controller: scroll,
@@ -287,7 +287,7 @@ class _StockRow extends StatelessWidget {
         vertical: BsTokens.space2,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: const Color(0xFFEAEAEA)),
       ),
@@ -374,7 +374,7 @@ class _RequestComposer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6FA),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: Column(
@@ -403,23 +403,23 @@ class _RequestComposer extends StatelessWidget {
             textDirection: TextDirection.rtl,
             keyboardType: TextInputType.multiline,
             textInputAction: TextInputAction.newline,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'לדוגמה:\nסרט טפלון\nברך 1/2 צול\nאטם גומי',
               filled: true,
-              fillColor: BsTokens.cardLight,
-              border: OutlineInputBorder(),
+              fillColor: Theme.of(context).colorScheme.surface,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: BsTokens.space2),
           TextField(
             controller: noteCtrl,
             textDirection: TextDirection.rtl,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'הערה (לא חובה)',
               hintText: 'לדוגמה: דחוף, נגמר באתר',
               filled: true,
-              fillColor: BsTokens.cardLight,
-              border: OutlineInputBorder(),
+              fillColor: Theme.of(context).colorScheme.surface,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: BsTokens.space3),
@@ -502,7 +502,7 @@ class _MyRequestRow extends StatelessWidget {
         vertical: BsTokens.space2,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: const Color(0xFFEAEAEA)),
       ),

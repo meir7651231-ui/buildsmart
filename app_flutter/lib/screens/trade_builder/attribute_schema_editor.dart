@@ -187,7 +187,7 @@ class _AttributeSchemaEditorState
   InputDecoration _dec(String label) => InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: BsTokens.cardLight,
+        fillColor: Theme.of(context).colorScheme.surface,
         labelStyle:
             const TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
         border: OutlineInputBorder(
@@ -218,9 +218,9 @@ class _AttributeSchemaEditorState
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: BsTokens.bgLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: BsTokens.cardLight,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
             title: CfgText(
@@ -282,7 +282,7 @@ class _AttributeSchemaEditorState
               const SizedBox(height: BsTokens.space4),
               DropdownButtonFormField<AttributeKind>(
                 value: _kind,
-                dropdownColor: BsTokens.cardLight,
+                dropdownColor: Theme.of(context).colorScheme.surface,
                 style:
                     const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 decoration: _dec('סוג'),
@@ -330,7 +330,7 @@ class _AttributeSchemaEditorState
                             fontSize: 13,
                           ),
                         ),
-                        backgroundColor: BsTokens.cardLight,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
                         side: const BorderSide(color: Color(0xFFEDEDED)),
                         deleteButtonTooltipMessage: 'הסר',
                         onDeleted: () =>
@@ -412,7 +412,7 @@ class _AttributeTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space4),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -511,7 +511,7 @@ class _ValueChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
