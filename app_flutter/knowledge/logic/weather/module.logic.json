@@ -1,0 +1,346 @@
+{
+  "module": "weather",
+  "source": "lib/services/weather.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "_httpGetJson",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Uri url) -> Future<Map<String, dynamic>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "http"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "res = await http.get(url)"
+          },
+          {
+            "kind": "return",
+            "detail": "jsonDecode(res.body) as Map<String, dynamic>"
+          }
+        ]
+      },
+      "floor": [
+        "get",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "(Uri url)",
+        "output": "Future<Map<String, dynamic>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "fetchOpenMeteoDaily",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required double lat, required double lon, WeatherHttpGet? get}) -> Future<Map<String, dynamic>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "url = Uri.parse('https://api.open-meteo.com/v1/forecast' '?latitude=$lat&longitude=$lon' '&dail…"
+          },
+          {
+            "kind": "return",
+            "detail": "(get ?? _httpGetJson)(url)"
+          }
+        ]
+      },
+      "floor": [
+        "parse"
+      ],
+      "contract": {
+        "input": "({required double lat, required double lon, WeatherHttpGet? get})",
+        "output": "Future<Map<String, dynamic>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "weatherDaysFromOpenMeteo",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic> json) -> List<WeatherDay>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_dayLabel",
+            "module": true
+          },
+          {
+            "name": "weatherIconFor",
+            "module": true
+          },
+          {
+            "name": "weatherNoteFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "daily = json['daily']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if daily is! Map → return const []"
+          },
+          {
+            "kind": "compute",
+            "detail": "times = (daily['time'] as List?) ?? const []"
+          },
+          {
+            "kind": "compute",
+            "detail": "codes = (daily['weather_code'] as List?) ?? const []"
+          },
+          {
+            "kind": "compute",
+            "detail": "temps = (daily['temperature_2m_max'] as List?) ?? const []"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <WeatherDay>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < times.length && i < 4; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "code = (i < codes.length && codes[i] is num) ? (codes[i] as num).toInt() : 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "t = (i < temps.length && temps[i] is num) ? temps[i] as num : null"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add(WeatherDay(day: _dayLabel(i), ic: weatherIconFor(code), temp: t == null ? '—' : '…"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "WeatherDay",
+        "add",
+        "round",
+        "toInt"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> json)",
+        "output": "List<WeatherDay>",
+        "purity": "pure",
+        "precond": [
+          "if daily is! Map → return const []"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_dayLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int i) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "weatherDaysFromOpenMeteo"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (i) {0 => 'היום', 1 => 'מחר', 2 => 'מחרתיים', _ => 'בעוד $i ימים'}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int i)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "weatherIconFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int code) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "weatherDaysFromOpenMeteo"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if code <= 0 → return '☀️'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 3 → return '⛅'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 48 → return '🌫️'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 67 → return '🌧️'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 77 → return '❄️'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 82 → return '🌦️'"
+          },
+          {
+            "kind": "return",
+            "detail": "'⛈️'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int code)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if code <= 0 → return '☀️'",
+          "if code <= 3 → return '⛅'",
+          "if code <= 48 → return '🌫️'",
+          "if code <= 67 → return '🌧️'",
+          "if code <= 77 → return '❄️'",
+          "if code <= 82 → return '🌦️'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "weatherNoteFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int code) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "weatherDaysFromOpenMeteo"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if code <= 3 → return 'מזג אוויר טוב לעבודות חוץ'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 48 → return 'ערפל — זהירות בנהיגה לאתר'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 67 → return '⚠️ גשם — לדחות יציקות בטון'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 77 → return '⚠️ שלג — עבודות פנים בלבד'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if code <= 82 → return '⚠️ ממטרים — עבודות גמר בלבד'"
+          },
+          {
+            "kind": "return",
+            "detail": "'⚠️ סופה — להימנע מעבודות חוץ'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int code)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if code <= 3 → return 'מזג אוויר טוב לעבודות חוץ'",
+          "if code <= 48 → return 'ערפל — זהירות בנהיגה לאתר'",
+          "if code <= 67 → return '⚠️ גשם — לדחות יציקות בטון'",
+          "if code <= 77 → return '⚠️ שלג — עבודות פנים בלבד'",
+          "if code <= 82 → return '⚠️ ממטרים — עבודות גמר בלבד'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

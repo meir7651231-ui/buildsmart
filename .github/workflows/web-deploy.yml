@@ -1,0 +1,132 @@
+name: Web — deploy to Firebase Hosting (always-latest, zero-install)
+
+# Builds the Flutter web app and deploys it to Firebase Hosting so the LATEST
+# build is always live at https://buildsmart-b0b78.web.app — zero install, just
+# open the URL (it "auto-updates" on refresh). firebase.json already targets
+# app_flutter/build/web with SPA rewrites; the SA→ADC pattern mirrors
+# bootstrap-admin.yml.
+#
+# ⚠️ Web Google sign-in needs a WEB OAuth client id in web/index.html (the app is
+#    Android-only today). The contractor / demo surfaces work on web; the manager
+#    "כניסה עם Google" on web is a follow-up (create a Web OAuth client in the
+#    Google Cloud console, then drop its id into web/index.html).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - 'app_flutter/**'
+      - 'firebase.json'
+      - '.github/workflows/web-deploy.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
+      - name: Build web (release)
+        working-directory: app_flutter
+        # --dart-define=ENABLE_WORD_FINDER=true: this workflow ALSO deploys to the
+        # live channel (buildsmart-il.com / buildsmart-b0b78.web.app), racing
+        # firebase-hosting.yml — so it must carry the SAME flags, else whichever
+        # deploy wins could ship a flag-OFF build with the demo features hidden.
+        # --dart-define=KB_LIVE_MIRROR=true: the live-mirror keyboard — MUST match
+        # firebase-hosting.yml (same race). OWNER-REQUESTED live (22/6), reversible.
+        # --dart-define=KB_GLOBAL=true: the unified keyboard-on-every-screen (the
+        # contractor-board monster) — MUST match firebase-hosting.yml (same race),
+        # else whichever deploy wins could ship it OFF. OWNER cut-over (1/7).
+        # --dart-define=GLOBAL_SEARCH=true: the unified global search (the keyboard
+        # row searches every domain) — MUST match firebase-hosting.yml (same race).
+        # --dart-define=PLAIN_DIVE=true: the layman 'מאתר פשוט' finder (the plain
+        # 4-ring dictionary drill) running ALONGSIDE 'מאתר חכם'. OWNER-REQUESTED live
+        # (10/7). MUST match firebase-hosting.yml (same race).
+        # --dart-define=AXIS_DIVE=true: the owner's 'מאתר-על' axis-dive wheel — pick
+        # ANY of the 17 catalog axes in any order, with a LIVE product-photo gallery
+        # under the wheel. OWNER-REQUESTED live (12/7). MUST match firebase-hosting.yml.
+        # ── STUDIO GO-LIVE SEAM (dormant by default) ─────────────────────────
+        # ${{ vars.STUDIO_DART_DEFINES }} appends the Studio/Pillar flags for a
+        # STAGED, owner-controlled go-live. UNSET (default) → empty → this build is
+        # BYTE-IDENTICAL to today's live (the Studio surface tree-shakes out). To arm,
+        # set the repo variable STUDIO_DART_DEFINES to a stage's defines (see
+        # knowledge/STUDIO_GA.md §3), e.g.
+        #   --dart-define=USE_FIREBASE_BACKEND=true --dart-define=STUDIO_LIVE=true
+        # It persists across re-deploys (unlike an ephemeral dispatch input a later
+        # push would revert). Reversible: clear the variable → next deploy is
+        # byte-identical again. MUST match firebase-hosting.yml (same live race).
+        # CATALOG_BASE_URL + STORE_COMPARISON_UI = the catalog-to-server GO-LIVE (MUST
+        # match firebase-hosting.yml — same live site). useFirebaseBackend is already ON
+        # (STUDIO_DART_DEFINES), so a non-empty CATALOG_BASE_URL flips useServerCatalog
+        # TRUE → the catalog reads Firestore (guests anon-sign-in; a server blip falls
+        # back to the bundled catalog — C5.5). Reversible: drop these two flags.
+        # --dart-define=UID_SCOPED_QUERIES=true: #8 phase 3a — arms the UID-SCOPED
+        # Firestore listens (orders + the per-user chatThreads listen), so per-user
+        # DM threads are readable live under the participant-scoped rules. MUST match
+        # firebase-hosting.yml (same live race). Reversible: drop the flag → the
+        # whole-collection listens return, byte-identical to today.
+        # --dart-define=CLOUD_PHOTOS=true: user-uploaded photos (task-completion,
+        # signatures, worker/courier profile) go to Cloudflare R2 via getUploadUrl
+        # instead of inline base64. OWNER-ARMED (R2 provisioned + getUploadUrl
+        # deployed). Non-owner-safe: OFF is byte-identical base64, and even ON it
+        # FALLS BACK to base64 if R2 is unreachable — a photo is never lost. MUST
+        # match firebase-hosting.yml (same live race).
+        # --dart-define=EDGE_PROXY=true (12.8): Firestore via fs.buildsmart-il.com
+        # (Cloudflare Worker → Firestore) so filtered lines never see googleapis.
+        # No active users yet ⇒ safe live validation; revert = drop this flag.
+        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=AXIS_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true --dart-define=CATALOG_BASE_URL=https://buildsmart-il.com --dart-define=STORE_COMPARISON_UI=true --dart-define=ORDER_EMAIL=true --dart-define=UID_SCOPED_QUERIES=true --dart-define=EMAIL_PASSWORD_AUTH=true --dart-define=ORG_CONFIG=true --dart-define=CLOUD_PHOTOS=true --dart-define=INTERNAL_CARD=true --dart-define=EDGE_PROXY=true --dart-define=FITTING_ENGINE=true --dart-define=FITTING_ENGINE_INTEL=true --dart-define=USER_DATA_SERVER=true --dart-define=TASKS_SERVER=true --dart-define=ACCESS_LOCK=true --dart-define=ORG_CONFIG_LIVE=true ${{ vars.STUDIO_DART_DEFINES }}
+
+      - name: 🚀 Launch flags → run summary (verify backend / catalog / studio)
+        # Group-2 launch-verify (SSOT close-web-for-launch). The static defines are
+        # visible in the Build step above; the INVISIBLE part is the repo var
+        # STUDIO_DART_DEFINES (real backend + studio arming). Echo it so every live
+        # deploy self-documents its effective launch flags — auditable at a glance.
+        run: |
+          {
+            echo "### 🚀 Live launch flags — verification"
+            echo ""
+            echo "**Server catalog (static):** \`CATALOG_BASE_URL=https://buildsmart-il.com\` + \`STORE_COMPARISON_UI=true\`"
+            echo ""
+            echo "**Backend + studio arming — \`vars.STUDIO_DART_DEFINES\` expanded to:**"
+            echo '```'
+            echo "${{ vars.STUDIO_DART_DEFINES }}"
+            echo '```'
+            echo ""
+            echo "- Real backend ⇐ \`USE_FIREBASE_BACKEND=true\` must appear above."
+            echo "- Server catalog ⇐ non-empty \`CATALOG_BASE_URL\` + backend ON ⇒ \`useServerCatalog=TRUE\`."
+            echo "- Studio ⇐ \`STUDIO=true\` above arms the seam; owner-gating (kStudioFlag + owner #84) is enforced in-app."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Write service account credentials
+        run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+        env:
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy to Firebase Hosting
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+        run: |
+          npm install -g firebase-tools >/dev/null 2>&1
+          firebase deploy --only hosting --project buildsmart-b0b78 --non-interactive

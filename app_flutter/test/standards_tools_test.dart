@@ -88,11 +88,28 @@ void main() {
       }
     });
 
-    test('no-spec product yields no tools', () {
-      final noSpec =
-          kLipskeyCatalog.where((p) => kVerifiedSpecs[p.sku] == null);
-      for (final p in noSpec) {
-        expect(installToolsFor(p), isEmpty);
+    test('no-spec PLUMBING product yields no tools', () {
+      // installToolsFor deliberately surfaces mounting tools (drill/dowel/level)
+      // for wall-mounted auxiliaries — kMountAuxCats (pipe clamps, hangers, grab
+      // bars) carry no water-path spec by design but DO have real mount steps.
+      // Every OTHER no-spec product must still yield nothing. (R8's name-borne
+      // spec enrichment surfaced a mount-aux no-spec product, exposing that this
+      // test never encoded the documented kMountAuxCats exception.)
+      final noSpecPlumbing = kLipskeyCatalog.where((p) =>
+          kVerifiedSpecs[p.sku] == null &&
+          !kMountAuxCats.contains(p.categoryHe));
+      for (final p in noSpecPlumbing) {
+        expect(installToolsFor(p), isEmpty, reason: p.sku);
+      }
+    });
+
+    test('no-spec mount-aux product yields its mounting tools', () {
+      final mountAux = kLipskeyCatalog.where((p) =>
+          kVerifiedSpecs[p.sku] == null &&
+          kMountAuxCats.contains(p.categoryHe));
+      for (final p in mountAux) {
+        expect(installToolsFor(p), isNotEmpty,
+            reason: '${p.sku} (${p.categoryHe}) is a wall-mount aux');
       }
     });
   });

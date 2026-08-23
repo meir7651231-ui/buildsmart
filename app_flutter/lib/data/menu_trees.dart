@@ -63,25 +63,6 @@ const List<Section> kHomeTree = [
   ),
 ];
 
-/// Cart dial — @legacy index.html:5060-5061 + :5103-5104 (vs-btn switch)
-/// + :5074-5081 (ca-svc supply-chain services).
-const List<Section> kCartTree = [
-  Section(id: 'cart-mine', emoji: '🛒', title: 'הסל שלי'),
-  Section(
-    id: 'cart-orders',
-    emoji: '📦',
-    title: 'ההזמנות שלי',
-    children: [
-      Section(id: 'svc-rental',   emoji: '🔧',  title: 'השכרת כלים'),
-      Section(id: 'svc-deposits', emoji: '💰',  title: 'פקדונות'),
-      Section(id: 'svc-return',   emoji: '↩️', title: 'החזרה חדשה'),
-      Section(id: 'svc-rfq',      emoji: '📨',  title: 'מכרז ספקים'),
-      Section(id: 'svc-msds',     emoji: '🧪',  title: 'גיליונות בטיחות'),
-      Section(id: 'svc-compare',  emoji: '📊',  title: 'השוואת מחירים'),
-    ],
-  ),
-];
-
 /// Finance hub — @legacy openFinanceHub @ index.html:19489-19498.
 /// 10 tiles, ic+t verbatim.
 const List<Section> kFinanceHub = [

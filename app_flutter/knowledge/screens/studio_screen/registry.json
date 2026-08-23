@@ -1,0 +1,37 @@
+{
+  "matched": 6,
+  "total": 6,
+  "summary": "6/6",
+  "entries": [
+    {
+      "id": "studio_screen_old.t01",
+      "ok": true,
+      "atom": "StudioScreen"
+    },
+    {
+      "id": "studio_screen_old.t02",
+      "ok": true,
+      "atom": "StudioScreen"
+    },
+    {
+      "id": "studio_screen_old.t03",
+      "ok": true,
+      "atom": "_CoEditorPane"
+    },
+    {
+      "id": "studio_screen_old.t04",
+      "ok": true,
+      "atom": "_CoEditorPane"
+    },
+    {
+      "id": "studio_screen_old.t05",
+      "ok": true,
+      "atom": "_CoEditorPane"
+    },
+    {
+      "id": "studio_screen_old.t06",
+      "ok": true,
+      "atom": "_CoEditorPane"
+    }
+  ]
+}

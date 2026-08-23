@@ -1,0 +1,17 @@
+{
+  "matched": 2,
+  "total": 2,
+  "summary": "2/2",
+  "entries": [
+    {
+      "id": "credit_explain_screen.title",
+      "ok": true,
+      "atom": "CreditExplainScreen"
+    },
+    {
+      "id": "credit_explain_screen.note",
+      "ok": true,
+      "atom": "CreditExplainScreen"
+    }
+  ]
+}

@@ -1,0 +1,785 @@
+{
+  "module": "home_atoms",
+  "source": "lib/atoms/home_atoms.dart",
+  "atomCount": 13,
+  "atoms": [
+    {
+      "fn": "atomChipRow",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String hint, List<Widget> chips) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_mute"
+          },
+          {
+            "kind": "const",
+            "name": "_surface"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AtomChipBar.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Container(height: 48, decoration: const BoxDecoration(border: Border(bottom: BorderSide(c…"
+          }
+        ]
+      },
+      "floor": [
+        "AtomChipScroll",
+        "Border",
+        "BorderSide",
+        "BoxDecoration",
+        "Container",
+        "Expanded",
+        "Padding",
+        "Row",
+        "Text",
+        "TextStyle",
+        "only"
+      ],
+      "contract": {
+        "input": "(String hint, List<Widget> chips)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "atomChip",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String label, bool active, VoidCallback onTap) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_ink"
+          },
+          {
+            "kind": "const",
+            "name": "_surface"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AtomChipBar.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Padding(padding: const EdgeInsetsDirectional.only(end: 8), child: GestureDetector(onTap: …"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "Container",
+        "GestureDetector",
+        "Padding",
+        "Text",
+        "TextStyle",
+        "chipLabelDirection",
+        "circular",
+        "only",
+        "symmetric"
+      ],
+      "contract": {
+        "input": "(String label, bool active, VoidCallback onTap)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AtomTypeGrid.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_ink"
+          },
+          {
+            "kind": "const",
+            "name": "_mute"
+          },
+          {
+            "kind": "const",
+            "name": "_surface"
+          },
+          {
+            "kind": "field",
+            "name": "groups"
+          },
+          {
+            "kind": "field",
+            "name": "onSelect"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "ListView.separated(key: const Key('catalog-list'), itemCount: groups.length, separatorBui…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "Column",
+        "Container",
+        "Divider",
+        "Expanded",
+        "Icon",
+        "InkWell",
+        "Key",
+        "Padding",
+        "Row",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "circular",
+        "finderGroupGlyph",
+        "onSelect",
+        "separated",
+        "symmetric"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AtomBreadcrumb.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_ink"
+          },
+          {
+            "kind": "const",
+            "name": "_mute"
+          },
+          {
+            "kind": "const",
+            "name": "_surface"
+          },
+          {
+            "kind": "field",
+            "name": "group"
+          },
+          {
+            "kind": "field",
+            "name": "onBack"
+          },
+          {
+            "kind": "field",
+            "name": "size"
+          },
+          {
+            "kind": "field",
+            "name": "sub"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "crumbs = <String>[group.label, if (sub != null) sub!, if (size != null) size!]"
+          },
+          {
+            "kind": "return",
+            "detail": "Material(color: Colors.white, child: InkWell(onTap: onBack, child: Padding(padding: const…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "Container",
+        "Expanded",
+        "Icon",
+        "InkWell",
+        "Material",
+        "Padding",
+        "Row",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "finderGroupGlyph",
+        "join",
+        "symmetric"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AtomChipBar.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_ink",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_mute",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_surface",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "hint"
+          },
+          {
+            "kind": "field",
+            "name": "labelFor"
+          },
+          {
+            "kind": "field",
+            "name": "onSelect"
+          },
+          {
+            "kind": "field",
+            "name": "onSelectAll"
+          },
+          {
+            "kind": "field",
+            "name": "options"
+          },
+          {
+            "kind": "field",
+            "name": "selected"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "atomChipRow",
+            "module": true
+          },
+          {
+            "name": "atomChip",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "atomChipRow(hint, [atomChip('הכל', selected == null, onSelectAll), for (final c in option…"
+          }
+        ]
+      },
+      "floor": [
+        "call",
+        "label",
+        "onSelect"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AtomResultCount.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_mute"
+          },
+          {
+            "kind": "field",
+            "name": "count"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 4), child: Align(alignment: Alignme…"
+          }
+        ]
+      },
+      "floor": [
+        "Align",
+        "Padding",
+        "Text",
+        "TextStyle",
+        "fromLTRB"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AtomChipTip.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_ink"
+          },
+          {
+            "kind": "const",
+            "name": "_mute"
+          },
+          {
+            "kind": "field",
+            "name": "onDismiss"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Container(margin: const EdgeInsets.fromLTRB(12, 0, 12, 6), padding: const EdgeInsets.symm…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "Center",
+        "CfgText",
+        "Color",
+        "Container",
+        "Expanded",
+        "GestureDetector",
+        "Icon",
+        "Row",
+        "Semantics",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "Tooltip",
+        "circular",
+        "fromLTRB",
+        "symmetric"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AtomProductList.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_mute"
+          },
+          {
+            "kind": "field",
+            "name": "products"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "products.isEmpty ? const Center(child: CfgText('finder_screen.no_results', 'לא נמצאו מוצר…"
+          }
+        ]
+      },
+      "floor": [
+        "Center",
+        "CfgText",
+        "LipskeyProductsList",
+        "TextStyle"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AtomChipScroll.createState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> State<AtomChipScroll>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_AtomChipScrollState()"
+          }
+        ]
+      },
+      "floor": [
+        "_AtomChipScrollState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "State<AtomChipScroll>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AtomChipScrollState.initState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ctrl"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_more",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_recompute",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.initState()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ctrl.addListener(_recompute)"
+          },
+          {
+            "kind": "effect",
+            "detail": "WidgetsBinding.instance.addPostFrameCallback((_) => _recompute())"
+          }
+        ]
+      },
+      "floor": [
+        "addListener",
+        "addPostFrameCallback",
+        "initState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AtomChipScrollState._recompute",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ctrl"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_more"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "_AtomChipScrollState.build",
+          "_AtomChipScrollState.initState"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_ctrl.hasClients → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "more = _ctrl.offset < _ctrl.position.maxScrollExtent - 0.5"
+          },
+          {
+            "kind": "branch",
+            "detail": "if more != _more"
+          }
+        ]
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !_ctrl.hasClients → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AtomChipScrollState.dispose",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ctrl"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_ctrl.dispose()"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "dispose"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AtomChipScrollState.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_mute"
+          },
+          {
+            "kind": "field",
+            "name": "_ctrl"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_more",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_recompute",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Stack(children: [NotificationListener<ScrollMetricsNotification>(onNotification: (_) {_re…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "Color",
+        "Container",
+        "Icon",
+        "IgnorePointer",
+        "Key",
+        "LinearGradient",
+        "ListView",
+        "NotificationListener",
+        "Positioned",
+        "Stack",
+        "symmetric"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

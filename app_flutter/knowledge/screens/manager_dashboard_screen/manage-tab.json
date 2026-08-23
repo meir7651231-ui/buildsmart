@@ -1,0 +1,216 @@
+{
+  "name": "_ManageTab",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.",
+        "registryId": "manager.manage.intro",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🎉 אין משימות הממתינות לאישור.",
+        "registryId": "manager_dashboard_screen.approvals_empty",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין בקשות חופשה.",
+        "registryId": "manager_dashboard_screen.vacations_empty",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "שינוי שם קטגוריה מעדכן את כל המוצרים שבה."
+      },
+      {
+        "kind": "cfgText",
+        "text": "עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.",
+        "registryId": "manager_dashboard_screen.producttree_intro",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי)."
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "manager_dashboard_screen.regression_intro",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "manager.manage.regression.open",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔬 פתח מרכז בדיקות רגרסיה",
+        "registryId": "manager.manage.regression.open",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "manager_dashboard_screen.roleassign_intro",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "manager.manage.roles.open",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔑 פתח שיוך תפקידים",
+        "registryId": "manager.manage.roles.open",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "manager_dashboard_screen.approvals_intro",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "manager.manage.approvals.open",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📋 פתח בקשות אישור",
+        "registryId": "manager.manage.approvals.open",
+        "registryOk": true
+      }
+    ],
+    "registered": 13,
+    "unregistered": [
+      "שינוי שם קטגוריה מעדכן את כל המוצרים שבה.",
+      "כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי)."
+    ],
+    "summary": "registry 13 · mapped 13/13 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "vacationRequestsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerNotifsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatEngineProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "managerAnalyticsProvider.select((a) => a.catalogCategories)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "pendingApprovalTasksProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "vacationRequestsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "featureFlagsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "RegressionPanelScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showManagerRoleAssignSheet",
+        "target": "showManagerRoleAssignSheet"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "RoleRequestsInboxScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "TradeBuilderHomeScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "OrgSetupWizardScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "pendingRoleRequestsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tasksProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(TradeBuilderHomeScreen.route())",
+        "effect": "navigate → TradeBuilderHomeScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(OrgSetupWizardScreen.route())",
+        "effect": "navigate → OrgSetupWizardScreen"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "cfgRadius",
+    "onApprove",
+    "onReject",
+    "promptRejectReason",
+    "setState",
+    "sort",
+    "taskPhotoWidget"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

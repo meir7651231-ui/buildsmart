@@ -1,0 +1,45 @@
+{
+  "module": "text_normalize",
+  "source": "../../../app_flutter/lib/logic/text_normalize.dart",
+  "primitiveCount": 2,
+  "primitives": [
+    {
+      "name": "normSearch",
+      "line": 24,
+      "signature": "(String t) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": [
+        {
+          "signal": ".toLowerCase()",
+          "note": "case-folded to lowercase"
+        },
+        {
+          "signal": "final-fold table",
+          "note": "Hebrew final letters folded to base form (ך→כ …)"
+        },
+        {
+          "signal": "RegExp char-class strip",
+          "note": "Hebrew diacritics (niqqud) / punctuation stripped"
+        },
+        {
+          "signal": ".trim()",
+          "note": "surrounding whitespace trimmed"
+        }
+      ]
+    },
+    {
+      "name": "normName",
+      "line": 36,
+      "signature": "(String s) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "replaceAll(\\s → \"\")",
+          "note": "ALL whitespace removed (tight dedup key)"
+        }
+      ]
+    }
+  ]
+}

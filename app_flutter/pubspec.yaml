@@ -1,13 +1,25 @@
 name: buildsmart
 description: "BuildSmart — construction site procurement & task management"
 publish_to: 'none'
-version: 1.4.1+6
+version: 1.5.2+14
 
 environment:
   sdk: ^3.7.2
 
 dependencies:
+  # REAL webcam capture on web (#85ב/#85ד) — getUserMedia preview + shutter
+  # for the proof/profile photo (screens/webcam_capture_sheet.dart); the same
+  # browser permission flow the barcode scanner already uses.
+  camera: ^0.11.0
+  camera_web: ^0.3.5
+
   cupertino_icons: ^1.0.8
+
+  # SHA-256 for the owner-set access-lock password hash — the literal password is
+  # never persisted, only its hash (the org-config doc is public-read). Promoted
+  # from transitive (firebase pulls it); `any` like intl, resolved on both SDK pins.
+  crypto: any
+
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -16,41 +28,125 @@ dependencies:
   # state management — closest spirit to @preact/signals
   flutter_riverpod: ^2.6.1
 
-  # routing — official, supports deep links + web URLs
-  go_router: ^14.6.2
-
   # i18n — לא בשימוש ישיר; `any` נפתר על שני ה-SDK pins (0.19 ב-3.29 / 0.20 ב-3.44)
   intl: any
+
+  # cloud product images (Cloudflare R2) — keeps the AAB light (−52%); LRU-bounded
+  # on-device cache. lib/data/product_images.dart is the single resolver.
+  cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
+
+  # proof-photo capture (#85ב) + profile photo (#85ד) — camera on mobile;
+  # on web the FALLBACK file picker behind the real webcam capture
+  # (camera/camera_web via screens/webcam_capture_sheet.dart)
+  image_picker: ^1.1.2
 
   # native barcode scanner — iOS/Android + Web (limited)
   mobile_scanner: ^5.2.3
 
-  # microphone permission (used by speech_to_text)
-  permission_handler: ^11.3.1
+  # native/web share sheet — cart 'שתף' (falls back to the Web Share API on web)
+  share_plus: ^10.0.0
+
+  # real PDF generation + print/share — the finance-hub "הפק והורד דוח PDF"
+  # report. `printing` works on iOS/Android/Web (Web prints/downloads via the
+  # browser); `pdf` builds the document.
+  printing: ^5.13.0
+  pdf: ^3.11.0
+
+  # launch the native dialer (tel:) + WhatsApp (https://wa.me/…) from the
+  # contact/chat 📞/💬 buttons — no in-app calling, just hand off to the OS.
+  url_launcher: ^6.3.0
 
   # persistence (settings + profile)
   shared_preferences: ^2.3.4
 
+  # C6 — REAL native GPS for the site-hub GPS attendance (T2.4) and, via the
+  # SHARED services/geo.dart seam, the worker clock-in. Replaces the native null
+  # stub with a live fix: checks isLocationServiceEnabled + checkPermission/
+  # requestPermission, and ONLY on granted calls getCurrentPosition; on
+  # denied / disabled / error it returns null — never a fabricated coordinate
+  # (אין קואורדינטה מומצאת). Has first-party web support (geolocator_web →
+  # navigator.geolocation), so `flutter build web` keeps compiling; the
+  # conditional import still prefers our hand-rolled geo_web.dart on web. 14.x is
+  # the Dart-3.7 / Flutter-3.29 compatible line (sdk: ^3.5.0).
+  geolocator: ^14.0.0
+
   # native speech-to-text — iOS/Android (Web falls back to Web Speech)
   speech_to_text: ^7.0.0
+
+  # browser canvas downscale/JPEG re-encode for web captures
+  # (services/photo_downscale.dart — keeps data-URLs inside the persist budget)
+  web: ^1.1.0
+  firebase_core: ^4.10.0
+  firebase_auth: ^6.5.2
+  cloud_firestore: ^6.5.0
+  firebase_messaging: ^16.3.0
+  cloud_functions: ^6.3.2
+  firebase_app_check: ^0.4.4+2
+
+  # Manager (OWNER) login = "Sign in with Google" via Firebase Auth — the owner
+  # signs in with their Google account (Google handles password / 2FA / recovery;
+  # no password stored on-device). Mobile uses this plugin's token flow →
+  # GoogleAuthProvider credential; web uses FirebaseAuth signInWithPopup. v6 line
+  # (Dart-3.7 / Flutter-3.29 compatible; keeps the signIn()/authentication API).
+  google_sign_in: ^6.2.1
+
+  # F5 — explicit Android notification channels + FOREGROUND display. FCM on
+  # Android shows a tray notification only when the app is background/terminated;
+  # a FOREGROUND data/notification message is delivered silently to onMessage,
+  # so we re-show it ourselves through this plugin on the right importance-high
+  # channel (orders/chat/general). It also creates the channels at init so the
+  # `default_notification_channel_id` meta-data resolves and Android 13+ can be
+  # asked for POST_NOTIFICATIONS. ACTIVE ONLY when Firebase/push is up — the
+  # demo / no-Firebase path never constructs the plugin (the same
+  # `useFirebaseBackend` gate every other seam uses), so it is byte-identical to
+  # before. 18.x is the Flutter-3.29 / Dart-3.7 compatible line.
+  flutter_local_notifications: ^18.0.1
+
+  # G4 — production telemetry, ACTIVE ONLY when Firebase actually initialised
+  # (the `Firebase.apps.isNotEmpty` gate in lib/state/telemetry.dart). On the
+  # demo / no-Firebase path NONE of this runs — byte-identical to before. The
+  # 5.x / 12.x lines track firebase_core ^4.x (the project's pin).
+  firebase_crashlytics: ^5.0.0
+  firebase_analytics: ^12.0.0
+
+  # HTTP PUT of captured photo bytes to the R2 presigned URL (A14, gated on
+  # CLOUD_PHOTOS). Already a transitive dep — promoted to direct for the upload
+  # seam in services/task_photo.dart. Cross-platform (web BrowserClient + io).
+  http: ^1.6.0
+
+  # ALWAYS-ON live connection indicator (🟢 מחובר / 🔴 מנותק) — the fast network
+  # signal (Connectivity().onConnectivityChanged) that flips the top-of-screen
+  # pill within ~2s of wifi off. First-party web/iOS/Android support, so
+  # `flutter build web` keeps compiling. Read-only on the DEMO/no-Firebase path
+  # (the indicator opens NO listeners there — byte-identical to before).
+  connectivity_plus: ^6.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # on-device integration tests — the Android-emulator CI (keyboard smoke + BACK)
+  integration_test:
+    sdk: flutter
+
   # strictest analyzer preset
   very_good_analysis: ^7.0.0
+
+  # #4 — regenerates the Android (legacy + adaptive) + iOS launcher icons from
+  # the brand source (web/icons), replacing the default Flutter logo. Generate
+  # with `dart run flutter_launcher_icons`.
+  flutter_launcher_icons: ^0.14.1
 
 flutter:
   uses-material-design: true
   generate: true
 
   assets:
+    # Product/page photos load from Cloudflare R2 at runtime + on-device cache
+    # (lib/data/product_images.dart) — only category icons + fonts stay bundled,
+    # so the app ships light (#3 weight; full image quality preserved on the CDN).
     - assets/lipskey/categories/
-    - assets/lipskey/products/
-    - assets/lipskey/pages/
-    - assets/polyroll/pages/
-    - assets/polyroll/products/
     - assets/fonts/
 
   fonts:
@@ -64,3 +160,23 @@ flutter:
           weight: 700
         - asset: assets/fonts/Heebo-ExtraBold.ttf
           weight: 800
+    # JetBrains Mono — the RingDive numerals + RINGDIVE·OS wordmark (RD-G).
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/JetBrainsMono-ExtraBold.ttf
+          weight: 800
+
+# #4 — launcher-icon generation (run `dart run flutter_launcher_icons`). Source =
+# the brand orange-helmet icon already shipped for web/PWA. Also adds the Android
+# adaptive icon (mipmap-anydpi-v26 + brand background) the legacy-only icon lacked.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "web/icons/Icon-512.png"
+  adaptive_icon_background: "#FF7A18"
+  adaptive_icon_foreground: "web/icons/Icon-maskable-512.png"
+  remove_alpha_ios: true

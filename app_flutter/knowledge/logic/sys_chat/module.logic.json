@@ -1,0 +1,1660 @@
+{
+  "module": "sys_chat",
+  "source": "lib/state/sys_chat.dart",
+  "atomCount": 24,
+  "caches": [
+    "kWorkerChatThreads"
+  ],
+  "atoms": [
+    {
+      "fn": "chatThreadVisibleToUid",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> participantUids, String uid) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "participantUids.isEmpty || participantUids.contains(uid)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(List<String> participantUids, String uid)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "dmThreadUids",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> participantUids) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ChatEngineNotifier.createOrGetThread",
+          "dmThreadId"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "set = <String>{for (final u in participantUids) if (u.isNotEmpty) u}"
+          },
+          {
+            "kind": "return",
+            "detail": "set.toList()..sort()"
+          }
+        ]
+      },
+      "floor": [
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<String> participantUids)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "dmThreadId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> participantUids) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "dmThreadUids",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ChatEngineNotifier.createOrGetThread"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'dm-${dmThreadUids(participantUids).join('__')}'"
+          }
+        ]
+      },
+      "floor": [
+        "join"
+      ],
+      "contract": {
+        "input": "(List<String> participantUids)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_boardSeed",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String threadId, BsRole from, String text, {required int minute}) -> ChatMessage",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_boardSeedDay"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ChatMessage(id: 'seed-$threadId-$minute', threadId: threadId, fromRole: from, text: text,…"
+          }
+        ]
+      },
+      "floor": [
+        "ChatMessage",
+        "Duration",
+        "add"
+      ],
+      "contract": {
+        "input": "(String threadId, BsRole from, String text, {required int minute})",
+        "output": "ChatMessage",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_seedThreads",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<ChatThread>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kChatThreads"
+          },
+          {
+            "kind": "global",
+            "name": "kWorkerChatThreads"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ChatEngineNotifier.resetToSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[...kChatThreads, ...kWorkerChatThreads]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<ChatThread>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatMessage.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? id, String? threadId, BsRole? fromRole, String? text, DateTime? ts, String? fromUid, MsgStatus? status}) -> ChatMessage",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ChatMessage(id: id ?? this.id, threadId: threadId ?? this.threadId, fromRole: fromRole ??…"
+          }
+        ]
+      },
+      "floor": [
+        "ChatMessage"
+      ],
+      "contract": {
+        "input": "({String? id, String? threadId, BsRole? fromRole, String? text, DateTime? ts, String? fromUid, MsgStatus? status})",
+        "output": "ChatMessage",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatMessage.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "fromRole"
+          },
+          {
+            "kind": "field",
+            "name": "fromUid"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          },
+          {
+            "kind": "field",
+            "name": "text"
+          },
+          {
+            "kind": "field",
+            "name": "threadId"
+          },
+          {
+            "kind": "field",
+            "name": "ts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'threadId' : threadId, 'fromRole' : fromRole.name, 'text' : text, 'ts' : ts.t…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatMessage.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> ChatMessage?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "fromRole"
+          },
+          {
+            "kind": "field",
+            "name": "fromUid"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "threadId = raw['threadId']"
+          },
+          {
+            "kind": "compute",
+            "detail": "text = raw['text']"
+          },
+          {
+            "kind": "compute",
+            "detail": "ts = DateTime.tryParse('${raw['ts']}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "role = BsRole.values.where((r) => r.name == raw['fromRole']).cast<BsRole?>().firstWhere((_) => t…"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! String || threadId is! String || text is! String || ts == null || role == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "ChatMessage(id: id, threadId: threadId, fromRole: role, text: text, ts: ts, fromUid: raw[…"
+          }
+        ]
+      },
+      "floor": [
+        "ChatMessage",
+        "cast",
+        "firstWhere",
+        "tryParse",
+        "where"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "ChatMessage?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if id is! String || threadId is! String || text is! String || ts == null || role == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · id is! String || threadId is! String || text is! String || ts == null || role == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatThread.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({List<ChatMessage>? messages, List<String>? participantUids}) -> ChatThread",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "audience"
+          },
+          {
+            "kind": "field",
+            "name": "avatar"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "isBot"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "participants"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ChatThread(id: id, participants: participants, name: name, avatar: avatar, messages: mess…"
+          }
+        ]
+      },
+      "floor": [
+        "ChatThread"
+      ],
+      "contract": {
+        "input": "({List<ChatMessage>? messages, List<String>? participantUids})",
+        "output": "ChatThread",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.bindRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ChatRepository remote) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_refreshFromRemote",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if identical(_remote, remote) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_remote?.removeListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_remote = remote"
+          },
+          {
+            "kind": "effect",
+            "detail": "remote.addListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_refreshFromRemote()"
+          }
+        ]
+      },
+      "floor": [
+        "addListener",
+        "identical",
+        "removeListener"
+      ],
+      "contract": {
+        "input": "(ChatRepository remote)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if identical(_remote, remote) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier._refreshFromRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSysChatKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatPersistCap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_loadSettled",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "ChatEngineNotifier.bindRemote"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r == null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = r.threads()"
+          }
+        ]
+      },
+      "floor": [
+        "threads"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if r == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.dispose",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_remote?.removeListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "dispose",
+        "removeListener"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSysChatKey"
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatPersistCap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_dirtyThreadIds"
+          },
+          {
+            "kind": "field",
+            "name": "_loadSettled"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "complete",
+        "contains",
+        "copyWith",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "tryFromJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSysChatKey"
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatPersistCap"
+          },
+          {
+            "kind": "field",
+            "name": "_loadSettled"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "ChatEngineNotifier.state="
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _loadSettled.future"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "sublist",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (List<ChatThread> value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSysChatKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatPersistCap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_loadSettled",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<ChatThread> value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier._nowTime",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "now = DateTime.now()"
+          },
+          {
+            "kind": "compute",
+            "detail": "h = now.hour.toString().padLeft(2, '0')"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = now.minute.toString().padLeft(2, '0')"
+          },
+          {
+            "kind": "return",
+            "detail": "'$h:$m'"
+          }
+        ]
+      },
+      "floor": [
+        "now",
+        "padLeft",
+        "toString"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier._mk",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String threadId, BsRole fromRole, String text, DateTime ts, {String fromUid = ''}) -> ChatMessage",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ChatEngineNotifier.send"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ChatMessage(id: 'm-${ts.microsecondsSinceEpoch}-${fromRole.name}', threadId: threadId, fr…"
+          }
+        ]
+      },
+      "floor": [
+        "ChatMessage"
+      ],
+      "contract": {
+        "input": "(String threadId, BsRole fromRole, String text, DateTime ts, {String fromUid = ''})",
+        "output": "ChatMessage",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.send",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String threadId, BsRole fromRole, String text, {String fromUid = ''}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBotAutoReplies"
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatPersistCap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_loadSettled",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "currentUid",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "lookup",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "uidScoped",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "unmodifiable",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "_dirtyThreadIds"
+          },
+          {
+            "kind": "state",
+            "name": "_uidResolveInFlight",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "ensureParticipantUids",
+            "module": true
+          },
+          {
+            "name": "_mk",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "ensureParticipantUids(threadId)"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "trimmed = text.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if trimmed.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = state.indexWhere((t) => t.id == threadId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if idx < 0 → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "thread = state[idx]"
+          },
+          {
+            "kind": "compute",
+            "detail": "now = DateTime.now()"
+          },
+          {
+            "kind": "init",
+            "detail": "appended = <ChatMessage>[...thread.messages, _mk(threadId, fromRole, trimmed, now, fromUid: fromUid)]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if thread.isBot && fromRole != BsRole.bot"
+          },
+          {
+            "kind": "effect",
+            "detail": "_dirtyThreadIds.add(threadId)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (var i = 0; i < state.length; i++) if (i == idx) thread.copyWith(messages: a…"
+          }
+        ]
+      },
+      "floor": [
+        "Duration",
+        "add",
+        "copyWith",
+        "indexWhere",
+        "now",
+        "send",
+        "trim",
+        "where"
+      ],
+      "contract": {
+        "input": "(String threadId, BsRole fromRole, String text, {String fromUid = ''})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if trimmed.isEmpty → return (void)",
+          "if idx < 0 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.createOrGetThread",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(List<String> participantUids, {String name = '', String avatar = '💬'}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSysChatKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatPersistCap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_loadSettled",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "_dirtyThreadIds"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "dmThreadUids",
+            "module": true
+          },
+          {
+            "name": "dmThreadId",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "uids = dmThreadUids(participantUids)"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = dmThreadId(participantUids)"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r != null → return r.createOrGetThread(participantUids, name: name, avatar: avatar)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if uids.length < 2 → return id"
+          },
+          {
+            "kind": "precond",
+            "detail": "if state.any((t) => t.id == id) → return id"
+          },
+          {
+            "kind": "effect",
+            "detail": "_dirtyThreadIds.add(id)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, ChatThread(id: id, participants: const [], participantUids: uids, name…"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [
+        "ChatThread",
+        "add",
+        "any",
+        "createOrGetThread"
+      ],
+      "contract": {
+        "input": "(List<String> participantUids, {String name = '', String avatar = '💬'})",
+        "output": "String",
+        "purity": "side-effecting",
+        "precond": [
+          "if r != null → return r.createOrGetThread(participantUids, name: name, avatar: avatar)",
+          "if uids.length < 2 → return id",
+          "if state.any((t) => t.id == id) → return id"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.ensureParticipantUids",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String threadId) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSysChatKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatPersistCap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_loadSettled",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "currentUid"
+          },
+          {
+            "kind": "field",
+            "name": "lookup"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "uidScoped"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          },
+          {
+            "kind": "global",
+            "name": "unmodifiable"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "_uidResolveInFlight"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "ChatEngineNotifier.send"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !uidScoped → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _uidResolveInFlight.contains(threadId) → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "me = currentUid?.call()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if me == null || me.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = state.indexWhere((t) => t.id == threadId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if idx < 0 → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if state[idx].participantUids.isNotEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "roles = state[idx].participants"
+          },
+          {
+            "kind": "effect",
+            "detail": "_uidResolveInFlight.add(threadId)"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "add",
+        "addAll",
+        "call",
+        "contains",
+        "copyWith",
+        "indexWhere",
+        "remove",
+        "setParticipantUids",
+        "uidsByRole"
+      ],
+      "contract": {
+        "input": "(String threadId)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !uidScoped → return (void)",
+          "if _uidResolveInFlight.contains(threadId) → return (void)",
+          "if me == null || me.isEmpty → return (void)",
+          "if idx < 0 → return (void)",
+          "if state[idx].participantUids.isNotEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.retry",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String threadId, String msgId) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_remote?.retry(threadId, msgId)"
+          }
+        ]
+      },
+      "floor": [
+        "retry"
+      ],
+      "contract": {
+        "input": "(String threadId, String msgId)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.threadsFor",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(BsRole role) -> List<ChatThread>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "currentUid"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "uid = currentUid?.call()"
+          },
+          {
+            "kind": "return",
+            "detail": "state.where((t) => t.participants.contains(role) || (uid != null && uid.isNotEmpty && t.p…"
+          }
+        ]
+      },
+      "floor": [
+        "call",
+        "contains",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(BsRole role)",
+        "output": "List<ChatThread>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.markRead",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String threadId, BsRole role) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String threadId, BsRole role)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatEngineNotifier.resetToSeed",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kChatThreads",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSysChatPersistCap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_loadSettled",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "kWorkerChatThreads",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "_dirtyThreadIds"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_seedThreads",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_dirtyThreadIds.addAll(_seedThreads().map((t) => t.id))"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = _seedThreads()"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "map",
+        "resetToSeed"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

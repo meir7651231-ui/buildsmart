@@ -1,0 +1,71 @@
+{
+  "name": "_CoEditorPane",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🤖 תאר בעברית מה לשנות. אכין תצוגה מקדימה — שום דבר לא ישתנה עד שתאשר.",
+        "registryId": "studio_screen_old.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נסח שינוי לתצוגה מקדימה",
+        "registryId": "studio_screen_old.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אשר והחל בטיוטה ✓",
+        "registryId": "studio_screen_old.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "👁️ תצוגה מקדימה (לפני החלה)",
+        "registryId": "studio_screen_old.t06",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [],
+    "summary": "registry 4 · mapped 4/4 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "configStoreProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "classifyScope",
+    "parseConfigEdit",
+    "scopeHe",
+    "setState",
+    "studioEditPrompt",
+    "studioScopePrompt",
+    "summarizeDiff",
+    "validateSafe"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "ai"
+    ],
+    "untangle": []
+  }
+}

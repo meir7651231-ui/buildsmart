@@ -1,0 +1,379 @@
+{
+  "module": "screen_view",
+  "source": "lib/state/intel/screen_view.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "screenKeyForTab",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int index) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "listenTabScreenView"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (index) {0 => 'home', 1 => 'departments', 2 => 'updates', 3 => 'store', _ => 'tab_…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int index)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "screenKeyForRoute",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? name) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "IntelRouteObserver.didPop",
+          "IntelRouteObserver.didPush"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if name == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = name.startsWith('/') ? name.substring(1) : name"
+          },
+          {
+            "kind": "return",
+            "detail": "key.isEmpty ? null : key"
+          }
+        ]
+      },
+      "floor": [
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String? name)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if name == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "name == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "listenTabScreenView",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "intelBusProvider"
+          },
+          {
+            "kind": "global",
+            "name": "mainTabProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "screenKeyForTab",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "ref.listen<int>(mainTabProvider, (prev, next) {if (prev == next) return; ref.read(intelBu…"
+          }
+        ]
+      },
+      "floor": [
+        "listen",
+        "read",
+        "track"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelRouteObserver.bind",
+      "kind": "method",
+      "object": {
+        "signature": "(IntelBus bus) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_bus"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_bus ??= bus"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(IntelBus bus)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelRouteObserver._track",
+      "kind": "method",
+      "object": {
+        "signature": "(String? screen) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_bus"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_lastScreen"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "IntelRouteObserver.didPop",
+          "IntelRouteObserver.didPush"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "bus = _bus"
+          },
+          {
+            "kind": "precond",
+            "detail": "if bus == null || screen == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if screen == _lastScreen → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "prev = _lastScreen"
+          },
+          {
+            "kind": "effect",
+            "detail": "_lastScreen = screen"
+          },
+          {
+            "kind": "effect",
+            "detail": "bus.track(IntelEvents.screenView, props: <String, String>{'screen' : screen, if (prev != …"
+          }
+        ]
+      },
+      "floor": [
+        "track"
+      ],
+      "contract": {
+        "input": "(String? screen)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if bus == null || screen == null → return (void)",
+          "if screen == _lastScreen → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelRouteObserver.didPush",
+      "kind": "method",
+      "object": {
+        "signature": "(Route<dynamic> route, Route<dynamic>? previousRoute) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_bus",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_lastScreen",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_track",
+            "module": true
+          },
+          {
+            "name": "screenKeyForRoute",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.didPush(route, previousRoute)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_track(screenKeyForRoute(route.settings.name))"
+          }
+        ]
+      },
+      "floor": [
+        "didPush"
+      ],
+      "contract": {
+        "input": "(Route<dynamic> route, Route<dynamic>? previousRoute)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelRouteObserver.didPop",
+      "kind": "method",
+      "object": {
+        "signature": "(Route<dynamic> route, Route<dynamic>? previousRoute) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_bus",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_lastScreen"
+          }
+        ],
+        "calls": [
+          {
+            "name": "screenKeyForRoute",
+            "module": true
+          },
+          {
+            "name": "_track",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.didPop(route, previousRoute)"
+          },
+          {
+            "kind": "compute",
+            "detail": "screen = screenKeyForRoute(previousRoute?.settings.name)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if screen == null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_track(screen)"
+          }
+        ]
+      },
+      "floor": [
+        "didPop"
+      ],
+      "contract": {
+        "input": "(Route<dynamic> route, Route<dynamic>? previousRoute)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

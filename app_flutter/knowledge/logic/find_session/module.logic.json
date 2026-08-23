@@ -1,0 +1,551 @@
+{
+  "module": "find_session",
+  "source": "lib/features/card_keyboard/find_session.dart",
+  "atomCount": 9,
+  "atoms": [
+    {
+      "fn": "findPredicateFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axisId, String value, String? subtype) -> bool Function(LipskeyCatalogProduct)",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FindSession.pushChip"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "src = sourcesFor(subtype).firstWhere((s) => s.axisId == axisId, orElse: () => const WordSignal(…"
+          },
+          {
+            "kind": "compute",
+            "detail": "chip = SignalChip(axisId: axisId, value: value, displayLabel: value)"
+          },
+          {
+            "kind": "return",
+            "detail": "(p) => src.matches(p, chip)"
+          }
+        ]
+      },
+      "floor": [
+        "SignalChip",
+        "WordSignal",
+        "firstWhere",
+        "matches",
+        "sourcesFor"
+      ],
+      "contract": {
+        "input": "(String axisId, String value, String? subtype)",
+        "output": "bool Function(LipskeyCatalogProduct)",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FindSession._invalidate",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_poolCache"
+          },
+          {
+            "kind": "field",
+            "name": "_verdictCache"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "FindSession.pop",
+          "FindSession.pushChip",
+          "FindSession.pushWord",
+          "FindSession.reset"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_poolCache = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_verdictCache = null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FindSession.pool",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          },
+          {
+            "kind": "field",
+            "name": "stack"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_poolCache"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "cached = _poolCache"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cached != null → return cached"
+          },
+          {
+            "kind": "compute",
+            "detail": "p = kDivePool"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final s in stack"
+          },
+          {
+            "kind": "effect",
+            "detail": "p = p.where(s.predicate).toList()"
+          },
+          {
+            "kind": "return",
+            "detail": "_poolCache = p"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "side-effecting",
+        "precond": [
+          "if cached != null → return cached"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FindSession.verdict",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> CardVerdict",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_lexicon"
+          },
+          {
+            "kind": "field",
+            "name": "stack"
+          },
+          {
+            "kind": "field",
+            "name": "subtype"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_verdictCache"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_verdictCache ??= mergedKeys(pool, stack, _lexicon, subtype)"
+          }
+        ]
+      },
+      "floor": [
+        "mergedKeys"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "CardVerdict",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FindSession.selection",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "stack"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final s in stack) s.crumbWord]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FindSession.pushChip",
+      "kind": "method",
+      "object": {
+        "signature": "(SignalChip chip) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "subtype"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_poolCache",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_verdictCache",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "stack"
+          }
+        ],
+        "calls": [
+          {
+            "name": "findPredicateFor",
+            "module": true
+          },
+          {
+            "name": "_invalidate",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "src = sourcesFor(subtype).firstWhere((s) => s.axisId == chip.axisId, orElse: () => const WordSi…"
+          },
+          {
+            "kind": "effect",
+            "detail": "stack.add(NewbieStep(axisLabel: src.axisName, chipLabel: chip.displayLabel, crumbWord: ch…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_invalidate()"
+          }
+        ]
+      },
+      "floor": [
+        "NewbieStep",
+        "WordSignal",
+        "add",
+        "firstWhere",
+        "sourcesFor"
+      ],
+      "contract": {
+        "input": "(SignalChip chip)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FindSession.pushWord",
+      "kind": "method",
+      "object": {
+        "signature": "(String word) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_lexicon"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_poolCache",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_verdictCache",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "stack"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_invalidate",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "seed = seedFromText(word, _lexicon)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if seed == null → return false"
+          },
+          {
+            "kind": "effect",
+            "detail": "stack.add(seedStep(seed))"
+          },
+          {
+            "kind": "effect",
+            "detail": "_invalidate()"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "seedFromText",
+        "seedStep"
+      ],
+      "contract": {
+        "input": "(String word)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if seed == null → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FindSession.pop",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "stack"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_poolCache",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_verdictCache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_invalidate",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if stack.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "stack.removeLast()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_invalidate()"
+          }
+        ]
+      },
+      "floor": [
+        "removeLast"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if stack.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FindSession.reset",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_poolCache",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_verdictCache",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "stack"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_invalidate",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "stack.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_invalidate()"
+          }
+        ]
+      },
+      "floor": [
+        "clear"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

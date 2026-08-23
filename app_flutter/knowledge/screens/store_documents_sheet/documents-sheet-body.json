@@ -1,0 +1,36 @@
+{
+  "name": "_DocumentsSheetBody",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🧾 חשבוניות ודוח חודשי",
+        "registryId": "store_documents_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "store_documents_sheet.t02",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

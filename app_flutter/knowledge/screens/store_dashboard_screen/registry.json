@@ -1,0 +1,77 @@
+{
+  "matched": 14,
+  "total": 14,
+  "summary": "14/14",
+  "entries": [
+    {
+      "id": "store.action.exit",
+      "ok": true,
+      "atom": "StoreDashboardScreen"
+    },
+    {
+      "id": "store_dashboard_screen.t01",
+      "ok": true,
+      "atom": "StoreDashboardScreen"
+    },
+    {
+      "id": "store_dashboard_screen.t02",
+      "ok": true,
+      "atom": "StoreDashboardScreen"
+    },
+    {
+      "id": "store.home.greeting",
+      "ok": true,
+      "atom": "StoreDashboardScreen"
+    },
+    {
+      "id": "store.section.orders",
+      "ok": true,
+      "atom": "StoreDashboardScreen"
+    },
+    {
+      "id": "store_dashboard_screen.t03",
+      "ok": true,
+      "atom": "StoreDashboardScreen"
+    },
+    {
+      "id": "store.action.newProduct",
+      "ok": true,
+      "atom": "StoreDashboardScreen"
+    },
+    {
+      "id": "store_dashboard_screen.t04",
+      "ok": true,
+      "atom": "StoreDashboardScreen"
+    },
+    {
+      "id": "store.addProduct.title",
+      "ok": true,
+      "atom": "_AddProductSheet"
+    },
+    {
+      "id": "store.addProduct.category",
+      "ok": true,
+      "atom": "_AddProductSheet"
+    },
+    {
+      "id": "store.action.addProduct",
+      "ok": true,
+      "atom": "_AddProductSheet"
+    },
+    {
+      "id": "store_dashboard_screen.t11",
+      "ok": true,
+      "atom": "_StoreOrderCard"
+    },
+    {
+      "id": "store_dashboard_screen.t12",
+      "ok": true,
+      "atom": "_StoreOrderCard"
+    },
+    {
+      "id": "store_dashboard_screen.t13",
+      "ok": true,
+      "atom": "_DeliveredCard"
+    }
+  ]
+}

@@ -1,0 +1,359 @@
+{
+  "module": "voice",
+  "source": "lib/services/voice.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "VoiceService._ensureInitialized",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_engine"
+          },
+          {
+            "kind": "field",
+            "name": "_sessionGotResult"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_initialized"
+          },
+          {
+            "kind": "field",
+            "name": "_sessionActive",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_sessionOnError",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_failSession",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "VoiceService.available",
+          "VoiceService.listen"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _initialized → return true"
+          }
+        ]
+      },
+      "floor": [
+        "initialize"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if _initialized → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VoiceService._failSession",
+      "kind": "method",
+      "object": {
+        "signature": "(String reason) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_sessionActive"
+          },
+          {
+            "kind": "field",
+            "name": "_sessionOnError"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "VoiceService._ensureInitialized"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_sessionActive → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_sessionActive = false"
+          },
+          {
+            "kind": "compute",
+            "detail": "cb = _sessionOnError"
+          },
+          {
+            "kind": "effect",
+            "detail": "_sessionOnError = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "cb?.call(reason)"
+          }
+        ]
+      },
+      "floor": [
+        "call"
+      ],
+      "contract": {
+        "input": "(String reason)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !_sessionActive → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VoiceService.available",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_engine",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_sessionGotResult",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_initialized",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_ensureInitialized",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ensureInitialized()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VoiceService.listen",
+      "kind": "method",
+      "object": {
+        "signature": "({required void Function(String text) onFinal, void Function(String reason)? onError, String localeId = 'he-IL'}) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_engine"
+          },
+          {
+            "kind": "global",
+            "name": "stt"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_initialized",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_sessionActive"
+          },
+          {
+            "kind": "field",
+            "name": "_sessionGotResult"
+          },
+          {
+            "kind": "field",
+            "name": "_sessionOnError"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_ensureInitialized",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ok = await _ensureInitialized()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !ok → return false"
+          },
+          {
+            "kind": "effect",
+            "detail": "_sessionActive = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_sessionGotResult = false"
+          },
+          {
+            "kind": "effect",
+            "detail": "_sessionOnError = onError"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "SpeechListenOptions",
+        "listen",
+        "onFinal"
+      ],
+      "contract": {
+        "input": "({required void Function(String text) onFinal, void Function(String reason)? onError, String localeId = 'he-IL'})",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !ok → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VoiceService.stop",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_engine"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "stop"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "VoiceService.isWebUnstable",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kIsWeb"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kIsWeb"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

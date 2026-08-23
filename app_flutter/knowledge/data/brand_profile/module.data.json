@@ -1,0 +1,355 @@
+{
+  "module": "brand_profile",
+  "source": "/home/user/buildsmart/app_flutter/lib/domain/brand_profile.dart",
+  "entityCount": 5,
+  "entities": [
+    {
+      "entity": "BoreParseStrategy",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "diRangeMax",
+            "type": "BoreParseStrategy",
+            "required": false
+          },
+          {
+            "name": "dnDirect",
+            "type": "BoreParseStrategy",
+            "required": false
+          },
+          {
+            "name": "none",
+            "type": "BoreParseStrategy",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 3 values: diRangeMax · dnDirect · none"
+        ]
+      }
+    },
+    {
+      "entity": "KitStrategy",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "pprSocketFusion",
+            "type": "KitStrategy",
+            "required": false
+          },
+          {
+            "name": "smartLockSnapFit",
+            "type": "KitStrategy",
+            "required": false
+          },
+          {
+            "name": "endsDerived",
+            "type": "KitStrategy",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 3 values: pprSocketFusion · smartLockSnapFit · endsDerived"
+        ]
+      }
+    },
+    {
+      "entity": "BrandSpecEnvelope",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "maxTempC",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "waterSystemHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "endsSummaryHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "materialFallbackHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "materialDimsKey",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "pressureDimsKey",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "maxTempC",
+          "waterSystemHe",
+          "endsSummaryHe",
+          "materialFallbackHe"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "BrandStripDef",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "kind",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "label",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "value",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tintArgb",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "kind",
+          "emoji",
+          "label",
+          "value",
+          "tintArgb"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "BrandProfile",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "brandId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "brandKey",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "specEnvelope",
+            "type": "BrandSpecEnvelope?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "boreParse",
+            "type": "BoreParseStrategy",
+            "required": false,
+            "default": "BoreParseStrategy.none"
+          },
+          {
+            "name": "boreDimsKey",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "imageDir",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "imageFallbackPagePrefix",
+            "type": "String",
+            "required": false,
+            "default": "'page_'"
+          },
+          {
+            "name": "finderEmoji",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "finderLabelHe",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "systemHint",
+            "type": "Set<WaterSystem>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "kitStrategy",
+            "type": "KitStrategy",
+            "required": true
+          },
+          {
+            "name": "kitCountFromRecommendedWhenSpecless",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "kitPanelShowsPprWeldPlan",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "specStrips",
+            "type": "List<BrandStripDef>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "specMaxTempC",
+            "type": "double?",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "brandId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "specEnvelope",
+            "ref": "BrandSpecEnvelope",
+            "kind": "embed"
+          },
+          {
+            "field": "boreParse",
+            "ref": "BoreParseStrategy",
+            "kind": "embed"
+          },
+          {
+            "field": "systemHint",
+            "ref": "WaterSystem",
+            "kind": "enum",
+            "collection": true
+          },
+          {
+            "field": "kitStrategy",
+            "ref": "KitStrategy",
+            "kind": "embed"
+          },
+          {
+            "field": "specStrips",
+            "ref": "BrandStripDef",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "parseBore",
+          "specEnvelopeFor"
+        ]
+      },
+      "contract": {
+        "required": [
+          "brandId",
+          "brandKey",
+          "imageDir",
+          "systemHint",
+          "kitStrategy"
+        ],
+        "defaults": {
+          "boreParse": "BoreParseStrategy.none",
+          "imageFallbackPagePrefix": "'page_'",
+          "kitCountFromRecommendedWhenSpecless": "false",
+          "kitPanelShowsPprWeldPlan": "false",
+          "specStrips": "const []"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

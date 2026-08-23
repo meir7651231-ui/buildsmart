@@ -1,0 +1,337 @@
+{
+  "module": "pool_seed",
+  "source": "lib/features/card_keyboard/pool_seed.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "seedPool",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CardSeed seed, List<LipskeyCatalogProduct> universe) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "universe.where(seed.seedPredicate).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(CardSeed seed, List<LipskeyCatalogProduct> universe)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "seedStep",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CardSeed seed) -> NewbieStep",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOpeningSeedAxis"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "NewbieStep(axisLabel: kOpeningSeedAxis, chipLabel: seed.displayLabel, crumbWord: seed.dis…"
+          }
+        ]
+      },
+      "floor": [
+        "NewbieStep"
+      ],
+      "contract": {
+        "input": "(CardSeed seed)",
+        "output": "NewbieStep",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_admits",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Set<String> skus) -> bool Function(LipskeyCatalogProduct)",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "seedFromSkus",
+          "seedFromText"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(p) => skus.contains(p.sku)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(Set<String> skus)",
+        "output": "bool Function(LipskeyCatalogProduct)",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "seedFromText",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String query, WordLexicon lexicon) -> CardSeed?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOpeningSeedAxis"
+          },
+          {
+            "kind": "const",
+            "name": "kWordMouth"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_admits",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "skus = resolveQuery(query, lexicon).toSet()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if skus.isEmpty → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "CardSeed(mouthId: kWordMouth, displayLabel: query, seedAxisLabel: kOpeningSeedAxis, seedP…"
+          }
+        ]
+      },
+      "floor": [
+        "CardSeed",
+        "resolveQuery",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(String query, WordLexicon lexicon)",
+        "output": "CardSeed?",
+        "purity": "pure",
+        "precond": [
+          "if skus.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "skus.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "seedFromMaterial",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String material) -> CardSeed?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final s in materialSeeds(kDivePool)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s.displayLabel == material → return s"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "materialSeeds"
+      ],
+      "contract": {
+        "input": "(String material)",
+        "output": "CardSeed?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "seedFromFacet",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String group) -> CardSeed?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final s in categorySeeds(kDivePool)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s.displayLabel == group → return s"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "categorySeeds"
+      ],
+      "contract": {
+        "input": "(String group)",
+        "output": "CardSeed?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "seedFromSkus",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Set<String> skus, String label) -> CardSeed?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOpeningSeedAxis"
+          },
+          {
+            "kind": "const",
+            "name": "kWordMouth"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_admits",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if skus.isEmpty → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "CardSeed(mouthId: kWordMouth, displayLabel: label, seedAxisLabel: kOpeningSeedAxis, seedP…"
+          }
+        ]
+      },
+      "floor": [
+        "CardSeed"
+      ],
+      "contract": {
+        "input": "(Set<String> skus, String label)",
+        "output": "CardSeed?",
+        "purity": "pure",
+        "precond": [
+          "if skus.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "skus.isEmpty · or search exhausted",
+        "throws": []
+      }
+    }
+  ]
+}

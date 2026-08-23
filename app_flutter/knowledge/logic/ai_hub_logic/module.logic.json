@@ -1,0 +1,639 @@
+{
+  "module": "ai_hub_logic",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/ai_hub_logic.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "fn": "computeStockForecast",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<Order> orders, List<SmartCartLine> cart, {DateTime? now}) -> List<StockPred>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "anchor = now ?? DateTime.now()"
+          },
+          {
+            "kind": "init",
+            "detail": "onHand = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final l in cart"
+          },
+          {
+            "kind": "effect",
+            "detail": "onHand[l.productName] = (onHand[l.productName] ?? 0) + l.productQty"
+          },
+          {
+            "kind": "init",
+            "detail": "consumed = <String, int>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "firstSeen = <String, DateTime>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "lastSeen = <String, DateTime>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "emojiByName = <String, String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "unitPriceByName = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final o in orders"
+          },
+          {
+            "kind": "compute",
+            "detail": "ts = o.createdAt ?? anchor"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final li in o.lines"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <StockPred>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final name in consumed.keys"
+          },
+          {
+            "kind": "compute",
+            "detail": "used = consumed[name]!"
+          },
+          {
+            "kind": "branch",
+            "detail": "if used <= 0 → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "span = lastSeen[name]!.difference(firstSeen[name]!).inDays"
+          },
+          {
+            "kind": "compute",
+            "detail": "spanDays = span < 1 ? 1 : span"
+          },
+          {
+            "kind": "compute",
+            "detail": "rate = (used / spanDays).round()"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = rate < 1 ? 1 : rate"
+          },
+          {
+            "kind": "compute",
+            "detail": "stock = onHand[name] ?? 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "days = (stock / r).round()"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add(StockPred(name: name, stock: stock, rate: r, days: days, emoji: emojiByName[name]…"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.sort((a, b) {final byDays = a.days.compareTo(b.days); return byDays != 0 ? byDays : a…"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "StockPred",
+        "add",
+        "compareTo",
+        "difference",
+        "isBefore",
+        "now",
+        "round",
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<Order> orders, List<SmartCartLine> cart, {DateTime? now})",
+        "output": "List<StockPred>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pricedSmartProduct",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProductBrands pb) -> SmartProduct",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "aiAlternatives"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "SmartProduct(key: pb.product, name: pb.product, emoji: '📦', cat: pb.product, brands: [fo…"
+          }
+        ]
+      },
+      "floor": [
+        "SmartBrand",
+        "SmartProduct"
+      ],
+      "contract": {
+        "input": "(ProductBrands pb)",
+        "output": "SmartProduct",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "aiAlternatives",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<AiAlt>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kHomeProductBrands"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pricedSmartProduct",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "computeAnalyticsInsights"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <AiAlt>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "seen = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final pb in kHomeProductBrands"
+          },
+          {
+            "kind": "compute",
+            "detail": "sp = _pricedSmartProduct(pb)"
+          },
+          {
+            "kind": "compute",
+            "detail": "recI = sp.brands.indexWhere((b) => b.rec)"
+          },
+          {
+            "kind": "compute",
+            "detail": "rec = sp.brands[recI >= 0 ? recI : 0]"
+          },
+          {
+            "kind": "compute",
+            "detail": "alt = cheaperAlternativeBrand(sp, recI >= 0 ? recI : 0)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if alt == null || rec.price == null → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !seen.add(pb.product) → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add(AiAlt(cat: pb.product, fromName: rec.name, fromPrice: rec.price!, toName: alt.nam…"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final CheaperAlt a in cheaperAlternativesAcrossCatalog()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !seen.add(a.product) → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add(AiAlt(cat: a.product, fromName: a.recName, fromPrice: a.recPrice, toName: a.altNa…"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.sort((a, b) => b.save.compareTo(a.save))"
+          },
+          {
+            "kind": "return",
+            "detail": "out.length > 5 ? out.sublist(0, 5) : out"
+          }
+        ]
+      },
+      "floor": [
+        "AiAlt",
+        "add",
+        "cheaperAlternativeBrand",
+        "cheaperAlternativesAcrossCatalog",
+        "compareTo",
+        "indexWhere",
+        "sort",
+        "sublist"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<AiAlt>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "computeAnalyticsInsights",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<Order> orders) -> List<Insight>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBudgetSpent"
+          },
+          {
+            "kind": "const",
+            "name": "kBudgetTotal"
+          },
+          {
+            "kind": "const",
+            "name": "kHomeProductBrands",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "aiAlternatives",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <Insight>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "orderCount = orders.length"
+          },
+          {
+            "kind": "compute",
+            "detail": "totalSpend = orders.fold<int>(0, (s, o) => s + o.sum)"
+          },
+          {
+            "kind": "compute",
+            "detail": "openCount = orders.where((o) => o.isOpen).length"
+          },
+          {
+            "kind": "compute",
+            "detail": "deliveredCount = orderCount - openCount"
+          },
+          {
+            "kind": "branch",
+            "detail": "if orderCount > 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "savings = aiAlternatives().fold<int>(0, (s, a) => s + a.save)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if savings > 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "budgetPctValue = kBudgetTotal > 0 ? (kBudgetSpent / kBudgetTotal * 100).round() : 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "budgetLeft = kBudgetTotal - kBudgetSpent"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add(Insight(ic: '📊', title: 'ניצול תקציב: $budgetPctValue%', sub: 'נותרו ${fMoney(bu…"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "Insight",
+        "add",
+        "fMoney",
+        "fold",
+        "round",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<Order> orders)",
+        "output": "List<Insight>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StockPred.urgent",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "days"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "days <= 3"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AiAlt.save",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "fromPrice"
+          },
+          {
+            "kind": "field",
+            "name": "toPrice"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "fromPrice - toPrice"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ThreeWayDoc.match",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "delivery"
+          },
+          {
+            "kind": "field",
+            "name": "invoice"
+          },
+          {
+            "kind": "field",
+            "name": "order"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "order == delivery && delivery == invoice"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WeatherDay.warn",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "note"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "note.contains('⚠️')"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "GearWear.pct",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "hours"
+          },
+          {
+            "kind": "field",
+            "name": "life"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(hours / life * 100).round()"
+          }
+        ]
+      },
+      "floor": [
+        "round"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "GearWear.worn",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "pct >= 85"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

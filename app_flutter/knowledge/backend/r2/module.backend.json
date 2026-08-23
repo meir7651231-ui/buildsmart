@@ -1,0 +1,24 @@
+{
+  "module": "r2",
+  "source": "../../../functions/src/r2.ts",
+  "functionCount": 1,
+  "functions": [
+    {
+      "name": "getUploadUrl",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 94,
+      "authGated": true,
+      "reads": [],
+      "writes": [],
+      "calls": [
+        "r2"
+      ],
+      "errorCodes": [
+        "failed-precondition",
+        "invalid-argument",
+        "unauthenticated"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "HomeContentReorder",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🏠 תוכן הבית",
+        "registryId": "home_content_reorder.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "home_content_reorder.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ חזרה",
+        "registryId": "home_content_reorder.t02",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [
+      "showAppBar"
+    ],
+    "untangle": []
+  }
+}

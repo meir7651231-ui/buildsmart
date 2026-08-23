@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:buildsmart/data/repositories/chat_settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -329,11 +330,21 @@ T _enum<T extends Enum>(Object? raw, List<T> values, T fallback) {
 }
 
 class ChatSettingsNotifier extends StateNotifier<ChatSettings> {
-  ChatSettingsNotifier() : super(ChatSettings.defaults) {
+  ChatSettingsNotifier([this._repo]) : super(ChatSettings.defaults) {
     unawaited(_load());
   }
 
+  /// Server store (`chatSettings/{uid}`) when USER_DATA_SERVER is on for a real
+  /// signed-in user; null ⇒ the SharedPreferences path.
+  final ChatSettingsRepository? _repo;
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      final s = await repo.load(repo.currentUid);
+      if (s != null) state = s;
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -344,6 +355,13 @@ class ChatSettingsNotifier extends StateNotifier<ChatSettings> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
@@ -357,6 +375,13 @@ class ChatSettingsNotifier extends StateNotifier<ChatSettings> {
 
   Future<void> reset() async {
     state = ChatSettings.defaults;
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, ChatSettings.defaults);
+      } on Object catch (_) {/* ignore */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kStorageKey);
@@ -366,5 +391,5 @@ class ChatSettingsNotifier extends StateNotifier<ChatSettings> {
 
 final chatSettingsProvider =
     StateNotifierProvider<ChatSettingsNotifier, ChatSettings>(
-  (_) => ChatSettingsNotifier(),
+  (ref) => ChatSettingsNotifier(ref.watch(chatSettingsRepositoryProvider)),
 );

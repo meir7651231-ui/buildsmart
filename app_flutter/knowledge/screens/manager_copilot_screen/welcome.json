@@ -1,0 +1,64 @@
+{
+  "name": "_Welcome",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🤖"
+      },
+      {
+        "kind": "cfgText",
+        "text": "שאל אותי כל דבר על העסק שלך.",
+        "registryId": "manager_copilot_screen.welcome_headline",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים.",
+        "registryId": "manager_copilot_screen.welcome_sub",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "☀️"
+      },
+      {
+        "kind": "cfgText",
+        "text": "תדריך-בוקר",
+        "registryId": "manager_copilot_screen.morning_brief",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "או שאל:",
+        "registryId": "manager_copilot_screen.or_ask",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [
+      "🤖",
+      "☀️"
+    ],
+    "summary": "registry 4 · mapped 4/4 · unregistered 2"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "onAsk"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "onAsk",
+      "onBrief"
+    ],
+    "untangle": []
+  }
+}

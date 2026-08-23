@@ -1,0 +1,105 @@
+{
+  "module": "money_format",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/money_format.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "fn": "groupThousands",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int n) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "formatNis"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = n.abs().toString()"
+          },
+          {
+            "kind": "compute",
+            "detail": "buf = StringBuffer()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < s.length; i++"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i > 0 && (s.length - i) % 3 == 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "buf.write(s[i])"
+          },
+          {
+            "kind": "return",
+            "detail": "buf.toString()"
+          }
+        ]
+      },
+      "floor": [
+        "StringBuffer",
+        "abs",
+        "toString",
+        "write"
+      ],
+      "contract": {
+        "input": "(int n)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "formatNis",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int n, {String prefix = ''}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "groupThousands",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'$prefix${n < 0 ? '-' : ''}₪${groupThousands(n)}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int n, {String prefix = ''})",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

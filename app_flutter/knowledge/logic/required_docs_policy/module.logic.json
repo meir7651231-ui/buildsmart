@@ -1,0 +1,471 @@
+{
+  "module": "required_docs_policy",
+  "source": "../../../app_flutter/lib/state/required_docs_policy.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "normalizeDocName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "RequiredDocsPolicyNotifier.addRequirement",
+          "RequiredDocsPolicyNotifier.removeRequirement",
+          "RequiredDocsPolicyNotifier.setRequirements"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "s.trim().replaceAll(RegExp(r'\\s+'), ' ').toLowerCase()"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "replaceAll",
+        "toLowerCase",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RequiredDocsPolicyNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRequiredDocsKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted || _userTouched → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(kRequiredDocsKey)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw == null → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted || _userTouched → return (void)",
+          "if raw == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RequiredDocsPolicyNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRequiredDocsKey"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "RequiredDocsPolicyNotifier.addRequirement",
+          "RequiredDocsPolicyNotifier.removeRequirement",
+          "RequiredDocsPolicyNotifier.setRequirements"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "then"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RequiredDocsPolicyNotifier.addRequirement",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String employerId, String name) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRequiredDocsKey",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "normalizeDocName",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = name.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if n.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "current = state[employerId] ?? const <String>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = normalizeDocName(n)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if current.any((m) => normalizeDocName(m) == key) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, employerId : [...current, n]}"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String employerId, String name)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if n.isEmpty → return (void)",
+          "if current.any((m) => normalizeDocName(m) == key) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RequiredDocsPolicyNotifier.removeRequirement",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String employerId, String name) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRequiredDocsKey",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "normalizeDocName",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "current = state[employerId]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if current == null → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = normalizeDocName(name)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, employerId : [for (final m in current) if (normalizeDocName(m) != key)…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String employerId, String name)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if current == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RequiredDocsPolicyNotifier.setRequirements",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String employerId, List<String> names) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRequiredDocsKey",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "normalizeDocName",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "seen = <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "cleaned = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final raw in names"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = raw.trim()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if n.isEmpty → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if seen.add(normalizeDocName(n))"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, employerId : cleaned}"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String employerId, List<String> names)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

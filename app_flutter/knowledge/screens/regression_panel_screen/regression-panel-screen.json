@@ -1,0 +1,62 @@
+{
+  "name": "RegressionPanelScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🔬 מרכז בדיקות רגרסיה",
+        "registryId": "regression_panel_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring",
+        "registryId": "regression_panel_screen.t02",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "regressionStatusProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "filteredSummaryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "summaryByCategoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "regressionFilterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "filteredResultsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

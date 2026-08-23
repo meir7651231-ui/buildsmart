@@ -1,0 +1,276 @@
+{
+  "screen": "courier_forms_screen",
+  "source": "courier_forms_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "CourierFormsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📄 טפסים",
+            "registryId": "courier.forms.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "",
+            "registryId": "courier.forms.form101_note",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הבקשות שלי",
+            "registryId": "courier.forms.my_requests",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "צלם את אישור המחלה — הצילום נשמר ברשימה כאן.",
+            "registryId": "courier.forms.sicknote_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין אישורים שהועלו עדיין",
+            "registryId": "courier_forms_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📷"
+          }
+        ],
+        "registered": 5,
+        "unregistered": [
+          "📷"
+        ],
+        "summary": "registry 5 · mapped 5/5 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "courierFormsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "vacationRequestsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "courierFormsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showDatePicker",
+            "target": "showDatePicker"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "vacationRequestsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showFullPhotoRefDialog",
+            "target": "showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showFullPhotoRefDialog(context, n.photo, label: 'אישור מחלה · ${_fmtDate(n.ts…",
+            "effect": "open → showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "floor": [
+        "confirmDestructive",
+        "imageProviderForRef",
+        "pickTaskPhoto",
+        "setState",
+        "sort",
+        "validIsraeliMobile"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_FormCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "title",
+          "children"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_PillButton",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "id",
+          "label",
+          "onPressed",
+          "filled"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_DateField",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "📅"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "📅"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "label",
+          "value",
+          "onPick"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_VacationRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "request"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 5,
+    "total": 5,
+    "summary": "5/5",
+    "entries": [
+      {
+        "id": "courier.forms.title",
+        "ok": true,
+        "atom": "CourierFormsScreen"
+      },
+      {
+        "id": "courier.forms.form101_note",
+        "ok": true,
+        "atom": "CourierFormsScreen"
+      },
+      {
+        "id": "courier.forms.my_requests",
+        "ok": true,
+        "atom": "CourierFormsScreen"
+      },
+      {
+        "id": "courier.forms.sicknote_hint",
+        "ok": true,
+        "atom": "CourierFormsScreen"
+      },
+      {
+        "id": "courier_forms_screen.t01",
+        "ok": true,
+        "atom": "CourierFormsScreen"
+      }
+    ]
+  }
+}

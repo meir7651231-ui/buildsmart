@@ -1,0 +1,380 @@
+{
+  "module": "feature_flags",
+  "source": "lib/state/feature_flags.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "FeatureFlagsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_forcedOnFlags"
+          },
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "list = prefs.getStringList(_key)"
+          },
+          {
+            "kind": "compute",
+            "detail": "loaded = list?.toSet() ?? <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "next = {...loaded, ..._forcedOnFlags}"
+          },
+          {
+            "kind": "precond",
+            "detail": "if setEquals(next, state) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getStringList",
+        "setEquals",
+        "toSet"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted → return (void)",
+          "if setEquals(next, state) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FeatureFlagsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FeatureFlagsNotifier.disable",
+          "FeatureFlagsNotifier.enable"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setStringList(_key, state.toList())"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "setStringList",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [
+          "if !mounted → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FeatureFlagsNotifier.isOn",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String flag) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.contains(flag)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String flag)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FeatureFlagsNotifier.enable",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String flag) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "FeatureFlagsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state.contains(flag) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, flag}"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String flag)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.contains(flag) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FeatureFlagsNotifier.disable",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String flag) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "FeatureFlagsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.contains(flag) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state}..remove(flag)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "remove"
+      ],
+      "contract": {
+        "input": "(String flag)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.contains(flag) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FeatureFlagsNotifier.toggle",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String flag) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "disable",
+            "module": true
+          },
+          {
+            "name": "enable",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.contains(flag) ? disable(flag) : enable(flag)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String flag)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

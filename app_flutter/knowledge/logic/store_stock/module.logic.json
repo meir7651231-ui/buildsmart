@@ -1,0 +1,780 @@
+{
+  "module": "store_stock",
+  "source": "lib/state/store_stock.dart",
+  "atomCount": 13,
+  "atoms": [
+    {
+      "fn": "StoreOosNotifier.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (Set<String> value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Set<String> value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreOosNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kOosKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "getStringList",
+        "toSet"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreOosNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kOosKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "StoreOosNotifier.markAvailable",
+          "StoreOosNotifier.markOos"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "setStringList",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreOosNotifier.markOos",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String name) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kOosKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = {...state, name}"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          }
+        ]
+      },
+      "floor": [
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(String name)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreOosNotifier.markAvailable",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String name) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kOosKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = {...state}..remove(name)"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          }
+        ]
+      },
+      "floor": [
+        "remove",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(String name)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProduct.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "category"
+          },
+          {
+            "kind": "field",
+            "name": "categoryEmoji"
+          },
+          {
+            "kind": "field",
+            "name": "createdTs"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "sku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'name' : name, 'sku' : sku, 'category' : category, 'categoryEmoji' : category…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProduct.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> StoreProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "categoryEmoji"
+          },
+          {
+            "kind": "field",
+            "name": "createdTs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "name = raw['name']"
+          },
+          {
+            "kind": "compute",
+            "detail": "sku = raw['sku']"
+          },
+          {
+            "kind": "compute",
+            "detail": "category = raw['category']"
+          },
+          {
+            "kind": "compute",
+            "detail": "created = DateTime.tryParse('${raw['createdTs']}')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! String || name is! String || sku is! String || category is! String || created == n… → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "StoreProduct(id: id, name: name, sku: sku, category: category, categoryEmoji: raw['catego…"
+          }
+        ]
+      },
+      "floor": [
+        "StoreProduct",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "StoreProduct?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if id is! String || name is! String || sku is! String || category is! String || created == n… → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · id is! String || name is! String || sku is! String || category is! String || created == n… · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProductsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStoreProductsKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "tryFromJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProductsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStoreProductsKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "StoreProductsNotifier.add",
+          "StoreProductsNotifier.remove"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProductsNotifier.skuTaken",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String sku) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "StoreProductsNotifier.add"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = sku.trim().toLowerCase()"
+          },
+          {
+            "kind": "return",
+            "detail": "state.any((p) => p.sku.toLowerCase() == s)"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "toLowerCase",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String sku)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProductsNotifier.nameTaken",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String name) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "StoreProductsNotifier.add"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = name.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "state.any((p) => p.name == n)"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String name)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProductsNotifier.add",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String name, required String sku, required String category, String categoryEmoji = '🆕'}) -> StoreProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStoreProductsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_seq"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "nameTaken",
+            "module": true
+          },
+          {
+            "name": "skuTaken",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = name.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = sku.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = category.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if n.isEmpty || s.isEmpty || c.isEmpty → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if nameTaken(n) || skuTaken(s) → return null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_seq++"
+          },
+          {
+            "kind": "compute",
+            "detail": "p = StoreProduct(id: 'sp-${DateTime.now().microsecondsSinceEpoch}-$_seq', name: n, sku: s, ca…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, p]"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          },
+          {
+            "kind": "return",
+            "detail": "p"
+          }
+        ]
+      },
+      "floor": [
+        "StoreProduct",
+        "now",
+        "trim",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "({required String name, required String sku, required String category, String categoryEmoji = '🆕'})",
+        "output": "StoreProduct?",
+        "purity": "side-effecting",
+        "precond": [
+          "if n.isEmpty || s.isEmpty || c.isEmpty → return null",
+          "if nameTaken(n) || skuTaken(s) → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "n.isEmpty || s.isEmpty || c.isEmpty · nameTaken(n) || skuTaken(s) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProductsNotifier.remove",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStoreProductsKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final p in state) if (p.id != id) p]"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          }
+        ]
+      },
+      "floor": [
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

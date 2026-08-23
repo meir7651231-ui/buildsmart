@@ -27,6 +27,19 @@ Otherwise it's 🚧 (placeholder toast) or ⛔ (blocked — no price/rating/geo 
 no notification engine, no media/telephony, no server). Keep `../WIRING.md`
 and `gaps_test.dart`/`wiring_test.dart` in sync.
 
+## Catalog reads — unified (`kCatalogProducts`) vs Lipskey-only
+**Catalog-wide reads MUST use `kCatalogProducts`** (= Lipskey + Polyroll +
+Huliot), NOT `kLipskeyCatalog`. The latter is Lipskey-only, so reading it
+silently DROPS Huliot/PPR — they vanish from results search, SKU lookup,
+sibling lists, favorites, and cart-line reopen/display. This exact mistake
+caused two bugs (blank Huliot card from an empty sibling list; Huliot SKU
+`64032300` "not found" in search). `kLipskeyCatalog` is reserved for genuinely
+Lipskey-scoped logic ONLY: the as-you-type autocomplete chips
+(`searchSuggestions`, pinned by `search_suggestions_test`) and the
+connection-planner (`install_engine` is Lipskey-only) + its product count.
+Guard: `huliot_search_test` + `huliot_card_render_test`. Recommended for
+פרוטוקוליסט: a grep gate flagging new `kLipskeyCatalog` reads outside those.
+
 ## Inherited shell rules (from `app/RULES.md`, still honored)
 - **R1**: 5 FABs (the *rule*; the Flutter shell currently realizes a 4-tab
   bottom-nav + cart-FAB, with only the BS dial wired — see `spec/shell-and-dials.md`

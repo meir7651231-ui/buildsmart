@@ -1,0 +1,115 @@
+{
+  "screen": "order_notif_sheet",
+  "source": "order_notif_sheet.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "OrderNotifSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🔔 התראות הזמנות ומשלוחים",
+            "registryId": "order_notif_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "שאר ההתראות נשארו בהגדרות › התראות",
+            "registryId": "order_notif_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "עדכוני הזמנות",
+            "registryId": "order_notif_sheet.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אישור · בהכנה · מוכן · שינוי סטטוס",
+            "registryId": "order_notif_sheet.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "עדכוני משלוחים",
+            "registryId": "order_notif_sheet.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "יצא לדרך · בדרך אליך · נמסר",
+            "registryId": "order_notif_sheet.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 6,
+        "unregistered": [],
+        "summary": "registry 6 · mapped 6/6 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "notifSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "order_notif_sheet.t01",
+        "ok": true,
+        "atom": "OrderNotifSheet"
+      },
+      {
+        "id": "order_notif_sheet.t02",
+        "ok": true,
+        "atom": "OrderNotifSheet"
+      },
+      {
+        "id": "order_notif_sheet.t03",
+        "ok": true,
+        "atom": "OrderNotifSheet"
+      },
+      {
+        "id": "order_notif_sheet.t04",
+        "ok": true,
+        "atom": "OrderNotifSheet"
+      },
+      {
+        "id": "order_notif_sheet.t05",
+        "ok": true,
+        "atom": "OrderNotifSheet"
+      },
+      {
+        "id": "order_notif_sheet.t06",
+        "ok": true,
+        "atom": "OrderNotifSheet"
+      }
+    ]
+  }
+}

@@ -1,0 +1,600 @@
+{
+  "module": "task_photo",
+  "source": "lib/services/task_photo.dart",
+  "atomCount": 10,
+  "caches": [
+    "photoHttpPut",
+    "photoUploadEnabled",
+    "photoUploadGateway"
+  ],
+  "atoms": [
+    {
+      "fn": "_realHttpPut",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Uri url, Uint8List bytes, String contentType) -> Future<int>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "http"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "res = await http.put(url, headers: {'Content-Type' : contentType}, body: bytes)"
+          },
+          {
+            "kind": "return",
+            "detail": "res.statusCode"
+          }
+        ]
+      },
+      "floor": [
+        "put"
+      ],
+      "contract": {
+        "input": "(Uri url, Uint8List bytes, String contentType)",
+        "output": "Future<int>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "pickTaskPhoto",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context) -> Future<String?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kIsWeb"
+          },
+          {
+            "kind": "const",
+            "name": "kWebcamCancelled"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guardAndDeliver",
+            "module": true
+          },
+          {
+            "name": "_pickViaImagePicker",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if kIsWeb"
+          },
+          {
+            "kind": "return",
+            "detail": "_pickViaImagePicker(context, ImageSource.camera, fallback: ImageSource.gallery)"
+          }
+        ]
+      },
+      "floor": [
+        "openWebcamCapture"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Future<String?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pickViaImagePicker",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context, ImageSource source, {ImageSource? fallback}) -> Future<String?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guardAndDeliver",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "pickTaskPhoto"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "picker = ImagePicker()"
+          },
+          {
+            "kind": "compute",
+            "detail": "file = "
+          },
+          {
+            "kind": "precond",
+            "detail": "if file == null → return null"
+          }
+        ]
+      },
+      "floor": [
+        "ImagePicker",
+        "base64Encode",
+        "pickImage",
+        "readAsBytes"
+      ],
+      "contract": {
+        "input": "(BuildContext context, ImageSource source, {ImageSource? fallback})",
+        "output": "Future<String?>",
+        "purity": "pure",
+        "precond": [
+          "if file == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_guardSize",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context, String dataUrl) -> Future<String?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMaxPhotoDataUrlChars"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_dataUrlBytes",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_guardAndDeliver"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if dataUrl.length <= kMaxPhotoDataUrlChars → return dataUrl"
+          },
+          {
+            "kind": "compute",
+            "detail": "bytes = _dataUrlBytes(dataUrl)"
+          },
+          {
+            "kind": "compute",
+            "detail": "smaller = bytes == null ? null : await downscaleToJpegDataUrl(bytes, maxWidth: 640, quality: 0.5)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if smaller != null && smaller.length <= kMaxPhotoDataUrlChars → return smaller"
+          },
+          {
+            "kind": "branch",
+            "detail": "if context.mounted"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "downscaleToJpegDataUrl",
+        "showToast"
+      ],
+      "contract": {
+        "input": "(BuildContext context, String dataUrl)",
+        "output": "Future<String?>",
+        "purity": "pure",
+        "precond": [
+          "if dataUrl.length <= kMaxPhotoDataUrlChars → return dataUrl",
+          "if smaller != null && smaller.length <= kMaxPhotoDataUrlChars → return smaller"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_guardAndDeliver",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context, String dataUrl) -> Future<String?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMaxPhotoDataUrlChars",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "photoUploadEnabled",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guardSize",
+            "module": true
+          },
+          {
+            "name": "deliverGuardedPhoto",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_pickViaImagePicker",
+          "pickTaskPhoto"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "guarded = await _guardSize(context, dataUrl)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if guarded == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "deliverGuardedPhoto(guarded)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(BuildContext context, String dataUrl)",
+        "output": "Future<String?>",
+        "purity": "pure",
+        "precond": [
+          "if guarded == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_maybeUploadDataUrl",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String dataUrl) -> Future<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kUploadKind",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kUploadableContentTypes",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "photoHttpPut"
+          },
+          {
+            "kind": "global",
+            "name": "photoUploadGateway"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "uploadCapturedPhoto",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "deliverGuardedPhoto"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "uploadCapturedPhoto(dataUrl, gateway: photoUploadGateway, put: photoHttpPut)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String dataUrl)",
+        "output": "Future<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "deliverGuardedPhoto",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String guardedDataUrl) -> Future<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "photoHttpPut",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "photoUploadEnabled"
+          },
+          {
+            "kind": "global",
+            "name": "photoUploadGateway",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_maybeUploadDataUrl",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_guardAndDeliver"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !photoUploadEnabled → return guardedDataUrl"
+          },
+          {
+            "kind": "return",
+            "detail": "_maybeUploadDataUrl(guardedDataUrl)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String guardedDataUrl)",
+        "output": "Future<String>",
+        "purity": "pure",
+        "precond": [
+          "if !photoUploadEnabled → return guardedDataUrl"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "uploadCapturedPhoto",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String dataUrl, {required UploadFunctionsGateway gateway, required PhotoHttpPut put}) -> Future<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kUploadKind"
+          },
+          {
+            "kind": "const",
+            "name": "_kUploadableContentTypes"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_dataUrlMime",
+            "module": true
+          },
+          {
+            "name": "_dataUrlBytes",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_maybeUploadDataUrl"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "contentType = _dataUrlMime(dataUrl)"
+          },
+          {
+            "kind": "compute",
+            "detail": "bytes = _dataUrlBytes(dataUrl)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if contentType == null || bytes == null || !_kUploadableContentTypes.contains(contentType) → return dataUrl"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "debugPrint",
+        "getUploadUrl",
+        "parse",
+        "put"
+      ],
+      "contract": {
+        "input": "(String dataUrl, {required UploadFunctionsGateway gateway, required PhotoHttpPut put})",
+        "output": "Future<String>",
+        "purity": "pure",
+        "precond": [
+          "if contentType == null || bytes == null || !_kUploadableContentTypes.contains(contentType) → return dataUrl"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_dataUrlMime",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String dataUrl) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "uploadCapturedPhoto"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !dataUrl.startsWith('data:') → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "semi = dataUrl.indexOf(';')"
+          },
+          {
+            "kind": "compute",
+            "detail": "comma = dataUrl.indexOf(',')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if semi <= 5 || comma <= semi → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "dataUrl.substring(5, semi)"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf",
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String dataUrl)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if !dataUrl.startsWith('data:') → return null",
+          "if semi <= 5 || comma <= semi → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "!dataUrl.startsWith('data:') · semi <= 5 || comma <= semi · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_dataUrlBytes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String dataUrl) -> Uint8List?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_guardSize",
+          "uploadCapturedPhoto"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "comma = dataUrl.indexOf(',')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if comma < 0 → return null"
+          }
+        ]
+      },
+      "floor": [
+        "base64Decode",
+        "indexOf",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String dataUrl)",
+        "output": "Uint8List?",
+        "purity": "pure",
+        "precond": [
+          "if comma < 0 → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "comma < 0 · or search exhausted",
+        "throws": []
+      }
+    }
+  ]
+}

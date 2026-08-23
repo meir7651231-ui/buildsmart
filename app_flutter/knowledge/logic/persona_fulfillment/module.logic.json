@@ -1,0 +1,1404 @@
+{
+  "module": "persona_fulfillment",
+  "source": "lib/state/persona_fulfillment.dart",
+  "atomCount": 22,
+  "atoms": [
+    {
+      "fn": "Fulfillment.hasMissing",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "lineStatus"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "lineStatus.values.any((s) => s == LineStatus.missing) || lineStatus.values.any((s) => s =…"
+          }
+        ]
+      },
+      "floor": [
+        "any"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Fulfillment.missingCount",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "lineStatus"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "lineStatus.values.where((s) => s == LineStatus.missing).length"
+          }
+        ]
+      },
+      "floor": [
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Fulfillment.podCaptured",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_podCaptured"
+          },
+          {
+            "kind": "field",
+            "name": "podPhoto"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "podPhoto != null || _podCaptured"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Fulfillment.podSigned",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_podSignedFlag"
+          },
+          {
+            "kind": "field",
+            "name": "podSignature"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "podSignature != null || _podSignedFlag"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Fulfillment.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({Map<int, LineStatus>? lineStatus, bool? heldForMissing, bool? missingResolved, int? splitInto, List<int>? splitPlan, String? podPhoto, String? podSignature, bool? podSigned, String? courierUser}) -> Fulfillment",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_podCaptured"
+          },
+          {
+            "kind": "field",
+            "name": "_podSignedFlag"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Fulfillment(lineStatus: lineStatus ?? this.lineStatus, heldForMissing: heldForMissing ?? …"
+          }
+        ]
+      },
+      "floor": [
+        "Fulfillment"
+      ],
+      "contract": {
+        "input": "({Map<int, LineStatus>? lineStatus, bool? heldForMissing, bool? missingResolved, int? splitInto, List<int>? splitPlan, String? podPhoto, String? podSignature, bool? podSigned, String? courierUser})",
+        "output": "Fulfillment",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Fulfillment.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "courierUser"
+          },
+          {
+            "kind": "field",
+            "name": "heldForMissing"
+          },
+          {
+            "kind": "field",
+            "name": "lineStatus"
+          },
+          {
+            "kind": "field",
+            "name": "missingResolved"
+          },
+          {
+            "kind": "field",
+            "name": "podSignature"
+          },
+          {
+            "kind": "field",
+            "name": "splitInto"
+          },
+          {
+            "kind": "field",
+            "name": "splitPlan"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{if (lineStatus.isNotEmpty) 'ls' : {for (final e in lineStatus.entries) '${e.key}' : e.va…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPodPhotosKey"
+          },
+          {
+            "kind": "const",
+            "name": "kFulfillmentKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_diskRead"
+          },
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "cast",
+        "copyWith",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFulfillmentKey"
+          },
+          {
+            "kind": "field",
+            "name": "_diskRead"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "FulfillmentNotifier.capturePod",
+          "FulfillmentNotifier.captureSignature",
+          "FulfillmentNotifier.state="
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return true"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (Map<String, Fulfillment> value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFulfillmentKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_diskRead",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Map<String, Fulfillment> value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.of",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> Fulfillment",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FulfillmentNotifier.capturePod",
+          "FulfillmentNotifier.captureSignature",
+          "FulfillmentNotifier.missLine",
+          "FulfillmentNotifier.pickLine",
+          "FulfillmentNotifier.proceedWithout",
+          "FulfillmentNotifier.replaceLine",
+          "FulfillmentNotifier.split",
+          "FulfillmentNotifier.stampCourier"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state[id] ?? const Fulfillment()"
+          }
+        ]
+      },
+      "floor": [
+        "Fulfillment"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "Fulfillment",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier._put",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, Fulfillment f) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFulfillmentKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_diskRead",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "FulfillmentNotifier.missLine",
+          "FulfillmentNotifier.pickLine",
+          "FulfillmentNotifier.proceedWithout",
+          "FulfillmentNotifier.replaceLine",
+          "FulfillmentNotifier.split",
+          "FulfillmentNotifier.stampCourier"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state = {...state, id : f}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id, Fulfillment f)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.pickLine",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, int line) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "of",
+            "module": true
+          },
+          {
+            "name": "_put",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "f = of(id)"
+          },
+          {
+            "kind": "compute",
+            "detail": "cur = f.lineStatus[line] ?? LineStatus.pending"
+          },
+          {
+            "kind": "init",
+            "detail": "next = {...f.lineStatus}"
+          },
+          {
+            "kind": "effect",
+            "detail": "next[line] = cur == LineStatus.picked ? LineStatus.pending : LineStatus.picked"
+          },
+          {
+            "kind": "compute",
+            "detail": "stillPending = next.values.any((s) => s == LineStatus.pendingDecision)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_put(id, f.copyWith(lineStatus: next, heldForMissing: stillPending))"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, int line)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.missLine",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, int line) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "of",
+            "module": true
+          },
+          {
+            "name": "_put",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "f = of(id)"
+          },
+          {
+            "kind": "compute",
+            "detail": "cur = f.lineStatus[line] ?? LineStatus.pending"
+          },
+          {
+            "kind": "init",
+            "detail": "next = {...f.lineStatus}"
+          },
+          {
+            "kind": "compute",
+            "detail": "nowMissing = cur != LineStatus.missing && cur != LineStatus.pendingDecision"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nowMissing"
+          },
+          {
+            "kind": "compute",
+            "detail": "stillPending = next.values.any((s) => s == LineStatus.pendingDecision)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_put(id, f.copyWith(lineStatus: next, heldForMissing: stillPending))"
+          },
+          {
+            "kind": "return",
+            "detail": "nowMissing"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, int line)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.proceedWithout",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, int line) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "of",
+            "module": true
+          },
+          {
+            "name": "_put",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "f = of(id)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = {...f.lineStatus}..[line] = LineStatus.cancelled"
+          },
+          {
+            "kind": "effect",
+            "detail": "_put(id, f.copyWith(lineStatus: next, heldForMissing: next.values.any((s) => s == LineSta…"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, int line)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.replaceLine",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, int line) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "of",
+            "module": true
+          },
+          {
+            "name": "_put",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "f = of(id)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = {...f.lineStatus}..[line] = LineStatus.replaced"
+          },
+          {
+            "kind": "effect",
+            "detail": "_put(id, f.copyWith(lineStatus: next, heldForMissing: next.values.any((s) => s == LineSta…"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, int line)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.split",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, int lineCount, int groups) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "of",
+            "module": true
+          },
+          {
+            "name": "_put",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "f = of(id)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if groups <= 1"
+          },
+          {
+            "kind": "init",
+            "detail": "plan = [for (var i = 0; i < lineCount; i++) (i % groups) + 1]"
+          },
+          {
+            "kind": "effect",
+            "detail": "_put(id, f.copyWith(splitInto: groups, splitPlan: plan))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, int lineCount, int groups)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.capturePod",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String dataUrl, {String? courierUser}) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPodPhotosKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kFulfillmentKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_diskRead",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "of",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          },
+          {
+            "name": "_mirrorPodPhoto",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "init",
+            "detail": "next = {...state, id : of(id).copyWith(podPhoto: dataUrl, courierUser: courierUser)}"
+          },
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = next"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok"
+          },
+          {
+            "kind": "compute",
+            "detail": "mirrored = await _mirrorPodPhoto(id, dataUrl)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !mirrored"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, String dataUrl, {String? courierUser})",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.stampCourier",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String username) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_put",
+            "module": true
+          },
+          {
+            "name": "of",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_put(id, of(id).copyWith(courierUser: username))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, String username)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier._mirrorPodPhoto",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String dataUrl) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPodPhotosKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "FulfillmentNotifier.capturePod"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return true"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "jsonEncode",
+        "setString"
+      ],
+      "contract": {
+        "input": "(String id, String dataUrl)",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.captureSignature",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String dataUrl) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFulfillmentKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_diskRead",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "of",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = {...state, id : of(id).copyWith(podSignature: dataUrl)}"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok && mounted"
+          },
+          {
+            "kind": "return",
+            "detail": "ok"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, String dataUrl)",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier.clear",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPodPhotosKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kFulfillmentKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_diskRead",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_unmirrorPodPhoto",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = {...state}..remove(id)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_unmirrorPodPhoto(id)"
+          }
+        ]
+      },
+      "floor": [
+        "remove"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FulfillmentNotifier._unmirrorPodPhoto",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPodPhotosKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "FulfillmentNotifier.clear"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "jsonEncode",
+        "remove",
+        "setString"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

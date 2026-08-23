@@ -1,0 +1,468 @@
+{
+  "screen": "org_setup_wizard_screen",
+  "source": "org_setup_wizard_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "OrgSetupWizardScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🔒 ליבה — נעול"
+          },
+          {
+            "kind": "text",
+            "text": "✎"
+          },
+          {
+            "kind": "text",
+            "text": "אין רכיבים תואמים"
+          },
+          {
+            "kind": "text",
+            "text": "כל מודול = סקציה. פתח סקציה כדי להדליק/לכבות רכיבים. חיפוש וצ׳יפים מסננים. ליבה (ניווט/כניסה) נעולה תמיד."
+          },
+          {
+            "kind": "text",
+            "text": "הכל"
+          },
+          {
+            "kind": "text",
+            "text": "🔌 אשף הקמת חברה"
+          },
+          {
+            "kind": "text",
+            "text": "מצב לא-חמוש: השינויים פעילים מיד, אך לא ייטענו אחרי סגירה (נדרש build עם ORG_CONFIG=true)."
+          },
+          {
+            "kind": "text",
+            "text": "החלת חבילה מחליפה מודולים+מונחים במלואם — שם וזהות נשמרים."
+          },
+          {
+            "kind": "text",
+            "text": "🔎"
+          },
+          {
+            "kind": "text",
+            "text": "מצא והחלף"
+          },
+          {
+            "kind": "text",
+            "text": "🕘"
+          },
+          {
+            "kind": "text",
+            "text": "גרסאות"
+          },
+          {
+            "kind": "text",
+            "text": "🖥️"
+          },
+          {
+            "kind": "text",
+            "text": "ניהול מסכים (סדר · הסתר)"
+          },
+          {
+            "kind": "text",
+            "text": "שמור והפעל"
+          },
+          {
+            "kind": "text",
+            "text": "ייצוא JSON"
+          },
+          {
+            "kind": "text",
+            "text": "ייבוא JSON"
+          },
+          {
+            "kind": "text",
+            "text": "איפוס טיוטה"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🔒 ליבה — נעול",
+          "✎",
+          "אין רכיבים תואמים",
+          "כל מודול = סקציה. פתח סקציה כדי להדליק/לכבות רכיבים. חיפוש וצ׳יפים מסננים. ליבה (ניווט/כניסה) נעולה תמיד.",
+          "הכל",
+          "🔌 אשף הקמת חברה",
+          "מצב לא-חמוש: השינויים פעילים מיד, אך לא ייטענו אחרי סגירה (נדרש build עם ORG_CONFIG=true).",
+          "החלת חבילה מחליפה מודולים+מונחים במלואם — שם וזהות נשמרים.",
+          "🔎",
+          "מצא והחלף",
+          "🕘",
+          "גרסאות",
+          "🖥️",
+          "ניהול מסכים (סדר · הסתר)",
+          "שמור והפעל",
+          "ייצוא JSON",
+          "ייבוא JSON",
+          "איפוס טיוטה"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 18"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "orgConfigProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "orgConfigProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "downloadTextFileProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "pickTextFileProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "_WizardFindReplaceScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "_WizardHistoryScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "_ScreenManagerScreen"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "terms == null"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (terms == null)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "applyVerticalPack",
+        "bsOnAccent",
+        "decodeOrgConfig",
+        "elementShown",
+        "encodeOrgConfig",
+        "moduleOn",
+        "persistOrgConfig",
+        "screenLabelHe",
+        "setState",
+        "sort",
+        "termOf"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onOrgConfig(…) callback instead of direct orgConfigProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_ElementInspectorSheet",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "אפס לברירת-מחדל"
+          },
+          {
+            "kind": "text",
+            "text": "החל וסגור (חי)"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "אפס לברירת-מחדל",
+          "החל וסגור (חי)"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "resolvedNodeProvider(_d.id)"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "configStoreProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "studioOwnerEmailProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "criticalIdsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "previewEmoji = _hasEmoji && _emoji.text.isNotEmpty ? … : …",
+            "effect": "text: '${_emoji.text} ' | ''"
+          }
+        ]
+      },
+      "floor": [
+        "applyCfgTextStyle",
+        "applyOps",
+        "publish",
+        "resolvedNodeProvider",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": false,
+        "props": [
+          "descriptor"
+        ],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_WizardFindReplaceScreen",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "מצא והחלף בטקסטים"
+          },
+          {
+            "kind": "text",
+            "text": "פורסם — חי בכל האפליקציה ✓"
+          },
+          {
+            "kind": "text",
+            "text": "פרסם לכולם (חי)"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "מצא והחלף בטקסטים",
+          "פורסם — חי בכל האפליקציה ✓",
+          "פרסם לכולם (חי)"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 3"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "configStoreProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "studioOwnerEmailProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "criticalIdsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(configStoreProvider.notifier).publish(note: 'מצא-והחלף · אשף', byEma…",
+            "effect": "write → configStoreProvider"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('פורס…",
+            "effect": "open → showSnackBar"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "FindReplacePane = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_WizardHistoryScreen",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "גרסאות והיסטוריה"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "גרסאות והיסטוריה"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "HistoryPane = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_ScreenManagerScreen",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "ניהול מסכים"
+          },
+          {
+            "kind": "text",
+            "text": "אפס סדר/הסתרה"
+          },
+          {
+            "kind": "text",
+            "text": "✎"
+          },
+          {
+            "kind": "text",
+            "text": "⌨️"
+          },
+          {
+            "kind": "text",
+            "text": "מקלדת"
+          },
+          {
+            "kind": "text",
+            "text": "ערוך שם"
+          },
+          {
+            "kind": "text",
+            "text": "אפס לברירת-מחדל"
+          },
+          {
+            "kind": "text",
+            "text": "שמור"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "ניהול מסכים",
+          "אפס סדר/הסתרה",
+          "✎",
+          "⌨️",
+          "מקלדת",
+          "ערוך שם",
+          "אפס לברירת-מחדל",
+          "שמור"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 8"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "MaterialPageRoute<void>(builder: (_) …"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "screenSectionsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "screenSectionsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => _ScreenKey…",
+            "effect": "navigate → MaterialPageRoute<void>(builder: (_) …"
+          }
+        ]
+      },
+      "floor": [
+        "keyboardLayoutKey"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "ReorderableListView = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 0,
+    "total": 0,
+    "summary": "0/0",
+    "entries": []
+  }
+}

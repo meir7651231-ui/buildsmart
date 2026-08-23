@@ -1,0 +1,343 @@
+{
+  "module": "brand_history",
+  "source": "lib/state/brand_history.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "BrandHistoryNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(_key)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw != null"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "map",
+        "toInt"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BrandHistoryNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "BrandHistoryNotifier.record"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setString(_key, jsonEncode(state))"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BrandHistoryNotifier.record",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String brandName) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "from"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "current = Map<String, Map<String, int>>.from(state)"
+          },
+          {
+            "kind": "init",
+            "detail": "brands = Map<String, int>.from(current[productKey] ?? const {})"
+          },
+          {
+            "kind": "effect",
+            "detail": "brands[brandName] = (brands[brandName] ?? 0) + 1"
+          },
+          {
+            "kind": "effect",
+            "detail": "current[productKey] = brands"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = current"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "Map"
+      ],
+      "contract": {
+        "input": "(String productKey, String brandName)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BrandHistoryNotifier.favouriteFor",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "brands = state[productKey]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if brands == null || brands.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "entries = brands.entries.toList()..sort((a, b) {final cmp = b.value.compareTo(a.value); return cmp …"
+          },
+          {
+            "kind": "return",
+            "detail": "entries.first.key"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(String productKey)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if brands == null || brands.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "brands == null || brands.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "BrandHistoryNotifier.countsFor",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey) -> Map<String, int>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          },
+          {
+            "kind": "global",
+            "name": "from"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Map<String, int>.from(state[productKey] ?? const {})"
+          }
+        ]
+      },
+      "floor": [
+        "Map"
+      ],
+      "contract": {
+        "input": "(String productKey)",
+        "output": "Map<String, int>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BrandHistoryNotifier.totalPicks",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.values.fold(0, (s, m) => s + m.values.fold<int>(0, (a, b) => a + b))"
+          }
+        ]
+      },
+      "floor": [
+        "fold"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

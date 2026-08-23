@@ -1,0 +1,57 @@
+{
+  "name": "_RegionSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בקרוב",
+        "registryId": "catalog_settings_screen.t11",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "appSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "appSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "onChanged"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onAppSettings(…) callback instead of direct appSettingsProvider write"
+    ]
+  }
+}

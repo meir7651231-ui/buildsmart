@@ -49,10 +49,13 @@ class ShareLogNotifier extends StateNotifier<List<ShareEntry>> {
   static const _key = 'bs.share-log.v1';
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    if (raw == null) return;
     try {
+      // getInstance INSIDE the guard (the #99 board_auth precedent): a missing
+      // prefs platform / plugin failure degrades to the default empty log
+      // instead of an unhandled async error.
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_key);
+      if (raw == null) return;
       final list = jsonDecode(raw) as List<dynamic>;
       final parsed = list
           .map((e) => ShareEntry.fromJson(e as Map<String, dynamic>))
@@ -63,16 +66,23 @@ class ShareLogNotifier extends StateNotifier<List<ShareEntry>> {
           ? parsed.sublist(0, maxEntries)
           : parsed;
     } on Object {
-      // Corrupt payload — start clean rather than crash the notifier.
+      // No prefs platform / corrupt payload — start clean rather than crash
+      // the notifier.
       state = const [];
     }
   }
 
   Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded =
-        jsonEncode(state.map((e) => e.toJson()).toList(growable: false));
-    await prefs.setString(_key, encoded);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded =
+          jsonEncode(state.map((e) => e.toJson()).toList(growable: false));
+      await prefs.setString(_key, encoded);
+    } on Object catch (e) {
+      // Storage failure (e.g. web quota) — the in-memory log stays live;
+      // best-effort persist, never an unhandled async error.
+      debugPrint('ShareLog: persist failed: $e');
+    }
   }
 
   /// Add a new entry to the **front** (newest first) and trim to [maxEntries].

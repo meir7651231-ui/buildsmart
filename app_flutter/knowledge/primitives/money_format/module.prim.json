@@ -1,0 +1,33 @@
+{
+  "module": "money_format",
+  "source": "../../../app_flutter/lib/logic/money_format.dart",
+  "primitiveCount": 2,
+  "primitives": [
+    {
+      "name": "groupThousands",
+      "line": 19,
+      "signature": "(int n) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": [
+        {
+          "signal": ".abs()",
+          "note": "negative input → absolute value (caller prepends the sign)"
+        }
+      ]
+    },
+    {
+      "name": "formatNis",
+      "line": 31,
+      "signature": "(int n, {String prefix = ''}) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "n<0 ? …",
+          "note": "sign is placed BEFORE the symbol (never \"symbol-minus\")"
+        }
+      ]
+    }
+  ]
+}

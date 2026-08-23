@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/notif_settings_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -199,6 +201,26 @@ class NotifSettings {
 
   bool get isSnoozedNow =>
       snoozeUntilMs > DateTime.now().millisecondsSinceEpoch;
+
+  /// Returns true when quiet-hours are enabled and the current local time falls
+  /// within [quietStart, quietEnd].  Handles windows that wrap past midnight
+  /// (e.g. 22:00 → 07:00): the window is active when the current time is
+  /// >= quietStart OR <= quietEnd.  For same-day windows (e.g. 09:00 → 17:00)
+  /// the current time must fall between start and end.
+  bool get isInQuietHours {
+    if (!quietHoursEnabled) return false;
+    final now = DateTime.now();
+    final nowMins = now.hour * 60 + now.minute;
+    final startMins = quietStartHour * 60 + quietStartMin;
+    final endMins = quietEndHour * 60 + quietEndMin;
+    if (startMins < endMins) {
+      // Same-day window, e.g. 09:00 → 17:00.
+      return nowMins >= startMins && nowMins < endMins;
+    } else {
+      // Overnight window, e.g. 22:00 → 07:00.
+      return nowMins >= startMins || nowMins < endMins;
+    }
+  }
 
   NotifSettings copyWith({
     bool? pushEnabled,
@@ -444,12 +466,54 @@ T _enum<T extends Enum>(Object? raw, List<T> values, T fallback) {
   return fallback;
 }
 
+/// What alert feedback an arriving in-app notification should fire, given the
+/// 'צליל ורטט' settings (notif_settings_screen). PURE → unit-testable. The
+/// caller ([playInAppNotifFeedback]) turns this into the actual platform calls.
+///
+/// Both channels are SILENCED while notifications are globally suppressed —
+/// snoozed or inside the quiet-hours window — so a buzz/click never escapes a
+/// window where the feed itself is hidden (consistency with the
+/// notifications_screen suppression banners).
+typedef NotifFeedback = ({bool sound, bool vibrate});
+
+NotifFeedback notifFeedbackFor(NotifSettings s) {
+  if (s.isSnoozedNow || s.isInQuietHours) {
+    return (sound: false, vibrate: false);
+  }
+  return (sound: s.soundEnabled, vibrate: s.vibrationEnabled);
+}
+
+/// Fires the alert feedback for an arriving in-app notification: a haptic when
+/// 'רטט' is on and the system alert sound when 'צליל מופעל' is on (both gated by
+/// [notifFeedbackFor]). This is the honest LOCAL effect of the 🔊 'צליל ורטט'
+/// toggles — wired to the live worker/courier bell. SystemSound on web is a
+/// no-op (the OS owns it); HapticFeedback is silently ignored where unsupported.
+void playInAppNotifFeedback(NotifSettings s) {
+  final fb = notifFeedbackFor(s);
+  if (fb.vibrate) HapticFeedback.mediumImpact();
+  if (fb.sound) unawaited(SystemSound.play(SystemSoundType.alert));
+}
+
 class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
-  NotifSettingsNotifier() : super(NotifSettings.defaults) {
+  NotifSettingsNotifier([this._repo]) : super(NotifSettings.defaults) {
     unawaited(_load());
   }
 
+  /// The server store for the settings blob (`notifSettings/{uid}`) when
+  /// USER_DATA_SERVER is on for a real signed-in user; null (the default) ⇒ the
+  /// SharedPreferences path below. Injected by [notifSettingsProvider].
+  final NotifSettingsRepository? _repo;
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path (USER_DATA_SERVER): the settings live at `notifSettings/{uid}`.
+      // Absent doc ⇒ null ⇒ keep [NotifSettings.defaults] (mirrors the local
+      // `raw == null` → return; the repo never throws).
+      final s = await repo.load(repo.currentUid);
+      if (s != null) state = s;
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -460,6 +524,14 @@ class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: mirror the whole settings blob to `notifSettings/{uid}`.
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
@@ -482,6 +554,15 @@ class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
 
   Future<void> reset() async {
     state = NotifSettings.defaults;
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: reset = persist the defaults blob to `notifSettings/{uid}`
+      // (the local path removes the key; both yield defaults on next load).
+      try {
+        await repo.save(repo.currentUid, NotifSettings.defaults);
+      } on Object catch (_) {/* ignore */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kStorageKey);
@@ -491,5 +572,7 @@ class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
 
 final notifSettingsProvider =
     StateNotifierProvider<NotifSettingsNotifier, NotifSettings>(
-  (_) => NotifSettingsNotifier(),
+  // Injects the server store (`notifSettings/{uid}`) when USER_DATA_SERVER is on
+  // for a real signed-in user; null (the default) ⇒ the SharedPreferences path.
+  (ref) => NotifSettingsNotifier(ref.watch(notifSettingsRepositoryProvider)),
 );

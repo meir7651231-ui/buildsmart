@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/store_settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -423,11 +424,21 @@ T _enum<T extends Enum>(Object? raw, List<T> values, T fallback) {
 }
 
 class StoreSettingsNotifier extends StateNotifier<StoreSettings> {
-  StoreSettingsNotifier() : super(StoreSettings.defaults) {
+  StoreSettingsNotifier([this._repo]) : super(StoreSettings.defaults) {
     unawaited(_load());
   }
 
+  /// Server store (`storeSettings/{uid}`) when USER_DATA_SERVER is on for a real
+  /// signed-in user; null ⇒ the SharedPreferences path.
+  final StoreSettingsRepository? _repo;
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      final s = await repo.load(repo.currentUid);
+      if (s != null) state = s;
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -440,6 +451,13 @@ class StoreSettingsNotifier extends StateNotifier<StoreSettings> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
@@ -455,6 +473,13 @@ class StoreSettingsNotifier extends StateNotifier<StoreSettings> {
 
   Future<void> reset() async {
     state = StoreSettings.defaults;
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, StoreSettings.defaults);
+      } on Object catch (_) {/* ignore */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kStorageKey);
@@ -464,5 +489,5 @@ class StoreSettingsNotifier extends StateNotifier<StoreSettings> {
 
 final storeSettingsProvider =
     StateNotifierProvider<StoreSettingsNotifier, StoreSettings>(
-  (_) => StoreSettingsNotifier(),
+  (ref) => StoreSettingsNotifier(ref.watch(storeSettingsRepositoryProvider)),
 );

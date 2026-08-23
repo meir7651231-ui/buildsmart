@@ -1,0 +1,119 @@
+{
+  "module": "claude_functions",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/claude_functions.dart",
+  "entityCount": 3,
+  "entities": [
+    {
+      "entity": "ClaudeResult",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "text",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "text",
+          "model"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ClaudeException",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "code",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "message",
+            "type": "String?",
+            "required": true,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirebaseClaudeGateway",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_injectedFunctions",
+            "type": "FirebaseFunctions?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_functions",
+            "type": "FirebaseFunctions",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_injectedFunctions",
+            "ref": "FirebaseFunctions",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "ask",
+          "_asMap",
+          "_str"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

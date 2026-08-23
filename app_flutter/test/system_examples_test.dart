@@ -21,6 +21,9 @@ void _show(String desc, String from, String to) {
 
 void main() {
   test('מגוון רחב', () {
+    // Guard the scan input: every _show() resolves SKUs against kCompatCatalog,
+    // so if it were empty the whole report would silently print "SKU חסר".
+    expect(kCompatCatalog, isNotEmpty);
     print('\n═══ חוצה-מערכת (צפוי: אין נתיב) ═══');
     _show('ניפל נחושת ½" → צינור אפור 110', '77777641', '116113');
     _show('NTM 16×16 → תעלת ניקוז',          '77401622', '77575327');

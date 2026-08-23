@@ -1,0 +1,48 @@
+{
+  "module": "related_info",
+  "source": "../../../app_flutter/lib/data/related_info.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "_FinderGroup",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "label",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "cats",
+            "type": "Set<String>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "emoji",
+          "label",
+          "cats"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

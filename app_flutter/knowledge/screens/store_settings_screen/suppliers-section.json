@@ -1,0 +1,92 @@
+{
+  "name": "_SuppliersSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+        "registryId": "store_settings_screen.section_wip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה",
+        "registryId": "store_settings_screen.placeholder_wip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — עדיין לא משפיע",
+        "registryId": "store_settings_screen.number_wip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — עדיין לא משפיע",
+        "registryId": "store_settings_screen.radio_wip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — עדיין לא משפיע",
+        "registryId": "store_settings_screen.switch_wip",
+        "registryOk": true
+      }
+    ],
+    "registered": 5,
+    "unregistered": [],
+    "summary": "registry 5 · mapped 5/5 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "storeSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '$label — בבנייה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "onChanged"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+    ]
+  }
+}

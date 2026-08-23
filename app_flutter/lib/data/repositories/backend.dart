@@ -1,0 +1,357 @@
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileCatalogBaseUrl, kProfileStudioSharedSync;
+import 'package:firebase_core/firebase_core.dart' show Firebase;
+
+/// Master switch for the LIVE Firebase backend. Repository providers route to
+/// their `_firebase` impls only when this is true; otherwise everything stays
+/// on the in-memory/demo `_local` path the app shipped with.
+///
+/// Default OFF: the live web build serves demo data even though S0 initialises
+/// Firebase, until the backend is explicitly enabled (Firestore deployed +
+/// Rules live + seeded). Flip on at build time:
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true
+/// Tests never initialise Firebase, so they stay on `_local` regardless.
+const bool kUseFirebaseBackendFlag =
+    bool.fromEnvironment('USE_FIREBASE_BACKEND');
+
+/// True only when the flag is set AND Firebase actually initialised.
+bool get useFirebaseBackend =>
+    kUseFirebaseBackendFlag && Firebase.apps.isNotEmpty;
+
+/// Studio "live for everyone" — the SELF-CONTAINED shared-sync switch. When ON,
+/// the owner's PUBLISHED Studio config (config_store.dart) mirrors to a single
+/// owner-writable Firestore doc (`studioConfigLive/current`) that every client
+/// reads live, so a published edit reaches all users. It is INDEPENDENT of the
+/// heavier pointer/shard pipeline ([kStudioLive] + the `publishConfig` callable,
+/// studio_config_firebase.dart) — that stays the future hardened path; this flag
+/// needs only the `studioConfigLive` rules block (owner-only write) + the owner's
+/// Google sign-in, no Cloud Function.
+///
+/// Default OFF ⇒ the config store keeps its LOCAL [LocalPrefsSink] (per-device),
+/// BYTE-IDENTICAL to today (zero regression — the same invariant as
+/// [kUseFirebaseBackendFlag]). Tests never initialise Firebase, so the local path
+/// ignores this flag. Flip on at build time once the rules are deployed:
+///   flutter build web --dart-define=STUDIO_SHARED_SYNC=true
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kStudioSharedSync = bool.fromEnvironment('STUDIO_SHARED_SYNC',
+    defaultValue: kProfileStudioSharedSync);
+
+/// True only when [kStudioSharedSync] is set AND Firebase actually initialised
+/// (so it can never activate offline / in the Firebase-free test suite).
+bool get useStudioSharedSync =>
+    kStudioSharedSync && Firebase.apps.isNotEmpty;
+
+/// A5 (launch uid-migration) — master switch for UID-SCOPED Firestore queries.
+/// Default OFF: the orders listen stays the WHOLE-collection listen every
+/// caller relies on today, so flipping this flag is the ONLY thing that changes
+/// behaviour — with it OFF the build is BYTE-IDENTICAL to today (zero
+/// regression, the A5 invariant). Flip on at build time once the rules +
+/// indexes are deployed and existing docs are backfilled with storeUid/
+/// courierUid:
+///   flutter build web --dart-define=UID_SCOPED_QUERIES=true
+/// When ON (and a uid + role are known) `ordersRepositoryProvider` scopes the
+/// orders listen to what the Security Rules can prove per role:
+///   • contractor → contractorUid == uid
+///   • store      → the shared pool (storeUid=='' & a store-stage) ∪ own
+///                  (storeUid == uid)
+///   • courier    → analogous on courierUid
+///   • manager/admin → no scope (the whole collection — the god view).
+/// Tests never initialise Firebase, so the local path ignores this flag.
+const bool kUidScopedQueries = bool.fromEnvironment('UID_SCOPED_QUERIES');
+
+/// stage-3.3 St4 (org-scoping) — master switch for ORG-SCOPED Firestore
+/// queries. Deliberately a NEW flag, NOT a reuse of [kUidScopedQueries] — that
+/// flag is already in the owner's flip-ready handoff, and one flag means one
+/// behaviour. Default OFF: every scope builder / repo construction keeps its
+/// exact uid-layer result (no `currentOrgIdProvider` watch even executes), so
+/// flipping this flag is the ONLY thing that changes behaviour — with it OFF
+/// the build is BYTE-IDENTICAL to today (zero regression, the
+/// [kUidScopedQueries] invariant). When ON (and the session carries an `orgId`
+/// custom claim) the orders/customers scope builders and the stock source
+/// PREFER an org-wide `where('orgId' == claim)` scope over the per-uid scope —
+/// every member of the org shares one tenant view — and FALL BACK to the uid
+/// scope when no claim is present. Manager/admin stay unscoped (the god view)
+/// in BOTH layers. Ships ONLY together with the St5 rules branches + the St6
+/// deploy order (see WIRING); flip on at build time once those are live:
+///   flutter build web --dart-define=ORG_SCOPED_QUERIES=true
+/// Tests never initialise Firebase, so the local path ignores this flag.
+const bool kOrgScopedQueries = bool.fromEnvironment('ORG_SCOPED_QUERIES');
+
+/// A13 (launch server-connect) — master switch for ROUTING the canonical
+/// order-stage advance + contractor-credit through their Cloud Functions
+/// CALLABLES (`advanceOrderStage` / `computeCredit`, region [me-west1]) instead
+/// of direct optimistic Firestore writes / the client-side credit hash.
+///
+/// Default OFF: with it OFF the build is BYTE-IDENTICAL to today —
+///   • `advance` keeps the direct optimistic `upsert` (cache + background
+///     `set`) verbatim, and
+///   • `creditLimit(name)` stays the deterministic `contractorCredit(name)`
+///     client hash —
+/// so flipping this flag is the ONLY thing that changes behaviour (the same
+/// zero-regression invariant as [kUidScopedQueries] / [kUseFirebaseBackendFlag]).
+///
+/// Flip on at build time ONCE the owner has deployed the functions
+/// (`functions/src/index.ts` re-exports both) + the S5 rules are live:
+///   flutter build web --dart-define=SERVER_CALLABLES=true
+///
+/// When ON (and a callable gateway is bound — only under the live Firebase
+/// backend) the server performs the canonical write/computation; the client
+/// keeps an OPTIMISTIC LOCAL update for UX but does NOT also fire a direct
+/// PERSISTENT write — the `orders` direct-write would otherwise be reverted by
+/// the `revertIllegalOrderStageWrite` trigger, since the callable IS the
+/// sanctioned stage-advance path. A `FirebaseFunctionsException` (function
+/// not-deployed / permission-denied) is surfaced honestly, never faked.
+///
+/// Tests never initialise Firebase + bind no gateway, so the local path is
+/// unaffected; an injected fake gateway + the per-notifier `serverCallables`
+/// field exercise the ON branch in the standard define-less suite (the
+/// `kUidScopedQueries` / `uidScoped` testability pattern).
+const bool kServerCallables = bool.fromEnvironment('SERVER_CALLABLES');
+
+/// A14 (launch photo-upload) — master switch for UPLOADING captured photos to
+/// Cloudflare R2 via the `getUploadUrl` callable (region [me-west1]) and storing
+/// the resulting `https://…` public URL, instead of inlining the image as a
+/// ~1.5MB `data:image/...;base64,…` data-URL in SharedPreferences/localStorage.
+///
+/// Default OFF: with it OFF the capture path is BYTE-IDENTICAL to today — every
+/// photo (POD / before-after / profile / store-logo / cert) stays the verbatim
+/// base64 data-URL the persist layer has always stored, the `getUploadUrl`
+/// callable is NEVER called, and the ~1.5MB persist-budget guard
+/// (`kMaxPhotoDataUrlChars`) is untouched. So flipping this flag is the ONLY
+/// thing that changes behaviour (the same zero-regression invariant as
+/// [kServerCallables] / [kUidScopedQueries] / [kUseFirebaseBackendFlag]).
+///
+/// Separate from [kServerCallables] so photo-upload can activate INDEPENDENTLY
+/// of the order/credit callables. Flip on at build time ONCE the owner has
+/// provisioned R2 (bucket + `R2_*` secrets/params) and deployed the function
+/// (`functions/src/r2.ts` is re-exported by `functions/src/index.ts`):
+///   flutter build web --dart-define=CLOUD_PHOTOS=true
+///
+/// When ON, the single capture seam (`services/task_photo.dart`) — after it has
+/// the downscaled image bytes — calls `getUploadUrl({kind, contentType})`, does
+/// an HTTP `PUT` of the bytes to the returned presigned URL, and on a 2xx
+/// returns the public object URL (`{IMAGE_BASE_URL}/{server-owned key}`). If the
+/// callable throws (not-deployed / R2 unconfigured → `failed-precondition`) or
+/// the PUT is non-2xx, it FALLS BACK to the base64 data-URL (the photo is NOT
+/// lost — saved locally exactly as today) and logs it honestly; a success is
+/// NEVER faked. Both forms are plain strings stored the same way, and every
+/// render site decodes BOTH (an `https://…` to a network image, a `data:…` to
+/// the current base64 decode — see `imageProviderForRef` in
+/// widgets/photo_viewer.dart).
+///
+/// Tests never initialise Firebase; the upload seams (`UploadFunctionsGateway` +
+/// the HTTP-PUT function) are injected as fakes, so the ON branch is exercised in
+/// the standard define-less suite without touching the network.
+const bool kCloudPhotos = bool.fromEnvironment('CLOUD_PHOTOS');
+
+/// S1 (launch demo-seed-isolation) — master switch for SEEDING a fresh remote
+/// backend from the local demo seed. When a manager/admin opens the app against
+/// an EMPTY Firestore, the first empty snapshot fires `onFirstSnapshotEmpty`,
+/// which routes 8 `_firebase` repos through [FirestoreCachedRepo.pushCacheToRemote]
+/// — writing every const DEMO row (orders/customers/stock/finance/…) into the
+/// REAL collections as if it were their own data.
+///
+/// Default OFF: with it OFF [pushCacheToRemote] short-circuits on its first line,
+/// so production NEVER auto-seeds — a real signed-in user's live backend stays
+/// exactly what the server holds (honest empty when fresh), and the in-memory
+/// optimistic cache still keeps the UI non-empty before the first snapshot (the
+/// born-seeded invariant is untouched — only the REMOTE write is suppressed). So
+/// flipping this flag is the ONLY thing that changes behaviour (the same
+/// zero-regression invariant as [kCloudPhotos] / [kServerCallables] /
+/// [kUidScopedQueries] / [kUseFirebaseBackendFlag]).
+///
+/// Flip on at build time ONLY for a deliberate demo/dev environment whose
+/// Firestore is meant to be populated from the seed:
+///   flutter build web --dart-define=SEED_FRESH_BACKEND=true
+///
+/// Tests never set the define, so the seeding path stays suppressed in the
+/// standard suite (any test that exercises [pushCacheToRemote]'s writes must
+/// drive the ON branch explicitly).
+const bool kSeedFreshBackend = bool.fromEnvironment('SEED_FRESH_BACKEND');
+
+/// AI (out-of-box) — master switch for the Claude-backed features (spec co-pilot,
+/// …). They route through the `askClaude` callable (functions/src/claude.ts) via
+/// [ClaudeGateway] (claude_functions.dart). Default OFF: `claudeGatewayProvider`
+/// returns null, so the AI entry points show an honest "requires connection"
+/// state and the demo/test build is byte-identical (same zero-regression invariant
+/// as [kServerCallables] / [kCloudPhotos]). Needs [useFirebaseBackend] too — no AI
+/// offline. Flip on at build time (AFTER `ANTHROPIC_API_KEY` is set in Secret
+/// Manager + the function is deployed):
+///   flutter build … --dart-define=USE_FIREBASE_BACKEND=true --dart-define=CLAUDE_AI=true
+const bool kClaudeAi = bool.fromEnvironment('CLAUDE_AI');
+
+/// F2 (launch App-Check-native) — master switch for the PRODUCTION App Check
+/// attestation providers at `FirebaseAppCheck.instance.activate` time
+/// (`lib/main.dart`).
+///
+/// Default OFF: with it OFF the `activate` call is BYTE-IDENTICAL to today —
+/// `AndroidProvider.debug` + `AppleProvider.debug` (the dev/demo attestation the
+/// app shipped with), web still skipped. So flipping this flag is the ONLY thing
+/// that changes the providers selected (the same zero-regression invariant as
+/// [kCloudPhotos] / [kServerCallables] / [kUidScopedQueries] /
+/// [kUseFirebaseBackendFlag]). App Check does NOT enforce client-side — the
+/// `activate` call only makes the Firebase SDKs ATTACH the attestation token;
+/// rejecting un-tokened requests is a Firebase console toggle (owner's). So a
+/// failure to activate must never block app start (the call stays inside
+/// `main`'s `Firebase.apps.isNotEmpty` gate, wrapped in a non-fatal try).
+///
+/// Flip on at build time ONCE the owner has (F1) supplied the real mobile
+/// `firebase_options` AND registered the App Check attestation keys in the
+/// console (Play Integrity for Android, App Attest/DeviceCheck for Apple):
+///   flutter build … --dart-define=APP_CHECK_PROD=true
+///
+/// When ON the native providers become `AndroidProvider.playIntegrity` +
+/// `AppleProvider.appAttestWithDeviceCheckFallback` (App Attest on iOS 14+/
+/// macOS 14+, DeviceCheck fallback otherwise). Web stays skipped unless a
+/// reCAPTCHA site key is supplied at build time (`--dart-define=APP_CHECK_RECAPTCHA_SITE_KEY=…`),
+/// matching today's web-skipped behaviour when none is set.
+///
+/// Tests never initialise Firebase; the provider SELECTION is a pure helper
+/// (`appCheckProvidersFor` in `lib/main.dart`) asserted in the standard
+/// define-less suite (this flag pinned false), so the ON branch is proven
+/// WITHOUT calling `activate`.
+const bool kAppCheckProd = bool.fromEnvironment('APP_CHECK_PROD');
+
+/// TEMPORARY launch diagnostic gate (cross-device-sync investigation). When set
+/// (`--dart-define=FS_DIAG=true`) the on-device `BackendDebugBadge` is mounted in
+/// a RELEASE/profile build too (it is normally `kDebugMode`-only), so a tester
+/// running the real signed APK can run the Firestore self-test and SEE the exact
+/// failure (`permission-denied` / `failed-precondition` + a create-index URL /
+/// network) that a guarded background write otherwise swallows silently. Default
+/// OFF → the shipped build is BYTE-IDENTICAL to today (the badge stays
+/// debug-only). REMOVE this flag + the badge after the sync issue is confirmed
+/// fixed on-device.
+const bool kFsDiag = bool.fromEnvironment('FS_DIAG');
+
+/// F2 — the web reCAPTCHA v3 site key for App Check. Empty (default) → the web
+/// App Check path stays SKIPPED exactly as today; supply it at build time to
+/// activate web attestation alongside the native [kAppCheckProd] providers:
+///   flutter build web --dart-define=APP_CHECK_PROD=true \
+///       --dart-define=APP_CHECK_RECAPTCHA_SITE_KEY=6Lc…
+const String kAppCheckRecaptchaSiteKey =
+    String.fromEnvironment('APP_CHECK_RECAPTCHA_SITE_KEY');
+
+// ── Studio Pillar 5 · Phase 4 (steps 51+) — scale / backend / publish-to-all ──
+// Step 51: the DORMANT openers. All default OFF/empty with NO consumer yet
+// (consumers land steps 53+), so a normal build is byte-identical / compiler-
+// inert. Same idiom as [kUseFirebaseBackendFlag]; enable via --dart-define.
+
+/// STUDIO_LIVE — master switch for server-backed Studio config (draft→publish
+/// on Firestore). Default OFF → the Studio stays local-first exactly as today.
+const bool kStudioLive = bool.fromEnvironment('STUDIO_LIVE');
+
+/// CATALOG_SERVER_SEARCH — routes catalog search to the paged server index.
+/// Default OFF → search stays the in-memory fuzzy path (byte-identical).
+const bool kCatalogServerSearch =
+    bool.fromEnvironment('CATALOG_SERVER_SEARCH');
+
+/// CATALOG_BASE_URL — base URL for the server catalog/config API. Empty
+/// (default) → the app uses the BUNDLED const catalog, byte-identical; a
+/// non-empty value is REQUIRED before any server route activates. The empty
+/// default is load-bearing — a non-empty default would point the OFF build at a
+/// remote and break byte-identity.
+// stage-3.4: profile-aware default (explicit define still wins).
+const String kCatalogBaseUrl = String.fromEnvironment('CATALOG_BASE_URL',
+    defaultValue: kProfileCatalogBaseUrl);
+
+/// True only when server-search is flagged ON *and* the backend is live —
+/// mirrors [useFirebaseBackend], so the flag can't activate offline / in tests.
+bool get useCatalogServerSearch => kCatalogServerSearch && useFirebaseBackend;
+
+// ── Studio Pillar 4 · עמוד-4 (AI Co-Editor · steps 69-85) ──
+// Step 80: the manager-only Studio CO-EDITOR gate. DORMANT — no screen consumes
+// `studioCoEditorProvider` (lib/logic/studio/co_editor_gate.dart) yet (the
+// surface lands step 81+), so with the flag OFF the whole gate tree-shakes out.
+// Same idiom as [kClaudeAi] / [kStudioLive]; enable via --dart-define.
+
+/// STUDIO_CO_EDITOR — master switch for the manager-only Studio CO-EDITOR (the
+/// model-grounded Hebrew "tell the app what to change" config editor over the
+/// frozen Pillar-1 seams). Default OFF: the `studioCoEditorProvider` `enabled`
+/// axis reads false and — because NO screen watches the provider yet (step 81
+/// adds the cockpit surface) — the shipped build tree-shakes the gate away, so
+/// the demo/test build is BYTE-IDENTICAL to today (the same zero-regression
+/// invariant as [kClaudeAi] / [kStudioLive] / [kServerCallables]). Needs
+/// [useFirebaseBackend] too — the `enabled` axis ANDs with the live backend
+/// (mirrors [useCatalogServerSearch]), so it never activates offline / in tests.
+/// The Claude gateway (`ai`) and the manager role (`manager`) are SEPARATE,
+/// independent axes tracked by `studioCoEditorProvider` — pillar-on / gateway-off
+/// is a legal distinct state. Flip on at build time (AFTER the backend + Claude
+/// gateway are live):
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=CLAUDE_AI=true --dart-define=STUDIO_CO_EDITOR=true
+const bool kStudioCoEditor = bool.fromEnvironment('STUDIO_CO_EDITOR');
+
+// ── Studio Pillar 3 · עמוד-3 (Live Customer Intelligence · steps 86-100) ──
+// Step 86: the privacy-foundation master switch. DORMANT — born INERT off the
+// backend, the same zero-regression invariant as [kStudioLive] / [kStudioCoEditor].
+
+/// INTEL_LIVE — master switch for the LIVE customer-intelligence layer (the
+/// consent-gated analytics forward + presence). Default OFF: the consent modal
+/// is COMPILE-GATED behind this flag at its single call-site (`if (kIntelLive)`
+/// in `home_shell.dart`), so const-false in every normal build → the branch AND
+/// the whole `consent_modal.dart` surface tree-shake away and the shipped
+/// demo/test build is BYTE-IDENTICAL to today (mirrors the step-81 `_StudioHero`
+/// hero pattern). The analytics FORWARD gate ([analyticsForwardEnabled]) ANDs
+/// this with [useFirebaseBackend] AND the persisted consent version, so it never
+/// activates offline / in tests — the local ring buffer stays the only always-on
+/// piece. Step 100 flips this on (staged) after the backend + consent are live:
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=INTEL_LIVE=true
+const bool kIntelLive = bool.fromEnvironment('INTEL_LIVE');
+
+// ── User-system foundation (SPEC-user-system · step U0) ──────────────────────
+// Step U0: the unified user model + `users/{uid}` server repo. DORMANT — born
+// INERT with NO live consumer, the same zero-regression invariant as
+// [kIntelLive] / [kStudioLive].
+
+/// USER_SYSTEM — master switch for the unified user layer (the typed `BsUser`
+/// model + the `users/{uid}` repository + the login→`users` doc sync). Default
+/// OFF: every new call-site is COMPILE-GATED behind `if (kUserSystem)` (mirroring
+/// the `if (kIntelLive)` consent-modal call-site in `home_shell.dart`), so
+/// const-false in every normal build → the sync provider, the users repository
+/// and the whole `bs_user`/`users_repository`/`user_system_sync` surface
+/// tree-shake away and the shipped demo/test build is BYTE-IDENTICAL to today.
+/// The existing login / guest / profile-mirror flow is UNTOUCHED — U0 is purely
+/// additive. `usersRepositoryProvider` also ANDs this with [useFirebaseBackend],
+/// so it can never touch Firestore offline / in the Firebase-free test suite
+/// (the local in-memory repo is the OFF path). Flip on at build time once the
+/// server + rules are live (a later staged step):
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=USER_SYSTEM=true
+const bool kUserSystem = bool.fromEnvironment('USER_SYSTEM');
+
+// ── Per-user data stores (local→server migration) ────────────────────────────
+// The FIRST migrated store is the smart cart → `carts/{uid}`. DORMANT — born
+// INERT with NO live consumer under the flag, the same zero-regression invariant
+// as [kUserSystem] / [kIntelLive].
+
+/// USER_DATA_SERVER — master switch for the local→server MIGRATION of the
+/// per-user data stores (the FIRST being the smart cart → `carts/{uid}`).
+/// Default OFF: every migrated store keeps its exact SharedPreferences path, so
+/// flipping this flag is the ONLY thing that changes WHERE a user's data lives —
+/// with it OFF the build is BYTE-IDENTICAL to today (the same zero-regression
+/// invariant as [kUserSystem] / [kUidScopedQueries] / [kUseFirebaseBackendFlag]).
+///
+/// Deliberately SEPARATE from [kUserSystem]: that flag owns the `users/{uid}`
+/// IDENTITY doc, this one owns the per-user DATA stores, so cart/… migration can
+/// activate INDEPENDENTLY of the identity layer (one flag = one behaviour).
+/// `cartsRepositoryProvider` (carts_repository.dart) also ANDs this with
+/// [useFirebaseBackend] and a NON-anonymous uid, so it can never touch Firestore
+/// offline / in the Firebase-free test suite (the SharedPreferences path is the
+/// OFF path) and the anonymous catalog guest stays local. With the flag OFF the
+/// provider's Firestore branch is dead code → tree-shaken. Flip on at build time
+/// once the `carts` rules are live (a later staged step):
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=USER_DATA_SERVER=true
+const bool kUserDataServer = bool.fromEnvironment('USER_DATA_SERVER');
+
+/// Wave T3 — the CROSS-PARTY §6 tasks board (`state/tasks_engine.dart`) goes
+/// server-backed (`tasks/{taskId}`, `data/repositories/tasks_firebase.dart`).
+/// DELIBERATELY SEPARATE from [kUserDataServer]: tasks are not a per-user data
+/// store but a shared cross-party board whose activation ALSO migrates the
+/// worker IDENTITY model (the demo `int worker` index → the real
+/// `assignedWorkerUid` from `directory/{uid}`, across the worker board + the
+/// contractor's authoring picker). That is a bigger, board-touching change, so
+/// it rides its OWN flag and flips only once the whole loop (repo · role-scoped
+/// provider · 6-state rules · engine bind · uid plumbing · worker-surface uid
+/// filter) is complete and verified. OFF (the default) → the provider's Firestore
+/// branch is dead code (tree-shaken) and the engine stays the byte-identical
+/// local store — the int-worker demo path, unchanged. Flip on at build time:
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=TASKS_SERVER=true
+const bool kTasksServer = bool.fromEnvironment('TASKS_SERVER');

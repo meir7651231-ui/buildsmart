@@ -1,0 +1,147 @@
+{
+  "screen": "lipskey_brand_screen",
+  "source": "lipskey_brand_screen.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "LipskeyBrandScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "ליפסקי ברקן",
+            "registryId": "lipskey_brand_screen.appbar_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אינסטלציה · סניטציה",
+            "registryId": "lipskey_brand_screen.appbar_sub",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "context"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.push(context, LipskeySectionScreen.route(section: section))",
+            "effect": "navigate → context"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "CustomScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_BrandHeader",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🏭"
+          },
+          {
+            "kind": "cfgText",
+            "text": "ליפסקי ברקן",
+            "registryId": "lipskey_brand_screen.header_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [
+          "🏭"
+        ],
+        "summary": "registry 1 · mapped 1/1 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "totalProducts",
+          "totalCats"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SectionCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "section",
+          "prodCount",
+          "catCount",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 3,
+    "total": 3,
+    "summary": "3/3",
+    "entries": [
+      {
+        "id": "lipskey_brand_screen.appbar_title",
+        "ok": true,
+        "atom": "LipskeyBrandScreen"
+      },
+      {
+        "id": "lipskey_brand_screen.appbar_sub",
+        "ok": true,
+        "atom": "LipskeyBrandScreen"
+      },
+      {
+        "id": "lipskey_brand_screen.header_title",
+        "ok": true,
+        "atom": "_BrandHeader"
+      }
+    ]
+  }
+}

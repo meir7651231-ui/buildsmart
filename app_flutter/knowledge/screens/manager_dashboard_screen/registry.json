@@ -1,0 +1,127 @@
+{
+  "matched": 24,
+  "total": 24,
+  "summary": "24/24",
+  "entries": [
+    {
+      "id": "manager.dash.title",
+      "ok": true,
+      "atom": "ManagerDashboardScreen"
+    },
+    {
+      "id": "manager.dash.subtitle",
+      "ok": true,
+      "atom": "ManagerDashboardScreen"
+    },
+    {
+      "id": "manager.dash.exit",
+      "ok": true,
+      "atom": "ManagerDashboardScreen"
+    },
+    {
+      "id": "manager.cockpit.copilot.title",
+      "ok": true,
+      "atom": "_DashboardTab"
+    },
+    {
+      "id": "manager_dashboard_screen.studio_hero_title",
+      "ok": true,
+      "atom": "_DashboardTab"
+    },
+    {
+      "id": "manager_dashboard_screen.studio_experimental_badge",
+      "ok": true,
+      "atom": "_DashboardTab"
+    },
+    {
+      "id": "manager.dash.pipeline.title",
+      "ok": true,
+      "atom": "_DashboardTab"
+    },
+    {
+      "id": "manager.orders.empty",
+      "ok": true,
+      "atom": "_OrdersTab"
+    },
+    {
+      "id": "manager_dashboard_screen.order_completed_badge",
+      "ok": true,
+      "atom": "_OrdersTab"
+    },
+    {
+      "id": "manager_dashboard_screen.order_completed_delivered",
+      "ok": true,
+      "atom": "_OrdersTab"
+    },
+    {
+      "id": "manager.orders.advance",
+      "ok": true,
+      "atom": "_OrdersTab"
+    },
+    {
+      "id": "manager.customers.empty",
+      "ok": true,
+      "atom": "_CustomersTab"
+    },
+    {
+      "id": "manager_dashboard_screen.credit_explain_btn",
+      "ok": true,
+      "atom": "_CustomersTab"
+    },
+    {
+      "id": "manager_dashboard_screen.journey_title",
+      "ok": true,
+      "atom": "_CustomersTab"
+    },
+    {
+      "id": "manager.manage.intro",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager_dashboard_screen.approvals_empty",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager_dashboard_screen.vacations_empty",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager_dashboard_screen.producttree_intro",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager_dashboard_screen.regression_intro",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager.manage.regression.open",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager_dashboard_screen.roleassign_intro",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager.manage.roles.open",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager_dashboard_screen.approvals_intro",
+      "ok": true,
+      "atom": "_ManageTab"
+    },
+    {
+      "id": "manager.manage.approvals.open",
+      "ok": true,
+      "atom": "_ManageTab"
+    }
+  ]
+}

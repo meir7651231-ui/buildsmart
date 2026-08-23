@@ -1,0 +1,119 @@
+{
+  "screen": "worker_task_board_screen",
+  "source": "worker_task_board_screen.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "WorkerTaskBoardScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🗂️ לוח משימות מלא",
+            "registryId": "worker_task_board_screen.board_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "groupByStatus",
+        "sort",
+        "workerIndexForSession"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_StatusGroup",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "אין משימות במצב זה",
+            "registryId": "worker_task_board_screen.empty_group",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showWorkerTaskDetailSheet",
+            "target": "showWorkerTaskDetailSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showWorkerTaskDetailSheet(context, taskId: task.id)",
+            "effect": "open → showWorkerTaskDetailSheet"
+          }
+        ]
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "title",
+          "tasks"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 2,
+    "total": 2,
+    "summary": "2/2",
+    "entries": [
+      {
+        "id": "worker_task_board_screen.board_title",
+        "ok": true,
+        "atom": "WorkerTaskBoardScreen"
+      },
+      {
+        "id": "worker_task_board_screen.empty_group",
+        "ok": true,
+        "atom": "_StatusGroup"
+      }
+    ]
+  }
+}

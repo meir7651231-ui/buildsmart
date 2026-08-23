@@ -8,7 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final withSpec = kCompatCatalog.where((p) => kVerifiedSpecs[p.sku] != null).toList();
 
-  test('A. יתומים — connector/fixture שלא מתחבר לכלום', () {
+  test('A. יתומים — connector/fixture שלא מתחבר לכלום (שער: אין יתומים חדשים)', () {
+    // 7 פערי-כיסוי ידועים ב-kVerifiedSpecs (מידה/תבריג נישתי שעדיין לא שודך):
+    // מאריכי-ברז 3/8×3/8, אל-חזור 3", צינור-ניקוז-מזגן. allow-listed כדי שהשער
+    // יתפוס יתום *חדש* (רגרסיה אמיתית) בלי להיכשל על הפערים המתועדים האלה.
+    // TODO(data/קטלגן): להוסיף specs ל-3/8 + 3" + צינור-מזגן ולצמצם את הרשימה.
+    const knownOrphans = {
+      '77383815', '77383820', '77383825', '77383830', '77383840',
+      '77004408', '9899',
+    };
     final orphans = <String>[];
     for (final p in withSpec) {
       if (flowRole(p) == FlowRole.accessory) continue;
@@ -17,9 +25,14 @@ void main() {
     }
     print('\n[A] יתומים: ${orphans.length}/${withSpec.length}');
     for (final o in orphans.take(20)) print('   ⚠️ $o');
+    final unexpected =
+        orphans.where((o) => !knownOrphans.contains(o.split('|').first)).toList();
+    expect(unexpected, isEmpty,
+        reason: 'יתומים חדשים (מחוץ ל-allowlist): ${unexpected.length}\n'
+            '${unexpected.join("\n")}');
   });
 
-  test(timeout: const Timeout(Duration(minutes:3)), 'B. סימטריה דו-כיוונית (מדגם 200)', () {
+  test(timeout: const Timeout(Duration(minutes:3)), 'B. סימטריה דו-כיוונית (מדגם 40)', () {
     final rnd = Random(7);
     var asym = 0;
     for (var i = 0; i < 40; i++) {
@@ -29,7 +42,7 @@ void main() {
       final ba = findShortestPath(b, a, maxDepth: 5) != null;
       if (ab != ba) { asym++; if (asym<=10) print('   ⚠️ אסימטרי: ${a.sku}↔${b.sku} ($ab/$ba)'); }
     }
-    print('\n[B] אסימטריות: $asym/200');
+    print('\n[B] אסימטריות: $asym/40');
     expect(asym, 0);
   });
 
@@ -49,7 +62,7 @@ void main() {
     expect(leaks, 0);
   });
 
-  test(timeout: const Timeout(Duration(minutes:3)), 'D. איכות מחברים במדגם תוך-מערכתי (300)', () {
+  test(timeout: const Timeout(Duration(minutes:3)), 'D. איכות מחברים במדגם תוך-מערכתי (40)', () {
     final rnd = Random(13);
     var built = 0, badQ = 0;
     for (var i = 0; i < 40; i++) {
@@ -73,7 +86,11 @@ void main() {
     expect(badQ, 0);
   });
 
-  test('E. התאמת גודל-שם (DN mm)', () {
+  test('E. התאמת גודל-שם (DN mm) — דיאגנוסטיקה בלבד (heuristic, לא שער)', () {
+    // Print-only BY DESIGN: ה-regex תופס כל מספר DN-דמוי בשם, כולל המון false-
+    // positives (אורכים "15 ס\"מ"/"50 מ׳", תבריג "3/8") → 116 חשודים שרובם רעש.
+    // שער-קשיח (isEmpty/baseline) היה שביר (נשבר על גידול-קטלוג תמים) ורועש —
+    // נשאר ככלי-אבחון לסריקה-בעין, לא כ-invariant.
     final dnRe = RegExp(r'(?<![0-9])(16|20|25|32|40|50|63|75|90|110|125|160)(?![0-9])');
     final mism = <String>[];
     for (final p in withSpec) {

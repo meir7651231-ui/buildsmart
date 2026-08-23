@@ -1,0 +1,85 @@
+{
+  "name": "_EmployerStockSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📦 מלאי הקבלן",
+        "registryId": "worker_employer_stock_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הקבלן טרם שיתף מלאי",
+        "registryId": "worker_employer_stock_sheet.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "רשימת המלאי תוצג כאן כשתחובר עם השרת.",
+        "registryId": "worker_employer_stock_sheet.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הבקשות שלי",
+        "registryId": "worker_employer_stock_sheet.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_employer_stock_sheet.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סגור",
+        "registryId": "worker_employer_stock_sheet.t05",
+        "registryOk": true
+      }
+    ],
+    "registered": 6,
+    "unregistered": [],
+    "summary": "registry 6 · mapped 6/6 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "employerStockProvider(session?.employerId ?? '')"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "requestsForWorker(session?.username ?? '')"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "materialRequestsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "employerStockProvider",
+    "requestsForWorker",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

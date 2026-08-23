@@ -1,0 +1,421 @@
+{
+  "module": "cart_lists_state",
+  "source": "lib/state/cart_lists_state.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "CartList.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? id, String? name, List<CartItem>? items, DateTime? createdAt}) -> CartList",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "CartList(id: id ?? this.id, name: name ?? this.name, items: items ?? this.items, createdA…"
+          }
+        ]
+      },
+      "floor": [
+        "CartList"
+      ],
+      "contract": {
+        "input": "({String? id, String? name, List<CartItem>? items, DateTime? createdAt})",
+        "output": "CartList",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CartList.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "createdAt"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "items"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "{'id' : id, 'name' : name, 'items' : items.map((item) => {'emoji' : item.emoji, 'name' : …"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toIso8601String",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CartListsNotifier.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (List<CartList> value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<CartList> value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CartListsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "map",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CartListsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "CartListsNotifier.clearAllLists",
+          "CartListsNotifier.deleteList",
+          "CartListsNotifier.saveCart"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "map",
+        "setString",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CartListsNotifier.saveCart",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String name, List<CartItem> items) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_seq"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "newList = CartList(id: '${DateTime.now().microsecondsSinceEpoch}-${_seq++}', name: name, items: ite…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, newList]"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _persist()"
+          }
+        ]
+      },
+      "floor": [
+        "CartList",
+        "now"
+      ],
+      "contract": {
+        "input": "(String name, List<CartItem> items)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CartListsNotifier.deleteList",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = state.where((list) => list.id != id).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _persist()"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CartListsNotifier.clearAllLists",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = []"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

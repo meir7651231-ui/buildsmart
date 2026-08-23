@@ -1,0 +1,94 @@
+{
+  "module": "analytics_repository",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/analytics_repository.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "FirebaseAnalyticsRepository",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "uid",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "_sink",
+            "type": "AnalyticsEventSink?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_log",
+            "type": "AnalyticsLogNotifier?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_maxPending",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "_now",
+            "type": "int Function()",
+            "required": true
+          },
+          {
+            "name": "_pending",
+            "type": "List<Map<String, dynamic>>",
+            "required": false,
+            "collection": true
+          },
+          {
+            "name": "pendingCount",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "uid",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "_sink",
+            "ref": "AnalyticsEventSink",
+            "kind": "embed"
+          },
+          {
+            "field": "_log",
+            "ref": "AnalyticsLogNotifier",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "_epochNow",
+          "logEvent",
+          "_event",
+          "_enqueue",
+          "_append",
+          "flushPending"
+        ]
+      },
+      "contract": {
+        "required": [
+          "uid",
+          "_maxPending",
+          "_now"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "name": "_NotificationsSection",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+    ]
+  }
+}

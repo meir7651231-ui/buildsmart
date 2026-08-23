@@ -1,0 +1,67 @@
+{
+  "module": "grid_cell",
+  "source": "../../../app_flutter/lib/features/fittings/engine/grid_cell.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "GridCell",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "x",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "y",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "z",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "element",
+            "type": "RunElement",
+            "required": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "element",
+            "ref": "RunElement",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "stepTo"
+        ]
+      },
+      "contract": {
+        "required": [
+          "x",
+          "y",
+          "z",
+          "element"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

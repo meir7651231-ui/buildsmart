@@ -1,0 +1,295 @@
+// #20 — פרופיל מנהל ייעודי (מודל: courier_profile_screen.dart, #73).
+//
+// מציג את ה-session החי מ-[boardAuthProvider] (שם תצוגה, שם משתמש),
+// סטטיסטיקת הזמנות חיה ממנוע ההזמנות המשותף, ושתי פעולות:
+//   ⚙️ הגדרות         → CatalogSettingsScreen (אותו יעד כמו פעולת ההגדרות בלוח)
+//   🖥️ מעבר בין מסכים → showManagerScreensSheet (התחזות לכל לוח — שלב 3)
+//
+// מנהל = חשבון הבעלים: אין כאן 'יציאה'/logout (דרישת מוצר — "המנהל לא מתנתק").
+
+import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
+import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbManagerProfileNodes;
+import 'package:buildsmart/screens/manager_screens_sheet.dart';
+import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/state/under_construction.dart';
+import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// מסך עצמאי (נדחף מאייקון הפרופיל ב-AppBar של מרכז השליטה).
+class ManagerProfileScreen extends StatelessWidget {
+  const ManagerProfileScreen({super.key});
+
+  static Route<void> route() =>
+      MaterialPageRoute<void>(builder: (_) => const ManagerProfileScreen());
+
+  static final List<KbToolNode> _kbNodes = kbManagerProfileNodes();
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget body = Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
+          title: CfgText(
+            'manager_profile_screen.t01',
+            'אזור אישי — מנהל המערכת',
+            style: TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          iconTheme: const IconThemeData(color: Colors.black54),
+        ),
+        body: const SafeArea(child: _ManagerProfileBody()),
+      ),
+    );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
+  }
+}
+
+/// גוף הפרופיל — session חי + סטטיסטיקת הזמנות חיה + פעולות.
+class _ManagerProfileBody extends ConsumerWidget {
+  const _ManagerProfileBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(boardAuthProvider);
+    // כלל 4 — בלי session מנהל אין תוכן לוח; הלוח עצמו כבר מציג את השער.
+    if (session == null || session.role != BoardRole.manager) {
+      return const SizedBox.shrink();
+    }
+
+    final orders = ref.watch(sysOrdersProvider);
+    final active = orders.countAt(OrderStage.newOrder) +
+        orders.countAt(OrderStage.preparing) +
+        orders.countAt(OrderStage.ready);
+    final onRoad = orders.countAt(OrderStage.pickup) +
+        orders.countAt(OrderStage.transit);
+    final delivered = orders.countAt(OrderStage.delivered);
+    final revenue = orders.todayRevenue;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space5,
+      ),
+      children: [
+        // ── זהות (session חי) ──────────────────────────────────────────────
+        Container(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0F000000),
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF0E3),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text('👔', style: TextStyle(fontSize: 28)),
+              ),
+              const SizedBox(width: BsTokens.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      session.displayName,
+                      style: const TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      '@${session.username} · מנהל המערכת',
+                      style: const TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // "מצב הדגמה" pill — a self-declared demo badge the App Store
+              // rejects; hidden for review (kHideUnderConstruction). The
+              // session.demo state is untouched; flip the flag to restore.
+              if (session.demo && !kHideUnderConstruction)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF4D6),
+                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                  ),
+                  child: CfgText(
+                    'manager_profile_screen.t02',
+                    'מצב הדגמה',
+                    style: TextStyle(
+                      color: Color(0xFF8A6D00),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: BsTokens.space4),
+
+        // ── הזמנות — סטטיסטיקה חיה (אותו מנוע משותף של הלוח) ───────────────
+        CfgText(
+          'manager_profile_screen.t03',
+          'הזמנות — סטטיסטיקה',
+          style: TextStyle(
+            color: BsTokens.inkLight,
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        Row(
+          children: [
+            _PStat(value: '$active', label: 'פעילות 📋'),
+            _PStat(value: '$onRoad', label: 'בדרך 🚚'),
+            _PStat(value: '$delivered', label: 'נמסרו ✅'),
+          ],
+        ),
+        const SizedBox(height: BsTokens.space2),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(BsTokens.space3),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          ),
+          child: Text(
+            'הכנסות היום (פעילות): ${fMoney(revenue)}',
+            style: const TextStyle(color: BsTokens.inkLight, fontSize: 13.5),
+          ),
+        ),
+        const SizedBox(height: BsTokens.space4),
+
+        // ── פעולות ─────────────────────────────────────────────────────────
+        Card(
+          margin: EdgeInsets.zero,
+          color: Theme.of(context).colorScheme.surface,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          ),
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
+                title: CfgText(
+                  'manager_profile_screen.t04',
+                  'הגדרות',
+                  style: TextStyle(color: BsTokens.inkLight),
+                ),
+                trailing:
+                    const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+                onTap: () => Navigator.of(context).push(
+                  // Manager = platform-admin: same No-Code admin WITHOUT the
+                  // contractor profile row (governance S0 fix).
+                  CatalogSettingsScreen.route(showProfileRow: false),
+                ),
+              ),
+              const Divider(height: 1, color: Color(0xFFF0F0F0)),
+              ListTile(
+                leading: const Text('🖥️', style: TextStyle(fontSize: 20)),
+                title: CfgText(
+                  'manager_profile_screen.t05',
+                  'מעבר בין מסכים',
+                  style: TextStyle(color: BsTokens.inkLight),
+                ),
+                subtitle: CfgText(
+                  'manager_profile_screen.t06',
+                  'צפייה בכל לוח — מצב מנהל',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                ),
+                trailing:
+                    const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+                onTap: () => showManagerScreensSheet(context),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+}
+
+/// תיבת סטטיסטיקה קטנה (אותו מראה כמו _PStat בפרופיל השליח).
+class _PStat extends StatelessWidget {
+  const _PStat({required this.value, required this.label});
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0F000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

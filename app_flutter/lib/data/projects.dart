@@ -1,3 +1,5 @@
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
+
 /// @legacy index.html:6447-6451 (PROJECTS array). Verbatim.
 class Project {
   const Project({
@@ -13,7 +15,12 @@ class Project {
   final String manager;
 }
 
-const List<Project> kProjects = [
+/// clean/company2 ([kProfileEmptySeeds]): a company starts with NO projects —
+/// the three sites are demo/buildsmart content (the projects engine renders
+/// its honest-empty sentinel until real projects are added).
+const List<Project> kProjects = kProfileEmptySeeds
+    ? <Project>[]
+    : [
   Project(
     id: 'PRJ-1',
     name: 'מגדל הרצליה — קומה 4',

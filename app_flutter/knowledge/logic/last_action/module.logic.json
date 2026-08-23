@@ -1,0 +1,179 @@
+{
+  "module": "last_action",
+  "source": "lib/state/last_action.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "fn": "LastActionNotifier.record",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String kind, required String label}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "maxEntries"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "entry = UserAction(kind: kind, label: label, at: DateTime.now())"
+          },
+          {
+            "kind": "init",
+            "detail": "next = <UserAction>[entry, ...state]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if next.length > maxEntries"
+          }
+        ]
+      },
+      "floor": [
+        "UserAction",
+        "now",
+        "sublist"
+      ],
+      "contract": {
+        "input": "({required String kind, required String label})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "LastActionNotifier.clear",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = const []"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "LastActionNotifier.latest",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> UserAction?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.isEmpty ? null : state.first"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "UserAction?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "LastActionNotifier.countByKind",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String kind) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.where((a) => a.kind == kind).length"
+          }
+        ]
+      },
+      "floor": [
+        "where"
+      ],
+      "contract": {
+        "input": "(String kind)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

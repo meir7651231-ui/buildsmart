@@ -1,0 +1,256 @@
+{
+  "module": "project_mode",
+  "source": "/home/user/buildsmart/app_flutter/lib/state/project_mode.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "nextProjectMode",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProjectMode current) -> ProjectMode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch current"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProjectMode current)",
+        "output": "ProjectMode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "labelForProjectMode",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProjectMode m) -> ({String emoji, String label})",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch m"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProjectMode m)",
+        "output": "({String emoji, String label})",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectModeNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'bs.project-mode.v1'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectModeNotifier.persistValues",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<ProjectMode>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ProjectMode.values"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<ProjectMode>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectModeNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "v = await readPersistedEnum()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v != null"
+          }
+        ]
+      },
+      "floor": [
+        "readPersistedEnum"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectModeNotifier.set",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ProjectMode mode) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "setPersisted(mode)"
+          }
+        ]
+      },
+      "floor": [
+        "setPersisted"
+      ],
+      "contract": {
+        "input": "(ProjectMode mode)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectModeNotifier.isFiltering",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state != ProjectMode.any"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

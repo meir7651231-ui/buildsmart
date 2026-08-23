@@ -1,0 +1,218 @@
+<title>מנוע הרכבה — תכנון חיבור × 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{--bg:#e9edf1;--panel:#fff;--ink:#152029;--soft:#5a6b7b;--line:#d2dae2;--accent:#5a9e4b;--steel:#3f6591;--brass:#b0842f;
+    --grid:rgba(63,101,145,.09);--sky-top:#eef3ef;--sky-bot:#d9e3dc;
+    --fh:"Rubik","Heebo","Segoe UI",system-ui,"Arial Hebrew",sans-serif;
+    --fb:"Assistant","Heebo","Segoe UI",system-ui,sans-serif;--fd:ui-monospace,"JetBrains Mono",Consolas,monospace;}
+  @media (prefers-color-scheme:dark){:root{--bg:#0d141c;--panel:#151f2a;--ink:#e6edf3;--soft:#93a5b5;--line:#26333f;
+    --accent:#6cbf58;--steel:#6f97c4;--brass:#d0a24f;--grid:rgba(111,151,196,.11);--sky-top:#111d18;--sky-bot:#0a1119;}}
+  :root[data-theme="light"]{--bg:#e9edf1;--panel:#fff;--ink:#152029;--soft:#5a6b7b;--line:#d2dae2;--accent:#5a9e4b;--steel:#3f6591;--brass:#b0842f;--grid:rgba(63,101,145,.09);--sky-top:#eef3ef;--sky-bot:#d9e3dc;}
+  :root[data-theme="dark"]{--bg:#0d141c;--panel:#151f2a;--ink:#e6edf3;--soft:#93a5b5;--line:#26333f;--accent:#6cbf58;--steel:#6f97c4;--brass:#d0a24f;--grid:rgba(111,151,196,.11);--sky-top:#111d18;--sky-bot:#0a1119;}
+  *{box-sizing:border-box}html{direction:rtl}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--fb);
+    display:flex;flex-direction:column;align-items:center;padding:clamp(14px,4vw,34px) 14px 34px;gap:14px;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:26px 26px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:680px;display:flex;flex-direction:column;gap:13px}
+  .eyebrow{font-family:var(--fd);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--accent);border-radius:2px}
+  h1{font-family:var(--fh);font-weight:800;font-size:clamp(19px,4.6vw,24px);margin:0;letter-spacing:-.01em}
+  .sub{color:var(--soft);font-size:13px;margin:2px 0 0}
+  .stage{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 20px 55px -26px rgba(0,0,0,.5);
+    background:linear-gradient(180deg,var(--sky-top),var(--sky-bot))}
+  canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}
+  .lab{position:absolute;transform:translate(-50%,-120%);font-family:var(--fd);font-size:10.5px;white-space:nowrap;
+    background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--accent);color:var(--ink);
+    border-radius:7px;padding:3px 7px;pointer-events:none;box-shadow:0 4px 14px -6px rgba(0,0,0,.5)}
+  .lab.thr{border-color:var(--brass)}
+  .lab b{color:var(--accent)}.lab.thr b{color:var(--brass)}
+  .ctrl{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .ctrl button{font-family:var(--fb);font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:7px 12px}
+  .ctrl button:hover{border-color:var(--accent)}
+  .ex{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--soft)}
+  input[type=range]{accent-color:var(--accent)}
+  .bom{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .bom h2{font-family:var(--fh);font-size:13px;margin:0;padding:11px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .bom h2 span{font-family:var(--fd);font-size:10px;color:var(--soft);font-weight:400}
+  .row{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:9px 15px;font-size:12.5px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .dot{width:14px;height:14px;border-radius:4px;justify-self:center}
+  .dot.pp{background:#4f9e57}.dot.br{background:#c69a44}
+  .row .j{font-family:var(--fd);font-size:10.5px;color:var(--soft)}
+  .row .j b{color:var(--accent)}.row .j.thr b{color:var(--brass)}
+  .note{max-width:680px;font-size:11.5px;color:var(--soft);text-align:center;line-height:1.65}
+  .note b{color:var(--accent)}
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:3px}
+</style>
+
+<div class="wrap">
+  <div>
+    <span class="eyebrow">מנוע הרכבה · תכנון חיבור × 3D</span>
+    <h1>הקו שתכנון-חיבור מתכנן — מורכב ב־3D</h1>
+    <p class="sub">אותה מטא-דאטה של "קצה" מזינה את שני המנועים: מה מתחבר למה (לוגיקה) + איך זה נראה (גאומטריה).</p>
+  </div>
+
+  <div class="stage">
+    <canvas id="c" aria-label="הרכבת קו אינסטלציה תלת־ממדית"></canvas>
+    <!-- joint labels injected here -->
+  </div>
+
+  <div class="ctrl">
+    <button id="spin">▶︎ הפעל סיבוב</button>
+    <button id="reset">איפוס מבט</button>
+    <label class="ex">פיצוץ מפרקים <input id="ex" type="range" min="0" max="100" value="0"></label>
+  </div>
+
+  <div class="bom">
+    <h2>רשימת קנייה (BOM) — מנוע ה-Dijkstra <span>4 מפרקים · 0 פערים · ✅ תקין</span></h2>
+    <div id="rows"></div>
+  </div>
+  <p class="note">כל מפרק מסומן בשיטת-החיבור האמיתית (<b>ריתוך שקע</b> ל-PPR · <b style="color:var(--brass)">תבריג + PTFE</b> למעבר לפליז). ה-<code>EndType</code> שקובע במנוע הלוגי "מה מתחבר" הוא אותו קצה שהמנוע הגאומטרי מצייר. גרור לסובב · גלגלת לזום · הזז את "פיצוץ מפרקים".</p>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById('c');const gl=cv.getContext('webgl',{antialias:true,alpha:false});
+const stage=document.querySelector('.stage');
+const M={mul:(a,b)=>{const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;},
+ id:()=>{const m=new Float32Array(16);m[0]=m[5]=m[10]=m[15]=1;return m;},t:(x,y,z)=>{const m=M.id();m[12]=x;m[13]=y;m[14]=z;return m;},
+ rotZ:a=>{const m=M.id(),c=Math.cos(a),s=Math.sin(a);m[0]=c;m[1]=s;m[4]=-s;m[5]=c;return m;},
+ persp:(f,as,n,fa)=>{const t=1/Math.tan(f/2),m=new Float32Array(16);m[0]=t/as;m[5]=t;m[10]=(fa+n)/(n-fa);m[11]=-1;m[14]=2*fa*n/(n-fa);return m;},
+ mv:(m,v)=>[m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12]*v[3],m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13]*v[3],m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14]*v[3],m[3]*v[0]+m[7]*v[1]+m[11]*v[2]+m[15]*v[3]],
+ look:(e,c,u)=>{let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]],zl=Math.hypot(...z);z=z.map(v=>v/zl);
+   let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]],xl=Math.hypot(...x)||1;x=x.map(v=>v/xl);
+   let y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+   return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]);}};
+function nrm(m){const a=m[0],b=m[1],c=m[2],d=m[4],e=m[5],f=m[6],g=m[8],h=m[9],i=m[10];const A=e*i-f*h,B=f*g-d*i,C=d*h-e*g;let det=a*A+b*B+c*C;det=det?1/det:0;
+  const v=[A*det,(c*h-b*i)*det,(b*f-c*e)*det,B*det,(a*i-c*g)*det,(c*d-a*f)*det,C*det,(b*g-a*h)*det,(a*e-b*d)*det];return new Float32Array([v[0],v[3],v[6],v[1],v[4],v[7],v[2],v[5],v[8]]);}
+/* ---- primitives (revolve around X: profile = [x,r] pairs) ---- */
+function revolve(prof,seg){const P=[],N=[],I=[];for(let i=0;i<prof.length;i++){const p0=prof[i],p1=prof[(i+1)%prof.length];
+  const dx=p1[0]-p0[0],dr=p1[1]-p0[1];let nx=-dr,nr=dx;const nl=Math.hypot(nx,nr)||1;nx/=nl;nr/=nl;
+  for(let s=0;s<seg;s++){const a0=s/seg*2*Math.PI,a1=(s+1)/seg*2*Math.PI,c0=Math.cos(a0),s0=Math.sin(a0),c1=Math.cos(a1),s1=Math.sin(a1),b=P.length/3;
+   P.push(p0[0],p0[1]*c0,p0[1]*s0);N.push(nx,nr*c0,nr*s0);P.push(p1[0],p1[1]*c0,p1[1]*s0);N.push(nx,nr*c0,nr*s0);
+   P.push(p0[0],p0[1]*c1,p0[1]*s1);N.push(nx,nr*c1,nr*s1);P.push(p1[0],p1[1]*c1,p1[1]*s1);N.push(nx,nr*c1,nr*s1);
+   I.push(b,b+1,b+2,b+2,b+1,b+3);}}return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+function hexRod(sides,r,len,cx){const P=[],N=[],I=[],h=len/2;
+  for(let i=0;i<sides;i++){const a0=i/sides*2*Math.PI,a1=(i+1)/sides*2*Math.PI,am=(a0+a1)/2,nc=Math.cos(am),ns=Math.sin(am),b=P.length/3;
+   P.push(cx-h,r*Math.cos(a0),r*Math.sin(a0));N.push(0,nc,ns);P.push(cx+h,r*Math.cos(a0),r*Math.sin(a0));N.push(0,nc,ns);
+   P.push(cx-h,r*Math.cos(a1),r*Math.sin(a1));N.push(0,nc,ns);P.push(cx+h,r*Math.cos(a1),r*Math.sin(a1));N.push(0,nc,ns);I.push(b,b+1,b+2,b+2,b+1,b+3);}
+  const cL=P.length/3;P.push(cx-h,0,0);N.push(-1,0,0);const cR=P.length/3;P.push(cx+h,0,0);N.push(1,0,0);
+  const rl=[],rr=[];for(let i=0;i<=sides;i++){const a=i/sides*2*Math.PI,c=Math.cos(a),s=Math.sin(a);
+   rl.push(P.length/3);P.push(cx-h,r*c,r*s);N.push(-1,0,0);rr.push(P.length/3);P.push(cx+h,r*c,r*s);N.push(1,0,0);}
+  for(let i=0;i<sides;i++){I.push(cL,rl[i+1],rl[i]);I.push(cR,rr[i],rr[i+1]);}return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+function sphere(r,la,lo){const P=[],N=[],I=[];for(let i=0;i<=la;i++){const th=i/la*Math.PI;for(let j=0;j<=lo;j++){const ph=j/lo*2*Math.PI;
+  const x=r*Math.sin(th)*Math.cos(ph),y=r*Math.cos(th),z=r*Math.sin(th)*Math.sin(ph);P.push(x,y,z);N.push(x/r,y/r,z/r);}}
+  for(let i=0;i<la;i++)for(let j=0;j<lo;j++){const a=i*(lo+1)+j,b=a+lo+1;I.push(a,b,a+1,a+1,b,b+1);}
+  return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+function box(w,h,d){const hx=w/2,hy=h/2,hz=d/2,P=[],N=[],I=[];
+  const F=[[[hx,-hy,-hz],[hx,hy,-hz],[hx,hy,hz],[hx,-hy,hz],[1,0,0]],[[-hx,-hy,hz],[-hx,hy,hz],[-hx,hy,-hz],[-hx,-hy,-hz],[-1,0,0]],
+   [[-hx,hy,-hz],[-hx,hy,hz],[hx,hy,hz],[hx,hy,-hz],[0,1,0]],[[-hx,-hy,hz],[-hx,-hy,-hz],[hx,-hy,-hz],[hx,-hy,hz],[0,-1,0]],
+   [[-hx,-hy,hz],[hx,-hy,hz],[hx,hy,hz],[-hx,hy,hz],[0,0,1]],[[hx,-hy,-hz],[-hx,-hy,-hz],[-hx,hy,-hz],[hx,hy,-hz],[0,0,-1]]];
+  for(const f of F){const b=P.length/3;for(let k=0;k<4;k++){P.push(f[k][0],f[k][1],f[k][2]);N.push(f[4][0],f[4][1],f[4][2]);}I.push(b,b+1,b+2,b,b+2,b+3);}
+  return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+/* ---- materials ---- */
+const PP={c:[.30,.60,.37],metal:0,rough:.42},BR={c:[.83,.63,.34],metal:1,rough:.3};
+/* ---- geometry constants ---- */
+const bore=.26,Rp=.34,Rs=.5,Rv=.6;
+function tube(x0,x1,Ro){return revolve([[x0,Ro],[x1,Ro],[x1,bore],[x0,bore]],48);}
+function threadStub(x0,x1){const p=[],base=.31,amp=.035,n=54;p.push([x0,base]);
+  for(let k=0;k<=n;k++){const x=x0+k/n*(x1-x0);p.push([x,base+amp*(.5+.5*Math.sin(k/n*Math.PI*2*11))]);}
+  p.push([x1,bore],[x0,bore]);return revolve(p,48);}
+/* ---- CHAIN: parts authored along +X in [0,L]; elbow turns the frame +90° ---- */
+const CHAIN=[
+ {name:'צינור PPR 20 מ״מ',sku:'95016002',dot:'pp',joint:null,
+   gen:[{g:tube(0,2.0,Rp),mat:PP}], L:2.0},
+ {name:'מצמד PPR 20',sku:'6602000200',dot:'pp',joint:'ריתוך שקע',
+   gen:[{g:tube(0,.9,Rs),mat:PP}], L:.9},
+ {name:'ברך PPR 90° 20',sku:'6601000200',dot:'pp',joint:'ריתוך שקע',turn:true,R:1.0,
+   gen:[{g:tube(0,1.0,Rs),mat:PP,local:M.id()},
+        {g:tube(0,1.0,Rs),mat:PP,local:M.mul(M.t(1.0,0,0),M.rotZ(Math.PI/2))},
+        {g:sphere(Rs*1.06,18,26),mat:PP,local:M.t(1.0,0,0)}]},
+ {name:'מתאם PPR→תבריג ½″ (מק״ט 6702000200)',sku:'6702000200',dot:'pp',joint:'ריתוך שקע',
+   gen:[{g:tube(0,.55,Rs),mat:PP},
+        {g:hexRod(6,Rs+.03,.40,.75),mat:BR},
+        {g:threadStub(.95,1.4),mat:BR}], L:1.4},
+ {name:'ברז ניל ½″',sku:'LP-VALVE-15',dot:'br',joint:'תבריג + PTFE',thr:true,
+   gen:[{g:hexRod(6,Rv+.02,.30,.15),mat:BR},
+        {g:tube(.30,1.25,Rv),mat:BR},
+        {g:box(.85,.14,.20),mat:BR,local:M.mul(M.t(.62,Rv+.20,0),M.rotZ(.5))}], L:1.25},
+];
+/* ---- GL ---- */
+function mkProg(vs,fs){const p=gl.createProgram();const a=gl.createShader(gl.VERTEX_SHADER);gl.shaderSource(a,vs);gl.compileShader(a);gl.attachShader(p,a);
+  const b=gl.createShader(gl.FRAGMENT_SHADER);gl.shaderSource(b,fs);gl.compileShader(b);gl.attachShader(p,b);gl.linkProgram(p);return p;}
+const prog=mkProg(
+ `attribute vec3 aPos,aNormal;uniform mat4 uProj,uView,uModel;uniform mat3 uNormal;varying vec3 vN,vW;
+  void main(){vec4 w=uModel*vec4(aPos,1.);vW=w.xyz;vN=normalize(uNormal*aNormal);gl_Position=uProj*uView*w;}`,
+ `precision highp float;varying vec3 vN,vW;uniform vec3 uColor,uLight,uEye;uniform float uMetal,uRough;
+  vec3 env(vec3 d){float t=clamp(d.y*.5+.5,0.,1.);return mix(vec3(.36,.4,.46),vec3(.96,.98,1.),t)+vec3(.4)*pow(max(d.y,0.),3.);}
+  void main(){vec3 N=normalize(vN),V=normalize(uEye-vW),L=normalize(uLight);if(dot(N,V)<0.)N=-N;
+   float NdotL=max(dot(N,L),0.),NdotV=max(dot(N,V),1e-3);vec3 F0=mix(vec3(.04),uColor,uMetal);vec3 F=F0+(1.-F0)*pow(1.-NdotV,5.);
+   vec3 H=normalize(L+V);float sh=mix(14.,300.,1.-uRough);float spec=pow(max(dot(N,H),0.),sh)*(sh+8.)/25.;
+   vec3 ec=env(reflect(-V,N));vec3 amb=uColor*mix(vec3(.2,.23,.27),vec3(.55,.58,.63),N.y*.5+.5);
+   vec3 diff=uColor*(1.-uMetal)*NdotL;vec3 col=amb*.7+diff*.85+F*spec*1.4+ec*F*mix(.12,1.,uMetal)*mix(.4,1.,uMetal);
+   col=pow(col,vec3(.86));gl_FragColor=vec4(col,1.);}`);
+const A={pos:gl.getAttribLocation(prog,'aPos'),nor:gl.getAttribLocation(prog,'aNormal'),proj:gl.getUniformLocation(prog,'uProj'),
+ view:gl.getUniformLocation(prog,'uView'),model:gl.getUniformLocation(prog,'uModel'),normal:gl.getUniformLocation(prog,'uNormal'),
+ color:gl.getUniformLocation(prog,'uColor'),light:gl.getUniformLocation(prog,'uLight'),eye:gl.getUniformLocation(prog,'uEye'),metal:gl.getUniformLocation(prog,'uMetal'),rough:gl.getUniformLocation(prog,'uRough')};
+gl.enable(gl.DEPTH_TEST);gl.useProgram(prog);
+function Mesh(g){const pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,g.P,gl.STATIC_DRAW);
+ const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,g.N,gl.STATIC_DRAW);
+ const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,g.I,gl.STATIC_DRAW);return {pb,nb,ib,n:g.I.length};}
+/* build buffers once */
+const PARTS=CHAIN.map(c=>({...c,meshes:c.gen.map(m=>({mesh:Mesh(m.g),local:m.local||M.id(),mat:m.mat}))}));
+/* layout walk: returns draw list + joint world positions */
+function layout(ex){let f=M.id();const out=[],joints=[];
+  for(let i=0;i<PARTS.length;i++){const p=PARTS[i];
+    if(i>0){f=M.mul(f,M.t(ex,0,0));joints.push({pos:[f[12],f[13],f[14]],label:p.joint,thr:!!p.thr});}
+    for(const m of p.meshes)out.push({mesh:m.mesh,model:M.mul(f,m.local),mat:m.mat});
+    if(p.turn)f=M.mul(f,M.mul(M.t(p.R,p.R,0),M.rotZ(Math.PI/2)));
+    else f=M.mul(f,M.t(p.L,0,0));}
+  return {out,joints};}
+/* camera */
+const TGT=[2.0,1.7,0];
+let yaw=-0.55,pitch=0.22,dist=11.5,spin=false,EX=0;
+if(matchMedia('(prefers-reduced-motion:reduce)').matches)spin=false;
+const eye=()=>[TGT[0]+dist*Math.cos(pitch)*Math.sin(yaw),TGT[1]+dist*Math.sin(pitch),TGT[2]+dist*Math.cos(pitch)*Math.cos(yaw)];
+let W,H,lastW=0,cssW=0,cssH=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);const w=cv.clientWidth||320,h=Math.round(w*0.92);cssW=w;cssH=h;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';W=cv.width;H=cv.height;gl.viewport(0,0,W,H);}
+function hx(h){h=(h||'#d9e3dc').replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];}
+function bind(m){gl.bindBuffer(gl.ARRAY_BUFFER,m.pb);gl.enableVertexAttribArray(A.pos);gl.vertexAttribPointer(A.pos,3,gl.FLOAT,false,0,0);
+ gl.bindBuffer(gl.ARRAY_BUFFER,m.nb);gl.enableVertexAttribArray(A.nor);gl.vertexAttribPointer(A.nor,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,m.ib);}
+/* joint labels */
+const labels=[];
+function ensureLabels(n){while(labels.length<n){const d=document.createElement('div');d.className='lab';stage.appendChild(d);labels.push(d);}
+  for(let i=0;i<labels.length;i++)labels[i].style.display=i<n?'block':'none';}
+function updateLabels(joints,proj,view){ensureLabels(joints.length);
+  for(let i=0;i<joints.length;i++){const j=joints[i],cl=M.mv(proj,M.mv(view,[j.pos[0],j.pos[1],j.pos[2],1]));
+    const el=labels[i];if(cl[3]<=0){el.style.display='none';continue;}el.style.display='block';
+    const sx=(cl[0]/cl[3]*.5+.5)*cssW,sy=(1-(cl[1]/cl[3]*.5+.5))*cssH;
+    el.style.left=sx+'px';el.style.top=sy+'px';el.className='lab'+(j.thr?' thr':'');
+    el.innerHTML=`<b>◆</b> ${j.label} ✓`;}}
+function frame(){if(spin)yaw+=0.006;if(cv.clientWidth!==lastW){lastW=cv.clientWidth;resize();}
+  const bg=hx(getComputedStyle(document.documentElement).getPropertyValue('--sky-bot').trim());
+  gl.clearColor(bg[0],bg[1],bg[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const proj=M.persp(0.72,W/H,0.1,100),e=eye(),view=M.look(e,TGT,[0,1,0]);
+  gl.uniformMatrix4fv(A.proj,false,proj);gl.uniformMatrix4fv(A.view,false,view);gl.uniform3fv(A.light,[0.55,0.9,0.5]);gl.uniform3fv(A.eye,e);
+  const {out,joints}=layout(EX);
+  for(const d of out){bind(d.mesh);gl.uniformMatrix4fv(A.model,false,d.model);gl.uniformMatrix3fv(A.normal,false,nrm(d.model));
+    gl.uniform3fv(A.color,d.mat.c);gl.uniform1f(A.metal,d.mat.metal);gl.uniform1f(A.rough,d.mat.rough);gl.drawElements(gl.TRIANGLES,d.mesh.n,gl.UNSIGNED_SHORT,0);}
+  updateLabels(joints,proj,view);
+  requestAnimationFrame(frame);}
+/* interaction */
+let drag=false,px=0,py=0;
+cv.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-px)*.008;pitch=Math.max(-1.2,Math.min(1.2,pitch+(e.clientY-py)*.008));px=e.clientX;py=e.clientY;});
+addEventListener('pointerup',()=>drag=false);
+cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(6,Math.min(20,dist+e.deltaY*.012));},{passive:false});
+document.getElementById('spin').onclick=e=>{spin=!spin;e.target.textContent=spin?'⏸︎ עצור סיבוב':'▶︎ סובב';};
+document.getElementById('reset').onclick=()=>{yaw=-0.55;pitch=0.22;dist=11.5;};
+document.getElementById('ex').oninput=e=>{EX=(+e.target.value)/100*0.9;};
+/* BOM table (mirrors the engine's buy-list output) */
+const rows=document.getElementById('rows');
+CHAIN.forEach(c=>{const r=document.createElement('div');r.className='row';
+  r.innerHTML=`<span class="dot ${c.dot}"></span><span>${c.name}<br><span style="color:var(--soft);font-family:var(--fd);font-size:10px">מק״ט ${c.sku}</span></span>`+
+   (c.joint?`<span class="j${c.thr?' thr':''}">◆ ${c.joint}</span>`:`<span class="j" style="color:var(--soft)">— קצה קו</span>`);
+  rows.appendChild(r);});
+resize();requestAnimationFrame(frame);
+</script>

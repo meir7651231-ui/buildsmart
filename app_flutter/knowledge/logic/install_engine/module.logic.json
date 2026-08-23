@@ -1,0 +1,3671 @@
+{
+  "module": "install_engine",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/install_engine.dart",
+  "atomCount": 44,
+  "caches": [
+    "_compatCache",
+    "_skuCache",
+    "_syntheticPipeCache"
+  ],
+  "atoms": [
+    {
+      "fn": "_skuOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String sku) -> LipskeyCatalogProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "chainUniverse"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_skuCache"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "_autoAddCompliance",
+          "buildTreeInstallation"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_skuCache ??= {for (final p in chainUniverse) p.sku : p}"
+          },
+          {
+            "kind": "return",
+            "detail": "_skuCache![sku]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String sku)",
+        "output": "LipskeyCatalogProduct?",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "productMaxTempC",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> double?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "productSuitableForTemp"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kVerifiedSpecs[p.sku]?.maxTempC"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "double?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "productMaterial",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_autoAddCompliance"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kVerifiedSpecs[p.sku]?.material"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "productSuitableForTemp",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, int tempC) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "productMaxTempC",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_findBridge",
+          "compatibleWith"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = productMaxTempC(p)"
+          },
+          {
+            "kind": "return",
+            "detail": "t == null || tempC <= t"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, int tempC)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "lineIsSupply",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> items) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_autoAddCompliance",
+          "lineComplianceChecklist"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "items.any((p) => kVerifiedSpecs[p.sku]?.endSystems.contains(WaterSystem.supply) ?? false)"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "contains"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> items)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "connectionMethodLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b, {TradeResolution? trade}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if trade != null && trade.tradeId != 'plumbing'"
+          },
+          {
+            "kind": "compute",
+            "detail": "vA = kVerifiedSpecs[a.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if vA == null || vB == null → return ''"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final eA in vA.ends"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final eB in vB.ends"
+          },
+          {
+            "kind": "return",
+            "detail": "''"
+          }
+        ]
+      },
+      "floor": [
+        "canConnect",
+        "directMatesWith",
+        "pipeSharedWith",
+        "specOf"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b, {TradeResolution? trade})",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if vA == null || vB == null → return ''"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_galvanicallyDissimilar",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Iterable<String> mats) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_autoAddCompliance",
+          "lineComplianceChecklist"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "copperGroup = {'נחושת', 'פליז'}"
+          },
+          {
+            "kind": "init",
+            "detail": "ironGroup = {'פלדה', 'נירוסטה'}"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = mats.toSet()"
+          },
+          {
+            "kind": "return",
+            "detail": "s.intersection(copperGroup).isNotEmpty && s.intersection(ironGroup).isNotEmpty"
+          }
+        ]
+      },
+      "floor": [
+        "intersection",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(Iterable<String> mats)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_isDirectionalDevice",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "lineComplianceChecklist"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if p.categoryHe == 'אל חזור' → return true"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = p.nameHe.replaceAll('-', '').replaceAll(' ', '')"
+          },
+          {
+            "kind": "return",
+            "detail": "n.contains('אלחזור') || n.contains('אלחוזר')"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "replaceAll"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if p.categoryHe == 'אל חזור' → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_directionalContext",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> chain, int i) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "lineComplianceChecklist"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "up = i > 0 ? chain[i - 1].nameHe : null"
+          },
+          {
+            "kind": "compute",
+            "detail": "down = i < chain.length - 1 ? chain[i + 1].nameHe : null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if up != null && down != null → return 'בין \"$up\" ל-\"$down\"'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if down != null → return 'בכניסת הקו (לפני \"$down\")'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if up != null → return 'ביציאת הקו (אחרי \"$up\")'"
+          },
+          {
+            "kind": "return",
+            "detail": "'בקו'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> chain, int i)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if up != null && down != null → return 'בין \"$up\" ל-\"$down\"'",
+          "if down != null → return 'בכניסת הקו (לפני \"$down\")'",
+          "if up != null → return 'ביציאת הקו (אחרי \"$up\")'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "lineComplianceChecklist",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> chain, int tempC, Set<String> accessories, {TradeResolution? trade}) -> List<LineCheck>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHotThresholdC"
+          },
+          {
+            "kind": "const",
+            "name": "_kIsolationValveSkus"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_galvanicallyDissimilar",
+            "module": true
+          },
+          {
+            "name": "lineIsSupply",
+            "module": true
+          },
+          {
+            "name": "_isDirectionalDevice",
+            "module": true
+          },
+          {
+            "name": "_directionalContext",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "InstallationPlan.compliance"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if trade != null && trade.tradeId != 'plumbing'"
+          },
+          {
+            "kind": "compute",
+            "detail": "skus = chain.map((p) => p.sku).toSet()"
+          },
+          {
+            "kind": "compute",
+            "detail": "mats = chain.map(productMaterial).whereType<String>().toSet()"
+          },
+          {
+            "kind": "compute",
+            "detail": "hot = tempC >= _kHotThresholdC"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasPex = mats.contains('PEX')"
+          },
+          {
+            "kind": "compute",
+            "detail": "recirc = skus.contains('HW-PUMP-25') || skus.contains('HW-TEE-RECIRC')"
+          },
+          {
+            "kind": "compute",
+            "detail": "dissimilar = _galvanicallyDissimilar(mats)"
+          },
+          {
+            "kind": "compute",
+            "detail": "isolationCount = chain.where((p) => _kIsolationValveSkus.contains(p.sku) || ((p.productType == 'ברז' || p.…"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasCommercialPump = skus.contains('HW-PUMP-40')"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasManifoldOrShower = has({'HW-MANIFOLD-3', 'HW-MANIFOLD-4', 'HW-MANIFOLD-6', 'HW-SHOWER-HEAD', 'HW-TMTV-32', '…"
+          },
+          {
+            "kind": "compute",
+            "detail": "isSupply = lineIsSupply(chain)"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasGardenOutlet = chain.any((p) => p.categoryHe == 'ברזי גן' || p.categoryHe == 'ציוד גן')"
+          },
+          {
+            "kind": "return",
+            "detail": "[if (isSupply) LineCheck(recirc ? 'ברז ניתוק ×3 (כניסת דוד + אחרי משאבה + מניפולד)' : 'בר…"
+          }
+        ]
+      },
+      "floor": [
+        "LineCheck",
+        "acc",
+        "any",
+        "completion",
+        "contains",
+        "has",
+        "map",
+        "specOf",
+        "systemCoherence",
+        "toSet",
+        "where",
+        "whereType"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> chain, int tempC, Set<String> accessories, {TradeResolution? trade})",
+        "output": "List<LineCheck>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "lineInstallReminders",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "const ['שיפוע לקטע אופקי ארוך', 'נקודת בדיקה/גישה לתחזוקה']"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "productSystems",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> Set<WaterSystem>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_allSystems"
+          },
+          {
+            "kind": "const",
+            "name": "_drainCats"
+          },
+          {
+            "kind": "const",
+            "name": "_fixtureCats"
+          },
+          {
+            "kind": "const",
+            "name": "_structuralCats"
+          },
+          {
+            "kind": "const",
+            "name": "_supplyCats"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_findBridge",
+          "_findShortestPathExcluding",
+          "findShortestPath"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "c = p.categoryHe"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _supplyCats.contains(c) → return {WaterSystem.supply}"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _drainCats.contains(c) → return {WaterSystem.drainage}"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _fixtureCats.contains(c) || _structuralCats.contains(c) → return _allSystems"
+          },
+          {
+            "kind": "compute",
+            "detail": "ends = kVerifiedSpecs[p.sku]?.endSystems"
+          },
+          {
+            "kind": "return",
+            "detail": "(ends == null || ends.isEmpty) ? _allSystems : ends"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "Set<WaterSystem>",
+        "purity": "pure",
+        "precond": [
+          "if _supplyCats.contains(c) → return {WaterSystem.supply}",
+          "if _drainCats.contains(c) → return {WaterSystem.drainage}",
+          "if _fixtureCats.contains(c) || _structuralCats.contains(c) → return _allSystems"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "flowRole",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> FlowRole",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_accessorySkus"
+          },
+          {
+            "kind": "const",
+            "name": "_fixtureCats"
+          },
+          {
+            "kind": "const",
+            "name": "_structuralCats"
+          },
+          {
+            "kind": "const",
+            "name": "_terminalCats"
+          },
+          {
+            "kind": "const",
+            "name": "kHotWaterAccessorySkus"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_findBridge",
+          "_findShortestPathExcluding",
+          "_usableConnector",
+          "buildInstallation",
+          "findShortestPath"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _accessorySkus.contains(p.sku) || kHotWaterAccessorySkus.contains(p.sku) → return FlowRole.accessory"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = p.categoryHe"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _structuralCats.contains(c) → return FlowRole.accessory"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _fixtureCats.contains(c) || _terminalCats.contains(c) → return FlowRole.fixture"
+          },
+          {
+            "kind": "return",
+            "detail": "FlowRole.connector"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "FlowRole",
+        "purity": "pure",
+        "precond": [
+          "if _accessorySkus.contains(p.sku) || kHotWaterAccessorySkus.contains(p.sku) → return FlowRole.accessory",
+          "if _structuralCats.contains(c) → return FlowRole.accessory",
+          "if _fixtureCats.contains(c) || _terminalCats.contains(c) → return FlowRole.fixture"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_usableConnector",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_accessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_fixtureCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_structuralCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_terminalCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kHotWaterAccessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "flowRole",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_findShortestPathExcluding",
+          "findShortestPath"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "flowRole(p) == FlowRole.connector && kVerifiedSpecs[p.sku] != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "canConnect",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_findBridge",
+          "_findShortestPathExcluding",
+          "compatibleWith",
+          "findShortestPath"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if a.sku == b.sku → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "vA = kVerifiedSpecs[a.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if vA != null && vB != null → return vA.compatibleWith(vB)"
+          },
+          {
+            "kind": "compute",
+            "detail": "sA = a.connectionSizes.toSet()"
+          },
+          {
+            "kind": "compute",
+            "detail": "sB = b.connectionSizes.toSet()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if sA.isEmpty || sB.isEmpty || sA.intersection(sB).isEmpty → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "gA = a.connectionGender"
+          },
+          {
+            "kind": "precond",
+            "detail": "if gA != null && gB != null && gA == gB → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "mA = a.connectionMethod"
+          },
+          {
+            "kind": "precond",
+            "detail": "if mA != null && mB != null && mA != mB → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "compatibleWith",
+        "intersection",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if a.sku == b.sku → return false",
+          "if vA != null && vB != null → return vA.compatibleWith(vB)",
+          "if sA.isEmpty || sB.isEmpty || sA.intersection(sB).isEmpty → return false",
+          "if gA != null && gB != null && gA == gB → return false",
+          "if mA != null && mB != null && mA != mB → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "connectionFailReason",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "vA = kVerifiedSpecs[a.sku]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if vA != null && vB != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "sA = a.connectionSizes.toSet()"
+          },
+          {
+            "kind": "compute",
+            "detail": "sB = b.connectionSizes.toSet()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if sA.isEmpty || sB.isEmpty → return 'גודל חיבור לא ידוע'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if sA.intersection(sB).isEmpty → return 'גודל שונה: ${sA.first} ↔ ${sB.first}'"
+          },
+          {
+            "kind": "compute",
+            "detail": "gA = a.connectionGender"
+          },
+          {
+            "kind": "precond",
+            "detail": "if gA == null || gB == null → return 'מין חיבור לא ידוע'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if gA == gB"
+          },
+          {
+            "kind": "compute",
+            "detail": "mA = a.connectionMethod"
+          },
+          {
+            "kind": "branch",
+            "detail": "if mA != null && mB != null && mA != mB"
+          },
+          {
+            "kind": "return",
+            "detail": "'אין נקודת חיבור משותפת'"
+          }
+        ]
+      },
+      "floor": [
+        "intersection",
+        "map",
+        "sizes",
+        "toSet",
+        "where"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if sA.isEmpty || sB.isEmpty → return 'גודל חיבור לא ידוע'",
+          "if sA.intersection(sB).isEmpty → return 'גודל שונה: ${sA.first} ↔ ${sB.first}'",
+          "if gA == null || gB == null → return 'מין חיבור לא ידוע'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "pipeConnectionDn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "vA = kVerifiedSpecs[a.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if vA == null || vB == null → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final eA in vA.ends"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final eB in vB.ends"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "pipeSharedWith"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if vA == null || vB == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "vA == null || vB == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "compatibleWith",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct anchor, {int tempC = 20}) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_compatCache"
+          }
+        ],
+        "calls": [
+          {
+            "name": "canConnect",
+            "module": true
+          },
+          {
+            "name": "productSuitableForTemp",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_findShortestPathExcluding",
+          "findShortestPath"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_compatCache.putIfAbsent('${anchor.sku}|$tempC', () => chainUniverse.where((p) => canConn…"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "putIfAbsent",
+        "sort",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct anchor, {int tempC = 20})",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "findAlternativePaths",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct from, LipskeyCatalogProduct to, {int k = 3, int maxDepth = 6, int tempC = 20}) -> List<List<LipskeyCatalogProduct>>",
+        "constants": [
+          "1 << 30"
+        ]
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "findShortestPath",
+            "module": true
+          },
+          {
+            "name": "_findShortestPathExcluding",
+            "module": true
+          },
+          {
+            "name": "_pathCost",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if k <= 0 → return const []"
+          },
+          {
+            "kind": "init",
+            "detail": "results = <List<LipskeyCatalogProduct>>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "first = findShortestPath(from, to, maxDepth: maxDepth, tempC: tempC)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if first == null → return const []"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(first)"
+          },
+          {
+            "kind": "init",
+            "detail": "blocked = <(String, String)>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "while results.length < k"
+          },
+          {
+            "kind": "init",
+            "detail": "bestCandidate = <LipskeyCatalogProduct>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "bestCost = 1 << 30"
+          },
+          {
+            "kind": "compute",
+            "detail": "lastPath = results.last"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < lastPath.length - 1; i++"
+          },
+          {
+            "kind": "branch",
+            "detail": "if bestCandidate.isEmpty → break"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(bestCandidate)"
+          },
+          {
+            "kind": "return",
+            "detail": "results"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "any",
+        "contains",
+        "every",
+        "generate",
+        "remove"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct from, LipskeyCatalogProduct to, {int k = 3, int maxDepth = 6, int tempC = 20})",
+        "output": "List<List<LipskeyCatalogProduct>>",
+        "purity": "pure",
+        "precond": [
+          "if k <= 0 → return const []",
+          "if first == null → return const []"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pathCost",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> path) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_drainageFamily",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_edgeCost",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "findAlternativePaths"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "c = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < path.length - 1; i++"
+          },
+          {
+            "kind": "effect",
+            "detail": "c += _edgeCost(path[i], path[i + 1])"
+          },
+          {
+            "kind": "return",
+            "detail": "c"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> path)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_findShortestPathExcluding",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct from, LipskeyCatalogProduct to, {required int maxDepth, required int tempC, required Set<(String, String)> blocked}) -> List<LipskeyCatalogProduct>?",
+        "constants": [
+          "1 << 30"
+        ]
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_accessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_allSystems",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_drainCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_drainageFamily",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_fixtureCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_structuralCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_supplyCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_terminalCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kHotWaterAccessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_compatCache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "flowRole",
+            "module": true
+          },
+          {
+            "name": "productSystems",
+            "module": true
+          },
+          {
+            "name": "canConnect",
+            "module": true
+          },
+          {
+            "name": "compatibleWith",
+            "module": true
+          },
+          {
+            "name": "_usableConnector",
+            "module": true
+          },
+          {
+            "name": "_edgeCost",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "findAlternativePaths"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if from.sku == to.sku → return [from]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "sysFrom = productSystems(from)"
+          },
+          {
+            "kind": "compute",
+            "detail": "sysTo = productSystems(to)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if sysFrom.intersection(sysTo).isEmpty → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if canConnect(from, to) && !blocked.contains((from.sku, to.sku)) → return [from, to]"
+          },
+          {
+            "kind": "init",
+            "detail": "buckets = SplayTreeMap<int, List<(List<LipskeyCatalogProduct>, Set<WaterSystem>)>>()"
+          },
+          {
+            "kind": "effect",
+            "detail": "buckets[0] = [([from], sysFrom)]"
+          },
+          {
+            "kind": "init",
+            "detail": "bestCost = <String, int>{from.sku : 0}"
+          },
+          {
+            "kind": "loop",
+            "detail": "while buckets.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "cost = buckets.firstKey()!"
+          },
+          {
+            "kind": "compute",
+            "detail": "bucket = buckets[cost]!"
+          },
+          {
+            "kind": "branch",
+            "detail": "if bucket.isEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "tail = path.last"
+          },
+          {
+            "kind": "branch",
+            "detail": "if tail.sku == to.sku → return path"
+          },
+          {
+            "kind": "branch",
+            "detail": "if cost > (bestCost[tail.sku] ?? 1 << 30) → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if path.length > maxDepth → continue"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final next in compatibleWith(tail, tempC: tempC)"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "SplayTreeMap",
+        "add",
+        "contains",
+        "firstKey",
+        "intersection",
+        "putIfAbsent",
+        "remove",
+        "removeLast"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct from, LipskeyCatalogProduct to, {required int maxDepth, required int tempC, required Set<(String, String)> blocked})",
+        "output": "List<LipskeyCatalogProduct>?",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if from.sku == to.sku → return [from]",
+          "if flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture → return null",
+          "if sysFrom.intersection(sysTo).isEmpty → return null",
+          "if canConnect(from, to) && !blocked.contains((from.sku, to.sku)) → return [from, to]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture · sysFrom.intersection(sysTo).isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "findShortestPath",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct from, LipskeyCatalogProduct to, {int maxDepth = 6, int tempC = 20}) -> List<LipskeyCatalogProduct>?",
+        "constants": [
+          "1 << 30"
+        ]
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_accessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_allSystems",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_drainCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_drainageFamily",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_fixtureCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_structuralCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_supplyCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_terminalCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kHotWaterAccessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_compatCache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "flowRole",
+            "module": true
+          },
+          {
+            "name": "productSystems",
+            "module": true
+          },
+          {
+            "name": "canConnect",
+            "module": true
+          },
+          {
+            "name": "compatibleWith",
+            "module": true
+          },
+          {
+            "name": "_usableConnector",
+            "module": true
+          },
+          {
+            "name": "_edgeCost",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildInstallation",
+          "buildTreeInstallation",
+          "findAlternativePaths"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if from.sku == to.sku → return [from]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "sysFrom = productSystems(from)"
+          },
+          {
+            "kind": "compute",
+            "detail": "sysTo = productSystems(to)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if sysFrom.intersection(sysTo).isEmpty → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if canConnect(from, to) → return [from, to]"
+          },
+          {
+            "kind": "init",
+            "detail": "buckets = SplayTreeMap<int, List<(List<LipskeyCatalogProduct>, Set<WaterSystem>)>>()"
+          },
+          {
+            "kind": "effect",
+            "detail": "buckets[0] = [([from], sysFrom)]"
+          },
+          {
+            "kind": "init",
+            "detail": "bestCost = <String, int>{from.sku : 0}"
+          },
+          {
+            "kind": "loop",
+            "detail": "while buckets.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "cost = buckets.firstKey()!"
+          },
+          {
+            "kind": "compute",
+            "detail": "bucket = buckets[cost]!"
+          },
+          {
+            "kind": "branch",
+            "detail": "if bucket.isEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "tail = path.last"
+          },
+          {
+            "kind": "branch",
+            "detail": "if tail.sku == to.sku → return path"
+          },
+          {
+            "kind": "branch",
+            "detail": "if cost > (bestCost[tail.sku] ?? 1 << 30) → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if path.length > maxDepth → continue"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final next in compatibleWith(tail, tempC: tempC)"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "SplayTreeMap",
+        "add",
+        "firstKey",
+        "intersection",
+        "putIfAbsent",
+        "remove",
+        "removeLast"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct from, LipskeyCatalogProduct to, {int maxDepth = 6, int tempC = 20})",
+        "output": "List<LipskeyCatalogProduct>?",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if from.sku == to.sku → return [from]",
+          "if flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture → return null",
+          "if sysFrom.intersection(sysTo).isEmpty → return null",
+          "if canConnect(from, to) → return [from, to]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture · sysFrom.intersection(sysTo).isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "isFitting",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_fittingCats"
+          },
+          {
+            "kind": "const",
+            "name": "_fittingTypes"
+          },
+          {
+            "kind": "global",
+            "name": "companyCatalogActive"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_edgeCost",
+          "_findBridge"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_fittingCats.contains(p.categoryHe) || (companyCatalogActive && _fittingTypes.contains(p.…"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_isPipe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_pipeCats"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "isPipe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_pipeCats.contains(p.categoryHe)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "isPipe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_pipeCats",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_isPipe",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_isPipe(p)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_minBoreMmOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> double?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBspInchToMm"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_edgeCost"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "spec = kVerifiedSpecs[p.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if spec == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "min = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in spec.ends"
+          },
+          {
+            "kind": "compute",
+            "detail": "mm = "
+          },
+          {
+            "kind": "branch",
+            "detail": "switch e.type"
+          },
+          {
+            "kind": "branch",
+            "detail": "if mm == null → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if min == null || mm < min"
+          },
+          {
+            "kind": "return",
+            "detail": "min"
+          }
+        ]
+      },
+      "floor": [
+        "replaceAll",
+        "toDouble",
+        "trim",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "double?",
+        "purity": "pure",
+        "precond": [
+          "if spec == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "spec == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_edgeCost",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_drainageFamily"
+          },
+          {
+            "kind": "const",
+            "name": "_fittingCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_fittingTypes",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kBspInchToMm",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          },
+          {
+            "kind": "global",
+            "name": "companyCatalogActive",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_minBoreMmOf",
+            "module": true
+          },
+          {
+            "name": "isFitting",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_findShortestPathExcluding",
+          "_pathCost",
+          "findShortestPath"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "sa = kVerifiedSpecs[a.sku]"
+          },
+          {
+            "kind": "compute",
+            "detail": "sb = kVerifiedSpecs[b.sku]"
+          },
+          {
+            "kind": "compute",
+            "detail": "ma = sa?.material"
+          },
+          {
+            "kind": "compute",
+            "detail": "mb = sb?.material"
+          },
+          {
+            "kind": "compute",
+            "detail": "transition = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if ma == null || mb == null || ma == mb"
+          },
+          {
+            "kind": "compute",
+            "detail": "pipeBridge = 2"
+          },
+          {
+            "kind": "branch",
+            "detail": "if sa != null && sb != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "bore = _minBoreMmOf(b)"
+          },
+          {
+            "kind": "compute",
+            "detail": "boreCost = bore == null || bore >= 15 ? 0 : (15 - bore).round().clamp(0, 10)"
+          },
+          {
+            "kind": "compute",
+            "detail": "deviceFiller = isFitting(b) ? 0 : 50"
+          },
+          {
+            "kind": "return",
+            "detail": "10 + deviceFiller + transition + pipeBridge + boreCost"
+          }
+        ]
+      },
+      "floor": [
+        "clamp",
+        "contains",
+        "directMatesWith",
+        "round"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_branchLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int i) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_branchLetters"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildTreeInstallation"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'ענף ${i < _branchLetters.length ? _branchLetters[i] : (i + 1).toString()}'"
+          }
+        ]
+      },
+      "floor": [
+        "toString"
+      ],
+      "contract": {
+        "input": "(int i)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_autoAddCompliance",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> items, Map<String, int> qty, int tempC, {bool loop = false, Set<String>? accessories}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHotThresholdC"
+          },
+          {
+            "kind": "const",
+            "name": "_kIsolationValveSkus"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "isShutoff"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_skuCache",
+            "transitive": true
+          },
+          {
+            "kind": "mutation",
+            "name": "accessories.add"
+          },
+          {
+            "kind": "mutation",
+            "name": "items.insert"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_skuOf",
+            "module": true
+          },
+          {
+            "name": "lineIsSupply",
+            "module": true
+          },
+          {
+            "name": "_galvanicallyDissimilar",
+            "module": true
+          },
+          {
+            "name": "productMaterial",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildInstallation",
+          "buildTreeInstallation"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "skus = qty.keys.toSet()"
+          },
+          {
+            "kind": "compute",
+            "detail": "hot = tempC >= _kHotThresholdC"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasCommercialPump = skus.contains('HW-PUMP-40')"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasManifoldOrShower = skus.intersection({'HW-MANIFOLD-3', 'HW-MANIFOLD-4', 'HW-MANIFOLD-6', 'HW-SHOWER-HEAD', '…"
+          },
+          {
+            "kind": "compute",
+            "detail": "isSupply = lineIsSupply(items)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if isSupply && isolations() == 0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if isSupply && hot"
+          },
+          {
+            "kind": "branch",
+            "detail": "if loop"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasPex = items.any((p) => kVerifiedSpecs[p.sku]?.material == 'PEX' || (p.categoryHe == 'מחברי NTM'…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if hot && hasPex"
+          },
+          {
+            "kind": "branch",
+            "detail": "if hasCommercialPump"
+          },
+          {
+            "kind": "compute",
+            "detail": "matsFinal = items.map(productMaterial).whereType<String>().toSet()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _galvanicallyDissimilar(matsFinal)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if accessories != null"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "any",
+        "clamp",
+        "contains",
+        "indexWhere",
+        "insert",
+        "insertAt",
+        "intersection",
+        "isolations",
+        "map",
+        "toInt",
+        "toSet",
+        "where",
+        "whereType"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> items, Map<String, int> qty, int tempC, {bool loop = false, Set<String>? accessories})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_findBridge",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct from, LipskeyCatalogProduct to, int tempC) -> LipskeyCatalogProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_accessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_allSystems",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_drainCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_fittingCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_fittingTypes",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_fixtureCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_structuralCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_supplyCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_terminalCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kHotWaterAccessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse"
+          },
+          {
+            "kind": "global",
+            "name": "companyCatalogActive",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "flowRole",
+            "module": true
+          },
+          {
+            "name": "productSystems",
+            "module": true
+          },
+          {
+            "name": "isFitting",
+            "module": true
+          },
+          {
+            "name": "productSuitableForTemp",
+            "module": true
+          },
+          {
+            "name": "canConnect",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildInstallation",
+          "buildTreeInstallation"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "shared = productSystems(from).intersection(productSystems(to))"
+          },
+          {
+            "kind": "precond",
+            "detail": "if shared.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "compute",
+            "detail": "bestVerified = false"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in chainUniverse"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !isFitting(p) → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !productSuitableForTemp(p, tempC) → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !canConnect(from, p) || !canConnect(p, to) → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "isVerified = kVerifiedSpecs[p.sku] != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if best == null || (!bestVerified && isVerified)"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "intersection"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct from, LipskeyCatalogProduct to, int tempC)",
+        "output": "LipskeyCatalogProduct?",
+        "purity": "pure",
+        "precond": [
+          "if flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture → return null",
+          "if shared.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture · shared.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_isPipeProductE",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_couplingFor",
+          "_pipeBetween",
+          "_realPipeOf"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = p.productType ?? ''"
+          },
+          {
+            "kind": "return",
+            "detail": "t == 'צינור' || t == 'צנרת' || t == 'גמיש' || t == 'מאריך'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_realPipeOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String dn, Set<String> mats) -> LipskeyCatalogProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kDrainageFamily"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_isPipeProductE",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_pipeBetween"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final p in chainUniverse"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !_isPipeProductE(p) → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = kVerifiedSpecs[p.sku]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = s.material"
+          },
+          {
+            "kind": "compute",
+            "detail": "compat = mats.contains(m) || (_kDrainageFamily.contains(m) && mats.any(_kDrainageFamily.contains))"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !compat → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s.ends.any((e) => e.type == EndType.hdpeCompression && e.size == dn) → return p"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "contains"
+      ],
+      "contract": {
+        "input": "(String dn, Set<String> mats)",
+        "output": "LipskeyCatalogProduct?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_syntheticPipe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String material, String dn) -> LipskeyCatalogProduct",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_syntheticPipeCache"
+          },
+          {
+            "kind": "state",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "_pipeBetween"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "sku = 'PIPE-$material-$dn'"
+          },
+          {
+            "kind": "return",
+            "detail": "_syntheticPipeCache.putIfAbsent(sku, () {kVerifiedSpecs.putIfAbsent(sku, () => VerifiedSp…"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorEnd",
+        "LipskeyCatalogProduct",
+        "VerifiedSpec",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(String material, String dn)",
+        "output": "LipskeyCatalogProduct",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_couplingFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String dn, Set<String> mats) -> LipskeyCatalogProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kDrainageFamily"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_isPipeProductE",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_pipeBetween"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "fallback = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in chainUniverse"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _isPipeProductE(p) → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = kVerifiedSpecs[p.sku]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = s.material"
+          },
+          {
+            "kind": "compute",
+            "detail": "compat = mats.contains(m) || (_kDrainageFamily.contains(m) && mats.any(_kDrainageFamily.contains))"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !compat → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "dnEnds = s.ends.where((e) => e.type == EndType.hdpeCompression && e.size == dn).length"
+          },
+          {
+            "kind": "branch",
+            "detail": "if dnEnds >= 2 → return p"
+          },
+          {
+            "kind": "branch",
+            "detail": "if dnEnds >= 1"
+          },
+          {
+            "kind": "return",
+            "detail": "fallback"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "contains",
+        "where"
+      ],
+      "contract": {
+        "input": "(String dn, Set<String> mats)",
+        "output": "LipskeyCatalogProduct?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pipeBetween",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b) -> LipskeyCatalogProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kDrainageFamily",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_syntheticPipeCache",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_isPipeProductE",
+            "module": true
+          },
+          {
+            "name": "_couplingFor",
+            "module": true
+          },
+          {
+            "name": "_realPipeOf",
+            "module": true
+          },
+          {
+            "name": "_syntheticPipe",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "materializeChain"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "sa = kVerifiedSpecs[a.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if sa == null || sb == null → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final ea in sa.ends"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final eb in sb.ends"
+          },
+          {
+            "kind": "compute",
+            "detail": "aPipe = _isPipeProductE(a)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final ea in sa.ends"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final eb in sb.ends"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "directMatesWith",
+        "pipeSharedWith"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct a, LipskeyCatalogProduct b)",
+        "output": "LipskeyCatalogProduct?",
+        "purity": "side-effecting",
+        "precond": [
+          "if sa == null || sb == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "sa == null || sb == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "materializeChain",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> chain) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pipeBetween",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildInstallation"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if chain.length < 2 → return List.of(chain)"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <LipskeyCatalogProduct>[chain.first]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < chain.length - 1; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "pipe = _pipeBetween(chain[i], chain[i + 1])"
+          },
+          {
+            "kind": "branch",
+            "detail": "if pipe != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add(chain[i + 1])"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "of"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> chain)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [
+          "if chain.length < 2 → return List.of(chain)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildInstallation",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> anchors, {int maxDepthPerSegment = 6, int tempC = 20, Set<String> accessories = const {}, bool loop = false, bool autoCompliance = false}) -> InstallationPlan",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_accessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_fixtureCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kHotThresholdC",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kIsolationValveSkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_structuralCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_terminalCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kHotWaterAccessorySkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse"
+          },
+          {
+            "kind": "global",
+            "name": "isShutoff",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "mutation",
+            "name": "accessories.add",
+            "transitive": true
+          },
+          {
+            "kind": "mutation",
+            "name": "items.insert",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "findShortestPath",
+            "module": true
+          },
+          {
+            "name": "_findBridge",
+            "module": true
+          },
+          {
+            "name": "materializeChain",
+            "module": true
+          },
+          {
+            "name": "_autoAddCompliance",
+            "module": true
+          },
+          {
+            "name": "flowRole",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildTreeInstallation"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if anchors.isEmpty → return const InstallationPlan([], [], {})"
+          },
+          {
+            "kind": "init",
+            "detail": "items = <LipskeyCatalogProduct>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "qty = <String, int>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "gaps = <InstallationGap>[]"
+          },
+          {
+            "kind": "effect",
+            "detail": "add(anchors.first)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < anchors.length - 1; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "a = anchors[i]"
+          },
+          {
+            "kind": "compute",
+            "detail": "seg = findShortestPath(a, b, maxDepth: maxDepthPerSegment, tempC: tempC)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if seg == null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in seg.skip(1)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if loop && anchors.length >= 2"
+          },
+          {
+            "kind": "branch",
+            "detail": "if items.length >= 2"
+          },
+          {
+            "kind": "branch",
+            "detail": "if accessories.isNotEmpty && items.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if autoCompliance && items.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "terminals = items.where((p) => flowRole(p) == FlowRole.fixture).toList()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if terminals.length > 1"
+          },
+          {
+            "kind": "compute",
+            "detail": "zones = items.isEmpty ? const <String, List<String>>{} : {'קו ראשי' : items.map((p) => p.sku).toL…"
+          },
+          {
+            "kind": "return",
+            "detail": "InstallationPlan(items, gaps, qty, zones: zones)"
+          }
+        ]
+      },
+      "floor": [
+        "InstallationGap",
+        "InstallationPlan",
+        "add",
+        "addAll",
+        "clear",
+        "containsKey",
+        "fold",
+        "forEach",
+        "map",
+        "skip",
+        "sublist",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> anchors, {int maxDepthPerSegment = 6, int tempC = 20, Set<String> accessories = const {}, bool loop = false, bool autoCompliance = false})",
+        "output": "InstallationPlan",
+        "purity": "side-effecting",
+        "precond": [
+          "if anchors.isEmpty → return const InstallationPlan([], [], {})"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "manifoldOutlets",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildTreeInstallation"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if p.productType != 'מחלק' && p.categoryHe != 'מחלקים' → return 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "spec = kVerifiedSpecs[p.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if spec == null || spec.ends.length < 3 → return 0"
+          },
+          {
+            "kind": "init",
+            "detail": "counts = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in spec.ends"
+          },
+          {
+            "kind": "effect",
+            "detail": "counts[e.size] = (counts[e.size] ?? 0) + 1"
+          },
+          {
+            "kind": "compute",
+            "detail": "maxc = counts.values.fold(0, (a, b) => a > b ? a : b)"
+          },
+          {
+            "kind": "return",
+            "detail": "maxc >= 2 ? maxc : 0"
+          }
+        ]
+      },
+      "floor": [
+        "fold"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if p.productType != 'מחלק' && p.categoryHe != 'מחלקים' → return 0",
+          "if spec == null || spec.ends.length < 3 → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildTreeInstallation",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> trunk, List<LipskeyCatalogProduct> branchTargets, {int maxDepthPerSegment = 6, int tempC = 20, Set<String> accessories = const {}, bool autoCompliance = false}) -> InstallationPlan",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_branchLetters",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kHotThresholdC"
+          },
+          {
+            "kind": "const",
+            "name": "_kIsolationValveSkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "isShutoff",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_skuCache",
+            "transitive": true
+          },
+          {
+            "kind": "mutation",
+            "name": "accessories.add",
+            "transitive": true
+          },
+          {
+            "kind": "mutation",
+            "name": "items.insert",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "buildInstallation",
+            "module": true
+          },
+          {
+            "name": "manifoldOutlets",
+            "module": true
+          },
+          {
+            "name": "_branchLabel",
+            "module": true
+          },
+          {
+            "name": "findShortestPath",
+            "module": true
+          },
+          {
+            "name": "_findBridge",
+            "module": true
+          },
+          {
+            "name": "_skuOf",
+            "module": true
+          },
+          {
+            "name": "_autoAddCompliance",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "items = <LipskeyCatalogProduct>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "qty = <String, int>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "gaps = <InstallationGap>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "zones = <String, List<String>>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "engineWarnings = <String>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "manifold = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if trunk.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null)"
+          },
+          {
+            "kind": "init",
+            "detail": "builtZones = <String>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "realTargets = root == null ? const <LipskeyCatalogProduct>[] : branchTargets.where((t) => t.sku != root…"
+          },
+          {
+            "kind": "compute",
+            "detail": "outlets = manifold != null ? manifoldOutlets(manifold) : 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "cap = (outlets > 0 && outlets < realTargets.length) ? outlets : realTargets.length"
+          },
+          {
+            "kind": "branch",
+            "detail": "if manifold != null && outlets > 0 && realTargets.length > outlets"
+          },
+          {
+            "kind": "compute",
+            "detail": "routed = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var bi = 0; bi < cap; bi++"
+          },
+          {
+            "kind": "compute",
+            "detail": "t = realTargets[bi]"
+          },
+          {
+            "kind": "compute",
+            "detail": "zl = _branchLabel(routed++)"
+          },
+          {
+            "kind": "effect",
+            "detail": "builtZones.add(zl)"
+          },
+          {
+            "kind": "compute",
+            "detail": "seg = findShortestPath(root!, t, maxDepth: maxDepthPerSegment, tempC: tempC)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if seg == null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in seg.skip(1)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if manifold != null && tempC >= _kHotThresholdC && builtZones.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "trunkSkus = items.map((p) => p.sku).toSet()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if trunkSkus.contains('HW-PUMP-40') && builtZones.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if accessories.isNotEmpty && items.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if autoCompliance && items.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "InstallationPlan(items, gaps, qty, zones: zones, warnings: engineWarnings)"
+          }
+        ]
+      },
+      "floor": [
+        "InstallationGap",
+        "InstallationPlan",
+        "add",
+        "addAll",
+        "contains",
+        "containsKey",
+        "difference",
+        "fold",
+        "map",
+        "putIfAbsent",
+        "qtyOf",
+        "skip",
+        "toList",
+        "toSet",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> trunk, List<LipskeyCatalogProduct> branchTargets, {int maxDepthPerSegment = 6, int tempC = 20, Set<String> accessories = const {}, bool autoCompliance = false})",
+        "output": "InstallationPlan",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.isComplete",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "gaps"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "gaps.isEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.totalPieces",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "quantities"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "quantities.values.fold(0, (sum, q) => sum + q)"
+          }
+        ]
+      },
+      "floor": [
+        "fold"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.qtyOf",
+      "kind": "method",
+      "object": {
+        "signature": "(String sku) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "quantities"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "quantities[sku] ?? 1"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String sku)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.compliance",
+      "kind": "method",
+      "object": {
+        "signature": "(int tempC, [Set<String> accessories = const {}]) -> List<LineCheck>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHotThresholdC",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kIsolationValveSkus",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "items"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "lineComplianceChecklist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "InstallationPlan.criticalOpen"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "lineComplianceChecklist(items, tempC, accessories)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int tempC, [Set<String> accessories = const {}])",
+        "output": "List<LineCheck>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.criticalOpen",
+      "kind": "method",
+      "object": {
+        "signature": "(int tempC, [Set<String> accessories = const {}]) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "items",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "compliance",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "compliance(tempC, accessories).where((c) => !c.satisfied && c.severity == CheckSeverity.c…"
+          }
+        ]
+      },
+      "floor": [
+        "where"
+      ],
+      "contract": {
+        "input": "(int tempC, [Set<String> accessories = const {}])",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

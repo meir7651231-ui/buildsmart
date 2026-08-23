@@ -1,0 +1,94 @@
+{
+  "module": "catalog_tree",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/catalog_tree.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "CatalogNode",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "title",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "children",
+            "type": "List<CatalogNode>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "brandIds",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "lipskeyCategory",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "smartKey",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "isLeaf",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "children",
+            "ref": "CatalogNode",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "title",
+          "emoji"
+        ],
+        "defaults": {
+          "children": "const []",
+          "brandIds": "const []"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

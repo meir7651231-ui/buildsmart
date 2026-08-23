@@ -1,0 +1,90 @@
+{
+  "name": "_ConsentDialog",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "שיפור השירות — נתוני שימוש",
+        "registryId": "consent_modal.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "consent_modal.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "consent_modal.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "קראו את מדיניות הפרטיות המלאה",
+        "registryId": "consent_modal.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "consent_modal.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "לא עכשיו",
+        "registryId": "consent_modal.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "consent_modal.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אני מסכים",
+        "registryId": "consent_modal.t05",
+        "registryOk": true
+      }
+    ],
+    "registered": 8,
+    "unregistered": [],
+    "summary": "registry 8 · mapped 8/8 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "LegalScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.privacy))",
+        "effect": "navigate → LegalScreen"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": false,
+    "props": [
+      "onAgree",
+      "onDismiss"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

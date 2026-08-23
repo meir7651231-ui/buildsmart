@@ -1,0 +1,238 @@
+{
+  "module": "deep_ends",
+  "source": "lib/features/fittings/plan/deep_ends.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "_socket",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int dn) -> ConnectorEnd",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ppRThreadAdapterEnds",
+          "weldEndsFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ConnectorEnd(EndType.hdpeCompression, dn.toString())"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorEnd",
+        "toString"
+      ],
+      "contract": {
+        "input": "(int dn)",
+        "output": "ConnectorEnd",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "weldEndsFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String family, int dn) -> List<ConnectorEnd>?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kWeldSockets"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_socket",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = _kWeldSockets[family]"
+          },
+          {
+            "kind": "return",
+            "detail": "n == null ? null : List<ConnectorEnd>.generate(n, (_) => _socket(dn))"
+          }
+        ]
+      },
+      "floor": [
+        "List"
+      ],
+      "contract": {
+        "input": "(String family, int dn)",
+        "output": "List<ConnectorEnd>?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "ppRThreadAdapterEnds",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int socketDn, {String? threadInch, bool? male}) -> List<ConnectorEnd>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_socket",
+            "module": true
+          },
+          {
+            "name": "_canonBsp",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ppRThreadAdapterSpec"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "ends = <ConnectorEnd>[_socket(socketDn)]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if threadInch != null && male != null"
+          },
+          {
+            "kind": "return",
+            "detail": "ends"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorEnd",
+        "add"
+      ],
+      "contract": {
+        "input": "(int socketDn, {String? threadInch, bool? male})",
+        "output": "List<ConnectorEnd>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_canonBsp",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String inch) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ppRThreadAdapterEnds"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = inch.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "t.contains('\"') ? t : '$t\"'"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String inch)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ppRThreadAdapterSpec",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required String sku, required int socketDn, String? threadInch, bool? male}) -> VerifiedSpec",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPprMaterial"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "ppRThreadAdapterEnds",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "VerifiedSpec(sku: sku, material: kPprMaterial, ends: ppRThreadAdapterEnds(socketDn, threa…"
+          }
+        ]
+      },
+      "floor": [
+        "VerifiedSpec"
+      ],
+      "contract": {
+        "input": "({required String sku, required int socketDn, String? threadInch, bool? male})",
+        "output": "VerifiedSpec",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

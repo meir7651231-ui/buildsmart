@@ -1,0 +1,64 @@
+{
+  "name": "WorkerTodayStrip",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📅 היום שלי",
+        "registryId": "worker.today.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין שלבי-יום מתוכננים עבורך בפרויקט",
+        "registryId": "worker.today.empty",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✅ כל שלבי-היום שלך בפרויקט הושלמו",
+        "registryId": "worker.today.alldone",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartProjectProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "toggle",
+        "target": "smartProjectProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "buildDayStages"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": false,
+    "props": [
+      "worker"
+    ],
+    "untangle": [
+      "onSmartProject(…) callback instead of direct smartProjectProvider write"
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "module": "default_brand_resolver",
+  "source": "../../../app_flutter/lib/state/default_brand_resolver.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "resolveDefaultBrandIndex",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required SmartProduct sp, required String? cardSelection, required String? brandHistoryFav}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if cardSelection != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if brandHistoryFav != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "ri = sp.brands.indexWhere((b) => b.rec)"
+          },
+          {
+            "kind": "return",
+            "detail": "ri >= 0 ? ri : 0"
+          }
+        ]
+      },
+      "floor": [
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "({required SmartProduct sp, required String? cardSelection, required String? brandHistoryFav})",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

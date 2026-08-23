@@ -1,0 +1,11 @@
+node_modules/
+firestore-debug.log
+firebase-debug.log
+ui-debug.log
+*.log
+# The ROOT .gitignore ignores every package.json/package-lock.json (a legacy
+# PWA-era rule, root .gitignore:18-19) — re-include this harness's manifest +
+# lockfile, otherwise the documented `npm install` CI step (README.md) has no
+# dependency list to install from. Mirrors functions/.gitignore.
+!package.json
+!package-lock.json

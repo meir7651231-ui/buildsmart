@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -55,7 +56,7 @@ class CartList {
           .map((item) => (
                 emoji: item['emoji'] as String,
                 name: item['name'] as String,
-                qty: item['qty'] as int,
+                qty: (item['qty'] as num).toInt(),
                 price: item['price'] as String,
               ))
           .toList(),
@@ -69,18 +70,42 @@ class CartListsNotifier extends StateNotifier<List<CartList>> {
     _load();
   }
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a mutation that arrived before prefs.
+  bool _loaded = false;
+
+  /// Monotonic id suffix — web DateTime is ~1ms-precise, so two saves in the
+  /// same millisecond would collide on a timestamp-only id, and `deleteList(id)`
+  /// would then remove BOTH. Mirrors worker_notifs / worker_trainings.
+  int _seq = 0;
+
+  @override
+  set state(List<CartList> value) {
+    _loaded = true; // mutation happened — block any pending _load
+    super.state = value;
+  }
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final json = prefs.getString('bs.cart-lists.v1');
-      if (json != null) {
-        final decoded = jsonDecode(json) as List<dynamic>;
-        state = decoded
-            .map((item) => CartList.fromJson(item as Map<String, dynamic>))
-            .toList();
+      if (json == null) {
+        _loaded = true;
+        return;
+      }
+      final decoded = jsonDecode(json) as List<dynamic>;
+      final list = decoded
+          .map((item) => CartList.fromJson(item as Map<String, dynamic>))
+          .toList();
+      if (!_loaded) {
+        super.state = list; // bypass setter so we don't re-persist on load
+        _loaded = true;
       }
     } catch (e) {
-      // Silently fail on malformed data
+      // Corrupt persisted payload — reset to empty, but LOG it: a silent reset
+      // would make a decode regression invisible in the field.
+      debugPrint('cart-lists: corrupt payload, resetting to empty: $e');
+      _loaded = true;
     }
   }
 
@@ -96,7 +121,7 @@ class CartListsNotifier extends StateNotifier<List<CartList>> {
 
   Future<void> saveCart(String name, List<CartItem> items) async {
     final newList = CartList(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: '${DateTime.now().microsecondsSinceEpoch}-${_seq++}',
       name: name,
       items: items,
       createdAt: DateTime.now(),

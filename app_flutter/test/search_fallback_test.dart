@@ -1,6 +1,6 @@
 // Roadmap step 62 — the UI's product-search uses a three-tier fallback chain
 // (AND → OR → fuzzy) so a user never hits a dead end. We lock the contract
-// statically: `_SearchResultsList` references all three matchers, and
+// statically: `diveResultsProvider` references all three matchers, and
 // `fuzzySearchProducts` actually returns results on a typical Hebrew query.
 
 import 'dart:io';

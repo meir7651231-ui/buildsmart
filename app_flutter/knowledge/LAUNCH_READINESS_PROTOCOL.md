@@ -70,9 +70,11 @@
 
 ## פאזה A — אוריינטציה ומיפוי (1–10)
 
-0. **יישור-ענף (לפני הכל):** `git fetch origin claude/whats-happening-LyY9G` →
-   `git checkout` אליו → `git reset --hard origin/...` → אמת `git rev-parse HEAD`
-   מול הרימוט. "קובץ חסר"? בדוק `git ls-tree -r origin/<branch>` לפני שמכריזים.
+0. **יישור-ענף בטוח (לפני הכל):** `git fetch` → בדוק `git status` + `git rev-list
+   --left-right --count origin/<branch>...HEAD`. נקי+ahead=0 → `git merge --ff-only`.
+   **ahead>0 או dirty → עצור, אל תאפס** (לקח #63 — `reset --hard` עיוור מוחק עבודה
+   לא-דחופה; ראה AGENT_COORDINATION "יישור-ענף בטוח"). "קובץ חסר"? בדוק
+   `git ls-tree -r origin/<branch>` לפני שמכריזים.
 1. קרא `CLAUDE.md` — הפנם את מבנה שני-הפרויקטים (`app/` Preact · `app_flutter/`).
 2. קרא `knowledge/README.md` · `STATUS.md` · `ARCHITECTURE.md` · `CONVENTIONS.md`.
 3. קרא `WIRING.md` · `STATE_OVERVIEW.md` · `HELPER_INDEX.md` — מה כבר מתועד.

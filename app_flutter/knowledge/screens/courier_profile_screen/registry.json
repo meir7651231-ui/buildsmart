@@ -1,0 +1,97 @@
+{
+  "matched": 18,
+  "total": 18,
+  "summary": "18/18",
+  "entries": [
+    {
+      "id": "courier_profile_screen.stats_heading",
+      "ok": true,
+      "atom": "CourierProfileBody"
+    },
+    {
+      "id": "courier.profile.settings_title",
+      "ok": true,
+      "atom": "CourierProfileBody"
+    },
+    {
+      "id": "courier.profile.role_switch_title",
+      "ok": true,
+      "atom": "CourierProfileBody"
+    },
+    {
+      "id": "courier_profile_screen.role_switch_subtitle",
+      "ok": true,
+      "atom": "CourierProfileBody"
+    },
+    {
+      "id": "courier.profile.logout_title",
+      "ok": true,
+      "atom": "CourierProfileBody"
+    },
+    {
+      "id": "courier_profile_screen.demo_chip",
+      "ok": true,
+      "atom": "_CourierIdentityCard"
+    },
+    {
+      "id": "courier.personal.attendance_title",
+      "ok": true,
+      "atom": "_CourierPersonalAreaCard"
+    },
+    {
+      "id": "courier_profile_screen.attendance_subtitle",
+      "ok": true,
+      "atom": "_CourierPersonalAreaCard"
+    },
+    {
+      "id": "courier.personal.forms_title",
+      "ok": true,
+      "atom": "_CourierPersonalAreaCard"
+    },
+    {
+      "id": "courier_profile_screen.forms_subtitle",
+      "ok": true,
+      "atom": "_CourierPersonalAreaCard"
+    },
+    {
+      "id": "courier.personal.certs_title",
+      "ok": true,
+      "atom": "_CourierPersonalAreaCard"
+    },
+    {
+      "id": "courier_profile_screen.certs_subtitle",
+      "ok": true,
+      "atom": "_CourierPersonalAreaCard"
+    },
+    {
+      "id": "courier.personal.payslips_title",
+      "ok": true,
+      "atom": "_CourierPersonalAreaCard"
+    },
+    {
+      "id": "courier_profile_screen.payslips_subtitle",
+      "ok": true,
+      "atom": "_CourierPersonalAreaCard"
+    },
+    {
+      "id": "courier_profile_screen.role_switch_dialog_title",
+      "ok": true,
+      "atom": "_RoleSwitchCodeDialog"
+    },
+    {
+      "id": "courier_profile_screen.role_switch_dialog_body",
+      "ok": true,
+      "atom": "_RoleSwitchCodeDialog"
+    },
+    {
+      "id": "courier_profile_screen.dialog_cancel",
+      "ok": true,
+      "atom": "_RoleSwitchCodeDialog"
+    },
+    {
+      "id": "courier_profile_screen.dialog_confirm",
+      "ok": true,
+      "atom": "_RoleSwitchCodeDialog"
+    }
+  ]
+}

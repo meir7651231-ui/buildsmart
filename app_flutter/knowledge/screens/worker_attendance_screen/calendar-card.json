@@ -1,0 +1,80 @@
+{
+  "name": "_CalendarCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_attendance_screen.prev",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ הקודם",
+        "registryId": "worker_attendance_screen.prev",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_attendance_screen.next",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הבא ›",
+        "registryId": "worker_attendance_screen.next",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין רישומי נוכחות בחודש זה",
+        "registryId": "worker_attendance_screen.no_records",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סה\"כ חודשי",
+        "registryId": "worker_attendance_screen.month_total",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📍"
+      }
+    ],
+    "registered": 6,
+    "unregistered": [
+      "📍"
+    ],
+    "summary": "registry 6 · mapped 6/6 · unregistered 1"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "attendanceDateKey",
+    "cfgRadius",
+    "mapsQueryForDay",
+    "onTapDay"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "month",
+      "byKey",
+      "total",
+      "dayCount",
+      "canGoNext",
+      "onPrev",
+      "onNext",
+      "onTapDay"
+    ],
+    "untangle": []
+  }
+}

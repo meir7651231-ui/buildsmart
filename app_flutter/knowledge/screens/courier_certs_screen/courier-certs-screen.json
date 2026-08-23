@@ -1,0 +1,116 @@
+{
+  "name": "CourierCertsScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🪪 תעודות נהג",
+        "registryId": "courier.certs.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🪪 הוספת תעודה",
+        "registryId": "courier.certs.sheet_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מילוי מהיר — ממלא את שם התעודה בלבד:",
+        "registryId": "courier_certs_screen.quick_fill_hint",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📅"
+      },
+      {
+        "kind": "cfgText",
+        "text": "📷 צרף צילום תעודה (לא חובה)",
+        "registryId": "courier_certs_screen.attach_photo",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📷 צילום צורף ✓",
+        "registryId": "courier_certs_screen.photo_attached",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "courier.certs.save_button",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💾 שמור תעודה",
+        "registryId": "courier.certs.save_button",
+        "registryOk": true
+      }
+    ],
+    "registered": 7,
+    "unregistered": [
+      "📅"
+    ],
+    "summary": "registry 7 · mapped 7/7 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "courierCertsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "remove",
+        "target": "courierCertsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showDatePicker",
+        "target": "showDatePicker"
+      },
+      {
+        "kind": "writes",
+        "via": "add",
+        "target": "courierCertsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "confirmDestructive",
+    "pickTaskPhoto",
+    "setSheetState",
+    "sort"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

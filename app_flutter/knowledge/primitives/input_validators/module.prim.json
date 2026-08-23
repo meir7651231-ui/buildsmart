@@ -1,0 +1,119 @@
+{
+  "module": "input_validators",
+  "source": "../../../app_flutter/lib/logic/input_validators.dart",
+  "primitiveCount": 8,
+  "primitives": [
+    {
+      "name": "validIsraeliMobile",
+      "line": 11,
+      "signature": "(String input) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "RegExp.hasMatch",
+          "note": "a regex shape gate (returns the boolean match)"
+        }
+      ]
+    },
+    {
+      "name": "validEmail",
+      "line": 17,
+      "signature": "(String input) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": [
+        {
+          "signal": ".trim()",
+          "note": "surrounding whitespace trimmed"
+        },
+        {
+          "signal": "RegExp.hasMatch",
+          "note": "a regex shape gate (returns the boolean match)"
+        }
+      ]
+    },
+    {
+      "name": "validBusinessId",
+      "line": 29,
+      "signature": "(String input) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "% 10 == 0",
+          "note": "invalid check digit → false (1-2-1-2 weighted checksum, mod 10)"
+        },
+        {
+          "signal": "RegExp.hasMatch",
+          "note": "a regex shape gate (returns the boolean match)"
+        }
+      ]
+    },
+    {
+      "name": "normalizePhone",
+      "line": 48,
+      "signature": "(String input) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "isEmpty → \"\"",
+          "note": "no usable characters → \"\" (caller decides what empty means)"
+        }
+      ]
+    },
+    {
+      "name": "validBoardCode",
+      "line": 59,
+      "signature": "(String input) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "RegExp.hasMatch",
+          "note": "a regex shape gate (returns the boolean match)"
+        }
+      ]
+    },
+    {
+      "name": "waMeDigits",
+      "line": 74,
+      "signature": "(String input) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "isEmpty → \"\"",
+          "note": "no usable characters → \"\" (caller decides what empty means)"
+        }
+      ]
+    },
+    {
+      "name": "validPositiveAmount",
+      "line": 91,
+      "signature": "(num? value) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "null-guard",
+          "note": "null argument → false / degrades (never throws on null)"
+        }
+      ]
+    },
+    {
+      "name": "validDateRange",
+      "line": 95,
+      "signature": "(DateTime start, DateTime end) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": [
+        {
+          "signal": ".isAfter(",
+          "note": "boundary is strict (end must be strictly after start)"
+        }
+      ]
+    }
+  ]
+}

@@ -3,16 +3,23 @@
 // Extracted from compat_screen.dart so the UI can be rebuilt on top of it.
 import 'dart:collection';
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/domain/connection_resolver.dart';
+import 'package:buildsmart/domain/connection_schema.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ── O(1) catalog lookup ──────────────────────────────────────────────────────
-// Built once on first use; avoids repeated O(n) scans across kCompatCatalog.
+// Built once on first use; avoids repeated O(n) scans across chainUniverse.
+// Safe as a lazy cache: the company overlay hydrates BEFORE runApp
+// (company_catalog_store), so the first read already sees the live universe.
 Map<String, LipskeyCatalogProduct>? _skuCache;
 LipskeyCatalogProduct? _skuOf(String sku) {
-  _skuCache ??= {for (final p in kCompatCatalog) p.sku: p};
+  _skuCache ??= {for (final p in chainUniverse) p.sku: p};
   return _skuCache![sku];
 }
 
@@ -85,9 +92,43 @@ class LineCheck {
   final CheckSeverity severity;
 }
 
+/// s41: the delegation seam. Carried by the (future, s43) provider layer —
+/// nothing live passes it yet; the kTradeStudioFlag gate lives at that layer.
+/// R1-2 KEYSTONE CONTRACT: plumbing ('plumbing') NEVER delegates — its
+/// hand-written physics branch below is permanent and non-deletable.
+@immutable
+class TradeResolution {
+  const TradeResolution({required this.tradeId, required this.resolver, required this.specOf});
+  final String tradeId;
+  final ConnectionResolver resolver;
+  final ProductConnectorSpec? Function(String sku) specOf;
+}
+
 /// The physical join method between two mating products, derived from end types
 /// — so each transition states exactly how it's connected (Press / PTFE / …).
-String connectionMethodLabel(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+///
+/// [trade]: optional s41 authored-trade delegation seam — see [TradeResolution].
+String connectionMethodLabel(
+  LipskeyCatalogProduct a,
+  LipskeyCatalogProduct b, {
+  TradeResolution? trade,
+}) {
+  // s41 delegation seam. R1-2 KEYSTONE: plumbing NEVER enters the resolver —
+  // this runtime guard is unconditional and deliberately carries NO assert
+  // (a plumbing TradeResolution must be silently ignored in every build mode;
+  // the delegation tests enforce it by passing a throwing specOf).
+  if (trade != null && trade.tradeId != 'plumbing') {
+    try {
+      final sa = trade.specOf(a.sku);
+      final sb = trade.specOf(b.sku);
+      if (sa == null || sb == null) return '';
+      return trade.resolver.canConnect(sa, sb).methodLabelHe;
+    } on Object {
+      // Kill-switch (plan addition-B): any resolver failure falls through to
+      // the legacy hand-written physics branch below — silently, no print.
+    }
+  }
+
   final vA = kVerifiedSpecs[a.sku], vB = kVerifiedSpecs[b.sku];
   if (vA == null || vB == null) return '';
   for (final eA in vA.ends) {
@@ -108,10 +149,95 @@ String connectionMethodLabel(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return '';
 }
 
+/// Galvanic corrosion needs a dielectric union only between DISSIMILAR metal
+/// GROUPS: a copper-group metal (נחושת/פליז) joined to an iron-group metal
+/// (פלדה/נירוסטה). Same-group joints (copper↔brass) are galvanically benign and
+/// must NOT be flagged. Returns true only when BOTH groups are present in [mats].
+/// (Fixes the old predicate that required copper specifically — so it missed
+/// brass↔steel — and omitted stainless entirely.)
+bool _galvanicallyDissimilar(Iterable<String> mats) {
+  const copperGroup = {'נחושת', 'פליז'};
+  const ironGroup = {'פלדה', 'נירוסטה'};
+  final s = mats.toSet();
+  return s.intersection(copperGroup).isNotEmpty &&
+      s.intersection(ironGroup).isNotEmpty;
+}
+
+/// A one-way (directional) flow device — a copper check valve (אל-חזור / אלחוזר,
+/// flap or spring) or a sewage backflow preventer (category 'אל חזור'). These
+/// must be installed facing the flow; the engine models their two ends as
+/// identical (so it cannot yet reject a backwards orientation), so a line that
+/// contains one is flagged for manual orientation verification.
+bool _isDirectionalDevice(LipskeyCatalogProduct p) {
+  if (p.categoryHe == 'אל חזור') return true;
+  final n = p.nameHe.replaceAll('-', '').replaceAll(' ', '');
+  return n.contains('אלחזור') || n.contains('אלחוזר');
+}
+
+/// Where a directional device at [i] sits in the built [chain], named by its
+/// neighbours — so the installer knows EXACTLY which valve, and between which two
+/// parts, to orient for flow (concrete, always-correct guidance; the engine can't
+/// compute the flow direction itself since the valve's two ends are identical).
+String _directionalContext(List<LipskeyCatalogProduct> chain, int i) {
+  final up = i > 0 ? chain[i - 1].nameHe : null;
+  final down = i < chain.length - 1 ? chain[i + 1].nameHe : null;
+  if (up != null && down != null) return 'בין "$up" ל-"$down"';
+  if (down != null) return 'בכניסת הקו (לפני "$down")';
+  if (up != null) return 'ביציאת הקו (אחרי "$up")';
+  return 'בקו';
+}
+
 /// Detects the safety/durability components a hot line requires and whether the
 /// current chain includes them — turning expert review into an automatic gate.
+///
+/// [trade]: optional s41 authored-trade delegation seam — see [TradeResolution].
 List<LineCheck> lineComplianceChecklist(
-    List<LipskeyCatalogProduct> chain, int tempC, Set<String> accessories) {
+  List<LipskeyCatalogProduct> chain,
+  int tempC,
+  Set<String> accessories, {
+  TradeResolution? trade,
+}) {
+  // s41 delegation seam — same R1-2 unconditional runtime guard as
+  // connectionMethodLabel: plumbing NEVER enters the resolver. v1 semantics
+  // for an AUTHORED trade: its checklist IS its rule violations — completion
+  // issues plus a system-coherence breach — returned as unsatisfied checks
+  // (no violations → empty checklist). Unknown skus (null spec) are skipped.
+  if (trade != null && trade.tradeId != 'plumbing') {
+    try {
+      final line = <ProductConnectorSpec>[
+        for (final p in chain)
+          if (trade.specOf(p.sku) case final s?) s,
+      ];
+      final coherence = trade.resolver.systemCoherence(line);
+      final mixedSku = coherence.offendingSku;
+      return <LineCheck>[
+        for (final issue in trade.resolver.completion(line))
+          LineCheck(
+            issue.whyHe,
+            false,
+            issue.whyHe,
+            severity: switch (issue.severity) {
+              RuleSeverity.critical => CheckSeverity.critical,
+              RuleSeverity.warning => CheckSeverity.warning,
+              RuleSeverity.info => CheckSeverity.info,
+            },
+          ),
+        if (!coherence.coherent)
+          LineCheck(
+            'ערבוב מערכות (אספקה/ניקוז)',
+            false,
+            mixedSku == null
+                ? 'הקו מערבב יותר ממערכת אחת'
+                : 'הקו מערבב יותר ממערכת אחת — רכיב חורג: $mixedSku',
+            severity: CheckSeverity.critical,
+          ),
+      ];
+    } on Object {
+      // Kill-switch (plan addition-B): any resolver failure falls through to
+      // the legacy plumbing checklist below — silently, by design (no print).
+    }
+  }
+
   final skus = chain.map((p) => p.sku).toSet();
   final mats = chain.map(productMaterial).whereType<String>().toSet();
   bool has(Set<String> ok) => skus.any(ok.contains);
@@ -120,9 +246,9 @@ List<LineCheck> lineComplianceChecklist(
   final hot    = tempC >= _kHotThresholdC;
   final hasPex = mats.contains('PEX');
   final recirc = skus.contains('HW-PUMP-25') || skus.contains('HW-TEE-RECIRC');
-  // Galvanic risk: copper joined to ANY other metal (brass/steel) — conservative.
-  final metals = mats.where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה');
-  final dissimilar = mats.contains('נחושת') && metals.toSet().length >= 2;
+  // Galvanic risk: a copper-group metal joined to an iron-group metal
+  // (see _galvanicallyDissimilar) — catches brass↔steel and any↔stainless.
+  final dissimilar = _galvanicallyDissimilar(mats);
   // Count BOTH synthetic and real catalog ball valves as shutoffs.
   final isolationCount = chain
       .where((p) =>
@@ -154,6 +280,11 @@ List<LineCheck> lineComplianceChecklist(
   // Supply-side compliance only applies to a pressurised supply line — a
   // gravity drainage line (traps + drain pipe) doesn't take an isolation valve.
   final isSupply = lineIsSupply(chain);
+  // A garden tap / hose outlet can back-siphon dirty water into the potable
+  // supply; code requires a vacuum-breaker (anti-siphon) device. No such product
+  // exists in the catalog yet, so this surfaces the requirement (warning) instead
+  // of silently passing — it cannot be auto-satisfied (no SKU to insert).
+  final hasGardenOutlet = chain.any((p) => p.categoryHe == 'ברזי גן' || p.categoryHe == 'ציוד גן');
 
   return [
     if (isSupply)
@@ -164,6 +295,21 @@ List<LineCheck> lineComplianceChecklist(
           recirc ? isolationCount >= 3 : isolationCount >= 1,
           'בידוד אזורי לתחזוקה',
           severity: CheckSeverity.critical),
+    if (isSupply && hasGardenOutlet)
+      LineCheck('שובר-ואקום למניעת זרימה-חוזרת', false,
+          'ברז-גן/חיבור-צינור דורש הגנה מפני זרימה-חוזרת למי-שתייה — '
+          'אין מק"ט בקטלוג, יש לספק בנפרד',
+          severity: CheckSeverity.warning),
+    // One check PER directional device: name it + where it sits, so the installer
+    // can orient EACH valve for flow. The engine can't reject a backwards mount
+    // (a check valve's two ends are modelled identically) — but it pinpoints
+    // which valve, and between which two parts, to orient.
+    for (var i = 0; i < chain.length; i++)
+      if (_isDirectionalDevice(chain[i]))
+        LineCheck('כיוון התקנה: ${chain[i].nameHe}', false,
+            'שסתום חד-כיווני ${_directionalContext(chain, i)} — '
+            'התקן בכיוון-הזרימה (אוריינטציה אינה מאומתת אוטומטית)',
+            severity: CheckSeverity.warning),
     if (recirc) ...[
       LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}),
           'מונע זרימה הפוכה בלולאה', severity: CheckSeverity.critical),
@@ -270,6 +416,29 @@ const _structuralCats = {
   'ידיות אחיזה', 'ארונות מחלק',
 };
 
+/// TERMINAL devices: a trap, a floor/roof drain, or a draw-off tap each serves a
+/// SINGLE fixture. Like a toilet/sink, a terminal may only sit at a line ENDPOINT
+/// — never spliced mid-line, and never two-on-one-line (a second trap downstream
+/// is a double-trap; two taps in series is two fixtures on one feed — both
+/// physically invalid). flowRole() maps these to FlowRole.fixture so the existing
+/// "fixtures are endpoint-only" machinery covers them too. They are NOT in
+/// _fixtureCats because productSystems() must still pin them to one system
+/// (drainage taps→drainage, supply taps→supply), not span both.
+/// Shower chain (E8): a HEAD (ראשי מקלחת) and a HAND-SPRAYER (מזלפי יד) are
+/// dead-end spray OUTLETS — terminals. But the ARM (זרועות דוש) and the MIXER
+/// (ברזי מקלחת) are in-line: the legitimate line is mixer→arm→head, so they stay
+/// connectors (otherwise mixer+head = two terminals would block the real chain).
+/// Deliberately EXCLUDED (genuinely in-line): ברזי מעבר (ball/stop valves),
+/// אל חזור (check valves — directional, handled by the flow-direction model).
+const _terminalCats = {
+  // drainage terminals (one per fixture; the body is not a through-fitting)
+  'סיפונים', 'מחסומים גלויים', 'מחסומי רצפה', 'מאספי רצפה',
+  'תעלות ניקוז', 'ניקוז גג', 'מאספים וקולטים',
+  // supply draw-off taps + shower spray outlets (terminal — the line ends here)
+  'ברזי מטבח', 'ברזי כיור', 'ברזי קיר', 'ברזי אמבטיה', 'ברזי גן', 'ברזי דלי',
+  'ראשי מקלחת', 'מזלפי יד',
+};
+
 const _allSystems = {WaterSystem.supply, WaterSystem.drainage};
 
 /// The plumbing systems a product belongs to, by engineering logic:
@@ -312,7 +481,11 @@ FlowRole flowRole(LipskeyCatalogProduct p) {
       kHotWaterAccessorySkus.contains(p.sku)) return FlowRole.accessory;
   final c = p.categoryHe;
   if (_structuralCats.contains(c)) return FlowRole.accessory;
-  if (_fixtureCats.contains(c)) return FlowRole.fixture;
+  // A fixture OR a terminal device (trap / floor drain / draw-off tap) is an
+  // endpoint-only flow node — never an auto-inserted mid-line connector.
+  if (_fixtureCats.contains(c) || _terminalCats.contains(c)) {
+    return FlowRole.fixture;
+  }
   return FlowRole.connector;
 }
 
@@ -431,12 +604,13 @@ String? pipeConnectionDn(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return null;
 }
 
-// Memoized: the result depends only on (anchor.sku, tempC) because the catalog
-// is const, so this avoids a full O(N) catalog scan on every BFS expansion.
+// Memoized: the result depends only on (anchor.sku, tempC) because the
+// universe is fixed for the run (overlay hydrates pre-runApp), so this avoids
+// a full O(N) catalog scan on every BFS expansion.
 final _compatCache = <String, List<LipskeyCatalogProduct>>{};
 List<LipskeyCatalogProduct> compatibleWith(
         LipskeyCatalogProduct anchor, {int tempC = 20}) =>
-    _compatCache.putIfAbsent('${anchor.sku}|$tempC', () => kCompatCatalog
+    _compatCache.putIfAbsent('${anchor.sku}|$tempC', () => chainUniverse
         .where((p) => canConnect(anchor, p) && productSuitableForTemp(p, tempC))
         .toList()
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
@@ -512,6 +686,12 @@ List<LipskeyCatalogProduct>? _findShortestPathExcluding(
   required Set<(String, String)> blocked,
 }) {
   if (from.sku == to.sku) return [from];
+  // Two terminal devices belong to two separate fixtures — they never join
+  // directly to each other (a second trap = double-trap; two draw-off taps in
+  // series = two fixtures on one feed). A line carries at most one terminal.
+  if (flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture) {
+    return null;
+  }
   final sysFrom = productSystems(from);
   final sysTo = productSystems(to);
   if (sysFrom.intersection(sysTo).isEmpty) return null;
@@ -557,6 +737,12 @@ List<LipskeyCatalogProduct>? findShortestPath(
   int tempC = 20,
 }) {
   if (from.sku == to.sku) return [from];
+  // Two terminal devices belong to two separate fixtures — they never join
+  // directly to each other (a second trap = double-trap; two draw-off taps in
+  // series = two fixtures on one feed). A line carries at most one terminal.
+  if (flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture) {
+    return null;
+  }
 
   // The whole line must stay within one plumbing system. Track the running
   // intersection of every product's systems; an empty intersection = the line
@@ -619,7 +805,17 @@ const _fittingCats = {
   'פקקים וצינורות', 'זקיף אסלה',
 };
 
-bool isFitting(LipskeyCatalogProduct p) => _fittingCats.contains(p.categoryHe);
+/// Name-derived fitting nouns — the fallback vocabulary for an IMPORTED
+/// company catalog, whose category names never match [_fittingCats]. Gated on
+/// [companyCatalogActive], so demo/off-overlay cost surfaces are untouched.
+const _fittingTypes = {
+  'מצמד', 'מחבר', 'מופה', 'ניפל', 'בושינג', 'רקורד', 'מתאם',
+  'ברך', 'זווית', 'מסעף', 'מעבר', 'אביזר',
+};
+
+bool isFitting(LipskeyCatalogProduct p) =>
+    _fittingCats.contains(p.categoryHe) ||
+    (companyCatalogActive && _fittingTypes.contains(p.productType));
 
 const _pipeCats = {
   'צינורות אפורות', 'צינורות PP', 'צינורות', 'צינורות רב שכבתי',
@@ -667,11 +863,7 @@ double? _minBoreMmOf(LipskeyCatalogProduct p) {
         mm = double.tryParse(e.size);
       case EndType.bspMale:
       case EndType.bspFemale:
-        const inchToMm = {
-          '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
-          '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
-        };
-        final v = inchToMm[e.size.replaceAll('"', '').trim()];
+        final v = kBspInchToMm[e.size.replaceAll('"', '').trim()];
         mm = v?.toDouble();
     }
     if (mm == null) continue;
@@ -806,7 +998,6 @@ void _autoAddCompliance(List<LipskeyCatalogProduct> items,
     Map<String, int> qty, int tempC,
     {bool loop = false, Set<String>? accessories}) {
   final skus = qty.keys.toSet();
-  final mats = items.map(productMaterial).whereType<String>().toSet();
   final hot = tempC >= _kHotThresholdC;
   final hasCommercialPump = skus.contains('HW-PUMP-40');
   // Detect manifolds & shower heads from BOTH synthetic hot-water SKUs
@@ -826,6 +1017,12 @@ void _autoAddCompliance(List<LipskeyCatalogProduct> items,
           p.categoryHe == 'ערכות רחצה');
 
   void insertAt(int position, Set<String> alternatives, String preferred) {
+    // A compliance part is inserted BETWEEN two existing pieces; a chain with
+    // fewer than 2 items has no interior slot. Guard first: otherwise
+    // `clamp(1, items.length - 1)` becomes `clamp(1, 0)` (or `clamp(1, -1)`)
+    // and Dart's clamp throws ArgumentError when lowerLimit > upperLimit —
+    // a latent crash on `buildInstallation([oneSupplyProduct], autoCompliance: true)`.
+    if (items.length < 2) return;
     if (alternatives.any(skus.contains)) return;
     final p = _skuOf(preferred);
     if (p == null) return;
@@ -922,11 +1119,13 @@ void _autoAddCompliance(List<LipskeyCatalogProduct> items,
     }
   }
 
-  // Dielectric union when copper meets brass or steel.
-  final metals = mats
-      .where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה')
-      .toSet();
-  if (mats.contains('נחושת') && metals.length >= 2) {
+  // Dielectric union between dissimilar metal groups (copper/brass ↔ steel/
+  // stainless) — same predicate as the checklist (see _galvanicallyDissimilar).
+  // Recompute over the FINAL items: the auto-added STEEL expansion tank itself
+  // creates a brass/copper↔steel couple, so the dielectric must be added for it
+  // too (the top-of-function `mats` predates these insertions).
+  final matsFinal = items.map(productMaterial).whereType<String>().toSet();
+  if (_galvanicallyDissimilar(matsFinal)) {
     var seamPos = items.length - 1;
     for (var i = 0; i < items.length - 1; i++) {
       if (productMaterial(items[i]) != productMaterial(items[i + 1])) {
@@ -960,9 +1159,22 @@ LipskeyCatalogProduct? _findBridge(
     LipskeyCatalogProduct from,
     LipskeyCatalogProduct to,
     int tempC) {
+  // Two terminal devices belong to separate fixtures — never bridge one to
+  // another (double-trap / two taps in series).
+  if (flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture) {
+    return null;
+  }
+  // Fail-closed across plumbing systems. The verified BFS rejects supply↔drainage
+  // via system-intersection (sysAcc, see findShortestPath); this name-inference
+  // fallback must match it — otherwise a spec-less fitting that merely size-matches
+  // both a supply and a drainage product could silently bridge them. A live probe
+  // found 0/3600 reachable cases today, so this is defence-in-depth (and an
+  // invariant locked by install_engine_safety_test), not a fix for an active leak.
+  final shared = productSystems(from).intersection(productSystems(to));
+  if (shared.isEmpty) return null;
   LipskeyCatalogProduct? best;
   bool bestVerified = false;
-  for (final p in kCompatCatalog) {
+  for (final p in chainUniverse) {
     if (!isFitting(p)) continue;
     if (!productSuitableForTemp(p, tempC)) continue;
     if (!canConnect(from, p) || !canConnect(p, to)) continue;
@@ -994,7 +1206,7 @@ const _kDrainageFamily = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
 /// compatible with [mats]. Null when no catalog pipe fits (e.g. supply lines —
 /// HDPE/PEX pipe is bought by the metre, not stocked as a SKU).
 LipskeyCatalogProduct? _realPipeOf(String dn, Set<String> mats) {
-  for (final p in kCompatCatalog) {
+  for (final p in chainUniverse) {
     if (!_isPipeProductE(p)) continue;
     final s = kVerifiedSpecs[p.sku];
     if (s == null) continue;
@@ -1046,7 +1258,7 @@ LipskeyCatalogProduct _syntheticPipe(String material, String dn) {
 /// ends); falls back to any compatible fitting with such an end.
 LipskeyCatalogProduct? _couplingFor(String dn, Set<String> mats) {
   LipskeyCatalogProduct? fallback;
-  for (final p in kCompatCatalog) {
+  for (final p in chainUniverse) {
     if (_isPipeProductE(p)) continue;
     final s = kVerifiedSpecs[p.sku];
     if (s == null) continue;
@@ -1220,7 +1432,7 @@ InstallationPlan buildInstallation(
         .fold<int>(0, (s, p) => s + (qty[p.sku] ?? 1));
     for (final accSku in accessories) {
       LipskeyCatalogProduct? prod;
-      for (final p in kCompatCatalog) {
+      for (final p in chainUniverse) {
         if (p.sku == accSku) { prod = p; break; }
       }
       if (prod == null) continue;
@@ -1231,6 +1443,16 @@ InstallationPlan buildInstallation(
   }
   if (autoCompliance && items.isNotEmpty) {
     _autoAddCompliance(items, qty, tempC, loop: loop);
+  }
+
+  // A line serves at most ONE terminal device. Two terminals on one line — even
+  // when separated by valid connectors (e.g. trap → pipe → trap, or
+  // faucet → nipple → faucet) — is a double-fixture error the pairwise path
+  // search can't see (each adjacent pair has only one terminal). Catch it here
+  // so isComplete (gaps.isEmpty) reflects physical validity, not just geometry.
+  final terminals = items.where((p) => flowRole(p) == FlowRole.fixture).toList();
+  if (terminals.length > 1) {
+    gaps.add(InstallationGap(terminals.first, terminals[1]));
   }
 
   // Tag all items under a single "קו ראשי" zone so callers get a consistent
@@ -1247,6 +1469,11 @@ InstallationPlan buildInstallation(
 /// How many identical outlets a manifold-type product exposes (e.g. a
 /// "מחלק 1\" 4 יציאות" has four ½" outlets). 0 when the product isn't a manifold.
 int manifoldOutlets(LipskeyCatalogProduct p) {
+  // Only a real distribution manifold ("מחלק") exposes parallel outlets. A tee /
+  // מסעף also has 3+ same-size ends but is a single branch off a run, not a
+  // multi-outlet manifold — classify by the catalog taxonomy, not raw end-count
+  // (e.g. 116565 "מסעף 45° תבריג כפול" has 3×DN50 ends but must NOT be a manifold).
+  if (p.productType != 'מחלק' && p.categoryHe != 'מחלקים') return 0;
   final spec = kVerifiedSpecs[p.sku];
   if (spec == null || spec.ends.length < 3) return 0;
   final counts = <String, int>{};
@@ -1269,6 +1496,7 @@ InstallationPlan buildTreeInstallation(
   int tempC = 20,
   Set<String> accessories = const {},
   bool autoCompliance = false,
+  bool loop = false,
 }) {
   final items = <LipskeyCatalogProduct>[];
   final qty = <String, int>{};
@@ -1299,29 +1527,40 @@ InstallationPlan buildTreeInstallation(
     manifold = trunk.last;
   }
 
-  // Warn when branch count exceeds the manifold's physical outlet count.
-  if (manifold != null) {
-    final outlets = manifoldOutlets(manifold);
-    if (outlets > 0 && branchTargets.length > outlets) {
-      engineWarnings.add(
-          'המחלק "${manifold.nameHe}" תומך ב-$outlets יציאות — '
-          'הוגדרו ${branchTargets.length} ענפים. נדרש מחלק עם יותר יציאות.');
+  // each branch: manifold → target, zone = "ענף א/ב/…"
+  final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
+  final builtZones = <String>[];
+
+  // A target equal to the manifold itself isn't a branch. CAP the branches at
+  // the manifold's physical outlet count: a 4-branch design on a 2-outlet
+  // manifold can only feed 2 — the overflow targets are recorded as gaps (so the
+  // plan is NOT reported complete) plus a warning, instead of silently emitting
+  // phantom branches (each with its own TMTV/balancing valve) off ports that
+  // don't exist. Within capacity (and for non-manifold roots) behaviour is unchanged.
+  final realTargets = root == null
+      ? const <LipskeyCatalogProduct>[]
+      : branchTargets.where((t) => t.sku != root.sku).toList();
+  final outlets = manifold != null ? manifoldOutlets(manifold) : 0;
+  final cap = (outlets > 0 && outlets < realTargets.length)
+      ? outlets
+      : realTargets.length;
+  if (manifold != null && outlets > 0 && realTargets.length > outlets) {
+    final overflow = realTargets.skip(outlets).toList();
+    engineWarnings.add(
+        'המחלק "${manifold.nameHe}" תומך ב-$outlets יציאות — נדרשו '
+        '${realTargets.length} ענפים; ${overflow.length} לא חוברו '
+        '(נדרש מחלק עם יותר יציאות).');
+    for (final t in overflow) {
+      gaps.add(InstallationGap(manifold, t));
     }
   }
 
-  // each branch: manifold → target, zone = "ענף א/ב/…"
-  // Track which zone labels were actually routed so TMTV/balance counts
-  // match real branches, not the raw branchTargets list.
-  final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
-  final builtZones = <String>[];
-  var routed = 0; // labels actually-routed branches (skips don't burn a letter)
-  for (var bi = 0; bi < branchTargets.length; bi++) {
-    final t = branchTargets[bi];
-    if (root == null) break;
-    if (t.sku == root.sku) continue;
+  var routed = 0; // actually-routed branches (each burns a zone letter)
+  for (var bi = 0; bi < cap; bi++) {
+    final t = realTargets[bi];
     final zl = _branchLabel(routed++);
     builtZones.add(zl);
-    final seg = findShortestPath(root, t,
+    final seg = findShortestPath(root!, t,
         maxDepth: maxDepthPerSegment, tempC: tempC);
     if (seg == null) {
       final bridge = _findBridge(root, t, tempC);
@@ -1378,7 +1617,12 @@ InstallationPlan buildTreeInstallation(
   // assigned to the "בטיחות" zone rather than appearing outside all zones.
   if (autoCompliance && items.isNotEmpty) {
     final skusBefore = qty.keys.toSet();
-    _autoAddCompliance(items, qty, tempC);
+    // Thread `loop` through so a recirculation-loop tree (a hot-water ring feeding
+    // a manifold) gets its loop-only safety group — 3rd isolation valve, check
+    // valve, balancing valve, air vent, Legionella sampling point. Without it the
+    // tree path silently dropped ALL of these (the linear buildInstallation passes
+    // loop; buildTreeInstallation used to default it to false).
+    _autoAddCompliance(items, qty, tempC, loop: loop);
     final added = qty.keys.toSet().difference(skusBefore);
     if (added.isNotEmpty) {
       zones['בטיחות'] = added.toList();

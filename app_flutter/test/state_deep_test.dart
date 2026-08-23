@@ -72,12 +72,15 @@ void main() {
       expect(isOrderOpen(kDeliveredStage), isFalse);
     });
 
-    test('seed orders expose exactly 3 open', () {
+    test('a fresh contractor has no seeded/fake orders (empty ⇒ 0 open)', () {
+      // fake-data-sweep S1: the 5 static demo orders (BS-1234…) were removed, so
+      // a contractor who placed nothing sees an honest EMPTY list — the "open
+      // orders" counter reads 0, not a fabricated 3.
       final c = ProviderContainer();
       addTearDown(c.dispose);
-      final open =
-          c.read(storeOrdersProvider).where((o) => isOrderOpen(o.stage)).length;
-      expect(open, 3);
+      final orders = c.read(storeOrdersProvider);
+      expect(orders, isEmpty);
+      expect(orders.where((o) => isOrderOpen(o.stage)).length, 0);
     });
   });
 

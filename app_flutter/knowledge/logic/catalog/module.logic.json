@@ -1,0 +1,686 @@
+{
+  "module": "catalog",
+  "source": "lib/test_harness/tests/catalog.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "testCatalog",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TestResult>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogProducts"
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogTree",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kLipskeyAccByCategory"
+          },
+          {
+            "kind": "const",
+            "name": "kLipskeyAccBySku"
+          },
+          {
+            "kind": "const",
+            "name": "kLipskeyCatalog"
+          },
+          {
+            "kind": "const",
+            "name": "kLipskeyCompatPairOverride"
+          },
+          {
+            "kind": "const",
+            "name": "kLipskeyConnectionSizeOverride"
+          },
+          {
+            "kind": "const",
+            "name": "kPolyrollCatalog"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          },
+          {
+            "kind": "global",
+            "name": "_size",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_stuck",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "fitsDN50"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_balancedParens",
+            "module": true
+          },
+          {
+            "name": "_hasStuckDigit",
+            "module": true
+          },
+          {
+            "name": "_treeLipskeyCategories",
+            "module": true
+          },
+          {
+            "name": "_hasSize",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "results = <TestResult>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "hard = <TestCheck>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "products = kLipskeyCatalog"
+          },
+          {
+            "kind": "compute",
+            "detail": "empty = products.where((p) => p.nameHe.trim().isEmpty).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "hard.add(TestCheck(name: 'אין שמות ריקים', pass: empty.isEmpty, expected: '0', got: '${em…"
+          },
+          {
+            "kind": "compute",
+            "detail": "bad = products.where((p) => garbled(p.nameHe)).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "hard.add(TestCheck(name: 'אין שמות פגומים (זבל/גרשיים/סוגריים)', pass: bad.isEmpty, expec…"
+          },
+          {
+            "kind": "compute",
+            "detail": "stuck = products.where((p) => _hasStuckDigit(p.nameHe)).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "hard.add(TestCheck(name: 'אין מספר תקוע במילה', pass: stuck.isEmpty, expected: '0', got: …"
+          },
+          {
+            "kind": "init",
+            "detail": "seen = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in products"
+          },
+          {
+            "kind": "effect",
+            "detail": "seen[p.sku] = (seen[p.sku] ?? 0) + 1"
+          },
+          {
+            "kind": "compute",
+            "detail": "dups = seen.entries.where((e) => e.value > 1).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "hard.add(TestCheck(name: 'מק\"ט ייחודי (אין כפילויות)', pass: dups.isEmpty, expected: '0',…"
+          },
+          {
+            "kind": "compute",
+            "detail": "missing = products.where((p) => p.sku.isEmpty || p.categoryHe.isEmpty).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "hard.add(TestCheck(name: 'כל מוצר עם sku + categoryHe', pass: missing.isEmpty, expected: …"
+          },
+          {
+            "kind": "compute",
+            "detail": "treeCats = _treeLipskeyCategories()"
+          },
+          {
+            "kind": "compute",
+            "detail": "prodCats = products.map((p) => p.categoryHe).toSet()"
+          },
+          {
+            "kind": "compute",
+            "detail": "unmapped = prodCats.difference(treeCats)"
+          },
+          {
+            "kind": "effect",
+            "detail": "hard.add(TestCheck(name: 'כל קטגוריה ממופה בעץ הצלילה', pass: unmapped.isEmpty, expected:…"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'catalog:hard', category: TestCategory.catalog, label: 'תקינות…"
+          },
+          {
+            "kind": "init",
+            "detail": "pprHard = <TestCheck>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "pprEmpty = kPolyrollCatalog.where((p) => p.nameHe.trim().isEmpty).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "pprHard.add(TestCheck(name: 'PPR · אין שמות ריקים', pass: pprEmpty.isEmpty, expected: '0'…"
+          },
+          {
+            "kind": "compute",
+            "detail": "pprBad = kPolyrollCatalog.where((p) => garbled(p.nameHe)).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "pprHard.add(TestCheck(name: 'PPR · אין שמות פגומים (זבל/גרשיים/סוגריים)', pass: pprBad.is…"
+          },
+          {
+            "kind": "compute",
+            "detail": "pprStuck = kPolyrollCatalog.where((p) => _hasStuckDigit(p.nameHe)).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "pprHard.add(TestCheck(name: 'PPR · אין מספר תקוע במילה', pass: pprStuck.isEmpty, expected…"
+          },
+          {
+            "kind": "compute",
+            "detail": "pprSkuName = kPolyrollCatalog.where((p) => p.nameHe.contains(p.sku)).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "pprHard.add(TestCheck(name: 'PPR · השם אינו מכיל את המק\"ט (חילוץ-זבל)', pass: pprSkuName.…"
+          },
+          {
+            "kind": "init",
+            "detail": "_toolWords = ['מקדח', 'תותב', 'מזוודת', 'מכונת', 'מברגה', 'פלטת ריתוך']"
+          },
+          {
+            "kind": "compute",
+            "detail": "pprMisTool = kPolyrollCatalog.where((p) => _toolWords.any((w) => p.nameHe.contains(w)) && p.categoryHe…"
+          },
+          {
+            "kind": "effect",
+            "detail": "pprHard.add(TestCheck(name: 'PPR · מוצר עם שם-כלי יושב בקטגוריית \"כלי ריתוך\"', pass: pprM…"
+          },
+          {
+            "kind": "compute",
+            "detail": "pprMatMismatch = kPolyrollCatalog.where((p) {final mat = p.dims?['חומר'] as String?; if (mat == null) retu…"
+          },
+          {
+            "kind": "effect",
+            "detail": "pprHard.add(TestCheck(name: 'PPR · חומר בשם תואם ל-dims[חומר] (PPR↔PPRCT)', pass: pprMatM…"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'catalog:hard-ppr', category: TestCategory.catalog, label: 'תק…"
+          },
+          {
+            "kind": "init",
+            "detail": "soft = <TestCheck>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "noSize = products.where((p) => !_hasSize(p.nameHe)).length"
+          },
+          {
+            "kind": "compute",
+            "detail": "noImg = products.where((p) => p.imageFile == null).length"
+          },
+          {
+            "kind": "effect",
+            "detail": "soft.add(TestCheck(name: 'מוצרים עם גודל DN (לתאימות)', pass: true, got: '${products.leng…"
+          },
+          {
+            "kind": "effect",
+            "detail": "soft.add(TestCheck(name: 'מוצרים עם תמונה', pass: true, got: '${products.length - noImg}/…"
+          },
+          {
+            "kind": "effect",
+            "detail": "soft.add(TestCheck(name: 'מספר קטגוריות', pass: true, got: '${prodCats.length}'))"
+          },
+          {
+            "kind": "compute",
+            "detail": "pprN = kPolyrollCatalog.length"
+          },
+          {
+            "kind": "compute",
+            "detail": "pImg = kPolyrollCatalog.where((p) => p.imageAsset != null).length"
+          },
+          {
+            "kind": "compute",
+            "detail": "pSpec = kPolyrollCatalog.where((p) => p.specImageAssets.first.contains('/products/spec_')).length"
+          },
+          {
+            "kind": "compute",
+            "detail": "pDims = kPolyrollCatalog.where((p) => (p.dims?.length ?? 0) >= 3).length"
+          },
+          {
+            "kind": "effect",
+            "detail": "soft.add(TestCheck(name: 'PPR · כיסוי-העשרה (תמונה · spec · dims)', pass: true, got: 'ima…"
+          },
+          {
+            "kind": "compute",
+            "detail": "pprMisD = kPolyrollCatalog.where((p) {final d = p.dims?['d']; if (d == null) return false; if (p.na…"
+          },
+          {
+            "kind": "effect",
+            "detail": "soft.add(TestCheck(name: 'PPR · dims[d] תואם לשם (יישור-עמודות)', pass: pprMisD.isEmpty, …"
+          },
+          {
+            "kind": "init",
+            "detail": "pprByCat = <String, List<int>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kPolyrollCatalog"
+          },
+          {
+            "kind": "effect",
+            "detail": "pprByCat.putIfAbsent(p.categoryHe, () => []).add(p.dims?.length ?? 0)"
+          },
+          {
+            "kind": "compute",
+            "detail": "richness = pprByCat.entries.map((e) => (cat: e.key, n: e.value.length, avg: e.value.fold<int>(0, (a,…"
+          },
+          {
+            "kind": "effect",
+            "detail": "soft.add(TestCheck(name: 'PPR · עושר-dims לכל קו (מטריקת-קצב §15)', pass: true, got: '${k…"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'catalog:coverage', category: TestCategory.catalog, label: 'כי…"
+          },
+          {
+            "kind": "init",
+            "detail": "compat = <TestCheck>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "reducer = products.firstWhere((p) => lipskeyConnectionSizes(p.nameHe).length >= 2, orElse: () => pr…"
+          },
+          {
+            "kind": "effect",
+            "detail": "compat.add(TestCheck(name: 'מוצר-מעבר מזוהה עם ≥2 קצוות', pass: reducer.connectionSizes.l…"
+          },
+          {
+            "kind": "compute",
+            "detail": "dn50 = products.where(fitsDN50).toList()"
+          },
+          {
+            "kind": "compute",
+            "detail": "cats50 = dn50.map((p) => p.categoryHe).toSet()"
+          },
+          {
+            "kind": "effect",
+            "detail": "compat.add(TestCheck(name: 'DN50 מתפרס על כמה קטגוריות (תאימות חוצה)', pass: cats50.lengt…"
+          },
+          {
+            "kind": "effect",
+            "detail": "compat.add(TestCheck(name: 'כמות/אורך אינם נקראים כמידה', pass: lipskeyConnectionSizes('צ…"
+          },
+          {
+            "kind": "compute",
+            "detail": "genderOk = const LipskeyCatalogProduct(sku: '_', nameHe: 'ניפל זכר 1\"', nameEn: '', categoryHe: '', …"
+          },
+          {
+            "kind": "effect",
+            "detail": "compat.add(TestCheck(name: 'זיהוי מין-חיבור (זכר/נקבה/דו-צדדי) — צעד 60', pass: genderOk))"
+          },
+          {
+            "kind": "compute",
+            "detail": "methodOk = const LipskeyCatalogProduct(sku: '_', nameHe: 'מצמד אלקטרופוזיה DN50', nameEn: '', catego…"
+          },
+          {
+            "kind": "effect",
+            "detail": "compat.add(TestCheck(name: 'זיהוי שיטת-חיבור (תבריג/דבק/אלקטרו) — צעד 61', pass: methodOk…"
+          },
+          {
+            "kind": "effect",
+            "detail": "compat.add(TestCheck(name: 'override-מידה גובר על חילוץ-שם (צעד 68)', pass: () {const ove…"
+          },
+          {
+            "kind": "init",
+            "detail": "allSkus = {for (final p in kLipskeyCatalog) p.sku}"
+          },
+          {
+            "kind": "init",
+            "detail": "orphanOverride = [...kLipskeyConnectionSizeOverride.keys, ...kLipskeyCompatPairOverride.keys, ...kLipskeyC…"
+          },
+          {
+            "kind": "effect",
+            "detail": "compat.add(TestCheck(name: 'טבלת-override ללא מק\"ט יתום (צעד 68)', pass: orphanOverride.i…"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'catalog:compat', category: TestCategory.catalog, label: 'מנוע…"
+          },
+          {
+            "kind": "init",
+            "detail": "model = <TestCheck>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "branded = products.where((p) => p.brandModel != null).length"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'זיהוי מותג-דגם מהשם (brandModel)', pass: branded > 50, got: '$…"
+          },
+          {
+            "kind": "compute",
+            "detail": "colored = products.where((p) => p.colorVariant != null).length"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'זיהוי גוון/גימור (colorVariant)', pass: colored > 50, got: '$c…"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = lipskeyWordIndex()"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'אינדקס-היפוך מילה→מוצרים נבנה', pass: idx.isNotEmpty && (idx['…"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'uid ייחודי לכל מוצר (מותג:מק\"ט)', pass: products.map((p) => p.…"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'saleUnits כולל לפחות \"בודד\"', pass: products.every((p) => p.sa…"
+          },
+          {
+            "kind": "compute",
+            "detail": "typed = products.where((p) => p.productType != null).length"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'מנתח-שם מזהה סוג ל-≥80% מהמוצרים (productType)', pass: typed >…"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'parsedName מחזיר רשומה עם 4 פאות', pass: () {final r = product…"
+          },
+          {
+            "kind": "compute",
+            "detail": "linked = products.where((p) => smartProductForSku(p.sku) != null).length"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'קישור מוצר↔SmartProduct (smartProductForSku) — צעד 77', pass: …"
+          },
+          {
+            "kind": "init",
+            "detail": "brandSkus = {for (final sp in kSmartProducts) for (final b in sp.brands) if (b.sku != null) b.sku!}"
+          },
+          {
+            "kind": "init",
+            "detail": "catalogSkus = {for (final p in kCatalogProducts) p.sku}"
+          },
+          {
+            "kind": "compute",
+            "detail": "orphanLinks = brandSkus.where((s) => !catalogSkus.contains(s)).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'אין קישור-SmartProduct יתום (מק\"ט לא בקטלוג) — צעד 77', pass: …"
+          },
+          {
+            "kind": "effect",
+            "detail": "model.add(TestCheck(name: 'lipskeyAccFor/StagesFor נופל לקטגוריה — צעד 78', pass: () {fin…"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'catalog:model', category: TestCategory.catalog, label: 'מודל …"
+          },
+          {
+            "kind": "return",
+            "detail": "results"
+          }
+        ]
+      },
+      "floor": [
+        "LipskeyCatalogProduct",
+        "RegExp",
+        "TestCheck",
+        "TestResult",
+        "_isPprct",
+        "add",
+        "allMatches",
+        "any",
+        "compareTo",
+        "contains",
+        "containsKey",
+        "difference",
+        "every",
+        "expand",
+        "firstWhere",
+        "floor",
+        "fold",
+        "garbled",
+        "group",
+        "join",
+        "lipskeyAccFor",
+        "lipskeyConnectionSizes",
+        "lipskeyWordIndex",
+        "map",
+        "pct",
+        "putIfAbsent",
+        "round",
+        "smartProductForSku",
+        "sort",
+        "take",
+        "toList",
+        "toSet",
+        "toString",
+        "toStringAsFixed",
+        "trim",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<TestResult>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_balancedParens",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String n) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "testCatalog"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'('.allMatches(n).length == ')'.allMatches(n).length"
+          }
+        ]
+      },
+      "floor": [
+        "allMatches"
+      ],
+      "contract": {
+        "input": "(String n)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_hasStuckDigit",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String n) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_stuck"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "testCatalog"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_stuck.hasMatch(n)"
+          }
+        ]
+      },
+      "floor": [
+        "hasMatch"
+      ],
+      "contract": {
+        "input": "(String n)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_hasSize",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String n) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_size"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "testCatalog"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_size.hasMatch(n)"
+          }
+        ]
+      },
+      "floor": [
+        "hasMatch"
+      ],
+      "contract": {
+        "input": "(String n)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_treeLipskeyCategories",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "testCatalog"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final n in kCatalogTree"
+          },
+          {
+            "kind": "effect",
+            "detail": "walk(n)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "walk"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -10,6 +10,7 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
 class ChainDiagram extends StatelessWidget {
@@ -47,12 +48,15 @@ class ChainDiagram extends StatelessWidget {
         child: SizedBox(
           width: width,
           height: height,
-          child: CustomPaint(
-            painter: _ChainPainter(
-              chain: chain,
-              bottleneckSku: bottleneckSku,
-              nodeSize: nodeSize,
-              gap: gap,
+          // Isolate the painter's repaints from the surrounding scroll view.
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _ChainPainter(
+                chain: chain,
+                bottleneckSku: bottleneckSku,
+                nodeSize: nodeSize,
+                gap: gap,
+              ),
             ),
           ),
         ),
@@ -74,20 +78,20 @@ class _ChainPainter extends CustomPainter {
   final double gap;
 
   static const _materialColors = {
-    'HDPE': Color(0xFF22D3EE), // cyan — cold supply
-    'PEX': Color(0xFFFB923C), // orange — pex
-    'נחושת': Color(0xFFEA580C), // copper
-    'פליז': Color(0xFFEAB308), // brass
-    'PVC': Color(0xFF94A3B8), // gray — drainage
-    'PP': Color(0xFF64748B),
-    'רב-שכבתי': Color(0xFFA855F7), // purple — multi-layer
-    'ceramic': Color(0xFFE2E8F0),
-    'rubber': Color(0xFF334155),
-    'פלדה': Color(0xFF475569),
-    'נירוסטה': Color(0xFFCBD5E1),
+    'HDPE': BsTokens.chainCyan, // cyan — cold supply
+    'PEX': BsTokens.chainOrange, // orange — pex
+    'נחושת': BsTokens.chainCopper, // copper
+    'פליז': BsTokens.chainBrass, // brass
+    'PVC': BsTokens.chainGray, // gray — drainage
+    'PP': BsTokens.chainSlate,
+    'רב-שכבתי': BsTokens.chainPurple, // purple — multi-layer
+    'ceramic': BsTokens.chainCeramic,
+    'rubber': BsTokens.chainRubber,
+    'פלדה': BsTokens.chainSteel,
+    'נירוסטה': BsTokens.chainStainless,
   };
 
-  static const _defaultColor = Color(0xFF7C8AA5);
+  static const _defaultColor = BsTokens.chainDefault;
 
   Color _colorOf(LipskeyCatalogProduct p) {
     final mat = kVerifiedSpecs[p.sku]?.material;
@@ -105,14 +109,14 @@ class _ChainPainter extends CustomPainter {
     final Color color;
     if (j != null) {
       color = switch (j.type) {
-        EndType.bspMale || EndType.bspFemale => const Color(0xFFEAB308),
-        EndType.pexPress => const Color(0xFFFB923C),
-        EndType.copperPress => const Color(0xFFEA580C),
-        EndType.hdpeCompression => const Color(0xFF22D3EE),
+        EndType.bspMale || EndType.bspFemale => BsTokens.chainBrass,
+        EndType.pexPress => BsTokens.chainOrange,
+        EndType.copperPress => BsTokens.chainCopper,
+        EndType.hdpeCompression => BsTokens.chainCyan,
         EndType.drainOpening => _defaultColor,
       };
     } else if (label.isNotEmpty) {
-      color = const Color(0xFF22D3EE); // engine implicit-pipe bridge
+      color = BsTokens.chainCyan; // engine implicit-pipe bridge
     } else {
       color = _defaultColor;
     }
@@ -158,7 +162,7 @@ class _ChainPainter extends CustomPainter {
               text: style.label,
               style: TextStyle(
                 color: style.color,
-                fontSize: 9,
+                fontSize: BsTokens.fontSm,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -179,7 +183,7 @@ class _ChainPainter extends CustomPainter {
       // Bottleneck gets a red warning ring underneath the material ring
       if (isBottleneck) {
         final warnPaint = Paint()
-          ..color = const Color(0xFFEF4444)
+          ..color = BsTokens.chainWarning
           ..strokeWidth = 3.0
           ..style = PaintingStyle.stroke;
         canvas.drawCircle(
@@ -208,7 +212,7 @@ class _ChainPainter extends CustomPainter {
       final emoji = TextPainter(
         text: TextSpan(
           text: p.typeEmoji,
-          style: const TextStyle(fontSize: 22),
+          style: const TextStyle(fontSize: BsTokens.fontLg),
         ),
         textDirection: TextDirection.rtl,
       )..layout();
@@ -220,8 +224,8 @@ class _ChainPainter extends CustomPainter {
         text: TextSpan(
           text: '#${p.sku}',
           style: const TextStyle(
-            color: Color(0xFF7C8AA5),
-            fontSize: 8,
+            color: BsTokens.chainDefault,
+            fontSize: BsTokens.fontXs,
             fontFamily: 'monospace',
           ),
         ),
@@ -234,8 +238,13 @@ class _ChainPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ChainPainter old) =>
-      old.chain.length != chain.length ||
-      List.generate(chain.length, (i) => old.chain[i].sku != chain[i].sku)
-          .any((x) => x);
+  bool shouldRepaint(covariant _ChainPainter old) {
+    if (old.chain.length != chain.length) return true;
+    // Short-circuit on the first differing SKU instead of allocating an
+    // n-length bool list every check (was List.generate(...).any(...)).
+    for (var i = 0; i < chain.length; i++) {
+      if (old.chain[i].sku != chain[i].sku) return true;
+    }
+    return false;
+  }
 }

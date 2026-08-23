@@ -1,0 +1,2197 @@
+{
+  "module": "auth_state",
+  "source": "lib/state/auth_state.dart",
+  "atomCount": 42,
+  "atoms": [
+    {
+      "fn": "rolesFromClaims",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic>? claims) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonas"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AuthStateNotifier._onAuthEvent",
+          "AuthStateNotifier.reloadRole"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if claims == null || claims.isEmpty → return const []"
+          },
+          {
+            "kind": "init",
+            "detail": "known = {for (final p in kPersonas) p.id}"
+          },
+          {
+            "kind": "compute",
+            "detail": "multi = claims['roles']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if multi is List"
+          },
+          {
+            "kind": "compute",
+            "detail": "single = claims['role']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if single is String && known.contains(single) → return List.unmodifiable([single])"
+          },
+          {
+            "kind": "return",
+            "detail": "const []"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "contains",
+        "unmodifiable"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic>? claims)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [
+          "if claims == null || claims.isEmpty → return const []",
+          "if single is String && known.contains(single) → return List.unmodifiable([single])"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "orgIdFromClaims",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic>? claims) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AuthStateNotifier._onAuthEvent",
+          "AuthStateNotifier.reloadRole"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if claims == null || claims.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "value = claims['orgId']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if value is! String → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "trimmed = value.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "trimmed.isEmpty ? null : trimmed"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic>? claims)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if claims == null || claims.isEmpty → return null",
+          "if value is! String → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "claims == null || claims.isEmpty · value is! String · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "employerIdFromClaims",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic>? claims) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AuthStateNotifier._onAuthEvent"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if claims == null || claims.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "value = claims['employerId']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if value is! String → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "trimmed = value.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "trimmed.isEmpty ? null : trimmed"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic>? claims)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if claims == null || claims.isEmpty → return null",
+          "if value is! String → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "claims == null || claims.isEmpty · value is! String · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthUser.isRealUser",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "isAnonymous"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "!isAnonymous"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthUser.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "displayName"
+          },
+          {
+            "kind": "field",
+            "name": "email"
+          },
+          {
+            "kind": "field",
+            "name": "isAnonymous"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          },
+          {
+            "kind": "field",
+            "name": "uid"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is AuthUser && other.uid == uid && other.phone == phone && other.email == email && …"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthUser.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "displayName"
+          },
+          {
+            "kind": "field",
+            "name": "email"
+          },
+          {
+            "kind": "field",
+            "name": "isAnonymous"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          },
+          {
+            "kind": "field",
+            "name": "uid"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(uid, phone, email, displayName, isAnonymous)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthGatewayException.toString",
+      "kind": "method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "code"
+          },
+          {
+            "kind": "field",
+            "name": "message"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'AuthGatewayException($code${message == null ? '' : ': $message'})'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway._auth",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> fb.FirebaseAuth",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_injectedAuth"
+          },
+          {
+            "kind": "global",
+            "name": "fb"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_injectedAuth ?? fb.FirebaseAuth.instance"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "fb.FirebaseAuth",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway._functions",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> FirebaseFunctions",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAuthFunctionsRegion"
+          },
+          {
+            "kind": "field",
+            "name": "_injectedFunctions"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_injectedFunctions ?? FirebaseFunctions.instanceFor(region: kAuthFunctionsRegion)"
+          }
+        ]
+      },
+      "floor": [
+        "instanceFor"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "FirebaseFunctions",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway._toAuthUser",
+      "kind": "method",
+      "object": {
+        "signature": "(fb.User? u) -> AuthUser?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirebaseAuthGateway.currentUser",
+          "FirebaseAuthGateway.signInWithGoogle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "u == null ? null : AuthUser(uid: u.uid, phone: u.phoneNumber, email: u.email, displayName…"
+          }
+        ]
+      },
+      "floor": [
+        "AuthUser"
+      ],
+      "contract": {
+        "input": "(fb.User? u)",
+        "output": "AuthUser?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway._guard",
+      "kind": "method",
+      "object": {
+        "signature": "(Future<T> Function() op) -> Future<T>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirebaseAuthGateway.createUserWithEmailPassword",
+          "FirebaseAuthGateway.deleteAccount",
+          "FirebaseAuthGateway.idTokenClaims",
+          "FirebaseAuthGateway.resetPassword",
+          "FirebaseAuthGateway.sendOtp",
+          "FirebaseAuthGateway.setRole",
+          "FirebaseAuthGateway.signInWithEmailPassword",
+          "FirebaseAuthGateway.signInWithGoogle",
+          "FirebaseAuthGateway.signInWithSmsCode",
+          "FirebaseAuthGateway.signOut"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "AuthGatewayException",
+        "op"
+      ],
+      "contract": {
+        "input": "(Future<T> Function() op)",
+        "output": "Future<T>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": [
+          "AuthGatewayException(e.code, e.message)",
+          "AuthGatewayException(e.code, e.message)"
+        ]
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.authStateChanges",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Stream<AuthUser?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_auth.authStateChanges().map(_toAuthUser)"
+          }
+        ]
+      },
+      "floor": [
+        "authStateChanges",
+        "map"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Stream<AuthUser?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.currentUser",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> AuthUser?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_toAuthUser",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_toAuthUser(_auth.currentUser)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "AuthUser?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.sendOtp",
+      "kind": "method",
+      "object": {
+        "signature": "(String phone) -> Future<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kIsWeb"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_webConfirmations"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if kIsWeb"
+          },
+          {
+            "kind": "compute",
+            "detail": "completer = Completer<String>()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _guard(() => _auth.verifyPhoneNumber(phoneNumber: phone, verificationCompleted: (cr…"
+          },
+          {
+            "kind": "return",
+            "detail": "completer.future.timeout(const Duration(seconds: 120), onTimeout: () => throw const AuthG…"
+          }
+        ]
+      },
+      "floor": [
+        "AuthGatewayException",
+        "Completer",
+        "Duration",
+        "complete",
+        "completeError",
+        "debugPrint",
+        "signInWithCredential",
+        "signInWithPhoneNumber",
+        "timeout",
+        "verifyPhoneNumber"
+      ],
+      "contract": {
+        "input": "(String phone)",
+        "output": "Future<String>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": [
+          "const AuthGatewayException('unavailable')"
+        ]
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.signInWithSmsCode",
+      "kind": "method",
+      "object": {
+        "signature": "(String verificationId, String smsCode) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "fb"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_webConfirmations"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          },
+          {
+            "name": "_linkOrSignIn",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() async {final pending = _webConfirmations[verificationId]; if (pending != null) …"
+          }
+        ]
+      },
+      "floor": [
+        "confirm",
+        "credential",
+        "remove"
+      ],
+      "contract": {
+        "input": "(String verificationId, String smsCode)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.signInWithEmailPassword",
+      "kind": "method",
+      "object": {
+        "signature": "(String email, String password) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() => _auth.signInWithEmailAndPassword(email: email, password: password))"
+          }
+        ]
+      },
+      "floor": [
+        "signInWithEmailAndPassword"
+      ],
+      "contract": {
+        "input": "(String email, String password)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.resetPassword",
+      "kind": "method",
+      "object": {
+        "signature": "(String email) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() => _auth.sendPasswordResetEmail(email: email))"
+          }
+        ]
+      },
+      "floor": [
+        "sendPasswordResetEmail"
+      ],
+      "contract": {
+        "input": "(String email)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.createUserWithEmailPassword",
+      "kind": "method",
+      "object": {
+        "signature": "(String email, String password) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "fb",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          },
+          {
+            "name": "_linkOrCreateEmail",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() async {final user = await _linkOrCreateEmail(email, password); try {await user?…"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "sendEmailVerification"
+      ],
+      "contract": {
+        "input": "(String email, String password)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.signInWithGoogle",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<AuthUser?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kIsWeb"
+          },
+          {
+            "kind": "global",
+            "name": "fb"
+          },
+          {
+            "kind": "global",
+            "name": "gsi"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          },
+          {
+            "name": "_toAuthUser",
+            "module": true
+          },
+          {
+            "name": "_linkOrSignInWithPopup",
+            "module": true
+          },
+          {
+            "name": "_linkOrSignIn",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() async {if (kIsWeb) {final provider = fb.GoogleAuthProvider()..setCustomParamete…"
+          }
+        ]
+      },
+      "floor": [
+        "GoogleAuthProvider",
+        "GoogleSignIn",
+        "credential",
+        "setCustomParameters",
+        "signIn",
+        "signOut"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<AuthUser?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway._linkOrSignIn",
+      "kind": "method",
+      "object": {
+        "signature": "(fb.AuthCredential cred) -> Future<fb.User?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirebaseAuthGateway.signInWithGoogle",
+          "FirebaseAuthGateway.signInWithSmsCode"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "current = _auth.currentUser"
+          },
+          {
+            "kind": "branch",
+            "detail": "if current != null"
+          },
+          {
+            "kind": "return",
+            "detail": "(await _auth.signInWithCredential(cred)).user"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "linkWithCredential",
+        "signInWithCredential"
+      ],
+      "contract": {
+        "input": "(fb.AuthCredential cred)",
+        "output": "Future<fb.User?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway._linkOrSignInWithPopup",
+      "kind": "method",
+      "object": {
+        "signature": "(fb.AuthProvider provider) -> Future<fb.User?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirebaseAuthGateway.signInWithGoogle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "current = _auth.currentUser"
+          },
+          {
+            "kind": "branch",
+            "detail": "if current != null"
+          },
+          {
+            "kind": "return",
+            "detail": "(await _auth.signInWithPopup(provider)).user"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "linkWithPopup",
+        "signInWithPopup"
+      ],
+      "contract": {
+        "input": "(fb.AuthProvider provider)",
+        "output": "Future<fb.User?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway._linkOrCreateEmail",
+      "kind": "method",
+      "object": {
+        "signature": "(String email, String password) -> Future<fb.User?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "fb"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirebaseAuthGateway.createUserWithEmailPassword"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "cred = fb.EmailAuthProvider.credential(email: email, password: password)"
+          },
+          {
+            "kind": "compute",
+            "detail": "current = _auth.currentUser"
+          },
+          {
+            "kind": "branch",
+            "detail": "if current != null"
+          },
+          {
+            "kind": "return",
+            "detail": "(await _auth.createUserWithEmailAndPassword(email: email, password: password)).user"
+          }
+        ]
+      },
+      "floor": [
+        "createUserWithEmailAndPassword",
+        "credential",
+        "debugPrint",
+        "linkWithCredential"
+      ],
+      "contract": {
+        "input": "(String email, String password)",
+        "output": "Future<fb.User?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.idTokenClaims",
+      "kind": "method",
+      "object": {
+        "signature": "({bool forceRefresh = false}) -> Future<Map<String, dynamic>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() async {final user = _auth.currentUser; if (user == null) return const <String, …"
+          }
+        ]
+      },
+      "floor": [
+        "getIdTokenResult"
+      ],
+      "contract": {
+        "input": "({bool forceRefresh = false})",
+        "output": "Future<Map<String, dynamic>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.signOut",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() => _auth.signOut())"
+          }
+        ]
+      },
+      "floor": [
+        "signOut"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.deleteAccount",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() async {final user = _auth.currentUser; if (user == null) {throw const AuthGatew…"
+          }
+        ]
+      },
+      "floor": [
+        "AuthGatewayException",
+        "call",
+        "httpsCallable",
+        "signOut"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": [
+          "const AuthGatewayException('no-current-user')"
+        ]
+      }
+    },
+    {
+      "fn": "FirebaseAuthGateway.setRole",
+      "kind": "method",
+      "object": {
+        "signature": "({required String uid, required String role}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_guard(() async {await _functions.httpsCallable('setRole').call<dynamic>(<String, String>…"
+          }
+        ]
+      },
+      "floor": [
+        "call",
+        "httpsCallable"
+      ],
+      "contract": {
+        "input": "({required String uid, required String role})",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthSnapshot.signedIn",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "user"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "user != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthSnapshot.singleRole",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "roles"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "signedIn && roles.length == 1"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier._onAuthEvent",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(AuthUser? user) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonas",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_gateway"
+          },
+          {
+            "kind": "field",
+            "name": "_gen"
+          },
+          {
+            "kind": "field",
+            "name": "_onIdentityCleared",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_clearIdentityCache",
+            "module": true
+          },
+          {
+            "name": "rolesFromClaims",
+            "module": true
+          },
+          {
+            "name": "orgIdFromClaims",
+            "module": true
+          },
+          {
+            "name": "employerIdFromClaims",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "gen = ++_gen"
+          },
+          {
+            "kind": "compute",
+            "detail": "previousUid = state.user?.uid"
+          },
+          {
+            "kind": "branch",
+            "detail": "if previousUid != null && previousUid != user?.uid"
+          },
+          {
+            "kind": "branch",
+            "detail": "if user == null"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = AuthSnapshot(user: user)"
+          },
+          {
+            "kind": "init",
+            "detail": "roles = const <String>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "orgId = "
+          },
+          {
+            "kind": "compute",
+            "detail": "employerId = "
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted || gen != _gen → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = AuthSnapshot(user: user, roles: roles, orgId: orgId, employerId: employerId, load…"
+          }
+        ]
+      },
+      "floor": [
+        "AuthSnapshot",
+        "debugPrint",
+        "idTokenClaims"
+      ],
+      "contract": {
+        "input": "(AuthUser? user)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted || gen != _gen → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier._required",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> AuthGateway",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AuthStateNotifier.assignRole",
+          "AuthStateNotifier.createUserWithEmailPassword",
+          "AuthStateNotifier.deleteAccount",
+          "AuthStateNotifier.resetPassword",
+          "AuthStateNotifier.sendOtp",
+          "AuthStateNotifier.signInWithEmailPassword",
+          "AuthStateNotifier.signInWithGoogle",
+          "AuthStateNotifier.signInWithSmsCode"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "g = _gateway"
+          },
+          {
+            "kind": "branch",
+            "detail": "if g == null"
+          },
+          {
+            "kind": "return",
+            "detail": "g"
+          }
+        ]
+      },
+      "floor": [
+        "AuthGatewayException"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "AuthGateway",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": [
+          "const AuthGatewayException('unavailable', 'auth gateway not available (Firebase not initi…"
+        ]
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.sendOtp",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String phone) -> Future<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_required",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_required().sendOtp(phone)"
+          }
+        ]
+      },
+      "floor": [
+        "sendOtp"
+      ],
+      "contract": {
+        "input": "(String phone)",
+        "output": "Future<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.signInWithSmsCode",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String verificationId, String smsCode) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_required",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_required().signInWithSmsCode(verificationId, smsCode)"
+          }
+        ]
+      },
+      "floor": [
+        "signInWithSmsCode"
+      ],
+      "contract": {
+        "input": "(String verificationId, String smsCode)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.signInWithEmailPassword",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String email, String password) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_required",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_required().signInWithEmailPassword(email, password)"
+          }
+        ]
+      },
+      "floor": [
+        "signInWithEmailPassword"
+      ],
+      "contract": {
+        "input": "(String email, String password)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.createUserWithEmailPassword",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String email, String password) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_required",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_required().createUserWithEmailPassword(email, password)"
+          }
+        ]
+      },
+      "floor": [
+        "createUserWithEmailPassword"
+      ],
+      "contract": {
+        "input": "(String email, String password)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.signInWithGoogle",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<AuthUser?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_required",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_required().signInWithGoogle()"
+          }
+        ]
+      },
+      "floor": [
+        "signInWithGoogle"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<AuthUser?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.resetPassword",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String email) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_required",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_required().resetPassword(email)"
+          }
+        ]
+      },
+      "floor": [
+        "resetPassword"
+      ],
+      "contract": {
+        "input": "(String email)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.signOut",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway"
+          },
+          {
+            "kind": "field",
+            "name": "_gen"
+          },
+          {
+            "kind": "field",
+            "name": "_onIdentityCleared",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_clearIdentityCache",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_gen++"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = const AuthSnapshot(loaded: true)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_clearIdentityCache()"
+          }
+        ]
+      },
+      "floor": [
+        "AuthSnapshot",
+        "debugPrint",
+        "signOut"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.deleteAccount",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_gen"
+          },
+          {
+            "kind": "field",
+            "name": "_onIdentityCleared",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_required",
+            "module": true
+          },
+          {
+            "name": "_clearIdentityCache",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "await _required().deleteAccount()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_gen++"
+          },
+          {
+            "kind": "branch",
+            "detail": "if mounted"
+          },
+          {
+            "kind": "effect",
+            "detail": "_clearIdentityCache()"
+          }
+        ]
+      },
+      "floor": [
+        "AuthSnapshot",
+        "deleteAccount"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.assignRole",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String uid, required String role}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_required",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_required().setRole(uid: uid, role: role)"
+          }
+        ]
+      },
+      "floor": [
+        "setRole"
+      ],
+      "contract": {
+        "input": "({required String uid, required String role})",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.reloadRole",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonas",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_gateway"
+          },
+          {
+            "kind": "field",
+            "name": "_gen"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "rolesFromClaims",
+            "module": true
+          },
+          {
+            "name": "orgIdFromClaims",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "g = _gateway"
+          },
+          {
+            "kind": "compute",
+            "detail": "user = state.user"
+          },
+          {
+            "kind": "precond",
+            "detail": "if g == null || user == null → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "gen = ++_gen"
+          },
+          {
+            "kind": "compute",
+            "detail": "roles = "
+          },
+          {
+            "kind": "compute",
+            "detail": "orgId = "
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted || gen != _gen → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = AuthSnapshot(user: user, roles: roles, orgId: orgId, loaded: true)"
+          }
+        ]
+      },
+      "floor": [
+        "AuthSnapshot",
+        "debugPrint",
+        "idTokenClaims"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if g == null || user == null → return (void)",
+          "if !mounted || gen != _gen → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier._clearIdentityCache",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_onIdentityCleared"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AuthStateNotifier._onAuthEvent",
+          "AuthStateNotifier.deleteAccount",
+          "AuthStateNotifier.signOut"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_onIdentityCleared?.call()"
+          }
+        ]
+      },
+      "floor": [
+        "call"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AuthStateNotifier.dispose",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_sub"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_sub?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_sub = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "cancel",
+        "dispose"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

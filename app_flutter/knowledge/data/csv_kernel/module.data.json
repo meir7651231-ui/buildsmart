@@ -1,0 +1,42 @@
+{
+  "module": "csv_kernel",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/csv_kernel.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "CsvRecord",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "line",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "cells",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "line",
+          "cells"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,798 @@
+{
+  "module": "product_chips",
+  "source": "../../../app_flutter/lib/features/catalog_config/product_chips.dart",
+  "atomCount": 13,
+  "atoms": [
+    {
+      "fn": "chipPriority",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kUnknownPriority"
+          },
+          {
+            "kind": "const",
+            "name": "kChipPriority"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "prioritizedSchema"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kChipPriority[id] ?? _kUnknownPriority"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_chipKind",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id) -> AttributeKind",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_def"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (id) {'diameter' || 'diameter-small' => AttributeKind.dimension, 'color' => Attrib…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "AttributeKind",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_def",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id, List<AttributeValue> values) -> AttributeDef",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kChipLabel"
+          },
+          {
+            "kind": "const",
+            "name": "_kTradeId"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_chipKind",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "axisChips"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "AttributeDef(id: id, tradeId: _kTradeId, nameHe: _kChipLabel[id] ?? id, emoji: '', kind: …"
+          }
+        ]
+      },
+      "floor": [
+        "AttributeDef"
+      ],
+      "contract": {
+        "input": "(String id, List<AttributeValue> values)",
+        "output": "AttributeDef",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_values",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Iterable<String> raw) -> List<AttributeValue>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "axisChips"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "seen = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final r in raw"
+          },
+          {
+            "kind": "compute",
+            "detail": "t = r.trim()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t.isNotEmpty && !seen.contains(t)"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (var i = 0; i < seen.length; i++) AttributeValue(id: 'v$i', labelHe: seen[i], canoni…"
+          }
+        ]
+      },
+      "floor": [
+        "AttributeValue",
+        "add",
+        "contains",
+        "trim"
+      ],
+      "contract": {
+        "input": "(Iterable<String> raw)",
+        "output": "List<AttributeValue>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_typeGroup",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, List<LipskeyCatalogProduct> universe) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "axisChips"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "key = typeKeyOf(p)"
+          },
+          {
+            "kind": "init",
+            "detail": "group = [for (final m in universe) if (typeKeyOf(m) == key) m]"
+          },
+          {
+            "kind": "return",
+            "detail": "group.isEmpty ? [p] : group"
+          }
+        ]
+      },
+      "floor": [
+        "typeKeyOf"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, List<LipskeyCatalogProduct> universe)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "axisChips",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, List<LipskeyCatalogProduct> universe) -> List<AttributeDef>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kAxisToChip"
+          },
+          {
+            "kind": "const",
+            "name": "_kChipLabel",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kSizeChips"
+          },
+          {
+            "kind": "const",
+            "name": "_kTradeId",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_typeGroup",
+            "module": true
+          },
+          {
+            "name": "_def",
+            "module": true
+          },
+          {
+            "name": "_values",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "prioritizedSchema"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "group = _typeGroup(p, universe)"
+          },
+          {
+            "kind": "init",
+            "detail": "agg = <String, List<String>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final m in group"
+          },
+          {
+            "kind": "compute",
+            "detail": "memberHasDiameter = false"
+          },
+          {
+            "kind": "effect",
+            "detail": "catAxesOf(m).forEach((axis, values) {final chipId = _kAxisToChip[axis]; if (chipId == nul…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !memberHasDiameter"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final e in agg.entries) if (e.value.length > 1 || _kSizeChips.contains(e.key)) _def…"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "canonicalMaterial",
+        "catAxesOf",
+        "contains",
+        "forEach",
+        "isTrueColor",
+        "odOf",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, List<LipskeyCatalogProduct> universe)",
+        "output": "List<AttributeDef>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "prioritizedSchema",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, {List<LipskeyCatalogProduct>? universe}) -> ProductConfigSchema",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kAxisToChip",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kSizeChips",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kUnknownPriority",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kChipPriority",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "resolvedCatalogProducts"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "axisChips",
+            "module": true
+          },
+          {
+            "name": "chipPriority",
+            "module": true
+          },
+          {
+            "name": "_angleAttribute",
+            "module": true
+          },
+          {
+            "name": "_dnAttribute",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "chipRoster"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "products = universe ?? resolvedCatalogProducts"
+          },
+          {
+            "kind": "compute",
+            "detail": "base = configSchemaFor(p, universe: products)"
+          },
+          {
+            "kind": "compute",
+            "detail": "engine = base.familyId == p.categoryHe ? const <AttributeDef>[] : base.attributes"
+          },
+          {
+            "kind": "init",
+            "detail": "engineIds = {for (final a in engine) a.id}"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasDiameter = engineIds.any((id) => id.startsWith('diameter'))"
+          },
+          {
+            "kind": "init",
+            "detail": "extra = [for (final c in axisChips(p, products)) if (!engineIds.contains(c.id) && !(c.id == 'diam…"
+          },
+          {
+            "kind": "init",
+            "detail": "ordered = [...engine, ...extra]..sort((a, b) {final byPriority = chipPriority(a.id).compareTo(chipP…"
+          },
+          {
+            "kind": "return",
+            "detail": "ProductConfigSchema(sku: base.sku, nameHe: base.nameHe, familyId: base.familyId, emoji: b…"
+          }
+        ]
+      },
+      "floor": [
+        "ProductConfigSchema",
+        "any",
+        "compareTo",
+        "configSchemaFor",
+        "contains",
+        "sort",
+        "startsWith"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, {List<LipskeyCatalogProduct>? universe})",
+        "output": "ProductConfigSchema",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_angleDigits",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_angleAttribute"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "RegExp(r'\\d+').firstMatch(s)?.group(0) ?? s"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "firstMatch",
+        "group"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_angleAttribute",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AttributeDef a) -> AttributeDef",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_angleDigits",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "prioritizedSchema"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if a.id != 'angle' → return a"
+          },
+          {
+            "kind": "return",
+            "detail": "AttributeDef(id: a.id, tradeId: a.tradeId, nameHe: a.nameHe, emoji: a.emoji, kind: a.kind…"
+          }
+        ]
+      },
+      "floor": [
+        "AttributeDef",
+        "AttributeValue"
+      ],
+      "contract": {
+        "input": "(AttributeDef a)",
+        "output": "AttributeDef",
+        "purity": "pure",
+        "precond": [
+          "if a.id != 'angle' → return a"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_dnAttribute",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AttributeDef a) -> AttributeDef",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "prioritizedSchema"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if a.id != 'diameter' → return a"
+          },
+          {
+            "kind": "init",
+            "detail": "order = <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "inchHint = <String, String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final v in a.values"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = v.labelHe"
+          },
+          {
+            "kind": "compute",
+            "detail": "dn = canonicalDn(raw)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !order.contains(dn)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw.contains('\"')"
+          },
+          {
+            "kind": "effect",
+            "detail": "order.sort((x, y) => dnNumber(x).compareTo(dnNumber(y)))"
+          },
+          {
+            "kind": "return",
+            "detail": "AttributeDef(id: a.id, tradeId: a.tradeId, nameHe: a.nameHe, emoji: a.emoji, kind: a.kind…"
+          }
+        ]
+      },
+      "floor": [
+        "AttributeDef",
+        "AttributeValue",
+        "add",
+        "canonicalDn",
+        "compareTo",
+        "contains",
+        "dnNumber",
+        "putIfAbsent",
+        "sort"
+      ],
+      "contract": {
+        "input": "(AttributeDef a)",
+        "output": "AttributeDef",
+        "purity": "pure",
+        "precond": [
+          "if a.id != 'diameter' → return a"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "chipRoster",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, {List<LipskeyCatalogProduct>? universe}) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "resolvedCatalogProducts",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "prioritizedSchema",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final AttributeDef a in prioritizedSchema(p, universe: universe).attributes) a.id]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, {List<LipskeyCatalogProduct>? universe})",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "chipValuesOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> Map<String, Set<String>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kAxisToChip"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <String, Set<String>>{}"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasDiameter = false"
+          },
+          {
+            "kind": "effect",
+            "detail": "catAxesOf(p).forEach((axis, values) {final chipId = _kAxisToChip[axis]; if (chipId == nul…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !hasDiameter"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "add",
+        "canonicalDn",
+        "canonicalMaterial",
+        "catAxesOf",
+        "firstMatch",
+        "forEach",
+        "group",
+        "isTrueColor",
+        "odOf",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "Map<String, Set<String>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "variantByAxes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<(LipskeyCatalogProduct, Map<String, Set<String>>)> family, Map<String, String> selection, List<String> axisOrder) -> LipskeyCatalogProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if family.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "candidates = family"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final id in axisOrder"
+          },
+          {
+            "kind": "compute",
+            "detail": "want = selection[id]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if want == null → continue"
+          },
+          {
+            "kind": "init",
+            "detail": "narrowed = [for (final e in candidates) if (e.$2[id]?.contains(want) ?? false) e]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if narrowed.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "candidates.first.$1"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(List<(LipskeyCatalogProduct, Map<String, Set<String>>)> family, Map<String, String> selection, List<String> axisOrder)",
+        "output": "LipskeyCatalogProduct?",
+        "purity": "pure",
+        "precond": [
+          "if family.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "family.isEmpty · or search exhausted",
+        "throws": []
+      }
+    }
+  ]
+}

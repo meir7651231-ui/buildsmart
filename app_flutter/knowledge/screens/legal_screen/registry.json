@@ -1,0 +1,12 @@
+{
+  "matched": 1,
+  "total": 1,
+  "summary": "1/1",
+  "entries": [
+    {
+      "id": "legal_screen.t01",
+      "ok": true,
+      "atom": "LegalScreen"
+    }
+  ]
+}

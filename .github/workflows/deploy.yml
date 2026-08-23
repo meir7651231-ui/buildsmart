@@ -51,6 +51,9 @@ jobs:
         working-directory: app_flutter
         run: flutter pub get
 
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
       - name: Flutter analyze (GATE — blocks build on any error)
         working-directory: app_flutter
         # Errors are fatal; pre-existing lint infos/warnings (avoid_print etc.
@@ -59,16 +62,38 @@ jobs:
 
       - name: Flutter test (GATE — blocks build on any failure)
         working-directory: app_flutter
-        run: flutter test --reporter=compact
+        # --concurrency=2 caps parallel test isolates so the CI gate can't OOM on
+        # the larger merged suite (a local default-concurrency run exhausted RAM).
+        run: flutter test --reporter=compact --concurrency=2
 
       - name: Build Flutter web
         working-directory: app_flutter
-        run: flutter build web --release --base-href "/buildsmart/flutter/"
+        # KB_GLOBAL cut-over: the unified "keyboard on every screen" goes live
+        # (the contractor board — swarm-audited, GATE-PASS, verified merged).
+        run: flutter build web --release --base-href "/buildsmart/flutter/" --dart-define=KB_GLOBAL=true
 
       - name: Stage Flutter under /flutter/
         run: |
           mkdir -p app/dist/flutter
           cp -r app_flutter/build/web/* app/dist/flutter/
+
+      # ─── Manager preview (agent-network-live) at /buildsmart/flutter-preview/ ─
+      # Additive & best-effort: a failure here must NEVER block the live deploy
+      # (continue-on-error). Builds the integrated manager + live-engine branch
+      # and stages it under /flutter-preview/ so it rides the same gh-pages push
+      # (otherwise the force-push below would wipe any separately-uploaded copy).
+      - name: Build manager preview under /flutter-preview/
+        continue-on-error: true
+        run: |
+          set -e
+          git clone --depth 1 --branch claude/agent-network-live \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/preview-src
+          ( cd /tmp/preview-src && bash scripts/gen_version.sh )
+          ( cd /tmp/preview-src/app_flutter \
+              && flutter pub get \
+              && flutter build web --release --base-href "/buildsmart/flutter-preview/" )
+          mkdir -p app/dist/flutter-preview
+          cp -r /tmp/preview-src/app_flutter/build/web/* app/dist/flutter-preview/
 
       # ─── Publish combined output FIRST ──────────────────────────
       # The web deploy must NOT depend on the (fragile, Android-toolchain)

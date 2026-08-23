@@ -1,0 +1,5539 @@
+import 'package:buildsmart/config/org_config.dart'
+    show kOrgConfigFlag, moduleOn;
+import 'package:buildsmart/data/board_accounts_local.dart';
+import 'package:buildsmart/data/brands.dart';
+import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/data/repositories/backend.dart'
+    show kIntelLive, kStudioCoEditor, useFirebaseBackend;
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
+// A13 — the server-canonical credit seam: the repository provider + the
+// neutral CreditResult the `computeCredit` callable resolves through.
+import 'package:buildsmart/data/repositories/customers_local.dart'
+    show customersRepositoryProvider;
+import 'package:buildsmart/data/repositories/order_functions.dart'
+    show CreditResult;
+// #8/3c — the counterparty→uid directory (phone→chat uid), gated on the live
+// backend (null off the launch path) so the manager's chat link resolves.
+import 'package:buildsmart/data/repositories/users_lookup.dart'
+    show usersLookupProvider;
+import 'package:buildsmart/logic/attention_engine.dart'
+    show AttentionItem, AttentionSev;
+import 'package:buildsmart/logic/customer_score.dart' show CustomerScore;
+import 'package:buildsmart/logic/fuzzy_match.dart' show fuzzyNameMatch;
+import 'package:buildsmart/logic/delivery_note.dart'
+    show buildDeliveryNoteRows, deliveryNoteTitle;
+import 'package:buildsmart/logic/invoice.dart'
+    show buildInvoiceRows, invoiceTitle;
+import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:buildsmart/logic/printable_docs.dart' show buildPrintableHtml;
+import 'package:buildsmart/logic/studio/co_editor_gate.dart'
+    show studioCoEditorProvider;
+import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/credit_explain_screen.dart'
+    show CreditExplainScreen;
+import 'package:buildsmart/screens/customer_import_sheet.dart'
+    show showCustomerImportSheet;
+import 'package:buildsmart/screens/intel/intel_tab.dart' show IntelTab;
+import 'package:buildsmart/screens/intel/journey_labels.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbManagerDashboardNodes;
+import 'package:buildsmart/screens/manager_copilot_screen.dart';
+import 'package:buildsmart/screens/manager_profile_screen.dart';
+import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
+import 'package:buildsmart/screens/regression_panel_screen.dart';
+import 'package:buildsmart/screens/studio/studio_entry.dart';
+import 'package:buildsmart/screens/studio_screen.dart';
+import 'package:buildsmart/screens/trade_builder/system_setup_host_screen.dart';
+import 'package:buildsmart/screens/welcome_screen.dart';
+// #85ב/#23 — the SHARED proof-photo renderer (one renderer for both sides
+// of the approval: the worker sheet and this dashboard).
+import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
+    show taskPhotoWidget;
+import 'package:buildsmart/services/doc_print.dart' show printDocument;
+// #8/3c — the signed-in manager's uid, one half of the DM thread's participants.
+import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
+import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
+import 'package:buildsmart/state/connection_status.dart'
+    show ConnectionStatus, connectionStatusProvider;
+import 'package:buildsmart/state/feature_flags.dart'
+    show featureFlagsProvider, kHrRelocationFlag;
+import 'package:buildsmart/state/intel/intel_event.dart' show IntelEvent;
+import 'package:buildsmart/state/intel/intel_log.dart' show intelLogProvider;
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/attention_source.dart'
+    show attentionItemsProvider;
+import 'package:buildsmart/state/customer_score_source.dart'
+    show customerScoreProvider;
+import 'package:buildsmart/state/customers_store.dart'
+    show SavedCustomer, savedCustomerForProvider, savedCustomersProvider;
+import 'package:buildsmart/state/directory.dart'
+    show
+        DirectoryEntry,
+        directoryProvider,
+        kDirectoryStatusActive,
+        kDirectoryStatusPending,
+        pendingDirectoryEntries,
+        resolveApproveTargets;
+import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
+import 'package:buildsmart/state/org_gates.dart'
+    show elementVisible, featEnabled, orgTerm;
+import 'package:buildsmart/state/role_requests.dart'
+    show userApproverProvider, userDeleterProvider;
+import 'package:buildsmart/state/screen_sections.dart'
+    show screenSectionsProvider;
+import 'package:buildsmart/state/manager_dashboard_state.dart';
+import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/state/sys_chat.dart';
+import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/state/vacation_requests.dart';
+import 'package:buildsmart/state/worker_notifs.dart';
+import 'package:buildsmart/state/worker_tasks_engine.dart';
+import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
+import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart' show confirmDestructive;
+import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/reject_reason_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
+import 'package:buildsmart/widgets/toast.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// 👔 מרכז השליטה — the manager-of-the-system role app (the "מנהל המערכת"
+/// persona). Same full-role-app shell/style as the worker app
+/// (`worker_app_screen.dart`): a LIGHT [Scaffold] (`bgLight`), a WHITE AppBar
+/// (`cardLight`) with dark text, and a top segmented toggle that drives an
+/// [IndexedStack] (the `updates_screen.dart` pattern).
+///
+/// All four tabs are live and complete: 📊 לוח בקרה (M2 — the live cockpit),
+/// 🚚 הזמנות (M3 — the live order list + god-mode stage-advance), 👥 לקוחות
+/// (M4 — live customer list with credit tracking), and 🛠️ ניהול (M5 — the
+/// management accordion). Reached
+/// from the role picker ("מי אתה?" → מנהל המערכת), which `Navigator.push`es this
+/// route instead of opening the old BS-dial drill.
+class ManagerDashboardScreen extends ConsumerWidget {
+  const ManagerDashboardScreen({super.key});
+
+  static Route<void> route() =>
+      MaterialPageRoute<void>(builder: (_) => const ManagerDashboardScreen());
+
+  static final List<KbToolNode> _kbNodes = kbManagerDashboardNodes();
+
+  /// Number of top tabs (📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול) —
+  /// DERIVED from [_kManagerTabs].length so the toggle, the help tuples and the
+  /// [IndexedStack] children can NEVER drift out of lockstep: all four carry the
+  /// SAME one `if (kIntelLive)`-gated 5th element (step 98). const-false
+  /// `kIntelLive` ⇒ 4 (byte-identical demo); INTEL_LIVE on ⇒ 5, all four together.
+  /// Giant-system V2: this stays the COMPILE-floor count — the runtime `intel`
+  /// org gate is ANDed at the lockstep CONSUMERS (toggle · IndexedStack ·
+  /// journey), so an INTEL_LIVE build with `intel` off RENDERS 4 while the
+  /// const lists (and this ceiling) keep 5.
+  static int get tabCount => _kManagerTabs.length;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // task #65 · חוק: מבחוץ לא רואים כלום — without a manager [BoardSession]
+    // ONLY the gate (the registration screen in role mode) is built; a
+    // successful login flips [boardAuthProvider] and this build swaps to the
+    // real board in place. logout() swaps it back to the gate.
+    if (ref.watch(boardAuthProvider)?.role != BoardRole.manager) {
+      return WelcomeScreen(boardRole: BoardRole.manager);
+    }
+    // Giant-system V2 — the runtime `intel` org gate ANDed onto the step-98
+    // compile floor: pure [moduleOn] over the live org config, watched ONCE
+    // here in build(). const-false `kIntelLive` (every normal/test build)
+    // short-circuits both lines below back to the plain watch — byte-identical
+    // demo by construction. Index safety (the updates_screen clamp precedent):
+    // in an INTEL_LIVE build with `intel` off, a stale managerTabProvider=4
+    // must not point the IndexedStack past its last child — clamp to לוח בקרה
+    // (0). The intel tab is the LAST index, so tabs 0–3 never renumber.
+    final intelTabOn =
+        kIntelLive && moduleOn(ref.watch(orgConfigProvider), 'intel');
+    final rawTab = ref.watch(managerTabProvider);
+    final active =
+        kIntelLive && !intelTabOn && rawTab == _kManagerTabs.length - 1
+            ? 0
+            : rawTab;
+
+    final Widget scaffold = Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        titleSpacing: BsTokens.space4,
+        title: const Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CfgText(
+                    'manager.dash.title',
+                    'מרכז השליטה',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  CfgText(
+                    'manager.dash.subtitle',
+                    'מנהל המערכת',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            _LivePill(),
+          ],
+        ),
+        actions: [
+          // #31 — 💡 enters "מצב היכרות"; the wrapped controls then explain
+          // themselves in a bubble (the 💡 + ✕ stay tappable to toggle/exit).
+          // (The 🤖 Co-Pilot entry is the cockpit HERO card — not an AppBar
+          // action — to keep the 5-action bar from overflowing on narrow widths.)
+          const HelpToggleButton(),
+          // Each persona reaches profile + settings from its OWN dashboard
+          // (product-owner: separately per role). Three muted AppBar actions
+          // sit before the '‹ יציאה' exit; tooltips double as Semantics
+          // labels for a11y. RTL: actions lay out leading→trailing, so this
+          // reads 💡 · 💬 שיחות · profile · settings · exit from the right.
+          //
+          // 🔒 ISOLATION (SPEC §2.5): the chat action ONLY pushes the manager's
+          // standalone [ChatsScreen] (its own "שיחות" AppBar + back→pop) — back
+          // returns to THIS manager dashboard; no route to home_shell, the role
+          // picker, or any other persona's board.
+          //
+          // The default ('contractor') thread list admits worker-audience
+          // threads the manager participates in (`_visibleToAudience`,
+          // chats_screen.dart) — so 'th-worker-manager' (the worker's 'מנהל'
+          // thread, rendered here as 'עובד — רן') is readable, not write-only.
+          HelpTarget(
+            title: 'שיחות',
+            body:
+                'פותח את מרכז השיחות של מנהל המערכת — קריאה ומענה לשרשורי '
+                'הצ׳אט מול עובדים, קבלנים, חנויות ושליחים. נפתח כמסך עצמאי '
+                'וחוזר אחורה ללוח; אינו מתנתק ואינו מחליף תפקיד.',
+            child: IconButton(
+              tooltip: 'שיחות',
+              icon: const Icon(
+                Icons.chat_bubble_outline,
+                color: BsTokens.mutedLight,
+              ),
+              onPressed:
+                  () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder:
+                          (_) => const ChatsScreen(persona: BsRole.manager),
+                    ),
+                  ),
+            ),
+          ),
+          HelpTarget(
+            title: 'אזור אישי',
+            body:
+                'פותח את האזור האישי של מנהל המערכת: פרטי החשבון, סטטיסטיקת '
+                'הזמנות חיה, ומעבר להגדרות ולהחלפת תפקיד מוגנת בקוד.',
+            child: IconButton(
+              tooltip: 'פרופיל',
+              icon: const Icon(
+                Icons.person_outline,
+                color: BsTokens.mutedLight,
+              ),
+              // #20 — the manager's OWN profile (session + role-switch +
+              // logout), not the contractor's ProfileScreen.
+              onPressed:
+                  () =>
+                      Navigator.of(context).push(ManagerProfileScreen.route()),
+            ),
+          ),
+          HelpTarget(
+            title: 'הגדרות הקטלוג',
+            body:
+                'פותח את הגדרות הקטלוג והאפליקציה — שליטת No-Code על '
+                'הפרמטרים שכל הקבלנים רואים.',
+            child: IconButton(
+              tooltip: 'הגדרות',
+              icon: const Icon(
+                Icons.settings_outlined,
+                color: BsTokens.mutedLight,
+              ),
+              onPressed:
+                  () => Navigator.of(context).push(
+                    // Manager = platform-admin: the No-Code catalog/app admin
+                    // WITHOUT the contractor profile row (governance S0 fix).
+                    CatalogSettingsScreen.route(showProfileRow: false),
+                  ),
+            ),
+          ),
+          // מנהל = חשבון הבעלים: אין התנתקות (דרישת מוצר — "המנהל לא מתנתק").
+          // ה-session נשאר קבוע; אין כפתור logout. '‹ יציאה' למטה היא
+          // ניווט-בלבד (Navigator.maybePop) — חוזרת אחורה בלי לנקות את ה-session.
+          // composite hide: the whole exit button goes when the org hides it.
+          CfgVisible(
+            'manager.dash.exit',
+            critical: true, // exit/back — never hideable (don't trap the user)
+            child: TextButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              child: const CfgText(
+                'manager.dash.exit',
+                '‹ יציאה',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          _ManagerToggle(active: active),
+          Expanded(
+            child: IndexedStack(
+              index: active,
+              children: [
+                // The manager screen is now COMPLETE — every tab is real, NO
+                // "בקרוב" placeholder remains. 📊 לוח בקרה (M2) — the dashboard
+                // cockpit, live over the shared orders engine. 🚚 הזמנות (M3) —
+                // the live order list + the manager's god-mode stage-advance.
+                // 👥 לקוחות (M4) — the live customer list + credit. 🛠️ ניהול
+                // (M5) — the 5 management tools (the FINAL tab).
+                const _DashboardTab(),
+                const _OrdersTab(),
+                const _CustomersTab(),
+                const _ManageTab(),
+                // Step 98 — the 5th tab (📡 מודיעין לקוחות) is COMPILE-GATED behind
+                // `kIntelLive` (const-false in every normal/test build ⇒ tree-shaken
+                // out, so the shipped dashboard is byte-identical with 4 tabs). In
+                // LOCKSTEP with `_kManagerTabs` / `_kManagerTabHelp` / `tabCount` —
+                // all four share this one `if (kIntelLive)`. Giant-system V2 —
+                // `intelTabOn` ANDs the runtime `intel` org gate in (the IndexedStack
+                // keeps children ALIVE, so a dark tab must not even mount).
+                if (kIntelLive && intelTabOn) const IntelTab(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: kKbGlobal ? KbScreen(tools: _kbNodes, child: scaffold) : scaffold,
+    );
+  }
+}
+
+/// A small green "חי" status pill in the AppBar — signals the dashboard is on
+/// the LIVE shared data (the orders engine), mirroring the role drawer's tone.
+/// The status pill — now bound to the LIVE [connectionStatusProvider] (the same
+/// always-on truth the top-of-screen connection indicator reads), never a fixed
+/// "חי". 🟢 connected · 🔴 disconnected (actions won't persist) · grey demo/test.
+class _LivePill extends ConsumerWidget {
+  const _LivePill();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(connectionStatusProvider);
+    final Color bg;
+    final Color fg;
+    final String text;
+    switch (status) {
+      case ConnectionStatus.connected:
+        bg = const Color(0xFFE7F6EC);
+        fg = const Color(0xFF1B7A3D);
+        text = 'חי';
+      case ConnectionStatus.disconnected:
+        bg = const Color(0xFFFCE9E7);
+        fg = const Color(0xFFB23B3B);
+        text = 'מנותק';
+      case ConnectionStatus.demo:
+        bg = const Color(0xFFEDEAE3);
+        fg = const Color(0xFF6F6656);
+        text = 'דמו';
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space3,
+        vertical: 5,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _Dot(color: fg),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              color: fg,
+              fontWeight: FontWeight.w800,
+              fontSize: 12.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot({this.color = const Color(0xFF22A75A)});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+}
+
+/// The 4-tab segmented toggle — replicates `updates_screen`'s `seg()` helper,
+/// but in the PILL style the manager shell uses: the selected pill is a
+/// [BsTokens.brand] fill with white text, an unselected pill is a
+/// [BsTokens.cardLight] fill with [BsTokens.inkLight] text; both are pill-radius
+/// (icon-emoji + Hebrew label). Tapping a pill sets [managerTabProvider].
+class _ManagerToggle extends ConsumerWidget {
+  const _ManagerToggle({required this.active});
+
+  final int active;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Giant-system V2 — the runtime `intel` org gate ANDed at the CONSUMER
+    // (the top-level const lists `_kManagerTabs`/`_kManagerTabHelp` stay
+    // untouched): with the module off, an INTEL_LIVE build renders one pill
+    // fewer — the LAST index, so nothing renumbers and the per-index help
+    // lockstep holds. const-false `kIntelLive` (every normal/test build)
+    // folds this back to `_kManagerTabs.length` — byte-identical demo.
+    final count =
+        kIntelLive && !moduleOn(ref.watch(orgConfigProvider), 'intel')
+            ? _kManagerTabs.length - 1
+            : _kManagerTabs.length;
+    Widget seg(int i, String emoji, String label) {
+      final on = active == i;
+      return Expanded(
+        child: Padding(
+          // Half-gap on each inner edge → an even gap between pills, none at the
+          // row's outer edges. Directional (start/end) so RTL/LTR both lay out
+          // correctly (gate 62 — no hard-coded edge inset).
+          padding: EdgeInsetsDirectional.only(
+            start: i == 0 ? 0 : BsTokens.space2 / 2,
+            end: i == count - 1 ? 0 : BsTokens.space2 / 2,
+          ),
+          // #31 — each tab wrapped in its OWN HelpTarget (orange ring + bubble
+          // out of the tab); the four pills are built in this one seg() loop so
+          // the per-index help text comes from [_kManagerTabHelp].
+          child: HelpTarget(
+            title: _kManagerTabHelp[i].$1,
+            body: _kManagerTabHelp[i].$2,
+            child: Material(
+              color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: () => ref.read(managerTabProvider.notifier).state = i,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 6,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(emoji, style: const TextStyle(fontSize: 15)),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: on ? bsOnAccent(context) : BsTokens.inkLight,
+                            fontSize: 13.5,
+                            fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      color: Theme.of(context).colorScheme.surface,
+      // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
+      // (gate 62 — no hard-coded edge inset).
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        BsTokens.space3,
+        BsTokens.space2,
+        BsTokens.space3,
+        BsTokens.space3,
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i < count; i++)
+            seg(i, _kManagerTabs[i].emoji, _kManagerTabs[i].label),
+        ],
+      ),
+    );
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  📊 לוח בקרה — the dashboard cockpit (M2)
+// ───────────────────────────────────────────────────────────────────────────
+
+/// The 📊 לוח בקרה tab body — a LIGHT scrollable cockpit over the LIVE shared
+/// orders engine. A faithful port of the legacy `renderMgrDashboard`
+/// (@index.html:12133) trimmed to this wave's two sections:
+///   • the 5 `mdMetric` tiles (@index.html:12160-12164) — read via
+///     [managerAnalyticsProvider]; 🚚 open-orders is engine-LIVE (recounts when an
+///     order is placed/advanced), while 📦 catalog / 🧰 accessories / ✅ available /
+///     🏪 stores are static-by-design ports of [kManagerCatalogCategories] /
+///     [kManagerStores] (real numbers that don't mutate at runtime);
+///   • the order pipeline (@index.html:12177-12198) — a per-stage count across
+///     the 6 [kManagerOrderFlow] stages, read straight off [ordersEngineProvider].
+///
+/// Reading the providers (not the static `managerAnalytics` const) is what keeps
+/// the LIVE figures — 🚚 open-orders + the pipeline — reflowing whenever any role
+/// mutates the engine.
+/// 📊 לוח בקרה — the manager cockpit's reorderable/hideable sections (screen-mgmt
+/// slice-5b). Ids == enum name, so the wizard's "ניהול מסכים" editor (ManagedScreen
+/// 'manager') drives this board's order + hide LIVE. `studio` is COMPILE-gated
+/// (kStudioCoEditor, dev-only) — excluded from the wizard registry, still honoured
+/// here when the dev flag is on.
+enum ManagerDashSection { copilot, studio, studioEntry, attention, kpis, pipeline }
+
+/// The [screenSectionsProvider] key for the manager cockpit.
+const String kManagerDashScreenKey = 'manager';
+
+class _DashboardTab extends ConsumerWidget {
+  const _DashboardTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analytics = ref.watch(managerAnalyticsProvider);
+    final orders = ref.watch(ordersEngineProvider);
+
+    // Per-stage counts across the canonical 6-stage flow (live engine read).
+    final byStage = <String, int>{
+      for (final stage in kManagerOrderFlow)
+        stage: orders.where((o) => o.stage == stage).length,
+    };
+
+    // screen-mgmt slice-5b: the cockpit renders through the UNIFIED per-screen
+    // model (order + hide · 'manager' key). `defaults` carries the SAME gates as
+    // the old inline build — compile `kStudioCoEditor` (dev-only cockpit hero,
+    // tree-shaken byte-identical in live) and runtime `manager.attention` (opt-in,
+    // OFF by absence) — so an empty layout ⇒ the exact same children in the exact
+    // same order ⇒ BYTE-IDENTICAL. Each section bundles its own leading spacing
+    // and is spread, so the flat children list is preserved verbatim.
+    ref.watch(screenSectionsProvider);
+    final defaults = <String>[
+      ManagerDashSection.copilot.name,
+      if (kStudioCoEditor) ManagerDashSection.studio.name,
+      ManagerDashSection.studioEntry.name,
+      if (featEnabled(ref, 'manager', 'attention'))
+        ManagerDashSection.attention.name,
+      ManagerDashSection.kpis.name,
+      ManagerDashSection.pipeline.name,
+    ];
+    final order = ref
+        .read(screenSectionsProvider.notifier)
+        .visibleIds(kManagerDashScreenKey, defaults)
+        .map(ManagerDashSection.values.byName);
+
+    List<Widget> childrenFor(ManagerDashSection s) => switch (s) {
+          ManagerDashSection.copilot => const [_CopilotHero()],
+          ManagerDashSection.studio => const [_StudioHero()],
+          ManagerDashSection.studioEntry => const [
+              SizedBox(height: BsTokens.space4),
+              StudioEntryCard(),
+            ],
+          ManagerDashSection.attention => const [_AttentionCard()],
+          ManagerDashSection.kpis => [_MetricGrid(analytics: analytics)],
+          ManagerDashSection.pipeline => [
+              const SizedBox(height: BsTokens.space5),
+              _OrderPipeline(byStage: byStage),
+            ],
+        };
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space5,
+      ),
+      children: [
+        for (final s in order) ...childrenFor(s),
+      ],
+    );
+  }
+}
+
+/// 🤖 Co-Pilot hero — the cockpit's headline gateway into "שאל את העסק שלך".
+/// A brand-gradient card at the very top of 📊 לוח בקרה → pushes the co-pilot.
+class _CopilotHero extends ConsumerWidget {
+  const _CopilotHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final live = ref.watch(claudeGatewayProvider) != null;
+    return Semantics(
+      button: true,
+      label: 'קו-פיילוט — שאל את העסק שלך',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        onTap: () =>
+            Navigator.of(context).push(ManagerCopilotScreen.route()),
+        child: Container(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [BsTokens.brand, BsTokens.brandDark],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+            ),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
+          ),
+          child: Row(
+            children: [
+              const Text('🤖', style: TextStyle(fontSize: 34)),
+              const SizedBox(width: BsTokens.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CfgText(
+                      'manager.cockpit.copilot.title',
+                      'שאל את העסק שלך',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      live
+                          ? 'מה בוער? מי הלקוח הכי שווה? — אני עונה מהנתונים החיים'
+                          : 'מודיעין-עסקי AI · דורש חיבור לשרת',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.5,
+                      ), // full white — white70 on brand failed contrast
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_left, color: Colors.white),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 🎬 Studio hero (Pillar-4 · step 81) — the manager-only cockpit gateway into
+/// the Studio CO-EDITOR. COMPILE-GATED behind [kStudioCoEditor] at its single
+/// call-site (`if (kStudioCoEditor) const _StudioHero()` in [_DashboardTab]):
+/// const-false in every normal build, so the branch AND this whole widget
+/// tree-shake away → the shipped cockpit is BYTE-IDENTICAL to today. The runtime
+/// `manager` axis (via [studioCoEditorProvider]) is a SECONDARY guard INSIDE
+/// build, never the outer gate. §9: an "ניסיוני" badge + a deep-link that opens
+/// [StudioScreen] on its default tab (the always-working manual builder).
+class _StudioHero extends ConsumerWidget {
+  const _StudioHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gate = ref.watch(studioCoEditorProvider);
+    // Secondary runtime guard: only a signed-in manager sees the hero. The
+    // compile-const `kStudioCoEditor` at the call-site is the OUTER byte-identical
+    // gate; this is the belt-and-braces role check (never the sole gate).
+    if (!gate.manager) return const SizedBox.shrink();
+    return Padding(
+      // The gap ABOVE the hero (below the co-pilot hero); the SizedBox in the
+      // ListView supplies the gap below it.
+      padding: const EdgeInsets.only(top: BsTokens.space4),
+      child: Semantics(
+        key: const Key('studio-hero'),
+        button: true,
+        label: 'סטודיו — ערוך את האפליקציה',
+        child: InkWell(
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
+          onTap: () => Navigator.of(context).push(StudioScreen.route()),
+          child: Container(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [BsTokens.brand, BsTokens.brandDark],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+              ),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
+            ),
+            child: Row(
+              children: [
+                const Text('🎬', style: TextStyle(fontSize: 34)),
+                const SizedBox(width: BsTokens.space3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          const Flexible(
+                            child: CfgText(
+                              'manager_dashboard_screen.studio_hero_title',
+                              'סטודיו — ערוך את האפליקציה',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: BsTokens.space2),
+                          // §9 — the "ניסיוני" (experimental) badge: a white pill
+                          // with brand text flags the pillar as new/beta.
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: BsTokens.space2,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              borderRadius: BorderRadius.circular(
+                                BsTokens.radiusPill,
+                              ),
+                            ),
+                            child: const CfgText(
+                              'manager_dashboard_screen.studio_experimental_badge',
+                              'ניסיוני',
+                              style: TextStyle(
+                                color: BsTokens.brandDark,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        gate.ai
+                            ? 'תאר בעברית מה לשנות — או בנה ידנית · אני עורך את הנתונים'
+                            : 'בנייה ידנית עובדת תמיד · העורך החכם דורש חיבור לשרת',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_left, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// GIANT Phase-2 — the attention card ("needs attention"): the ranked list from
+/// [attentionItemsProvider], crit rows first. Empty ⇒ nothing (`SizedBox.shrink`),
+/// so an all-clear cockpit shows no empty frame. Each row drills to its manager
+/// tab (the existing KPI-drill idiom — writes [managerTabProvider]).
+class _AttentionCard extends ConsumerWidget {
+  const _AttentionCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(attentionItemsProvider);
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: BsTokens.space4),
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: BsTokens.space2),
+            child: Text(
+              '🔔 דורש טיפול',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: BsTokens.typeSubhead,
+              ),
+            ),
+          ),
+          for (final it in items) _AttentionRow(item: it),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttentionRow extends ConsumerWidget {
+  const _AttentionRow({required this.item});
+
+  final AttentionItem item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final crit = item.sev == AttentionSev.crit;
+    final c = crit ? BsTokens.danger : BsTokens.warnText;
+    return InkWell(
+      onTap: () => ref.read(managerTabProvider.notifier).state = item.navTab,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: BsTokens.space2),
+        child: Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: BsTokens.space2),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: BsTokens.space2,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: c.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                item.tag,
+                style: TextStyle(
+                  color: c,
+                  fontSize: BsTokens.typeLabel,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: BsTokens.space2),
+            Expanded(
+              child: Text(
+                item.title,
+                style: const TextStyle(fontSize: BsTokens.typeBody),
+              ),
+            ),
+            const Icon(Icons.chevron_left, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The five `mdMetric` tiles (@index.html:12160-12164), laid out as a wrapping
+/// grid of WHITE cards. Each shows the emoji, the LIVE number, and the Hebrew
+/// label — labels VERBATIM from the legacy tiles (🚚 הזמנות פתוחות · 📦 מוצרים
+/// בקטלוג · 🧰 אביזרים נלווים · ✅ זמינים כעת · 🏪 חנויות פעילות).
+class _MetricGrid extends ConsumerWidget {
+  const _MetricGrid({required this.analytics});
+
+  final ManagerAnalytics analytics;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Drill-down: each KPI tile jumps to the tab that details it — 🚚 to the
+    // הזמנות tab (1); 📦/🧰/✅/🏪 (catalog · accessories · available · stores) to
+    // the ניהול tab (3, the live category + system view). Sets managerTabProvider.
+    void go(int tab) => ref.read(managerTabProvider.notifier).state = tab;
+    final tiles = <_MetricTile>[
+      _MetricTile(
+        emoji: '🚚',
+        value: '${analytics.openOrders}',
+        label: 'הזמנות פתוחות',
+        cfgId: 'manager.cockpit.kpi.openOrders',
+        onTap: () => go(1),
+      ),
+      _MetricTile(
+        emoji: '📦',
+        value: '${analytics.catalogCount}',
+        label: 'מוצרים בקטלוג',
+        cfgId: 'manager.cockpit.kpi.products',
+        onTap: () => go(3),
+      ),
+      _MetricTile(
+        emoji: '🧰',
+        value: '${analytics.accessoryCount}',
+        label: 'אביזרים נלווים',
+        cfgId: 'manager.cockpit.kpi.accessories',
+        onTap: () => go(3),
+      ),
+      _MetricTile(
+        emoji: '✅',
+        value: '${analytics.availableCount}',
+        label: 'זמינים כעת',
+        cfgId: 'manager.cockpit.kpi.available',
+        onTap: () => go(3),
+      ),
+      _MetricTile(
+        emoji: '🏪',
+        value: analytics.storesLabel,
+        label: 'חנויות פעילות',
+        cfgId: 'manager.cockpit.kpi.stores',
+        onTap: () => go(3),
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Two tiles per row (with the inter-tile gap removed from the width).
+        const gap = BsTokens.space3;
+        final tileW = (constraints.maxWidth - gap) / 2;
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [for (final t in tiles) SizedBox(width: tileW, child: t)],
+        );
+      },
+    );
+  }
+}
+
+/// One metric tile — a WHITE card (`cardLight`) with the emoji, the big
+/// `brand`-orange number, and the `mutedLight` Hebrew label.
+class _MetricTile extends ConsumerWidget {
+  const _MetricTile({
+    required this.emoji,
+    required this.value,
+    required this.label,
+    required this.cfgId,
+    this.onTap,
+  });
+
+  final String emoji;
+  final String value;
+  final String label;
+
+  /// Studio element id for the editable label (step 14 pilot).
+  final String cfgId;
+
+  /// Drill-down: tapping the tile navigates to the relevant tab. Null → the tile
+  /// stays non-interactive (no ripple, not announced as a button) — golden-safe.
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // giant · composite hide: an org that hides this KPI removes the WHOLE tile
+    // (not an empty card). One gate covers all 5 cockpit KPIs. Absent config ⇒
+    // visible ⇒ byte-identical (golden-safe).
+    if (!elementVisible(ref, cfgId)) return const SizedBox.shrink();
+    final radius = cfgRadius(context);
+    final card = Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space4,
+        vertical: BsTokens.space4,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 22)),
+          const SizedBox(height: BsTokens.space2),
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.brand,
+              fontWeight: FontWeight.w800,
+              fontSize: 26,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          // Step-14 pilot: the KPI label is studio-editable. Empty doc ⇒ the
+          // literal `label` verbatim with this exact style ⇒ golden-identical.
+          CfgText(
+            cfgId,
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: BsTokens.mutedLight,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+    return Semantics(
+      label: '$emoji $label: $value',
+      button: onTap != null,
+      child: onTap == null
+          ? card
+          : Material(
+              type: MaterialType.transparency,
+              borderRadius: BorderRadius.circular(radius),
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(radius),
+                child: card,
+              ),
+            ),
+    );
+  }
+}
+
+/// The order-pipeline section (@index.html:12177-12198) — a WHITE card listing
+/// every [kManagerOrderFlow] stage with its LIVE count and a proportional bar.
+/// Labels are the short pipeline forms the legacy `md-pipe` uses (התקבלה ·
+/// בהכנה · מוכן · בדרך · נמסר), plus נאסף for the pickup stage — all six stages.
+class _OrderPipeline extends ConsumerWidget {
+  const _OrderPipeline({required this.byStage});
+
+  final Map<String, int> byStage;
+
+  /// The short Hebrew pipeline label per stage. Verbatim from the legacy
+  /// `md-pipe` stages array (@index.html:12181-12187: new=התקבלה · preparing=
+  /// בהכנה · ready=מוכן · transit=בדרך · delivered=נמסר); pickup=נאסף (the
+  /// 6th stage the dashboard pipeline omits but the flow carries, @index.html:
+  /// 12044 `ORDER_STAGE.pickup.label`).
+  static const Map<String, String> _stageLabel = {
+    'new': 'התקבלה',
+    'preparing': 'בהכנה',
+    'ready': 'מוכן',
+    'pickup': 'נאסף',
+    'transit': 'בדרך',
+    'delivered': 'נמסר',
+  };
+
+  /// The per-stage accent colours, verbatim from the legacy pipeline
+  /// (@index.html:12181-12187). pickup reuses the `ready` green (it has no
+  /// legacy colour, sitting between ready and transit in the flow).
+  static const Map<String, Color> _stageColor = {
+    'new': Color(0xFF1F6F6B),
+    'preparing': Color(0xFFF2A516),
+    'ready': Color(0xFF1F8A4C),
+    'pickup': Color(0xFF1F8A4C),
+    'transit': Color(0xFF2B7DB8),
+    'delivered': Color(0xFF8B8D8F),
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // The legacy `maxStage=Math.max(1, …)` denominator for the bar widths.
+    final maxStage = byStage.values.fold<int>(1, (m, n) => n > m ? n : m);
+
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CfgText(
+            'manager.dash.pipeline.title',
+            'צינור ההזמנות',
+            style: TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: BsTokens.space3),
+          for (final stage in kManagerOrderFlow)
+            _PipelineRow(
+              label: _stageLabel[stage] ?? stage,
+              count: byStage[stage] ?? 0,
+              max: maxStage,
+              color: _stageColor[stage] ?? BsTokens.brand,
+              onTap: () => ref.read(managerTabProvider.notifier).state = 1,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One pipeline row — the stage label, its LIVE count, and a proportional bar
+/// (`count / max`) in the stage colour, on a light track.
+class _PipelineRow extends StatelessWidget {
+  const _PipelineRow({
+    required this.label,
+    required this.count,
+    required this.max,
+    required this.color,
+    this.onTap,
+  });
+
+  final String label;
+  final int count;
+  final int max;
+  final Color color;
+
+  /// Drill-down: tapping a stage row opens the הזמנות tab. Null → non-interactive.
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final fraction = max <= 0 ? 0.0 : (count / max).clamp(0.0, 1.0);
+    final row = Padding(
+      padding: const EdgeInsets.only(bottom: BsTokens.space3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Text(
+                  '$count',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              child: LinearProgressIndicator(
+                value: fraction,
+                minHeight: 7,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            ),
+          ],
+        ),
+    );
+    return Semantics(
+      label: '$label: $count',
+      button: onTap != null,
+      child: onTap == null
+          ? row
+          : Material(
+              type: MaterialType.transparency,
+              child: InkWell(onTap: onTap, child: row),
+            ),
+    );
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  🚚 הזמנות — the live order control center (M3)
+// ───────────────────────────────────────────────────────────────────────────
+
+/// The full stage label per [kManagerOrderFlow] stage — VERBATIM from the legacy
+/// `ORDER_STAGE` map (@index.html:12041-12048). These are the strings the legacy
+/// status-filter chips, the order-row pill, and the detail sheet all render
+/// (`ORDER_STAGE[st].label`). Distinct from the SHORT pipeline labels the 📊
+/// dashboard uses (התקבלה/בהכנה/מוכן/…) so the two tabs never collide.
+const Map<String, String> _kOrderStageLabel = {
+  'new': 'התקבלה',
+  'preparing': 'בהכנה',
+  'ready': 'מוכן לאיסוף',
+  'pickup': 'נאסף',
+  'transit': 'בדרך לאתר',
+  'delivered': 'נמסר ✓',
+};
+
+/// The per-stage pill accent — the legacy `ORDER_STAGE[st].cls` mapped to the
+/// pipeline hex palette (@index.html:12181-12187): new→teal, preparing→amber,
+/// ready/pickup/transit→green (the legacy bundles them under `cls:'ready'`),
+/// delivered→grey (`cls:'done'`). Used only as a small pill tint, LIGHT-safe.
+const Map<String, Color> _kOrderStageColor = {
+  'new': Color(0xFF1F6F6B),
+  'preparing': Color(0xFFF2A516),
+  'ready': Color(0xFF1F8A4C),
+  'pickup': Color(0xFF1F8A4C),
+  'transit': Color(0xFF1F8A4C),
+  'delivered': Color(0xFF8B8D8F),
+};
+
+/// The 🚚 הזמנות tab body — the manager's LIVE order control center, a faithful
+/// port of the legacy `renderMgrOrders` (@index.html:16939-17075). Reads the
+/// shared [ordersEngineProvider] so the list is always live; the per-order
+/// "קדם שלב ›" button calls `ordersEngineProvider.notifier.advance(id)` (the
+/// god-mode stage-advance — verbatim `mgrAdvanceOrder` @index.html:17022). Because
+/// the engine is SHARED, advancing here also reflows the 📊 dashboard's 🚚 tile +
+/// pipeline + counts LIVE (proven in `manager_dashboard_screen_test`).
+///
+/// Sections (top→bottom): a 3-stat summary (הזמנות / פתוחות / מחזור), a stage
+/// filter chip row (`הכל` + one chip per non-empty stage, verbatim labels +
+/// counts), and the filtered order list. LIGHT only — white `cardLight` rows on
+/// `bgLight`, `inkLight`/`mutedLight` text, `brand` accents.
+class _OrdersTab extends ConsumerStatefulWidget {
+  const _OrdersTab();
+
+  @override
+  ConsumerState<_OrdersTab> createState() => _OrdersTabState();
+}
+
+class _OrdersTabState extends ConsumerState<_OrdersTab> {
+  /// The active stage filter — `'all'` (the legacy `mgrOrderFilter` default) or
+  /// one of [kManagerOrderFlow]. Local widget state (the legacy module-scoped
+  /// `let mgrOrderFilter='all'`); no engine/global state is touched.
+  String _filter = 'all';
+
+  @override
+  Widget build(BuildContext context) {
+    final all = ref.watch(ordersEngineProvider);
+
+    // Summary (@index.html:16953-16962): total / open(stage!=='delivered') /
+    // revenue(Σsum).
+    final open = all.where((o) => o.isOpen).length;
+    final revenue = all.fold<int>(0, (s, o) => s + o.sum);
+
+    // Per-stage counts for the chips (@index.html:16965-16966).
+    final counts = <String, int>{
+      for (final st in kManagerOrderFlow)
+        st: all.where((o) => o.stage == st).length,
+    };
+
+    // If the active filter's stage has emptied out (e.g. its last order was
+    // advanced away), fall back to `הכל` so the user is never stranded on a chip
+    // that no longer renders (the legacy chip simply vanishes; this keeps the
+    // list visible rather than wedged on a missing filter).
+    final effectiveFilter =
+        _filter == 'all' || (counts[_filter] ?? 0) > 0 ? _filter : 'all';
+
+    // Filtered list (@index.html:16974-16982) — by stage only (the legacy free-
+    // text search is not part of this wave).
+    final list =
+        effectiveFilter == 'all'
+            ? all
+            : all.where((o) => o.stage == effectiveFilter).toList();
+
+    // The fixed widgets above the rows (summary · chips · the empty note);
+    // the order rows themselves build lazily via ListView.builder below, so
+    // only the on-screen rows are constructed — not the whole filtered list.
+    final head = <Widget>[
+      _OrderSummary(total: all.length, open: open, revenue: revenue),
+      const SizedBox(height: BsTokens.space4),
+      _OrderStageChips(
+        active: effectiveFilter,
+        allCount: all.length,
+        counts: counts,
+        onSelect: (st) => setState(() => _filter = st),
+      ),
+      const SizedBox(height: BsTokens.space4),
+      if (list.isEmpty)
+        // The legacy empty line (@index.html:16983 `md-empty`).
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+          child: CfgText(
+            'manager.orders.empty',
+            'לא נמצאו הזמנות תואמות.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+          ),
+        ),
+    ];
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space5,
+      ),
+      itemCount: head.length + list.length,
+      itemBuilder: (_, i) {
+        if (i < head.length) return head[i];
+        final o = list[i - head.length];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: BsTokens.space3),
+          child: _OrderRow(
+            order: o,
+            onAdvance: () => _advance(o),
+            onTap: () => _openDetail(o),
+          ),
+        );
+      },
+    );
+  }
+
+  /// God-mode stage-advance — the keystone manager WRITE. Verbatim behavior of
+  /// `mgrAdvanceOrder` (@index.html:17022-17032): a `delivered` order is already
+  /// complete → toast "ההזמנה כבר הושלמה"; otherwise advance one stage on the
+  /// SHARED engine and toast "הזמנה `id` → `next-label`". The engine write
+  /// reflows the 📊 dashboard (🚚 tile + pipeline) live because they read the
+  /// same provider.
+  void _advance(Order o) {
+    if (!o.isOpen) {
+      showToast(context, 'ההזמנה כבר הושלמה');
+      return;
+    }
+    final cur = kManagerOrderFlow.indexOf(o.stage);
+    if (cur < 0) return; // unknown stage — don't silently wrap to index 0
+    ref.read(ordersEngineProvider.notifier).advance(o.id);
+    // Re-read the live order after advancing so the toast labels the NEW stage
+    // (not the stale snapshot stage the caller captured before the write).
+    final live = ref
+        .read(ordersEngineProvider)
+        .firstWhere((x) => x.id == o.id, orElse: () => o);
+    showToast(
+      context,
+      'הזמנה ${o.id} → ${_kOrderStageLabel[live.stage] ?? live.stage}',
+    );
+  }
+
+  /// The order-detail bottom sheet — the legacy `mgrOrderDetail`
+  /// (@index.html:17037-17075): a 6-step progress tracker, an items/sum/step
+  /// grid, the קבלן/אתר/סטטוס rows, and the `קדם ל"…"` action (or a
+  /// completed note). Advancing from the sheet routes through [_advance], so it
+  /// is the same shared-engine write.
+  void _openDetail(Order o) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(BsTokens.radiusCard),
+        ),
+      ),
+      builder:
+          (sheetCtx) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: _OrderDetailSheet(
+              orderId: o.id,
+              onAdvance: () {
+                Navigator.of(sheetCtx).pop();
+                _advance(o);
+              },
+            ),
+          ),
+    );
+  }
+}
+
+/// The 3-stat order summary (@index.html:16953-16962) — `mo-summary`: total
+/// orders / open orders / revenue (₪, grouped). A WHITE `cardLight` strip.
+class _OrderSummary extends StatelessWidget {
+  const _OrderSummary({
+    required this.total,
+    required this.open,
+    required this.revenue,
+  });
+
+  final int total;
+  final int open;
+  final int revenue;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget stat(String value, String label) => Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+        ],
+      ),
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space4,
+        vertical: BsTokens.space4,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Row(
+        children: [
+          stat('$total', 'הזמנות'),
+          stat('$open', 'פתוחות'),
+          stat('₪${_grouped(revenue)}', 'מחזור'),
+        ],
+      ),
+    );
+  }
+}
+
+/// The status-filter chip row (@index.html:16967-16973) — `הכל (N)` plus one
+/// chip per stage that has at least one order (verbatim `ORDER_STAGE[st].label`
+/// + count). The active chip is a `brand` fill; the rest are light outlines.
+class _OrderStageChips extends StatelessWidget {
+  const _OrderStageChips({
+    required this.active,
+    required this.allCount,
+    required this.counts,
+    required this.onSelect,
+  });
+
+  final String active;
+  final int allCount;
+  final Map<String, int> counts;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    // #31 — each stage chip is wrapped in a HelpTarget (one bubble text for the
+    // whole filter row); in help mode it rings + explains, otherwise unchanged.
+    Widget chip(String key, String label, int count) {
+      final on = active == key;
+      return HelpTarget(
+        title: 'סינון לפי שלב',
+        body:
+            'מסנן את רשימת ההזמנות לשלב שנבחר; ׳הכל׳ מציג את כולן. רק שלבים '
+            'שיש בהם הזמנות מופיעים. סינון תצוגה בלבד — אינו משנה דאטה.',
+        child: Material(
+          color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: () => onSelect(key),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
+              ),
+              child: Text(
+                '$label ($count)',
+                style: TextStyle(
+                  color: on ? bsOnAccent(context) : BsTokens.inkLight,
+                  fontSize: 13,
+                  fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: BsTokens.space2,
+      runSpacing: BsTokens.space2,
+      children: [
+        chip('all', 'הכל', allCount),
+        for (final st in kManagerOrderFlow)
+          if ((counts[st] ?? 0) > 0)
+            chip(st, _kOrderStageLabel[st] ?? st, counts[st] ?? 0),
+      ],
+    );
+  }
+}
+
+/// One order row (@index.html:16998-17017) — `mo-card`: the `📦 id` + a stage
+/// pill on top, the `who · site` line, a 6-step mini tracker, then a footer of
+/// `items פריטים · ₪sum` and the "קדם שלב ›" advance button (or a "✓ הושלם"
+/// badge once delivered). A WHITE `cardLight` card; tapping it opens the detail
+/// sheet (the advance button stops propagation so it never also opens the sheet).
+class _OrderRow extends StatelessWidget {
+  const _OrderRow({
+    required this.order,
+    required this.onAdvance,
+    required this.onTap,
+  });
+
+  final Order order;
+  final VoidCallback onAdvance;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final stageLabel = _kOrderStageLabel[order.stage] ?? order.stage;
+    final stageColor = _kOrderStageColor[order.stage] ?? BsTokens.brand;
+    final stageIdx = kManagerOrderFlow.indexOf(order.stage);
+
+    return Semantics(
+      button: true,
+      label: '📦 ${order.id} · ${order.who} · $stageLabel',
+      // #31 — tapping the card opens the order-detail sheet; in help mode the
+      // HelpTarget rings the whole card and explains it instead.
+      child: HelpTarget(
+        title: 'פרטי הזמנה',
+        body:
+            'פותח את גיליון פרטי ההזמנה: מעקב 6 שלבים, פריטים/סכום, '
+            'קבלן/אתר/סטטוס ופעולת קידום שלב.',
+        child: Material(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.all(BsTokens.space4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
+                border: Border.all(color: const Color(0xFFEDEDED)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '📦 ${order.id}',
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                      _StagePill(label: stageLabel, color: stageColor),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${order.who} · ${order.site}',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 13,
+                    ),
+                  ),
+                  // 📞/💬 — call / WhatsApp the contractor who placed the order
+                  // (hidden when the order carries no phone — seed/legacy).
+                  ContactActions(phone: order.customerPhone, compact: true),
+                  const SizedBox(height: BsTokens.space3),
+                  _MiniTracker(stageIdx: stageIdx),
+                  const SizedBox(height: BsTokens.space3),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${order.items} פריטים · ₪${_grouped(order.sum)}',
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      if (order.isOpen)
+                        // #31 — the god-mode stage-advance; in help mode the
+                        // HelpTarget rings + explains it instead of advancing.
+                        HelpTarget(
+                          title: 'קדם שלב להזמנה',
+                          body:
+                              'מקדם את ההזמנה לשלב הבא בצינור '
+                              '(התקבלה→בהכנה→מוכן→נאסף→בדרך→נמסר). עקיפת-מנהל '
+                              'המעדכנת מיד את כל הלוחות. הזמנה שנמסרה אינה ניתנת '
+                              'לקידום.',
+                          child: _AdvanceButton(onPressed: onAdvance),
+                        )
+                      else
+                        const CfgText(
+                          'manager_dashboard_screen.order_completed_badge',
+                          '✓ הושלם',
+                          style: TextStyle(
+                            color: Color(0xFF1B7A3D),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The small status pill on an order row — a tinted capsule in the stage colour
+/// (the legacy `adm-pill <cls>`). A 12% colour wash with the full-colour text,
+/// LIGHT-safe (never a dark surface).
+class _StagePill extends StatelessWidget {
+  const _StagePill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+/// The 6-step mini progress tracker (@index.html:16992-16996 `mo-track`) — one
+/// segment per [kManagerOrderFlow] stage; segments up to & including the current
+/// stage are `brand`-filled, the rest are a light track.
+class _MiniTracker extends StatelessWidget {
+  const _MiniTracker({required this.stageIdx});
+
+  final int stageIdx;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (var i = 0; i < kManagerOrderFlow.length; i++) ...[
+          Expanded(
+            child: Container(
+              height: 5,
+              decoration: BoxDecoration(
+                color: i <= stageIdx ? BsTokens.brand : const Color(0xFFEDEDED),
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              ),
+            ),
+          ),
+          if (i < kManagerOrderFlow.length - 1) const SizedBox(width: 4),
+        ],
+      ],
+    );
+  }
+}
+
+/// The "קדם שלב ›" advance button (@index.html:17013-17014 `mo-adv`) — a `brand`
+/// pill that drives the god-mode stage-advance. White text on `brand`.
+class _AdvanceButton extends StatelessWidget {
+  const _AdvanceButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    // giant · composite hide: an org that hides 'manager.orders.advance'
+    // removes the WHOLE advance pill (not an empty shell — CfgText alone would
+    // blank only the label). CfgVisible wraps the outer button; absent config
+    // ⇒ child verbatim ⇒ byte-identical.
+    return CfgVisible(
+      'manager.orders.advance',
+      child: Material(
+        color: BsTokens.brand,
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: CfgText(
+              'manager.orders.advance',
+              'קדם שלב ›',
+              style: TextStyle(
+                color: bsOnAccent(context),
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The order-detail bottom sheet body (@index.html:17037-17075 `mgrOrderDetail`)
+/// — `📦`, the id, the `status · who` tag, a full 6-step labelled tracker, an
+/// items/sum/step grid, the קבלן/אתר/סטטוס rows, and the action: either
+/// `קדם ל"…"` (open order) or a "✓ ההזמנה הושלמה ונמסרה" note. LIGHT.
+///
+/// Watches [ordersEngineProvider] directly (NEW-A) so stage/timeline/advance-
+/// label follow live advances: tapping "קדם" from the list while the sheet is
+/// open causes the sheet to reflect the new stage without reopening it, and the
+/// advance button hides automatically once the order reaches `delivered`.
+class _OrderDetailSheet extends ConsumerWidget {
+  const _OrderDetailSheet({required this.orderId, required this.onAdvance});
+
+  final String orderId;
+  final VoidCallback onAdvance;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Look up the LIVE order by id — falls back to null if somehow removed.
+    final allOrders = ref.watch(ordersEngineProvider);
+    Order? order;
+    for (final o in allOrders) {
+      if (o.id == orderId) {
+        order = o;
+        break;
+      }
+    }
+
+    // If the order is gone (edge-case), close the sheet gracefully.
+    if (order == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => Navigator.of(context, rootNavigator: false).maybePop(),
+      );
+      return const SizedBox.shrink();
+    }
+
+    // Non-null capture for the (async) invoice closure — a mutable local isn't
+    // promoted inside a closure.
+    final invoiceOrder = order;
+    final stageIdx = kManagerOrderFlow.indexOf(order.stage);
+    final stageLabel = _kOrderStageLabel[order.stage] ?? order.stage;
+    // L7: guard stageIdx >= 0 to avoid index crash on unknown/corrupt stage.
+    final next =
+        (stageIdx >= 0 && order.isOpen)
+            ? kManagerOrderFlow[stageIdx + 1]
+            : null;
+
+    Widget tile(String value, String label) => Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFEDEDED)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    Widget row(String label, String value) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          BsTokens.space4,
+          BsTokens.space4,
+          BsTokens.space4,
+          BsTokens.space5,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              '📦',
+              style: TextStyle(fontSize: 34),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: BsTokens.space2),
+            Text(
+              order.id,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '$stageLabel · ${order.who}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            ),
+            const SizedBox(height: BsTokens.space4),
+            _MiniTracker(stageIdx: stageIdx),
+            const SizedBox(height: BsTokens.space4),
+            Row(
+              children: [
+                tile('${order.items}', 'פריטים'),
+                tile('₪${_grouped(order.sum)}', 'סכום'),
+                tile('${stageIdx + 1}/${kManagerOrderFlow.length}', 'שלב'),
+              ],
+            ),
+            const SizedBox(height: BsTokens.space4),
+            row('קבלן', order.who),
+            // 📞/💬 — call / WhatsApp the contractor (hidden when no phone).
+            Center(child: ContactActions(phone: order.customerPhone)),
+            row('אתר', order.site),
+            row('סטטוס', stageLabel),
+            const SizedBox(height: BsTokens.space4),
+            if (next != null)
+              _SheetAdvanceButton(
+                label: 'קדם ל"${_kOrderStageLabel[next] ?? next}"',
+                onPressed: onAdvance,
+              )
+            else
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE7F6EC),
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                ),
+                child: const CfgText(
+                  'manager_dashboard_screen.order_completed_delivered',
+                  '✓ ההזמנה הושלמה ונמסרה',
+                  style: TextStyle(
+                    color: Color(0xFF1B7A3D),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            // GIANT Phase-2 wave-3 (documents) — invoice/receipt on the
+            // existing printable_docs rail, behind the opt-in `orders.invoicing`
+            // gate; absent by default ⇒ the order sheet is byte-identical.
+            if (featEnabled(ref, 'orders', 'invoicing')) ...[
+              const SizedBox(height: BsTokens.space3),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final title = invoiceTitle(invoiceOrder, receipt: false);
+                  final ok = await printDocument(
+                    title: title,
+                    html: buildPrintableHtml(
+                      title: title,
+                      rows: buildInvoiceRows(invoiceOrder),
+                    ),
+                  );
+                  if (!ok && context.mounted) {
+                    showToast(context, 'הדפסה זמינה בדפדפן');
+                  }
+                },
+                icon: const Icon(Icons.receipt_long, size: 18),
+                label: const Text('🧾 הפק חשבונית'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: BsTokens.brandDark,
+                  side: const BorderSide(color: BsTokens.brand),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              // The receipt (קבלה) — the SAME billing rail, receipt:true; under
+              // the same orders.invoicing opt-in as the invoice above it.
+              const SizedBox(height: BsTokens.space3),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final title = invoiceTitle(invoiceOrder, receipt: true);
+                  final ok = await printDocument(
+                    title: title,
+                    html: buildPrintableHtml(
+                      title: title,
+                      rows: buildInvoiceRows(invoiceOrder),
+                    ),
+                  );
+                  if (!ok && context.mounted) {
+                    showToast(context, 'הדפסה זמינה בדפדפן');
+                  }
+                },
+                icon: const Icon(Icons.price_check, size: 18),
+                label: const Text('💵 הפק קבלה'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: BsTokens.brandDark,
+                  side: const BorderSide(color: BsTokens.brand),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+            // GIANT Phase-2 wave-4 (documents) — a delivery note (goods, no
+            // money) on the SAME printable_docs rail, behind its own opt-in
+            // `orders.deliveryNote` gate; absent by default ⇒ byte-identical.
+            if (featEnabled(ref, 'orders', 'deliveryNote')) ...[
+              const SizedBox(height: BsTokens.space3),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final title = deliveryNoteTitle(invoiceOrder);
+                  final ok = await printDocument(
+                    title: title,
+                    html: buildPrintableHtml(
+                      title: title,
+                      rows: buildDeliveryNoteRows(invoiceOrder),
+                    ),
+                  );
+                  if (!ok && context.mounted) {
+                    showToast(context, 'הדפסה זמינה בדפדפן');
+                  }
+                },
+                icon: const Icon(Icons.local_shipping, size: 18),
+                label: const Text('📦 תעודת משלוח'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: BsTokens.brandDark,
+                  side: const BorderSide(color: BsTokens.brand),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The sheet's full-width green advance button (the legacy `btn btn-green`).
+class _SheetAdvanceButton extends StatelessWidget {
+  const _SheetAdvanceButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    // #31 — the detail-sheet stage-advance; in help mode the HelpTarget rings +
+    // explains it instead of advancing.
+    return HelpTarget(
+      title: 'קדם לשלב הבא',
+      body:
+          'מקדם את ההזמנה לשלב הבא ישירות מתוך גיליון הפרטים. אותה עקיפת-מנהל '
+          'כמו ׳קדם שלב׳ ברשימה; השלב מתעדכן בכל הלוחות.',
+      child: Material(
+        color: const Color(0xFF1F8A4C),
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Thousands-grouped integer (the legacy `Number.toLocaleString()` for the ₪
+/// sums) — e.g. 3150 → "3,150". Pure, no locale dependency.
+String _grouped(int n) {
+  final s = n.abs().toString();
+  final buf = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
+    buf.write(s[i]);
+  }
+  return n < 0 ? '-$buf' : buf.toString();
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  👥 לקוחות — the live customer list + credit (M4)
+// ───────────────────────────────────────────────────────────────────────────
+
+/// The Hebrew status label per customer status — VERBATIM from the legacy
+/// `renderMgrCustomers` (@index.html:16592:
+/// `c.status==='low'?'אשראי גבוה':c.status==='off'?'לא פעיל':'פעיל'`). The
+/// detail-sheet tag uses the longer legacy forms (@index.html:16616).
+const Map<String, String> _kCustomerStatusLabel = {
+  'live': 'פעיל',
+  'low': '⚠️ אשראי גבוה',
+  'off': 'לא פעיל',
+};
+
+/// The per-status accent colour — green for an active contractor (`live`),
+/// amber for a high-credit one (`low`, the legacy `hot` class @index.html:16601),
+/// grey for an inactive one (`off`). LIGHT-safe (the dashboard's own greens/amber,
+/// never a dark token).
+const Map<String, Color> _kCustomerStatusColor = {
+  'live': Color(0xFF1F8A4C),
+  'low': Color(0xFFF2A516),
+  'off': Color(0xFF8B8D8F),
+};
+
+/// GLOBAL SEARCH (`kGlobalSearch`) — open a customer's detail sheet directly over
+/// [context], the SAME manager sheet the dashboard's customers tab shows on tap.
+/// Resolves the live view-model by name via the private [_customerViewsProvider]
+/// (so pct/sites derive exactly as the tab does). Only called from the flag-gated
+/// customer source, so it tree-shakes when the flag is off and this file stays
+/// byte-identical.
+void showCustomerDetailSheet(WidgetRef ref, BuildContext context, String name) {
+  final match =
+      ref.read(_customerViewsProvider).where((v) => v.customer.name == name);
+  if (match.isEmpty) return;
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+    ),
+    builder: (_) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: _CustomerDetailSheet(view: match.first),
+    ),
+  );
+}
+
+/// One customer's full view-model — the [ManagerCustomer] aggregate (name /
+/// orderCount / totalSpend / creditLimit) PLUS the two derived fields the legacy
+/// `mc-card` renders that are NOT on the aggregate: `pct` (credit-utilisation %)
+/// and `sites` (distinct build-site count). Both are computed exactly as the
+/// legacy `mgrCustomerList` does over the LIVE orders (@index.html:16554,
+/// 16559-16562) — `pct = min(100, round(spent/credit*100))`, `sites` = the size
+/// of the per-buyer site set.
+@immutable
+class _CustomerView {
+  const _CustomerView({
+    required this.customer,
+    required this.pct,
+    required this.sites,
+    this.uid = '',
+    this.accountStatus = '',
+    this.role,
+  });
+
+  final ManagerCustomer customer;
+  final int pct;
+  final int sites;
+
+  /// #reg-approval — the directory uid this row maps to. '' for an order-derived-
+  /// only row (a seed buyer, or ANY row when the backend is OFF — the directory is
+  /// empty then, so these default to the byte-identical values). Lets the chat
+  /// affordance reach a registered user who never ordered (no phone), by uid.
+  final String uid;
+
+  /// #reg-approval — the account-lifecycle status from the directory
+  /// ([kDirectoryStatusPending]/[kDirectoryStatusActive]), '' when order-derived-
+  /// only / backend OFF. Drives the ממתין/פעיל row badge; NEVER a permission
+  /// decision (the `approveUsers` callable authorizes server-side).
+  final String accountStatus;
+
+  /// #reg-approval — the directory role for this row ([BsRole]), or null for an
+  /// order-derived / CRM-only row (and ANY row when the backend is OFF — the
+  /// directory is empty then). Drives the row's role badge; display-only, NEVER
+  /// a permission decision.
+  final BsRole? role;
+
+  /// @legacy index.html:16562 — `pct>=90?'low':pct>0?'live':'off'`.
+  String get status => pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
+}
+
+/// PERF-M2: top-level Riverpod provider for the LIVE customer view-models.
+///
+/// Watches [managerCustomersProvider] for the sorted buyer list (sort order is
+/// spend-desc, the legacy `mgrCustomerList` order @index.html:16554 — keeping
+/// it as the primary watch preserves stable ordering across engine ticks) AND
+/// [ordersEngineProvider] for the raw orders needed to derive `pct` / `sites`.
+/// Extracted from the former free-function `_liveCustomerViews` so the O(N)
+/// derivation runs once per engine tick, not once per build call, and eliminates
+/// the double-subscription that the old call inside `build()` caused.
+final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
+  final customers = ref.watch(managerCustomersProvider);
+  final orders = ref.watch(ordersEngineProvider);
+  // #reg-approval — ALL registered users (the people directory), so a user who
+  // registered but NEVER ordered still appears. EMPTY when the backend is OFF
+  // (the whole test suite + demo), so the union below collapses to today's
+  // order-derived list ⇒ BYTE-IDENTICAL when off. valueOrNull → [] while the
+  // stream is loading (no throw into the sync provider).
+  final directory =
+      ref.watch(directoryProvider).valueOrNull ?? const <DirectoryEntry>[];
+
+  // Distinct build sites per buyer (legacy `byName[nm].sites` set @16554) —
+  // a non-empty `o.site` is added to that buyer's set; its size is `c.sites`.
+  final sitesByBuyer = <String, Set<String>>{};
+  for (final o in orders) {
+    if (o.site.isEmpty) continue;
+    (sitesByBuyer[o.who] ??= <String>{}).add(o.site);
+  }
+
+  // @legacy index.html:16559 — `min(100, round(spent/credit*100))`.
+  int pctOf(ManagerCustomer c) => c.creditLimit == 0
+      ? 0
+      : ((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100);
+
+  // The order-derived stats keyed by (trimmed) buyer name, for the by-name merge
+  // (spend/orders flow onto a matching registered user; unmatched registered
+  // users show with zero stats).
+  final statsByName = <String, ManagerCustomer>{
+    for (final c in customers) c.name.trim(): c,
+  };
+
+  final views = <_CustomerView>[];
+  final takenNames = <String>{};
+
+  // 1) Every REGISTERED user (directory) — appears even with zero orders. Merge
+  //    the order-derived stats (spend/orders) by name when the buyer placed any.
+  for (final e in directory) {
+    final key = e.displayName.trim();
+    final stats = statsByName[key];
+    final base = stats ??
+        ManagerCustomer(
+          name: e.displayName,
+          orderCount: 0,
+          totalSpend: 0,
+          creditLimit: 0,
+        );
+    views.add(_CustomerView(
+      customer: base,
+      pct: pctOf(base),
+      sites: sitesByBuyer[base.name]?.length ?? 0,
+      uid: e.uid,
+      accountStatus: e.status,
+      role: e.role,
+    ));
+    if (stats != null) takenNames.add(key);
+  }
+
+  // 2) Order-derived buyers with NO directory row — the seed customers, and the
+  //    ENTIRE list when the backend is OFF (directory empty). Preserves today's
+  //    order + content exactly in that case (byte-identical when off).
+  for (final c in customers) {
+    if (takenNames.contains(c.name.trim())) continue;
+    // #reg-approval launch-clean — on the LIVE backend, DROP an order-derived
+    // buyer with NO contact (empty phone). These are the bundled demo-seed
+    // customers (משה אברהם … — kOrdersEngineSeed) surfacing through the born-seed
+    // when the real `orders` collection is empty (firestore_cached_repo
+    // `_onSnapshot` keeps the seed on an UNSCOPED empty first snapshot) — they are
+    // NOT real accounts, and deleting from the DB can't remove them. A REAL buyer
+    // carries `customerPhone`; a REGISTERED user is in the directory (kept in step
+    // 1 above, regardless of phone). GATED on [useFirebaseBackend] so the OFF/demo
+    // build is byte-identical — the seed IS the demo content there, never filtered.
+    if (useFirebaseBackend && c.phone.isEmpty) continue;
+    views.add(_CustomerView(
+      customer: c,
+      pct: pctOf(c),
+      sites: sitesByBuyer[c.name]?.length ?? 0,
+    ));
+  }
+
+  return views;
+});
+
+/// #reg-approval — PURE predicate for the user-management hub's account-status
+/// filter chips ([_AccountFilterChips]). [filter] ∈ 'all' | 'pending' | 'active'
+/// | 'customers' (the `_accountFilter` values): 'all' passes every row,
+/// 'pending'/'active' match the directory [accountStatus]
+/// ([kDirectoryStatusPending]/[kDirectoryStatusActive]), 'customers' = a row with
+/// NO app account (uid==''). Display-only filtering; NEVER a permission decision.
+/// Top-level + public so it is unit-testable project-style.
+bool accountFilterMatch({
+  required String accountStatus,
+  required String uid,
+  required String filter,
+}) {
+  switch (filter) {
+    case 'pending':
+      return accountStatus == kDirectoryStatusPending;
+    case 'active':
+      return accountStatus == kDirectoryStatusActive;
+    case 'customers':
+      return uid.isEmpty;
+    default:
+      return true;
+  }
+}
+
+/// A13 (launch server-connect) — the server-canonical credit AGGREGATE for one
+/// contractor, routed through `CustomersRepository.computeCredit(name)` (the
+/// `computeCredit` callable). THIS is the consumer that finally reaches the A13
+/// `computeCredit` seam — previously fully built end-to-end but UNCALLED, so
+/// credit never routed through the server even with the flag on.
+///
+/// ZERO-REGRESSION: the repo's `computeCredit` gates INTERNALLY on
+/// `kServerCallables` — OFF (default / the whole demo + test suite) it returns
+/// the SAME local derivation the dashboard derives synchronously today
+/// (`creditLimit == contractorCredit(name)`), with NO network; ON + a bound
+/// gateway it returns the server-canonical figures, falling back to the same
+/// local derivation on a callable failure (never a faked success). So the
+/// figure this resolves to is BYTE-IDENTICAL to the sync `creditLimit` when OFF.
+///
+/// The detail sheet shows the sync `c.creditLimit` immediately and refines to
+/// this once it resolves — OFF the two are equal, so the displayed number never
+/// changes (no jarring flicker); ON it upgrades to the server-canonical value.
+final customerCreditProvider = FutureProvider.family<CreditResult, String>((
+  ref,
+  name,
+) async {
+  return ref.read(customersRepositoryProvider).computeCredit(name);
+});
+
+/// The fleet-wide credit ceiling — Σ of the LIVE `computeCredit` ceiling across
+/// all customers, so the manager's "ניצול אשראי %" summary stops aggregating the
+/// fabricated seed ceiling. OFF (demo/tests): each `computeCredit` returns
+/// `contractorCredit(name) == c.creditLimit`, so the sum is byte-identical to the
+/// old `Σ c.creditLimit`; ON it sums the server-canonical ceilings. The summary
+/// falls back to the seed sum while this resolves, so the number never flickers.
+final fleetCreditProvider = FutureProvider<int>((ref) async {
+  final customers = ref.watch(managerCustomersProvider);
+  var total = 0;
+  for (final c in customers) {
+    final r = await ref.watch(customerCreditProvider(c.name).future);
+    total += r.creditLimit;
+  }
+  return total;
+});
+
+/// The 👥 לקוחות tab body — the manager's LIVE customer list, a faithful port of
+/// the legacy `renderMgrCustomers` (@index.html:16566-16607). Each contractor is
+/// derived from the shared [ordersEngineProvider] (grouped by `who` via
+/// [managerCustomersProvider]), so the list is always live: a new contractor
+/// order (placed via the engine by any role) adds or updates a customer card here.
+///
+/// Sections (top→bottom): a 3-stat summary (קבלנים / סך רכש / ניצול אשראי), a
+/// status filter chip row (`הכל` + פעיל / אשראי גבוה when populated), and the
+/// filtered customer list. Each `_CustomerCard` mirrors the legacy `mc-card`:
+/// `👷 name`, `N הזמנות · M אתרים`, a credit-utilisation bar + the line
+/// `ניצול אשראי: ₪used / ₪limit (pct%)`, and a פעיל / ⚠️ אשראי גבוה status pill.
+/// Tapping a card opens the `mgrCustomerDetail` bottom sheet. LIGHT only — white
+/// `cardLight` cards on `bgLight`, `inkLight`/`mutedLight` text, `brand` accents,
+/// green for active / amber for high-credit.
+class _CustomersTab extends ConsumerStatefulWidget {
+  const _CustomersTab();
+
+  @override
+  ConsumerState<_CustomersTab> createState() => _CustomersTabState();
+}
+
+class _CustomersTabState extends ConsumerState<_CustomersTab> {
+  /// The active status filter — `'all'` or one of `live` / `low` (the two the
+  /// legacy `mc-pill` surfaces). Local widget state; no engine/global write.
+  String _filter = 'all';
+
+  /// #reg-approval — the active ACCOUNT-status filter for the user-management hub:
+  /// `'all'` / `pending` / `active` / `customers` (= a row with no app account,
+  /// uid==''). Local widget state (setState). Defaults to `'all'` (a no-op), so
+  /// the list is byte-identical until the manager picks a chip; the chip row
+  /// itself is absent unless the merged list carries a directory-sourced row.
+  String _accountFilter = 'all';
+
+  /// GIANT Phase-2 — the fuzzy search query (opt-in `search.fuzzy`). Local
+  /// state, EMPTY by default (the live-reflow test depends on empty =
+  /// pass-through); no debounce — the customer set is tiny.
+  final TextEditingController _searchCtl = TextEditingController();
+  String _search = '';
+
+  @override
+  void dispose() {
+    _searchCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // PERF-M2: single ref.watch on the pre-computed provider — O(N) derivation
+    // runs once per engine tick in the provider, not on every build call.
+    final views = ref.watch(_customerViewsProvider);
+    // Fuzzy search rides the opt-in gate; OFF ⇒ q is '' ⇒ pass-through ⇒ the
+    // list is byte-identical to today (the box is also absent, below).
+    final searchOn = featEnabled(ref, 'search', 'fuzzy');
+    final q = searchOn ? _search.trim() : '';
+
+    // Summary (@index.html:16570-16578): contractor count, total spend
+    // (Σ used), and the fleet credit-utilisation % (Σ used / Σ limit).
+    final totalUsed = views.fold<int>(0, (s, v) => s + v.customer.totalSpend);
+    // S-connect: the fleet ceiling is the LIVE computeCredit sum (byte-identical
+    // OFF == Σ c.creditLimit, the proven invariant); fall back to the seed sum
+    // while it resolves so the % never flickers.
+    final totalCredit =
+        ref.watch(fleetCreditProvider).valueOrNull ??
+        views.fold<int>(0, (s, v) => s + v.customer.creditLimit);
+    final fleetPct =
+        totalCredit == 0
+            ? 0
+            : ((totalUsed / totalCredit) * 100).round().clamp(0, 100);
+
+    // Per-status counts for the chips (only live/low are user-facing).
+    final counts = <String, int>{
+      for (final st in const ['live', 'low'])
+        st: views.where((v) => v.status == st).length,
+    };
+
+    // If the active filter's status has emptied out, fall back to הכל so the
+    // user is never stranded on a chip that no longer renders.
+    final effectiveFilter =
+        _filter == 'all' || (counts[_filter] ?? 0) > 0 ? _filter : 'all';
+
+    // #reg-approval — the ACCOUNT-status filter (user-management hub). DATA-DRIVEN:
+    // the chip row exists only when the merged list carries a directory-sourced
+    // row (uid != ''), which is NEVER the case off (the directory is empty) ⇒ the
+    // OFF/demo path has no account chips and this collapses to `all` ⇒ the list is
+    // byte-identical. `customers` = a CRM/order-derived row with no app account.
+    final hasDirectory = views.any((v) => v.uid.isNotEmpty);
+    final effectiveAccountFilter = hasDirectory ? _accountFilter : 'all';
+
+    // The status chip, the account chip AND the fuzzy name query compose (never
+    // replace). An empty query / `all` account filter passes every row, so the
+    // credit-status chip filter alone is unchanged.
+    final list = [
+      for (final v in views)
+        if (effectiveFilter == 'all' || v.status == effectiveFilter)
+          if (accountFilterMatch(
+            accountStatus: v.accountStatus,
+            uid: v.uid,
+            filter: effectiveAccountFilter,
+          ))
+            if (q.isEmpty || fuzzyNameMatch(q, v.customer.name)) v,
+    ];
+
+    return ListView(
+      // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
+      // (gate 62 — no hard-coded left/right edge inset).
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space5,
+      ),
+      children: [
+        // #reg-approval — the owner's registration-approval panel at the TOP.
+        // GATED on the LIVE backend + the manager persona (the same
+        // BoardRole.manager gate the whole screen is built under, line ~142) so it
+        // is NEVER shown to a non-manager and is ABSENT from the tree when the
+        // backend is OFF ⇒ the tab is byte-identical off (the whole Firebase-free
+        // test suite + demo). The panel self-hides when nobody is pending.
+        if (useFirebaseBackend &&
+            ref.watch(boardAuthProvider)?.role == BoardRole.manager)
+          const _PendingApprovalPanel(),
+        _CustomerSummary(
+          contractors: views.length,
+          totalUsed: totalUsed,
+          fleetPct: fleetPct,
+        ),
+        const SizedBox(height: BsTokens.space4),
+        _CustomerStatusChips(
+          active: effectiveFilter,
+          allCount: views.length,
+          counts: counts,
+          onSelect: (st) => setState(() => _filter = st),
+        ),
+        const SizedBox(height: BsTokens.space4),
+        // #reg-approval — the account-status filter row (הכל / ממתינים / פעילים /
+        // לקוחות בלבד). Absent unless the merged list carries a directory-sourced
+        // row (see `hasDirectory`), so the OFF/demo tab is byte-identical.
+        if (hasDirectory) ...[
+          _AccountFilterChips(
+            active: effectiveAccountFilter,
+            onSelect: (k) => setState(() => _accountFilter = k),
+          ),
+          const SizedBox(height: BsTokens.space4),
+        ],
+        // GIANT Phase-2 wave-3d — CSV bulk-import, behind the same opt-in
+        // `manager.customers` gate as the saved-customer block it feeds;
+        // absent by default ⇒ the tab is byte-identical.
+        if (featEnabled(ref, 'manager', 'customers')) ...[
+          OutlinedButton.icon(
+            onPressed: () => showCustomerImportSheet(context),
+            icon: const Icon(Icons.upload_file, size: 18),
+            label: const Text('⬆️ ייבוא לקוחות מ-CSV'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: BsTokens.brandDark,
+              side: const BorderSide(color: BsTokens.brand),
+              padding: const EdgeInsets.symmetric(vertical: 11),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space4),
+        ],
+        // GIANT Phase-2 — the fuzzy search box rides `search.fuzzy` (opt-in);
+        // absent by default ⇒ the tab is byte-identical. Typo-tolerant name
+        // match (Damerau-Levenshtein) over the derived contractor names.
+        if (searchOn) ...[
+          TextField(
+            controller: _searchCtl,
+            textDirection: TextDirection.rtl,
+            onChanged: (v) => setState(() => _search = v),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: 'חיפוש ${orgTerm(ref, 'nav.customers', 'לקוחות')}',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon: _search.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      tooltip: 'נקה',
+                      onPressed: () => setState(() {
+                        _searchCtl.clear();
+                        _search = '';
+                      }),
+                    ),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space4),
+        ],
+        if (list.isEmpty)
+          // The legacy empty line (@index.html:16586 `md-empty`).
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+            child: CfgText(
+              'manager.customers.empty',
+              'לא נמצאו קבלנים תואמים.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+            ),
+          )
+        else
+          for (final v in list)
+            Padding(
+              padding: const EdgeInsets.only(bottom: BsTokens.space3),
+              child: _CustomerCard(view: v, onTap: () => _openDetail(v)),
+            ),
+      ],
+    );
+  }
+
+  /// The customer-detail bottom sheet — the legacy `mgrCustomerDetail`
+  /// (@index.html:16609-16643): the 👷 avatar, the name + a status tag, an
+  /// orders/spend/pct grid, the credit rows (limit / used / balance / sites),
+  /// and the contractor's own orders. Read-only (the legacy sheet has no action).
+  void _openDetail(_CustomerView view) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(BsTokens.radiusCard),
+        ),
+      ),
+      builder:
+          (sheetCtx) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: _CustomerDetailSheet(view: view),
+          ),
+    );
+  }
+}
+
+/// The 3-stat customer summary (@index.html:16574-16578) — `mo-summary`:
+/// contractor count / total spend / fleet credit-utilisation %. A WHITE strip.
+class _CustomerSummary extends StatelessWidget {
+  const _CustomerSummary({
+    required this.contractors,
+    required this.totalUsed,
+    required this.fleetPct,
+  });
+
+  final int contractors;
+  final int totalUsed;
+  final int fleetPct;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget stat(String value, String label) => Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+        ],
+      ),
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space4,
+        vertical: BsTokens.space4,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Row(
+        children: [
+          stat('$contractors', 'קבלנים'),
+          stat('₪${_grouped(totalUsed)}', 'סך רכש'),
+          stat('$fleetPct%', 'ניצול אשראי'),
+        ],
+      ),
+    );
+  }
+}
+
+/// The status-filter chip row — `הכל (N)` plus a פעיל / אשראי גבוה chip per
+/// status that has at least one contractor. The active chip is a `brand` fill;
+/// the rest are light outlines. (The legacy `renderMgrCustomers` filters by a
+/// free-text search box; this wave swaps that for the status filter the task
+/// asks for, reusing the legacy `mc-pill` status labels @index.html:16592.)
+class _CustomerStatusChips extends StatelessWidget {
+  const _CustomerStatusChips({
+    required this.active,
+    required this.allCount,
+    required this.counts,
+    required this.onSelect,
+  });
+
+  final String active;
+  final int allCount;
+  final Map<String, int> counts;
+  final ValueChanged<String> onSelect;
+
+  /// The short chip label per status (no ⚠️ glyph — that is reserved for the
+  /// card pill / detail tag). פעיל / אשראי גבוה, verbatim @index.html:16592.
+  static const Map<String, String> _chipLabel = {
+    'live': 'פעיל',
+    'low': 'אשראי גבוה',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    // #31 — each status chip is wrapped in a HelpTarget (one bubble text for
+    // the whole filter row); help mode rings + explains, otherwise unchanged.
+    Widget chip(String key, String label, int count) {
+      final on = active == key;
+      return HelpTarget(
+        title: 'סינון קבלנים',
+        body:
+            'מסנן את רשימת הקבלנים לפי סטטוס אשראי (פעיל / אשראי גבוה); '
+            '׳הכל׳ מציג את כולם. סינון תצוגה בלבד.',
+        child: Material(
+          color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: () => onSelect(key),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
+              ),
+              child: Text(
+                '$label ($count)',
+                style: TextStyle(
+                  color: on ? bsOnAccent(context) : BsTokens.inkLight,
+                  fontSize: 13,
+                  fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: BsTokens.space2,
+      runSpacing: BsTokens.space2,
+      children: [
+        chip('all', 'הכל', allCount),
+        for (final st in const ['live', 'low'])
+          if ((counts[st] ?? 0) > 0)
+            chip(st, _chipLabel[st] ?? st, counts[st] ?? 0),
+      ],
+    );
+  }
+}
+
+/// #reg-approval — the account-status filter chip row for the user-management hub:
+/// הכל / ממתינים / פעילים / לקוחות בלבד, filtering the merged customer list by the
+/// directory `accountStatus` (ממתינים→pending · פעילים→active) or by `uid==''`
+/// (לקוחות בלבד = a CRM/order-derived row with NO app account). Display-only
+/// filter; the active chip is a `brand` fill, the rest light outlines — the SAME
+/// style as [_CustomerStatusChips]. The tab mounts this ONLY when the list carries
+/// a directory-sourced row, so it is ABSENT on the OFF/demo path ⇒ byte-identical.
+class _AccountFilterChips extends StatelessWidget {
+  const _AccountFilterChips({required this.active, required this.onSelect});
+
+  final String active;
+  final ValueChanged<String> onSelect;
+
+  /// The chip key→label per account filter, verbatim (no counts — a light row).
+  static const List<MapEntry<String, String>> _options = [
+    MapEntry('all', 'הכל'),
+    MapEntry('pending', 'ממתינים'),
+    MapEntry('active', 'פעילים'),
+    MapEntry('customers', 'לקוחות בלבד'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chip(String key, String label) {
+      final on = active == key;
+      return Material(
+        color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: () => onSelect(key),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: on ? bsOnAccent(context) : BsTokens.inkLight,
+                fontSize: 13,
+                fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: BsTokens.space2,
+      runSpacing: BsTokens.space2,
+      children: [
+        for (final o in _options) chip(o.key, o.value),
+      ],
+    );
+  }
+}
+
+/// One customer card (@index.html:16593-16604 `mc-card`) — `👷 name` + the
+/// `N הזמנות · M אתרים` sub-line + a status pill on top, then the credit block:
+/// a utilisation bar (green, or amber `hot` at pct≥90) and the line
+/// `ניצול אשראי: ₪used / ₪limit (pct%)`. A WHITE card; tapping it opens the
+/// detail sheet.
+/// GIANT Phase-2 — the RFM tier label/emoji per score key. Hebrew defaults; the
+/// widget wraps each in `orgTerm` so a vertical can rename them.
+const Map<String, String> _kRfmTierEmoji = {
+  'champion': '🏆',
+  'loyal': '⭐',
+  'occasional': '🔹',
+  'dormant': '💤',
+};
+const Map<String, String> _kRfmTierLabel = {
+  'champion': 'לקוח מוביל',
+  'loyal': 'לקוח קבוע',
+  'occasional': 'לקוח מזדמן',
+  'dormant': 'רדום',
+};
+
+/// The RFM tier badge — a compact light-token pill (never a progress bar). Shows
+/// the tier; when [CustomerScore.atRisk] it flips to a warning "בסיכון".
+class _RfmPill extends ConsumerWidget {
+  const _RfmPill({required this.score});
+
+  final CustomerScore score;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final atRisk = score.atRisk;
+    final emoji = atRisk ? '⚠️' : (_kRfmTierEmoji[score.tier] ?? '🔹');
+    final label = atRisk
+        ? 'בסיכון'
+        : orgTerm(ref, 'scoring.tier.${score.tier}',
+            _kRfmTierLabel[score.tier] ?? score.tier);
+    final color = atRisk ? const Color(0xFFB54708) : BsTokens.brand;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: BsTokens.space2, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        '$emoji $label · ${score.points}/${score.maxPoints}',
+        style: TextStyle(
+          color: color,
+          fontSize: BsTokens.typeLabel,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomerCard extends ConsumerWidget {
+  const _CustomerCard({required this.view, required this.onTap});
+
+  final _CustomerView view;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = view.customer;
+    // S-connect: resolve the LIVE credit ceiling via computeCredit (the same
+    // seam the detail sheet uses). OFF → byte-identical to c.creditLimit (the
+    // provider returns contractorCredit(name) with no network); ON → the
+    // gateway-bound server figure. The list card showed the fabricated seed
+    // ceiling before — only the detail sheet was wired (C1/A13).
+    final liveLimit =
+        ref.watch(customerCreditProvider(c.name)).valueOrNull?.creditLimit ??
+        c.creditLimit;
+    final pct =
+        liveLimit == 0
+            ? 0
+            : ((c.totalSpend / liveLimit) * 100).round().clamp(0, 100);
+    final status = pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
+    final statusLabel = _kCustomerStatusLabel[status] ?? status;
+    final statusColor = _kCustomerStatusColor[status] ?? BsTokens.brand;
+
+    return Semantics(
+      button: true,
+      label: '👷 ${c.name} · $statusLabel',
+      // #31 — tapping the card opens the contractor-detail sheet; in help mode
+      // the HelpTarget rings the whole card and explains it instead.
+      child: HelpTarget(
+        title: 'פרטי קבלן',
+        body:
+            'פותח את גיליון פרטי הקבלן: מסגרת אשראי, נוצל, יתרה זמינה, אתרי '
+            'בנייה ורשימת ההזמנות שלו. תצוגה בלבד.',
+        child: Material(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.all(BsTokens.space4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
+                border: Border.all(color: const Color(0xFFEDEDED)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('👷', style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: BsTokens.space2),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              c.name,
+                              style: const TextStyle(
+                                color: BsTokens.inkLight,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${c.orderCount} הזמנות · ${view.sites} אתרים',
+                              style: const TextStyle(
+                                color: BsTokens.mutedLight,
+                                fontSize: 13,
+                              ),
+                            ),
+                            // #reg-approval — the account-lifecycle badge
+                            // (⏳ ממתין / ✓ פעיל) + the directory ROLE badge
+                            // (קבלן / מנהל / …). LIVE-ONLY: only a directory-
+                            // sourced row carries a status/role, and the directory
+                            // is empty when the backend is OFF, so this is absent
+                            // off ⇒ the card is byte-identical (the seed cards show
+                            // no badge, as today).
+                            if (useFirebaseBackend &&
+                                (view.accountStatus.isNotEmpty ||
+                                    view.role != null)) ...[
+                              const SizedBox(height: 4),
+                              Wrap(
+                                spacing: BsTokens.space2,
+                                runSpacing: 4,
+                                children: [
+                                  if (view.accountStatus.isNotEmpty)
+                                    _ApprovalBadge(status: view.accountStatus),
+                                  if (view.role != null)
+                                    _RoleBadge(role: view.role!),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: BsTokens.space2),
+                      _StagePill(label: statusLabel, color: statusColor),
+                    ],
+                  ),
+                  // GIANT Phase-2 — the RFM tier badge rides the opt-in gate
+                  // `manager.scoring`; default-OFF ⇒ the card is byte-identical
+                  // (a pill, never a progress bar — the per-customer bar count
+                  // is pinned).
+                  if (featEnabled(ref, 'manager', 'scoring')) ...[
+                    const SizedBox(height: BsTokens.space2),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: _RfmPill(
+                          score: ref.watch(customerScoreProvider(c.name))),
+                    ),
+                  ],
+                  const SizedBox(height: BsTokens.space3),
+                  _CreditBar(pct: pct, color: statusColor),
+                  const SizedBox(height: 6),
+                  Text(
+                    liveLimit <= 0
+                        ? 'אשראי: לא רשומה'
+                        : 'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(liveLimit)} ($pct%)',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The credit-utilisation bar (@index.html:16601 `mc-credit-bar`) — a light
+/// track with a `pct`-wide fill in the status colour (green normally, amber at
+/// pct≥90). LIGHT-safe.
+class _CreditBar extends StatelessWidget {
+  const _CreditBar({required this.pct, required this.color});
+
+  final int pct;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'ניצול אשראי $pct%',
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: LinearProgressIndicator(
+          value: (pct / 100).clamp(0.0, 1.0),
+          minHeight: 8,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          valueColor: AlwaysStoppedAnimation<Color>(color),
+        ),
+      ),
+    );
+  }
+}
+
+/// The customer-detail bottom sheet body (@index.html:16609-16643
+/// `mgrCustomerDetail`) — the 👷 avatar, the name, a status tag (🟢 קבלן פעיל /
+/// ⚠️ ניצול אשראי גבוה / לא פעיל), an orders/spend/pct grid, the credit rows
+/// (מסגרת אשראי / נוצל / יתרה זמינה / אתרי בנייה), and the contractor's own
+/// orders. Read-only. LIGHT.
+///
+/// Watches [ordersEngineProvider] directly so the contractor's order list stays
+/// live while the sheet is open (orders placed while open appear immediately
+/// without reopening the sheet).
+class _CustomerDetailSheet extends ConsumerWidget {
+  const _CustomerDetailSheet({required this.view});
+
+  final _CustomerView view;
+
+  /// The detail-sheet status TAG — the longer legacy forms (@index.html:16616:
+  /// `low`→⚠️ ניצול אשראי גבוה · `off`→לא פעיל · else 🟢 קבלן פעיל).
+  static const Map<String, String> _tagLabel = {
+    'live': '🟢 קבלן פעיל',
+    'low': '⚠️ ניצול אשראי גבוה',
+    'off': 'לא פעיל',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = view.customer;
+    final tag = _tagLabel[view.status] ?? view.status;
+    // Watch live so orders placed while the sheet is open appear immediately
+    // (@index.html:16612-16613 `SYS_ORDERS.filter(o=>o.who===name)`).
+    final orders =
+        ref.watch(ordersEngineProvider).where((o) => o.who == c.name).toList();
+
+    // M4: recompute header stats from the LIVE orders so they stay in sync
+    // with the order list below (the frozen aggregate snapshot on `c` lags
+    // until the CustomerProvider re-emits, which may be a frame behind).
+    final liveOrderCount = orders.length;
+    final liveTotalSpend = orders.fold<int>(0, (s, o) => s + o.sum);
+
+    // A13 — the credit ceiling routed through the `computeCredit` callable seam
+    // (`customerCreditProvider`). The sync `c.creditLimit` is shown IMMEDIATELY
+    // (the loading/error fallback), then refined to the resolved figure. OFF
+    // (default) the callable returns the SAME local derivation, so
+    // `creditLimit == c.creditLimit` → the displayed number never changes
+    // (byte-identical, no flicker); ON it upgrades to the server-canonical value.
+    final creditLimit =
+        ref.watch(customerCreditProvider(c.name)).valueOrNull?.creditLimit ??
+        c.creditLimit;
+
+    final livePct =
+        creditLimit == 0
+            ? 0
+            : ((liveTotalSpend / creditLimit) * 100).round().clamp(0, 100);
+    final liveSites =
+        orders.map((o) => o.site).where((s) => s.isNotEmpty).toSet().length;
+    final balance = (creditLimit - liveTotalSpend).clamp(
+      0,
+      creditLimit,
+    ); // יתרה ≥ 0
+
+    Widget tile(String value, String label) => Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFEDEDED)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    Widget row(String label, String value) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
+        // (gate 62 — no hard-coded left/right edge inset).
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          BsTokens.space4,
+          BsTokens.space4,
+          BsTokens.space4,
+          BsTokens.space5,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              '👷',
+              style: TextStyle(fontSize: 34),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: BsTokens.space2),
+            Text(
+              c.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              tag,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            ),
+            const SizedBox(height: BsTokens.space4),
+            // #reg-approval — the manager's ACTION row, shown ONLY for a real
+            // app-user (a directory-sourced row: uid != ''). approve/suspend +
+            // role-change route through the EXISTING server seams; an order-
+            // derived / OFF row has uid=='' ⇒ this block is absent ⇒ the sheet is
+            // byte-identical off. The read-only CRM/contractor detail stays below.
+            if (view.uid.isNotEmpty) ...[
+              _CustomerActionRow(view: view),
+              const SizedBox(height: BsTokens.space4),
+            ],
+            Row(
+              children: [
+                tile('$liveOrderCount', 'הזמנות'),
+                tile('₪${_grouped(liveTotalSpend)}', 'סך רכש'),
+                tile(creditLimit <= 0 ? '—' : '$livePct%', 'אשראי'),
+              ],
+            ),
+            const SizedBox(height: BsTokens.space4),
+            row('מסגרת אשראי', creditLimit <= 0 ? 'לא רשומה' : '₪${_grouped(creditLimit)}'),
+            row('נוצל', '₪${_grouped(liveTotalSpend)}'),
+            row('יתרה זמינה', creditLimit <= 0 ? '—' : '₪${_grouped(balance)}'),
+            row('אתרי בנייה', '$liveSites'),
+            // #8/3c (per-customer chat link) — the manager's in-app chat
+            // affordance. LIVE-ONLY: gated on `useFirebaseBackend` (the demo has
+            // no directory/uid to resolve against), so with the backend OFF this
+            // whole block is absent from the tree and the sheet is byte-identical
+            // to today. When ON it resolves customer→uid (`uidByPhone`) and opens
+            // the real DM thread, falling back to 📞/💬 or an honest toast.
+            if (useFirebaseBackend) ...[
+              const SizedBox(height: BsTokens.space3),
+              _CustomerChatButton(customer: c, directUid: view.uid),
+            ],
+            // GIANT Phase-2 — the SAVED customer entity (phone/notes/tags) rides
+            // the opt-in gate `manager.customers`; default-OFF ⇒ this sheet is
+            // byte-identical (the block is compiled in but the gate is false).
+            if (featEnabled(ref, 'manager', 'customers'))
+              _SavedCustomerSection(displayName: c.name),
+            // #ai-credit-explain — when AI is live, explain what this utilisation
+            // means before approving the next order. gateway null (demo) → not in
+            // the tree → the detail sheet is byte-identical.
+            if (ref.watch(claudeGatewayProvider) != null) ...[
+              const SizedBox(height: BsTokens.space3),
+              SizedBox(
+                width: double.infinity,
+                // composite hide: whole button (icon + label) gone when hidden.
+                child: CfgVisible(
+                  'manager_dashboard_screen.credit_explain_btn',
+                  child: OutlinedButton.icon(
+                    onPressed:
+                        () => Navigator.of(context).push(
+                          CreditExplainScreen.route(
+                            name: c.name,
+                            creditLimit: creditLimit,
+                            used: liveTotalSpend,
+                            balance: balance,
+                            pct: livePct,
+                          ),
+                        ),
+                    icon: const Text('💳'),
+                    label: const CfgText(
+                      'manager_dashboard_screen.credit_explain_btn',
+                      'הסבר אשראי',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (orders.isNotEmpty) ...[
+              const SizedBox(height: BsTokens.space4),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  'ההזמנות של ${c.name}',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space2),
+              for (final o in orders)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '📦 ${o.id}',
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '₪${_grouped(o.sum)}',
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: BsTokens.space3),
+                      _StagePill(
+                        label: _kOrderStageLabel[o.stage] ?? o.stage,
+                        color: _kOrderStageColor[o.stage] ?? BsTokens.brand,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+            // ── Pillar-3 · step 99 (PART A) — the per-customer JOURNEY TIMELINE.
+            // ADDITIVE + COMPILE-GATED behind `kIntelLive` (const-false in every
+            // normal / test build ⇒ this whole block AND JourneyTimeline + its
+            // widget tree tree-shake out ⇒ the customer sheet is BYTE-IDENTICAL to
+            // today; the step-98 IntelTab gating pattern). Giant-system V2 — the
+            // runtime `intel` org gate ANDed in (the inline-watch idiom of the
+            // credit-explain block above), so an INTEL_LIVE build with `intel` off
+            // darks the journey too. JOINED BY the owner-side
+            // stable key (uid/actorKey), NEVER the display name (R2-#12); today the
+            // derived customer carries no key (`_resolveCustomerKey` → null) so the
+            // section shows its honest empty state instead of ever joining by name.
+            if (kIntelLive &&
+                moduleOn(ref.watch(orgConfigProvider), 'intel')) ...[
+              const SizedBox(height: BsTokens.space4),
+              JourneyTimeline(
+                customerKey: _resolveCustomerKey(c),
+                events: ref.watch(intelLogProvider),
+                now: DateTime.now(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// #8/3c (per-customer chat link) — the manager's in-app chat affordance on the
+/// customer-detail sheet. LIVE-ONLY: only mounted inside the sheet's
+/// `if (useFirebaseBackend)` branch (the demo has no directory/uid to resolve
+/// against), so with the backend OFF it never enters the tree and the sheet is
+/// byte-identical to today.
+///
+/// The customer→uid resolve is best-effort and NEVER crashes:
+///   • manager uid = [currentUidProvider]; customer uid =
+///     `usersLookupProvider.uidByPhone(phone)` — an ASYNC one-shot over the
+///     EXISTING directory seam (no new listen — stage-2 rule #4);
+///   • BOTH present → [ChatEngineNotifier.createOrGetThread] mints/gets the
+///     deterministic DM thread, then [openChatThread] opens it as the manager;
+///   • the customer has no chat account (uid null) / a lookup error → an honest
+///     toast, with the 📞/💬 [ContactActions] rendered beside as the visible
+///     fallback whenever a phone exists (the same widget the order rows use).
+///
+/// The effective phone is the order-derived [ManagerCustomer.phone], falling
+/// back to the saved-CRM record's phone ([savedCustomerForProvider]) — the
+/// order/saved-customer sources #8/3c calls for. A stateful busy flag disables
+/// the button (a spinner) during the async lookup so a double-tap can never kick
+/// a second resolve.
+class _CustomerChatButton extends ConsumerStatefulWidget {
+  const _CustomerChatButton({required this.customer, this.directUid = ''});
+
+  final ManagerCustomer customer;
+
+  /// #reg-approval — the customer's directory uid when this row came from the
+  /// people directory (ALL registered users). When present, chat opens on it
+  /// DIRECTLY — no phone→uid lookup — so a registered user who never ordered (no
+  /// phone on the aggregate) is still reachable. '' for an order-derived-only row,
+  /// where the phone→uid resolve stays the path (byte-identical to #8/3c).
+  final String directUid;
+
+  @override
+  ConsumerState<_CustomerChatButton> createState() =>
+      _CustomerChatButtonState();
+}
+
+class _CustomerChatButtonState extends ConsumerState<_CustomerChatButton> {
+  /// In-flight guard: true while [UsersLookup.uidByPhone] resolves. Disables the
+  /// button (shows a spinner) so a rapid double-tap can never kick a 2nd resolve.
+  bool _busy = false;
+
+  Future<void> _open(String phone) async {
+    if (_busy) return; // double-tap guard (belt-and-suspenders with onPressed)
+    final managerUid = ref.read(currentUidProvider);
+    if (managerUid == null || managerUid.isEmpty) {
+      // No signed-in manager (should not happen on the live board) — honest bail,
+      // never a create-or-get with a missing half.
+      showToast(context, "יש להתחבר כדי לפתוח צ'אט");
+      return;
+    }
+
+    // #reg-approval — a directory-sourced row carries the uid directly; open the
+    // DM on it without a phone lookup (this is what makes a registered user who
+    // never ordered — hence no phone — reachable from the customers list).
+    final direct = widget.directUid;
+    if (direct.isNotEmpty) {
+      final threadId = ref.read(chatEngineProvider.notifier).createOrGetThread(
+        [managerUid, direct],
+        name: widget.customer.name,
+      );
+      if (!context.mounted) return;
+      openChatThread(context, ref, threadId, persona: BsRole.manager);
+      return;
+    }
+
+    setState(() => _busy = true);
+    String? customerUid;
+    try {
+      // ASYNC one-shot resolve through the existing directory seam (null off the
+      // live path). A null answer / any error degrades to the fallback below —
+      // it must NEVER throw into the tap handler (the users_lookup contract).
+      customerUid = await ref.read(usersLookupProvider)?.uidByPhone(phone);
+    } on Object catch (_) {
+      customerUid = null;
+    }
+    if (!mounted) return; // the sheet was dismissed mid-resolve
+    setState(() => _busy = false);
+
+    if (customerUid != null && customerUid.isNotEmpty) {
+      // BOTH present → create-or-get the deterministic DM thread (gated exactly
+      // like send), then open the real engine-backed thread as the manager.
+      final threadId = ref.read(chatEngineProvider.notifier).createOrGetThread(
+        [managerUid, customerUid],
+        name: widget.customer.name,
+      );
+      if (!context.mounted) return;
+      openChatThread(context, ref, threadId, persona: BsRole.manager);
+      return;
+    }
+    // No registered chat account → honest toast. The 📞/💬 fallback (built below)
+    // is already on screen whenever a phone exists, so the manager is one tap
+    // from a call/WhatsApp.
+    if (context.mounted) {
+      showToast(context, "ללקוח אין עדיין חשבון בצ'אט");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // The effective phone: the order-derived aggregate phone, else the saved-CRM
+    // record's phone (the order/saved-customer sources #8/3c resolves on).
+    final saved = ref.watch(savedCustomerForProvider(widget.customer.name));
+    final phone = widget.customer.phone.isNotEmpty
+        ? widget.customer.phone
+        : (saved?.phone ?? '');
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            // Disabled while busy — the visual + functional double-tap guard.
+            onPressed: _busy ? null : () => _open(phone),
+            icon: _busy
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('💬'),
+            label: const Text("צ'אט עם הלקוח"),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: BsTokens.brandDark,
+              side: const BorderSide(color: BsTokens.brand),
+              padding: const EdgeInsets.symmetric(vertical: 11),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle:
+                  const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+            ),
+          ),
+        ),
+        // The 📞/💬 fallback — the SAME ContactActions the order rows use — shown
+        // whenever a phone exists (its own empty-guard collapses it otherwise).
+        if (phone.isNotEmpty) ...[
+          const SizedBox(width: BsTokens.space2),
+          ContactActions(phone: phone),
+        ],
+      ],
+    );
+  }
+}
+
+// ── #reg-approval — the registration-approval panel (owner-driven) ───────────
+
+/// The Hebrew label per directory role, for the pending checklist rows. Display-
+/// only (never a permission decision); an absent/unknown role reads as ''.
+const Map<BsRole, String> _kBsRoleLabel = {
+  BsRole.contractor: 'קבלן',
+  BsRole.manager: 'מנהל',
+  BsRole.store: 'חנות',
+  BsRole.courier: 'שליח',
+  BsRole.worker: 'עובד',
+  BsRole.bot: '',
+};
+
+/// #reg-approval — the account-lifecycle badge shown on a customer row and echoed
+/// in the pending checklist: ⏳ ממתין (amber) for a `pending` account, ✓ פעיל
+/// (green) for an `active` one. LIGHT tokens; only mounted on the LIVE path
+/// (directory-sourced status), so the card is byte-identical when the backend is
+/// off.
+class _ApprovalBadge extends StatelessWidget {
+  const _ApprovalBadge({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = status == kDirectoryStatusPending;
+    final active = status == kDirectoryStatusActive;
+    final label = pending
+        ? '⏳ ממתין'
+        : active
+            ? '✓ פעיל'
+            : status;
+    final color = pending
+        ? const Color(0xFFB07400)
+        : active
+            ? const Color(0xFF1F8A4C)
+            : BsTokens.mutedLight;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space2,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: BsTokens.typeLabel,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// #reg-approval — the directory ROLE badge beside a customer row's name
+/// (קבלן / מנהל / חנות / שליח / עובד, from [_kBsRoleLabel]). A brand-tinted pill
+/// in the SAME light style as [_ApprovalBadge]; an absent/bot role ('' label)
+/// renders nothing. LIVE-ONLY (only a directory-sourced row carries a role), so
+/// it is absent when the backend is OFF ⇒ the card is byte-identical.
+class _RoleBadge extends StatelessWidget {
+  const _RoleBadge({required this.role});
+
+  final BsRole role;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = _kBsRoleLabel[role] ?? '';
+    if (label.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space2,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: BsTokens.brand.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: BsTokens.brand,
+          fontSize: BsTokens.typeLabel,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// #reg-approval — the manager's ACTION row on the customer-detail sheet, mounted
+/// ONLY for a real app-user (a directory-sourced row: `view.uid.isNotEmpty`). Three
+/// affordances, all through EXISTING server seams — NO client-side authorization:
+///   • ✓ אשר (a `pending` account) / ⏸️ השהה (an `active` one) →
+///     [userApproverProvider]([uid], approve:), the SAME callable the top-of-tab
+///     pending panel uses (mirrors `_PendingApprovalPanel._approve`);
+///   • 🔑 שנה תפקיד → [showManagerRoleAssignSheet] focused on this uid/name.
+///   • 🗑️ מחק → [userDeleterProvider]([uid]), a full-system account+data delete
+///     behind a destructive confirm; the SERVER authorizes + owner-guards (the
+///     manager's OWN row is already out of the directory, so it never appears).
+/// The approve/suspend button is disabled (a spinner) while the call is in flight,
+/// so a double-tap can never kick a second server call. An order-derived / OFF row
+/// has uid=='' ⇒ this row is absent ⇒ the sheet is byte-identical off.
+class _CustomerActionRow extends ConsumerStatefulWidget {
+  const _CustomerActionRow({required this.view});
+
+  final _CustomerView view;
+
+  @override
+  ConsumerState<_CustomerActionRow> createState() => _CustomerActionRowState();
+}
+
+class _CustomerActionRowState extends ConsumerState<_CustomerActionRow> {
+  /// True while the approve/suspend call is in flight (button disabled + spinner).
+  bool _busy = false;
+
+  Future<void> _setApproval({required bool approve}) async {
+    final approver = ref.read(userApproverProvider);
+    if (approver == null || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final n = await approver([widget.view.uid], approve: approve);
+      if (mounted) {
+        showToast(
+          context,
+          n > 0 ? (approve ? '✓ אושר' : '⏸️ הושהה') : 'לא בוצעה פעולה',
+        );
+      }
+    } on Object catch (_) {
+      if (mounted) showToast(context, 'הפעולה נכשלה — נסה שוב');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// #reg-approval — irreversible full-system delete of this user (account + all
+  /// data) via [userDeleterProvider], behind a destructive confirm. The SERVER
+  /// authorizes + owner-guards; this mirrors [_setApproval]'s `_busy`/try pattern
+  /// (the shared `_busy` disables BOTH buttons during any in-flight call). The row
+  /// removes itself when the live directory stream drops the deleted uid.
+  Future<void> _delete() async {
+    final deleter = ref.read(userDeleterProvider);
+    if (deleter == null || _busy) return;
+    final ok = await confirmDestructive(
+      context,
+      title: 'מחיקת משתמש',
+      message:
+          'למחוק לצמיתות את ${widget.view.customer.name} מכל המערכות '
+          '(חשבון + כל הנתונים)? הפעולה בלתי-הפיכה.',
+      confirmLabel: 'מחק',
+    );
+    if (!ok || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await deleter(widget.view.uid);
+      if (mounted) showToast(context, 'המשתמש נמחק');
+    } on Object catch (_) {
+      if (mounted) showToast(context, 'המחיקה נכשלה — נסה שוב');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final view = widget.view;
+    final pending = view.accountStatus == kDirectoryStatusPending;
+    final active = view.accountStatus == kDirectoryStatusActive;
+    return Row(
+      children: [
+        // ✓ אשר (pending) / ⏸️ השהה (active) — one server call (approveUsers).
+        if (pending || active) ...[
+          Expanded(
+            child: FilledButton(
+              onPressed: _busy ? null : () => _setApproval(approve: pending),
+              style: FilledButton.styleFrom(
+                backgroundColor: BsTokens.brand,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 11),
+              ),
+              child: _busy
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(pending ? '✓ אשר' : '⏸️ השהה'),
+            ),
+          ),
+          const SizedBox(width: BsTokens.space3),
+        ],
+        // 🔑 שנה תפקיד — the role-assign sheet, focused on this user.
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () => showManagerRoleAssignSheet(
+              context,
+              targetUid: view.uid,
+              targetName: view.customer.name,
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: BsTokens.brandDark,
+              side: const BorderSide(color: BsTokens.brand),
+              padding: const EdgeInsets.symmetric(vertical: 11),
+            ),
+            child: const Text('🔑 שנה תפקיד'),
+          ),
+        ),
+        // 🗑️ מחק — irreversible account+data delete, mounted ONLY for a real
+        // directory row (uid non-empty). Destructive red (dangerDark text /
+        // danger border, the 'הסר'-label pairing) and disabled while any call is
+        // in flight (`_busy`). The SERVER authorizes + owner-guards.
+        if (view.uid.isNotEmpty) ...[
+          const SizedBox(width: BsTokens.space3),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _busy ? null : _delete,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: BsTokens.dangerDark,
+                side: const BorderSide(color: BsTokens.danger),
+                padding: const EdgeInsets.symmetric(vertical: 11),
+              ),
+              child: const Text('🗑️ מחק'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// #reg-approval — the OWNER's registration-approval panel, at the TOP of the
+/// 👥 לקוחות tab. New users are born `pending` (checkout-blocked) and appear here
+/// as a default-CHECKED checklist; the owner approves them in bulk. Three
+/// affordances, all one server call (`approveUsers` via [userApproverProvider]):
+///   • "אשר הכל"      — approve EVERY pending user (ignores the tick-state);
+///   • "אשר מסומנים"  — approve only the ticked (the "manual" path AND the
+///                       "approve all-except-X": untick X, then press this).
+/// On success the directory stream flips the approved rows active, so they drop
+/// out of the pending list here with no reload. Hidden entirely when nobody is
+/// pending. Only ever mounted behind `useFirebaseBackend` + the manager persona
+/// (see the tab's gate), so it is absent off ⇒ byte-identical.
+class _PendingApprovalPanel extends ConsumerStatefulWidget {
+  const _PendingApprovalPanel();
+
+  @override
+  ConsumerState<_PendingApprovalPanel> createState() =>
+      _PendingApprovalPanelState();
+}
+
+class _PendingApprovalPanelState extends ConsumerState<_PendingApprovalPanel> {
+  /// uids the owner explicitly UNCHECKED (excluded). Empty ⇒ every pending row is
+  /// checked by default (the task's default-checked). Tracking EXCLUSIONS (not
+  /// inclusions) means a newly-arrived pending user is auto-checked, and an
+  /// approved user simply drops out of the pending stream — no reconciliation.
+  final Set<String> _unchecked = {};
+
+  /// True while an approve batch is in flight (checkboxes + buttons disabled).
+  bool _busy = false;
+
+  Future<void> _approve(List<String> uids) async {
+    final approver = ref.read(userApproverProvider);
+    if (approver == null || uids.isEmpty || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final n = await approver(uids, approve: true);
+      if (mounted) {
+        showToast(context, n > 0 ? '✓ אושרו $n משתמשים' : 'לא בוצע אישור');
+        // Drop stale exclusions for the acted uids (they leave `pending` anyway).
+        setState(() => _unchecked.removeAll(uids));
+      }
+    } on Object catch (_) {
+      if (mounted) showToast(context, 'האישור נכשל — נסה שוב');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final directory =
+        ref.watch(directoryProvider).valueOrNull ?? const <DirectoryEntry>[];
+    final pending = pendingDirectoryEntries(directory);
+    // Nobody waiting → the panel disappears entirely (no empty strip).
+    if (pending.isEmpty) return const SizedBox.shrink();
+
+    final pendingUids = [for (final e in pending) e.uid];
+    final checked = {
+      for (final u in pendingUids)
+        if (!_unchecked.contains(u)) u,
+    };
+    final selected = resolveApproveTargets(
+      all: false,
+      pendingUids: pendingUids,
+      checked: checked,
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: BsTokens.space4),
+      padding: const EdgeInsets.all(BsTokens.space4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        // Amber outline — this card asks for an action (accounts are waiting).
+        border: Border.all(color: const Color(0xFFF2A516)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('🔔', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: BsTokens.space2),
+              Expanded(
+                child: Text(
+                  'אישור משתמשים חדשים (${pending.length})',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            'משתמשים חדשים נולדים כ״ממתינים״ ואינם יכולים לקנות עד לאישור. '
+            'בחר את מי לאשר (ברירת-מחדל: הכל).',
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+          const SizedBox(height: BsTokens.space3),
+          for (final e in pending)
+            _PendingRow(
+              entry: e,
+              checked: checked.contains(e.uid),
+              enabled: !_busy,
+              onChanged: (v) => setState(() {
+                if (v) {
+                  _unchecked.remove(e.uid);
+                } else {
+                  _unchecked.add(e.uid);
+                }
+              }),
+            ),
+          const SizedBox(height: BsTokens.space3),
+          if (_busy)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(6),
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2.4),
+                ),
+              ),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => _approve(pendingUids),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: BsTokens.brand,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                    icon: const Icon(Icons.done_all, size: 18),
+                    label: Text('אשר הכל (${pendingUids.length})'),
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space3),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    // Disabled when nothing is ticked (approving nobody is a no-op).
+                    onPressed:
+                        selected.isEmpty ? null : () => _approve(selected),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: BsTokens.brandDark,
+                      side: const BorderSide(color: BsTokens.brand),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                    icon: const Icon(Icons.check, size: 18),
+                    label: Text('אשר מסומנים (${selected.length})'),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One pending-user row in the approval checklist — a tappable checkbox + the
+/// person's name (and role, when known) + the ⏳ ממתין tag. LIGHT tokens.
+class _PendingRow extends StatelessWidget {
+  const _PendingRow({
+    required this.entry,
+    required this.checked,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final DirectoryEntry entry;
+  final bool checked;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final roleLabel = _kBsRoleLabel[entry.role] ?? '';
+    return InkWell(
+      onTap: enabled ? () => onChanged(!checked) : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          children: [
+            Checkbox(
+              value: checked,
+              onChanged: enabled ? (v) => onChanged(v ?? false) : null,
+              activeColor: BsTokens.brand,
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            const SizedBox(width: BsTokens.space2),
+            Expanded(
+              child: Text(
+                roleLabel.isEmpty
+                    ? entry.displayName
+                    : '${entry.displayName} · $roleLabel',
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: BsTokens.space2),
+            const Text(
+              '⏳ ממתין',
+              style: TextStyle(
+                color: Color(0xFFB07400),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Owner-side resolver for a customer's STABLE intel key (uid/actorKey) — the
+/// journey timeline JOINS BY THIS, never the display name (R2-#12). The derived
+/// [ManagerCustomer] aggregate carries NO customer uid today: it is folded over
+/// `Order.who` display labels and its only identity-ish field, `ownerId`, is the
+/// OWNING MANAGER's uid (always '' on the derived path), NOT the customer's — so
+/// it is not a valid customer join key (identical reconciliation to intel_read.dart
+/// `_customerUid`, step 96). This therefore returns null and the live journey
+/// section shows its honest empty state rather than EVER joining by name.
+/// Forward-ready: when a customer-write path stamps a real customer uid, return it
+/// here and the timeline lights up owner-side — the event `displayName` stays
+/// unused.
+String? _resolveCustomerKey(ManagerCustomer c) => null;
+
+/// Pillar-3 STUDIO · step 99 (PART A) — the per-customer JOURNEY TIMELINE.
+///
+/// A vertical timeline of ONE customer's [IntelEvent]s, JOINED BY the customer's
+/// stable pseudonymous key ([customerKey] = uid/actorKey via `segmentKeyOf`) —
+/// NEVER the display name (R2-#12): two customers who share a NAME but resolve to
+/// different keys see disjoint journeys. The customer's human name is resolved
+/// OWNER-SIDE by the caller (R1-4); this widget NEVER reads
+/// [IntelEvent.displayName].
+///
+/// GATING (byte-identical): mounted ONLY inside `_CustomerDetailSheet`'s
+/// `if (kIntelLive)` branch, so with the compile-const flag OFF (every normal /
+/// test build) it tree-shakes away and the customer sheet is BYTE-IDENTICAL to
+/// today (the step-98 [IntelTab] pattern).
+///
+/// [customerKey] null/empty → the honest empty state (the derived ManagerCustomer
+/// carries no customer uid today — see [_resolveCustomerKey]); [events] is the full
+/// local ring buffer (this widget FOLDS it to the key via [journeyEventsFor]);
+/// [now] is INJECTED for the relative time (testable — never a hidden wall-clock
+/// read).
+///
+/// STYLE (Gate-46): a LIGHT surface, every colour from [BsTokens] (NO raw hex, NO
+/// dark token, NO chart library). Stuck rows are highlighted with the existing
+/// [_StagePill].
+class JourneyTimeline extends StatelessWidget {
+  const JourneyTimeline({
+    required this.customerKey,
+    required this.events,
+    required this.now,
+    super.key,
+  });
+
+  /// The owner-side-resolved stable join key (uid/actorKey). Null/empty → empty
+  /// state. NEVER a display label (R2-#12).
+  final String? customerKey;
+
+  /// The full local intel ring buffer — folded to [customerKey] here.
+  final List<IntelEvent> events;
+
+  /// Injected wall-clock for the relative-time labels (testable).
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context) {
+    final mine = journeyEventsFor(events, customerKey);
+    final converted = journeyConverted(mine);
+    final noKey = customerKey == null || customerKey!.isEmpty;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Semantics(
+              header: true,
+              child: const CfgText(
+                'manager_dashboard_screen.journey_title',
+                '🧭 מסע הלקוח',
+                style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space2),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsetsDirectional.all(BsTokens.space3),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: BsTokens.divider),
+            ),
+            child: noKey
+                ? const _JourneyEmpty(
+                    text: 'אין מזהה לקוח לשיוך — המסע יופיע כשייווצר מזהה יציב.',
+                  )
+                : mine.isEmpty
+                    ? const _JourneyEmpty(text: 'אין פעילות מתועדת ללקוח זה עדיין.')
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var i = 0; i < mine.length; i++)
+                            _JourneyRow(
+                              event: mine[i],
+                              now: now,
+                              stuck: journeyRowStuck(
+                                mine[i],
+                                converted: converted,
+                              ),
+                              isLast: i == mine.length - 1,
+                            ),
+                        ],
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// GIANT Phase-2 — the SAVED-customer block inside the detail sheet (gated
+/// `manager.customers`). Shows the saved phone/notes/tags for this contractor
+/// name (joined by [customerForName]), or an empty prompt — plus an add/edit
+/// button. Watch-only; the write goes through [_openSavedCustomerEditor].
+class _SavedCustomerSection extends ConsumerWidget {
+  const _SavedCustomerSection({required this.displayName});
+
+  final String displayName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final saved = ref.watch(savedCustomerForProvider(displayName));
+    Widget row(String label, String value) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(label,
+                    style: const TextStyle(
+                        color: BsTokens.mutedLight, fontSize: 13)),
+              ),
+              Flexible(
+                child: Text(value,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                        color: BsTokens.inkLight,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: BsTokens.space3),
+        const Divider(height: 1, color: Color(0xFFEDEDED)),
+        const SizedBox(height: BsTokens.space2),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            orgTerm(ref, 'entity.customer', 'פרטי לקוח'),
+            style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 14),
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        if (saved != null) ...[
+          if (saved.phone.isNotEmpty) row('טלפון', saved.phone),
+          if (saved.email.isNotEmpty) row('מייל', saved.email),
+          if (saved.notes.isNotEmpty) row('הערות', saved.notes),
+          if (saved.tags.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final t in saved.tags)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: BsTokens.space2, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: BsTokens.brand.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(t,
+                          style: const TextStyle(
+                              color: BsTokens.brand,
+                              fontSize: BsTokens.typeLabel,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                ],
+              ),
+            ),
+        ] else
+          const Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Text('אין פרטי לקוח שמורים עדיין',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+          ),
+        const SizedBox(height: BsTokens.space2),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () =>
+                _openSavedCustomerEditor(context, ref, displayName, saved),
+            icon: Text(saved == null ? '➕' : '✏️'),
+            label: Text(saved == null ? 'הוסף פרטי לקוח' : 'ערוך פרטי לקוח'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Opens the saved-customer editor sheet. New id from the wall clock when
+/// creating; the existing id is kept on edit (so a re-save is an edit, not a
+/// duplicate — reinforced by the store's name+phone dedup).
+void _openSavedCustomerEditor(
+    BuildContext context, WidgetRef ref, String displayName, SavedCustomer? existing) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    builder: (_) => _SavedCustomerEditor(displayName: displayName, existing: existing),
+  );
+}
+
+class _SavedCustomerEditor extends ConsumerStatefulWidget {
+  const _SavedCustomerEditor({required this.displayName, required this.existing});
+
+  final String displayName;
+  final SavedCustomer? existing;
+
+  @override
+  ConsumerState<_SavedCustomerEditor> createState() =>
+      _SavedCustomerEditorState();
+}
+
+class _SavedCustomerEditorState extends ConsumerState<_SavedCustomerEditor> {
+  late final TextEditingController _phone;
+  late final TextEditingController _email;
+  late final TextEditingController _notes;
+  late final TextEditingController _tags;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    _phone = TextEditingController(text: e?.phone ?? '');
+    _email = TextEditingController(text: e?.email ?? '');
+    _notes = TextEditingController(text: e?.notes ?? '');
+    _tags = TextEditingController(text: e?.tags.join(', ') ?? '');
+  }
+
+  @override
+  void dispose() {
+    _phone.dispose();
+    _email.dispose();
+    _notes.dispose();
+    _tags.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final tags = _tags.text
+        .split(RegExp('[,·]'))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .toList();
+    final id = widget.existing?.id ??
+        DateTime.now().microsecondsSinceEpoch.toString();
+    ref.read(savedCustomersProvider.notifier).upsert(SavedCustomer(
+          id: id,
+          name: widget.displayName,
+          phone: _phone.text.trim(),
+          email: _email.text.trim(),
+          notes: _notes.text.trim(),
+          tags: tags,
+        ));
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(BsTokens.space4, BsTokens.space4,
+            BsTokens.space4, BsTokens.space4 + bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('👷 ${widget.displayName}',
+                style: const TextStyle(
+                    fontWeight: FontWeight.w800, fontSize: 16)),
+            const SizedBox(height: BsTokens.space3),
+            TextField(
+              controller: _phone,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(labelText: 'טלפון'),
+            ),
+            TextField(
+              controller: _email,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(labelText: 'מייל'),
+            ),
+            TextField(
+              controller: _notes,
+              maxLines: 2,
+              decoration: const InputDecoration(labelText: 'הערות'),
+            ),
+            TextField(
+              controller: _tags,
+              decoration: const InputDecoration(
+                  labelText: 'תגיות (מופרדות בפסיק)'),
+            ),
+            const SizedBox(height: BsTokens.space4),
+            FilledButton(onPressed: _save, child: const Text('שמור')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One journey row — a timeline node (dot + connector), the event emoji + Hebrew
+/// label, a relative time, and — when [stuck] — the reused [_StagePill] highlight.
+/// NEVER renders the event's in-memory displayName (R1-4).
+class _JourneyRow extends StatelessWidget {
+  const _JourneyRow({
+    required this.event,
+    required this.now,
+    required this.stuck,
+    required this.isLast,
+  });
+
+  final IntelEvent event;
+  final DateTime now;
+  final bool stuck;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final node = stuck ? BsTokens.warnBright : BsTokens.brand;
+    return Semantics(
+      label: '${intelEventHe(event.name)}, ${journeyRelTime(event.at, now)}'
+          '${stuck ? ', תקוע' : ''}',
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Timeline gutter — the node dot + a connector line to the next node.
+            Column(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  margin: const EdgeInsetsDirectional.only(top: 2),
+                  decoration: BoxDecoration(color: node, shape: BoxShape.circle),
+                ),
+                if (!isLast)
+                  Expanded(
+                    child: Container(width: 2, color: BsTokens.divider),
+                  ),
+              ],
+            ),
+            const SizedBox(width: BsTokens.space3),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  bottom: BsTokens.space3,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      intelEventEmoji(event.name),
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    const SizedBox(width: BsTokens.space2),
+                    Expanded(
+                      child: Text(
+                        intelEventHe(event.name),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (stuck) ...[
+                      const _StagePill(label: 'תקוע', color: BsTokens.warnBright),
+                      const SizedBox(width: BsTokens.space2),
+                    ],
+                    Text(
+                      journeyRelTime(event.at, now),
+                      style: const TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The journey section's muted empty line — the honest "no key / no activity"
+/// state (never a fabricated row, never a name-join fallback).
+class _JourneyEmpty extends StatelessWidget {
+  const _JourneyEmpty({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        text,
+        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+      );
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  🛠️ ניהול — the 5 management tools (M5, the FINAL tab → screen COMPLETE)
+// ───────────────────────────────────────────────────────────────────────────
+
+/// The 🛠️ ניהול tab body — the manager's management center, the FINAL manager
+/// wave. A faithful port of the legacy `renderMgrManage` (@index.html:16645-16890),
+/// an accordion of 5 management tools. Only ONE section is open at a time
+/// (mirroring the legacy module-scoped `mgrManageOpen`); tapping a header toggles
+/// it. The tools (verbatim legacy emoji + title + sub-title @16653/16687/16715/
+/// 16733):
+///   1. 🗂️ קטגוריות — the LIVE catalog category list + per-category counts (the
+///      `managerAnalyticsProvider.catalogCategories` map — the same TREES-by-`cat`
+///      tally the legacy SECTION 3 builds @16716), header `קטגוריות פעילות (N)` +
+///      the verbatim hint.
+///   2. ⚙️ הגדרות אפליקציה — the contractor-app config rows VERBATIM from the
+///      legacy constants (SECTION 4 @16733): תוספת משלוח אקספרס=₪120 (`EXPRESS_FEE`
+///      corrected to 120 to match `deliveryFeeFor(CartDelivery.express)`) ·
+///      מסגרת אשראי לקבלן=₪50,000 (`creditLimit` @11963) · שיעור מע״מ=18%
+///      (`VAT_RATE` @11941) + the verbatim hint.
+///   3. 🌳 עץ המוצרים — an inline summary of the catalog product-tree (the legacy
+///      SECTION 1 manages the per-product accessory tree; the inline summary names
+///      the verbatim sub-title + the live product/category totals).
+///   4. 🏷️ מותגים ומחירים — the brands list from `lib/data/brands.dart` (`kBrands`)
+///      — `emoji name` + tagline + product count.
+///   5. 🔬 בדיקות רגרסיה — routes to the existing `RegressionPanelScreen` (the same
+///      target the old manager dial used).
+///
+/// LIGHT only — white `cardLight` cards on `bgLight`, `inkLight`/`mutedLight` text,
+/// `brand` accents. NO dark tokens.
+class _ManageTab extends ConsumerStatefulWidget {
+  const _ManageTab();
+
+  @override
+  ConsumerState<_ManageTab> createState() => _ManageTabState();
+}
+
+class _ManageTabState extends ConsumerState<_ManageTab> {
+  /// The currently-open accordion section key, or `''` when all are collapsed
+  /// (the legacy module-scoped `let mgrManageOpen=''`). Local widget state; no
+  /// engine/global write.
+  String _open = '';
+
+  void _toggle(String key) => setState(() => _open = _open == key ? '' : key);
+
+  /// cluster #85ח — decide a vacation request. Writes the SHARED
+  /// [vacationRequestsProvider] (the requester's own בקשות list reflects the
+  /// decision live), drops the decision onto the requester's 🔔 bell feed
+  /// ([workerNotifsProvider], #18 — the request carries the exact login
+  /// username, so no worker-index fan-out is needed), and — for a WORKER's
+  /// request only (F-26) — additionally posts it into the existing
+  /// worker↔manager chat thread (`th-worker-manager`, sys_chat — the worker
+  /// sees it in שיחות → מנהל) plus a manager-side toast. A courier's request
+  /// (#86.3) gets the bell only — see the inline comment below.
+  void _decideVacation(VacationRequest r, {required bool approve}) {
+    final notifier = ref.read(vacationRequestsProvider.notifier);
+    // A2 — fire the bell/chat/toast ONLY on a REAL transition (the engine returns
+    // false on an already-decided row), so a double-tap — or the contractor
+    // deciding the same shared request — can't double-notify the requester.
+    final fired = approve ? notifier.approve(r.id) : notifier.reject(r.id);
+    if (!fired) return;
+    // 🔔 #18 — the decision lands on the requester's bell (per-username, so
+    // it is correct for a worker AND a courier alike).
+    ref
+        .read(workerNotifsProvider.notifier)
+        .addNotification(
+          username: r.username,
+          emoji: approve ? '✅' : '❌',
+          title: approve ? 'בקשת החופשה אושרה' : 'בקשת החופשה נדחתה',
+          body: r.range,
+        );
+    // F-26 · the chat line goes to 'th-worker-manager' — a WORKER-audience
+    // thread a courier never sees, and the text is second-person. So it is
+    // sent ONLY for a worker's request: a courier requester gets the 🔔 bell
+    // above (already per-username and correct), and no personal decision is
+    // broadcast into the shared couriers group nor faked into a channel that
+    // doesn't exist in the courier's chat list.
+    if (!_isCourierVacationRequest(r)) {
+      ref
+          .read(chatEngineProvider.notifier)
+          .send(
+            'th-worker-manager',
+            BsRole.manager,
+            approve
+                ? '✅ בקשת החופשה שלך (${r.range}) אושרה'
+                : '❌ בקשת החופשה שלך (${r.range}) נדחתה',
+          );
+    }
+    showToast(
+      context,
+      approve
+          ? '✅ אושרה חופשה: ${r.workerName} · ${r.range}'
+          : '❌ נדחתה חופשה: ${r.workerName} · ${r.range}',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // The LIVE catalog category distribution (cat → product count) — the same
+    // map the 📊 dashboard reads, off the shared engine's analytics. Sorted by
+    // count desc so the biggest categories read first (a stable display order).
+    final cats = ref.watch(
+      managerAnalyticsProvider.select((a) => a.catalogCategories),
+    );
+    final catEntries =
+        cats.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final totalProducts = cats.values.fold<int>(0, (s, n) => s + n);
+
+    // The LIVE worker-approval queue — tasks the worker submitted (status
+    // `review`), read off the SHARED worker-tasks engine. A worker "שלח לאישור"
+    // surfaces here with no refresh; approving/rejecting writes back live.
+    final pending = ref.watch(pendingApprovalTasksProvider);
+
+    // cluster #85ח — the LIVE vacation-request queue (bs.vacation-requests.v1):
+    // requests the worker filed from the worker board's טפסים → בקשת חופשה.
+    final vacations = ref.watch(vacationRequestsProvider);
+    final pendingVacations =
+        vacations.where((v) => v.status == kVacationPending).length;
+
+    // PHASE 0 (HR relocation, governance #84): when kHrRelocationFlag is ON the
+    // manager goes OVERSIGHT-ONLY on worker HR (the contractor board owns the
+    // approvals). Default OFF → the live action section below is byte-identical.
+    final hrRelocated =
+        ref.watch(featureFlagsProvider).contains(kHrRelocationFlag);
+
+    return ListView(
+      // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
+      // (gate 62 — no hard-coded left/right edge inset).
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space5,
+      ),
+      children: [
+        // The legacy intro line (@index.html:16650 `mm-intro`).
+        const _ManageIntro(),
+        const SizedBox(height: BsTokens.space4),
+
+        // 0. 👷 אישורי עובדים — PHASE 0 (HR relocation, governance #84): OFF
+        // (default) keeps the LIVE action section byte-identical; ON makes the
+        // manager OVERSIGHT-ONLY (the contractor board owns worker approvals) —
+        // a read-only count, no approve/reject.
+        if (!hrRelocated) ...[
+          _ManageSection(
+            sectionKey: 'approvals',
+            titleCfgId: 'manager.manage.approvals.title',
+            emoji: '👷',
+            title: 'אישורי עובדים',
+            sub: 'משימות שעובדים שלחו לאישור',
+            open: _open == 'approvals',
+            onTap: () => _toggle('approvals'),
+            badge: pending.length,
+            child: _ApprovalsBody(
+              pending: pending,
+              onApprove: (t) {
+                // 🪙 #22 — coins + the worker's ✅ bell fire AT DECISION TIME on
+                // the single unified engine (Wave T1): approve runs its
+                // review→done side-effects once, guarded by the `review` status
+                // (no double award).
+                ref.read(tasksProvider.notifier).approve(t.id);
+                showToast(context, '✅ אושר: ${t.name}');
+              },
+              onReject: (t) async {
+                // 📝 #12 — optional rejection reason (promptRejectReason):
+                // null = cancelled (no reject); the reason rides the unified
+                // engine's reject (side-map + the worker's 🔁 bell), Wave T1's
+                // single source of truth.
+                final why = await promptRejectReason(context);
+                if (why == null || !context.mounted) return;
+                ref.read(tasksProvider.notifier).reject(t.id, reason: why);
+                showToast(context, '↩️ נדחה: ${t.name}');
+              },
+            ),
+          ),
+        ] else ...[
+          // OVERSIGHT-ONLY: the contractor board owns worker approvals; the
+          // manager sees a live count, no approve/reject (governance #84).
+          _ManageSection(
+            sectionKey: 'approvals',
+            titleCfgId: 'manager.manage.approvals.title',
+            emoji: '👷',
+            title: 'אישורי עובדים',
+            sub: 'מנוהל בלוח-הקבלן',
+            open: _open == 'approvals',
+            onTap: () => _toggle('approvals'),
+            badge: pending.length,
+            child: Padding(
+              key: const Key('hr-oversight-approvals'),
+              padding: const EdgeInsets.all(BsTokens.space3),
+              child: Text(
+                '👷 ${pending.length} אישורי-עובדים ממתינים אצל הקבלנים · פיקוח בלבד',
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: BsTokens.space3),
+
+        // 0.5 🏖️ בקשות חופשה (cluster #85ח) — vacation requests the worker
+        // filed from the worker board's טפסים screen, decided here LIVE on the
+        // shared [vacationRequestsProvider]; the worker's own בקשות list flips
+        // through the same provider, and a chat line lands in his מנהל thread.
+        _ManageSection(
+          sectionKey: 'vacations',
+          titleCfgId: 'manager.manage.vacations.title',
+          emoji: '🏖️',
+          title: 'בקשות חופשה',
+          sub: 'בקשות חופשה שעובדים ושליחים הגישו',
+          open: _open == 'vacations',
+          onTap: () => _toggle('vacations'),
+          badge: pendingVacations,
+          child: _VacationsBody(
+            requests: vacations,
+            onApprove: (r) => _decideVacation(r, approve: true),
+            onReject: (r) => _decideVacation(r, approve: false),
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 1. 🗂️ קטגוריות — the LIVE category list.
+        _ManageSection(
+          sectionKey: 'cats',
+          titleCfgId: 'manager.manage.cats.title',
+          emoji: '🗂️',
+          title: 'קטגוריות',
+          sub: 'ניהול קטגוריות הקטלוג',
+          open: _open == 'cats',
+          onTap: () => _toggle('cats'),
+          child: _CategoriesBody(entries: catEntries),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 2. ⚙️ הגדרות אפליקציה — the verbatim config rows.
+        _ManageSection(
+          sectionKey: 'settings',
+          titleCfgId: 'manager.manage.settings.title',
+          emoji: '⚙️',
+          title: 'הגדרות אפליקציה',
+          sub: 'פרמטרים שהקבלן רואה',
+          open: _open == 'settings',
+          onTap: () => _toggle('settings'),
+          child: const _AppSettingsBody(),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 3. 🌳 עץ המוצרים — an inline summary of the catalog tree.
+        _ManageSection(
+          sectionKey: 'trees',
+          titleCfgId: 'manager.manage.trees.title',
+          emoji: '🌳',
+          title: 'עץ המוצרים',
+          sub: 'עריכת האביזרים המשלימים של כל מוצר',
+          open: _open == 'trees',
+          onTap: () => _toggle('trees'),
+          child: _ProductTreeBody(
+            categoryCount: cats.length,
+            productCount: totalProducts,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 4. 🏷️ מותגים ומחירים — the brands list.
+        _ManageSection(
+          sectionKey: 'brands',
+          titleCfgId: 'manager.manage.brands.title',
+          emoji: '🏷️',
+          title: 'מותגים ומחירים',
+          sub: 'עריכת המותגים והמחירים של כל מוצר',
+          open: _open == 'brands',
+          onTap: () => _toggle('brands'),
+          child: const _BrandsBody(),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 5. 🔬 בדיקות רגרסיה — DEV-ONLY internal tooling (#6). Gated to debug
+        // builds so the test_harness runner never reaches an end user who selects
+        // the manager persona in a shipped release (mirrors BackendDebugBadge's
+        // kDebugMode gate). The screen + runner stay in code (reversible); a
+        // release build tree-shakes the unreachable panel out.
+        if (kDebugMode) ...[
+          _ManageSection(
+            sectionKey: 'regression',
+            titleCfgId: 'manager.manage.regression.title',
+            emoji: '🔬',
+            title: 'בדיקות רגרסיה',
+            sub: 'הרצת חבילת הבדיקות המלאה של האפליקציה',
+            open: _open == 'regression',
+            onTap: () => _toggle('regression'),
+            child: _RegressionBody(
+              onOpen:
+                  () =>
+                      Navigator.of(context).push(RegressionPanelScreen.route()),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space3),
+        ],
+
+        // 7. 🔌 הקמת המערכת (Pillar-2 + giant-system V5) — the UNIFIED
+        // manager-only setup entry. One place, two phases: FIRST build the
+        // trade (categories/products/rules), THEN configure the org
+        // (vertical/modules/terms/screens) — "קודם מקימים מערכת ואז מגדירים
+        // אותה". A collection-`if` on the COMPILE-CONST [kOrgConfigFlag] (ships
+        // OFF — `--dart-define=ORG_CONFIG=true` arms it), so every define-less
+        // build drops the entry at compile time and the ניהול tab stays
+        // byte-identical (out of the pinned manager tests' way); the tile only
+        // appears when ORG_CONFIG is armed, which is exactly when phase-2's
+        // config persists. Same NAVIGATION-tile idiom (`open: false`, no
+        // accordion body): tapping the header pushes the two-phase host, which
+        // constructs the trade-builder screen DIRECTLY (it does not self-gate),
+        // so `kTradeBuilder` stays owner-staged-OFF and its pinned tests are
+        // untouched.
+        if (kOrgConfigFlag) ...[
+          const SizedBox(height: BsTokens.space3),
+          _ManageSection(
+            sectionKey: 'systemSetup',
+            titleCfgId: 'manager.manage.systemSetup.title',
+            emoji: '🔌',
+            title: 'הקמת המערכת',
+            sub: 'בניית ענף חדש והגדרת החברה — הכל במקום אחד',
+            open: false,
+            onTap: () =>
+                Navigator.of(context).push(SystemSetupHostScreen.route()),
+            child: const SizedBox.shrink(),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// The 🛠️ tab intro line (@index.html:16650 `mm-intro`) — a soft `brand`-tinted
+/// banner with the verbatim copy.
+class _ManageIntro extends StatelessWidget {
+  const _ManageIntro();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space4,
+        vertical: BsTokens.space3,
+      ),
+      decoration: BoxDecoration(
+        color: BsTokens.brand.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+      ),
+      child: const CfgText(
+        'manager.manage.intro',
+        '🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.',
+        style: TextStyle(
+          color: BsTokens.inkLight,
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+          height: 1.3,
+        ),
+      ),
+    );
+  }
+}
+
+/// One accordion section (@index.html:16855 `mmSection`) — a WHITE card with a
+/// tappable header (the `emoji` icon, the `title` + `sub` two-line label, and a
+/// ▾/‹ chevron) that reveals the [child] body when [open]. Tapping the header
+/// calls [onTap] (the parent toggles which one is open).
+class _ManageSection extends StatelessWidget {
+  const _ManageSection({
+    required this.sectionKey,
+    required this.titleCfgId,
+    required this.emoji,
+    required this.title,
+    required this.sub,
+    required this.open,
+    required this.onTap,
+    required this.child,
+    this.badge = 0,
+  });
+
+  final String sectionKey;
+
+  /// Studio element id for the editable section title (mirrors [_MetricTile.cfgId]):
+  /// empty doc ⇒ the literal [title] verbatim with the same style ⇒ golden-identical.
+  final String titleCfgId;
+  final String emoji;
+  final String title;
+  final String sub;
+  final bool open;
+  final VoidCallback onTap;
+  final Widget child;
+
+  /// Optional count badge next to the title (0 = no badge) — used by the
+  /// 👷 אישורי עובדים section to surface how many tasks are awaiting approval.
+  final int badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            button: true,
+            label: '$emoji $title',
+            // #31 — the shared accordion-section header (opens/closes a No-Code
+            // management section); in help mode the HelpTarget rings + explains
+            // it. One wrapper covers every section instance of _ManageSection.
+            child: HelpTarget(
+              title: 'מקטע ניהול',
+              body:
+                  'פותח/סוגר מקטע ניהול באקורדיון (מקטע אחד פתוח בכל רגע). '
+                  'חל על כל המקטעים: אישורי עובדים, בקשות חופשה, קטגוריות, '
+                  'הגדרות אפליקציה, עץ מוצרים, מותגים, בדיקות רגרסיה ושיוך '
+                  'תפקידים.',
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
+                  onTap: onTap,
+                  child: Padding(
+                    padding: const EdgeInsets.all(BsTokens.space4),
+                    child: Row(
+                      children: [
+                        Text(emoji, style: const TextStyle(fontSize: 22)),
+                        const SizedBox(width: BsTokens.space3),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: CfgText(
+                                      titleCfgId,
+                                      title,
+                                      style: const TextStyle(
+                                        color: BsTokens.inkLight,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                  if (badge > 0) ...[
+                                    const SizedBox(width: BsTokens.space2),
+                                    _CountBadge(count: badge),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                sub,
+                                style: const TextStyle(
+                                  color: BsTokens.mutedLight,
+                                  fontSize: 12.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: BsTokens.space2),
+                        Text(
+                          open ? '▾' : '‹',
+                          style: const TextStyle(
+                            color: BsTokens.mutedLight,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (open)
+            Padding(
+              // Directional (start/top/end/bottom) so RTL/LTR both lay out
+              // correctly (gate 62 — no hard-coded left/right edge inset).
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                BsTokens.space4,
+                0,
+                BsTokens.space4,
+                BsTokens.space4,
+              ),
+              child: child,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A small `brand`-fill count badge for a section header (the 👷 אישורי עובדים
+/// pending count). White number on `brand`; LIGHT-safe.
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'ממתינים לאישור: $count',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        constraints: const BoxConstraints(minWidth: 22),
+        decoration: BoxDecoration(
+          color: BsTokens.brand,
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        ),
+        child: Text(
+          '$count',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: bsOnAccent(context),
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The 👷 אישורי עובדים body — the manager's LIVE worker-approval queue. Lists
+/// every task the worker submitted (`pending`, status `review`), each with the
+/// worker name, the `🕒 days · steps` line, the worker's note, and two actions:
+/// ✅ אשר (review → done, ✅ אושר) and ↩️ דחה (review → rejected, back to the
+/// worker). Both write the SHARED unified [tasksProvider], so the worker's own
+/// screen reflects the decision live. An empty queue shows a calm note.
+class _ApprovalsBody extends StatelessWidget {
+  const _ApprovalsBody({
+    required this.pending,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  final List<PersonaTask> pending;
+  final void Function(PersonaTask) onApprove;
+  final void Function(PersonaTask) onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    if (pending.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
+        child: CfgText(
+          'manager_dashboard_screen.approvals_empty',
+          '🎉 אין משימות הממתינות לאישור.',
+          style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final t in pending)
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: _ApprovalRow(
+              task: t,
+              onApprove: () => onApprove(t),
+              onReject: () => onReject(t),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// One pending-approval row — a soft `bgLight` panel with the task name, the
+/// `🦺 worker · 🕒 days · steps` meta, the worker's PROOF PHOTO (#85ב), the
+/// note, and the ✅ אשר / ↩️ דחה buttons.
+/// The buttons are keyed `approve-<id>` / `reject-<id>` so the W3 test can tap a
+/// specific task's decision.
+class _ApprovalRow extends ConsumerWidget {
+  const _ApprovalRow({
+    required this.task,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  final PersonaTask task;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // #85ב — the submitted proof photo lives on the RICH tasks engine (the
+    // legacy PersonaTask carries no photo field); ids are shared across both
+    // engines (the W3 bridge), so this lookup surfaces the worker's actual
+    // capture next to the decision buttons.
+    final richMatch =
+        ref.watch(tasksProvider).where((x) => x.id == task.id).toList();
+    final photo = richMatch.isEmpty ? null : richMatch.first.photo;
+    // #5 — the worker's LIVE submit note also rides the rich engine (the
+    // legacy PersonaTask.note never changes after the seed); prefer it when
+    // non-empty so the manager reads what the worker actually wrote.
+    final note =
+        richMatch.isNotEmpty && richMatch.first.note.isNotEmpty
+            ? richMatch.first.note
+            : task.note;
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            task.name,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '🦺 ${kWorkers[(task.worker >= 0 && task.worker < kWorkers.length) ? task.worker : 0]} · 🕒 ${task.days} ימים · ${task.steps} שלבים',
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+          if (photo != null) ...[
+            const SizedBox(height: BsTokens.space2),
+            // #85ב — the manager SEES the worker's proof before deciding:
+            // the SHARED [taskPhotoWidget] (worker_task_detail_sheet.dart) —
+            // a real Image.memory for a data-URL, the honest placeholder for
+            // the legacy 'demo' seeds — both sides render the same proof.
+            taskPhotoWidget(photo, height: 120),
+          ],
+          if (note.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              note,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+          ],
+          const SizedBox(height: BsTokens.space3),
+          Row(
+            children: [
+              Expanded(
+                // #31 — help mode rings + explains; otherwise approves the task.
+                child: HelpTarget(
+                  title: 'אשר משימה',
+                  body:
+                      'מאשר משימה שעובד שלח לאישור: המשימה עוברת ל׳בוצע׳, מזכה '
+                      'מטבעות ושולחת התראת ✅ לעובד. כתיבה למנוע המשותף — '
+                      'נראית מיד בלוח העובד.',
+                  child: _ApprovalButton(
+                    key: ValueKey('approve-${task.id}'),
+                    label: '✅ אשר',
+                    color: const Color(0xFF1F8A4C),
+                    onPressed: onApprove,
+                  ),
+                ),
+              ),
+              const SizedBox(width: BsTokens.space2),
+              Expanded(
+                // #31 — help mode rings + explains; otherwise rejects the task.
+                child: HelpTarget(
+                  title: 'דחה משימה',
+                  body:
+                      'דוחה משימה שנשלחה לאישור ומחזיר אותה לעובד עם סיבת '
+                      'דחייה. הסיבה והסטטוס מתעדכנים מיד בלוח העובד.',
+                  child: _ApprovalButton(
+                    key: ValueKey('reject-${task.id}'),
+                    label: '↩️ דחה',
+                    color: Theme.of(context).colorScheme.surface,
+                    textColor: BsTokens.inkLight,
+                    bordered: true,
+                    onPressed: onReject,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A pill action button used by an approval row — a `color` fill with [textColor]
+/// text (or a bordered light outline when [bordered]). White text by default.
+class _ApprovalButton extends StatelessWidget {
+  const _ApprovalButton({
+    required this.label,
+    required this.color,
+    required this.onPressed,
+    super.key,
+    this.textColor = Colors.white,
+    this.bordered = false,
+  });
+
+  final String label;
+  final Color color;
+  final Color textColor;
+  final bool bordered;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            border:
+                bordered ? Border.all(color: const Color(0xFFE2E2E2)) : null,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The 🏖️ בקשות חופשה body (cluster #85ח) — pending requests first (each with
+/// ✅ אשר / ❌ דחה), then the decided history with read-only status pills. An
+/// empty queue shows a calm note. Decision buttons reuse [_ApprovalButton] and
+/// are keyed `vac-approve-<id>` / `vac-reject-<id>` so tests can tap a
+/// specific request's decision.
+class _VacationsBody extends StatelessWidget {
+  const _VacationsBody({
+    required this.requests,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  final List<VacationRequest> requests;
+  final void Function(VacationRequest) onApprove;
+  final void Function(VacationRequest) onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    if (requests.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
+        child: CfgText(
+          'manager_dashboard_screen.vacations_empty',
+          'אין בקשות חופשה.',
+          style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+        ),
+      );
+    }
+    final pending =
+        requests.where((r) => r.status == kVacationPending).toList();
+    final decided =
+        requests.where((r) => r.status != kVacationPending).toList()..sort(
+          (a, b) => (b.decidedTs ?? b.createdTs).compareTo(
+            a.decidedTs ?? a.createdTs,
+          ),
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final r in pending)
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: _VacationRequestRow(
+              request: r,
+              onApprove: () => onApprove(r),
+              onReject: () => onReject(r),
+            ),
+          ),
+        for (final r in decided)
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: _VacationRequestRow(request: r),
+          ),
+      ],
+    );
+  }
+}
+
+/// F-26/F-27 · is this vacation request a courier's? [VacationRequest.role]
+/// is authoritative for new records ('courier' is written by the courier
+/// board's forms screen). Legacy records persisted before the role field all
+/// load with the back-compat default 'worker' — for those, a lookup in the
+/// seeded [kBoardAccounts] by username keeps an old courier request honest
+/// (the shared 'demo' username is in no seeded account → treated as worker,
+/// the pre-F-26 behavior).
+bool _isCourierVacationRequest(VacationRequest r) {
+  if (r.role == 'courier') return true;
+  if (r.role != 'worker') return false;
+  return kBoardAccounts.any(
+    (a) => a.username == r.username && a.role == BoardRole.courier,
+  );
+}
+
+/// One vacation-request row — `🛵/🦺 requester · range` (the icon follows the
+/// requester's board role, F-27) + the reason, and (while pending) the
+/// ✅ אשר / ❌ דחה buttons; a decided row carries a read-only status pill
+/// ([_StagePill]) instead.
+class _VacationRequestRow extends StatelessWidget {
+  const _VacationRequestRow({
+    required this.request,
+    this.onApprove,
+    this.onReject,
+  });
+
+  final VacationRequest request;
+  final VoidCallback? onApprove;
+  final VoidCallback? onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = request.status == kVacationPending;
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  // F-27: 🛵 for a courier's request, 🦺 for a worker's — the
+                  // manager can tell the boards apart in the shared queue.
+                  '${_isCourierVacationRequest(request) ? '🛵' : '🦺'} ${request.workerName} · ${request.range}',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              if (!pending)
+                _StagePill(
+                  label:
+                      request.status == kVacationApproved ? 'אושרה' : 'נדחתה',
+                  color:
+                      request.status == kVacationApproved
+                          ? const Color(0xFF1F8A4C)
+                          : BsTokens.danger,
+                ),
+            ],
+          ),
+          if (request.reason.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              request.reason,
+              style: const TextStyle(
+                color: BsTokens.mutedLight,
+                fontSize: 12.5,
+              ),
+            ),
+          ],
+          if (pending) ...[
+            const SizedBox(height: BsTokens.space3),
+            Row(
+              children: [
+                Expanded(
+                  // #31 — help mode rings + explains; otherwise approves leave.
+                  child: HelpTarget(
+                    title: 'אשר בקשת חופשה',
+                    body:
+                        'מאשר בקשת חופשה שעובד/שליח הגיש: מעדכן את רשימת '
+                        'הבקשות שלו ושולח התראה. הסטטוס מתעדכן מיד אצל המבקש.',
+                    child: _ApprovalButton(
+                      key: ValueKey('vac-approve-${request.id}'),
+                      label: '✅ אשר',
+                      color: const Color(0xFF1F8A4C),
+                      onPressed: onApprove ?? () {},
+                    ),
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space2),
+                Expanded(
+                  // #31 — help mode rings + explains; otherwise rejects leave.
+                  child: HelpTarget(
+                    title: 'דחה בקשת חופשה',
+                    body:
+                        'דוחה את בקשת החופשה ומעדכן את המבקש בהתראה. הסטטוס '
+                        'מתעדכן מיד אצל העובד/שליח.',
+                    child: _ApprovalButton(
+                      key: ValueKey('vac-reject-${request.id}'),
+                      label: '❌ דחה',
+                      color: Theme.of(context).colorScheme.surface,
+                      textColor: BsTokens.inkLight,
+                      bordered: true,
+                      onPressed: onReject ?? () {},
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A small label→value row inside a management section (the legacy `mm-acc` /
+/// `mm-set` row) — the `label` on the start, the `value` on the end.
+class _ManageRow extends StatelessWidget {
+  const _ManageRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: BsTokens.space3),
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.mutedLight,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A `mutedLight` hint line at the foot of a management section (the legacy
+/// `mm-hint`).
+class _ManageHint extends StatelessWidget {
+  const _ManageHint(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space2),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: BsTokens.mutedLight,
+          fontSize: 12,
+          height: 1.3,
+        ),
+      ),
+    );
+  }
+}
+
+/// The 🗂️ קטגוריות body (@index.html:16715-16729 SECTION 3) — the LIVE catalog
+/// category list: a `קטגוריות פעילות (N)` header, then one row per category with
+/// its product count (`<count> מוצרים`), and the verbatim hint. Counts come from
+/// the live `managerAnalyticsProvider` map, so they track the catalog.
+class _CategoriesBody extends StatelessWidget {
+  const _CategoriesBody({required this.entries});
+
+  final List<MapEntry<String, int>> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'קטגוריות פעילות (${entries.length})',
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        for (final e in entries)
+          _ManageRow(label: e.key, value: '${e.value} מוצרים'),
+        const _ManageHint('שינוי שם קטגוריה מעדכן את כל המוצרים שבה.'),
+      ],
+    );
+  }
+}
+
+/// The ⚙️ הגדרות אפליקציה body (@index.html:16733-16740 SECTION 4) — the three
+/// contractor-app config rows, VERBATIM values from the legacy constants, plus
+/// the verbatim hint. Display-only (the legacy `prompt()`-edit has no backend
+/// here; the values are the source of truth the contractor cart already reads).
+class _AppSettingsBody extends StatelessWidget {
+  const _AppSettingsBody();
+
+  /// @legacy index.html:11961 `let EXPRESS_FEE=80;` — corrected to 120 to
+  /// match `deliveryFeeFor(CartDelivery.express)` in store_screen.dart.
+  static const int _expressFee = 120;
+
+  /// @legacy index.html:11963 `let creditLimit=50000;` (rendered toLocaleString).
+  static const int _creditLimit = 50000;
+
+  /// @legacy index.html:11941 `const VAT_RATE = 0.18;` → 18%. Derived from the
+  /// single-source [kVatRate] so the manager's displayed rate can't drift from
+  /// the catalog browse price / cart charge.
+  static int get _vatPercent => (kVatRate * 100).round();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const _ManageRow(label: 'תוספת משלוח אקספרס', value: '₪$_expressFee'),
+        _ManageRow(
+          label: 'מסגרת אשראי לקבלן',
+          value: '₪${_grouped(_creditLimit)}',
+        ),
+        _ManageRow(label: 'שיעור מע״מ', value: '$_vatPercent%'),
+        _ManageHint(
+          'המע״מ קבוע לפי חוק ($_vatPercent%). תוספת האקספרס והאשראי נראים מיד בעגלת הקבלן.',
+        ),
+      ],
+    );
+  }
+}
+
+/// The 🌳 עץ המוצרים body (@index.html:16652-16685 SECTION 1) — the legacy section
+/// manages the per-product accessory tree via a product-picker + `prompt()`-driven
+/// add/edit/delete of complementary accessories against a backend. With no such
+/// backend here, this renders an inline SUMMARY of the catalog tree: the verbatim
+/// section purpose + the live tree size (categories × products). NO invented edit.
+class _ProductTreeBody extends StatelessWidget {
+  const _ProductTreeBody({
+    required this.categoryCount,
+    required this.productCount,
+  });
+
+  final int categoryCount;
+  final int productCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const CfgText(
+          'manager_dashboard_screen.producttree_intro',
+          'עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.',
+          style: TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 13,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        _ManageRow(label: 'מוצרים בעץ', value: '$productCount'),
+        _ManageRow(label: 'קטגוריות', value: '$categoryCount'),
+        const _ManageHint(
+          'כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי).',
+        ),
+      ],
+    );
+  }
+}
+
+/// The 🏷️ מותגים ומחירים body (@index.html:16687-16713 SECTION 2) — the brands
+/// list. The legacy section edits per-product brand+price rows; here we surface
+/// the catalog's REAL brand roster from `lib/data/brands.dart` (`kBrands`): each
+/// brand's `emoji name`, its tagline, and its product count (when known).
+class _BrandsBody extends StatelessWidget {
+  const _BrandsBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'מותגים (${kBrands.length})',
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        for (final b in kBrands)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(b.emoji, style: const TextStyle(fontSize: 18)),
+                const SizedBox(width: BsTokens.space2),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        b.name,
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (b.tagline.isNotEmpty) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          b.tagline,
+                          style: const TextStyle(
+                            color: BsTokens.mutedLight,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (b.productCount > 0) ...[
+                  const SizedBox(width: BsTokens.space2),
+                  Text(
+                    '${b.productCount} מוצרים',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// The 🔬 בדיקות רגרסיה body — a short note + a `brand` action button that opens
+/// the existing `RegressionPanelScreen` (the same target the old manager dial
+/// used). [onOpen] performs the `Navigator.push`.
+class _RegressionBody extends StatelessWidget {
+  const _RegressionBody({required this.onOpen});
+
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const CfgText(
+          'manager_dashboard_screen.regression_intro',
+          'הרצת חבילת בדיקות הרגרסיה המלאה (קטלוג · מאתר · מנוע תאימות · state · '
+          'ניווט) על המכשיר.',
+          style: TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 13,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
+        // #31 — help mode rings + explains; this whole body sits inside the
+        // kDebugMode gate, so the HelpTarget is dormant in release just like
+        // the button itself.
+        HelpTarget(
+          title: 'בדיקות רגרסיה',
+          body: 'פותח את מרכז בדיקות הרגרסיה (כלי פיתוח). קיים רק בבילד debug.',
+          // giant · composite hide: an org that hides
+          // 'manager.manage.regression.open' removes the WHOLE button (not an
+          // empty shell — CfgText alone would blank only the label). CfgVisible
+          // wraps the outer button; absent config ⇒ child verbatim ⇒
+          // byte-identical.
+          child: CfgVisible(
+            'manager.manage.regression.open',
+            child: Material(
+              color: BsTokens.brand,
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: onOpen,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: CfgText(
+                    'manager.manage.regression.open',
+                    '🔬 פתח מרכז בדיקות רגרסיה',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// One manager tab descriptor — emoji icon + Hebrew label.
+class _ManagerTab {
+  const _ManagerTab({required this.emoji, required this.label});
+
+  final String emoji;
+  final String label;
+}
+
+/// The four manager tabs — emoji + Hebrew label, verbatim from the legacy
+/// manager sections (📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול). Private so
+/// the screen exposes only [ManagerDashboardScreen.tabCount] publicly.
+const List<_ManagerTab> _kManagerTabs = [
+  _ManagerTab(emoji: '📊', label: 'לוח בקרה'),
+  _ManagerTab(emoji: '🚚', label: 'הזמנות'),
+  _ManagerTab(emoji: '👥', label: 'לקוחות'),
+  _ManagerTab(emoji: '🛠️', label: 'ניהול'),
+  // Step 98 — the 5th tab, COMPILE-GATED behind `kIntelLive` (const-false in
+  // every normal/test build ⇒ this element collapses out and the list is the
+  // verbatim 4 tabs). LOCKSTEP with `_kManagerTabHelp` / the `IndexedStack`
+  // children / `tabCount` — all four carry this SAME `if (kIntelLive)`.
+  if (kIntelLive) _ManagerTab(emoji: '📡', label: 'מודיעין לקוחות'),
+];
+
+/// #31 — the per-tab "מצב היכרות" (title, body) explanations, indexed in
+/// lockstep with [_kManagerTabs]. The four pills are built in one seg() loop
+/// (`_ManagerToggle`), so each pill's HelpTarget reads its text from here by
+/// index — one bubble per tab.
+const List<(String, String)> _kManagerTabHelp = [
+  (
+    'לוח בקרה',
+    'מציג את לוח הבקרה החי: אריחי מדדים (הזמנות פתוחות, מוצרים, חנויות) '
+        'וצינור ההזמנות לפי שלב.',
+  ),
+  (
+    'הזמנות',
+    'פותח את מרכז ניהול ההזמנות החי — רשימת ההזמנות, סינון לפי שלב וקידום '
+        'שלב (עקיפת-מנהל).',
+  ),
+  (
+    'לקוחות',
+    'מציג את רשימת הקבלנים-הלקוחות החיה: ניצול אשראי, מספר אתרים והזמנות '
+        'לכל קבלן.',
+  ),
+  (
+    'ניהול',
+    'פותח את מרכז הניהול (No-Code): אישורי משימות, בקשות חופשה, קטגוריות, '
+        'הגדרות אפליקציה, עץ מוצרים, מותגים ושיוך תפקידים.',
+  ),
+  // Step 98 — the 5th tab's help tuple, COMPILE-GATED behind `kIntelLive`
+  // (const-false ⇒ collapses out, 4 tuples byte-identical). LOCKSTEP with
+  // `_kManagerTabs` / the `IndexedStack` children / `tabCount`.
+  if (kIntelLive)
+    (
+      'מודיעין לקוחות',
+      'מציג מודיעין לקוחות חי: משפך המרה, פלחי לקוחות, שימור ומי מחובר כעת — '
+          'מקופל מהמכשיר, קריאה בלבד למנהל.',
+    ),
+];

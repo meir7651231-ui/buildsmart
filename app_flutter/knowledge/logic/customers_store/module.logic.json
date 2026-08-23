@@ -1,0 +1,749 @@
+{
+  "module": "customers_store",
+  "source": "lib/state/customers_store.dart",
+  "atomCount": 12,
+  "atoms": [
+    {
+      "fn": "upsertCustomer",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<SavedCustomer> list, SavedCustomer incoming) -> List<SavedCustomer>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "CustomersStore.importAll",
+          "CustomersStore.upsert"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "key = incoming.dedupKey"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = list.indexWhere((c) => c.id == incoming.id || c.dedupKey == key)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if idx < 0 → return [...list, incoming]"
+          },
+          {
+            "kind": "compute",
+            "detail": "kept = list[idx]"
+          },
+          {
+            "kind": "compute",
+            "detail": "merged = SavedCustomer(id: kept.id, name: incoming.name, phone: incoming.phone, email: incoming.em…"
+          },
+          {
+            "kind": "return",
+            "detail": "[...list.sublist(0, idx), merged, ...list.sublist(idx + 1)]"
+          }
+        ]
+      },
+      "floor": [
+        "SavedCustomer",
+        "indexWhere",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(List<SavedCustomer> list, SavedCustomer incoming)",
+        "output": "List<SavedCustomer>",
+        "purity": "pure",
+        "precond": [
+          "if idx < 0 → return [...list, incoming]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "customerForName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<SavedCustomer> list, String displayName) -> SavedCustomer?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "key = normName(displayName)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in list"
+          },
+          {
+            "kind": "branch",
+            "detail": "if normName(c.name) == key → return c"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "normName"
+      ],
+      "contract": {
+        "input": "(List<SavedCustomer> list, String displayName)",
+        "output": "SavedCustomer?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedCustomer.dedupKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'${normName(name)}|${normalizePhone(phone)}'"
+          }
+        ]
+      },
+      "floor": [
+        "normName",
+        "normalizePhone"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedCustomer.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? name, String? phone, String? email, String? businessId, String? notes, List<String>? tags}) -> SavedCustomer",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "SavedCustomer(id: id, name: name ?? this.name, phone: phone ?? this.phone, email: email ?…"
+          }
+        ]
+      },
+      "floor": [
+        "SavedCustomer"
+      ],
+      "contract": {
+        "input": "({String? name, String? phone, String? email, String? businessId, String? notes, List<String>? tags})",
+        "output": "SavedCustomer",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedCustomer.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "businessId"
+          },
+          {
+            "kind": "field",
+            "name": "email"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "notes"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          },
+          {
+            "kind": "field",
+            "name": "tags"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'name' : name, if (phone.isNotEmpty) 'phone' : phone, if (email.isNotEmpty) '…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedCustomer.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? j) -> SavedCustomer?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "businessId"
+          },
+          {
+            "kind": "field",
+            "name": "email"
+          },
+          {
+            "kind": "field",
+            "name": "notes"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          },
+          {
+            "kind": "field",
+            "name": "tags"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if j is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = j['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "name = j['name']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! String || id.isEmpty || name is! String || name.isEmpty → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "SavedCustomer(id: id, name: name, phone: j['phone'] is String ? j['phone'] as String : ''…"
+          }
+        ]
+      },
+      "floor": [
+        "SavedCustomer"
+      ],
+      "contract": {
+        "input": "(Object? j)",
+        "output": "SavedCustomer?",
+        "purity": "pure",
+        "precond": [
+          "if j is! Map → return null",
+          "if id is! String || id.isEmpty || name is! String || name.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "j is! Map · id is! String || id.isEmpty || name is! String || name.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "CustomersStore.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (List<SavedCustomer> v) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSavedCustomersKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = v"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<SavedCustomer> v)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CustomersStore._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSavedCustomersKey"
+          },
+          {
+            "kind": "field",
+            "name": "_repo"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "repo = _repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if repo != null"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "debugPrint",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "load",
+        "tryFromJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CustomersStore._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSavedCustomersKey"
+          },
+          {
+            "kind": "field",
+            "name": "_repo"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "CustomersStore.state="
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "repo = _repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if repo != null"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "getInstance",
+        "jsonEncode",
+        "save",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CustomersStore.upsert",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(SavedCustomer c) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSavedCustomersKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "upsertCustomer",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state = upsertCustomer(state, c)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(SavedCustomer c)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CustomersStore.importAll",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(List<SavedCustomer> incoming) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSavedCustomersKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "upsertCustomer",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if incoming.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "next = state"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in incoming"
+          },
+          {
+            "kind": "effect",
+            "detail": "next = upsertCustomer(next, c)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<SavedCustomer> incoming)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if incoming.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CustomersStore.remove",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSavedCustomersKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_repo",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state = [for (final c in state) if (c.id != id) c]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

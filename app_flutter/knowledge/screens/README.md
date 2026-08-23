@@ -1,0 +1,121 @@
+# Screen atom decompositions — coverage index
+
+> Auto-derived from code by `tools/atom/decompose` (on whats-happening).
+> Regenerate: `dart run tools/atom/decompose/bin/decompose.dart --batch app_flutter/lib/screens --out app_flutter/knowledge/screens`.
+> Do not hand-edit — this is a projection of the code, next to the code.
+
+- **Screens decomposed:** 108
+- **Multi-atom (composer + sections):** 76 · **single-atom:** 32
+- **Registry:** 676/676 CfgText/CfgVisible ids matched against element_registry (100%)
+- **Golden anchor:** `contractor-home` (smart_home_screen) pinned in tools/atom/decompose/test/golden/
+
+| screen | atoms | registry |
+|---|---|---|
+| `catalog_settings_screen` | 12 | 12/12 |
+| `chat_settings_screen` | 11 | 17/17 |
+| `notif_settings_screen` | 11 | 10/10 |
+| `store_dashboard_screen` | 11 | 14/14 |
+| `tasks_screen` | 11 | 12/12 |
+| `lipskey_product_sheet` | 10 | 30/30 |
+| `smart_home_screen` | 10 | 6/6 |
+| `store_settings_screen` | 10 | 11/11 |
+| `manager_dashboard_screen` | 7 | 24/24 |
+| `budget_screen` | 6 | 13/13 |
+| `camera_sheet` | 6 | 1/1 |
+| `catalog_screen` | 6 | 39/39 |
+| `courier_dashboard_screen` | 6 | 7/7 |
+| `courier_reports_tab` | 6 | 11/11 |
+| `home_shell` | 6 | 6/6 |
+| `install_studio_screen` | 6 | 0/0 |
+| `profile_screen` | 6 | 6/6 |
+| `store_screen` | 6 | 40/40 |
+| `worker_reports_tab` | 6 | 9/9 |
+| `chats_screen` | 5 | 11/11 |
+| `contractor_hr_sheet` | 5 | 8/8 |
+| `courier_forms_screen` | 5 | 5/5 |
+| `courier_profile_screen` | 5 | 18/18 |
+| `courier_settings_screen` | 5 | 4/4 |
+| `departments_screen` | 5 | 5/5 |
+| `manager_copilot_screen` | 5 | 6/6 |
+| `org_setup_wizard_screen` | 5 | 0/0 |
+| `persona_picking_sheet` | 5 | 8/8 |
+| `projects_screen` | 5 | 9/9 |
+| `regression_panel_screen` | 5 | 2/2 |
+| `worker_attendance_screen` | 5 | 11/11 |
+| `worker_forms_screen` | 5 | 7/7 |
+| `worker_profile_screen` | 5 | 11/11 |
+| `worker_settings_screen` | 5 | 8/8 |
+| `courier_attendance_screen` | 4 | 6/6 |
+| `docs_readiness_gate` | 4 | 4/4 |
+| `lipskey_products_screen` | 4 | 7/7 |
+| `manager_role_assign_sheet` | 4 | 4/4 |
+| `rewards_hub_screen` | 4 | 0/0 |
+| `smart_project_screen` | 4 | 9/9 |
+| `stock_screen` | 4 | 3/3 |
+| `store_profile_screen` | 4 | 11/11 |
+| `worker_employer_stock_sheet` | 4 | 10/10 |
+| `worker_equipment_checklist_sheet` | 4 | 4/4 |
+| `worker_task_detail_sheet` | 4 | 4/4 |
+| `ai_hub_screen` | 3 | 1/1 |
+| `contractor_attendance_sheet` | 3 | 6/6 |
+| `courier_certs_screen` | 3 | 8/8 |
+| `defects_sheet` | 3 | 4/4 |
+| `legal_screen` | 3 | 1/1 |
+| `lipskey_brand_screen` | 3 | 3/3 |
+| `notifications_screen` | 3 | 9/9 |
+| `role_request_sheet` | 3 | 2/2 |
+| `role_requests_inbox_screen` | 3 | 4/4 |
+| `studio_screen` | 3 | 6/6 |
+| `tasks_gantt_sheet` | 3 | 5/5 |
+| `worker_app_screen` | 3 | 15/15 |
+| `worker_safety_screen` | 3 | 14/14 |
+| `contractor_material_requests_sheet` | 2 | 3/3 |
+| `courier_portal_tab` | 2 | 3/3 |
+| `finder_screen` | 2 | 2/2 |
+| `home_content_reorder` | 2 | 4/4 |
+| `lens_selector_row` | 2 | 1/1 |
+| `manager_profile_screen` | 2 | 6/6 |
+| `manager_screens_sheet` | 2 | 3/3 |
+| `onboarding_screen` | 2 | 1/1 |
+| `profession_screen` | 2 | 4/4 |
+| `role_picker_sheet` | 2 | 2/2 |
+| `site_hub_screen` | 2 | 1/1 |
+| `store_documents_sheet` | 2 | 3/3 |
+| `suppliers_screen` | 2 | 1/1 |
+| `updates_screen` | 2 | 0/0 |
+| `worker_notifs_sheet` | 2 | 4/4 |
+| `worker_payslips_sheet` | 2 | 2/2 |
+| `worker_task_board_screen` | 2 | 2/2 |
+| `worker_today_strip` | 2 | 3/3 |
+| `adapter_explain_screen` | 1 | 3/3 |
+| `ai_assistant_screen` | 1 | 5/5 |
+| `ai_finder_screen` | 1 | 6/6 |
+| `alt_explain_screen` | 1 | 2/2 |
+| `audit_screen` | 1 | 3/3 |
+| `barcode_scanner` | 1 | 1/1 |
+| `business_summary_screen` | 1 | 3/3 |
+| `coming_soon_screen` | 1 | 4/4 |
+| `company_catalog_import_sheet` | 1 | 0/0 |
+| `consent_modal` | 1 | 5/5 |
+| `contractor_tools_sheets` | 1 | 0/0 |
+| `courier_delivery_detail_sheet` | 1 | 7/7 |
+| `credit_explain_screen` | 1 | 2/2 |
+| `customer_import_sheet` | 1 | 0/0 |
+| `daily_report_screen` | 1 | 4/4 |
+| `describe_to_cart_screen` | 1 | 7/7 |
+| `finance_hub_sheets` | 1 | 0/0 |
+| `floating_card_keyboard` | 1 | 1/1 |
+| `login_sheet` | 1 | 6/6 |
+| `order_notif_sheet` | 1 | 6/6 |
+| `paired_explain_screen` | 1 | 3/3 |
+| `persona_pod_sheet` | 1 | 6/6 |
+| `persona_portal` | 1 | 0/0 |
+| `quote_polish_screen` | 1 | 4/4 |
+| `reject_reason_screen` | 1 | 4/4 |
+| `spec_copilot_screen` | 1 | 5/5 |
+| `studio_component_builder` | 1 | 0/0 |
+| `studio_rules_screen` | 1 | 3/3 |
+| `supplier_onboarding_screen` | 1 | 0/0 |
+| `webcam_capture_sheet` | 1 | 1/1 |
+| `welcome_screen` | 1 | 19/19 |
+| `worker_report_drilldowns` | 1 | 0/0 |

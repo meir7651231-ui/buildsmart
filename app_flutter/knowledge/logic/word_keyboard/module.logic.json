@@ -1,0 +1,242 @@
+{
+  "module": "word_keyboard",
+  "source": "lib/features/word_finder/word_keyboard.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "WordKeyboard._buildWordRow",
+      "kind": "method",
+      "object": {
+        "signature": "(List<WordKey> rowWords) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "onWordTap"
+          },
+          {
+            "kind": "field",
+            "name": "primary"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "WordKeyboard.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "children = <Widget>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < rowWords.length; i++"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i > 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "word = rowWords[i]"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = BsKey(model: KbKey(word.label), isAccent: identical(word, primary), leadingImageAsset: wo…"
+          },
+          {
+            "kind": "effect",
+            "detail": "children.add(Expanded(child: word.isDestination ? Stack(clipBehavior: Clip.none, children…"
+          },
+          {
+            "kind": "return",
+            "detail": "Row(children: children)"
+          }
+        ]
+      },
+      "floor": [
+        "BsKey",
+        "Expanded",
+        "Icon",
+        "KbKey",
+        "Positioned",
+        "Row",
+        "SizedBox",
+        "Stack",
+        "add",
+        "identical",
+        "onWordTap"
+      ],
+      "contract": {
+        "input": "(List<WordKey> rowWords)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WordKeyboard._buildUtilityRow",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "onAll"
+          },
+          {
+            "kind": "field",
+            "name": "onType"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "WordKeyboard.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Row(children: [Expanded(child: BsKey(model: const KbKey('הכל'), onTap: () => onAll?.call(…"
+          }
+        ]
+      },
+      "floor": [
+        "BsKey",
+        "Expanded",
+        "KbKey",
+        "Row",
+        "SizedBox",
+        "call"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WordKeyboard.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_wordsPerRow"
+          },
+          {
+            "kind": "field",
+            "name": "onAll",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "onType",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "onWordTap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "primary",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "showUtilityRow"
+          },
+          {
+            "kind": "field",
+            "name": "words"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_buildWordRow",
+            "module": true
+          },
+          {
+            "name": "_buildUtilityRow",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "rowWidgets = <Widget>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < words.length; i += _wordsPerRow"
+          },
+          {
+            "kind": "compute",
+            "detail": "end = (i + _wordsPerRow < words.length) ? i + _wordsPerRow : words.length"
+          },
+          {
+            "kind": "effect",
+            "detail": "rowWidgets..add(_buildWordRow(words.sublist(i, end)))..add(const SizedBox(height: BsToken…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if showUtilityRow"
+          },
+          {
+            "kind": "return",
+            "detail": "Directionality(textDirection: TextDirection.ltr, child: Material(color: BsTokens.surfaceM…"
+          }
+        ]
+      },
+      "floor": [
+        "Column",
+        "Directionality",
+        "Material",
+        "Padding",
+        "SizedBox",
+        "add",
+        "all",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

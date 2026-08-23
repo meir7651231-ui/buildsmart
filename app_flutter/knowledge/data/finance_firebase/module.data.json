@@ -1,0 +1,94 @@
+{
+  "module": "finance_firebase",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/finance_firebase.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "FirebaseFinanceRepository",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_derived",
+            "type": "LocalFinanceRepository",
+            "required": true
+          },
+          {
+            "name": "_approvals",
+            "type": "_ApprovalsCacheRepo",
+            "required": true
+          },
+          {
+            "name": "_penalties",
+            "type": "_PenaltiesCacheRepo",
+            "required": true
+          },
+          {
+            "name": "_paymentTerm",
+            "type": "_PaymentTermCacheRepo",
+            "required": true
+          },
+          {
+            "name": "_budget",
+            "type": "_BudgetCacheRepo",
+            "required": true
+          },
+          {
+            "name": "budgetListenable",
+            "type": "Listenable?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "approvalsListenable",
+            "type": "Listenable?",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_derived",
+            "ref": "LocalFinanceRepository",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "attach",
+          "dispose",
+          "budgetTotal",
+          "budgetSpent",
+          "budgetCategories",
+          "budgetPct",
+          "budgetLevel",
+          "financeHub",
+          "activeRevenue",
+          "setBudget",
+          "approvals",
+          "penalties",
+          "activePaymentTerm",
+          "decide",
+          "addPenalty",
+          "setPaymentTerm"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_derived",
+          "_approvals",
+          "_penalties",
+          "_paymentTerm",
+          "_budget"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

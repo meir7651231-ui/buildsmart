@@ -1,0 +1,84 @@
+{
+  "name": "_QuickReplyBanner",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "תשובות מהירות",
+        "registryId": "chat_settings_screen.t06",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "chat_settings_screen.t07",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הבנתי",
+        "registryId": "chat_settings_screen.t07",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "⚡"
+      },
+      {
+        "kind": "cfgText",
+        "text": "תשובות מהירות",
+        "registryId": "chat_settings_screen.t08",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "chat_settings_screen.t09",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ערוך",
+        "registryId": "chat_settings_screen.t09",
+        "registryOk": true
+      }
+    ],
+    "registered": 6,
+    "unregistered": [
+      "⚡"
+    ],
+    "summary": "registry 6 · mapped 6/6 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'התבנית הועתקה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

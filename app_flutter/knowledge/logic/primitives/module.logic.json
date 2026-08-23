@@ -1,0 +1,423 @@
+{
+  "module": "primitives",
+  "source": "lib/features/fittings/geometry/primitives.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "revolve",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<List<double>> profile, int seg) -> Mesh",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "tube"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "p = <double>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "n = <double>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "idx = <int>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < profile.length; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "p0 = profile[i]"
+          },
+          {
+            "kind": "compute",
+            "detail": "p1 = profile[(i + 1) % profile.length]"
+          },
+          {
+            "kind": "compute",
+            "detail": "dx = p1[0] - p0[0]"
+          },
+          {
+            "kind": "compute",
+            "detail": "dr = p1[1] - p0[1]"
+          },
+          {
+            "kind": "compute",
+            "detail": "nx = -dr"
+          },
+          {
+            "kind": "compute",
+            "detail": "nr = dx"
+          },
+          {
+            "kind": "compute",
+            "detail": "nl = math.sqrt(nx * nx + nr * nr)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nl != 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var s = 0; s < seg; s++"
+          },
+          {
+            "kind": "return",
+            "detail": "Mesh(p, n, idx)"
+          }
+        ]
+      },
+      "floor": [
+        "Mesh",
+        "addAll",
+        "cos",
+        "sin",
+        "sqrt"
+      ],
+      "contract": {
+        "input": "(List<List<double>> profile, int seg)",
+        "output": "Mesh",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "tube",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double x0, double x1, double ro, double ri, {int seg = 48}) -> Mesh",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "math",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "revolve",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "revolve([[x0, ro], [x1, ro], [x1, ri], [x0, ri]], seg)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(double x0, double x1, double ro, double ri, {int seg = 48})",
+        "output": "Mesh",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "hexRod",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int sides, double r, double len, double cx) -> Mesh",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "p = <double>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "n = <double>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "idx = <int>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "hh = len / 2"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < sides; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "a0 = i / sides * 2 * math.pi"
+          },
+          {
+            "kind": "compute",
+            "detail": "a1 = (i + 1) / sides * 2 * math.pi"
+          },
+          {
+            "kind": "compute",
+            "detail": "am = (a0 + a1) / 2"
+          },
+          {
+            "kind": "compute",
+            "detail": "nc = math.cos(am)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ns = math.sin(am)"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = p.length ~/ 3"
+          },
+          {
+            "kind": "effect",
+            "detail": "p.addAll([cx - hh, r * math.cos(a0), r * math.sin(a0)])"
+          },
+          {
+            "kind": "effect",
+            "detail": "n.addAll([0, nc, ns])"
+          },
+          {
+            "kind": "effect",
+            "detail": "p.addAll([cx + hh, r * math.cos(a0), r * math.sin(a0)])"
+          },
+          {
+            "kind": "effect",
+            "detail": "n.addAll([0, nc, ns])"
+          },
+          {
+            "kind": "effect",
+            "detail": "p.addAll([cx - hh, r * math.cos(a1), r * math.sin(a1)])"
+          },
+          {
+            "kind": "effect",
+            "detail": "n.addAll([0, nc, ns])"
+          },
+          {
+            "kind": "effect",
+            "detail": "p.addAll([cx + hh, r * math.cos(a1), r * math.sin(a1)])"
+          },
+          {
+            "kind": "effect",
+            "detail": "n.addAll([0, nc, ns])"
+          },
+          {
+            "kind": "effect",
+            "detail": "idx.addAll([b, b + 1, b + 2, b + 2, b + 1, b + 3])"
+          },
+          {
+            "kind": "return",
+            "detail": "Mesh(p, n, idx)"
+          }
+        ]
+      },
+      "floor": [
+        "Mesh",
+        "addAll",
+        "cos",
+        "sin"
+      ],
+      "contract": {
+        "input": "(int sides, double r, double len, double cx)",
+        "output": "Mesh",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "sphere",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double r, int la, int lo) -> Mesh",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "p = <double>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "n = <double>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "idx = <int>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i <= la; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "th = i / la * math.pi"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var j = 0; j <= lo; j++"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < la; i++"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var j = 0; j < lo; j++"
+          },
+          {
+            "kind": "return",
+            "detail": "Mesh(p, n, idx)"
+          }
+        ]
+      },
+      "floor": [
+        "Mesh",
+        "addAll",
+        "cos",
+        "sin"
+      ],
+      "contract": {
+        "input": "(double r, int la, int lo)",
+        "output": "Mesh",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Mesh.vertexCount",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "positions"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "positions.length ~/ 3"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Mesh.triangleCount",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "indices"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "indices.length ~/ 3"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

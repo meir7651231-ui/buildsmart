@@ -1,7 +1,27 @@
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
+import 'package:buildsmart/state/under_construction.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
+
+/// The catalog entries of [section] that have at least one product. Under
+/// [kHideUnderConstruction] the level-2 grid renders ONLY these — the empty
+/// brand categories ("אמבט ואגנית", "מאספים וקולטים") would otherwise show a
+/// dimmed "בקרוב" badge the App Store rejects. Reversible data filter (mirrors
+/// catalog_screen's `_categoryHasContent`): no `kLipskeySections` data is
+/// deleted, so flipping the flag back re-exposes the "בקרוב" cards as before.
+/// Content is checked against the UNIFIED `kCatalogProducts` (not the
+/// Lipskey-only subset) — for Lipskey section names the two are equivalent
+/// (disjoint brand taxonomies) and it honors the unified-catalog rule.
+List<LipskeyCatEntry> visibleSectionEntries(LipskeySection section) {
+  if (!kHideUnderConstruction) return section.entries;
+  return section.entries
+      .where((e) => kCatalogProducts.any((p) => p.categoryHe == e.name))
+      .toList();
+}
 
 // ── Level 1: שני מקטעים — אינסטלציה / סניטציה ───────────────────────────────
 class LipskeyBrandScreen extends StatelessWidget {
@@ -15,27 +35,29 @@ class LipskeyBrandScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              backgroundColor: const Color(0xFFFFFFFF),
-              foregroundColor: const Color(0xFF1A1A1A),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              foregroundColor: BsTokens.inkLight,
               elevation: 0,
               pinned: true,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                tooltip: 'חזרה',
+                icon: const Icon(Icons.arrow_forward),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  Text('ליפסקי ברקן',
+                  CfgText('lipskey_brand_screen.appbar_title', 'ליפסקי ברקן',
                       style: TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontWeight: FontWeight.bold,
                           fontSize: 17)),
-                  Text('אינסטלציה · סניטציה',
+                  CfgText(
+                      'lipskey_brand_screen.appbar_sub', 'אינסטלציה · סניטציה',
                       style:
                           TextStyle(color: Colors.black38, fontSize: 12)),
                 ],
@@ -116,7 +138,8 @@ class _BrandHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('ליפסקי ברקן',
+                const CfgText(
+                    'lipskey_brand_screen.header_title', 'ליפסקי ברקן',
                     style: TextStyle(
                         color: Color(0xFF64FFDA),
                         fontSize: 14,
@@ -153,7 +176,7 @@ class _SectionCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
               color: const Color(0xFFEEEEEE),
@@ -171,7 +194,7 @@ class _SectionCard extends StatelessWidget {
               children: [
                 Text(section.name,
                     style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         height: 1.2)),
@@ -218,19 +241,23 @@ class LipskeySectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // B4/Apple-readiness: hide empty brand categories (the dimmed "בקרוב"
+    // cards). Reversible filter — see [visibleSectionEntries].
+    final entries = visibleSectionEntries(section);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              backgroundColor: const Color(0xFFFFFFFF),
-              foregroundColor: const Color(0xFF1A1A1A),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              foregroundColor: BsTokens.inkLight,
               elevation: 0,
               pinned: true,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                tooltip: 'חזרה',
+                icon: const Icon(Icons.arrow_forward),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Column(
@@ -242,7 +269,7 @@ class LipskeySectionScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 16)),
                   Text(
-                      'ליפסקי ברקן · ${section.entries.length} קטגוריות',
+                      'ליפסקי ברקן · ${entries.length} קטגוריות',
                       style: const TextStyle(
                           color: Colors.black38, fontSize: 11)),
                 ],
@@ -253,7 +280,7 @@ class LipskeySectionScreen extends StatelessWidget {
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate(
                   (context, i) {
-                    final entry = section.entries[i];
+                    final entry = entries[i];
                     final products = kLipskeyCatalog
                         .where((p) => p.categoryHe == entry.name)
                         .toList();
@@ -271,7 +298,7 @@ class LipskeySectionScreen extends StatelessWidget {
                               ),
                     );
                   },
-                  childCount: section.entries.length,
+                  childCount: entries.length,
                 ),
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
@@ -311,7 +338,7 @@ class _CategoryCard extends StatelessWidget {
         opacity: isEmpty ? 0.4 : 1.0,
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
                 color: const Color(0xFFEEEEEE),
@@ -329,7 +356,7 @@ class _CategoryCard extends StatelessWidget {
                 children: [
                   Text(entry.name,
                       style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           height: 1.2),
@@ -341,10 +368,11 @@ class _CategoryCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF5F5F5),
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Text('בקרוב',
+                          child: const CfgText(
+                              'lipskey_brand_screen.badge_soon', 'בקרוב',
                               style: TextStyle(
                                   color: Color(0xFF888888),
                                   fontSize: 11)),
@@ -358,7 +386,7 @@ class _CategoryCard extends StatelessWidget {
                           ),
                           child: Text('${products.length} מוצרים',
                               style: const TextStyle(
-                                  color: Color(0xFFFF7A18),
+                                  color: BsTokens.brand,
                                   fontSize: 11)),
                         ),
                 ],

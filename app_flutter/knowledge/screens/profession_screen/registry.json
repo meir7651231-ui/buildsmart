@@ -1,0 +1,27 @@
+{
+  "matched": 4,
+  "total": 4,
+  "summary": "4/4",
+  "entries": [
+    {
+      "id": "profession_screen.t01",
+      "ok": true,
+      "atom": "ProfessionScreen"
+    },
+    {
+      "id": "profession_screen.t02",
+      "ok": true,
+      "atom": "ProfessionScreen"
+    },
+    {
+      "id": "profession_screen.t03",
+      "ok": true,
+      "atom": "ProfessionScreen"
+    },
+    {
+      "id": "profession_screen.t04",
+      "ok": true,
+      "atom": "ProfessionScreen"
+    }
+  ]
+}

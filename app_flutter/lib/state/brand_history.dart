@@ -18,12 +18,16 @@ class BrandHistoryNotifier extends StateNotifier<Map<String, Map<String, int>>> 
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw != null) {
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      state = m.map((k, v) => MapEntry(
-            k,
-            (v as Map<String, dynamic>)
-                .map((bk, bv) => MapEntry(bk, (bv as num).toInt())),
-          ));
+      try {
+        final m = jsonDecode(raw) as Map<String, dynamic>;
+        state = m.map((k, v) => MapEntry(
+              k,
+              (v as Map<String, dynamic>)
+                  .map((bk, bv) => MapEntry(bk, (bv as num).toInt())),
+            ));
+      } catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
     }
   }
 

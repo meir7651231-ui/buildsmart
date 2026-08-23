@@ -1,0 +1,97 @@
+{
+  "name": "StudioComponentBuilder",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🛠️ בונה ידני — ללא מודל"
+      },
+      {
+        "kind": "text",
+        "text": "בחר רכיב לעריכה…"
+      },
+      {
+        "kind": "text",
+        "text": "אין ערכי צבע מוגדרים לרכיב זה (fail-closed)."
+      },
+      {
+        "kind": "text",
+        "text": "🙈 הסתר"
+      },
+      {
+        "kind": "text",
+        "text": "👁️ הצג"
+      },
+      {
+        "kind": "text",
+        "text": "בחר מסך-יעד (מסכי-פרמטר מאופרים — צריך פרמטרים):"
+      },
+      {
+        "kind": "text",
+        "text": "צריך פרמטרים — לא זמין"
+      },
+      {
+        "kind": "text",
+        "text": "👁️ תצוגה מקדימה (לפני החלה)"
+      },
+      {
+        "kind": "text",
+        "text": "בחר עריכה כדי לראות תצוגה מקדימה."
+      },
+      {
+        "kind": "text",
+        "text": "אשר והחל בטיוטה ✓"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "🛠️ בונה ידני — ללא מודל",
+      "בחר רכיב לעריכה…",
+      "אין ערכי צבע מוגדרים לרכיב זה (fail-closed).",
+      "🙈 הסתר",
+      "👁️ הצג",
+      "בחר מסך-יעד (מסכי-פרמטר מאופרים — צריך פרמטרים):",
+      "צריך פרמטרים — לא זמין",
+      "👁️ תצוגה מקדימה (לפני החלה)",
+      "בחר עריכה כדי לראות תצוגה מקדימה.",
+      "אשר והחל בטיוטה ✓"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 10"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "configStoreProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "configStoreProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "findDescriptor",
+    "fn",
+    "setState",
+    "sort",
+    "summarizeDiff",
+    "validateAddComponent",
+    "validateSafe"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

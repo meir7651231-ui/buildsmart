@@ -7,3 +7,36 @@
 # מאומת 2026-06-01: הסוויטה המלאה = 930 ✅ / 0 ✗ → הרשימה ריקה (known-failing: 0).
 # אם תוסיף baseline — פרט כאן את השמות המדויקים (לא מספר בלבד), אחרת agents
 # נתקעים בלי לדעת אילו כשלים ידועים ואילו חדשים.
+
+# 2026-06-14→fixed 2026-06-23 (v6.58): worker_reports_drilldown_test היה כושל
+# (close-button לא נמצא ע"י find.bySemanticsLabel('סגור') בלי semantics-tree פעיל).
+# תוקן: הבדיקה משתמשת ב-find.byIcon(Icons.close).last (חסין, בודק אותה התנהגות).
+# הוסר מה-baseline → known-failing ירד 2→1.
+
+# 2026-06-17→fixed 2026-06-23 (v6.71): kb_golden_test היה כושל ב-setUpAll (path קשיח
+# של Windows `C:/flutter/.../materialicons-regular.otf` שזרק על Linux/CI).
+# תוקן: resolver חוצה-פלטפורמה (FLUTTER_ROOT / נגזר מ-resolvedExecutable) + הגולדנים
+# מדלגים by-default (host-specific — font hinting/AA שונה בין OS); רצים בכוונה עם
+# RUN_GOLDENS=1 בהוסט-הייחוס. הוסר מה-baseline → known-failing 1→0 (הרשימה ריקה כעת).
+
+# 2026-06-30→fixed 2026-07-27: 2 כשלים רעועים-תחת-עומס (state_loadrace_guards ·
+# favorite_tile_opens_sheet) — עברו בבידוד תמיד, נפלו רק בסוויטה-המלאה (concurrency=4).
+# יוצבו: (1) המתנה דטרמיניסטית ל-notifier.ready (hook @visibleForTesting על 3 ה-
+# notifiers: product_favorites/card_filter/card_acc) במקום Future.delayed(60ms);
+# (2) finder-לפי-שם-מוצר + pump-until-מופיע במקום star-icon.first השביר.
+# הוסרו מה-baseline → known-failing 2→0 (הרשימה ריקה כעת). [ראה גם: stock_local קיבל
+# פטור מתועד ב-stage2_scale — offender דטרמיניסטי שנבלע בתקציב עד לאודיט 2026-07-27.]
+
+# ── 2026-08-03 (atom-engine slice-1) — CORRECTION + REAL FIX ────────────────
+# The 2026-08-02 entry mislabeled 10 product_journey failures as "environmental
+# / green in CI". That was WRONG: they FAILED on the CI runner too (Flutter
+# 3.29.3) — a REAL ~9-17px RenderFlex overflow in the product-sheet side column
+# (fixed 100px), not a font-only artifact. FIXED, not baselined:
+#   • product_journey_test loads the real Heebo font (the app's default family)
+#     so the headless test measures true glyph widths, not Ahem's 1em squares;
+#   • lipskey_products_screen `_side()` wraps the unit-toggle + stepper in
+#     FittedBox(scaleDown) — unchanged when they fit, shrinks a hair instead of
+#     overflowing when the label metrics run a few px wide.
+# worker_attendance_geo P-15 was a concurrency flake; passes in the verified
+# full run. Full suite on Flutter 3.29.3 (the CI toolchain): 5332 ✅ / 0 ✗ /
+# 12 skip. known-failing → 0 (list empty below). Zero-tolerance restored.

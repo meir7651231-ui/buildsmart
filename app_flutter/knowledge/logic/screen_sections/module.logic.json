@@ -1,0 +1,1090 @@
+{
+  "module": "screen_sections",
+  "source": "lib/state/screen_sections.dart",
+  "atomCount": 19,
+  "atoms": [
+    {
+      "fn": "ScreenLayout.isEmpty",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "hidden"
+          },
+          {
+            "kind": "field",
+            "name": "labels"
+          },
+          {
+            "kind": "field",
+            "name": "order"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "order.isEmpty && hidden.isEmpty && labels.isEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenLayout.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({List<String>? order, Set<String>? hidden, Map<String, String>? labels}) -> ScreenLayout",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ScreenLayout(order: order ?? this.order, hidden: hidden ?? this.hidden, labels: labels ??…"
+          }
+        ]
+      },
+      "floor": [
+        "ScreenLayout"
+      ],
+      "contract": {
+        "input": "({List<String>? order, Set<String>? hidden, Map<String, String>? labels})",
+        "output": "ScreenLayout",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenLayout.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "hidden"
+          },
+          {
+            "kind": "field",
+            "name": "labels"
+          },
+          {
+            "kind": "field",
+            "name": "order"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{if (order.isNotEmpty) 'order' : order, if (hidden.isNotEmpty) 'hidden' : hidden.toList()…"
+          }
+        ]
+      },
+      "floor": [
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "ScreenSectionsNotifier._set"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "remove",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier._of",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen) -> ScreenLayout",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ScreenSectionsNotifier.hide",
+          "ScreenSectionsNotifier.isHidden",
+          "ScreenSectionsNotifier.labelOf",
+          "ScreenSectionsNotifier.orderedIds",
+          "ScreenSectionsNotifier.reorder",
+          "ScreenSectionsNotifier.setLabel",
+          "ScreenSectionsNotifier.show",
+          "ScreenSectionsNotifier.visibleIds"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state[screen] ?? const ScreenLayout()"
+          }
+        ]
+      },
+      "floor": [
+        "ScreenLayout"
+      ],
+      "contract": {
+        "input": "(String screen)",
+        "output": "ScreenLayout",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier._set",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, ScreenLayout layout) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ScreenSectionsNotifier.hide",
+          "ScreenSectionsNotifier.reorder",
+          "ScreenSectionsNotifier.resetScreen",
+          "ScreenSectionsNotifier.setLabel",
+          "ScreenSectionsNotifier.show"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "next = {...state}"
+          },
+          {
+            "kind": "branch",
+            "detail": "if layout.isEmpty"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "remove"
+      ],
+      "contract": {
+        "input": "(String screen, ScreenLayout layout)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.orderedIds",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, List<String> defaults) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_of",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ScreenSectionsNotifier.moveDown",
+          "ScreenSectionsNotifier.moveUp",
+          "ScreenSectionsNotifier.reorder",
+          "ScreenSectionsNotifier.visibleIds"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "stored = _of(screen).order"
+          },
+          {
+            "kind": "compute",
+            "detail": "valid = defaults.toSet()"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final id in stored"
+          },
+          {
+            "kind": "branch",
+            "detail": "if valid.contains(id) && !out.contains(id)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final id in defaults"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !out.contains(id)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "contains",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(String screen, List<String> defaults)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.visibleIds",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, List<String> defaults) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_of",
+            "module": true
+          },
+          {
+            "name": "orderedIds",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "hidden = _of(screen).hidden"
+          },
+          {
+            "kind": "return",
+            "detail": "orderedIds(screen, defaults).where((id) => !hidden.contains(id)).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String screen, List<String> defaults)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.isHidden",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, String id) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_of",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ScreenSectionsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_of(screen).hidden.contains(id)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String screen, String id)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.hide",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_of",
+            "module": true
+          },
+          {
+            "name": "_set",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ScreenSectionsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "l = _of(screen)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if l.hidden.contains(id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_set(screen, l.copyWith(hidden: {...l.hidden, id}))"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String screen, String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if l.hidden.contains(id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.show",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_of",
+            "module": true
+          },
+          {
+            "name": "_set",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ScreenSectionsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "l = _of(screen)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !l.hidden.contains(id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_set(screen, l.copyWith(hidden: {...l.hidden}..remove(id)))"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "copyWith",
+        "remove"
+      ],
+      "contract": {
+        "input": "(String screen, String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !l.hidden.contains(id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.toggle",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "isHidden",
+            "module": true
+          },
+          {
+            "name": "show",
+            "module": true
+          },
+          {
+            "name": "hide",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "isHidden(screen, id) ? show(screen, id) : hide(screen, id)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String screen, String id)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.labelOf",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, String id, String fallback) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_of",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_of(screen).labels[id] ?? fallback"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String screen, String id, String fallback)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.setLabel",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, String id, String value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_of",
+            "module": true
+          },
+          {
+            "name": "_set",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "l = _of(screen)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = {...l.labels}"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = value.trim()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v.isEmpty"
+          },
+          {
+            "kind": "effect",
+            "detail": "_set(screen, l.copyWith(labels: next))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "remove",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String screen, String id, String value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.reorder",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, List<String> defaults, int oldIndex, int newIndex) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "orderedIds",
+            "module": true
+          },
+          {
+            "name": "_set",
+            "module": true
+          },
+          {
+            "name": "_of",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ScreenSectionsNotifier.moveDown",
+          "ScreenSectionsNotifier.moveUp"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ids = orderedIds(screen, defaults)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if oldIndex < 0 || oldIndex >= ids.length → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "target = newIndex"
+          },
+          {
+            "kind": "branch",
+            "detail": "if target > oldIndex"
+          },
+          {
+            "kind": "branch",
+            "detail": "if target < 0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if target > ids.length - 1"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...ids]"
+          },
+          {
+            "kind": "compute",
+            "detail": "item = next.removeAt(oldIndex)"
+          },
+          {
+            "kind": "effect",
+            "detail": "next.insert(target, item)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_set(screen, _of(screen).copyWith(order: next))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "insert",
+        "removeAt"
+      ],
+      "contract": {
+        "input": "(String screen, List<String> defaults, int oldIndex, int newIndex)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if oldIndex < 0 || oldIndex >= ids.length → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.moveUp",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, List<String> defaults, String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "orderedIds",
+            "module": true
+          },
+          {
+            "name": "reorder",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ids = orderedIds(screen, defaults)"
+          },
+          {
+            "kind": "compute",
+            "detail": "i = ids.indexOf(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i <= 0 → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "reorder(screen, defaults, i, i - 1)"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(String screen, List<String> defaults, String id)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if i <= 0 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.moveDown",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen, List<String> defaults, String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "orderedIds",
+            "module": true
+          },
+          {
+            "name": "reorder",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ids = orderedIds(screen, defaults)"
+          },
+          {
+            "kind": "compute",
+            "detail": "i = ids.indexOf(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i < 0 || i >= ids.length - 1 → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "reorder(screen, defaults, i, i + 2)"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(String screen, List<String> defaults, String id)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if i < 0 || i >= ids.length - 1 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScreenSectionsNotifier.resetScreen",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String screen) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_set",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_set(screen, const ScreenLayout())"
+          }
+        ]
+      },
+      "floor": [
+        "ScreenLayout"
+      ],
+      "contract": {
+        "input": "(String screen)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

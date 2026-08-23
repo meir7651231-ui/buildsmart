@@ -1,0 +1,292 @@
+{
+  "module": "equipment_stock_join",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/equipment_stock_join.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "_normalize",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "availabilityFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "s.toLowerCase().replaceAll(RegExp(r'[^\\p{L}\\p{N}]+', unicode: true), ' ').trim()"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "replaceAll",
+        "toLowerCase",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_tokens",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String normalized) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "availabilityFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "normalized.isEmpty ? const [] : normalized.split(' ')"
+          }
+        ]
+      },
+      "floor": [
+        "split"
+      ],
+      "contract": {
+        "input": "(String normalized)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_isContiguousSubsequence",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> needle, List<String> haystack) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "availabilityFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if needle.length < 2 || needle.length > haystack.length → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "last = haystack.length - needle.length"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<String> needle, List<String> haystack)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if needle.length < 2 || needle.length > haystack.length → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_locationToAvailability",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String location) -> StockAvailability",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "availabilityFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "location == 'warehouse' ? StockAvailability.warehouse : StockAvailability.site"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String location)",
+        "output": "StockAvailability",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "availabilityFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String equipmentLabel, List<EmployerStockItem> stock) -> StockAvailability",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_normalize",
+            "module": true
+          },
+          {
+            "name": "_tokens",
+            "module": true
+          },
+          {
+            "name": "_isContiguousSubsequence",
+            "module": true
+          },
+          {
+            "name": "_locationToAvailability",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "annotate"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "label = _normalize(equipmentLabel)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if label.isEmpty → return StockAvailability.unknown"
+          },
+          {
+            "kind": "compute",
+            "detail": "labelTokens = _tokens(label)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final item in stock"
+          },
+          {
+            "kind": "compute",
+            "detail": "name = _normalize(item.name)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if name.isEmpty → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "nameTokens = _tokens(name)"
+          },
+          {
+            "kind": "compute",
+            "detail": "hit = name == label || _isContiguousSubsequence(nameTokens, labelTokens) || _isContiguousSubseq…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if hit → return _locationToAvailability(item.location)"
+          },
+          {
+            "kind": "return",
+            "detail": "StockAvailability.unknown"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String equipmentLabel, List<EmployerStockItem> stock)",
+        "output": "StockAvailability",
+        "purity": "pure",
+        "precond": [
+          "if label.isEmpty → return StockAvailability.unknown"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "annotate",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> labels, List<EmployerStockItem> stock) -> List<({String label, StockAvailability availability})>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "availabilityFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final label in labels) (label: label, availability: availabilityFor(label, stock))]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<String> labels, List<EmployerStockItem> stock)",
+        "output": "List<({String label, StockAvailability availability})>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

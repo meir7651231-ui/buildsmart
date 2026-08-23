@@ -1,0 +1,958 @@
+{
+  "module": "trade_schema",
+  "source": "/home/user/buildsmart/app_flutter/lib/domain/trade_schema.dart",
+  "entityCount": 10,
+  "entities": [
+    {
+      "entity": "AttributeKind",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "dimension",
+            "type": "AttributeKind",
+            "required": false
+          },
+          {
+            "name": "choice",
+            "type": "AttributeKind",
+            "required": false
+          },
+          {
+            "name": "material",
+            "type": "AttributeKind",
+            "required": false
+          },
+          {
+            "name": "color",
+            "type": "AttributeKind",
+            "required": false
+          },
+          {
+            "name": "freeText",
+            "type": "AttributeKind",
+            "required": false
+          },
+          {
+            "name": "number",
+            "type": "AttributeKind",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 6 values: dimension · choice · material · color · freeText · number"
+        ]
+      }
+    },
+    {
+      "entity": "Trade",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "color",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "personaId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "published",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "schemaVersion",
+            "type": "int",
+            "required": false,
+            "default": "kTradeSchemaVersion"
+          },
+          {
+            "name": "brandIds",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "personaId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "nameHe",
+          "emoji",
+          "color",
+          "personaId"
+        ],
+        "defaults": {
+          "published": "false",
+          "schemaVersion": "kTradeSchemaVersion",
+          "brandIds": "const []"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "TradeCategory",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "titleHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "parentId",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "sortIndex",
+            "type": "int",
+            "required": false,
+            "default": "0"
+          },
+          {
+            "name": "attributeSchemaIds",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "smartFixtureId",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "parentId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "smartFixtureId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "titleHe",
+          "emoji"
+        ],
+        "defaults": {
+          "sortIndex": "0",
+          "attributeSchemaIds": "const []"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "AttributeValue",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "labelHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "canonical",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "sortIndex",
+            "type": "int",
+            "required": false,
+            "default": "0"
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "labelHe"
+        ],
+        "defaults": {
+          "sortIndex": "0"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "AttributeDef",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "kind",
+            "type": "AttributeKind",
+            "required": true
+          },
+          {
+            "name": "values",
+            "type": "List<AttributeValue>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "unitHe",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "isVariantAxis",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "required",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "matchTokens",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "kind",
+            "ref": "AttributeKind",
+            "kind": "enum"
+          },
+          {
+            "field": "values",
+            "ref": "AttributeValue",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "nameHe",
+          "emoji",
+          "kind"
+        ],
+        "defaults": {
+          "values": "const []",
+          "isVariantAxis": "false",
+          "required": "false",
+          "matchTokens": "const []"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "TradeProduct",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "categoryId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "brandId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameEn",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "type": "Map<String, String>",
+            "required": false,
+            "collection": true,
+            "default": "const {}"
+          },
+          {
+            "name": "dims",
+            "type": "Map<String, dynamic>",
+            "required": false,
+            "collection": true,
+            "default": "const {}"
+          },
+          {
+            "name": "imageFiles",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "specImageFiles",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "qtyPack",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "qtyPallet",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "required": false,
+            "default": "0"
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "categoryId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "brandId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "categoryId",
+          "brandId",
+          "nameHe",
+          "nameEn"
+        ],
+        "defaults": {
+          "attributes": "const {}",
+          "dims": "const {}",
+          "imageFiles": "const []",
+          "specImageFiles": "const []",
+          "page": "0"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "AccessoryRule",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "appliesToCategoryId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "appliesToProductId",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "whyHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "mustHave",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "price",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "linkSku",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "appliesToCategoryId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "appliesToProductId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "appliesToCategoryId",
+          "nameHe",
+          "emoji",
+          "whyHe"
+        ],
+        "defaults": {
+          "mustHave": "false"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SmartBrandRef",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tag",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "rec",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "sku",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "imageAsset",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "price",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "tag"
+        ],
+        "defaults": {
+          "rec": "false"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "InstallStage",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "labelHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "subHe",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "isFinal",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "matchTokens",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "emoji",
+          "labelHe"
+        ],
+        "defaults": {
+          "subHe": "''",
+          "isFinal": "false",
+          "matchTokens": "const []"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SmartFixture",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "categoryId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "diagramTitleHe",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "brandRefs",
+            "type": "List<SmartBrandRef>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "accessoryRuleIds",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "stages",
+            "type": "List<InstallStage>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "categoryId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "brandRefs",
+            "ref": "SmartBrandRef",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "stages",
+            "ref": "InstallStage",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "categoryId",
+          "nameHe",
+          "emoji"
+        ],
+        "defaults": {
+          "diagramTitleHe": "''",
+          "brandRefs": "const []",
+          "accessoryRuleIds": "const []",
+          "stages": "const []"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

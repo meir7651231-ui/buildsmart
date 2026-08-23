@@ -1,0 +1,48 @@
+{
+  "name": "_CourierNotifsBell",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "_courierUnreadCountProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showCourierNotifsSheet",
+        "target": "showCourierNotifsSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showCourierNotifsSheet(context)",
+        "effect": "open → showCourierNotifsSheet"
+      }
+    ]
+  },
+  "floor": [
+    "playInAppNotifFeedback"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

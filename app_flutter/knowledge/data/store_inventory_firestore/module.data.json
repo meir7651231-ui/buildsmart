@@ -1,0 +1,44 @@
+{
+  "module": "store_inventory_firestore",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/store_inventory_firestore.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "StoreInventoryFirestoreSource",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_db",
+            "type": "FirebaseFirestore",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_db",
+            "ref": "FirebaseFirestore",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "allStores",
+          "inventoryForSku"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_db"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

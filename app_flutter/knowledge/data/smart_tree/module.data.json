@@ -1,0 +1,300 @@
+{
+  "module": "smart_tree",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/smart_tree.dart",
+  "entityCount": 4,
+  "entities": [
+    {
+      "entity": "SmartStage",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "label",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "sub",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "isFinal",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "match",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "emoji",
+          "label",
+          "sub"
+        ],
+        "defaults": {
+          "isFinal": "false",
+          "match": "const []"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SmartBrand",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tag",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "rec",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          },
+          {
+            "name": "sku",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "imageAsset",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "tag"
+        ],
+        "defaults": {
+          "rec": "false"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SmartAcc",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "why",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "must",
+            "type": "bool",
+            "required": true
+          },
+          {
+            "name": "sku",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "emoji",
+          "why",
+          "must"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SmartProduct",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "key",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "cat",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "brands",
+            "type": "List<SmartBrand>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "acc",
+            "type": "List<SmartAcc>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "diagramTitle",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "stages",
+            "type": "List<SmartStage>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "mustCount",
+            "type": "int",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "recBrand",
+            "type": "SmartBrand",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "brands",
+            "ref": "SmartBrand",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "acc",
+            "ref": "SmartAcc",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "stages",
+            "ref": "SmartStage",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "key",
+          "name",
+          "emoji",
+          "cat",
+          "brands",
+          "acc"
+        ],
+        "defaults": {
+          "diagramTitle": "''",
+          "stages": "const []"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

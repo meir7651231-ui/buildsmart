@@ -1,0 +1,34 @@
+{
+  "name": "_DateField",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "📅"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "📅"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 1"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "label",
+      "value",
+      "onPick"
+    ],
+    "untangle": []
+  }
+}

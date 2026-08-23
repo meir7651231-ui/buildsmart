@@ -1,0 +1,80 @@
+# GIANT Phase-2 · wizard-preview — a LIVE preview of the runtime OrgConfig
+# setup wizard (giant-system V5 · "🔌 אשף הקמת חברה"), ARMED with
+# ORG_CONFIG=true AND STUDIO=true on the CLEAN empty-shell profile (zero demo
+# content — you see a company set itself up from nothing, AND you can edit it
+# live). The wizard entry chain is NOT clean-gated (manager persona is
+# modOn(manager)=on by default; the wizard card rides kOrgConfigFlag, not the
+# profile), so ORG_CONFIG=true surfaces it on clean with no code change.
+#
+# STUDIO=true arms the existing WYSIWYG edit-live (directive "wizard = the
+# studio", slice-0). The clean preview has no Google login, so the owner-email
+# gate can never be proven there — edit_mode.dart opens edit for any viewer on
+# ANY board ONLY under the compile consts kStudioFlag (STUDIO=true, set here
+# alone) && kProfileRawShell (clean). A persistent Studio chrome (StudioOverlay)
+# gives a נווט⇄ערוך toggle (default navigate — every tap is normal navigation)
+# and a board selector, so the owner browses/edits every board freely and is
+# never trapped in edit-mode. The LIVE app (buildsmart, no STUDIO) tree-shakes
+# all of that out and keeps the un-spoofable owner gate byte-identical.
+#
+# rev: sm-s11b — rebuild for screen-management s0–s11: boards live, keyboard editor,
+# ✎ per-item rename, 🕸️ מאתר-על open on home+keyboard, AND the edit-trigger un-freeze:
+# LONG-PRESS the global keyboard FAB → live edit-mode, a ✎ lights above the cart-FAB
+# (no banner). Owner-only (#84) + kStudioFlag-gated ⇒ production/non-owner byte-identical.
+# s11b: nudged the ✎ gap 12→28px so it clears the cart's count-badge (was ~2px).
+#
+# Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
+# untouched. Prints the live link in the run summary.
+name: wizard-preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/whats-happening-LyY9G
+    paths:
+      - '.github/workflows/wizard-preview.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Gen version
+        run: bash scripts/gen_version.sh
+
+      - name: Build (clean empty-shell · ORG_CONFIG + STUDIO armed)
+        working-directory: app_flutter
+        run: >
+          flutter build web --release --base-href "/"
+          --dart-define=APP_PROFILE=clean
+          --dart-define=ORG_CONFIG=true
+          --dart-define=STUDIO=true
+
+      - name: Deploy to channel `wizard`
+        id: deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: buildsmart-b0b78
+          channelId: wizard
+
+      - name: Link in run summary
+        run: |
+          echo "## 🔌 אשף הקמת חברה — live preview (clean · STUDIO-armed)" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.deploy.outputs.details_url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "מנהל → טאב ניהול → כרטיס '🔌 אשף הקמת חברה' → ורטיקל · מודולים · רכיבים · שמור והפעל." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "עריכה-בחי (slice-0b): מעטפת-הסטודיו למעלה → מתג 'נווט ⇄ ערוך' (ברירת-מחדל נווט) · '🔀 בורד' להחלפת בורד · 'ערוך' → הקש על טקסט/כפתור לעריכה במקום." >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,389 @@
+{
+  "screen": "worker_safety_screen",
+  "source": "worker_safety_screen.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "WorkerSafetyScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🛡️ תיק בטיחות",
+            "registryId": "worker_safety_screen.appbar_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🎓 הוספת הדרכה",
+            "registryId": "worker_safety_screen.add_training_title",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📅"
+          },
+          {
+            "kind": "cfgText",
+            "text": "📄 צרף מסמך הדרכה (לא חובה)",
+            "registryId": "worker_safety_screen.attach_doc",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📄 מסמך צורף ✓",
+            "registryId": "worker_safety_screen.doc_attached",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_safety_screen.save_training",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💾 שמור הדרכה",
+            "registryId": "worker_safety_screen.save_training",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🪪 הוספת תעודה",
+            "registryId": "worker_safety_screen.add_cert_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📷 צרף צילום תעודה (לא חובה)",
+            "registryId": "worker_safety_screen.attach_photo",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📷 צילום צורף ✓",
+            "registryId": "worker_safety_screen.photo_attached",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_safety_screen.save_cert",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💾 שמור תעודה",
+            "registryId": "worker_safety_screen.save_cert",
+            "registryOk": true
+          }
+        ],
+        "registered": 11,
+        "unregistered": [
+          "📅"
+        ],
+        "summary": "registry 11 · mapped 11/11 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerTrainingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerCertsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "workerTrainingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showFullPhotoDialog",
+            "target": "showFullPhotoDialog"
+          },
+          {
+            "kind": "writes",
+            "via": "remove",
+            "target": "workerCertsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "writes",
+            "via": "remove",
+            "target": "workerTrainingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showDatePicker",
+            "target": "showDatePicker"
+          },
+          {
+            "kind": "writes",
+            "via": "add",
+            "target": "workerTrainingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "add",
+            "target": "workerCertsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "confirmDestructive",
+        "decodeDataUrlPhoto",
+        "pickTaskPhoto",
+        "setSheetState",
+        "sort"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_TrainingsCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "אין הדרכות רשומות עדיין — הוסף את הראשונה.",
+            "registryId": "worker_safety_screen.no_trainings",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "נתוני דמו — רישום הדרכות אמיתי יחובר עם חיבור השרת.",
+            "registryId": "worker_safety_screen.demo_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_safety_screen.add_training_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "➕ הוסף הדרכה",
+            "registryId": "worker_safety_screen.add_training_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "✅"
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "✅"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "onRemove",
+        "onSend",
+        "onView"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "trainings",
+          "onAdd",
+          "onSend",
+          "onView",
+          "onRemove"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CertsCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "אין תעודות בארנק עדיין — הוסף את הראשונה.",
+            "registryId": "worker_safety_screen.no_certs",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_safety_screen.add_cert_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "➕ הוסף תעודה",
+            "registryId": "worker_safety_screen.add_cert_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📷"
+          }
+        ],
+        "registered": 3,
+        "unregistered": [
+          "📷"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showFullPhotoRefDialog",
+            "target": "showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showFullPhotoRefDialog(context, cert.photo, label: cert.name)",
+            "effect": "open → showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "imageProviderForRef",
+        "onRemove"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "certs",
+          "onAdd",
+          "onRemove"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 14,
+    "total": 14,
+    "summary": "14/14",
+    "entries": [
+      {
+        "id": "worker_safety_screen.appbar_title",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.add_training_title",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.attach_doc",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.doc_attached",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.save_training",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.add_cert_title",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.attach_photo",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.photo_attached",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.save_cert",
+        "ok": true,
+        "atom": "WorkerSafetyScreen"
+      },
+      {
+        "id": "worker_safety_screen.no_trainings",
+        "ok": true,
+        "atom": "_TrainingsCard"
+      },
+      {
+        "id": "worker_safety_screen.demo_hint",
+        "ok": true,
+        "atom": "_TrainingsCard"
+      },
+      {
+        "id": "worker_safety_screen.add_training_btn",
+        "ok": true,
+        "atom": "_TrainingsCard"
+      },
+      {
+        "id": "worker_safety_screen.no_certs",
+        "ok": true,
+        "atom": "_CertsCard"
+      },
+      {
+        "id": "worker_safety_screen.add_cert_btn",
+        "ok": true,
+        "atom": "_CertsCard"
+      }
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "matched": 14,
+  "total": 14,
+  "summary": "14/14",
+  "entries": [
+    {
+      "id": "worker_safety_screen.appbar_title",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.add_training_title",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.attach_doc",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.doc_attached",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.save_training",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.add_cert_title",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.attach_photo",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.photo_attached",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.save_cert",
+      "ok": true,
+      "atom": "WorkerSafetyScreen"
+    },
+    {
+      "id": "worker_safety_screen.no_trainings",
+      "ok": true,
+      "atom": "_TrainingsCard"
+    },
+    {
+      "id": "worker_safety_screen.demo_hint",
+      "ok": true,
+      "atom": "_TrainingsCard"
+    },
+    {
+      "id": "worker_safety_screen.add_training_btn",
+      "ok": true,
+      "atom": "_TrainingsCard"
+    },
+    {
+      "id": "worker_safety_screen.no_certs",
+      "ok": true,
+      "atom": "_CertsCard"
+    },
+    {
+      "id": "worker_safety_screen.add_cert_btn",
+      "ok": true,
+      "atom": "_CertsCard"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+name: atom_decompose
+description: >-
+  Automatic atom-decomposer for BuildSmart screens. Reads one screen .dart file
+  and emits a 3-layer decomposition (object · connections · behaviour) per atom
+  plus a registry reconciliation, in the knowledge/screens/<screen>/ format.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  analyzer: '>=6.4.0 <10.0.0'
+  path: ^1.9.0
+
+dev_dependencies:
+  test: ^1.25.0

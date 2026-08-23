@@ -1,0 +1,524 @@
+{
+  "module": "offline_cache",
+  "source": "lib/state/offline_cache.dart",
+  "atomCount": 8,
+  "caches": [
+    "offlineCacheProvider"
+  ],
+  "atoms": [
+    {
+      "fn": "CacheEntry.isFresh",
+      "kind": "method",
+      "object": {
+        "signature": "(DateTime now) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "savedAt"
+          },
+          {
+            "kind": "field",
+            "name": "ttl"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "now.difference(savedAt) < ttl"
+          }
+        ]
+      },
+      "floor": [
+        "difference"
+      ],
+      "contract": {
+        "input": "(DateTime now)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CacheEntry.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "savedAt"
+          },
+          {
+            "kind": "field",
+            "name": "ttl"
+          },
+          {
+            "kind": "field",
+            "name": "value"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'v' : value, 'at' : savedAt.toIso8601String(), 'ttlMs' : ttl.inMilliseconds}"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineCacheNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(_key)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _userTouched → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw != null"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "map"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineCacheNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "OfflineCacheNotifier.clearAll",
+          "OfflineCacheNotifier.put",
+          "OfflineCacheNotifier.sweep"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setString(_key, jsonEncode(state.map((k, v) => MapEntry(k, v.toJson()))))"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "getInstance",
+        "jsonEncode",
+        "map",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineCacheNotifier.get",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String key, {DateTime? now}) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "entry = state[key]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if entry == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "entry.isFresh(now ?? DateTime.now()) ? entry.value : null"
+          }
+        ]
+      },
+      "floor": [
+        "isFresh",
+        "now"
+      ],
+      "contract": {
+        "input": "(String key, {DateTime? now})",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if entry == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "entry == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineCacheNotifier.put",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String key, String value, {Duration ttl = const Duration(hours: 24)}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "from"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "init",
+            "detail": "next = Map<String, CacheEntry>.from(state)"
+          },
+          {
+            "kind": "effect",
+            "detail": "next[key] = CacheEntry(value: value, savedAt: DateTime.now(), ttl: ttl)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "CacheEntry",
+        "Map",
+        "now"
+      ],
+      "contract": {
+        "input": "(String key, String value, {Duration ttl = const Duration(hours: 24)})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineCacheNotifier.sweep",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({DateTime? now}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "at = now ?? DateTime.now()"
+          },
+          {
+            "kind": "init",
+            "detail": "survivors = <String, CacheEntry>{}"
+          },
+          {
+            "kind": "compute",
+            "detail": "dropped = 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "state.forEach((k, v) {if (v.isFresh(at)) {survivors[k] = v;} else {dropped++;}})"
+          },
+          {
+            "kind": "branch",
+            "detail": "if dropped > 0"
+          },
+          {
+            "kind": "return",
+            "detail": "dropped"
+          }
+        ]
+      },
+      "floor": [
+        "forEach",
+        "isFresh",
+        "now"
+      ],
+      "contract": {
+        "input": "({DateTime? now})",
+        "output": "int",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineCacheNotifier.clearAll",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "precond",
+            "detail": "if state.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = const {}"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

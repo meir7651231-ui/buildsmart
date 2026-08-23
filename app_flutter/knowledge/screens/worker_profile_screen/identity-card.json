@@ -1,0 +1,61 @@
+{
+  "name": "_IdentityCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_profile_screen.demo",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "דמו",
+        "registryId": "worker_profile_screen.demo",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🦺"
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "🦺"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showWorkerProfileEditSheet",
+        "target": "showWorkerProfileEditSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showWorkerProfileEditSheet(context, session: session)",
+        "effect": "open → showWorkerProfileEditSheet"
+      }
+    ]
+  },
+  "floor": [
+    "imageProviderForRef"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "session",
+      "profile",
+      "specialty"
+    ],
+    "untangle": []
+  }
+}

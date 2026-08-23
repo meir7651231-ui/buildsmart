@@ -1,0 +1,32 @@
+{
+  "matched": 5,
+  "total": 5,
+  "summary": "5/5",
+  "entries": [
+    {
+      "id": "consent_modal.t01",
+      "ok": true,
+      "atom": "_ConsentDialog"
+    },
+    {
+      "id": "consent_modal.t02",
+      "ok": true,
+      "atom": "_ConsentDialog"
+    },
+    {
+      "id": "consent_modal.t03",
+      "ok": true,
+      "atom": "_ConsentDialog"
+    },
+    {
+      "id": "consent_modal.t04",
+      "ok": true,
+      "atom": "_ConsentDialog"
+    },
+    {
+      "id": "consent_modal.t05",
+      "ok": true,
+      "atom": "_ConsentDialog"
+    }
+  ]
+}

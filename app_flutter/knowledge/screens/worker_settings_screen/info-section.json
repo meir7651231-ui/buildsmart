@@ -1,0 +1,57 @@
+{
+  "name": "_InfoSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "תנאי שימוש",
+        "registryId": "worker_settings_screen.terms",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מדיניות פרטיות",
+        "registryId": "worker_settings_screen.privacy",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "LegalScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.terms))",
+        "effect": "navigate → LegalScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.privacy))",
+        "effect": "navigate → LegalScreen"
+      }
+    ]
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "matched": 4,
+  "total": 4,
+  "summary": "4/4",
+  "entries": [
+    {
+      "id": "courier.settings.title",
+      "ok": true,
+      "atom": "CourierSettingsScreen"
+    },
+    {
+      "id": "courier_settings_screen.soon",
+      "ok": true,
+      "atom": "_CourierRegionSection"
+    },
+    {
+      "id": "courier.info.terms",
+      "ok": true,
+      "atom": "_CourierInfoSection"
+    },
+    {
+      "id": "courier.info.privacy",
+      "ok": true,
+      "atom": "_CourierInfoSection"
+    }
+  ]
+}

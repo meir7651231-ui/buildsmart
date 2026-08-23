@@ -1,0 +1,57 @@
+{
+  "name": "_RolePickerCard",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "מי אתה?",
+        "registryId": "role_picker_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בחר תפקיד כדי להיכנס",
+        "registryId": "role_picker_sheet.t02",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "manager"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "supplier"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "courier"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "worker"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

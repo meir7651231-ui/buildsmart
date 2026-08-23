@@ -1,0 +1,60 @@
+{
+  "name": "_InternalCardHero",
+  "role": "section",
+  "section": "internalCard",
+  "variant": "preview",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "כרטיס פנימי"
+      },
+      {
+        "kind": "text",
+        "text": "🃏 כרטיס פנימי"
+      },
+      {
+        "kind": "text",
+        "text": "כל המנוע במקום אחד — 13 סקציות"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "כרטיס פנימי",
+      "🃏 כרטיס פנימי",
+      "כל המנוע במקום אחד — 13 סקציות"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 3"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "MaterialPageRoute<void>(builder: (_) …"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => Scaffold(a…",
+        "effect": "navigate → MaterialPageRoute<void>(builder: (_) …"
+      }
+    ]
+  },
+  "floor": [
+    "catalogProductForSku",
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

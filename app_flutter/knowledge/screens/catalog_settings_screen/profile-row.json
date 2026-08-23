@@ -1,0 +1,49 @@
+{
+  "name": "_ProfileRow",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "👤"
+      },
+      {
+        "kind": "cfgText",
+        "text": "הפרופיל שלי",
+        "registryId": "catalog_settings_screen.t06",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [
+      "👤"
+    ],
+    "summary": "registry 1 · mapped 1/1 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "ProfileScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(ProfileScreen.route())",
+        "effect": "navigate → ProfileScreen"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "matched": 11,
+  "total": 11,
+  "summary": "11/11",
+  "entries": [
+    {
+      "id": "courier.reports.title",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier.reports.subtitle",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier_reports_tab.t01",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier_reports_tab.t02",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier.reports.history_title",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier.reports.empty_title",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier_reports_tab.t03",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier.reports.send_report",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier_reports_tab.t04",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier_reports_tab.t05",
+      "ok": true,
+      "atom": "CourierReportsTab"
+    },
+    {
+      "id": "courier_reports_tab.t06",
+      "ok": true,
+      "atom": "_DeliveredCard"
+    }
+  ]
+}

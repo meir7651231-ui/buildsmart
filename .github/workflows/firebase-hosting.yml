@@ -1,0 +1,121 @@
+name: Deploy Flutter Web to Firebase Hosting
+
+on:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+  workflow_dispatch:
+
+concurrency:
+  group: firebase-hosting
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Install Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored)
+        run: bash scripts/gen_version.sh
+
+      - name: Build Flutter web (root base-href for custom domain)
+        working-directory: app_flutter
+        # --dart-define=ENABLE_WORD_FINDER=true turns ON the 'מאתר חכם' word-finder
+        # for the buildsmart-il.com demo build ONLY (OWNER-REVIEW). Scoped here, so
+        # the app / Android / preview builds stay default-off. Reversible: remove
+        # the flag to hide the word-finder again.
+        # --dart-define=KB_LIVE_MIRROR=true turns ON the live-mirror keyboard: the
+        # prediction row + tools mirror the current tab/drill across all 4 tabs
+        # (קטלוג/מחלקות/עדכונים/חנות). OWNER-REQUESTED live (22/6). Reversible:
+        # remove the flag to fall back to byte-identical (the mirror tree-shakes).
+        # --dart-define=KB_GLOBAL=true turns ON the unified "keyboard on every
+        # screen" — the contractor-board monster (global floating overlay + the
+        # dive engine), swarm-audited (8 lens fixes) + full GATE-PASS + merged.
+        # OWNER cut-over: deploy all fixes to buildsmart-il.com (1/7). Reversible:
+        # remove the flag to fall back to byte-identical (the overlay tree-shakes).
+        # --dart-define=GLOBAL_SEARCH=true turns ON the unified global search:
+        # typing the keyboard row searches EVERY domain (products · screens · chats ·
+        # orders · notifications · tasks · customers) — navigate + open, with an
+        # "עוד…" overflow. Reversible: drop the flag → byte-identical (tree-shaken).
+        # --dart-define=PLAIN_DIVE=true turns ON the layman 'מאתר פשוט' finder (the
+        # plain 4-ring dictionary drill) running ALONGSIDE 'מאתר חכם'. OWNER-REQUESTED
+        # live (10/7). Reversible: drop the flag → byte-identical. MUST match web-deploy.yml.
+        # --dart-define=AXIS_DIVE=true turns ON the owner's 'מאתר-על' axis-dive wheel
+        # (pick any of the 17 catalog axes in any order + a LIVE product-photo gallery
+        # under the wheel). OWNER-REQUESTED live (12/7). MUST match web-deploy.yml.
+        # ── STUDIO GO-LIVE SEAM (dormant by default) ─────────────────────────
+        # ${{ vars.STUDIO_DART_DEFINES }} appends the Studio/Pillar flags for a
+        # STAGED, owner-controlled go-live. UNSET (default) → empty → BYTE-IDENTICAL
+        # to today's live (the Studio surface tree-shakes out). Arm by setting the
+        # repo variable STUDIO_DART_DEFINES to a stage's defines (knowledge/STUDIO_GA.md
+        # §3). Persists across re-deploys; reversible by clearing it. MUST match
+        # web-deploy.yml (same live race — else whichever deploy wins ships a mismatch).
+        # CATALOG_BASE_URL + STORE_COMPARISON_UI = the catalog-to-server GO-LIVE. With
+        # useFirebaseBackend already ON (via STUDIO_DART_DEFINES), a non-empty
+        # CATALOG_BASE_URL flips useServerCatalog TRUE → the catalog reads Firestore
+        # (guests anon-sign-in; a server blip falls back to the bundled catalog — C5.5).
+        # STORE_COMPARISON_UI shows the product-sheet store comparison. Reversible: drop
+        # these two flags → the catalog returns to the bundled const. MUST match web-deploy.yml.
+        # --dart-define=UID_SCOPED_QUERIES=true: #8 phase 3a — arms the UID-SCOPED
+        # Firestore listens (orders + the per-user chatThreads listen), so per-user
+        # DM threads are readable live under the participant-scoped rules. MUST match
+        # web-deploy.yml (same live race). Reversible: drop the flag → the
+        # whole-collection listens return, byte-identical to today.
+        # --dart-define=CLOUD_PHOTOS=true: user-uploaded photos → Cloudflare R2 via
+        # getUploadUrl instead of inline base64. OWNER-ARMED (R2 provisioned +
+        # getUploadUrl deployed). Non-owner-safe: OFF byte-identical base64; ON
+        # still falls back to base64 if R2 is unreachable. MUST match web-deploy.yml.
+        # --dart-define=EDGE_PROXY=true (12.8): route Firestore through the
+        # approved domain (fs.buildsmart-il.com → Cloudflare Worker → Firestore)
+        # so filtered lines (Netfree etc.) never see googleapis. No active users
+        # yet ⇒ safe to validate live; revert = remove this one flag. MUST match
+        # web-deploy.yml.
+        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=AXIS_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true --dart-define=CATALOG_BASE_URL=https://buildsmart-il.com --dart-define=STORE_COMPARISON_UI=true --dart-define=ORDER_EMAIL=true --dart-define=UID_SCOPED_QUERIES=true --dart-define=EMAIL_PASSWORD_AUTH=true --dart-define=ORG_CONFIG=true --dart-define=CLOUD_PHOTOS=true --dart-define=INTERNAL_CARD=true --dart-define=EDGE_PROXY=true --dart-define=FITTING_ENGINE=true --dart-define=FITTING_ENGINE_INTEL=true --dart-define=USER_DATA_SERVER=true --dart-define=TASKS_SERVER=true --dart-define=ACCESS_LOCK=true --dart-define=ORG_CONFIG_LIVE=true ${{ vars.STUDIO_DART_DEFINES }}
+
+      - name: 🚀 Launch flags → run summary (verify backend / catalog / studio)
+        # Group-2 launch-verify (SSOT close-web-for-launch). The static defines are
+        # visible in the Build step above; the INVISIBLE part is the repo var
+        # STUDIO_DART_DEFINES (real backend + studio arming). Echo it so every live
+        # deploy self-documents its effective launch flags — auditable at a glance.
+        run: |
+          {
+            echo "### 🚀 Live launch flags — verification"
+            echo ""
+            echo "**Server catalog (static):** \`CATALOG_BASE_URL=https://buildsmart-il.com\` + \`STORE_COMPARISON_UI=true\`"
+            echo ""
+            echo "**Backend + studio arming — \`vars.STUDIO_DART_DEFINES\` expanded to:**"
+            echo '```'
+            echo "${{ vars.STUDIO_DART_DEFINES }}"
+            echo '```'
+            echo ""
+            echo "- Real backend ⇐ \`USE_FIREBASE_BACKEND=true\` must appear above."
+            echo "- Server catalog ⇐ non-empty \`CATALOG_BASE_URL\` + backend ON ⇒ \`useServerCatalog=TRUE\`."
+            echo "- Studio ⇐ \`STUDIO=true\` above arms the seam; owner-gating (kStudioFlag + owner #84) is enforced in-app."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deploy to Firebase Hosting (live channel)
+        # Redundant with web-deploy.yml (firebase-tools CLI), which already deploys
+        # this same live site and is idempotent. A byte-identical rebuild yields the
+        # same version hash → this action returns 400 "version already active" (a
+        # harmless no-op re-deploy). Non-blocking so the redundant duplicate can't
+        # red the branch; the real live deploy is covered by web-deploy.yml (a real
+        # deploy change still produces a new hash and deploys normally).
+        continue-on-error: true
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: buildsmart-b0b78
+          channelId: live

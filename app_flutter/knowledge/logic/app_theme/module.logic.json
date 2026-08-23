@@ -1,0 +1,297 @@
+{
+  "module": "app_theme",
+  "source": "lib/theme/app_theme.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "bsOnAccent",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context) -> Color",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Theme.of(context).extension<BsSemanticColors>()?.onAccent ?? Colors.white"
+          }
+        ]
+      },
+      "floor": [
+        "extension",
+        "of"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Color",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "bsSuccess",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context) -> Color",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Theme.of(context).extension<BsSemanticColors>()?.success ?? const Color(0xFF22C55E)"
+          }
+        ]
+      },
+      "floor": [
+        "Color",
+        "extension",
+        "of"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Color",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppTheme.dark",
+      "kind": "method",
+      "object": {
+        "signature": "({bool highContrast = false, CfgTheme cfg = CfgTheme.fallback}) -> ThemeData",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_build",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_build(Brightness.dark, highContrast: highContrast, cfg: cfg)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "({bool highContrast = false, CfgTheme cfg = CfgTheme.fallback})",
+        "output": "ThemeData",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppTheme.light",
+      "kind": "method",
+      "object": {
+        "signature": "({bool highContrast = false, CfgTheme cfg = CfgTheme.fallback}) -> ThemeData",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_build",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_build(Brightness.light, highContrast: highContrast, cfg: cfg)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "({bool highContrast = false, CfgTheme cfg = CfgTheme.fallback})",
+        "output": "ThemeData",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AppTheme._build",
+      "kind": "method",
+      "object": {
+        "signature": "(Brightness b, {bool highContrast = false, CfgTheme cfg = CfgTheme.fallback}) -> ThemeData",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AppTheme.dark",
+          "AppTheme.light"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "isDark = b == Brightness.dark"
+          },
+          {
+            "kind": "compute",
+            "detail": "scheme = ColorScheme.fromSeed(seedColor: cfg.brand, brightness: b, primary: cfg.brand, surface: is…"
+          },
+          {
+            "kind": "compute",
+            "detail": "ink = highContrast ? (isDark ? Colors.white : Colors.black) : (isDark ? BsTokens.inkDark : Colo…"
+          },
+          {
+            "kind": "return",
+            "detail": "ThemeData(useMaterial3: true, brightness: b, colorScheme: scheme, scaffoldBackgroundColor…"
+          }
+        ]
+      },
+      "floor": [
+        "BsSemanticColors",
+        "FloatingActionButtonThemeData",
+        "TextStyle",
+        "TextTheme",
+        "ThemeData",
+        "fromSeed"
+      ],
+      "contract": {
+        "input": "(Brightness b, {bool highContrast = false, CfgTheme cfg = CfgTheme.fallback})",
+        "output": "ThemeData",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BsSemanticColors.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({Color? onAccent, Color? success}) -> BsSemanticColors",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "BsSemanticColors(onAccent: onAccent ?? this.onAccent, success: success ?? this.success)"
+          }
+        ]
+      },
+      "floor": [
+        "BsSemanticColors"
+      ],
+      "contract": {
+        "input": "({Color? onAccent, Color? success})",
+        "output": "BsSemanticColors",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BsSemanticColors.lerp",
+      "kind": "method",
+      "object": {
+        "signature": "(ThemeExtension<BsSemanticColors>? other, double t) -> BsSemanticColors",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "onAccent"
+          },
+          {
+            "kind": "field",
+            "name": "success"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if other is! BsSemanticColors → return this"
+          },
+          {
+            "kind": "return",
+            "detail": "BsSemanticColors(onAccent: Color.lerp(onAccent, other.onAccent, t)!, success: Color.lerp(…"
+          }
+        ]
+      },
+      "floor": [
+        "BsSemanticColors",
+        "lerp"
+      ],
+      "contract": {
+        "input": "(ThemeExtension<BsSemanticColors>? other, double t)",
+        "output": "BsSemanticColors",
+        "purity": "pure",
+        "precond": [
+          "if other is! BsSemanticColors → return this"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

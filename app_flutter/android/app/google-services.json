@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "483064122180",
+    "project_id": "buildsmart-b0b78",
+    "storage_bucket": "buildsmart-b0b78.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483064122180:android:e9d240f3251e7a33ca6511",
+        "android_client_info": {
+          "package_name": "com.buildsmart.buildsmart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "483064122180-4cg1m1cmevr5pcenq0q9v57chfkn5e0d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.buildsmart.buildsmart",
+            "certificate_hash": "68f9f13f638a0caa6d57e46ac2a6b3c24d576852"
+          }
+        },
+        {
+          "client_id": "483064122180-avbsbpsodcou34a4dv8ateqcsgfgegjs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSkrlVrWhHdm-2VasEwae3V6S9v7mrslg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "483064122180-avbsbpsodcou34a4dv8ateqcsgfgegjs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "483064122180-02de91qu152e48qgk07qgr4i48lkfeqb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.buildsmart.buildsmart"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

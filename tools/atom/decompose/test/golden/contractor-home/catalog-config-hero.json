@@ -1,0 +1,51 @@
+{
+  "name": "_CatalogConfigHero",
+  "role": "section",
+  "section": "catalogConfig",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🎛️ קטלוג מגדיר"
+      },
+      {
+        "kind": "text",
+        "text": "כרטיס-הגדרה לכל מוצר — תמונה + גלגלים"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "🎛️ קטלוג מגדיר",
+      "כרטיס-הגדרה לכל מוצר — תמונה + גלגלים"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "CatalogConfigScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Cata…",
+        "effect": "navigate → CatalogConfigScreen"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

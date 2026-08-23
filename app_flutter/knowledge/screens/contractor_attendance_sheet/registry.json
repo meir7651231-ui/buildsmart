@@ -1,0 +1,37 @@
+{
+  "matched": 6,
+  "total": 6,
+  "summary": "6/6",
+  "entries": [
+    {
+      "id": "contractor_attendance_sheet.header",
+      "ok": true,
+      "atom": "_ContractorAttendanceSheet"
+    },
+    {
+      "id": "contractor_attendance_sheet.subtitle",
+      "ok": true,
+      "atom": "_ContractorAttendanceSheet"
+    },
+    {
+      "id": "contractor_attendance_sheet.empty_present",
+      "ok": true,
+      "atom": "_ContractorAttendanceSheet"
+    },
+    {
+      "id": "contractor_attendance_sheet.today",
+      "ok": true,
+      "atom": "_ContractorAttendanceSheet"
+    },
+    {
+      "id": "contractor_attendance_sheet.empty_today",
+      "ok": true,
+      "atom": "_ContractorAttendanceSheet"
+    },
+    {
+      "id": "contractor_attendance_sheet.location",
+      "ok": true,
+      "atom": "_PresentRow"
+    }
+  ]
+}

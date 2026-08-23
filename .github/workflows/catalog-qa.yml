@@ -49,6 +49,7 @@ jobs:
         working-directory: app_flutter
         run: |
           flutter pub get
+          bash ../scripts/gen_version.sh   # version.g.dart (gitignored — לקח #72)
           # info/warning lints קיימים בקוד; חוסמים רק על error אמיתי
           flutter analyze 2>&1 | tee /tmp/an.txt || true
           if grep -qE "error •" /tmp/an.txt; then

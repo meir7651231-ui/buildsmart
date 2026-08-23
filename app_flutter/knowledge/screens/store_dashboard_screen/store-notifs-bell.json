@@ -1,0 +1,31 @@
+{
+  "name": "_StoreNotifsBell",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "workerNotifsProvider.select((m) => m[username] ?? const <WorkerNotif>[])"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "username"
+    ],
+    "untangle": []
+  }
+}

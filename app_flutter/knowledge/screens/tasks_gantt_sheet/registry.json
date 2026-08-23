@@ -1,0 +1,32 @@
+{
+  "matched": 5,
+  "total": 5,
+  "summary": "5/5",
+  "entries": [
+    {
+      "id": "tasks_gantt_sheet.header",
+      "ok": true,
+      "atom": "_TasksGanttSheet"
+    },
+    {
+      "id": "tasks_gantt_sheet.subtitle",
+      "ok": true,
+      "atom": "_TasksGanttSheet"
+    },
+    {
+      "id": "tasks_gantt_sheet.empty",
+      "ok": true,
+      "atom": "_TasksGanttSheet"
+    },
+    {
+      "id": "tasks_gantt_sheet.timeline",
+      "ok": true,
+      "atom": "_TasksGanttSheet"
+    },
+    {
+      "id": "tasks_gantt_sheet.unscheduled_note",
+      "ok": true,
+      "atom": "_TasksGanttSheet"
+    }
+  ]
+}

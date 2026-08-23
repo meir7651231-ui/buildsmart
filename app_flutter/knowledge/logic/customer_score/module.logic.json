@@ -1,0 +1,197 @@
+{
+  "module": "customer_score",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/customer_score.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "_band",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int value, int high, int mid) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "scoreCustomer"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "value >= high ? 2 : (value >= mid ? 1 : 0)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int value, int high, int mid)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "scoreCustomer",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RfmInput input) -> CustomerScore",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRfmFreqHigh"
+          },
+          {
+            "kind": "const",
+            "name": "kRfmFreqMid"
+          },
+          {
+            "kind": "const",
+            "name": "kRfmMoneyHigh"
+          },
+          {
+            "kind": "const",
+            "name": "kRfmMoneyMid"
+          },
+          {
+            "kind": "const",
+            "name": "kRfmRecentDays"
+          },
+          {
+            "kind": "const",
+            "name": "kRfmStaleDays"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_band",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "f = _band(input.orderCount, kRfmFreqHigh, kRfmFreqMid)"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = _band(input.totalSpend, kRfmMoneyHigh, kRfmMoneyMid)"
+          },
+          {
+            "kind": "compute",
+            "detail": "rd = input.recencyDays"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if rd == null"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasR = r >= 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "points = f + m + (hasR ? r : 0)"
+          },
+          {
+            "kind": "compute",
+            "detail": "maxPoints = hasR ? 6 : 4"
+          },
+          {
+            "kind": "compute",
+            "detail": "ratio = maxPoints == 0 ? 0.0 : points / maxPoints"
+          },
+          {
+            "kind": "compute",
+            "detail": "tier = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if ratio >= 0.75"
+          },
+          {
+            "kind": "compute",
+            "detail": "atRisk = hasR && r == 0 && (f + m) >= 3"
+          },
+          {
+            "kind": "return",
+            "detail": "CustomerScore(r: r, f: f, m: m, points: points, maxPoints: maxPoints, tier: tier, atRisk:…"
+          }
+        ]
+      },
+      "floor": [
+        "CustomerScore"
+      ],
+      "contract": {
+        "input": "(RfmInput input)",
+        "output": "CustomerScore",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CustomerScore.ratio",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "maxPoints"
+          },
+          {
+            "kind": "field",
+            "name": "points"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "maxPoints == 0 ? 0 : points / maxPoints"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

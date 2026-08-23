@@ -1,0 +1,618 @@
+{
+  "module": "connection_schema",
+  "source": "/home/user/buildsmart/app_flutter/lib/domain/connection_schema.dart",
+  "entityCount": 8,
+  "entities": [
+    {
+      "entity": "SizeMatch",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "exactSame",
+            "type": "SizeMatch",
+            "required": false
+          },
+          {
+            "name": "anyToAny",
+            "type": "SizeMatch",
+            "required": false
+          },
+          {
+            "name": "tableLookup",
+            "type": "SizeMatch",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 3 values: exactSame · anyToAny · tableLookup"
+        ]
+      }
+    },
+    {
+      "entity": "RuleSeverity",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "info",
+            "type": "RuleSeverity",
+            "required": false
+          },
+          {
+            "name": "warning",
+            "type": "RuleSeverity",
+            "required": false
+          },
+          {
+            "name": "critical",
+            "type": "RuleSeverity",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 3 values: info · warning · critical"
+        ]
+      }
+    },
+    {
+      "entity": "ConnectorType",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "sizeValues",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "systemId",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "systemId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "nameHe"
+        ],
+        "defaults": {
+          "sizeValues": "const []"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SystemDef",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "color",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "nameHe",
+          "color"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ProductEnd",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "connectorTypeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "sizeValue",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "connectorTypeId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "connectorTypeId",
+          "sizeValue"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ProductConnectorSpec",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "productSku",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "ends",
+            "type": "List<ProductEnd>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "materialId",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "ratingHe",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "envelope",
+            "type": "Map<String, num>",
+            "required": false,
+            "collection": true,
+            "default": "const {}"
+          },
+          {
+            "name": "materialGroupId",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "ends",
+            "ref": "ProductEnd",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "materialId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "materialGroupId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "productSku",
+          "tradeId"
+        ],
+        "defaults": {
+          "ends": "const []",
+          "envelope": "const {}"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "CompatibilityRule",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "aTypeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "bTypeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "sizeMatch",
+            "type": "SizeMatch",
+            "required": true
+          },
+          {
+            "name": "sizeTable",
+            "type": "List<List<String>>?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "methodLabelHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "onMismatch",
+            "type": "RuleSeverity",
+            "required": false,
+            "default": "RuleSeverity.warning"
+          },
+          {
+            "name": "materialGroup",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "incompatibleMaterialGroups",
+            "type": "List<String>?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "aTypeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "bTypeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "sizeMatch",
+            "ref": "SizeMatch",
+            "kind": "embed"
+          },
+          {
+            "field": "sizeTable",
+            "ref": "List<String>",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "onMismatch",
+            "ref": "RuleSeverity",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "aTypeId",
+          "bTypeId",
+          "sizeMatch",
+          "methodLabelHe"
+        ],
+        "defaults": {
+          "onMismatch": "RuleSeverity.warning"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "CompletionRule",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tradeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "whenInLineHasTypeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "requireTypeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "whyHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "severity",
+            "type": "RuleSeverity",
+            "required": false,
+            "default": "RuleSeverity.warning"
+          },
+          {
+            "name": "incompatibleMaterialGroups",
+            "type": "List<String>?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "requiredInterposerWhyHe",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "tradeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "whenInLineHasTypeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "requireTypeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "severity",
+            "ref": "RuleSeverity",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson",
+          "toJson"
+        ],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "tradeId",
+          "whenInLineHasTypeId",
+          "requireTypeId",
+          "whyHe"
+        ],
+        "defaults": {
+          "severity": "RuleSeverity.warning"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

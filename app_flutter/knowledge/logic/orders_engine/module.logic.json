@@ -1,0 +1,1181 @@
+{
+  "module": "orders_engine",
+  "source": "/home/user/buildsmart/app_flutter/lib/state/orders_engine.dart",
+  "atomCount": 18,
+  "caches": [
+    "kOrdersEngineSeed"
+  ],
+  "atoms": [
+    {
+      "fn": "OrderLineItem.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "price"
+          },
+          {
+            "kind": "field",
+            "name": "qty"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'name' : name, 'emoji' : emoji, 'qty' : qty, 'price' : price}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Order.isOpen",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "stage"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "stage != 'delivered'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Order.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? stage, List<OrderLineItem>? lines, String? shipTo, String? notes, String? storeUid, String? courierUid, String? customerPhone, String? customerEmail}) -> Order",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "contractorUid"
+          },
+          {
+            "kind": "field",
+            "name": "createdAt"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "items"
+          },
+          {
+            "kind": "field",
+            "name": "orgId"
+          },
+          {
+            "kind": "field",
+            "name": "site"
+          },
+          {
+            "kind": "field",
+            "name": "sum"
+          },
+          {
+            "kind": "field",
+            "name": "who"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Order(id: id, who: who, site: site, items: items, sum: sum, stage: stage ?? this.stage, c…"
+          }
+        ]
+      },
+      "floor": [
+        "Order"
+      ],
+      "contract": {
+        "input": "({String? stage, List<OrderLineItem>? lines, String? shipTo, String? notes, String? storeUid, String? courierUid, String? customerPhone, String? customerEmail})",
+        "output": "Order",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Order.toManagerOrder",
+      "kind": "method",
+      "object": {
+        "signature": "() -> ManagerOrder",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "items"
+          },
+          {
+            "kind": "field",
+            "name": "site"
+          },
+          {
+            "kind": "field",
+            "name": "stage"
+          },
+          {
+            "kind": "field",
+            "name": "sum"
+          },
+          {
+            "kind": "field",
+            "name": "who"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ManagerOrder(id: id, who: who, site: site, items: items, sum: sum, stage: stage)"
+          }
+        ]
+      },
+      "floor": [
+        "ManagerOrder"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "ManagerOrder",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Order.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "contractorUid"
+          },
+          {
+            "kind": "field",
+            "name": "courierUid"
+          },
+          {
+            "kind": "field",
+            "name": "createdAt"
+          },
+          {
+            "kind": "field",
+            "name": "customerEmail"
+          },
+          {
+            "kind": "field",
+            "name": "customerPhone"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "items"
+          },
+          {
+            "kind": "field",
+            "name": "lines"
+          },
+          {
+            "kind": "field",
+            "name": "notes"
+          },
+          {
+            "kind": "field",
+            "name": "orgId"
+          },
+          {
+            "kind": "field",
+            "name": "shipTo"
+          },
+          {
+            "kind": "field",
+            "name": "site"
+          },
+          {
+            "kind": "field",
+            "name": "stage"
+          },
+          {
+            "kind": "field",
+            "name": "storeUid"
+          },
+          {
+            "kind": "field",
+            "name": "sum"
+          },
+          {
+            "kind": "field",
+            "name": "who"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'who' : who, 'site' : site, 'items' : items, 'sum' : sum, 'stage' : stage, if…"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toIso8601String",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.bindRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(FirebaseOrdersRepository remote) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_refreshFromRemote",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if identical(_remote, remote) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_remote?.removeListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_remote = remote"
+          },
+          {
+            "kind": "effect",
+            "detail": "remote.addListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_refreshFromRemote()"
+          }
+        ]
+      },
+      "floor": [
+        "addListener",
+        "identical",
+        "removeListener"
+      ],
+      "contract": {
+        "input": "(FirebaseOrdersRepository remote)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if identical(_remote, remote) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier._refreshFromRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "OrdersEngineNotifier.bindRemote"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r == null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = r.all()"
+          }
+        ]
+      },
+      "floor": [
+        "all"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if r == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.dispose",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_remote?.removeListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "dispose",
+        "removeListener"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOrdersEngineKey"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "add",
+        "debugPrint",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "markLoaded",
+        "seedIfUnloaded"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.persistState",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOrdersEngineKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "map",
+        "setString",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier._nextId",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "OrdersEngineNotifier.placeOrder"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "re = RegExp(r'^BS-(\\d+)$')"
+          },
+          {
+            "kind": "compute",
+            "detail": "maxN = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final o in state"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = re.firstMatch(o.id)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if m != null"
+          },
+          {
+            "kind": "return",
+            "detail": "maxN > 0 ? 'BS-${maxN + 1}' : 'BS-${DateTime.now().millisecondsSinceEpoch}'"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "firstMatch",
+        "group",
+        "now",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.placeOrder",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String who, required String site, required int items, required int sum, String? id, DateTime? createdAt, List<OrderLineItem> lines = const [], String shipTo = '', String notes = '', String contractorUid = '', String orgId = '', String customerPhone = '', String customerEmail = ''}) -> Order",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kManagerOrderFlow"
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_nextId",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r != null → return r.placeOrder(who: who, site: site, items: items, sum: sum, id: id, createdAt: createdAt, …"
+          },
+          {
+            "kind": "compute",
+            "detail": "order = Order(id: id ?? _nextId(), who: who, site: site, items: items, sum: sum, stage: kManagerO…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [order, ...state]"
+          },
+          {
+            "kind": "return",
+            "detail": "order"
+          }
+        ]
+      },
+      "floor": [
+        "Order",
+        "now",
+        "placeOrder"
+      ],
+      "contract": {
+        "input": "({required String who, required String site, required int items, required int sum, String? id, DateTime? createdAt, List<OrderLineItem> lines = const [], String shipTo = '', String notes = '', String contractorUid = '', String orgId = '', String customerPhone = '', String customerEmail = ''})",
+        "output": "Order",
+        "purity": "side-effecting",
+        "precond": [
+          "if r != null → return r.placeOrder(who: who, site: site, items: items, sum: sum, id: id, createdAt: createdAt, …"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.advance",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String orderId) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kManagerOrderFlow"
+          },
+          {
+            "kind": "field",
+            "name": "_functions"
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "serverCallables"
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_advanceViaCallable",
+            "module": true
+          },
+          {
+            "name": "setStage",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = state.indexWhere((o) => o.id == orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if idx < 0 → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "cur = kManagerOrderFlow.indexOf(state[idx].stage)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cur < 0 || cur >= kManagerOrderFlow.length - 1 → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "setStage(orderId, kManagerOrderFlow[cur + 1])"
+          }
+        ]
+      },
+      "floor": [
+        "advance",
+        "indexOf",
+        "indexWhere",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(String orderId)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if idx < 0 → return (void)",
+          "if cur < 0 || cur >= kManagerOrderFlow.length - 1 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier._advanceViaCallable",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(FirebaseOrdersRepository remote, OrderFunctionsGateway functions, String orderId) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "OrdersEngineNotifier.advance"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "advanceOrderStage",
+        "applyServerStage",
+        "debugPrint"
+      ],
+      "contract": {
+        "input": "(FirebaseOrdersRepository remote, OrderFunctionsGateway functions, String orderId)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.setStage",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String orderId, String stage) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kManagerOrderFlow"
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "OrdersEngineNotifier.advance"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !kManagerOrderFlow.contains(stage) → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = state.indexWhere((o) => o.id == orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if idx < 0 → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if state[idx].stage == stage → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (var i = 0; i < state.length; i++) if (i == idx) state[i].copyWith(stage: st…"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "copyWith",
+        "indexWhere",
+        "setStage"
+      ],
+      "contract": {
+        "input": "(String orderId, String stage)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !kManagerOrderFlow.contains(stage) → return (void)",
+          "if idx < 0 → return (void)",
+          "if state[idx].stage == stage → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.claimStore",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String orderId, String uid) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if uid.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = state.indexWhere((o) => o.id == orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if idx < 0 → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "cur = state[idx].storeUid"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cur.isNotEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (var i = 0; i < state.length; i++) if (i == idx) state[i].copyWith(storeUid:…"
+          }
+        ]
+      },
+      "floor": [
+        "claimStore",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(String orderId, String uid)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if uid.isEmpty → return (void)",
+          "if idx < 0 → return (void)",
+          "if cur.isNotEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.claimCourier",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String orderId, String uid) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if uid.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = state.indexWhere((o) => o.id == orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if idx < 0 → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "cur = state[idx].courierUid"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cur.isNotEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (var i = 0; i < state.length; i++) if (i == idx) state[i].copyWith(courierUi…"
+          }
+        ]
+      },
+      "floor": [
+        "claimCourier",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(String orderId, String uid)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if uid.isEmpty → return (void)",
+          "if idx < 0 → return (void)",
+          "if cur.isNotEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OrdersEngineNotifier.resetToSeed",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "_seed"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = _seed"
+          }
+        ]
+      },
+      "floor": [
+        "resetToSeed"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

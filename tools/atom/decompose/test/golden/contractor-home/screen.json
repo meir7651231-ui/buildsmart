@@ -1,0 +1,845 @@
+{
+  "screen": "contractor-home",
+  "source": "smart_home_screen.dart",
+  "atomCount": 14,
+  "atoms": [
+    {
+      "name": "SmartHomeBody",
+      "role": "composer",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "screenSectionsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "screenSectionsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "modOn",
+            "target": "compat"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "childrenFor"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [
+          "scrollCtrl"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Departments",
+      "role": "section",
+      "section": "categories",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "מחלקות"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "מחלקות"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kProfileRawShell"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "homeDepartmentProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "mainTabProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kProfileRawShell)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(homeDepartmentProvider.notifier).state = d.name",
+            "effect": "write → homeDepartmentProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(mainTabProvider.notifier).state = 1",
+            "effect": "write → mainTabProvider"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write",
+          "onMainTab(…) callback instead of direct mainTabProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_SmartTreeRow",
+      "role": "section",
+      "section": "products",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🌳 עץ חכם — אינסטלציה"
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "smart_home_screen.add_to_cart",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הוסף לסל",
+            "registryId": "smart_home_screen.add_to_cart",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [
+          "🌳 עץ חכם — אינסטלציה"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kSmartProducts.isEmpty"
+          },
+          {
+            "kind": "writes",
+            "via": "add",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kSmartProducts.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "priceLabel = rec.price == null ? … : …",
+            "effect": "text: 'מחיר לפי ספק' | '₪${groupThousands(rec.price!)}'"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(smartCartProvider.notifier).add(SmartCartLine(productKey: rec.sku ??…",
+            "effect": "write → smartCartProvider"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, '${p.name} נוסף לסל')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius",
+        "groupThousands",
+        "productImage"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onSmartCart(…) callback instead of direct smartCartProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_WorkPath",
+      "role": "section",
+      "section": "workPath",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "מסלול עבודה חכם"
+          },
+          {
+            "kind": "cfgText",
+            "text": "🛁 חדש — מאפס עד גמר",
+            "registryId": "smart_home_screen.workpath_badge",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "גמר אמבטיה — מלווה אותך שלב-שלב",
+            "registryId": "smart_home_screen.workpath_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "4 שלבים בסדר הנכון. כל שלב: עץ מוצרים + חלון \"סדר הרכבה\".",
+            "registryId": "smart_home_screen.workpath_sub",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [
+          "מסלול עבודה חכם"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kProfileRawShell"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kProfileRawShell)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_QuickTools",
+      "role": "section",
+      "section": "promise",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "כלים מהירים"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "כלים מהירים"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "modOn",
+            "target": "site"
+          },
+          {
+            "kind": "gated-by",
+            "via": "featOn",
+            "target": "site.stock"
+          },
+          {
+            "kind": "action",
+            "via": "openScanPlanSheet",
+            "target": "openScanPlanSheet"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "StockScreen"
+          },
+          {
+            "kind": "action",
+            "via": "openSiteHub",
+            "target": "openSiteHub"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "rows.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (rows.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_InstallStudioHero",
+      "role": "section",
+      "section": "installHero",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "תכנון חיבור",
+            "registryId": "smart_home_screen.install_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בחר מה לחבר — נכין רשימת קנייה תקנית ונבדוק את החיבור",
+            "registryId": "smart_home_screen.install_sub",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "InstallStudioScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Inst…",
+            "effect": "navigate → InstallStudioScreen"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SuperFinderOpen",
+      "role": "section",
+      "section": "superFinder",
+      "variant": "live",
+      "gate": "kAxisDive",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🕸️ מאתר-על"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🕸️ מאתר-על"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "CatalogWheelScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_SuperFinderHero",
+      "role": "section",
+      "section": "superFinder",
+      "variant": "preview",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🕸️ מאתר-על"
+          },
+          {
+            "kind": "text",
+            "text": "גלגל-חיפוש-על — בחר מאיזה ציר להתחיל"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🕸️ מאתר-על",
+          "גלגל-חיפוש-על — בחר מאיזה ציר להתחיל"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "mainTabProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "catalogSectionProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "keyboardDiveQueryProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(mainTabProvider.notifier).state = 0",
+            "effect": "write → mainTabProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(catalogSectionProvider.notifier).state = 'מאתר-על'",
+            "effect": "write → catalogSectionProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(keyboardDiveQueryProvider.notifier).state = ''",
+            "effect": "write → keyboardDiveQueryProvider"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onCatalogSection(…) callback instead of direct catalogSectionProvider write",
+          "onKeyboardDiveQuery(…) callback instead of direct keyboardDiveQueryProvider write",
+          "onMainTab(…) callback instead of direct mainTabProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_CatalogConfigOpen",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "CatalogConfigScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_CatalogConfigHero",
+      "role": "section",
+      "section": "catalogConfig",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🎛️ קטלוג מגדיר"
+          },
+          {
+            "kind": "text",
+            "text": "כרטיס-הגדרה לכל מוצר — תמונה + גלגלים"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🎛️ קטלוג מגדיר",
+          "כרטיס-הגדרה לכל מוצר — תמונה + גלגלים"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CatalogConfigScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Cata…",
+            "effect": "navigate → CatalogConfigScreen"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_InternalCardOpen",
+      "role": "section",
+      "section": "internalCard",
+      "variant": "live",
+      "gate": "kInternalCard",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🃏 כרטיס פנימי"
+          },
+          {
+            "kind": "text",
+            "text": "—"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🃏 כרטיס פנימי",
+          "—"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 2"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "catalogProductForSku",
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_InternalCardHero",
+      "role": "section",
+      "section": "internalCard",
+      "variant": "preview",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "כרטיס פנימי"
+          },
+          {
+            "kind": "text",
+            "text": "🃏 כרטיס פנימי"
+          },
+          {
+            "kind": "text",
+            "text": "כל המנוע במקום אחד — 13 סקציות"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "כרטיס פנימי",
+          "🃏 כרטיס פנימי",
+          "כל המנוע במקום אחד — 13 סקציות"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 3"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "MaterialPageRoute<void>(builder: (_) …"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => Scaffold(a…",
+            "effect": "navigate → MaterialPageRoute<void>(builder: (_) …"
+          }
+        ]
+      },
+      "floor": [
+        "catalogProductForSku",
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_Favorites",
+      "role": "section",
+      "section": "favorites",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "מועדפים"
+          },
+          {
+            "kind": "text",
+            "text": "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "מועדפים",
+          "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "productFavoritesProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogRepositoryProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogRepositoryProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showLipskeyProductSheet(context, p, ref.read(catalogRepositoryProvider).allPr…",
+            "effect": "open → showLipskeyProductSheet"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RecentOrders",
+      "role": "section",
+      "section": "reorderHistory",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "הזמנות אחרונות לאתר"
+          },
+          {
+            "kind": "text",
+            "text": "עדיין אין הזמנות — לאחר הראשונה היא תופיע כאן."
+          },
+          {
+            "kind": "text",
+            "text": "📦"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "הזמנות אחרונות לאתר",
+          "עדיין אין הזמנות — לאחר הראשונה היא תופיע כאן.",
+          "📦"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 3"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "sysOrdersProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius",
+        "groupThousands"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "smart_home_screen.add_to_cart",
+        "ok": true,
+        "atom": "_SmartTreeRow"
+      },
+      {
+        "id": "smart_home_screen.workpath_badge",
+        "ok": true,
+        "atom": "_WorkPath"
+      },
+      {
+        "id": "smart_home_screen.workpath_title",
+        "ok": true,
+        "atom": "_WorkPath"
+      },
+      {
+        "id": "smart_home_screen.workpath_sub",
+        "ok": true,
+        "atom": "_WorkPath"
+      },
+      {
+        "id": "smart_home_screen.install_title",
+        "ok": true,
+        "atom": "_InstallStudioHero"
+      },
+      {
+        "id": "smart_home_screen.install_sub",
+        "ok": true,
+        "atom": "_InstallStudioHero"
+      }
+    ]
+  }
+}

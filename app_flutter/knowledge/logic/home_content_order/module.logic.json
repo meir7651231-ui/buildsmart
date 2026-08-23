@@ -1,0 +1,382 @@
+{
+  "module": "home_content_order",
+  "source": "lib/state/home_content_order.dart",
+  "atomCount": 6,
+  "caches": [
+    "kHomeSectionIds"
+  ],
+  "atoms": [
+    {
+      "fn": "HomeContentOrderNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDefaultHomeOrder"
+          },
+          {
+            "kind": "field",
+            "name": "_prefsKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "add",
+        "cast",
+        "contains",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HomeContentOrderNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_prefsKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "HomeContentOrderNotifier.reorder",
+          "HomeContentOrderNotifier.reset"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "map",
+        "setString",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HomeContentOrderNotifier.reorder",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int oldIndex, int newIndex) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_prefsKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "HomeContentOrderNotifier.moveDown",
+          "HomeContentOrderNotifier.moveUp"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if oldIndex < 0 || oldIndex >= state.length → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "target = newIndex"
+          },
+          {
+            "kind": "branch",
+            "detail": "if target > oldIndex"
+          },
+          {
+            "kind": "branch",
+            "detail": "if target < 0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if target > state.length - 1"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...state]"
+          },
+          {
+            "kind": "compute",
+            "detail": "item = next.removeAt(oldIndex)"
+          },
+          {
+            "kind": "effect",
+            "detail": "next.insert(target, item)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "insert",
+        "removeAt"
+      ],
+      "contract": {
+        "input": "(int oldIndex, int newIndex)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if oldIndex < 0 || oldIndex >= state.length → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HomeContentOrderNotifier.moveUp",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(HomeSection s) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "reorder",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.indexOf(s)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i <= 0 → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "reorder(i, i - 1)"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(HomeSection s)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i <= 0 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HomeContentOrderNotifier.moveDown",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(HomeSection s) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "reorder",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.indexOf(s)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i < 0 || i >= state.length - 1 → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "reorder(i, i + 2)"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(HomeSection s)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i < 0 || i >= state.length - 1 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HomeContentOrderNotifier.reset",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDefaultHomeOrder"
+          },
+          {
+            "kind": "field",
+            "name": "_prefsKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = kDefaultHomeOrder"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

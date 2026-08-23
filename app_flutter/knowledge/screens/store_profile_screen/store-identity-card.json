@@ -1,0 +1,61 @@
+{
+  "name": "_StoreIdentityCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_profile_screen.demo_chip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "דמו",
+        "registryId": "store_profile_screen.demo_chip",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🏪"
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "🏪"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showStoreProfileEditSheet",
+        "target": "showStoreProfileEditSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showStoreProfileEditSheet(context, session: session)",
+        "effect": "open → showStoreProfileEditSheet"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "imageProviderForRef"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "session",
+      "profile"
+    ],
+    "untangle": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "_StoreOrderCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🕒 נדרש: בתיאום",
+        "registryId": "store_dashboard_screen.t11",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✓ תיקון בוצע — בדוק שינויים",
+        "registryId": "store_dashboard_screen.t12",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "splitTag = fulfillment.splitInto > 1 ? … : …",
+        "effect": "text: ' · 🚚 הוכן ב-${fulfillment.splitInto} חבילות' | ''"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "confirmDestructive",
+    "fMoney",
+    "onAdvance"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "order",
+      "fulfillment",
+      "onAdvance",
+      "onOpenPick"
+    ],
+    "untangle": []
+  }
+}

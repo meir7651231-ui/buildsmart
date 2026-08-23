@@ -1,0 +1,32 @@
+{
+  "name": "_ProjectDone",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🎉 כל ימי העבודה בוצעו — הפרויקט הושלם!",
+        "registryId": "smart_project_screen.t08",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

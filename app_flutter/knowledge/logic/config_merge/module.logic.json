@@ -1,0 +1,291 @@
+{
+  "module": "config_merge",
+  "source": "lib/state/studio/config_merge.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "roleKeyOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? role) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(role == null || role.isEmpty) ? 'contractor' : role"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String? role)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "mergeNode",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id, ConfigDoc doc, String roleKey, {bool includeDraft = false, Set<String> criticalIds = const {}}) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "mergeNodeSlices",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "mergeNodeSlices(id, publishedGlobal: doc.published.global[id], publishedPersona: doc.publ…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id, ConfigDoc doc, String roleKey, {bool includeDraft = false, Set<String> criticalIds = const {}})",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "mergeNodeSlices",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id, {CfgNode? publishedGlobal, CfgNode? publishedPersona, CfgNode? draftGlobal, CfgNode? draftPersona, bool includeDraft = false, Set<String> criticalIds = const {}}) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_overlay",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "mergeNode"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "out = CfgNode.identity"
+          },
+          {
+            "kind": "effect",
+            "detail": "out = _overlay(out, publishedGlobal)"
+          },
+          {
+            "kind": "effect",
+            "detail": "out = _overlay(out, publishedPersona)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if includeDraft"
+          },
+          {
+            "kind": "branch",
+            "detail": "if criticalIds.contains(id) && (out.hidden != null || out.action != null)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode",
+        "contains"
+      ],
+      "contract": {
+        "input": "(String id, {CfgNode? publishedGlobal, CfgNode? publishedPersona, CfgNode? draftGlobal, CfgNode? draftPersona, bool includeDraft = false, Set<String> criticalIds = const {}})",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_overlay",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CfgNode base, CfgNode? over) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "mergeStyle",
+            "module": true
+          },
+          {
+            "name": "mergeAction",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "mergeNodeSlices"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if over == null || over.isEmpty → return base"
+          },
+          {
+            "kind": "return",
+            "detail": "CfgNode(text: over.text ?? base.text, emoji: over.emoji ?? base.emoji, hidden: over.hidde…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "(CfgNode base, CfgNode? over)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [
+          "if over == null || over.isEmpty → return base"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "mergeStyle",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CfgStyle? base, CfgStyle? over) -> CfgStyle?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_overlay"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if over == null → return base"
+          },
+          {
+            "kind": "precond",
+            "detail": "if base == null → return over"
+          },
+          {
+            "kind": "return",
+            "detail": "CfgStyle(colorToken: over.colorToken ?? base.colorToken, bgToken: over.bgToken ?? base.bg…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgStyle"
+      ],
+      "contract": {
+        "input": "(CfgStyle? base, CfgStyle? over)",
+        "output": "CfgStyle?",
+        "purity": "pure",
+        "precond": [
+          "if over == null → return base",
+          "if base == null → return over"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "mergeAction",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CfgAction? base, CfgAction? over) -> CfgAction?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_overlay"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if over == null → return base"
+          },
+          {
+            "kind": "precond",
+            "detail": "if base == null → return over"
+          },
+          {
+            "kind": "return",
+            "detail": "CfgAction(kind: over.kind, args: base.args.isEmpty && over.args.isEmpty ? const {} : {...…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgAction"
+      ],
+      "contract": {
+        "input": "(CfgAction? base, CfgAction? over)",
+        "output": "CfgAction?",
+        "purity": "pure",
+        "precond": [
+          "if over == null → return base",
+          "if base == null → return over"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    }
+  ]
+}

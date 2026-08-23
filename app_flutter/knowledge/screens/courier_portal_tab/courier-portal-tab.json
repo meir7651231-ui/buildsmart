@@ -1,0 +1,79 @@
+{
+  "name": "CourierPortalTab",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🧰 פורטל השליח",
+        "registryId": "courier_portal_tab.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ניווט, צי רכב, צ׳אט ומעקב SLA",
+        "registryId": "courier_portal_tab.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "—:—"
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "—:—"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "ChatsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showPortalSheet",
+        "target": "showPortalSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showPodSheet",
+        "target": "showPodSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showPodSheet(context, o.id)",
+        "effect": "open → showPodSheet"
+      }
+    ]
+  },
+  "floor": [
+    "fMoney"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

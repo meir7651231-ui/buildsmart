@@ -1,0 +1,63 @@
+{
+  "name": "_DeliveredCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_dashboard_screen.t13",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נמסר ✓",
+        "registryId": "store_dashboard_screen.t13",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📷"
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "📷"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showFullPhotoRefDialog",
+        "target": "showFullPhotoRefDialog"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showFullPhotoRefDialog(context, fulfillment.podPhoto, label: '📦 ${order.id} …",
+        "effect": "open → showFullPhotoRefDialog"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "fMoney",
+    "imageProviderForRef"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "order",
+      "fulfillment",
+      "onTap"
+    ],
+    "untangle": []
+  }
+}

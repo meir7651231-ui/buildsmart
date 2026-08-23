@@ -1,5 +1,12 @@
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbNotifSettingsNodes;
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/notif_settings.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,17 +20,25 @@ class NotifSettingsScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const NotifSettingsScreen());
 
+  /// STABLE [KbScreen] tool list — built once so the floating-keyboard mirror
+  /// never re-registers on rebuild. Tree-shaken with the [KbScreen] path off-flag.
+  static final List<KbToolNode> _kbNodes = kbNotifSettingsNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+    // KbScreen: while this pushed route is front-most under [kKbGlobal], the
+    // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
+    // Pure pass-through (byte-identical) when the flag is off.
+    final Widget body = Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'notif_settings_screen.t01',
           'הגדרות התראות',
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -53,6 +68,7 @@ class NotifSettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
@@ -60,24 +76,36 @@ class NotifSettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
+            title: const CfgText(
+              'notif_settings_screen.t02',
               'איפוס הגדרות?',
-              style: TextStyle(color: Color(0xFF1A1A1A)),
+              style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
+            content: const CfgText(
+              'notif_settings_screen.t03',
               'כל הגדרות ההתראות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+              // composite hide: whole cancel button vanishes, not just its label.
+              CfgVisible(
+                'notif_settings_screen.t04',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const CfgText('notif_settings_screen.t04', 'ביטול'),
+                ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text('אפס'),
+              // composite hide: whole reset button vanishes, not just its label.
+              CfgVisible(
+                'notif_settings_screen.t05',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                  ),
+                  child: const CfgText('notif_settings_screen.t05', 'אפס'),
+                ),
               ),
             ],
           ),
@@ -105,7 +133,7 @@ class _SnoozeBanner extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
       decoration: BoxDecoration(
-        color: snoozed ? const Color(0xFF3A2A0F) : const Color(0xFFFFFFFF),
+        color: snoozed ? const Color(0xFF3A2A0F) : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: snoozed ? Colors.orange : Colors.transparent),
       ),
@@ -137,7 +165,7 @@ class _SnoozeBanner extends ConsumerWidget {
                           ? 'התראות מושתקות עד $untilLabel'
                           : '🔇 השתק התראות זמנית',
                       style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -165,7 +193,7 @@ class _SnoozeBanner extends ConsumerWidget {
   Future<void> _showSnoozeMenu(BuildContext context, WidgetRef ref) async {
     final picked = await showModalBottomSheet<int>(
       context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -209,10 +237,11 @@ class _SnoozeSheet extends StatelessWidget {
           const SizedBox(height: 16),
           const Align(
             alignment: Alignment.centerRight,
-            child: Text(
+            child: CfgText(
+              'notif_settings_screen.t06',
               '🔇 השתק התראות',
               style: TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -224,7 +253,7 @@ class _SnoozeSheet extends StatelessWidget {
             (o) => ListTile(
               title: Text(
                 o.label,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
               trailing: const Icon(
                 Icons.chevron_left,
@@ -251,17 +280,23 @@ class _ChannelsSection extends ConsumerWidget {
       emoji: '📱',
       title: 'ערוצי קבלה',
       children: [
+        // הערוץ היחיד שניתן לחווט בכנות ללא שרת: כשהוא כבוי, חיווי
+        // ההתראות החדשות בתוך האפליקציה (בדג' ה'עדכונים' + מונה 'חדשות')
+        // מושתק דרך notifUnreadCountProvider.
         _SwitchRow(
-          label: 'Push (אפליקציה)',
+          label: 'התראות בתוך האפליקציה',
           value: settings.pushEnabled,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
                   .update((s) => s.copyWith(pushEnabled: v)),
         ),
+        // ערוצים התלויים בשרת — מושבתים ביושר ('דורש חיבור שרת') במקום
+        // מתג ששומר ערך בלי שום השפעה.
         _SwitchRow(
           label: 'אימייל',
           value: settings.emailEnabled,
+          requiresServer: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -270,6 +305,7 @@ class _ChannelsSection extends ConsumerWidget {
         _SwitchRow(
           label: 'SMS',
           value: settings.smsEnabled,
+          requiresServer: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -278,6 +314,7 @@ class _ChannelsSection extends ConsumerWidget {
         _SwitchRow(
           label: 'WhatsApp',
           value: settings.whatsappEnabled,
+          requiresServer: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -300,24 +337,16 @@ class _TypesSection extends ConsumerWidget {
       emoji: '🔔',
       title: 'סוגי התראות',
       children: [
+        // 🔔 #52 — 'הזמנות' + 'משלוחים' notifications RELOCATED to the orders
+        // world (store_screen · 📦 הזמנות → OrderNotifSheet). They bind the SAME
+        // notifSettingsProvider (typeOrders / typeShipments); every other type
+        // below stays here.
+        // 🔑 This toggle gates the BUDGET-overrun feed ('חריגת תקציב',
+        // high-priority) via notifMutedSections (typePriceDrops →
+        // NotifSection.budget) — NOT price drops. Label matches the true
+        // effect; the persisted field name (typePriceDrops) is left unchanged.
         _SwitchRow(
-          label: 'הזמנות',
-          value: settings.typeOrders,
-          onChanged:
-              (v) => ref
-                  .read(notifSettingsProvider.notifier)
-                  .update((s) => s.copyWith(typeOrders: v)),
-        ),
-        _SwitchRow(
-          label: 'משלוחים',
-          value: settings.typeShipments,
-          onChanged:
-              (v) => ref
-                  .read(notifSettingsProvider.notifier)
-                  .update((s) => s.copyWith(typeShipments: v)),
-        ),
-        _SwitchRow(
-          label: 'מחירים במועדפים',
+          label: 'התראות תקציב',
           value: settings.typePriceDrops,
           onChanged:
               (v) => ref
@@ -335,6 +364,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'הצעות ספקים',
           value: settings.typeSupplierOffers,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -343,6 +373,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'חזר למלאי',
           value: settings.typeBackInStock,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -351,6 +382,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'תזכורות',
           value: settings.typeReminders,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -359,6 +391,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'שיחות חדשות',
           value: settings.typeNewChats,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -367,6 +400,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'עדכוני פרויקטים',
           value: settings.typeProjectUpdates,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -428,6 +462,7 @@ class _QuietHoursSection extends ConsumerWidget {
         _SwitchRow(
           label: 'ימי שבת/חג',
           value: settings.quietOnShabbat,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -436,6 +471,7 @@ class _QuietHoursSection extends ConsumerWidget {
         _SwitchRow(
           label: 'תוך פגישות',
           value: settings.quietInMeetings,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -444,6 +480,7 @@ class _QuietHoursSection extends ConsumerWidget {
         _SwitchRow(
           label: 'מצב נהיגה',
           value: settings.quietWhileDriving,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -466,6 +503,9 @@ class _SoundSection extends ConsumerWidget {
       emoji: '🔊',
       title: 'צליל ורטט',
       children: [
+        // 🟢 WIRED — צליל מופעל / רטט drive the LIVE in-app bell feedback
+        // (worker + courier boards) via playInAppNotifFeedback; silenced during
+        // snooze / quiet-hours by notifFeedbackFor. No 'בבנייה' marker.
         _SwitchRow(
           label: 'צליל מופעל',
           value: settings.soundEnabled,
@@ -482,9 +522,12 @@ class _SoundSection extends ConsumerWidget {
                   .read(notifSettingsProvider.notifier)
                   .update((s) => s.copyWith(vibrationEnabled: v)),
         ),
+        // 🔑 Per-type sound + LED need a native notification-channel pipeline
+        // (Android channels / a sound asset per type) — kept honest, not faked.
         _SwitchRow(
           label: 'צלילים שונים לפי סוג',
           value: settings.soundPerType,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -511,10 +554,13 @@ class _ImportanceSection extends ConsumerWidget {
         _RadioGroupRow<NotifImportance>(
           label: 'רמת חשיבות',
           value: settings.importanceFilter,
+          // No 'critical' tier exists in the data model — passesImportance
+          // treats every non-'all' filter identically (== all || highPriority),
+          // so a 'קריטיות בלבד' option would behave exactly like 'חשובות בלבד'.
+          // Only the two meaningful tiers are offered.
           options: const [
             (value: NotifImportance.all, label: 'הכל'),
             (value: NotifImportance.important, label: 'חשובות בלבד'),
-            (value: NotifImportance.critical, label: 'קריטיות בלבד'),
           ],
           onChanged:
               (v) => ref
@@ -540,9 +586,13 @@ class _PersonaSection extends ConsumerWidget {
       emoji: '👤',
       title: 'לפי תפקיד',
       children: [
+        // 🔑 Contractor / store / admin have no dedicated in-app bell FEED to
+        // gate yet (the contractor reads the shared 'התראות' feed, already
+        // filtered by 'סוגי התראות'); kept honest until each gets its own feed.
         _SwitchRow(
           label: '👷 קבלן — התראות פרויקט',
           value: settings.personaContractor,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -551,11 +601,15 @@ class _PersonaSection extends ConsumerWidget {
         _SwitchRow(
           label: '🏪 חנות — הזמנות + מלאי',
           value: settings.personaStore,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
                   .update((s) => s.copyWith(personaStore: v)),
         ),
+        // 🟢 WIRED — these two gate the LIVE per-username bell feed on the
+        // courier / worker boards via boardFeedEnabled (currentWorkerNotifs +
+        // _courierFeed): off ⇒ that board's bell goes quiet.
         _SwitchRow(
           label: '🛵 שליח — pickup + active',
           value: settings.personaCourier,
@@ -573,8 +627,9 @@ class _PersonaSection extends ConsumerWidget {
                   .update((s) => s.copyWith(personaWorker: v)),
         ),
         _SwitchRow(
-          label: '👔 מנהל מערכת — דשבורד',
+          label: '👔 מנהל המערכת — דשבורד',
           value: settings.personaAdmin,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -596,6 +651,7 @@ class _SummariesSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '📊',
       title: 'סיכומים תקופתיים',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'סיכום יומי',
@@ -698,6 +754,7 @@ class _LockScreenSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🔐',
       title: 'פרטיות במסך נעול',
+      underConstruction: true,
       children: [
         _RadioGroupRow<NotifLockScreen>(
           label: 'תצוגה במסך נעול',
@@ -760,24 +817,51 @@ class _SectionTile extends StatelessWidget {
     required this.emoji,
     required this.title,
     required this.children,
+    this.underConstruction = false,
   });
 
   final String emoji;
   final String title;
   final List<Widget> children;
 
-  // Count only functional rows — exclude "בבנייה" placeholders.
-  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+  // When true: this section's persisted toggles have no engine yet — show an
+  // honest "בבנייה" subtitle and suppress the active-count badge (Wave 8 / D2).
+  final bool underConstruction;
+
+  // A row is a backend-blocked "under construction" placeholder when it is a
+  // _PlaceholderRow, a server-only channel, or an _Inert row flagged
+  // underConstruction. Single source of truth for the count badge AND the
+  // Apple-readiness hide-filter.
+  static bool _isUnderConstruction(Widget w) =>
+      w is _PlaceholderRow ||
+      (w is _SwitchRow && w.requiresServer) ||
+      (w is _Inert && (w as _Inert).underConstruction);
+
+  // Count only functional rows — exclude "בבנייה" placeholders and rows
+  // that require a server connection (honestly disabled in this build).
+  int get _activeCount =>
+      children.where((w) => !_isUnderConstruction(w)).length;
+
+  // For Apple review (kHideUnderConstruction) we render only the functional
+  // rows; the placeholder rows stay defined in code (reversible) but are hidden.
+  List<Widget> get _visibleChildren =>
+      kHideUnderConstruction
+          ? children.where((w) => !_isUnderConstruction(w)).toList()
+          : children;
 
   @override
   Widget build(BuildContext context) {
+    // A whole section that is itself "under construction" — or one whose every
+    // row is a hidden placeholder — disappears entirely for Apple review.
+    if (kHideUnderConstruction &&
+        (underConstruction || _visibleChildren.isEmpty)) {
+      return const SizedBox.shrink();
+    }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -788,7 +872,7 @@ class _SectionTile extends StatelessWidget {
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           // Count badge replaces the default expand chevron.
           trailing:
-              _activeCount == 0
+              (underConstruction || _activeCount == 0)
                   ? null
                   : Container(
                     padding: const EdgeInsets.symmetric(
@@ -811,37 +895,79 @@ class _SectionTile extends StatelessWidget {
           title: Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
           ),
-          children: children,
+          subtitle:
+              underConstruction
+                  ? const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: CfgText(
+                      'notif_settings_screen.t07',
+                      'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 12,
+                      ),
+                    ),
+                  )
+                  : null,
+          children: _visibleChildren,
         ),
       ),
     );
   }
 }
 
-class _SwitchRow extends StatelessWidget {
+/// Marker for settings rows that persist a value no engine consumes yet
+/// (honesty pass). Excluded from the section active-count badge.
+abstract interface class _Inert {
+  bool get underConstruction;
+}
+
+class _SwitchRow extends StatelessWidget implements _Inert {
   const _SwitchRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
+    this.requiresServer = false,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  /// Channels that cannot work without a server (אימייל/SMS/WhatsApp):
+  /// rendered disabled with an honest 'דורש חיבור שרת' caption — never fake.
+  final bool requiresServer;
+  @override
+  final bool underConstruction;
+
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      subtitle:
+          requiresServer
+              ? const CfgText(
+                'notif_settings_screen.t08',
+                'דורש חיבור שרת — לא זמין בגרסה זו',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              )
+              : underConstruction
+              ? const CfgText(
+                'notif_settings_screen.t09',
+                'בבנייה — עדיין לא משפיע',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              )
+              : null,
       value: value,
       activeColor: BsTokens.brand,
-      onChanged: onChanged,
+      onChanged: requiresServer ? null : onChanged,
     );
   }
 }
@@ -876,7 +1002,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(
               o.label,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
             ),
             value: o.value,
             groupValue: value,
@@ -909,7 +1035,7 @@ class _TimeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: Text(
         _formatted,
         style: const TextStyle(
@@ -947,10 +1073,11 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
-      trailing: const Text(
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      trailing: const CfgText(
+        'notif_settings_screen.t10',
         'בבנייה',
-        style: TextStyle(color: Color(0xFF666666), fontSize: 12),
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),
       onTap: () => showToast(context, '$label — בבנייה'),
     );

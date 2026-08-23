@@ -5,6 +5,32 @@
 
 ---
 
+## 🏆 Top 10 חובה-לסשן (קרא ראשון)
+
+> עשרת הלקחים שחוזרים הכי הרבה ושמחירם הכי גבוה אם מדלגים עליהם.
+
+**T1. Fetch + branch check פותח כל סשן.** `git fetch origin claude/whats-happening-LyY9G && git rev-parse HEAD` — אמת שה-SHA זהה לרימוט. "קובץ חסר" תמיד = בדוק ענף ראשון, לא ה-working-tree. (לקח #60)
+
+**T2. Preflight לפני commit — חוסך 13 דק'.** `bash scripts/preflight.sh` — שערים 59/81/83 + גרסאות בלי Flutter (30 שניות). רק אחרי ✅ preflight → `git commit`. (לקח #68)
+
+**T3. Re-fetch לפני commit — sessions מקבילים דוחפים.** `git fetch` → `ahead/behind` → rebase אם origin זז. "אותו HEAD" = הנחה מסוכנת. (לקח #5)
+
+**T4. kCatalogProducts לרוחב UI, לעולם לא kLipskeyCatalog.** `kLipskeyCatalog` = Lipskey בלבד → ריק ל-Huliot/PPR → כרטיס לבן. בכל `screens/` / `state/` / `logic/` → `kCatalogProducts`. שער 114 אוכף. (לקח #69)
+
+**T5. flutter test <file> אחרי שינוי טיפוסים — analyze לא מספיק.** `flutter analyze` עובר גם כשחסר `import` (resolve טרנזיטיבי). רק `flutter test test/FILE_test.dart` תופס compile error. (לקח #70)
+
+**T6. קובץ ידע חדש = שורה ב-README באותו commit.** ≥27 יתומים נוצרו כי "עוד מסמך" לא אינדוקס. חפש קיים-לעדכון לפני יצירה. (לקח #59)
+
+**T7. GATE_REGISTRY.md — רשום שער לפני שאתה מוסיף.** ראה `knowledge/GATE_REGISTRY.md`. קולידה (שני סוכנים מוסיפים 113 ביום אחד) = rebase conflict. (לקח #66, 2026-06-03)
+
+**T8. Contact-sheet + visual verify לפני "done" על assets.** unit-tests-green ≠ content-correct. Script שמייצר תמונות → contact-sheet → עין → commit. (לקח #6)
+
+**T9. פרוטוקוליסט = hook / docs / tests בלבד.** לא feature code, לא UI, לא data. הוראה זו גוברת. (לקח #35)
+
+**T10. Parallel agents = קבצים חדשים נפרדים בלבד.** שני agents על קובץ אחד = merge conflict שמבטל את כל יתרון הקבילות. (AGENT_PATTERNS)
+
+---
+
 ## 🎯 Process & Discipline
 
 1. **Tests-first.** כתוב 5-15 בדיקות **נכשלות** לפני שורת קוד ראשונה. הצעד הראשון ב-Implementation phase הוא "תרגל RED → GREEN".
@@ -16,6 +42,32 @@
 4. **"מחוץ ל-scope" הוא timeframe.** אם המשתמש מרחיב — הרחב את הפרוטוקול במקום (sub-protocol חדש), לא תכנן מחדש.
 
 5. **Re-fetch origin לפני commit.** sessions מקבילים דוחפים. רצף: code → test → `git fetch` → אם זז: rebase → ואז commit.
+
+6. **Asset-generation = visual contact-sheet verification חובה לפני "done".**
+   Unit-tests (file-on-disk, path-mapping, count) **לא** מאמתים שהcontent עצמו
+   נכון. כל run של crop/render/composite script דורש:
+   (א) ליצור contact-sheet שמרכז את כל הoutputs בפריסה ניתנת-לסריקה,
+   (ב) לקרוא אותו עיני (Read tool על הקובץ — לראות את כל הasset),
+   (ג) להחליט "כל אסט תקין" או "X% פגום" לפני אכרזת "100%".
+   חזר ב-Huliot crops (2026-06-02): הסתכלתי על דוגמה בודדת + tests עברו →
+   הצהרתי "100%" → 80% מהcrops לוכדים גם דיאגרמה. **קונדנציה כעת: אם אסט
+   נוצר ע"י script → לפני commit-of-done, contact-sheet + visual verify חובה.**
+
+7. **Per-band tuning גובר על per-page או per-N-sections לcrop scripts.**
+   כל מודל אחיד (`PHOTO_H = const`, `FIXED_PHOTO_H_BY_N`, `frac * band_h`)
+   נכשל לקטלוגים שיש בהם variability בגודל מוצר בתוך עמוד אחד. דוגמא:
+   page 21 ב-Huliot מציג drain 80/50 (photo 120px), drain 140/50 (150px),
+   drain 245/50 (175px) — באותו עמוד. כל single PHOTO_H יחתוך את הגדולים
+   או יכלול diagram בקטנים. **גישה נכונה:** dict `{(page, tag): height}`
+   או bbox-detection per-band עם defaults הכי בטוחים. ניסיתי 6 גישות
+   אוטומטיות לפני שעברתי לper-band — הפסדתי 2 שעות.
+
+8. **כשscript-output נכנס לbinary repo (תמונות/PDFs), revert קל יותר
+   מ-iteration במקום.** הקבצים גדולים, ה-diff לא קריא, ו-merge-conflicts
+   פוגעים. השתדל לעבוד באיזורי-עבודה נפרדים (`/tmp/`) עד אישור visual,
+   ורק אז להעביר ל-repo. ב-2026-06-02 דחפתי 4 batches של 89-172 crops
+   לrepo (89→123→89→89 files churned), כל אחד יצר merge-conflicts עם
+   commits מקבילים של בנצי.
 
 ---
 
@@ -131,6 +183,24 @@
 
 51. **grep של emoji ב-hook חייב `-aF` (binary + fixed-string).** `grep -q "🟦"` נכשל תחת locale של git-commit ב-Windows/MSYS (כמו 81/103) — emoji 4-בייט + regex-engine + locale = לא-דטרמיניסטי. `-a` (binary-safe) + `-F` (fixed-string, byte-match בלי regex) = locale-independent. חל על שערים 23 (🟦) ו-109 (✅/⬜). הערה: לא משוחזר על Linux — fragility ספציפי-MSYS, אך עקבי עם הדפוס המתועד.
 
+69. **קריאה רוחבית מ-UI = `kCatalogProducts`, לעולם לא `kLipskeyCatalog`.** (דיווח מקבץ, 2026-06-03) `kLipskeyCatalog` מכיל Lipskey בלבד → ריק עבור Huliot/PPR → כרטיס-מוצר לבן + חיפוש-מק"ט כושל + מועדפים שבורים. `kCatalogProducts` = המאוחד (כל המותגים). כלל: כל פונקציה ב-`lib/screens/` · `lib/state/` · `lib/logic/` שעוברת על מוצרים לרוחב חייבת `kCatalogProducts`. `kLipskeyCatalog` = רק ב-`lib/data/` (הגדרה) + `lib/test_harness/` (בדיקות-UI ייעודיות). שער 114 אוכף זאת.
+
+68. **fail-fast בשערים: שערים 59/81 לפני Flutter, early-exit לפני analyze/test/build.** (המלצת בנצי, 2026-06-02) מיקום מקורי: שערים 59 (גרסה לא עלתה) ו-81 (hook לא מסונכרן) רצו *אחרי* `flutter analyze/test/build` — כל כשל = 13 דק' לחינם. 4 מחזורים × 13 דק' = ~52 דק' אבודות. תיקון: (א) שערים 59+81+83 הועברו לפני `NEEDS_FLUTTER`; (ב) `fail-fast` check (`if [[ "$FAIL" -gt 0 ]]; then exit; fi`) לפני הבלוק היקר — עוצר בכשל-זול; (ג) `scripts/preflight.sh` — סקריפט ידני שמריץ את כל השערים-הזולים ללא Flutter (30 שניות). גם שגיאת-gate 59 שודרגה: מדפיסה גרסה נוכחית + 3 מקומות לבמפ. כלל-על: **שערים זולים תמיד לפני שערים יקרים; fail-fast לפני כל בלוק-יקר.** כשמוסיפים gate חדש — שאל "איפה זה יגרום הכי פחות נזק אם יכשל?".
+
+67. **CI "Protocol Enforcement" אדום — 2 שורשים נפרדים, שניהם מוסתרים מבדיקה מקומית.** (זוהה ע"י פרוטוקוליסט ב-"ווידוא פריסה") **(א) pin-drift:** `protocol-enforce.yml` קיבע `flutter-version: '3.29.0'` (Dart 3.7.0) מול `pubspec environment.sdk ^3.7.2` → "version solving failed" ב-`pub get`. מקומי (3.29.**3**) ו-deploy (3.44.0) עברו → red-X הסתתר. תוקן: pin → 3.29.3. **(ב) `set -e` הורג השמה מ-command-substitution שיוצא ≠0:** ה-shell של GitHub-step הוא `bash -e {0}`. `ANALYZE=$(flutter analyze --no-pub 2>&1)` — `flutter analyze` יוצא **1 על כל lint** (very_good_analysis מייצר 3900+ infos), לא רק error → ההשמה מתה **לפני** ה-grep שאמור לסנן רק `^error •`. אותו דפוס ב-Gate 5 (`DARK=$(grep|grep -v)` יוצא 1 כשנקי). תוקן: `|| true` אחרי ה-substitution בשני הגייטים. כללים: (1) **כל ה-workflows = גרסת-Flutter אחת ≥ מינימום-pubspec**; (2) **תחת `set -e`, כל `VAR=$(cmd-שעלול-לצאת-≠0)` חייב `|| true`** — אחרת ה-step מת לפני הלוגיקה; (3) `flutter analyze` יוצא ≠0 על infos/warnings, אז gate שמסנן רק errors **חייב** `|| true` + grep; (4) "ירוק מקומי ≠ ירוק ב-CI" — בדוק `flutter --version` ואת ה-exit-code המדויק שה-CI רואה לפני שמכריזים "פרוס".
+
+66. **ריבוי-סוכנים על ענף משותף = תור-דחיפה מסודר (rebase-each), לעולם לא reset מקבילי.** כשל-N סוכנים יש commits מקומיים על אותו ענף, הפרוטוקול הבטוח: (1) המשתמש/פרוטוקוליסט קובע סדר; (2) סוכן אחד דוחף בכל פעם; (3) כל סוכן עוקב עושה `fetch`→בודק ahead/behind→`rebase` (או `ff-only` אם ahead=0) מעל ה-origin HEAD החדש; (4) פותר התנגשויות — מסמכי-תיאום keep-both (append §142-145), קבצי-`lib/**` ידנית עם הסלמה לפרוטוקוליסט (§146); (5) `analyze`+`test` ירוק מחדש; (6) דוחף. **אסור `reset --hard`** ככלי-יישור (#63). הסשן הזה: מקבץ(v5.64)→בנצי(v5.65)→קטלגן(v5.68)→ליטוש — כל אחד rebase מעל הקודם, 0 עבודה אבודה, 0 HEAD שבור (אחרי תיקון #65). כלל-משנה: **פרוטוקוליסט מעדכן רק מסמכים שאף סוכן-בתור לא נוגע בהם** (כאן: SESSION_REPORT+CARRY_FORWARD), ולא את 5 מסמכי-התיאום שליטוש עומד למזג — אחרת הוא מייצר התנגשות-rebase לסוכן-בתור.
+
+65. **commit עם imports של חבילה שקיימת רק ב-working-tree של סוכן אחר → HEAD שבור (analyze ✅ בזמן-commit, ❌ אחרי).** (זוהה ע"י פרוטוקוליסט מדוח מקבץ) במהלך יישור-ענף, מקבץ "סחף" את `product_images.dart` של בנצי לתוך commit `8799077` — אבל שינוי ה-pubspec (`cached_network_image` + `flutter_cache_manager`) נשאר רק ב-working-tree של בנצי (ואז ירד ל-stash שאבד). ה-hook הריץ `analyze` מול ה-working-tree (שהיו בו ה-deps) → עבר; אבל ה-commit עצמו כלל את הקובץ בלי ה-deps → origin HEAD לא קימפל (6 שגיאות `uri_does_not_exist`). תיקון: הוספת 2 ה-deps ל-pubspec (הקובץ תקין ובדוק — רק יתום). **המסכים נשארו על `Image.asset`** כי `kImageBaseUrl` ברירת-מחדל = R2 חי שעדיין ריק (C0) — מיגרציה עכשיו = תמונות שבורות בפרודקשן. כללים: (א) `git add -p`/`git add <file>` מפורש — לעולם לא `git add -A` כשעץ-העבודה משותף; "סחיפת קובץ" סוחפת אותו בלי תלויותיו. (ב) analyze-בזמן-commit לא מבטיח HEAD-קומפילבילי כשעץ-העבודה מזוהם — אחרי commit-בענף-משותף, ודא `git stash && flutter analyze && git stash pop` או בדוק בעותק-נקי. (ג) קובץ-תשתית + תלות-pubspec = יחידה אטומית אחת ל-commit.
+
+64. **שער 102 — שער 42 ("helper חדש בלי בדיקה") פטור מתיעוד ANTIPATTERN.** (דיווח בנצי, 2026-06-01) שער 102 מסווג retry לפי סוג-הכשל הקודם: code/test (31-45) → דורש; bookkeeping (12/24/59) → פטור. אבל שער 42 ("helper חדש בלי בדיקה") הוא בתוך 31-45 — למרות שהפתרון הוא **הוספת בדיקה**, לא תיקון אנטי-פטרן. בנצי הוסיף בדיקה (תיקון נכון), שער 102 עדיין דרש ANTIPATTERN — false-positive. תוקן: גבול gate-42 נוסף לרשימת-הפטורים בהיגיון הסיווג (`(( g != 42 ))`), עם הערה. כלל: כשמוסיפים שער-פטור חדש — בדוק גם **את הגבול של טווח**: שער בתחום שמסווג-כ"code/test" יכול להיות בעל-תיקון-מובנה (הוסף X) שלא מייצר ANTIPATTERN משמעותי.
+
+63. **יישור-ענף = `merge --ff-only` אחרי בדיקת-ahead, לעולם לא `reset --hard` עיוור.** (תפס: בנצי) שלב-הפתיחה שכתבתי ל-3 פרוטוקולים (לקח #60) אמר `git reset --hard origin/<branch>` כצעד-חובה. בסביבת ריבוי-סוכנים על ענף משותף זה **footgun הרסני**: הוא מוחק (א) commits מקומיים לא-דחופים של הסוכן עצמו, (ב) שינויים ב-staging, (ג) ויכול להשחית repo אם `.git/index.lock` פעיל (commit/hook רץ). בנצי קיבל הוראה לאפס, זיהה שיש לו commit פעיל + 2 commits לא-דחופים, **ועצר נכון** במקום לציית. תוקן ב-3 הפרוטוקולים + AGENT_COORDINATION: (1) בדוק `[[ -f .git/index.lock ]]` — אם כן, אל תיגע ב-git; (2) `git fetch` (לא-הרסני); (3) `git rev-list --left-right --count origin/<branch>...HEAD` — אם `ahead>0` או tree dirty → **עצור**, דחוף/שמור קודם; (4) רק אם נקי+ahead=0 → `git merge --ff-only` (זהה-תוצאה ל-reset, אפס-סיכון). כלל-על: **פקודה הרסנית (reset --hard / clean -fd / checkout שמדריס) בפרוטוקול-חובה חייבת precondition-check לפניה** — אחרת היא תמחק עבודה של מישהו, מתישהו. "אל תניח שהעץ שלך זהה לרימוט" (#60) הורחב ל"ואל תהרוס אותו כדי לאמת".
+
+62. **בסיס-ידע בריא = בעיית-אינדקס, לא בעיית-כפילות.** (לקח-מתודולוגיה מ-ליטוש פאזה K) הציפייה לפני הביקורת היתה "150 מסמכים עם כפילות המונית" — הממצא: 76 מסמכים, רובם עם תפקיד-נבדל, ובעיה **אחת** אמיתית: האינדקס הצביע על 13/76 בלבד (27 יתומים). תיקון האינדקס (K9) פתר 95% מה"בלגן". **כלל:** לפני biased-audit ("הכל בלגן") — בדוק את ה-README index ראשון; יתומים ≠ כפילות ≠ מיותר.
+
+61. **verdict 4-שדות לפני כל נגיעה במסמך-ידע — גם כשהתשובה ברורה.** (לקח-מתודולוגיה מ-ליטוש פאזה K) "למה נכתב · תפקיד היום · רלוונטי? · למה-כן/לא" — הכריח עצירה ו-explicit reasoning גם על מסמכים שנראו ברורים. 3 מקרים שהוכחו כ-"keep" רק אחרי ה-verdict (נראו כמיועדים-למחיקה מבחוץ): `AGENT_READINESS.md`, `adr/003-*`, `PROTOCOL.md`-גרעין. כלל: הכרעה-ב-verdict מונעת "מחיקה כי זה נראה ישן" — ה-4 שדות חייבים להיות כתובים, לא מחשבה-פנימית.
+
 60. **לפני ש"קובץ חסר" — אמת ענף+SHA אחרי fetch; "אותו commit" לא מניחים.** ליטוש דיווח ש-4 מסמכי-הליבה (POLISH/VERIFICATION/KNOWLEDGE_AUDIT) "לא קיימים באף ענף" — ובצדק עצר במקום להמציא. השורש: הסשן שלו נפתח על ענף אחר (`determined-mendel-gSDiq`, שלא קיים על הרימוט) שנוצר **לפני** 8 ה-commits, ומעולם לא עשה fetch. הוא הניח "אותו commit בדיוק" בלי לאמת SHA — אבל הקבצים כן היו ב-`whats-happening-LyY9G@7ab5b57`. כללים: (א) **צעד-פתיחה לכל סשן = `git fetch origin claude/whats-happening-LyY9G && git checkout` אליו**, ולאמת `git rev-parse HEAD` מול הרימוט לפני כל עבודה; (ב) "קובץ חסר" = בדוק `git ls-tree -r origin/<branch> | grep`, לא רק את ה-working-tree המקומי; (ג) "שני ענפים זהים" = הוכח ב-`git ls-remote`, לא בהנחה; (ד) הבחן **תוצר-נוצר-תוך-כדי** (כמו `POLISH_LOG.md` שליטוש כותב בעצמו) מ**מסמך-קיים-מראש** — חוסר של הראשון אינו באג.
 
 59. **אין מסמך-יתום + לא R בעבודה חדשה.** שני בלגנים שהתגלו יחד: (א) ~150 מסמכי-ידע נכתבו ב-11 ימים, כל סשן פתח חדש בלי לאנדקס → `README` הצביע על 13/75 (68% יתומים). כלל: מסמך-ידע חדש = שורה ב-`README` (אינדקס-אמת) **באותו commit**, ולפני יצירה — חפש קיים-לעדכון. (ב) R1–R9 (חוקי-ה-UI הישנים) זלגו לפרוטוקולים חדשים (בנצי/ליטוש) למרות שהם של `app/` הישן ולא רלוונטיים לעבודה החדשה — כי הם ב-`CLAUDE.md` שנטען כל סשן. כלל: אל תצטט R בעבודה חדשה; הכוונה (verbatim/regression) בשפה רגילה. הערה: R לא נאכף באף שער (דוקומנטרי בלבד); המקור שמחזיר אותו = `CLAUDE.md`. (R8/ProGuard = כלי-אנדרואיד, לא חוק.)
@@ -148,3 +218,13 @@
 53. **גנרטור הרגרסיה — escape ל-Dart string רגיל, לא `r'''…'''`.** דווח (קטלגן): ANTIPATTERN שמתחיל/נגמר בגרש בודד `'` יוצר 4 גרשים רצופים בגבול של `r'''…'''` ⇒ שגיאת קומפילציה בקובץ המיוצר ⇒ **כל הסוויטה נשברת לכל הסוכנים** (landmine high-impact). תוקן: הגנרטור עושה escape (`\`→`\\`, `$`→`\$`, `'`→`\'`, בסדר הזה — backslash ראשון) ועוטף ב-string רגיל `'…'`. semantics נשמרים (`\$`→תו `$`→anchor/literal כמו ב-raw). כלל: כשמטמיעים תוכן משתנה בתוך מחרוזת קוד מיוצרת — escape דטרמיניסטי תמיד עדיף על delimiter-wrapping שמניח שהתוכן לא מכיל את ה-delimiter.
 
 52. **emoji-match ב-hook = bash `case`/glob builtin, לא grep כלל (אפילו לא `-aF`).** לקח #51 (`-aqF`) **לא הספיק**: סוכן (מקבץ) דיווח ששער 23 עדיין נכשל תחת `git commit` למרות ש-`grep -aqF "🟦"` עובר standalone בכל locale. השורש: git-for-windows מחליף את ה-grep binary/PATH ב-invocation של ה-hook — כך שכל תלות ב-binary חיצוני היא לא-אמינה, ללא קשר ל-flags. תוקן (אותו class כמו 103): `while IFS= read -r _l; do case "$_l" in *🟦*) ...;; esac; done < file` — builtin טהור, אפס binary חיצוני, byte-match עקבי. **כלל-על:** בדיקת-תוכן ב-hook שצריכה להיות אמינה בכל סביבה (emoji/multibyte/untrusted) → bash builtin (`case`/glob/`[[ == ]]`), לעולם לא pipe ל-grep/echo חיצוניים. זה מאחד את 45/51/52 לעיקרון אחד.
+
+73. **תווית-הגרסה — מומשה (v5.92, P0): `version.g.dart` gitignored + gen_version.** (פרוטוקוליסט 2026-06-03, פתרון #72) השורש (#72) נסגר במימוש: `scripts/gen_version.sh` מייצר `lib/version.g.dart` (gitignored) מ-git+STATUS בכל commit/build; `home_shell` קורא `kVersionLabel` בלבד. **לקחי-מימוש קריטיים שצצו רק בקוד:** (א) `.gitignore` **לא מסיר קבצים שכבר tracked** → hook-guard `git ls-files --error-unmatch` חובה, אחרת גישה-C דולפת; (ב) קובץ gitignored שה-app מייבא → **חייב להיווצר לפני analyze/build בכל מקום** (hook + 4 workflows + session-start), אחרת fresh-clone לא מקמפל; (ג) `git rev-list --count` לא-מונוטוני בין branches + מחזיר 1 ב-shallow → `count.shortSHA` (SHA מציל ייחודיות); (ד) ה-hook חייב **re-generate** (לא mutate-in-place) — אין race עם stash; (ה) שערים שקוראים גרסה (11/12 + CI Gate 4) חייבים לעבור **כולם יחד** מ-home_shell ל-version.g.dart, אחרת CI נשבר ביום-1. שער 59 (forced-bump) בוטל — הוא היה ה-conflict-magnet.
+
+74. **fast-gate מומש (P2): build web → pre-push, skip test ב-rebase replay.** (פרוטוקוליסט 2026-06-03) השער-האיטי (#72, 3 סוכנים) טופל בלי per-directory scoping המסוכן: (א) `flutter build web --release` (~2-4 דק') הוצא מ-pre-commit ל-**pre-push** (תנאי-יציאה-מהתור) — analyze+test נשארים ב-commit, build פעם אחת ב-push+CI; (ב) `GIT_REFLOG_ACTION=rebase*/amend*` → דלג על test היקר (מקבץ: "11×hook"), analyze נשאר (תופס compile מ-conflict-resolution). **עיקרון:** העבר את היקר-ביותר (build) ל-push ושמור correctness (analyze+test) ב-commit — speedup בלי סיכון scoping. visual-verify (#2) נאכף בשער 116 (`visual_log.md` staged), כי warn=no-op (ליטוש).
+
+72. **תווית-הגרסה ב-`home_shell.dart` = נקודת-כשל כפולה — flagged ע"י 4/4 הסוכנים באותו יום.** (קטלגן + בנצי + מקבץ + Finder, 2026-06-03) שורה גלובלית אחת `vX.YY` שכל סוכן עורך בכל commit יוצרת שתי בעיות: **(א) conflict-magnet** — כל rebase מתנגש על אותה שורה (v5.84/85/86/87 → re-number ידני בכל סבב); **(ב) test-trap** — בנצי שם תוויות-כפתור ("הזמן עכשיו"/"אישור הזמנה") במחרוזת-הגרסה (שמרונדרת בכל מסך) ושבר 10 journey tests. **המלצה אחידה (טרם הוכרע):** או (1) להפיק את התווית לקובץ נפרד/אוטומטי (`git describe` / build-number), או (2) שה-hook יבמפ אוטומטית בזמן-push, או (3) build-number בלבד. **כלל-ביניים עד הכרעה:** המספר נקבע **אחרון** (אחרי fetch+rebase, מעל ראש-origin), לעולם לא בתחילת העבודה; אסור לשים טקסט-לא-גרסה במחרוזת-הגרסה (כבר ANTIPATTERN ב-stuck_log של בנצי). נלווה: **שער איטי (~15-20 דק'/commit)** flagged ע"י 3 סוכנים → בקשת fast pre-gate (analyze + בדיקות-אזור-משתנה בלבד, ~2 דק') לאיטרציה, שער-מלא רק ב-push/CI.
+
+71. **feedback שלילי מעורפל = trigger לחקירה, לא לעבודה.** (דיווח קטלגן, 2026-06-03) "כולם בעייתי" / "לא נקי" → קטלגן קפץ לעצב את ה-script עם ניחוש-ציר שגוי (חיתוך-תחתון) ועשה iteration שלם — בעוד הבעיה היתה ציר אחר לגמרי (X1, drains רחבים). המחיר: שעות iteration + 5× הכרזת-"סגור" שגויה. **כלל:** כשהמשתמש נותן feedback שלילי בלי specifics, ה-תגובה הנכונה היא **שאלה ממוקדת אחת**, לא commit: (א) "תראה לי דוגמה **אחת** עם זום"; (ב) "מאיזה כיוון החיתוך — top/bottom/left/right?"; (ג) רק כשידוע **איזה ציר/אסט** — לגעת בקוד. זו הרחבה של #39 (אבחן 100% לפני פתרון) למקרה הספציפי של interpretation-of-feedback. נלווה: בתיקון crop, **זהה את הציר** (x0/y0/x1/y1) לפני שינוי המספר — "חתוך ימין" = X1, לא PHOTO_H (p36_b עבר 190→225→195→290 כי לא זוהה הציר).
+
+70. **`flutter analyze` עובר כשחסר import — רק `flutter test <file>` תופס compile error.** (זוהה ע"י פרוטוקוליסט 2026-06-03) `huliot_card_render_test.dart`: שינוי `dynamic` → `LipskeyCatalogProduct` בלי `import` — `flutter analyze` עבר (resolve טרנזיטיבי), `flutter test test/huliot_card_render_test.dart` נכשל על "Target of URI hasn't been generated". **כלל:** אחרי כל שינוי טיפוס, signature, או import — הרץ `flutter test test/<file>_test.dart` (לא רק `flutter analyze`). זה הבדיקה האמינה. תוקן: הוסף `import 'package:buildsmart/data/lipskey_catalog.dart'` + הסר `.cast()`. תועד ב-`stuck_log.md` 2026-06-03.

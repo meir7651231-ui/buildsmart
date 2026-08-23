@@ -1,34 +1,29 @@
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Onboarding progress — a persisted `Set<String>` of *hint ids the user has
 /// already seen* (and therefore shouldn't see again). Foundation for any future
 /// onboarding overlay / first-time tooltip surface.
 ///
-/// Mirrors the `FeatureFlagsNotifier` persistence pattern: async `_load()` in
-/// the ctor and `_persist()` after each mutation. Mutations are idempotent —
+/// Mirrors the `FeatureFlagsNotifier` persistence pattern: async `loadFromPrefs()` in
+/// the ctor and `persistToPrefs()` after each mutation. Mutations are idempotent —
 /// no state churn (and no extra `_persist`) when the hint is already in the
 /// desired state.
 ///
 /// Persisted under `'bs.onboarding-progress.v1'` via SharedPreferences
 /// `setStringList`/`getStringList`, so it survives a refresh / app restart.
-class OnboardingProgressNotifier extends StateNotifier<Set<String>> {
+class OnboardingProgressNotifier extends StateNotifier<Set<String>>
+    with StringSetPrefsPersisted {
   OnboardingProgressNotifier() : super(const {}) {
-    _load();
+    loadFromPrefs();
   }
+
+  @override
+  String get persistKey => _key;
 
   static const _key = 'bs.onboarding-progress.v1';
 
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = prefs.getStringList(_key);
-    if (list != null) state = list.toSet();
-  }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_key, state.toList());
-  }
 
   /// Whether the user has already seen [hintId].
   bool hasSeen(String hintId) => state.contains(hintId);
@@ -37,7 +32,7 @@ class OnboardingProgressNotifier extends StateNotifier<Set<String>> {
   void markSeen(String hintId) {
     if (state.contains(hintId)) return; // idempotent
     state = {...state, hintId};
-    _persist();
+    persistToPrefs();
   }
 
   /// Has the user seen ALL of the given [hintIds]? Useful for "are we done
@@ -53,7 +48,7 @@ class OnboardingProgressNotifier extends StateNotifier<Set<String>> {
   void reset() {
     if (state.isEmpty) return; // idempotent
     state = const {};
-    _persist();
+    persistToPrefs();
   }
 }
 

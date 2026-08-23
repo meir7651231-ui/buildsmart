@@ -1,0 +1,130 @@
+{
+  "name": "CourierDeliveryDetailSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "📦"
+      },
+      {
+        "kind": "cfgText",
+        "text": "ההזמנה לא נמצאה",
+        "registryId": "courier_delivery_detail_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ייתכן שההזמנה הוסרה או שהמשלוח כבר נסגר — חזרו לרשימת המשלוחים",
+        "registryId": "courier_delivery_detail_sheet.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "פריטי המשלוח",
+        "registryId": "courier_delivery_detail_sheet.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מסלול ההזמנה",
+        "registryId": "courier_delivery_detail_sheet.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "חותמות זמן לשלבים יחוברו עם חיבור השרת",
+        "registryId": "courier_delivery_detail_sheet.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📸 אישור מסירה (POD)",
+        "registryId": "courier_delivery_detail_sheet.t06",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "POD זמין משלב האיסוף (כשההזמנה בידי השליח)",
+        "registryId": "courier_delivery_detail_sheet.t07",
+        "registryOk": true
+      }
+    ],
+    "registered": 7,
+    "unregistered": [
+      "📦"
+    ],
+    "summary": "registry 7 · mapped 7/7 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showPodSheet",
+        "target": "showPodSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "fulfillmentProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "rewardsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerNotifsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showPodSheet(context, order.id)",
+        "effect": "open → showPodSheet"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "confirmDestructive",
+    "fMoney",
+    "haulInfo",
+    "stampCourierClock"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": false,
+    "props": [
+      "orderId"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

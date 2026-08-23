@@ -1,0 +1,335 @@
+{
+  "module": "saved_configs",
+  "source": "lib/state/saved_configs.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "SavedConfigsNotifier.keyFor",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String brandName) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "SavedConfigsNotifier.isSaved",
+          "SavedConfigsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'$productKey#$brandName'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String productKey, String brandName)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedConfigsNotifier.ready",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ready"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ready"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedConfigsNotifier._key",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_base"
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "scopedPrefsKey(_base, _uid)"
+          }
+        ]
+      },
+      "floor": [
+        "scopedPrefsKey"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedConfigsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_base"
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "list = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if list != null"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getStringList",
+        "toSet"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedConfigsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "SavedConfigsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setStringList(_key, state.toList())"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "setStringList",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedConfigsNotifier.isSaved",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String brandName) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "keyFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.contains(keyFor(productKey, brandName))"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String productKey, String brandName)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SavedConfigsNotifier.toggle",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String brandName) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "keyFor",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "k = keyFor(productKey, brandName)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.contains(k) ? ({...state}..remove(k)) : {...state, k}"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "remove"
+      ],
+      "contract": {
+        "input": "(String productKey, String brandName)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

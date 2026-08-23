@@ -1,0 +1,679 @@
+{
+  "module": "wheel_picker",
+  "source": "lib/features/catalog_config/wheel_picker.dart",
+  "atomCount": 12,
+  "atoms": [
+    {
+      "fn": "_swatchColor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String nameHe) -> Color",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kSwatchBlack"
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchBlue"
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchGray"
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchRed"
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchWhite"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_ColorRow.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch nameHe"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String nameHe)",
+        "output": "Color",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WheelPicker.createState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> State<WheelPicker>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_WheelPickerState()"
+          }
+        ]
+      },
+      "floor": [
+        "_WheelPickerState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "State<WheelPicker>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WheelPickerState._clampedIndex",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "widget.values.isEmpty ? 0 : widget.selectedIndex.clamp(0, widget.values.length - 1)"
+          }
+        ]
+      },
+      "floor": [
+        "clamp"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WheelPickerState.initState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_controller"
+          },
+          {
+            "kind": "field",
+            "name": "_current"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.initState()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_current = _clampedIndex"
+          },
+          {
+            "kind": "effect",
+            "detail": "_controller = FixedExtentScrollController(initialItem: _current)"
+          }
+        ]
+      },
+      "floor": [
+        "FixedExtentScrollController",
+        "initState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WheelPickerState.didUpdateWidget",
+      "kind": "method",
+      "object": {
+        "signature": "(WheelPicker oldWidget) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_controller"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_current"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.didUpdateWidget(oldWidget)"
+          },
+          {
+            "kind": "compute",
+            "detail": "target = _clampedIndex"
+          },
+          {
+            "kind": "branch",
+            "detail": "if target != _current && _controller.hasClients"
+          }
+        ]
+      },
+      "floor": [
+        "animateToItem",
+        "didUpdateWidget"
+      ],
+      "contract": {
+        "input": "(WheelPicker oldWidget)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WheelPickerState.dispose",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_controller"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_controller.dispose()"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "dispose"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WheelPickerState._onChanged",
+      "kind": "method",
+      "object": {
+        "signature": "(int index) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_current"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "setState(() => _current = index)"
+          },
+          {
+            "kind": "effect",
+            "detail": "widget.onSelected(index)"
+          }
+        ]
+      },
+      "floor": [
+        "onSelected",
+        "setState"
+      ],
+      "contract": {
+        "input": "(int index)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WheelPickerState.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kItemExtent",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kLabelStyle"
+          },
+          {
+            "kind": "const",
+            "name": "_kWheelHeight"
+          },
+          {
+            "kind": "field",
+            "name": "_controller",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_spinner",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Column(children: [Text(widget.labelHe, maxLines: 1, overflow: TextOverflow.ellipsis, text…"
+          }
+        ]
+      },
+      "floor": [
+        "Column",
+        "SizedBox",
+        "Text"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WheelPickerState._spinner",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kItemExtent"
+          },
+          {
+            "kind": "field",
+            "name": "_controller"
+          },
+          {
+            "kind": "field",
+            "name": "_current",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_row",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_WheelPickerState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if widget.values.isEmpty → return const Center(child: Text('—', style: TextStyle(color: BsTokens.mutedLight, fontSize: BsTo…"
+          },
+          {
+            "kind": "return",
+            "detail": "Stack(alignment: Alignment.center, children: [ListWheelScrollView.useDelegate(controller:…"
+          }
+        ]
+      },
+      "floor": [
+        "Center",
+        "FixedExtentScrollPhysics",
+        "IgnorePointer",
+        "ListWheelChildBuilderDelegate",
+        "Stack",
+        "Text",
+        "TextStyle",
+        "_SelectionBand",
+        "useDelegate"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [
+          "if widget.values.isEmpty → return const Center(child: Text('—', style: TextStyle(color: BsTokens.mutedLight, fontSize: BsTo…"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_WheelPickerState._row",
+      "kind": "method",
+      "object": {
+        "signature": "(int index) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_current"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_WheelPickerState._spinner"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "centred = index == _current"
+          },
+          {
+            "kind": "compute",
+            "detail": "value = widget.values[index]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if widget.kind == AttributeKind.color → return _ColorRow(nameHe: value, centred: centred)"
+          },
+          {
+            "kind": "return",
+            "detail": "Center(child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(…"
+          }
+        ]
+      },
+      "floor": [
+        "Center",
+        "Text",
+        "TextStyle",
+        "_ColorRow"
+      ],
+      "contract": {
+        "input": "(int index)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [
+          "if widget.kind == AttributeKind.color → return _ColorRow(nameHe: value, centred: centred)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_SelectionBand.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kBandFill"
+          },
+          {
+            "kind": "const",
+            "name": "_kBandLine"
+          },
+          {
+            "kind": "const",
+            "name": "_kItemExtent"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Container(height: _kItemExtent, margin: const EdgeInsets.symmetric(horizontal: BsTokens.s…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "Container",
+        "all",
+        "circular",
+        "symmetric"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_ColorRow.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kSwatchBlack",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchBlue",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchGray",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchRed",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchSize"
+          },
+          {
+            "kind": "const",
+            "name": "_kSwatchWhite",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "centred"
+          },
+          {
+            "kind": "field",
+            "name": "nameHe"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_swatchColor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "Container",
+        "Flexible",
+        "Key",
+        "Row",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "all"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

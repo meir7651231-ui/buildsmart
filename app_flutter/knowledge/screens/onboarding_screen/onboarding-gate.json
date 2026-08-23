@@ -1,0 +1,39 @@
+{
+  "name": "OnboardingGate",
+  "role": "composer",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "welcomeSeenProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "authStateProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "guestBrowsingProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

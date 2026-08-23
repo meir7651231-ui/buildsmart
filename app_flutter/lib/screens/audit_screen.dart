@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/tokens.dart';
 // Live, in-app audit screen — generates 20 RANDOM installation scenarios
 // each run and shows the auto-built plan + compliance result for each.
 // Random anchors are sampled from the verified-spec catalog with bias
@@ -10,6 +11,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:buildsmart/logic/pressure_drop.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 class AuditScreen extends StatefulWidget {
@@ -133,8 +135,10 @@ class _AuditScreenState extends State<AuditScreen> {
       ));
       setState(() {}); // progressive update — user sees rows appear live
       await Future.delayed(const Duration(milliseconds: 80));
+      if (!mounted) return;
     }
 
+    if (!mounted) return;
     setState(() => _running = false);
   }
 
@@ -144,25 +148,38 @@ class _AuditScreenState extends State<AuditScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Column(
             children: [
               // Custom header — consistent with the app (no Material AppBar).
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 4),
                 child: Row(children: [
-                  GestureDetector(
-                    onTap: () => Navigator.maybePop(context),
-                    child: const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(Icons.arrow_forward,
-                          color: Color(0xFF1A1A1A), size: 22),
+                  Semantics(
+                    button: true,
+                    label: 'חזרה',
+                    child: Tooltip(
+                      message: 'חזרה',
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => Navigator.maybePop(context),
+                        // ≥48dp tap target around the small arrow (a11y),
+                        // without enlarging the visible glyph.
+                        child: const SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Center(
+                            child: Icon(Icons.arrow_back,
+                                color: BsTokens.inkLight, size: 22),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  const Text('אודיט תרחישים',
+                  const CfgText('audit_screen.t01', 'אודיט תרחישים',
                       style: TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 16,
                           fontWeight: FontWeight.w800)),
                   const Spacer(),
@@ -173,7 +190,7 @@ class _AuditScreenState extends State<AuditScreen> {
                       decoration: BoxDecoration(
                         color: allOk
                             ? const Color(0xFF15803D).withOpacity(0.2)
-                            : const Color(0xFFEF4444).withOpacity(0.2),
+                            : BsTokens.danger.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -181,7 +198,7 @@ class _AuditScreenState extends State<AuditScreen> {
                         style: TextStyle(
                             color: allOk
                                 ? const Color(0xFF15803D)
-                                : const Color(0xFFEF4444),
+                                : BsTokens.danger,
                             fontWeight: FontWeight.w800,
                             fontSize: 13),
                       ),
@@ -196,7 +213,7 @@ class _AuditScreenState extends State<AuditScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _running ? null : _run,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF7A18),
+                    backgroundColor: BsTokens.brand,
                     foregroundColor: const Color(0xFFFFFFFF),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
@@ -214,12 +231,38 @@ class _AuditScreenState extends State<AuditScreen> {
               ),
             ),
             Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: _results.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (_, i) => _buildRow(_results[i]),
-              ),
+              child: _results.isEmpty && !_running
+                  ? const Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('🧪', style: TextStyle(fontSize: 48)),
+                          SizedBox(height: 12),
+                          CfgText(
+                            'audit_screen.t02',
+                            'עדיין לא הורצו בדיקות',
+                            style: TextStyle(
+                              color: Color(0xFF334155),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          CfgText(
+                            'audit_screen.t03',
+                            'הקש "⚡ הרץ 20 תרחישי בדיקה" כדי להתחיל',
+                            style: TextStyle(
+                                color: Color(0xFF64748B), fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      itemCount: _results.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, i) => _buildRow(_results[i]),
+                    ),
             ),
           ],
         ),
@@ -229,12 +272,12 @@ class _AuditScreenState extends State<AuditScreen> {
   }
 
   Widget _buildRow(_ScenarioResult r) {
-    final color = r.ok ? const Color(0xFF15803D) : const Color(0xFFEF4444);
+    final color = r.ok ? const Color(0xFF15803D) : BsTokens.danger;
     final overBudget = r.dropBar > 1.0;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withOpacity(0.4)),
       ),
@@ -248,7 +291,7 @@ class _AuditScreenState extends State<AuditScreen> {
             Expanded(
               child: Text(r.title,
                   style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 13,
                       fontWeight: FontWeight.w700)),
             ),
@@ -304,12 +347,12 @@ class _AuditScreenState extends State<AuditScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444).withOpacity(0.2),
+                  color: BsTokens.danger.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text('${r.criticalOpen} קריטי',
                     style: const TextStyle(
-                        color: Color(0xFFEF4444),
+                        color: BsTokens.danger,
                         fontSize: 10,
                         fontWeight: FontWeight.w800)),
               ),
@@ -326,13 +369,13 @@ class _AuditScreenState extends State<AuditScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF7A18).withOpacity(0.10),
+                      color: BsTokens.brand.withOpacity(0.10),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '${p.typeEmoji} ${p.productType ?? "?"}',
                       style: const TextStyle(
-                          color: Color(0xFFFF7A18),
+                          color: BsTokens.brand,
                           fontSize: 9,
                           fontWeight: FontWeight.w700),
                     ),

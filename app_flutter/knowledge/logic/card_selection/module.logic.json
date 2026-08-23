@@ -1,0 +1,134 @@
+{
+  "module": "card_selection",
+  "source": "/home/user/buildsmart/app_flutter/lib/state/card_selection.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "CardSelectionNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_key"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardSelectionNotifier.brandFor",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state[productKey]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String productKey)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardSelectionNotifier.setBrand",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String brandName) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state[productKey] == brandName → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, productKey : brandName}"
+          },
+          {
+            "kind": "effect",
+            "detail": "persistToPrefs()"
+          }
+        ]
+      },
+      "floor": [
+        "persistToPrefs"
+      ],
+      "contract": {
+        "input": "(String productKey, String brandName)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state[productKey] == brandName → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

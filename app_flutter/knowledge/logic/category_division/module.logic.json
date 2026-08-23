@@ -1,0 +1,163 @@
+{
+  "module": "category_division",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/category_division.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "isCatalogDept",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String deptName) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDeptCatHeadings"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kDeptCatHeadings.containsKey(deptName)"
+          }
+        ]
+      },
+      "floor": [
+        "containsKey"
+      ],
+      "contract": {
+        "input": "(String deptName)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "resolveCatTitle",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String title) -> CatalogNode?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "hit = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in kCatalogTree"
+          },
+          {
+            "kind": "effect",
+            "detail": "walk(t)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if hit != null → return hit"
+          },
+          {
+            "kind": "precond",
+            "detail": "if catalogRepo().allProducts().any((p) => p.categoryHe == title) → return CatalogNode(id: 'catdept.$title', title: title, emoji: '📦', lipskeyCategory: title)"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "CatalogNode",
+        "allProducts",
+        "any",
+        "catalogRepo",
+        "walk"
+      ],
+      "contract": {
+        "input": "(String title)",
+        "output": "CatalogNode?",
+        "purity": "pure",
+        "precond": [
+          "if hit != null → return hit",
+          "if catalogRepo().allProducts().any((p) => p.categoryHe == title) → return CatalogNode(id: 'catdept.$title', title: title, emoji: '📦', lipskeyCategory: title)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "catNodeProductCount",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CatalogNode node) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "cats = <String>{}"
+          },
+          {
+            "kind": "effect",
+            "detail": "collect(node)"
+          },
+          {
+            "kind": "return",
+            "detail": "catalogRepo().allProducts().where((p) => cats.contains(p.categoryHe)).length"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "allProducts",
+        "catalogRepo",
+        "collect",
+        "contains",
+        "where"
+      ],
+      "contract": {
+        "input": "(CatalogNode node)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,10 +1,15 @@
+import 'package:buildsmart/theme/tokens.dart';
 import 'dart:math';
+import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/catalog_lens.dart';
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive, lipskeyScanPool, resolvedCatalogProducts;
 import 'package:buildsmart/data/chip_hierarchy.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
-import 'package:buildsmart/data/smart_tree.dart' show smartProductForSku;
+import 'package:buildsmart/data/repositories/catalog_local.dart'
+    show catalogRepositoryProvider;
 import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show openSmartProductSheet;
 import 'package:buildsmart/screens/lens_selector_row.dart';
@@ -12,6 +17,9 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/state/catalog_lens_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,15 +52,27 @@ class LipskeyProductsScreen extends StatelessWidget {
   static void openWordSearch(BuildContext context, String word) {
     final w = word.trim();
     if (w.isEmpty) return;
-    final indexed = (lipskeyWordIndex()[w] ?? const <String>[]).toSet();
-    final hits = indexed.isNotEmpty
-        ? kLipskeyCatalog.where((p) => indexed.contains(p.sku)).toList()
-        : kLipskeyCatalog.where((p) => p.nameHe.contains(w)).toList();
+    final hits = _wordHits(w);
     if (hits.isEmpty) return;
     Navigator.push(
       context,
       route(category: 'תוצאות: $w', products: hits),
     );
+  }
+
+  /// Company build — the vocabulary is the company's: with an imported catalog
+  /// active, resolve [w] by a direct scan over [resolvedCatalogProducts]
+  /// (nameHe.contains — what the index provides); else the const-index path.
+  static List<LipskeyCatalogProduct> _wordHits(String w) {
+    if (companyCatalogActive) {
+      return resolvedCatalogProducts
+          .where((p) => p.nameHe.contains(w))
+          .toList();
+    }
+    final indexed = (lipskeyWordIndex()[w] ?? const <String>[]).toSet();
+    return indexed.isNotEmpty
+        ? lipskeyScanPool.where((p) => indexed.contains(p.sku)).toList()
+        : lipskeyScanPool.where((p) => p.nameHe.contains(w)).toList();
   }
 
   @override
@@ -109,7 +129,10 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
   LipskeyCatalogProduct _displayed(LipskeyCatalogProduct orig) {
     final cur = _swap[orig.sku];
     if (cur == null || cur == orig.sku) return orig;
-    return kCatalogProducts.firstWhere(
+    // T6.3: route through the catalog repository (returns the same const
+    // `resolvedCatalogProducts`). `ref.read` (not `.watch`) — this is a build-helper,
+    // the const never changes, and `.read` is valid in every lifecycle phase.
+    return ref.read(catalogRepositoryProvider).allProducts().firstWhere(
       (q) => q.sku == cur,
       orElse: () => orig,
     );
@@ -144,6 +167,32 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.products.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('📦', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 12),
+            CfgText(
+              'lipskey_products_screen.empty_title',
+              'אין מוצרים להצגה',
+              style: TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            CfgText(
+              'lipskey_products_screen.empty_hint',
+              'נסו לבחור קטגוריה אחרת בקטלוג',
+              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }
     // Step 3b — list-level lens selector ABOVE the list. Default lens =
     // category → the existing flat list, visually unchanged. A non-category
     // lens re-organises the SAME products into titled groups via groupByLens.
@@ -203,28 +252,50 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
   /// Grouped view for variant / smart-tree lenses: a titled section per
   /// [LensGroup], products rendered as the standard row card (forced row
   /// style for a clean sectioned list regardless of grid/list setting).
+  /// Uses CustomScrollView + SliverList so rows are built lazily (not all
+  /// at once like a ListView with an inline children list).
   Widget _groupedList(CatalogLens lens) {
     final groups = groupByLens(widget.products, lens);
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(0, 4, 0, 24),
-      children: [
-        for (final g in groups) ...[
-          // Header is a plain label. Under the 🌳 smart-tree lens, the GATEWAY
-          // to the rich SmartProduct card is each row's own "כרטיס חכם" button
-          // (option א, per-row) — not the header.
-          _LensGroupHeader(
-            title: g.title,
-            count: g.count,
-            smartTree: lens == CatalogLens.smartTree,
+    // Build a flat index so SliverChildBuilderDelegate can map index →
+    // (header-or-row). Entry is either a _LensGroupHeader or a _ProductRow.
+    // We compute this once and pass it as a delegate closure.
+    final items = <Object>[]; // _LensGroupHeader | ({lens, p})
+    for (final g in groups) {
+      items.add(g); // sentinel for the header
+      for (final p in g.products) {
+        items.add((lens: lens, p: p));
+      }
+    }
+    return CustomScrollView(
+      slivers: [
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 4),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final item = items[index];
+              if (item is LensGroup) {
+                return _LensGroupHeader(
+                  title: item.title,
+                  count: item.count,
+                  smartTree: lens == CatalogLens.smartTree,
+                );
+              }
+              final row = item as ({CatalogLens lens, LipskeyCatalogProduct p});
+              return _ProductRow(
+                key: ValueKey('${row.lens.name}:${row.p.sku}'),
+                product: row.p,
+                categoryProducts: widget.products,
+                smartLens: row.lens == CatalogLens.smartTree,
+              );
+            },
+            childCount: items.length,
           ),
-          for (final p in g.products)
-            _ProductRow(
-              key: ValueKey('${lens.name}:${p.sku}'),
-              product: p,
-              categoryProducts: widget.products,
-              smartLens: lens == CatalogLens.smartTree,
-            ),
-        ],
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 24),
+        ),
       ],
     );
   }
@@ -260,7 +331,7 @@ class _LensGroupHeader extends StatelessWidget {
             child: Text(
               title,
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
@@ -294,8 +365,9 @@ class LipskeyProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final grid = ref.watch(catalogSettingsProvider).viewMode ==
-        CatalogViewMode.grid;
+    final grid =
+        ref.watch(catalogSettingsProvider.select((s) => s.viewMode)) ==
+            CatalogViewMode.grid;
     return grid
         ? LipskeyProductGridCard(product: product, products: products)
         : _ProductRow(product: product, categoryProducts: products);
@@ -323,7 +395,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
   final LipskeyCatalogProduct product;
   final List<LipskeyCatalogProduct> products;
 
-  static const _brand = Color(0xFFFF7A18);
+  static const _brand = BsTokens.brand;
   static const _ok = Color(0xFF1F8A4C);
 
   String get _key => 'lip:${product.sku}';
@@ -372,11 +444,11 @@ class LipskeyProductGridCard extends ConsumerWidget {
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(img.pad),
                     child: product.imageAsset != null
-                        ? Image.asset(product.imageAsset!,
+                        ? productImage(product.imageAsset!,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Text(product.typeEmoji,
                                 style: TextStyle(fontSize: img.emoji)))
@@ -384,7 +456,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
                             style: TextStyle(fontSize: img.emoji)),
                   ),
                   if (inCart)
-                    const Positioned(
+                    Positioned(
                       top: 6,
                       right: 6,
                       child: CircleAvatar(
@@ -392,7 +464,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
                         backgroundColor: _ok,
                         child: Text('✓',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: bsOnAccent(context),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900)),
                       ),
@@ -426,7 +498,8 @@ class LipskeyProductGridCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  const Text(
+                  CfgText(
+                    'lipskey_products_screen.price_by_supplier_grid',
                     'מחיר לפי ספק',
                     style: TextStyle(
                       color: Color(0xFF45575E),
@@ -455,16 +528,30 @@ class LipskeyProductGridCard extends ConsumerWidget {
                         onTap: () => cart.setQtyForKey(_line(qty - 1)),
                       ),
                       Expanded(
-                        child: GestureDetector(
-                          onTap: () => showQtyWheel(context, qty,
-                              (n) => cart.setQtyForKey(_line(n))),
-                          child: Text(
-                            '$qty',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: cs.onSurface,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
+                        child: Semantics(
+                          button: true,
+                          label: 'בחר כמות',
+                          child: Tooltip(
+                            message: 'בחר כמות',
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => showQtyWheel(context, qty,
+                                  (n) => cart.setQtyForKey(_line(n))),
+                              // ≥48dp tap target around the qty number (a11y).
+                              child: SizedBox(
+                                height: 48,
+                                child: Center(
+                                  child: Text(
+                                    '$qty',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: cs.onSurface,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -477,28 +564,35 @@ class LipskeyProductGridCard extends ConsumerWidget {
                     ],
                   )
                 : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => cart.setQtyForKey(_line(1)),
-                    child: Container(
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: _brand,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.add, color: Colors.white, size: 16),
-                          SizedBox(width: 4),
-                          Text(
-                            'לעגלה',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
+                    // ≥48dp tap target: transparent vertical padding around
+                    // the 32dp visible bar (a11y).
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Container(
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: _brand,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add, color: bsOnAccent(context), size: 16),
+                            const SizedBox(width: 4),
+                            CfgText(
+                              'lipskey_products_screen.to_cart',
+                              'לסל',
+                              style: TextStyle(
+                                color: bsOnAccent(context),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -517,19 +611,35 @@ class _StepBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const brand = Color(0xFFFF7A18);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          color: filled ? brand : Theme.of(context).colorScheme.surface,
-          shape: BoxShape.circle,
-          border: filled ? null : Border.all(color: brand, width: 1.2),
+    const brand = BsTokens.brand;
+    final label = icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות';
+    return Semantics(
+      button: true,
+      label: label,
+      child: Tooltip(
+        message: label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          // ≥48dp tap target around the 30dp visible circle (a11y).
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: filled ? brand : Theme.of(context).colorScheme.surface,
+                  shape: BoxShape.circle,
+                  border: filled ? null : Border.all(color: brand, width: 1.2),
+                ),
+                child: Icon(icon,
+                    color: filled ? bsOnAccent(context) : brand, size: 18),
+              ),
+            ),
+          ),
         ),
-        child: Icon(icon,
-            color: filled ? Colors.white : brand, size: 18),
       ),
     );
   }
@@ -540,6 +650,7 @@ class _StepBtn extends StatelessWidget {
 /// instead of tapping +/− N times. [onPick] receives the chosen 1–99.
 void showQtyWheel(BuildContext context, int current, void Function(int) onPick) {
   var sel = current < 1 ? 1 : (current > 99 ? 99 : current);
+  final wheelCtrl = FixedExtentScrollController(initialItem: sel - 1);
   showModalBottomSheet<void>(
     context: context,
     builder: (ctx) => StatefulBuilder(
@@ -547,9 +658,9 @@ void showQtyWheel(BuildContext context, int current, void Function(int) onPick) 
         height: 280,
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.all(14),
-              child: Text('בחר כמות',
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: CfgText('lipskey_products_screen.choose_qty', 'בחר כמות',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
             ),
             Expanded(
@@ -557,7 +668,7 @@ void showQtyWheel(BuildContext context, int current, void Function(int) onPick) 
                 itemExtent: 44,
                 perspective: 0.004,
                 physics: const FixedExtentScrollPhysics(),
-                controller: FixedExtentScrollController(initialItem: sel - 1),
+                controller: wheelCtrl,
                 onSelectedItemChanged: (i) => setSheet(() => sel = i + 1),
                 childDelegate: ListWheelChildBuilderDelegate(
                   childCount: 99,
@@ -586,7 +697,7 @@ void showQtyWheel(BuildContext context, int current, void Function(int) onPick) 
         ),
       ),
     ),
-  );
+  ).whenComplete(() => wheelCtrl.dispose());
 }
 
 class _ProductRow extends ConsumerStatefulWidget {
@@ -623,6 +734,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   bool _open = false;
   int _qty = 1;
   _Unit _unit = _Unit.single;
+  /// Cached in-cart state — written once per build() frame so _image() can
+  /// read the value without calling ref.watch again.
+  bool _inCart = false;
   /// Local cycle state for standalone cards (when no onCycle parent callback).
   LipskeyCatalogProduct? _localProduct;
   /// Inline attribute picker state — non-null when picker is open.
@@ -632,7 +746,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   int? _hPickerIndex;
   String? _hPickerTitle;
 
-  static const _brand = Color(0xFFFF7A18);
+  static const _brand = BsTokens.brand;
   static const _teal = Color(0xFF3DD9B0);
   Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(0.45);
   Color get _line => Theme.of(context).colorScheme.outline.withOpacity(0.2);
@@ -649,6 +763,12 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       _pickerSiblings = null;
       _hPickerIndex = null;
       _hPickerTitle = null;
+      // Reset the stepper/unit state so a recycled row doesn't leak the previous
+      // product's selection; build() then re-derives _qty from the live cart for
+      // the new product (mirrors the grid card's cart-driven state).
+      _open = false;
+      _qty = 1;
+      _unit = _Unit.single;
     }
   }
 
@@ -723,13 +843,14 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   void _cycleHierarchy(int chipIndex) {
     final path = parseChips(p.nameHe).path;
     if (chipIndex >= path.length) return;
-    final all = kPolyrollCatalog;
+    // Unified catalog so Huliot/PPR products find their own-brand siblings
+    // (kPolyrollCatalog excluded Huliot → dead picker — lesson T4).
     final sibs = findHierarchySiblings(
       p, chipIndex,
-      all: all,
+      // T6.3: route through the catalog repository (same const `resolvedCatalogProducts`).
+      all: ref.read(catalogRepositoryProvider).allProducts(),
       nameOf: (q) => q.nameHe,
       brandOf: (q) => q.brand,
-      polyrollBrand: (_) => kPolyrollBrand,
     );
     // Dedupe by value-at-chipIndex (keep first occurrence of each distinct value).
     final byVal = <String, LipskeyCatalogProduct>{};
@@ -787,11 +908,6 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
         _Unit.pallet => p.qtyPallet ?? 1,
       };
 
-  bool get _inCart {
-    final key = 'lip:${p.sku}';
-    return ref.watch(smartCartProvider).any((l) => l.productKey == key);
-  }
-
   SmartCartLine _cartLine(int qty) => SmartCartLine(
         productKey: 'lip:${p.sku}',
         productName: p.nameHe,
@@ -803,12 +919,34 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       );
 
   void _addToCart() {
-    ref.read(smartCartProvider.notifier).add(_cartLine(_qty * _unitMult));
+    // setQtyForKey (not add): idempotent on the product key, so re-tapping + after
+    // a ListView recycle — when this row's _open is fresh but the product is
+    // already in the cart — sets the line instead of appending a duplicate.
+    // Matches the grid card's add path (setQtyForKey) and _setQty.
+    ref
+        .read(smartCartProvider.notifier)
+        .setQtyForKey(_cartLine(_qty * _unitMult));
+  }
+
+  /// Stepper change while the card is open (the product is already in the cart):
+  /// update the local count AND mirror it to the cart via setQtyForKey, so the
+  /// list card's stepper drives the real cart quantity — matching the grid card
+  /// (was: setState-only, so qty changes were silently lost — W5).
+  void _setQty(int n) {
+    setState(() => _qty = max(1, n));
+    ref.read(smartCartProvider.notifier).setQtyForKey(_cartLine(_qty * _unitMult));
   }
 
   /// Cancel the selection — clears every line of this product and collapses
   /// the card back to its unselected (+) state.
-  void _removeFromCart() {
+  Future<void> _removeFromCart() async {
+    final ok = await confirmDestructive(
+      context,
+      title: 'הסרה מהסל?',
+      message: '"${p.nameHe}" יוסר מהסל.',
+      confirmLabel: 'הסר',
+    );
+    if (!ok || !mounted) return;
     ref.read(smartCartProvider.notifier).setQtyForKey(_cartLine(0));
     setState(() => _open = false);
   }
@@ -834,7 +972,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     // opens the rich SmartProduct card for this product's fixture. Falls back
     // to the standard Lipskey sheet when not in smart-tree lens or unmapped.
     if (widget.smartLens) {
-      final sp = smartProductForSku(p.sku);
+      // T6.3: route through the catalog repository (same const-derived helper).
+      final sp = ref.read(catalogRepositoryProvider).smartProductForSku(p.sku);
       if (sp != null) {
         openSmartProductSheet(context, sp);
         return;
@@ -854,10 +993,14 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           maxScale: 4,
           child: Center(
             child: p.imageAsset != null
-                ? Image.asset(p.imageAsset!, fit: BoxFit.contain,
+                ? productImage(p.imageAsset!, fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) =>
-                        Image.asset(p.specImageAsset, fit: BoxFit.contain))
-                : Image.asset(p.specImageAsset, fit: BoxFit.contain),
+                        productImage(p.specImageAsset, fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Text(p.typeEmoji,
+                                style: const TextStyle(fontSize: 96))))
+                : productImage(p.specImageAsset, fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Text(p.typeEmoji,
+                        style: const TextStyle(fontSize: 96))),
           ),
         ),
       ),
@@ -867,9 +1010,26 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final compact = ref.watch(catalogSettingsProvider).compactMode;
+    final compact =
+        ref.watch(catalogSettingsProvider.select((s) => s.compactMode));
     // Selected = product is in the cart → render the whole card as "pressed".
-    final selected = _inCart;
+    // Use .select so only THIS row rebuilds when its own cart membership changes
+    // (not on every cart change from unrelated products). Uses the currently
+    // displayed product's SKU (p = _localProduct ?? widget.product).
+    // Live cart qty for this product — mirrors the grid card
+    // (LipskeyProductGridCard), whose single source of truth is the live cart.
+    // .select so only THIS row rebuilds when its own cart qty changes.
+    final cartQty = ref.watch(smartCartProvider.select((lines) => lines
+        .where((l) => l.productKey == 'lip:${p.sku}')
+        .fold<int>(0, (s, l) => s + l.productQty)));
+    final inCart = cartQty > 0;
+    _inCart = inCart; // cache for _image() helper which runs in the same frame
+    // Drive the stepper's local qty from the live cart so a product already in
+    // the cart (after a ListView recycle / re-entry / relaunch) shows its real
+    // quantity — the + button only renders when NOT in cart, so it can never
+    // reset an in-cart qty back to 1 (W-recycle overwrite).
+    if (inCart) _qty = max(1, cartQty ~/ _unitMult);
+    final selected = inCart;
     final highlight = selected || _open;
     final surface = Theme.of(context).colorScheme.surface;
     return Container(
@@ -1047,7 +1207,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 onTap: () => onTap(item),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  margin: const EdgeInsets.only(left: 6),
+                  margin: const EdgeInsetsDirectional.only(end: 6),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isSelected(item)
@@ -1079,7 +1239,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
   // ── image (tap = fullscreen) + ✓ in-cart badge ───────────────────────────
   Widget _image() {
-    final sz = ref.watch(catalogSettingsProvider).imageSize;
+    final sz = ref.watch(catalogSettingsProvider.select((s) => s.imageSize));
     final w = switch (sz) {
       CatalogImageSize.small => 64.0,
       CatalogImageSize.medium => 88.0,
@@ -1101,10 +1261,10 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             fit: StackFit.expand,
             children: [
               Container(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 alignment: Alignment.center,
                 child: p.imageAsset != null
-                    ? Image.asset(p.imageAsset!,
+                    ? productImage(p.imageAsset!,
                         height: h,
                         fit: BoxFit.contain,
                         errorBuilder: (_, __, ___) => Text(p.typeEmoji,
@@ -1114,19 +1274,39 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
               ),
               if (_inCart)
                 Positioned(
-                  top: 6,
-                  right: 6,
+                  top: 0,
+                  right: 0,
                   // Tap the badge to cancel the selection (remove from cart).
-                  child: GestureDetector(
-                    onTap: _removeFromCart,
-                    child: const CircleAvatar(
-                      radius: 12,
-                      backgroundColor: _teal,
-                      child: Text('✓',
-                          style: TextStyle(
-                              color: Color(0xFF06251C),
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900)),
+                  child: Semantics(
+                    button: true,
+                    label: 'הסר מהסל',
+                    child: Tooltip(
+                      message: 'הסר מהסל',
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: _removeFromCart,
+                        // ≥48dp tap target; the 24dp badge keeps its exact
+                        // original spot (6,6 from the corner).
+                        child: const SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 6, right: 6),
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: CircleAvatar(
+                                radius: 12,
+                                backgroundColor: _teal,
+                                child: Text('✓',
+                                    style: TextStyle(
+                                        color: Color(0xFF06251C),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w900)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -1161,7 +1341,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                           height: 1.2)),
                 ),
                 const SizedBox(width: 8),
-                Text('מחיר לפי ספק',
+                CfgText('lipskey_products_screen.price_by_supplier_row',
+                    'מחיר לפי ספק',
                     style: TextStyle(
                         color: _muted,
                         fontSize: 11,
@@ -1170,9 +1351,11 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             ),
           ),
           const SizedBox(height: 4),
-          // line 2: chips. Polyroll uses the hierarchy breadcrumb (§21);
-          // Lipskey stays on the word-by-word extractor for now.
-          if (p.brand == kPolyrollBrand)
+          // line 2: chips. Polyroll/חוליות/ליפסקי use the hierarchy breadcrumb
+          // (§21); after gate 117 9/9 + the compound-type lookahead in
+          // parseChips, Lipski products produce clean breadcrumbs too. AQUATEC
+          // stays on the word-by-word extractor (its names lack structure).
+          if (p.brand == kPolyrollBrand || p.brand == 'חוליות' || p.brand == 'ליפסקי')
             _HierarchyChips(
                 product: p,
                 onChipTap: _cycleHierarchy,
@@ -1186,25 +1369,36 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 Text(
                     p.brand == 'AQUATEC'
                         ? '💧 AQUATEC'
-                        : '🏭 ${p.brand}',
+                        : p.brand == kPolyrollBrand
+                            ? '🔵 ${p.brand}'
+                            : p.brand == 'חוליות'
+                                ? '🟢 ${p.brand}'
+                                : '🏭 ${p.brand}',
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
                         fontSize: 10)),
                 const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: p.sku));
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('מק"ט הועתק'),
-                      duration: Duration(seconds: 1),
-                      behavior: SnackBarBehavior.floating,
-                    ));
-                  },
-                  child: Text('#${p.sku}',
-                      style: TextStyle(
-                          color: _muted,
-                          fontSize: 10,
-                          fontFamily: 'monospace')),
+                Semantics(
+                  button: true,
+                  label: 'העתק מק"ט',
+                  child: Tooltip(
+                    message: 'העתק מק"ט',
+                    child: GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: p.sku));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: CfgText('lipskey_products_screen.sku_copied', 'מק"ט הועתק'),
+                          duration: const Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                        ));
+                      },
+                      child: Text('#${p.sku}',
+                          style: TextStyle(
+                              color: _muted,
+                              fontSize: 10,
+                              fontFamily: 'monospace')),
+                    ),
+                  ),
                 ),
                 if (p.dims?['PN'] != null || p.dims?['SDR'] != null) ...[
                   const SizedBox(width: 10),
@@ -1217,21 +1411,28 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 ],
                 if (widget.familySiblings.length > 1) ...[
                   const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: _cycleFamily,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0x22FF7A18),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0x55FF7A18)),
-                      ),
-                      child: Text(
-                        '${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)}/${widget.familySiblings.length}',
-                        style: const TextStyle(
-                          color: Color(0xFFCC6614),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
+                  Semantics(
+                    button: true,
+                    label: 'החלף וריאנט',
+                    child: Tooltip(
+                      message: 'החלף וריאנט',
+                      child: GestureDetector(
+                        onTap: _cycleFamily,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0x22FF7A18),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0x55FF7A18)),
+                          ),
+                          child: Text(
+                            '${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)}/${widget.familySiblings.length}',
+                            style: const TextStyle(
+                              color: Color(0xFFCC6614),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -1258,10 +1459,18 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           // top zone
           SizedBox(
             height: 34,
-            child: Center(child: _open ? _unitToggle() : const SizedBox()),
+            child: Center(
+                child: (_open || _inCart)
+                    // scaleDown-only: unchanged when the 3 unit chips fit the
+                    // 100px side column, shrinks a hair (never grows) rather
+                    // than overflow when the label metrics run a few px wide.
+                    ? FittedBox(fit: BoxFit.scaleDown, child: _unitToggle())
+                    : const SizedBox()),
           ),
           // middle zone
-          _open ? _stepper() : _plusBtn(),
+          (_open || _inCart)
+              ? FittedBox(fit: BoxFit.scaleDown, child: _stepper())
+              : _plusBtn(),
           // bottom zone — details (opens sheet)
           GestureDetector(
             onTap: _openSheet,
@@ -1306,25 +1515,40 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 
   Widget _plusBtn() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _open = true;
-          _qty = 1;
-        });
-        _addToCart();
-      },
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-            color: _brand, borderRadius: BorderRadius.circular(12)),
-        alignment: Alignment.center,
-        child: const Text('+',
-            style: TextStyle(
-                color: Color(0xFF1A1200),
-                fontSize: 24,
-                fontWeight: FontWeight.w800)),
+    return Semantics(
+      button: true,
+      label: 'הוסף לסל',
+      child: Tooltip(
+        message: 'הוסף לסל',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            setState(() {
+              _open = true;
+              _qty = 1;
+            });
+            _addToCart();
+          },
+          // ≥48dp tap target around the 40dp visible button (a11y).
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    color: _brand, borderRadius: BorderRadius.circular(12)),
+                alignment: Alignment.center,
+                child: const Text('+',
+                    style: TextStyle(
+                        color: Color(0xFF1A1200),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1366,18 +1590,28 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 
   Widget _stepper() {
-    Widget btn(String s, VoidCallback onTap) => GestureDetector(
-          onTap: onTap,
-          child: SizedBox(
-            width: 28,
-            height: 30,
-            child: Center(
-                child: Text(s,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 17))),
+    Widget btn(String s, VoidCallback onTap) {
+      final label = s == '+' ? 'הוסף כמות' : 'הפחת כמות';
+      return Semantics(
+        button: true,
+        label: label,
+        child: Tooltip(
+          message: label,
+          child: GestureDetector(
+            onTap: onTap,
+            child: SizedBox(
+              width: 28,
+              height: 30,
+              child: Center(
+                  child: Text(s,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 17))),
+            ),
           ),
-        );
+        ),
+      );
+    }
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -1388,10 +1622,10 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          btn('−', () => setState(() => _qty = max(1, _qty - 1))),
+          btn('−', () => _setQty(_qty - 1)),
           GestureDetector(
             onTap: () =>
-                showQtyWheel(context, _qty, (n) => setState(() => _qty = n)),
+                showQtyWheel(context, _qty, _setQty),
             child: SizedBox(
               width: 34,
               child: Center(
@@ -1402,7 +1636,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                           fontSize: 14))),
             ),
           ),
-          btn('+', () => setState(() => _qty++)),
+          btn('+', () => _setQty(_qty + 1)),
         ],
       ),
     );
@@ -1429,9 +1663,13 @@ bool isSizeToken(String w) {
   final stripped = w.startsWith('Ø') ? w.substring(1) : w;
   // numbers, fractions, ratios, inch marks, degrees, with × / x / X /
   // - separators (capital X appears in PPR product names like `160X25X1/2"`).
-  return RegExp(r'^[\d]+([./×xX\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
+  // A leading bare fraction glyph counts as numeric too, so `½"` (no leading
+  // digit) is recognised the same as `parseSizeTokens` does — keeping the two
+  // tokenizers in agreement (no chip the finder surfaces that the card's
+  // word-classifier would treat as a plain link).
+  return RegExp(r'^[\d¼½¾⅛⅜⅝⅞]+([./×xX\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
           .hasMatch(stripped) &&
-      RegExp(r'\d').hasMatch(stripped);
+      RegExp(r'[\d¼½¾⅛⅜⅝⅞]').hasMatch(stripped);
 }
 
 /// A plain word is a meaningful tappable link if it isn't a stop-word, has
@@ -1608,7 +1846,8 @@ List<LipskeyCatalogProduct> findAttrSiblings(
     final sig = _makerSignature(p);
     final seen = <String>{};
     final res = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+    for (final q in resolvedCatalogProducts) {
       if (q.brand != kPolyrollBrand || _makerSignature(q) != sig) continue;
       final m = _makerOf(q);
       if (m.isEmpty || !seen.add(m)) continue;
@@ -1630,7 +1869,7 @@ List<LipskeyCatalogProduct> findAttrSiblings(
     final sameLineOnly = kind == AttrKind.size;
     final seen = <String>{};
     final res = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.brand != kPolyrollBrand || _getCompoundType(q) != pType) continue;
       if (sameLineOnly && q.categoryHe != p.categoryHe) continue;
       final v = q.nameHe
@@ -1646,7 +1885,7 @@ List<LipskeyCatalogProduct> findAttrSiblings(
     // Category-wide: one representative per distinct model word.
     final seen = <String>{};
     final result = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final modelWord = q.nameHe
           .split(RegExp(r'\s+'))
@@ -1660,7 +1899,7 @@ List<LipskeyCatalogProduct> findAttrSiblings(
 
   final pFrame = _stripWordsOfKind(p.nameHe, kind);
   if (pFrame.length < 2) return [p];
-  return kCatalogProducts.where((q) {
+  return resolvedCatalogProducts.where((q) {
     if (q.categoryHe != p.categoryHe) return false;
     if (_stripWordsOfKind(q.nameHe, kind) != pFrame) return false;
     if (kind == AttrKind.colorMod) return true;
@@ -1742,7 +1981,7 @@ List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
   String keyOf(LipskeyCatalogProduct q) => ppr ? _leadingType(q) : _getCompoundType(q);
   final byCompound = <String, LipskeyCatalogProduct>{};
   byCompound[keyOf(p)] = p;
-  for (final q in kCatalogProducts) {
+  for (final q in resolvedCatalogProducts) {
     if (q.categoryHe != p.categoryHe) continue;
     final qc = keyOf(q);
     if (qc.isEmpty) continue;
@@ -1927,22 +2166,34 @@ class _NameWords extends StatelessWidget {
       }
     }
 
+    // Diameter from dims (e.g. DN110) — informational gray chip. Many fittings
+    // (elbows, seals, covers) carry their bore ONLY in dims, never in the name,
+    // so without this the finder's DN size axis is invisible on the card and the
+    // collapsed size variants (cycled via the "N/M" family badge) look
+    // identical. Sourced from tokensFromDims so the label matches the finder
+    // size chip verbatim. We add each dims DN whose label isn't already one of
+    // the name's own size chips — this mirrors the finder exactly (which also
+    // shows e.g. BOTH `4"` from the name AND `DN110` from dims) while never
+    // duplicating a DN the name already states. (An angle like `90°` is a size
+    // token but not a diameter, so an elbow still gets its dims DN chip.)
+    if (product.dims != null) {
+      final nameSizeLabels = product.nameHe
+          .split(RegExp(r'\s+'))
+          .where(isSizeToken)
+          .expand((w) => parseSizeTokens(w).map((t) => t.label))
+          .toSet();
+      for (final t in tokensFromDims(product.dims!)) {
+        if (t.family == SizeFamily.dnDiameter &&
+            !nameSizeLabels.contains(t.label)) {
+          chips.add(_grayInfoChip(t.label));
+        }
+      }
+    }
+
     // Length — informational gray chip (e.g. "4 מ׳"), never pickable.
     final length = product.dims?['אורך'] as String?;
     if (length != null && length.isNotEmpty) {
-      chips.add(Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-        decoration: BoxDecoration(
-          color: const Color(0x10888888),
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: const Color(0x30888888), width: 0.9),
-        ),
-        child: Text(length,
-            style: const TextStyle(
-                color: Color(0xFF909090),
-                fontSize: 12,
-                fontWeight: FontWeight.w600)),
-      ));
+      chips.add(_grayInfoChip(length));
     }
 
     return Wrap(
@@ -1953,6 +2204,23 @@ class _NameWords extends StatelessWidget {
     );
   }
 }
+
+/// A small, non-pickable informational chip (gray) — used for the dims-derived
+/// diameter (DN) and the length, neither of which is a tappable variant axis.
+Widget _grayInfoChip(String text) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0x10888888),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: const Color(0x30888888), width: 0.9),
+      ),
+      child: Text(text,
+          textDirection: chipLabelDirection(text),
+          style: const TextStyle(
+              color: Color(0xFF909090),
+              fontSize: 12,
+              fontWeight: FontWeight.w600)),
+    );
 
 /// One attribute chip in the product name.
 /// • Has siblings → orange border; shows `word · N` where N = picker option count.
@@ -2000,6 +2268,22 @@ class _HierarchyChips extends StatelessWidget {
       shown.add(MapEntry(i, _chipDisplayLabel(rawPath[i])));
     }
     if (shown.isEmpty) return const SizedBox.shrink();
+    // Dims-derived DN — only when the breadcrumb carries NO size of its own.
+    // Hierarchy products usually expose their size in the name (PPR `20`,
+    // חוליות `32`), but covers/risers/grates (e.g. הגבהה/מכסה/רשת) carry their
+    // bore ONLY in dims, so without this their card shows no size at all while
+    // the finder filters them by DN. Gated on "no path size" so a PPR valve
+    // (whose name already states the OD) never gets a second, possibly
+    // less-reliable, dims-DN chip. Sourced from tokensFromDims → matches the
+    // finder chip verbatim.
+    final pathHasSize =
+        rawPath.any((seg) => seg.split(RegExp(r'\s+')).any(isSizeToken));
+    final dnInfoChips = (!pathHasSize && product.dims != null)
+        ? tokensFromDims(product.dims!)
+            .where((t) => t.family == SizeFamily.dnDiameter)
+            .map((t) => t.label)
+            .toList()
+        : const <String>[];
     // §21.C — each chip is stacked: tiny grey label on top (חיבור / צורה /
     // תכונה / תבריג / מידה) + the value pill below. The label makes the
     // hierarchy visible at a glance — primary (חיבור) reads first in RTL,
@@ -2042,6 +2326,27 @@ class _HierarchyChips extends StatelessWidget {
             ],
           ),
         ],
+        // Informational dims-DN (covers/risers with no name size) — a stacked
+        // "מידה" label + gray pill, non-tappable (not a navigable level).
+        for (final dn in dnInfoChips)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CfgText(
+                'lipskey_products_screen.size_label',
+                'מידה',
+                style: TextStyle(
+                  color: Color(0xFF8E8E93),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(height: 2),
+              _grayInfoChip(dn),
+            ],
+          ),
       ],
     );
   }
@@ -2058,13 +2363,13 @@ class _HierarchyChipPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSize = RegExp(r'^["”]?\d|^\d').hasMatch(word);
     final bg = isOpen
-        ? const Color(0xFFFF7A18)
-        : (isSize ? const Color(0xFFFF7A18) : const Color(0xFFF1F1F4));
-    final fg = (isOpen || isSize) ? Colors.white : const Color(0xFF1C1C1E);
+        ? BsTokens.brand
+        : (isSize ? BsTokens.brand : const Color(0xFFF1F1F4));
+    final fg = (isOpen || isSize) ? bsOnAccent(context) : const Color(0xFF1C1C1E);
     final border = isOpen
-        ? const Color(0xFFFF7A18)
+        ? BsTokens.brand
         : (isSize
-            ? const Color(0xFFFF7A18)
+            ? BsTokens.brand
             : const Color(0xFFE0E0E5));
     return GestureDetector(
       onTap: onTap,
@@ -2103,7 +2408,7 @@ class _AttrChip extends StatelessWidget {
   final void Function(String word, AttrKind kind)? onTap;
   final bool isOpen;
 
-  static const _orange = Color(0xFFFF7A18);
+  static const _orange = BsTokens.brand;
 
   /// Number of choices shown in the picker for [kind].
   /// Color picker deduplicates by base colour, so count distinct bases.

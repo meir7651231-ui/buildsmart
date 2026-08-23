@@ -1,4 +1,48 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Product/page images load from the cloud (Cloudflare R2) at runtime, so the
+         RELEASE build needs INTERNET. Flutter auto-adds this only to the debug/profile
+         manifests, so without it here release builds show blank product images. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- mobile_scanner + image_picker(camera) — barcode scanning & proof/profile
+         photo capture (camera not required to install; those features simply
+         won't run on a camera-less device — required="false" keeps the app
+         installable for Play compliance). -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <!-- speech_to_text — voice search (microphone). Hardware feature marked
+         required="false" so the app installs on mic-less devices. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+    <!-- image_picker (gallery pick) — attach existing photos for proof-of-delivery,
+         profile picture and certificates. Modern Android (13+, API 33+) uses the
+         scoped READ_MEDIA_IMAGES; older devices (<=API 32) fall back to
+         READ_EXTERNAL_STORAGE, capped with maxSdkVersion so it isn't requested
+         on API 33+ where it has no effect. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+    <!-- F5 — FCM push notifications. POST_NOTIFICATIONS is the Android 13+ (API
+         33+) runtime permission for showing notifications; on older devices it
+         is auto-granted and ignored. The prompt is requested at sign-in via the
+         push layer (firebase_messaging.requestPermission + the local-notifs
+         Android 13 request), never on app start — push is additive and gated on
+         Firebase, so a no-Firebase / demo run never asks. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- C6 — geolocator (real GPS). FOREGROUND location only, used to tag the
+         construction-site GPS attendance (site-hub) and the worker clock-in/out
+         with the device's current coordinate. COARSE + FINE are both requested
+         so the OS can grant either precision; we never ask for background
+         location (no ACCESS_BACKGROUND_LOCATION). The runtime prompt is shown
+         only when the user taps "החתם כניסה"/clock-in (geolocator.requestPermission
+         behind the honest gate) — denied/disabled simply records attendance with
+         NO location, never an invented point. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- GPS/location hardware marked not-required so the app stays installable on
+         location-less devices (Play compliance); the feature simply yields an
+         honest "מיקום לא זמין" there. -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+    <uses-feature android:name="android.hardware.location" android:required="false"/>
     <application
         android:label="buildsmart"
         android:name="${applicationName}"
@@ -30,6 +74,21 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- F5 — FCM default notification appearance (used by the system when a
+             notification message arrives while the app is background/terminated,
+             where the OS draws the tray notification directly). The icon is a
+             WHITE/transparent silhouette: Android renders the small icon as a
+             monochrome mask, so a colored asset would show as a white square —
+             see @drawable/ic_notification. The default channel id MUST match a
+             channel we actually create at runtime (kDefaultPushChannelId in
+             lib/state/push_state.dart) or, on Android 8+, FCM falls back to a
+             "Miscellaneous" channel. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

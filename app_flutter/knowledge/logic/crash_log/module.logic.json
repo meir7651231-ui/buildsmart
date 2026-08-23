@@ -1,0 +1,147 @@
+{
+  "module": "crash_log",
+  "source": "lib/state/crash_log.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "CrashLogNotifier.record",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String message, {String? context}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "maxEntries"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "entry = CrashEntry(message: message, context: context, at: DateTime.now())"
+          },
+          {
+            "kind": "init",
+            "detail": "next = <CrashEntry>[entry, ...state]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if next.length > maxEntries"
+          }
+        ]
+      },
+      "floor": [
+        "CrashEntry",
+        "now",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(String message, {String? context})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CrashLogNotifier.clear",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = const []"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CrashLogNotifier.countBy",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({String? contextFilter}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if contextFilter == null → return state.length"
+          },
+          {
+            "kind": "return",
+            "detail": "state.where((e) => (e.context ?? '').contains(contextFilter)).length"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "where"
+      ],
+      "contract": {
+        "input": "({String? contextFilter})",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if contextFilter == null → return state.length"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

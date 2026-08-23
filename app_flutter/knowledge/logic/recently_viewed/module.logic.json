@@ -1,0 +1,387 @@
+{
+  "module": "recently_viewed",
+  "source": "lib/state/recently_viewed.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "recentlyViewedNext",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> current, String sku, {int cap = RecentlyViewedNotifier.cap}) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if sku.isEmpty → return current"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [sku, ...current.where((s) => s != sku)]"
+          },
+          {
+            "kind": "return",
+            "detail": "next.length > cap ? next.sublist(0, cap) : next"
+          }
+        ]
+      },
+      "floor": [
+        "sublist",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<String> current, String sku, {int cap = RecentlyViewedNotifier.cap})",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [
+          "if sku.isEmpty → return current"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RecentlyViewedNotifier.ready",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ready"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ready"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RecentlyViewedNotifier._key",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_base"
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "scopedPrefsKey(_base, _uid)"
+          }
+        ]
+      },
+      "floor": [
+        "scopedPrefsKey"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RecentlyViewedNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_base"
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "list = "
+          },
+          {
+            "kind": "precond",
+            "detail": "if _userTouched → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if list != null"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getStringList",
+        "unmodifiable"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RecentlyViewedNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "RecentlyViewedNotifier.clear",
+          "RecentlyViewedNotifier.touch"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setStringList(_key, state)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "setStringList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RecentlyViewedNotifier.touch",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String? sku) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "cap"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if sku == null || sku.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [sku, ...state.where((s) => s != sku)]"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = List.unmodifiable(next.length > cap ? next.sublist(0, cap) : next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "sublist",
+        "unmodifiable",
+        "where"
+      ],
+      "contract": {
+        "input": "(String? sku)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if sku == null || sku.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RecentlyViewedNotifier.clear",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "precond",
+            "detail": "if state.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = const []"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "_PayslipsSheetBody",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "💰 תלושי שכר",
+        "registryId": "worker_payslips_sheet.t01",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

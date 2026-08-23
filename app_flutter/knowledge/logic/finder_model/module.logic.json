@@ -1,0 +1,421 @@
+{
+  "module": "finder_model",
+  "source": "lib/atoms/finder_model.dart",
+  "atomCount": 7,
+  "caches": [
+    "claimedCats"
+  ],
+  "atoms": [
+    {
+      "fn": "productsForGroup",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(FinderGroup g) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "claimedCats"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if g.cats.isEmpty → return catalogRepo().allProducts().where((p) => !claimedCats.contains(p.categoryHe)).toList()"
+          },
+          {
+            "kind": "return",
+            "detail": "catalogRepo().allProducts().where((p) => g.cats.contains(p.categoryHe)).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "allProducts",
+        "catalogRepo",
+        "contains",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(FinderGroup g)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [
+          "if g.cats.isEmpty → return catalogRepo().allProducts().where((p) => !claimedCats.contains(p.categoryHe)).toList()"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "categoryCounts",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WaterSystem? systemFilter) -> Map<String, int>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "counts = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in filterBySystem(catalogRepo().allProducts(), systemFilter)"
+          },
+          {
+            "kind": "effect",
+            "detail": "counts[p.categoryHe] = (counts[p.categoryHe] ?? 0) + 1"
+          },
+          {
+            "kind": "return",
+            "detail": "counts"
+          }
+        ]
+      },
+      "floor": [
+        "allProducts",
+        "catalogRepo",
+        "filterBySystem"
+      ],
+      "contract": {
+        "input": "(WaterSystem? systemFilter)",
+        "output": "Map<String, int>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "groupCount",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(FinderGroup g, Map<String, int> catCounts) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "claimedCats"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if g.cats.isEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in g.cats"
+          },
+          {
+            "kind": "effect",
+            "detail": "n += catCounts[c] ?? 0"
+          },
+          {
+            "kind": "return",
+            "detail": "n"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "forEach"
+      ],
+      "contract": {
+        "input": "(FinderGroup g, Map<String, int> catCounts)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "letterOptions",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kLetterSizeOrder"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "all = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in pool"
+          },
+          {
+            "kind": "effect",
+            "detail": "all.addAll(letterSizeTokens(p.nameHe))"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = all.toList()..sort((a, b) => kLetterSizeOrder.indexOf(a).compareTo(kLetterSizeOrder.index…"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "compareTo",
+        "indexOf",
+        "letterSizeTokens",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wallOptions",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "all = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in pool"
+          },
+          {
+            "kind": "effect",
+            "detail": "all.addAll(wallTokens(p.nameHe))"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = all.toList()..sort((a, b) => (double.tryParse(a) ?? double.infinity).compareTo(double.try…"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "compareTo",
+        "sort",
+        "toList",
+        "tryParse",
+        "wallTokens"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_cleanSub",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String cat) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "subsFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final pre in const ['ברזי ', 'אביזרי ', 'מחברי ']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if cat.startsWith(pre) → return cat.substring(pre.length)"
+          },
+          {
+            "kind": "return",
+            "detail": "cat"
+          }
+        ]
+      },
+      "floor": [
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String cat)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "subsFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(FinderGroup group, List<LipskeyCatalogProduct> base) -> List<FinderSub>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFinderSubs"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_cleanSub",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "present = <String>{for (final p in base) p.categoryHe}"
+          },
+          {
+            "kind": "compute",
+            "detail": "curated = kFinderSubs[group.label]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if curated != null → return [for (final s in curated) if (s.cats.any(present.contains)) s]"
+          },
+          {
+            "kind": "init",
+            "detail": "cats = <String, Set<String>>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "counts = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in base"
+          },
+          {
+            "kind": "compute",
+            "detail": "l = _cleanSub(p.categoryHe)"
+          },
+          {
+            "kind": "effect",
+            "detail": "(cats[l] ??= <String>{}).add(p.categoryHe)"
+          },
+          {
+            "kind": "effect",
+            "detail": "counts[l] = (counts[l] ?? 0) + 1"
+          },
+          {
+            "kind": "compute",
+            "detail": "labels = cats.keys.toList()..sort((a, b) => counts[b]!.compareTo(counts[a]!))"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final l in labels) FinderSub(l, cats[l]!)]"
+          }
+        ]
+      },
+      "floor": [
+        "FinderSub",
+        "add",
+        "any",
+        "compareTo",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(FinderGroup group, List<LipskeyCatalogProduct> base)",
+        "output": "List<FinderSub>",
+        "purity": "pure",
+        "precond": [
+          "if curated != null → return [for (final s in curated) if (s.cats.any(present.contains)) s]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}
