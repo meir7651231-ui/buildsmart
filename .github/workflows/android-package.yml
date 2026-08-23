@@ -71,11 +71,11 @@ jobs:
 
       - name: Build AAB (Google Play app bundle)
         working-directory: app_flutter
-        run: flutter build appbundle --release --dart-define=INTERNAL_CARD=true --dart-define=ACCESS_LOCK=true --dart-define=ORG_CONFIG=true --dart-define=ORG_CONFIG_LIVE=true
+        run: flutter build appbundle --release --dart-define=INTERNAL_CARD=true --dart-define=ACCESS_LOCK=true --dart-define=ORG_CONFIG=true --dart-define=ORG_CONFIG_LIVE=true --dart-define=SCREEN_SECTIONS_LIVE=true
 
       - name: Build APK (installable on a device)
         working-directory: app_flutter
-        run: flutter build apk --release --dart-define=INTERNAL_CARD=true --dart-define=ACCESS_LOCK=true --dart-define=ORG_CONFIG=true --dart-define=ORG_CONFIG_LIVE=true
+        run: flutter build apk --release --dart-define=INTERNAL_CARD=true --dart-define=ACCESS_LOCK=true --dart-define=ORG_CONFIG=true --dart-define=ORG_CONFIG_LIVE=true --dart-define=SCREEN_SECTIONS_LIVE=true
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4

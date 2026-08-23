@@ -100,6 +100,7 @@ jobs:
             --dart-define=TASKS_SERVER=true \
             --dart-define=ORG_CONFIG=true \
             --dart-define=ORG_CONFIG_LIVE=true \
+            --dart-define=SCREEN_SECTIONS_LIVE=true \
             --dart-define=ACCESS_LOCK=true \
             ${{ vars.STUDIO_DART_DEFINES }}
 
