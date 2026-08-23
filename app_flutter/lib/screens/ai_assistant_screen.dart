@@ -236,9 +236,9 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: const CfgText('ai_assistant_screen.title', '🤖 העוזר החכם',
               style: TextStyle(
@@ -313,7 +313,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
         constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.78),
         decoration: BoxDecoration(
-          color: isUser ? BsTokens.brand : BsTokens.cardLight,
+          color: isUser ? BsTokens.brand : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
@@ -355,7 +355,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
           margin: const EdgeInsets.symmetric(vertical: 4),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: BsTokens.cardLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
           ),
           child: const SizedBox(
@@ -381,7 +381,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
                   decoration: InputDecoration(
                     hintText: 'כתוב הודעה…',
                     filled: true,
-                    fillColor: BsTokens.cardLight,
+                    fillColor: Theme.of(context).colorScheme.surface,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
                     border: OutlineInputBorder(

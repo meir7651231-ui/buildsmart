@@ -200,7 +200,7 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
         MaterialPageRoute<void>(
           fullscreenDialog: true,
           builder: (routeCtx) => Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(routeCtx).colorScheme.surface,
             // No AppBar — the card owns its top bar (📋 · SKU · → back). It
             // FILLS the screen edge-to-edge (fillHeight), and the → arrow pops
             // back one screen.
@@ -230,9 +230,9 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.bgLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
           scrolledUnderElevation: 2,
           title: Text(
@@ -489,7 +489,7 @@ class _Tile extends StatelessWidget {
     return SizedBox(
       width: 128,
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         clipBehavior: Clip.antiAlias,
         shape: selected ? _kTileShapeOpen : _kTileShape,
         child: InkWell(
@@ -563,7 +563,7 @@ class _ProductThumb extends StatelessWidget {
       alignment: Alignment.center,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: BsTokens.bgLightAlt,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(radius),
       ),
       child: asset == null

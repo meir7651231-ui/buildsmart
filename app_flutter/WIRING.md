@@ -4409,3 +4409,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave7 — 8 screens theme-aware (2026-08-23)
 **גל 7:** 43 משטחים ב-manager_profile(6)·manager_copilot(6)·regression_panel(6)·finance_hub_sheets(5)·projects(5)·worker_attendance(5)·notifications(5)·courier_portal_tab(4) → theme (כולל תיקון-ידני של RefreshIndicator5 ב-notifications:796). 1 offender ב-courier_portal_tab:359 דולג (arrow-method בלי context). analyze 0 · אטלס 270→228. מצטבר dark-mode 659→228 (431 תוקנו).
+
+### #darkmode-wave8 — 8 screens theme-aware (2026-08-23)
+**גל 8:** 37 משטחים ב-trade_builder_home(5)·catalog_config(5)·catalog_settings(5)·ai_assistant(5)·stock(5)·persona_portal(4)·courier_reports(4)·install_studio(4) → theme. 1 offender ב-persona_portal:325 דולג (arrow-method בלי context). analyze 0 · אטלס 228→191. מצטבר dark-mode 659→191 (468 תוקנו).

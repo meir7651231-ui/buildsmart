@@ -160,9 +160,9 @@ class StockScreen extends ConsumerWidget {
     // grid mirrors THIS screen's tools ([_kbNodes]); on pop the parent's tools
     // return. Pure pass-through (byte-identical) when the flag is off.
     final Widget body = Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black54),
         title: CfgText(
@@ -273,7 +273,7 @@ class _StockTab extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: on ? BsTokens.brand : Colors.white,
+          color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: on ? BsTokens.brand : const Color(0xFFEAEAEA),
@@ -308,7 +308,7 @@ class _StockRow extends StatelessWidget {
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(color: const Color(0xFFEAEAEA)),
     ),
@@ -319,7 +319,7 @@ class _StockRow extends StatelessWidget {
           height: 44,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F6FA),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(info.img, style: const TextStyle(fontSize: 22)),

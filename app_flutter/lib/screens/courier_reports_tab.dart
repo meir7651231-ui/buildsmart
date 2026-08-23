@@ -349,7 +349,7 @@ class CourierReportsTab extends ConsumerWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(
-            color: BsTokens.cardLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(BsTokens.radiusCard),
             boxShadow: const [
               BoxShadow(
@@ -750,7 +750,7 @@ class _DeliveredCardState extends State<_DeliveredCard> {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         boxShadow: const [
           BoxShadow(
@@ -906,7 +906,7 @@ class _RStat extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 3),
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
           boxShadow: const [
             BoxShadow(
@@ -951,7 +951,7 @@ class _RCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         boxShadow: const [
           BoxShadow(

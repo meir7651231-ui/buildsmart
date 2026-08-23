@@ -85,7 +85,7 @@ class PortalTileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       elevation: 1,
       shadowColor: Colors.black26,
@@ -136,7 +136,7 @@ void showPersonaPortalGrid(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -191,7 +191,7 @@ void showPortalSheet(BuildContext context, PortalTileData tile) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -363,7 +363,7 @@ class _ChatEntryRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         child: InkWell(
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),

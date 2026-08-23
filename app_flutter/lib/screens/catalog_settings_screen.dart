@@ -45,9 +45,9 @@ class CatalogSettingsScreen extends ConsumerWidget {
     // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
     // Pure pass-through (byte-identical) when the flag is off.
     final Widget body = Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: const CfgText(
           'catalog_settings_screen.t01',
@@ -95,7 +95,7 @@ class CatalogSettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
             title: const CfgText(
               'catalog_settings_screen.t02',
               'איפוס הגדרות?',
@@ -150,7 +150,7 @@ class _ProfileRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
@@ -756,7 +756,7 @@ class _SectionTile extends StatelessWidget {
     }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(

@@ -68,7 +68,7 @@ class _SheetClose extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 0, 2),
           child: Material(
-            color: const Color(0xFFF5F5F5),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             shape: const CircleBorder(),
             child: Semantics(
               button: true,
@@ -2317,7 +2317,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _accent.withOpacity(0.4)),
                     ),
@@ -2763,7 +2763,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _mute.withOpacity(0.35)),
                     ),
@@ -3082,7 +3082,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _mute.withOpacity(0.35)),
       ),
