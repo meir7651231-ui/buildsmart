@@ -26,7 +26,7 @@ class StudioEntryCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space4),
       child: Card(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         child: ListTile(
           leading: const Text('🎨', style: TextStyle(fontSize: 24)),
           title: const Text(

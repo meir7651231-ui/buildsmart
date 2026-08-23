@@ -221,7 +221,7 @@ class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: Padding(
           padding: const EdgeInsets.all(BsTokens.space1),
           child: Column(

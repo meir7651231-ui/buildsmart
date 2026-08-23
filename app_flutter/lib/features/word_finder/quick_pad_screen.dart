@@ -132,7 +132,7 @@ class _QuickPadScreenState extends ConsumerState<QuickPadScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.surfaceMid,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         body: SafeArea(
           child: picks.isEmpty
               ? _buildEmptyState()

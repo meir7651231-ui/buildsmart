@@ -24,7 +24,7 @@ Future<String?> promptRejectReason(BuildContext context) async {
       builder: (dialogCtx) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          backgroundColor: const Color(0xFFFFFFFF),
+          backgroundColor: Theme.of(dialogCtx).colorScheme.surface,
           title: CfgText(
             'reject_reason_dialog.title',
             '↩️ החזרה לתיקון',

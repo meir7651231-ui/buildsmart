@@ -4454,3 +4454,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave19 — 8 files theme-aware (2026-08-23)
 **גל 19:** 8 משטחים ב-onboarding·nav_launch·tree_pane·finder·catalog_wheel·home_atoms·updates·order_notif → theme. tree_pane threaded context. analyze 0 · אטלס 30→22. מצטבר dark-mode 659→22 (637 תוקנו). החרגה קבועה: edit_safety:132 (קבוע-ייחוס-ניגודיות, לא משטח).
+
+### #darkmode-wave20 — 8 files theme-aware (2026-08-23)
+**גל 20:** 9 משטחים ב-reject_reason_dialog·confirm_dialog·quick_pad_screen·word_finder_home·studio_entry·quick_pad_keyboard·word_keyboard·sudoku_grid(2) → theme. analyze 0 · אטלס 22→13. מצטבר dark-mode 659→13 (646 תוקנו). **fan-out הסתיים** — 13 נותרים = golden/theme-file/canvas/painter/reference בלבד.

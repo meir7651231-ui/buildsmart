@@ -21,7 +21,7 @@ Future<bool> confirmDestructive(
     context: context,
     builder:
         (ctx) => AlertDialog(
-          backgroundColor: const Color(0xFFFFFFFF),
+          backgroundColor: Theme.of(ctx).colorScheme.surface,
           title: Text(
             title,
             style: const TextStyle(color: BsTokens.inkLight),

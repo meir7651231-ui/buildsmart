@@ -336,7 +336,7 @@ class _SudokuGridState extends State<SudokuGrid> {
         height: size,
         margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
           boxShadow: const [
             BoxShadow(
@@ -428,7 +428,7 @@ class _SudokuGridState extends State<SudokuGrid> {
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   shape: BoxShape.circle,
                   border: Border.all(color: _cLine),
                   boxShadow: const [

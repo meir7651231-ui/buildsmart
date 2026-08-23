@@ -142,7 +142,7 @@ class _WordFinderHomeState extends ConsumerState<WordFinderHome> {
         children: [
           // ── Toggle row: two plain-text segments, active one accented ──────
           Material(
-            color: BsTokens.surfaceMid,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
               padding: const EdgeInsets.all(BsTokens.space1),
               child: Row(
