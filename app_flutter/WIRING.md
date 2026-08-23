@@ -4403,3 +4403,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave5 — 8 screens theme-aware (2026-08-23)
 **גל 5:** 56 משטחים ב-accessory_rule_editor(8)·ai_hub(7)·product_authoring(7)·courier_forms(7)·worker_employer_stock(7)·attribute_schema_editor(7)·profile_screen(7)·persona_picking_sheet(6) → theme. 1 offender ב-persona_picking_sheet:777 דולג (`_decisionRow` בלי context — context-threading בהמשך). analyze 0 errors · אטלס 375→319. מצטבר dark-mode 659→319 (340 תוקנו).
+
+### #darkmode-wave6 — 8 screens theme-aware (2026-08-23)
+**גל 6:** 49 משטחים ב-category_tree_editor(7)·lipskey_brand(7)·budget(7)·smart_project(6)·studio_rules(6)·chat_settings(6)·notif_settings(6)·signature_pad(4) → theme. 2 offenders ב-signature_pad:206,440 דולגו לצמיתות (canvas לכידת-חתימה — חייב לבן). analyze 0 errors · אטלס 319→270. מצטבר dark-mode 659→270 (389 תוקנו).

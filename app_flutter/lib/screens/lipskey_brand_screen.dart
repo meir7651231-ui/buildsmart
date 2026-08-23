@@ -35,11 +35,11 @@ class LipskeyBrandScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              backgroundColor: const Color(0xFFFFFFFF),
+              backgroundColor: Theme.of(context).colorScheme.surface,
               foregroundColor: BsTokens.inkLight,
               elevation: 0,
               pinned: true,
@@ -176,7 +176,7 @@ class _SectionCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
               color: const Color(0xFFEEEEEE),
@@ -247,11 +247,11 @@ class LipskeySectionScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              backgroundColor: const Color(0xFFFFFFFF),
+              backgroundColor: Theme.of(context).colorScheme.surface,
               foregroundColor: BsTokens.inkLight,
               elevation: 0,
               pinned: true,
@@ -338,7 +338,7 @@ class _CategoryCard extends StatelessWidget {
         opacity: isEmpty ? 0.4 : 1.0,
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
                 color: const Color(0xFFEEEEEE),
@@ -368,7 +368,7 @@ class _CategoryCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF5F5F5),
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const CfgText(

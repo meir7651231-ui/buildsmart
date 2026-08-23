@@ -167,7 +167,7 @@ class _CategoryTreeEditorState extends ConsumerState<CategoryTreeEditorScreen> {
   InputDecoration _dec(String label) => InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: BsTokens.cardLight,
+        fillColor: Theme.of(context).colorScheme.surface,
         labelStyle:
             const TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
         border: OutlineInputBorder(
@@ -197,9 +197,9 @@ class _CategoryTreeEditorState extends ConsumerState<CategoryTreeEditorScreen> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: BsTokens.bgLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: BsTokens.cardLight,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
             title: const CfgText(
@@ -335,7 +335,7 @@ class _EmptyCategories extends StatelessWidget {
         vertical: BsTokens.space5,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -379,7 +379,7 @@ class _CategoryTile extends StatelessWidget {
       button: true,
       label: '${category.emoji} ${category.titleHe}',
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         child: InkWell(
           borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -470,7 +470,7 @@ class _RenameCategoryDialogState extends State<_RenameCategoryDialog> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: AlertDialog(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: const CfgText(
           'category_tree_editor.t03',
           'שינוי שם',
@@ -487,7 +487,7 @@ class _RenameCategoryDialogState extends State<_RenameCategoryDialog> {
           style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
           decoration: InputDecoration(
             filled: true,
-            fillColor: BsTokens.cardLight,
+            fillColor: Theme.of(context).colorScheme.surface,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFEDEDED)),

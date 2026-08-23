@@ -21,9 +21,9 @@ class ChatSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: CfgText(
           'chat_settings_screen.t01',
@@ -66,7 +66,7 @@ class ChatSettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
             title: CfgText(
               'chat_settings_screen.t02',
               'איפוס הגדרות?',
@@ -150,7 +150,7 @@ class _QuickReplyBanner extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(14),
@@ -445,7 +445,7 @@ class _ChatPrivacySection extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
             title: CfgText(
               'chat_settings_screen.t10',
               'מחיקת היסטוריית שיחות',
@@ -794,7 +794,7 @@ class _SectionTile extends StatelessWidget {
     }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

@@ -64,9 +64,9 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
@@ -110,7 +110,7 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
               Container(
                 padding: const EdgeInsets.all(BsTokens.space4),
                 decoration: BoxDecoration(
-                  color: BsTokens.cardLight,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(cfgRadius(context)),
                 ),
                 child: const Column(
@@ -181,9 +181,9 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
           maxChildSize: 0.95,
           expand: false,
           builder: (_, scroll) => Container(
-            decoration: const BoxDecoration(
-              color: BsTokens.cardLight,
-              borderRadius: BorderRadius.vertical(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(BsTokens.radiusCard)),
             ),
             child: ListView(
@@ -262,7 +262,7 @@ class _Hero extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -344,7 +344,9 @@ class _StageCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
-        color: isDone ? const Color(0xFFF1FAF3) : BsTokens.cardLight,
+        color: isDone
+            ? const Color(0xFFF1FAF3)
+            : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,

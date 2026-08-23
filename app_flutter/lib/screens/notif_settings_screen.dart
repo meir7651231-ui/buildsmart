@@ -30,9 +30,9 @@ class NotifSettingsScreen extends ConsumerWidget {
     // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
     // Pure pass-through (byte-identical) when the flag is off.
     final Widget body = Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: const CfgText(
           'notif_settings_screen.t01',
@@ -76,7 +76,7 @@ class NotifSettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
             title: const CfgText(
               'notif_settings_screen.t02',
               'איפוס הגדרות?',
@@ -133,7 +133,7 @@ class _SnoozeBanner extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
       decoration: BoxDecoration(
-        color: snoozed ? const Color(0xFF3A2A0F) : const Color(0xFFFFFFFF),
+        color: snoozed ? const Color(0xFF3A2A0F) : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: snoozed ? Colors.orange : Colors.transparent),
       ),
@@ -193,7 +193,7 @@ class _SnoozeBanner extends ConsumerWidget {
   Future<void> _showSnoozeMenu(BuildContext context, WidgetRef ref) async {
     final picked = await showModalBottomSheet<int>(
       context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -859,7 +859,7 @@ class _SectionTile extends StatelessWidget {
     }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(

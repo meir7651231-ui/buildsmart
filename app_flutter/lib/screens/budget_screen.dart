@@ -245,9 +245,9 @@ class BudgetScreen extends ConsumerWidget {
         : 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black54),
         title: const CfgText('budget_screen.title', 'תקציב הפרויקט',
@@ -262,7 +262,9 @@ class BudgetScreen extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 22),
               decoration: BoxDecoration(
-                color: over ? const Color(0xFFFFF0F0) : Colors.white,
+                color: over
+                    ? const Color(0xFFFFF0F0)
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                     color: over ? const Color(0xFFFFD0D0) : const Color(0xFFEAEAEA)),
@@ -420,7 +422,7 @@ class BudgetScreen extends ConsumerWidget {
     final costCtl = TextEditingController();
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
@@ -532,7 +534,7 @@ class BudgetScreen extends ConsumerWidget {
     final canDelete = exists && cats.length > 1;
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
@@ -642,7 +644,7 @@ class _NumBox extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: const Color(0xFFEAEAEA)),
               ),
@@ -769,7 +771,7 @@ class _Field extends StatelessWidget {
             labelStyle: const TextStyle(color: _muted),
             errorText: validator?.call(value.text),
             filled: true,
-            fillColor: const Color(0xFFF5F6FA),
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none),

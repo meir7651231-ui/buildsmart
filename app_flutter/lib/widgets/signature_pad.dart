@@ -112,7 +112,7 @@ Future<String?> openSignaturePad(BuildContext context) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -391,7 +391,7 @@ Future<String?> showSignatureSheet(
 
   return showModalBottomSheet<String?>(
     context: context,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius:
@@ -470,7 +470,7 @@ Future<String?> showSignatureSheet(
                       child: CfgVisible(
                         'signature_pad.clear2',
                         child: Material(
-                        color: BsTokens.surfaceMid,
+                        color: Theme.of(sheetCtx).colorScheme.surfaceContainerHighest,
                         borderRadius:
                             BorderRadius.circular(BsTokens.radiusPill),
                         child: InkWell(
@@ -507,7 +507,7 @@ Future<String?> showSignatureSheet(
                       child: CfgVisible(
                         'signature_pad.cancel_btn',
                         child: Material(
-                        color: BsTokens.surfaceMid,
+                        color: Theme.of(sheetCtx).colorScheme.surfaceContainerHighest,
                         borderRadius:
                             BorderRadius.circular(BsTokens.radiusPill),
                         child: InkWell(

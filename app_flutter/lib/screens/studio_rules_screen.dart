@@ -162,7 +162,7 @@ class _StudioRulesScreenState extends ConsumerState<StudioRulesScreen> {
                 decoration: InputDecoration(
                   isDense: true,
                   filled: true,
-                  fillColor: BsTokens.cardLight,
+                  fillColor: Theme.of(context).colorScheme.surface,
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10,
                     horizontal: 8,
@@ -249,7 +249,7 @@ class _StudioRulesScreenState extends ConsumerState<StudioRulesScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: const CfgText(
@@ -281,7 +281,7 @@ class _StudioRulesScreenState extends ConsumerState<StudioRulesScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: Text(
@@ -310,7 +310,7 @@ class _StudioRulesScreenState extends ConsumerState<StudioRulesScreen> {
       margin: const EdgeInsets.only(bottom: BsTokens.space2),
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: BsTokens.divider),
       ),
@@ -358,8 +358,8 @@ class _StudioRulesScreenState extends ConsumerState<StudioRulesScreen> {
     bool disabled = false,
   }) {
     final bg = disabled
-        ? BsTokens.surfaceMid
-        : (selected ? BsTokens.brand : BsTokens.cardLight);
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : (selected ? BsTokens.brand : Theme.of(context).colorScheme.surface);
     final fg = disabled
         ? BsTokens.mutedLight
         : (selected ? bsOnAccent(context) : BsTokens.inkLight);
