@@ -1638,7 +1638,7 @@ class _InternalCardGalleryState extends State<_InternalCardGallery> {
                       margin: const EdgeInsets.all(24),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(18),
                       ),
                       child: ProductLine3D(route: route),

@@ -162,9 +162,9 @@ class _CompanyCatalogImportSheetState
           BsTokens.space4,
           BsTokens.space5,
         ),
-        decoration: const BoxDecoration(
-          color: BsTokens.cardLight,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
         ),
         child: SafeArea(
           top: false,

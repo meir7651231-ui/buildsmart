@@ -190,14 +190,14 @@ class _SegmentedToggle extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _segment(label: 'תנאי שימוש', tab: LegalTab.terms),
-          _segment(label: 'מדיניות פרטיות', tab: LegalTab.privacy),
+          _segment(context, label: 'תנאי שימוש', tab: LegalTab.terms),
+          _segment(context, label: 'מדיניות פרטיות', tab: LegalTab.privacy),
         ],
       ),
     );
   }
 
-  Widget _segment({required String label, required LegalTab tab}) {
+  Widget _segment(BuildContext context, {required String label, required LegalTab tab}) {
     final selected = value == tab;
     return Expanded(
       child: GestureDetector(
@@ -206,7 +206,7 @@ class _SegmentedToggle extends StatelessWidget {
           duration: BsTokens.microIn,
           padding: const EdgeInsets.symmetric(vertical: BsTokens.space2),
           decoration: BoxDecoration(
-            color: selected ? BsTokens.cardLight : Colors.transparent,
+            color: selected ? Theme.of(context).colorScheme.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(BsTokens.space2),
             boxShadow: selected ? BsTokens.labelShadow : null,
           ),

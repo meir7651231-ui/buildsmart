@@ -2747,3 +2747,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave17 — 8 files (supplier_onboarding/reject_reason/business_summary/worker_report_drilldowns/login_sheet/worker_equipment_checklist/camera_sheet/word_finder) (2026-08-23)
 **גל 17 (8 fixers מקבילים):** 11 light-surfaces → תמה, 0 דולגו. cardLight/white→`colorScheme.surface` · bgLight→`scaffoldBackgroundColor` · surfaceMid→`surfaceContainerHighest`. **camera_sheet:404** אומת כדיאלוג-אישור (chrome) ולא preview-מצלמה → הומר בבטחה. `flutter analyze` 0 errors. **אטלס 49→38** (‎-11). מצטבר 659→38 (621 תוקנו).
+
+## #darkmode-wave18 — 4 arrow-method threading (הדחויים) + 4 קבצים (2026-08-23)
+**גל 18 (8 fixers):** 8 light-surfaces → תמה, 0 דולגו. **4 הדחויים arrow-method נפתרו ב-context-threading:** persona_picking_sheet:777 (`_decisionRow`, 2 call-sites) · courier_portal_tab:359 (`_row`, **9 call-sites**) · legal_screen:209 (`_segment`, 2) · persona_portal:325 (`_row`, **11 call-sites**) — כל אחד קיבל פרמטר `BuildContext context` שהושחל מכל אתרי-הקריאה. +4 קבצים רגילים: full_internal_card · company_catalog_import · customer_import · worker_today_strip. `flutter analyze` 0 errors (מאמת שכל אתרי-הקריאה המושחלים נפתרים). **אטלס 38→30** (‎-8). מצטבר 659→30 (629 תוקנו). **כל דחיות ה-arrow/helper נסגרו — נותרו רק golden/theme-file/canvas/painter.**

@@ -251,23 +251,23 @@ class _PortalSheet extends ConsumerWidget {
         return [
           if (!kHideUnderConstruction) ...[
             for (final r in kSupplierRatings)
-              _row('⭐ ${r.score} · ${r.orders} הזמנות · ${r.onTime}% בזמן'),
+              _row(context, '⭐ ${r.score} · ${r.orders} הזמנות · ${r.onTime}% בזמן'),
             _note('נתוני הדגמה (seed מהפרוטוטייפ) — יוחלפו בנתונים חיים עם חיבור השרת'),
           ] else
-            _row('דירוגי ספקים חיים יתווספו עם חיבור השרת'),
+            _row(context, 'דירוגי ספקים חיים יתווספו עם חיבור השרת'),
         ];
       case PortalKind.zones:
         return [
           for (final z in kDistZones)
-            _row('${z.name} · ${z.eta} · משלוח ${fMoney(z.fee)}'),
+            _row(context, '${z.name} · ${z.eta} · משלוח ${fMoney(z.fee)}'),
         ];
       case PortalKind.sla:
         return [
-          for (final z in kDistZones) _row('${z.name} · יעד אספקה: ${z.eta}'),
+          for (final z in kDistZones) _row(context, '${z.name} · יעד אספקה: ${z.eta}'),
         ];
       case PortalKind.bulk:
         return [
-          for (final t in kBulkTiers) _row('${t.min}+ יח׳ · ${t.discount}% הנחה'),
+          for (final t in kBulkTiers) _row(context, '${t.min}+ יח׳ · ${t.discount}% הנחה'),
         ];
       case PortalKind.fleet:
         // fake-data-sweep: kFleet is a demo seed with no live source — gate it and
@@ -275,20 +275,20 @@ class _PortalSheet extends ConsumerWidget {
         return [
           if (!kHideUnderConstruction) ...[
             for (final v in kFleet)
-              _row('${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
+              _row(context, '${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
           ] else
-            _row('ניהול צי חי יתחבר עם חיבור השרת'),
+            _row(context, 'ניהול צי חי יתחבר עם חיבור השרת'),
         ];
       case PortalKind.autoStock:
         // Live out-of-stock list — the supplier's [storeOosProvider] set, the
         // same source the store dashboard's מלאי tab toggles.
         final oos = ref.watch(storeOosProvider).toList()..sort();
         if (oos.isEmpty) {
-          return [_row('✓ כל המוצרים זמינים במלאי')];
+          return [_row(context, '✓ כל המוצרים זמינים במלאי')];
         }
         return [
-          _row('⚠️ ${oos.length} מוצרים אזלו מהמלאי'),
-          for (final name in oos) _row('❌ $name'),
+          _row(context, '⚠️ ${oos.length} מוצרים אזלו מהמלאי'),
+          for (final name in oos) _row(context, '❌ $name'),
         ];
       // 💬 chat tiles are now wired (CH-4) to the shared cross-persona
       // [ChatsScreen]. The portal serves a SINGLE active persona, so the tile's
@@ -309,11 +309,11 @@ class _PortalSheet extends ConsumerWidget {
       case PortalKind.barcode:
       case PortalKind.nav:
       case PortalKind.pod:
-        return [_row('${tile.sub} — כלי זה יחובר בהמשך הפיתוח.')];
+        return [_row(context, '${tile.sub} — כלי זה יחובר בהמשך הפיתוח.')];
     }
   }
 
-  Widget _row(String text) => Padding(
+  Widget _row(BuildContext context, String text) => Padding(
     padding: const EdgeInsets.only(bottom: BsTokens.space2),
     child: Container(
       width: double.infinity,
@@ -322,7 +322,7 @@ class _PortalSheet extends ConsumerWidget {
         vertical: BsTokens.space3,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: Text(

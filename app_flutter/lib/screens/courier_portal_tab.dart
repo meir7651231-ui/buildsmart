@@ -149,7 +149,7 @@ class CourierPortalTab extends ConsumerWidget {
     if (eligible.isEmpty) {
       // ביושר: אין משלוח פעיל — לא מזייפים POD.
       _sheet(context, '📸 אישור מסירה', 'POD + צילום', [
-        _row('אין כרגע משלוח בידי השליח — POD זמין משלב האיסוף (לקיחה/בדרך).'),
+        _row(context, 'אין כרגע משלוח בידי השליח — POD זמין משלב האיסוף (לקיחה/בדרך).'),
       ]);
       return;
     }
@@ -176,6 +176,7 @@ class CourierPortalTab extends ConsumerWidget {
     _sheet(context, tile.title, tile.sub, [
       for (final h in kHaulTypes)
         _row(
+          context,
           // fake-data-sweep: tier + price are real static config (keep, always);
           // the demo "זמינים היום" availability is gated with its label below.
           '${h.ic} ${h.name} · תוספת ${fMoney(h.extra)}'
@@ -192,7 +193,7 @@ class CourierPortalTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space2),
         _subhead('רכבי הצי'),
         for (final v in kFleet)
-          _row('${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
+          _row(context, '${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
       ],
     ]);
   }
@@ -206,14 +207,14 @@ class CourierPortalTab extends ConsumerWidget {
     _sheet(context, tile.title, tile.sub, [
       _subhead('כתובות משלוח פעילות'),
       if (active.isEmpty)
-        _row('✓ אין משלוחים פעילים כרגע')
+        _row(context, '✓ אין משלוחים פעילים כרגע')
       else
         for (final o in active)
-          _row('📍 ${o.site} · ${o.id} · ${kOrderStageLabel[o.stage]}'),
+          _row(context, '📍 ${o.site} · ${o.id} · ${kOrderStageLabel[o.stage]}'),
       const SizedBox(height: BsTokens.space2),
       _subhead('אזורי שירות'),
       for (final z in kDistZones)
-        _row('${z.name} · ${z.eta} · משלוח ${fMoney(z.fee)}'),
+        _row(context, '${z.name} · ${z.eta} · משלוח ${fMoney(z.fee)}'),
       // ביושר: רשימת אזורים בלבד (מפה/ניווט = C6 location fleet — לא נגעתי).
       // fake-data-sweep: ניסוח נקי — ההערה מוצגת גם ב-review, בלי מילת-הדגמה.
       _note('תצוגת מפה חיה תחובר עם חיבור השרת'),
@@ -230,7 +231,7 @@ class CourierPortalTab extends ConsumerWidget {
       _serverPending('ניווט חי במפות (Waze / Google Maps) יחובר עם חיבור השרת'),
       const SizedBox(height: BsTokens.space2),
       if (active.isEmpty)
-        _row('✓ אין משלוחים פעילים לניווט כרגע')
+        _row(context, '✓ אין משלוחים פעילים לניווט כרגע')
       else
         for (final o in active) _DestinationCard(order: o),
     ]);
@@ -247,7 +248,7 @@ class CourierPortalTab extends ConsumerWidget {
       const SizedBox(height: BsTokens.space2),
       _subhead('משלוחים פעילים'),
       if (active.isEmpty)
-        _row('✓ אין משלוחים פעילים כרגע')
+        _row(context, '✓ אין משלוחים פעילים כרגע')
       else
         for (final o in active)
           Padding(
@@ -287,7 +288,7 @@ class CourierPortalTab extends ConsumerWidget {
           ),
       const SizedBox(height: BsTokens.space2),
       _subhead('יעדי אספקה לפי אזור'),
-      for (final z in kDistZones) _row('${z.name} · יעד אספקה: ${z.eta}'),
+      for (final z in kDistZones) _row(context, '${z.name} · יעד אספקה: ${z.eta}'),
     ]);
   }
 
@@ -347,7 +348,7 @@ class CourierPortalTab extends ConsumerWidget {
     );
   }
 
-  Widget _row(String text) => Padding(
+  Widget _row(BuildContext context, String text) => Padding(
     padding: const EdgeInsets.only(bottom: BsTokens.space2),
     child: Container(
       width: double.infinity,
@@ -356,7 +357,7 @@ class CourierPortalTab extends ConsumerWidget {
         vertical: BsTokens.space3,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: Text(

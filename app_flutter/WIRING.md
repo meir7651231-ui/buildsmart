@@ -4448,3 +4448,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave17 — 8 files theme-aware (2026-08-23)
 **גל 17:** 11 משטחים ב-supplier_onboarding(2)·reject_reason(2)·business_summary(2)·worker_report_drilldowns(1)·login_sheet(1)·worker_equipment_checklist(1)·camera_sheet(1)·word_finder(1) → theme. camera_sheet=confirm-dialog (chrome). analyze 0 · אטלס 49→38. מצטבר dark-mode 659→38 (621 תוקנו).
+
+### #darkmode-wave18 — arrow-method threading + 4 files (2026-08-23)
+**גל 18:** 8 משטחים → theme. 4 דחויי-arrow נפתרו ב-threading (persona_picking:777 · courier_portal_tab:359 [9 call-sites] · legal:209 · persona_portal:325 [11 call-sites]) + full_internal_card · company_catalog_import · customer_import · worker_today_strip. analyze 0 · אטלס 38→30. מצטבר dark-mode 659→30 (629 תוקנו).

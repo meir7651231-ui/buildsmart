@@ -673,7 +673,7 @@ class ContractorMissingDecisionSheet extends ConsumerWidget {
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               )
             else ...[
-              _decisionRow('הזמנה: ${order.id} · ${order.site}'),
+              _decisionRow(context, 'הזמנה: ${order.id} · ${order.site}'),
               if (pending.isEmpty)
                 const _Banner(
                   text: '✓ ההחלטה התקבלה — הספק ממשיך בליקוט (תיקון בוצע)',
@@ -682,6 +682,7 @@ class ContractorMissingDecisionSheet extends ConsumerWidget {
                 )
               else ...[
                 _decisionRow(
+                  context,
                   'הספק עצר את הליקוט — יש לבחור לכל פריט חסר: החלפה או הסרה, '
                   'או לבטל את ההזמנה כולה.',
                 ),
@@ -765,7 +766,7 @@ class ContractorMissingDecisionSheet extends ConsumerWidget {
   }
 }
 
-Widget _decisionRow(String text) => Padding(
+Widget _decisionRow(BuildContext context, String text) => Padding(
   padding: const EdgeInsets.only(bottom: BsTokens.space2),
   child: Container(
     width: double.infinity,
@@ -774,7 +775,7 @@ Widget _decisionRow(String text) => Padding(
       vertical: BsTokens.space3,
     ),
     decoration: BoxDecoration(
-      color: BsTokens.bgLight,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
     ),
     child: Text(
