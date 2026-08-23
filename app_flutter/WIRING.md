@@ -4397,3 +4397,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave3 — 8 screens theme-aware (2026-08-18)
 **גל 3:** 114 משטחים ב-manager_dashboard(30)·chats(16)·org_setup(15)·worker_safety(12)·courier_dashboard(12)·rewards(12)·tasks(11)·site_hub(6) → theme. 7 offenders ב-site_hub דולגו (פונקציות-עזר בלי context — context-threading בהמשך). analyze 0 errors · אטלס 561→447. מצטבר dark-mode 659→447 (212 תוקנו).
+
+### #darkmode-wave4 — 8 screens theme-aware (2026-08-18)
+**גל 4:** 72 משטחים ב-connection_rule_studio(11)·courier_profile(10)·worker_app(9)·lipskey_product_sheet(9)·worker_profile(9)·contractor_hr(8)·worker_forms(8)·courier_certs(8) → theme, 0 דולגו. analyze 0 · אטלס 447→375. מצטבר dark-mode 659→375 (284 תוקנו).

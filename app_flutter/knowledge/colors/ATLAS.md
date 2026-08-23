@@ -2,28 +2,20 @@
 
 Scanned **652** files · **192** carry colors.
 
-- **7804** hardcoded color references total
-- **447** LIGHT-hardcoded SURFACES ⇒ the dark-mode offenders (a white bg painted over the themed Scaffold)
-- by role: other=3517 · text=2428 · surface=1012 · border=676 · icon=150 · shadow=20 · gradient=1
+- **7732** hardcoded color references total
+- **375** LIGHT-hardcoded SURFACES ⇒ the dark-mode offenders (a white bg painted over the themed Scaffold)
+- by role: other=3517 · text=2428 · surface=940 · border=676 · icon=150 · shadow=20 · gradient=1
 
 ## Work-list — screens ranked by dark-mode offenders (fix top-down)
 
 | screen | light-surfaces | total colors |
 |---|---|---|
-| `connection_rule_studio.dart` | **11** | 72 |
-| `courier_profile_screen.dart` | **10** | 97 |
-| `worker_app_screen.dart` | **9** | 160 |
-| `lipskey_product_sheet.dart` | **9** | 150 |
-| `worker_profile_screen.dart` | **9** | 110 |
-| `contractor_hr_sheet.dart` | **8** | 100 |
-| `worker_forms_screen.dart` | **8** | 95 |
-| `courier_certs_screen.dart` | **8** | 81 |
 | `accessory_rule_editor.dart` | **8** | 58 |
 | `persona_picking_sheet.dart` | **7** | 148 |
 | `courier_forms_screen.dart` | **7** | 74 |
 | `worker_employer_stock_sheet.dart` | **7** | 70 |
-| `ai_hub_screen.dart` | **7** | 67 |
 | `site_hub_screen.dart` | **7** | 67 |
+| `ai_hub_screen.dart` | **7** | 67 |
 | `product_authoring_screen.dart` | **7** | 65 |
 | `attribute_schema_editor.dart` | **7** | 59 |
 | `profile_screen.dart` | **7** | 55 |
@@ -64,8 +56,8 @@ Scanned **652** files · **192** carry colors.
 | `studio_component_builder.dart` | **3** | 57 |
 | `contractor_tools_sheets.dart` | **3** | 50 |
 | `defects_sheet.dart` | **3** | 45 |
-| `docs_readiness_gate.dart` | **3** | 43 |
 | `worker_task_board_screen.dart` | **3** | 43 |
+| `docs_readiness_gate.dart` | **3** | 43 |
 | `manager_role_assign_sheet.dart` | **3** | 43 |
 | `contractor_attendance_sheet.dart` | **3** | 40 |
 | `help_target.dart` | **3** | 37 |
@@ -78,8 +70,8 @@ Scanned **652** files · **192** carry colors.
 | `ai_finder_screen.dart` | **3** | 19 |
 | `describe_to_cart_screen.dart` | **3** | 18 |
 | `config_theme.dart` | **3** | 12 |
-| `welcome_screen.dart` | **2** | 94 |
 | `ring_dive_screen.dart` | **2** | 94 |
+| `welcome_screen.dart` | **2** | 94 |
 | `worker_reports_tab.dart` | **2** | 76 |
 | `worker_task_detail_sheet.dart` | **2** | 70 |
 | `courier_delivery_detail_sheet.dart` | **2** | 56 |
@@ -88,27 +80,27 @@ Scanned **652** files · **192** carry colors.
 | `persona_pod_sheet.dart` | **2** | 38 |
 | `worker_notifs_sheet.dart` | **2** | 31 |
 | `store_documents_sheet.dart` | **2** | 30 |
-| `worker_payslips_sheet.dart` | **2** | 30 |
 | `role_request_sheet.dart` | **2** | 30 |
+| `worker_payslips_sheet.dart` | **2** | 30 |
 | `audit_screen.dart` | **2** | 28 |
 | `profession_screen.dart` | **2** | 21 |
 | `consent_modal.dart` | **2** | 18 |
 | `role_picker_sheet.dart` | **2** | 17 |
-| `alt_explain_screen.dart` | **2** | 16 |
 | `sudoku_grid.dart` | **2** | 16 |
+| `alt_explain_screen.dart` | **2** | 16 |
 | `quote_polish_screen.dart` | **2** | 16 |
 | `coming_soon_screen.dart` | **2** | 15 |
-| `adapter_explain_screen.dart` | **2** | 14 |
 | `paired_explain_screen.dart` | **2** | 14 |
+| `adapter_explain_screen.dart` | **2** | 14 |
+| `daily_report_screen.dart` | **2** | 13 |
 | `credit_explain_screen.dart` | **2** | 13 |
 | `manager_screens_sheet.dart` | **2** | 13 |
-| `daily_report_screen.dart` | **2** | 13 |
 | `supplier_onboarding_screen.dart` | **2** | 12 |
-| `reject_reason_screen.dart` | **2** | 11 |
 | `business_summary_screen.dart` | **2** | 11 |
+| `reject_reason_screen.dart` | **2** | 11 |
 | `studio_screen.dart` | **2** | 5 |
-| `login_sheet.dart` | **1** | 49 |
 | `worker_report_drilldowns.dart` | **1** | 49 |
+| `login_sheet.dart` | **1** | 49 |
 | `worker_equipment_checklist_sheet.dart` | **1** | 48 |
 | `camera_sheet.dart` | **1** | 45 |
 | `word_finder_screen.dart` | **1** | 44 |
@@ -116,14 +108,14 @@ Scanned **652** files · **192** carry colors.
 | `company_catalog_import_sheet.dart` | **1** | 35 |
 | `customer_import_sheet.dart` | **1** | 32 |
 | `worker_today_strip.dart` | **1** | 24 |
-| `app_theme.dart` | **1** | 18 |
 | `onboarding_screen.dart` | **1** | 18 |
-| `nav_launch.dart` | **1** | 13 |
+| `app_theme.dart` | **1** | 18 |
 | `tree_pane.dart` | **1** | 13 |
 | `finder_screen.dart` | **1** | 13 |
+| `nav_launch.dart` | **1** | 13 |
 | `catalog_wheel_screen.dart` | **1** | 12 |
-| `smart_chip_strip.dart` | **1** | 11 |
 | `home_atoms.dart` | **1** | 11 |
+| `smart_chip_strip.dart` | **1** | 11 |
 | `edit_safety.dart` | **1** | 8 |
 | `quick_pad_keyboard.dart` | **1** | 7 |
 | `updates_screen.dart` | **1** | 6 |
@@ -136,94 +128,6 @@ Scanned **652** files · **192** carry colors.
 | `order_notif_sheet.dart` | **1** | 2 |
 
 ## Offender sites (light surfaces, file:line → token)
-
-### app_flutter/lib/screens/trade_builder/connection_rule_studio.dart
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:227` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:265` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:267` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:346` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:359` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:434` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:473` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:557` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:661` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:679` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/trade_builder/connection_rule_studio.dart:726` · `BsTokens.cardLight`
-
-### app_flutter/lib/screens/courier_profile_screen.dart
-- `app_flutter/lib/screens/courier_profile_screen.dart:73` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/courier_profile_screen.dart:75` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_profile_screen.dart:223` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_profile_screen.dart:249` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_profile_screen.dart:393` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_profile_screen.dart:557` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_profile_screen.dart:808` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_profile_screen.dart:846` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_profile_screen.dart:1042` · `Color(0xFFFFFFFF)`
-- `app_flutter/lib/screens/courier_profile_screen.dart:1116` · `BsTokens.cardLight`
-
-### app_flutter/lib/screens/worker_app_screen.dart
-- `app_flutter/lib/screens/worker_app_screen.dart:150` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/worker_app_screen.dart:152` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_app_screen.dart:711` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_app_screen.dart:930` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_app_screen.dart:991` · `Color(0xFFF5F6FA)`
-- `app_flutter/lib/screens/worker_app_screen.dart:1181` · `Color(0xFFFFFFFF)`
-- `app_flutter/lib/screens/worker_app_screen.dart:1254` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_app_screen.dart:1524` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_app_screen.dart:1970` · `BsTokens.cardLight`
-
-### app_flutter/lib/screens/lipskey_product_sheet.dart
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:749` · `Color(0xFFF5F6FA)`
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:771` · `Color(0xFFF5F5F5)`
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:1187` · `Color(0xFFF5F6FA)`
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:1336` · `Color(0xFFFFFFFF)`
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:1429` · `Color(0xFFFFFFFF)`
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:1591` · `Color(0xFFF5F6FA)`
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:1791` · `Colors.white`
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:2310` · `Colors.white`
-- `app_flutter/lib/screens/lipskey_product_sheet.dart:3045` · `Colors.white`
-
-### app_flutter/lib/screens/worker_profile_screen.dart
-- `app_flutter/lib/screens/worker_profile_screen.dart:153` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/worker_profile_screen.dart:155` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_profile_screen.dart:219` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_profile_screen.dart:388` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_profile_screen.dart:594` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_profile_screen.dart:772` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_profile_screen.dart:882` · `Color(0xFFFFFFFF)`
-- `app_flutter/lib/screens/worker_profile_screen.dart:1209` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_profile_screen.dart:1414` · `BsTokens.bgLight`
-
-### app_flutter/lib/screens/contractor_hr_sheet.dart
-- `app_flutter/lib/screens/contractor_hr_sheet.dart:201` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/contractor_hr_sheet.dart:438` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/contractor_hr_sheet.dart:543` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/contractor_hr_sheet.dart:619` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/contractor_hr_sheet.dart:667` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/contractor_hr_sheet.dart:781` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/contractor_hr_sheet.dart:825` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/contractor_hr_sheet.dart:892` · `BsTokens.bgLight`
-
-### app_flutter/lib/screens/worker_forms_screen.dart
-- `app_flutter/lib/screens/worker_forms_screen.dart:182` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/worker_forms_screen.dart:184` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_forms_screen.dart:351` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/worker_forms_screen.dart:750` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/worker_forms_screen.dart:1021` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_forms_screen.dart:1070` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_forms_screen.dart:1118` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/worker_forms_screen.dart:1176` · `BsTokens.bgLight`
-
-### app_flutter/lib/screens/courier_certs_screen.dart
-- `app_flutter/lib/screens/courier_certs_screen.dart:53` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/courier_certs_screen.dart:55` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_certs_screen.dart:125` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_certs_screen.dart:285` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/courier_certs_screen.dart:336` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_certs_screen.dart:490` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/courier_certs_screen.dart:538` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/courier_certs_screen.dart:641` · `BsTokens.bgLight`
 
 ### app_flutter/lib/screens/trade_builder/accessory_rule_editor.dart
 - `app_flutter/lib/screens/trade_builder/accessory_rule_editor.dart:195` · `BsTokens.cardLight`
@@ -262,15 +166,6 @@ Scanned **652** files · **192** carry colors.
 - `app_flutter/lib/screens/worker_employer_stock_sheet.dart:421` · `BsTokens.cardLight`
 - `app_flutter/lib/screens/worker_employer_stock_sheet.dart:505` · `BsTokens.cardLight`
 
-### app_flutter/lib/screens/ai_hub_screen.dart
-- `app_flutter/lib/screens/ai_hub_screen.dart:261` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/ai_hub_screen.dart:355` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/ai_hub_screen.dart:734` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/ai_hub_screen.dart:812` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/ai_hub_screen.dart:865` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/ai_hub_screen.dart:949` · `Color(0xFFEEEEEE)`
-- `app_flutter/lib/screens/ai_hub_screen.dart:1023` · `Color(0xFFF5F5F5)`
-
 ### app_flutter/lib/screens/site_hub_screen.dart
 - `app_flutter/lib/screens/site_hub_screen.dart:669` · `BsTokens.cardLight`
 - `app_flutter/lib/screens/site_hub_screen.dart:697` · `BsTokens.bgLight`
@@ -279,6 +174,15 @@ Scanned **652** files · **192** carry colors.
 - `app_flutter/lib/screens/site_hub_screen.dart:1002` · `BsTokens.cardLight`
 - `app_flutter/lib/screens/site_hub_screen.dart:1088` · `BsTokens.cardLight`
 - `app_flutter/lib/screens/site_hub_screen.dart:1133` · `BsTokens.bgLight`
+
+### app_flutter/lib/screens/ai_hub_screen.dart
+- `app_flutter/lib/screens/ai_hub_screen.dart:261` · `BsTokens.bgLight`
+- `app_flutter/lib/screens/ai_hub_screen.dart:355` · `BsTokens.bgLight`
+- `app_flutter/lib/screens/ai_hub_screen.dart:734` · `BsTokens.cardLight`
+- `app_flutter/lib/screens/ai_hub_screen.dart:812` · `BsTokens.cardLight`
+- `app_flutter/lib/screens/ai_hub_screen.dart:865` · `BsTokens.cardLight`
+- `app_flutter/lib/screens/ai_hub_screen.dart:949` · `Color(0xFFEEEEEE)`
+- `app_flutter/lib/screens/ai_hub_screen.dart:1023` · `Color(0xFFF5F5F5)`
 
 ### app_flutter/lib/screens/trade_builder/product_authoring_screen.dart
 - `app_flutter/lib/screens/trade_builder/product_authoring_screen.dart:273` · `BsTokens.cardLight`
@@ -565,15 +469,15 @@ Scanned **652** files · **192** carry colors.
 - `app_flutter/lib/screens/defects_sheet.dart:309` · `BsTokens.bgLight`
 - `app_flutter/lib/screens/defects_sheet.dart:521` · `BsTokens.cardLight`
 
-### app_flutter/lib/screens/docs_readiness_gate.dart
-- `app_flutter/lib/screens/docs_readiness_gate.dart:53` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/docs_readiness_gate.dart:59` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/docs_readiness_gate.dart:275` · `BsTokens.cardLight`
-
 ### app_flutter/lib/screens/worker_task_board_screen.dart
 - `app_flutter/lib/screens/worker_task_board_screen.dart:91` · `BsTokens.bgLight`
 - `app_flutter/lib/screens/worker_task_board_screen.dart:93` · `BsTokens.cardLight`
 - `app_flutter/lib/screens/worker_task_board_screen.dart:160` · `BsTokens.cardLight`
+
+### app_flutter/lib/screens/docs_readiness_gate.dart
+- `app_flutter/lib/screens/docs_readiness_gate.dart:53` · `BsTokens.bgLight`
+- `app_flutter/lib/screens/docs_readiness_gate.dart:59` · `BsTokens.cardLight`
+- `app_flutter/lib/screens/docs_readiness_gate.dart:275` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/manager_role_assign_sheet.dart
 - `app_flutter/lib/screens/manager_role_assign_sheet.dart:86` · `BsTokens.cardLight`
@@ -635,13 +539,13 @@ Scanned **652** files · **192** carry colors.
 - `app_flutter/lib/theme/config_theme.dart:31` · `BsTokens.cardLight`
 - `app_flutter/lib/theme/config_theme.dart:99` · `BsTokens.cardLight`
 
-### app_flutter/lib/screens/welcome_screen.dart
-- `app_flutter/lib/screens/welcome_screen.dart:718` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/welcome_screen.dart:808` · `BsTokens.cardLight`
-
 ### app_flutter/lib/features/ring_dive/ring_dive_screen.dart
 - `app_flutter/lib/features/ring_dive/ring_dive_screen.dart:272` · `Colors.white`
 - `app_flutter/lib/features/ring_dive/ring_dive_screen.dart:1629` · `Colors.white`
+
+### app_flutter/lib/screens/welcome_screen.dart
+- `app_flutter/lib/screens/welcome_screen.dart:718` · `BsTokens.cardLight`
+- `app_flutter/lib/screens/welcome_screen.dart:808` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/worker_reports_tab.dart
 - `app_flutter/lib/screens/worker_reports_tab.dart:821` · `BsTokens.cardLight`
@@ -675,13 +579,13 @@ Scanned **652** files · **192** carry colors.
 - `app_flutter/lib/screens/store_documents_sheet.dart:20` · `BsTokens.cardLight`
 - `app_flutter/lib/screens/store_documents_sheet.dart:162` · `BsTokens.bgLight`
 
-### app_flutter/lib/screens/worker_payslips_sheet.dart
-- `app_flutter/lib/screens/worker_payslips_sheet.dart:14` · `BsTokens.cardLight`
-- `app_flutter/lib/screens/worker_payslips_sheet.dart:152` · `BsTokens.bgLight`
-
 ### app_flutter/lib/screens/role_request_sheet.dart
 - `app_flutter/lib/screens/role_request_sheet.dart:80` · `BsTokens.cardLight`
 - `app_flutter/lib/screens/role_request_sheet.dart:237` · `Color(0xFFFFFFFF)`
+
+### app_flutter/lib/screens/worker_payslips_sheet.dart
+- `app_flutter/lib/screens/worker_payslips_sheet.dart:14` · `BsTokens.cardLight`
+- `app_flutter/lib/screens/worker_payslips_sheet.dart:152` · `BsTokens.bgLight`
 
 ### app_flutter/lib/screens/audit_screen.dart
 - `app_flutter/lib/screens/audit_screen.dart:151` · `Color(0xFFFAFAFA)`
@@ -699,13 +603,13 @@ Scanned **652** files · **192** carry colors.
 - `app_flutter/lib/screens/role_picker_sheet.dart:96` · `BsTokens.cardLight`
 - `app_flutter/lib/screens/role_picker_sheet.dart:199` · `Color(0xFFFFFFFF)`
 
-### app_flutter/lib/screens/alt_explain_screen.dart
-- `app_flutter/lib/screens/alt_explain_screen.dart:150` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/alt_explain_screen.dart:152` · `BsTokens.cardLight`
-
 ### app_flutter/lib/features/fittings/ui/sudoku_grid.dart
 - `app_flutter/lib/features/fittings/ui/sudoku_grid.dart:339` · `Colors.white`
 - `app_flutter/lib/features/fittings/ui/sudoku_grid.dart:431` · `Colors.white`
+
+### app_flutter/lib/screens/alt_explain_screen.dart
+- `app_flutter/lib/screens/alt_explain_screen.dart:150` · `BsTokens.bgLight`
+- `app_flutter/lib/screens/alt_explain_screen.dart:152` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/quote_polish_screen.dart
 - `app_flutter/lib/screens/quote_polish_screen.dart:129` · `BsTokens.bgLight`
@@ -715,13 +619,17 @@ Scanned **652** files · **192** carry colors.
 - `app_flutter/lib/screens/coming_soon_screen.dart:26` · `BsTokens.bgLight`
 - `app_flutter/lib/screens/coming_soon_screen.dart:28` · `BsTokens.cardLight`
 
+### app_flutter/lib/screens/paired_explain_screen.dart
+- `app_flutter/lib/screens/paired_explain_screen.dart:122` · `BsTokens.bgLight`
+- `app_flutter/lib/screens/paired_explain_screen.dart:124` · `BsTokens.cardLight`
+
 ### app_flutter/lib/screens/adapter_explain_screen.dart
 - `app_flutter/lib/screens/adapter_explain_screen.dart:170` · `BsTokens.bgLight`
 - `app_flutter/lib/screens/adapter_explain_screen.dart:172` · `BsTokens.cardLight`
 
-### app_flutter/lib/screens/paired_explain_screen.dart
-- `app_flutter/lib/screens/paired_explain_screen.dart:122` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/paired_explain_screen.dart:124` · `BsTokens.cardLight`
+### app_flutter/lib/screens/daily_report_screen.dart
+- `app_flutter/lib/screens/daily_report_screen.dart:131` · `BsTokens.bgLight`
+- `app_flutter/lib/screens/daily_report_screen.dart:133` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/credit_explain_screen.dart
 - `app_flutter/lib/screens/credit_explain_screen.dart:165` · `BsTokens.bgLight`
@@ -731,31 +639,27 @@ Scanned **652** files · **192** carry colors.
 - `app_flutter/lib/screens/manager_screens_sheet.dart:47` · `Color(0xFFFFFFFF)`
 - `app_flutter/lib/screens/manager_screens_sheet.dart:175` · `BsTokens.bgLight`
 
-### app_flutter/lib/screens/daily_report_screen.dart
-- `app_flutter/lib/screens/daily_report_screen.dart:131` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/daily_report_screen.dart:133` · `BsTokens.cardLight`
-
 ### app_flutter/lib/screens/supplier_onboarding_screen.dart
 - `app_flutter/lib/screens/supplier_onboarding_screen.dart:139` · `BsTokens.bgLight`
 - `app_flutter/lib/screens/supplier_onboarding_screen.dart:270` · `Colors.white`
-
-### app_flutter/lib/screens/reject_reason_screen.dart
-- `app_flutter/lib/screens/reject_reason_screen.dart:129` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/reject_reason_screen.dart:131` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/business_summary_screen.dart
 - `app_flutter/lib/screens/business_summary_screen.dart:108` · `BsTokens.bgLight`
 - `app_flutter/lib/screens/business_summary_screen.dart:110` · `BsTokens.cardLight`
 
+### app_flutter/lib/screens/reject_reason_screen.dart
+- `app_flutter/lib/screens/reject_reason_screen.dart:129` · `BsTokens.bgLight`
+- `app_flutter/lib/screens/reject_reason_screen.dart:131` · `BsTokens.cardLight`
+
 ### app_flutter/lib/screens/studio/studio_screen.dart
 - `app_flutter/lib/screens/studio/studio_screen.dart:54` · `BsTokens.bgLight`
 - `app_flutter/lib/screens/studio/studio_screen.dart:56` · `BsTokens.cardLight`
 
-### app_flutter/lib/screens/login_sheet.dart
-- `app_flutter/lib/screens/login_sheet.dart:93` · `BsTokens.cardLight`
-
 ### app_flutter/lib/screens/worker_report_drilldowns.dart
 - `app_flutter/lib/screens/worker_report_drilldowns.dart:62` · `BsTokens.cardLight`
+
+### app_flutter/lib/screens/login_sheet.dart
+- `app_flutter/lib/screens/login_sheet.dart:93` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/worker_equipment_checklist_sheet.dart
 - `app_flutter/lib/screens/worker_equipment_checklist_sheet.dart:323` · `BsTokens.cardLight`
@@ -778,14 +682,11 @@ Scanned **652** files · **192** carry colors.
 ### app_flutter/lib/screens/worker_today_strip.dart
 - `app_flutter/lib/screens/worker_today_strip.dart:42` · `BsTokens.cardLight`
 
-### app_flutter/lib/theme/app_theme.dart
-- `app_flutter/lib/theme/app_theme.dart:43` · `BsTokens.bgLightAlt`
-
 ### app_flutter/lib/screens/onboarding_screen.dart
 - `app_flutter/lib/screens/onboarding_screen.dart:222` · `BsTokens.bgLight`
 
-### app_flutter/lib/services/nav_launch.dart
-- `app_flutter/lib/services/nav_launch.dart:102` · `BsTokens.cardLight`
+### app_flutter/lib/theme/app_theme.dart
+- `app_flutter/lib/theme/app_theme.dart:43` · `BsTokens.bgLightAlt`
 
 ### app_flutter/lib/screens/studio/panes/tree_pane.dart
 - `app_flutter/lib/screens/studio/panes/tree_pane.dart:94` · `BsTokens.surfaceMid`
@@ -793,14 +694,17 @@ Scanned **652** files · **192** carry colors.
 ### app_flutter/lib/screens/finder_screen.dart
 - `app_flutter/lib/screens/finder_screen.dart:626` · `Colors.white`
 
+### app_flutter/lib/services/nav_launch.dart
+- `app_flutter/lib/services/nav_launch.dart:102` · `BsTokens.cardLight`
+
 ### app_flutter/lib/features/ring_dive/catalog_wheel_screen.dart
 - `app_flutter/lib/features/ring_dive/catalog_wheel_screen.dart:549` · `Colors.white`
 
-### app_flutter/lib/widgets/smart_input/smart_chip_strip.dart
-- `app_flutter/lib/widgets/smart_input/smart_chip_strip.dart:72` · `BsTokens.cardLight`
-
 ### app_flutter/lib/atoms/home_atoms.dart
 - `app_flutter/lib/atoms/home_atoms.dart:138` · `Colors.white`
+
+### app_flutter/lib/widgets/smart_input/smart_chip_strip.dart
+- `app_flutter/lib/widgets/smart_input/smart_chip_strip.dart:72` · `BsTokens.cardLight`
 
 ### app_flutter/lib/logic/studio/edit_safety.dart
 - `app_flutter/lib/logic/studio/edit_safety.dart:132` · `BsTokens.cardLight`

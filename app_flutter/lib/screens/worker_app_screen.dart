@@ -147,9 +147,9 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
@@ -708,7 +708,7 @@ class _WeekStripCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -927,7 +927,7 @@ class _DayAttendanceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -988,7 +988,7 @@ class _DayAttendanceCard extends StatelessWidget {
                     vertical: BsTokens.space2,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F6FA),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(cfgRadius(context)),
                   ),
                   child: Row(
@@ -1178,7 +1178,7 @@ class _WorkerNav extends StatelessWidget {
       // reports the STABLE logical id whether or not שיחות is showing.
       onTap: (i) => onTap(chatOn || i == 0 ? i : i + 1),
       type: BottomNavigationBarType.fixed,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       selectedItemColor: BsTokens.brand,
       unselectedItemColor: const Color(0xFF888888),
       selectedFontSize: 12,
@@ -1251,7 +1251,7 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -1521,7 +1521,7 @@ class _TaskCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
@@ -1966,9 +1966,9 @@ class _ProposeTaskSheetState extends State<_ProposeTaskSheet> {
         expand: false,
         builder:
             (_, scroll) => Container(
-              decoration: const BoxDecoration(
-                color: BsTokens.cardLight,
-                borderRadius: BorderRadius.vertical(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(BsTokens.radiusCard),
                 ),
               ),

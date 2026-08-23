@@ -2705,3 +2705,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave3-testfix — manager_dashboard_screen_test theme-aware (2026-08-18)
 גל 3 חשף חוזה-טסט: `manager_dashboard_screen_test` נעל צבעים בהירים מדויקים (`scaffold==bgLight`, "NO dark tokens"). מאחר שהמסך עכשiw תמה-מודע, עודכן הטסט (אישור-בעלים "א"): pump נעטף ב-`AppTheme.light()` (התמה האמיתית), ו-5 assertion-י רקע-Scaffold עברו `bgLight→bgLightAlt` (הרקע-הבהיר של התמה). assertion-י `cardLight` עברו כמו-שהם (surface-בהיר=לבן=cardLight). אומת בבידוד: 31/31 עובר. (store_notif/product_journey שהופיעו בסוויטה-המלאה = flakes תחת concurrency — עוברים לבד.)
+
+## #darkmode-wave4 — 8 screens (connection_rule_studio/courier_profile/worker_app/lipskey_product_sheet/worker_profile/contractor_hr/worker_forms/courier_certs) (2026-08-18)
+**גל 4 (8 fixers מקבילים, קבצים נפרדים):** 72 light-surfaces → תמה, 0 דולגו. connection_rule_studio(11)·courier_profile(10)·worker_app(9)·lipskey_product_sheet(9)·worker_profile(9)·contractor_hr(8)·worker_forms(8)·courier_certs(8). אותם כללי-המרה (cardLight→surface · bgLight→scaffoldBackgroundColor/surface · white→surface · greys→surfaceContainerHighest · const הוסר · context מאומת). **אין טסטי-נועלי-צבע לאף מסך בגל זה** (בדיקה יזומה מראש — הבעיה של manager_dashboard לא חזרה). `flutter analyze` 0 errors/warnings. **אטלס 447→375** (‎-72). מצטבר 659→375 (284 תוקנו).

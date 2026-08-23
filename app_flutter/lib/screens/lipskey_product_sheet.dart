@@ -745,9 +745,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scrollCtrl) => Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF5F6FA),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -768,7 +768,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 0, 2),
                   child: Material(
-                    color: const Color(0xFFF5F5F5),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: const CircleBorder(),
                     child: Semantics(
                       button: true,
@@ -1183,9 +1183,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
               // Pinned purchase bar — qty/unit/add-to-cart always reachable.
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF5F6FA),
-                  border: Border(top: BorderSide(color: Color(0x14000000))),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  border: const Border(top: BorderSide(color: Color(0x14000000))),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1333,7 +1333,7 @@ class _QtyStepper extends StatelessWidget {
         );
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surface,
         border: Border.all(color: BsTokens.brand),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -1426,7 +1426,7 @@ class _RelatedCard extends StatelessWidget {
         width: 112,
         padding: const EdgeInsets.all(9),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: Theme.of(context).colorScheme.surface,
           border: Border.all(color: const Color(0xFFEEEEEE)),
           borderRadius: BorderRadius.circular(13),
         ),
@@ -1588,7 +1588,7 @@ class _ProductSideState extends State<_ProductSide> {
     return GestureDetector(
       onTap: widget.onZoom, // tap image → fullscreen zoom
       child: Container(
-        color: const Color(0xFFF5F6FA),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -1788,7 +1788,7 @@ class _SpecSideState extends State<_SpecSide> {
     return GestureDetector(
       onTap: widget.onZoom, // tap spec → fullscreen zoom
       child: Container(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -2307,7 +2307,7 @@ class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEEEEEE)),
       ),
@@ -3033,7 +3033,7 @@ class _StripPanel extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
         itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (_, i) {
+        itemBuilder: (context, i) {
           final q = items[i];
           final label = labelFor?.call(q) ?? '';
           return GestureDetector(
@@ -3042,7 +3042,7 @@ class _StripPanel extends StatelessWidget {
               width: 100,
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 border: Border.all(color: const Color(0xFFEEEEEE)),
                 borderRadius: BorderRadius.circular(10),
               ),

@@ -50,9 +50,9 @@ class CourierCertsScreen extends ConsumerWidget {
           ..sort((a, b) => a.expiry.compareTo(b.expiry));
 
     return Scaffold(
-      backgroundColor: BsTokens.bgLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: const CfgText(
           'courier.certs.title',
@@ -122,7 +122,7 @@ class CourierCertsScreen extends ConsumerWidget {
 
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
@@ -282,7 +282,7 @@ class CourierCertsScreen extends ConsumerWidget {
                         const SizedBox(height: BsTokens.space3),
                         // Expiry picker row (≥48dp).
                         Material(
-                          color: BsTokens.bgLight,
+                          color: Theme.of(ctx).colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
@@ -333,7 +333,7 @@ class CourierCertsScreen extends ConsumerWidget {
                         const SizedBox(height: BsTokens.space3),
                         // Optional photo via the camera seam.
                         Material(
-                          color: BsTokens.cardLight,
+                          color: Theme.of(ctx).colorScheme.surface,
                           borderRadius: BorderRadius.circular(
                             BsTokens.radiusPill,
                           ),
@@ -487,7 +487,7 @@ class _PresetChip extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: Material(
-        color: selected ? BsTokens.brand : BsTokens.bgLight,
+        color: selected ? BsTokens.brand : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
         child: InkWell(
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -535,7 +535,7 @@ class _CertsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         boxShadow: const [
           BoxShadow(
@@ -638,7 +638,7 @@ class _CertRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),

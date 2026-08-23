@@ -224,7 +224,7 @@ class _ConnectionRuleStudioState
   InputDecoration _dec(String label) => InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: BsTokens.cardLight,
+        fillColor: Theme.of(context).colorScheme.surface,
         labelStyle:
             const TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
         border: OutlineInputBorder(
@@ -262,9 +262,9 @@ class _ConnectionRuleStudioState
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: BsTokens.bgLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: BsTokens.cardLight,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
             title: const CfgText(
@@ -343,7 +343,7 @@ class _ConnectionRuleStudioState
               const SizedBox(height: BsTokens.space3),
               DropdownButtonFormField<String>(
                 value: benchA,
-                dropdownColor: BsTokens.cardLight,
+                dropdownColor: Theme.of(context).colorScheme.surface,
                 style:
                     const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 decoration: _dec('מחבר א'),
@@ -356,7 +356,7 @@ class _ConnectionRuleStudioState
               const SizedBox(height: BsTokens.space4),
               DropdownButtonFormField<String>(
                 value: benchB,
-                dropdownColor: BsTokens.cardLight,
+                dropdownColor: Theme.of(context).colorScheme.surface,
                 style:
                     const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 decoration: _dec('מחבר ב'),
@@ -431,7 +431,7 @@ class _EmptyConnectors extends StatelessWidget {
         vertical: BsTokens.space5,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -470,7 +470,7 @@ class _ConnectorTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space4),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -554,7 +554,7 @@ class _Matrix extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -658,7 +658,7 @@ class _MethodLabelDialogState extends State<_MethodLabelDialog> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: AlertDialog(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: const CfgText(
           'connection_rule_studio.new_rule',
           'כלל חדש',
@@ -676,7 +676,7 @@ class _MethodLabelDialogState extends State<_MethodLabelDialog> {
           decoration: InputDecoration(
             labelText: 'תווית שיטה',
             filled: true,
-            fillColor: BsTokens.cardLight,
+            fillColor: Theme.of(context).colorScheme.surface,
             labelStyle:
                 const TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
             enabledBorder: OutlineInputBorder(
@@ -723,7 +723,7 @@ class _RuleInspectDialog extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: AlertDialog(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: const CfgText(
           'connection_rule_studio.rule_title',
           'כלל חיבור',

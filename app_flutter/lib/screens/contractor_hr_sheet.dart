@@ -197,10 +197,10 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(BsTokens.radiusCard)),
           ),
           child: ListView(
             controller: scroll,
@@ -435,7 +435,7 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
                   Container(
                     padding: const EdgeInsets.all(BsTokens.space3),
                     decoration: BoxDecoration(
-                      color: BsTokens.bgLight,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: const Color(0xFFEDEDED)),
                     ),
@@ -540,7 +540,7 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
                           vertical: BsTokens.space3,
                         ),
                         filled: true,
-                        fillColor: BsTokens.bgLight,
+                        fillColor: Theme.of(context).colorScheme.surface,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide:
@@ -616,7 +616,7 @@ class _VacationRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -664,7 +664,7 @@ class _VacationRow extends StatelessWidget {
                   child: _DecideButton(
                     key: ValueKey('contractor-vac-reject-${request.id}'),
                     label: '❌ דחה',
-                    color: BsTokens.cardLight,
+                    color: Theme.of(context).colorScheme.surface,
                     textColor: BsTokens.inkLight,
                     bordered: true,
                     // Fire-and-forget the async reject (reason prompt) — the
@@ -778,7 +778,7 @@ class _TrainingRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -822,7 +822,7 @@ class _TrainingRow extends StatelessWidget {
                   child: _DecideButton(
                     key: ValueKey('contractor-train-reject-${training.id}'),
                     label: '❌ דחה',
-                    color: BsTokens.cardLight,
+                    color: Theme.of(context).colorScheme.surface,
                     textColor: BsTokens.inkLight,
                     bordered: true,
                     onPressed: onReject,
@@ -889,7 +889,7 @@ class _CertRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),

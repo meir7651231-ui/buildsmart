@@ -70,9 +70,9 @@ class CourierProfileScreen extends ConsumerWidget {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: const CfgText(
             'courier.profile.title',
@@ -220,7 +220,7 @@ class CourierProfileBody extends ConsumerWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(BsTokens.space3),
           decoration: BoxDecoration(
-            color: BsTokens.cardLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(cfgRadius(context)),
           ),
           child: Text(
@@ -246,7 +246,7 @@ class CourierProfileBody extends ConsumerWidget {
         // ── פעולות ─────────────────────────────────────────────────────────
         Card(
           margin: EdgeInsets.zero,
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -390,7 +390,7 @@ class _CourierIdentityCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -554,7 +554,7 @@ class _CourierPersonalAreaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -805,7 +805,7 @@ class _EditCourierProfileSheetState
       label: h.name,
       excludeSemantics: true,
       child: Material(
-        color: on ? BsTokens.brand : BsTokens.cardLight,
+        color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
         child: InkWell(
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -842,9 +842,9 @@ class _EditCourierProfileSheetState
           bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
         child: Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.vertical(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
               top: Radius.circular(BsTokens.radiusCard),
             ),
           ),
@@ -1039,7 +1039,7 @@ class _RoleSwitchCodeDialogState extends State<_RoleSwitchCodeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       title: const CfgText(
         'courier_profile_screen.role_switch_dialog_title',
         'החלפת תפקיד',
@@ -1113,7 +1113,7 @@ class _PStat extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 3),
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           boxShadow: const [
             BoxShadow(

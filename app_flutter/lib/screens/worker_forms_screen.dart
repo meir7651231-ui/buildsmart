@@ -179,9 +179,9 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: BsTokens.bgLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: CfgText(
           'worker_forms_screen.forms_title',
@@ -348,7 +348,7 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -747,7 +747,7 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
           vertical: BsTokens.space1,
         ),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -1018,7 +1018,7 @@ class _FormCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         boxShadow: const [
           BoxShadow(
@@ -1067,7 +1067,7 @@ class _PillButton extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: Material(
-        color: filled ? BsTokens.brand : BsTokens.cardLight,
+        color: filled ? BsTokens.brand : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
         child: InkWell(
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -1115,7 +1115,7 @@ class _DateField extends StatelessWidget {
       label: value == null ? label : '$label: ${_fmtDate(value!)}',
       excludeSemantics: true,
       child: Material(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -1173,7 +1173,7 @@ class _VacationRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
