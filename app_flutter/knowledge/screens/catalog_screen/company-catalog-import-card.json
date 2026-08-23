@@ -1,0 +1,45 @@
+{
+  "name": "_CompanyCatalogImportCard",
+  "role": "section",
+  "variant": "live",
+  "gate": "kProfileEmptyCatalog",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "📦 טעינת קטלוג החברה"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "📦 טעינת קטלוג החברה"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showCompanyCatalogImportSheet",
+        "target": "showCompanyCatalogImportSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showCompanyCatalogImportSheet(context)",
+        "effect": "open → showCompanyCatalogImportSheet"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

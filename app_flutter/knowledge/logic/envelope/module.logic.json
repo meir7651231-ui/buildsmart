@@ -1,0 +1,289 @@
+{
+  "module": "envelope",
+  "source": "lib/features/fittings/plan/envelope.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "envelopeFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String family, int od, {int? od2}) -> Envelope?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kEnvelopeFamilies"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_mk",
+            "module": true
+          },
+          {
+            "name": "_mk2",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_kEnvelopeFamilies.contains(family) → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "d = generate(family, od, od2: od2)"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch family"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "f",
+        "generate"
+      ],
+      "contract": {
+        "input": "(String family, int od, {int? od2})",
+        "output": "Envelope?",
+        "purity": "pure",
+        "precond": [
+          "if !_kEnvelopeFamilies.contains(family) → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "!_kEnvelopeFamilies.contains(family) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_mk",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double? axial, double? dia, [double? sec]) -> Envelope?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_mk2",
+          "envelopeFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(axial == null || dia == null) ? null : Envelope(axialLength: axial, radialDiameter: dia,…"
+          }
+        ]
+      },
+      "floor": [
+        "Envelope"
+      ],
+      "contract": {
+        "input": "(double? axial, double? dia, [double? sec])",
+        "output": "Envelope?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_mk2",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double? axialUnit, double mult, double? dia, double? sec) -> Envelope?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_mk",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "envelopeFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "axialUnit == null ? null : _mk(axialUnit * mult, dia, sec)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(double? axialUnit, double mult, double? dia, double? sec)",
+        "output": "Envelope?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "Envelope.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "axialLength"
+          },
+          {
+            "kind": "field",
+            "name": "radialDiameter"
+          },
+          {
+            "kind": "field",
+            "name": "secondaryExtent"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is Envelope && other.axialLength == axialLength && other.radialDiameter == radialDi…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Envelope.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "axialLength"
+          },
+          {
+            "kind": "field",
+            "name": "radialDiameter"
+          },
+          {
+            "kind": "field",
+            "name": "secondaryExtent"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(axialLength, radialDiameter, secondaryExtent)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Envelope.toString",
+      "kind": "method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "axialLength"
+          },
+          {
+            "kind": "field",
+            "name": "radialDiameter"
+          },
+          {
+            "kind": "field",
+            "name": "secondaryExtent"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'Envelope(axial=$axialLength, dia=$radialDiameter, sec=$secondaryExtent)'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

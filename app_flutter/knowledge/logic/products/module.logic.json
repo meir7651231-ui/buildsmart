@@ -1,0 +1,53 @@
+{
+  "module": "products",
+  "source": "lib/test_harness/tests/products.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "testProducts",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TestResult>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "kSmartProducts.map((p) {final checks = <TestCheck>[]; void add(String name, bool pass, {S…"
+          }
+        ]
+      },
+      "floor": [
+        "TestCheck",
+        "TestResult",
+        "add",
+        "join",
+        "map",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<TestResult>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

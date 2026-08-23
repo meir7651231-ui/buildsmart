@@ -1,0 +1,58 @@
+{
+  "module": "users_lookup",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/users_lookup.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "UsersLookup",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "_directory",
+            "type": "RemoteCollectionSource?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_source",
+            "type": "RemoteCollectionSource",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_directory",
+            "ref": "RemoteCollectionSource",
+            "kind": "embed"
+          },
+          {
+            "field": "_source",
+            "ref": "RemoteCollectionSource",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "_readAll",
+          "_readAllFrom",
+          "_roleMatches",
+          "uidByPhone",
+          "uidsByRole"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_source"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

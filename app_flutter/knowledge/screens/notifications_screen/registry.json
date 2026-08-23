@@ -1,0 +1,52 @@
+{
+  "matched": 9,
+  "total": 9,
+  "summary": "9/9",
+  "entries": [
+    {
+      "id": "notifications_screen.screen_title",
+      "ok": true,
+      "atom": "_Header"
+    },
+    {
+      "id": "notifications_screen.snooze_title",
+      "ok": true,
+      "atom": "_NotifList"
+    },
+    {
+      "id": "notifications_screen.quiet_title",
+      "ok": true,
+      "atom": "_NotifList"
+    },
+    {
+      "id": "notifications_screen.quiet_sub",
+      "ok": true,
+      "atom": "_NotifList"
+    },
+    {
+      "id": "notifications_screen.empty_title",
+      "ok": true,
+      "atom": "_NotifList"
+    },
+    {
+      "id": "notifications_screen.empty_sub",
+      "ok": true,
+      "atom": "_NotifList"
+    },
+    {
+      "id": "notifications_screen.deleted_toast",
+      "ok": true,
+      "atom": "_NotifList"
+    },
+    {
+      "id": "notifications_screen.mark_read",
+      "ok": true,
+      "atom": "_NotifList"
+    },
+    {
+      "id": "notifications_screen.menu_delete",
+      "ok": true,
+      "atom": "_NotifList"
+    }
+  ]
+}

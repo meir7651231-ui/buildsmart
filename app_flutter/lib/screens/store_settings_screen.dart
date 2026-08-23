@@ -1,5 +1,15 @@
+import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbStoreSettingsNodes;
+import 'package:buildsmart/screens/store_screen.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/store_settings.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,17 +23,25 @@ class StoreSettingsScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const StoreSettingsScreen());
 
+  /// STABLE [KbScreen] tool list — built once so the floating-keyboard mirror
+  /// never re-registers on rebuild. Tree-shaken with the [KbScreen] path off-flag.
+  static final List<KbToolNode> _kbNodes = kbStoreSettingsNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+    // KbScreen: while this pushed route is front-most under [kKbGlobal], the
+    // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
+    // Pure pass-through (byte-identical) when the flag is off.
+    final Widget body = Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'store_settings_screen.screen_title',
           'הגדרות חנות',
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -52,6 +70,7 @@ class StoreSettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
@@ -59,24 +78,37 @@ class StoreSettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
+            title: const CfgText(
+              'store_settings_screen.reset_title',
               'איפוס הגדרות?',
-              style: TextStyle(color: Color(0xFF1A1A1A)),
+              style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
+            content: const CfgText(
+              'store_settings_screen.reset_body',
               'כל הגדרות החנות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+              // composite hide: whole cancel button vanishes, not just its label.
+              CfgVisible(
+                'store_settings_screen.cancel',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const CfgText('store_settings_screen.cancel', 'ביטול'),
+                ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text('אפס'),
+              // composite hide: whole reset button vanishes, not just its label.
+              CfgVisible(
+                'store_settings_screen.reset_ok',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(
+                    // AA על רקע-דיאלוג לבן (redAccent=3.19:1 נכשל) — token חוזה 9.
+                    foregroundColor: BsTokens.dangerDark,
+                  ),
+                  child: const CfgText('store_settings_screen.reset_ok', 'אפס'),
+                ),
               ),
             ],
           ),
@@ -100,6 +132,9 @@ class _ShippingSection extends ConsumerWidget {
       emoji: '📍',
       title: 'משלוחים וכתובות',
       children: [
+        // 🟢 WIRED — pre-fills the 'לאן לשלוח?' ship-to sheet (openShipToSheet)
+        // when no in-progress address is set, so a saved default is ready to
+        // confirm at the first product selection.
         _InlineTextRow(
           label: 'כתובת ברירת מחדל',
           hint: 'רחוב, מספר, עיר',
@@ -112,6 +147,7 @@ class _ShippingSection extends ConsumerWidget {
         _RadioGroupRow<StoreDeliveryWindow>(
           label: 'חלון זמן מועדף',
           value: settings.preferredDeliveryWindow,
+          underConstruction: true,
           options: const [
             (value: StoreDeliveryWindow.morning, label: 'בוקר'),
             (value: StoreDeliveryWindow.noon, label: 'צהריים'),
@@ -127,6 +163,7 @@ class _ShippingSection extends ConsumerWidget {
           label: 'אזורי משלוח',
           hint: 'ת"א, רמת גן, הרצליה...',
           value: settings.deliveryAreas,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -136,6 +173,7 @@ class _ShippingSection extends ConsumerWidget {
           label: 'הוראות לשליח',
           hint: 'הערות למשלוח...',
           value: settings.courierInstructions,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -184,6 +222,7 @@ class _PaymentSection extends ConsumerWidget {
         _RadioGroupRow<StoreInstallments>(
           label: 'תשלומים (1/3/6/12)',
           value: settings.defaultInstallments,
+          underConstruction: true,
           options: const [
             (value: StoreInstallments.one, label: 'תשלום אחד'),
             (value: StoreInstallments.three, label: '3 תשלומים'),
@@ -195,6 +234,9 @@ class _PaymentSection extends ConsumerWidget {
                   .read(storeSettingsProvider.notifier)
                   .update((s) => s.copyWith(defaultInstallments: v)),
         ),
+        // 🟢 WIRED — gates the 'אשראי ספק' payment chip in the checkout
+        // _PaymentSelector: off (default) ⇒ the supplier-credit option is not
+        // offered at checkout; on ⇒ it appears alongside כרטיס/ביט.
         _SwitchRow(
           label: 'הסדר אשראי ספק',
           value: settings.supplierCreditEnabled,
@@ -232,6 +274,7 @@ class _InvoicesSection extends ConsumerWidget {
           label: 'פרטי עוסק/חברה',
           hint: 'שם עסק...',
           value: settings.businessName,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -241,6 +284,13 @@ class _InvoicesSection extends ConsumerWidget {
           label: 'ח.פ. / ע.מ.',
           hint: 'מספר...',
           value: settings.businessId,
+          underConstruction: true,
+          // task #64: format-only check — uniqueness deferred to Firebase.
+          errorText:
+              settings.businessId.trim().isEmpty ||
+                      validBusinessId(settings.businessId)
+                  ? null
+                  : 'ח.פ. חייב להכיל 9 ספרות',
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -249,6 +299,7 @@ class _InvoicesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'ייצוא לרו"ח',
           value: settings.exportToAccountant,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -257,6 +308,7 @@ class _InvoicesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'קבלות אוטומטיות',
           value: settings.autoReceipts,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -278,6 +330,7 @@ class _NotificationsSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🔔',
       title: 'התראות חנות',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'התראות מבצעים',
@@ -364,11 +417,15 @@ class _CartSection extends ConsumerWidget {
         _SwitchRow(
           label: 'הזמנות חוזרות',
           value: settings.repeatOrders,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
                   .update((s) => s.copyWith(repeatOrders: v)),
         ),
+        // 🟢 WIRED — gates the cart 'שתף' button (_CartActionsRow): off
+        // (default) ⇒ the button is hidden; on ⇒ it appears and hands the cart
+        // summary to the native/Web share sheet.
         _SwitchRow(
           label: 'שיתוף סל עם צוות',
           value: settings.shareCartWithTeam,
@@ -401,6 +458,7 @@ class _SuppliersSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🏪',
       title: 'ספקים מועדפים',
+      underConstruction: true,
       children: [
         const _PlaceholderRow(label: 'חנויות מסומנות'),
         const _PlaceholderRow(label: 'ספקים חסומים'),
@@ -455,10 +513,15 @@ class _DisplaySection extends ConsumerWidget {
         _RadioGroupRow<StoreSortDefault>(
           label: 'מיון ברירת מחדל',
           value: settings.sortDefault,
-          options: const [
+          options: [
             (value: StoreSortDefault.priceAsc, label: 'מחיר: זול → יקר'),
-            (value: StoreSortDefault.rating, label: 'דירוג גבוה'),
-            (value: StoreSortDefault.distance, label: 'מרחק קרוב'),
+            // rating/distance persist but nothing consumes them yet — only
+            // priceAsc orders the list (store_screen). Hidden for review,
+            // kept in code (reversible) like unitSystem/showStock below.
+            if (!kHideUnderConstruction) ...[
+              (value: StoreSortDefault.rating, label: 'דירוג גבוה'),
+              (value: StoreSortDefault.distance, label: 'מרחק קרוב'),
+            ],
           ],
           onChanged:
               (v) => ref
@@ -480,6 +543,7 @@ class _DisplaySection extends ConsumerWidget {
         _RadioGroupRow<StoreUnitSystem>(
           label: "יחידות (מטר / אינץ')",
           value: settings.unitSystem,
+          underConstruction: true,
           options: const [
             (value: StoreUnitSystem.metric, label: 'מטרי'),
             (value: StoreUnitSystem.imperial, label: 'אינגלי'),
@@ -492,6 +556,7 @@ class _DisplaySection extends ConsumerWidget {
         _SwitchRow(
           label: 'הצגת מלאי',
           value: settings.showStock,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -513,6 +578,7 @@ class _LogisticsSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '⚡',
       title: 'שירות ולוגיסטיקה',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'משלוח מהיר (תוך 4 שעות)',
@@ -569,6 +635,9 @@ class _PrivacySection extends ConsumerWidget {
       emoji: '🔐',
       title: 'פרטיות ורכישות',
       children: [
+        // 🟢 WIRED — buyer privacy toggle: off ⇒ the הזמנות tab hides the
+        // purchase-history list behind a privacy notice (_OrdersHidden in
+        // store_screen). Real, observable, local effect — no backend.
         _SwitchRow(
           label: 'היסטוריית רכישות',
           value: settings.purchaseHistory,
@@ -580,11 +649,22 @@ class _PrivacySection extends ConsumerWidget {
         _ActionRow(
           label: 'מחיקת חיפושים',
           buttonLabel: 'מחק',
-          onTap: () => showToast(context, 'החיפושים נמחקו'),
+          onTap: () async {
+            final ok = await confirmDestructive(
+              context,
+              title: 'מחיקת חיפושים?',
+              message: 'החיפוש הנוכחי בחנות יימחק.',
+              confirmLabel: 'מחק',
+            );
+            if (!ok || !context.mounted) return;
+            ref.read(storeSearchQueryProvider.notifier).state = '';
+            showToast(context, 'החיפוש נוקה');
+          },
         ),
         _SwitchRow(
           label: 'אישור ביומטרי לרכישה',
           value: settings.biometricConfirm,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -593,6 +673,7 @@ class _PrivacySection extends ConsumerWidget {
         _NumberRow(
           label: 'מגבלת אשראי יומית (₪, 0=ללא)',
           value: settings.dailyCreditLimit,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -610,24 +691,47 @@ class _SectionTile extends StatelessWidget {
     required this.emoji,
     required this.title,
     required this.children,
+    this.underConstruction = false,
   });
 
   final String emoji;
   final String title;
   final List<Widget> children;
 
+  // When true: this section's persisted toggles have no engine yet — show an
+  // honest "בבנייה" subtitle and suppress the active-count badge (Wave 8 / D2).
+  final bool underConstruction;
+
+  // A row is a backend-blocked "under construction" placeholder when it is a
+  // _PlaceholderRow or an _Inert row flagged underConstruction. Single source of
+  // truth for both the active-count badge and the Apple-readiness hide-filter.
+  static bool _isUnderConstruction(Widget w) =>
+      w is _PlaceholderRow || (w is _Inert && (w as _Inert).underConstruction);
+
   // Count only functional rows — exclude "בבנייה" placeholders.
-  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+  int get _activeCount =>
+      children.where((w) => !_isUnderConstruction(w)).length;
+
+  // For Apple review (kHideUnderConstruction) we render only the functional
+  // rows; the placeholder rows stay defined in code (reversible) but are hidden.
+  List<Widget> get _visibleChildren =>
+      kHideUnderConstruction
+          ? children.where((w) => !_isUnderConstruction(w)).toList()
+          : children;
 
   @override
   Widget build(BuildContext context) {
+    // A whole section that is itself "under construction" — or one whose every
+    // row is a hidden placeholder — disappears entirely for Apple review.
+    if (kHideUnderConstruction &&
+        (underConstruction || _visibleChildren.isEmpty)) {
+      return const SizedBox.shrink();
+    }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -638,7 +742,7 @@ class _SectionTile extends StatelessWidget {
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           // Count badge replaces the default expand chevron.
           trailing:
-              _activeCount == 0
+              (underConstruction || _activeCount == 0)
                   ? null
                   : Container(
                     padding: const EdgeInsets.symmetric(
@@ -661,34 +765,65 @@ class _SectionTile extends StatelessWidget {
           title: Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
           ),
-          children: children,
+          subtitle:
+              underConstruction
+                  ? const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: CfgText(
+                      'store_settings_screen.section_wip',
+                      'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 12,
+                      ),
+                    ),
+                  )
+                  : null,
+          children: _visibleChildren,
         ),
       ),
     );
   }
 }
 
-class _SwitchRow extends StatelessWidget {
+/// Marker for settings rows that persist a value no engine consumes yet
+/// (honesty pass). Excluded from the section active-count badge.
+abstract interface class _Inert {
+  bool get underConstruction;
+}
+
+class _SwitchRow extends StatelessWidget implements _Inert {
   const _SwitchRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      subtitle:
+          underConstruction
+              ? const CfgText(
+                'store_settings_screen.switch_wip',
+                'בבנייה — עדיין לא משפיע',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              )
+              : null,
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -696,18 +831,21 @@ class _SwitchRow extends StatelessWidget {
   }
 }
 
-class _RadioGroupRow<T> extends StatelessWidget {
+class _RadioGroupRow<T> extends StatelessWidget implements _Inert {
   const _RadioGroupRow({
     required this.label,
     required this.value,
     required this.options,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final T value;
   final List<({T value, String label})> options;
   final ValueChanged<T> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
@@ -716,9 +854,23 @@ class _RadioGroupRow<T> extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            label,
-            style: const TextStyle(color: Colors.black54, fontSize: 13),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.black54, fontSize: 13),
+              ),
+              if (underConstruction)
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: CfgText(
+                    'store_settings_screen.radio_wip',
+                    'בבנייה — עדיין לא משפיע',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                ),
+            ],
           ),
         ),
         ...options.map(
@@ -726,7 +878,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(
               o.label,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
             ),
             value: o.value,
             groupValue: value,
@@ -741,18 +893,27 @@ class _RadioGroupRow<T> extends StatelessWidget {
   }
 }
 
-class _InlineTextRow extends StatefulWidget {
+class _InlineTextRow extends StatefulWidget implements _Inert {
   const _InlineTextRow({
     required this.label,
     required this.hint,
     required this.value,
     required this.onChanged,
+    this.errorText,
+    this.underConstruction = false,
   });
 
   final String label;
   final String hint;
   final String value;
   final ValueChanged<String> onChanged;
+
+  /// task #64: short Hebrew format error (null = valid). Recomputed by the
+  /// parent on every keystroke — each change persists through the provider,
+  /// which rebuilds the watching section.
+  final String? errorText;
+  @override
+  final bool underConstruction;
 
   @override
   State<_InlineTextRow> createState() => _InlineTextRowState();
@@ -788,14 +949,24 @@ class _InlineTextRowState extends State<_InlineTextRow> {
             widget.label,
             style: const TextStyle(color: Colors.black54, fontSize: 13),
           ),
+          if (widget.underConstruction)
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: CfgText(
+                'store_settings_screen.inline_wip',
+                'בבנייה — עדיין לא משפיע',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              ),
+            ),
           const SizedBox(height: 6),
           TextField(
             controller: _ctrl,
-            style: const TextStyle(color: Color(0xFF1A1A1A)),
+            style: const TextStyle(color: BsTokens.inkLight),
             cursorColor: BsTokens.brand,
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: const TextStyle(color: Color(0xFF666666)),
+              hintStyle: const TextStyle(color: BsTokens.mutedLight),
+              errorText: widget.errorText,
               filled: true,
               fillColor: const Color(0xFFF2F3F5),
               border: OutlineInputBorder(
@@ -815,16 +986,19 @@ class _InlineTextRowState extends State<_InlineTextRow> {
   }
 }
 
-class _NumberRow extends StatefulWidget {
+class _NumberRow extends StatefulWidget implements _Inert {
   const _NumberRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final int value;
   final ValueChanged<int> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   State<_NumberRow> createState() => _NumberRowState();
@@ -857,16 +1031,36 @@ class _NumberRowState extends State<_NumberRow> {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              widget.label,
-              style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.label,
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 14,
+                  ),
+                ),
+                if (widget.underConstruction)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: CfgText(
+                      'store_settings_screen.number_wip',
+                      'בבנייה — עדיין לא משפיע',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           SizedBox(
             width: 100,
             child: TextField(
               controller: _ctrl,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
               cursorColor: BsTokens.brand,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
@@ -900,10 +1094,11 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
-      trailing: const Text(
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      trailing: const CfgText(
+        'store_settings_screen.placeholder_wip',
         'בבנייה',
-        style: TextStyle(color: Color(0xFF666666), fontSize: 12),
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),
       onTap: () => showToast(context, '$label — בבנייה'),
     );
@@ -925,10 +1120,13 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: TextButton(
         onPressed: onTap,
-        style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+        style: TextButton.styleFrom(
+          // AA על ListTile לבן (redAccent=3.19:1 נכשל) — token חוזה 9.
+          foregroundColor: BsTokens.dangerDark,
+        ),
         child: Text(buttonLabel),
       ),
     );

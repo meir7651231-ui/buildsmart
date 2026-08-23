@@ -1,0 +1,45 @@
+{
+  "name": "_RegionSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בקרוב",
+        "registryId": "worker_settings_screen.coming_soon",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "appSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "appSettingsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onAppSettings(…) callback instead of direct appSettingsProvider write"
+    ]
+  }
+}

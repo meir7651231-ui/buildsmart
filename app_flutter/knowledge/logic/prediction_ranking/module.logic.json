@@ -1,0 +1,262 @@
+{
+  "module": "prediction_ranking",
+  "source": "lib/features/global_search/prediction_ranking.dart",
+  "atomCount": 5,
+  "caches": [
+    "_diveSkus"
+  ],
+  "atoms": [
+    {
+      "fn": "contextCompatibleSkus",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Iterable<LipskeyCatalogProduct> context) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{for (final p in context) for (final q in compatibleProductsFor(p)) q.sku}"
+          }
+        ]
+      },
+      "floor": [
+        "compatibleProductsFor"
+      ],
+      "contract": {
+        "input": "(Iterable<LipskeyCatalogProduct> context)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "matesBoost",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct candidate, Set<String> compatibleSkus) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "compatibleSkus.contains(candidate.sku) ? 400 : 0"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct candidate, Set<String> compatibleSkus)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "jobBoost",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct candidate, Set<String> jobSkus) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "jobSkus.contains(candidate.sku) ? 300 : 0"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct candidate, Set<String> jobSkus)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "nameAffinity",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, String query) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "name = p.nameHe.trim().toLowerCase()"
+          },
+          {
+            "kind": "compute",
+            "detail": "q = query.trim().toLowerCase()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if q.isEmpty || name.isEmpty || !name.contains(q) → return 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = 0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if name == q"
+          },
+          {
+            "kind": "effect",
+            "detail": "s += (q.length * 60 / name.length).round().clamp(0, 60)"
+          },
+          {
+            "kind": "return",
+            "detail": "s"
+          }
+        ]
+      },
+      "floor": [
+        "clamp",
+        "contains",
+        "round",
+        "startsWith",
+        "toLowerCase",
+        "trim"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, String query)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if q.isEmpty || name.isEmpty || !name.contains(q) → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "productProminence",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          },
+          {
+            "kind": "global",
+            "name": "_diveSkus"
+          },
+          {
+            "kind": "global",
+            "name": "_wsSplit"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = 0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if p.imageFile != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if kVerifiedSpecs.containsKey(p.sku)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _diveSkus.contains(p.sku)"
+          },
+          {
+            "kind": "compute",
+            "detail": "toks = p.nameHe.trim().split(_wsSplit).where((t) => t.isNotEmpty).length"
+          },
+          {
+            "kind": "effect",
+            "detail": "s += (12 - toks).clamp(0, 12)"
+          },
+          {
+            "kind": "effect",
+            "detail": "s += ((300 - p.page) ~/ 30).clamp(0, 10)"
+          },
+          {
+            "kind": "return",
+            "detail": "s"
+          }
+        ]
+      },
+      "floor": [
+        "clamp",
+        "contains",
+        "containsKey",
+        "split",
+        "trim",
+        "where"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

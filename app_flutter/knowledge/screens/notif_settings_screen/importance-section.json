@@ -1,0 +1,74 @@
+{
+  "name": "_ImportanceSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+        "registryId": "notif_settings_screen.t07",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה",
+        "registryId": "notif_settings_screen.t10",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '$label — בבנייה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "onChanged"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+    ]
+  }
+}

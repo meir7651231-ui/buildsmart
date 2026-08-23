@@ -1,5 +1,7 @@
 # פרוטוקול ליטוש — סוכן "ליטוש"
 
+> 🔗 **אוחד ל-[`POLISH.md`](POLISH.md)** — workbook עבודה אחד (שיטה+פנקס+יומן). **התחל שם.** קובץ זה = פרוטוקול-המקור המלא (100 צעדים + פאזה K), נשמר כעומק.
+
 > **תפקיד הסוכן:** מעבר-ליטוש מקיף על `app_flutter/` — לוקח את האפליקציה
 > מ"עובד" ל"**מרגיש מוכן-לחנות**". ליטוש hands-on על: מראה (spacing/layout),
 > צבע/typography/tokens, תנועה (transitions/micro-interactions), states
@@ -91,10 +93,12 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 
 ## פאזה A — תצלום-בסיס ומיפוי (1–12)
 
-0. **יישור-ענף (לפני הכל):** `git fetch origin claude/whats-happening-LyY9G` →
-   `git checkout` אליו → `git reset --hard origin/...` → אמת `git rev-parse HEAD`
-   מול הרימוט. אם מסמך נראה "חסר" — בדוק `git ls-tree -r origin/<branch>` לפני
-   שמכריזים. (`POLISH_LOG`/`KNOWLEDGE_AUDIT` שאתה כותב = תוצר, לא חוסר.)
+0. **יישור-ענף בטוח (לפני הכל):** `git fetch` → בדוק `git status` + `git rev-list
+   --left-right --count origin/<branch>...HEAD`. אם נקי+ahead=0 → `git merge
+   --ff-only`. **אם ahead>0 (commits לא-דחופים) או dirty → עצור, אל תאפס** (לקח
+   #63 — `reset --hard` עיוור מוחק עבודה). ראה הנוהל המלא ב-AGENT_COORDINATION
+   "יישור-ענף בטוח". אם מסמך נראה "חסר" — בדוק `git ls-tree -r origin/<branch>`
+   לפני שמכריזים. (`POLISH_LOG`/`KNOWLEDGE_AUDIT` שאתה כותב = תוצר, לא חוסר.)
 1. קרא `CLAUDE.md` — הפנם את מבנה שני-הפרויקטים ועקרונות-היסוד לליטוש (§0).
 2. קרא `STATUS.md` · `WIRING.md` · `knowledge/README.md` — מצב נוכחי.
 3. קרא `knowledge/port/proto/` + `knowledge/port/preact/` — העוגנים הויזואליים.

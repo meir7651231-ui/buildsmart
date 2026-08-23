@@ -1,0 +1,134 @@
+{
+  "name": "_ActionsCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "⚙️"
+      },
+      {
+        "kind": "cfgText",
+        "text": "הגדרות עובד",
+        "registryId": "worker.profile.settings_title",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🔄"
+      },
+      {
+        "kind": "cfgText",
+        "text": "החלפת תפקיד",
+        "registryId": "worker.profile.role_switch_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מוגן בקוד",
+        "registryId": "worker.profile.role_switch_hint",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🚪"
+      },
+      {
+        "kind": "cfgText",
+        "text": "יציאה",
+        "registryId": "worker.profile.logout_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "החלפת תפקיד",
+        "registryId": "worker_profile_screen.role_switch_dialog_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:",
+        "registryId": "worker_profile_screen.role_switch_dialog_body",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_profile_screen.cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "worker_profile_screen.cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_profile_screen.confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אישור",
+        "registryId": "worker_profile_screen.confirm",
+        "registryOk": true
+      }
+    ],
+    "registered": 10,
+    "unregistered": [
+      "⚙️",
+      "🔄",
+      "🚪"
+    ],
+    "summary": "registry 10 · mapped 10/10 · unregistered 3"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "WorkerSettingsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "action",
+        "via": "showRolePicker",
+        "target": "showRolePicker"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(WorkerSettingsScreen.route())",
+        "effect": "navigate → WorkerSettingsScreen"
+      }
+    ]
+  },
+  "floor": [
+    "confirmDestructive",
+    "setState",
+    "submit"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "session"
+    ],
+    "untangle": []
+  }
+}

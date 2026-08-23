@@ -1,0 +1,58 @@
+{
+  "module": "orders_local",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/orders_local.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "LocalOrdersRepository",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "_ref",
+            "type": "Ref",
+            "required": true
+          },
+          {
+            "name": "_engine",
+            "type": "OrdersEngineNotifier",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_ref",
+            "ref": "Ref",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "seed",
+          "all",
+          "byId",
+          "open",
+          "placeOrder",
+          "advance",
+          "setStage",
+          "claimStore",
+          "claimCourier",
+          "resetToSeed"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_ref"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

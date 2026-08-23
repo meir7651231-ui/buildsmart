@@ -89,9 +89,10 @@ void main() {
         [_bySku('77777641'), _byCat('ברזי גן')], 20);
 
     // Scenario 8 — toilet inlet, brass nipple → cistern
+    // SKU 124850 = מיכל הדחה ספיר פרגמון (gate 117: was phantom 124050).
     _runScenario(
         '8) אסלה: ניפל½ → מיכל הדחה',
-        [_bySku('77777641'), _bySku('124050')],
+        [_bySku('77777641'), _bySku('124850')],
         20);
 
     // Scenario 9 — hot + dissimilar metals (HDPE coupling → brass nipple)

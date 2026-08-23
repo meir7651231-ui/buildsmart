@@ -1,0 +1,82 @@
+{
+  "name": "ChatSettingsScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "הגדרות שיחות",
+        "registryId": "chat_settings_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "איפוס הגדרות?",
+        "registryId": "chat_settings_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כל הגדרות השיחות יוחזרו לברירת המחדל.",
+        "registryId": "chat_settings_screen.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "chat_settings_screen.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "chat_settings_screen.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "chat_settings_screen.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אפס",
+        "registryId": "chat_settings_screen.t05",
+        "registryOk": true
+      }
+    ],
+    "registered": 7,
+    "unregistered": [],
+    "summary": "registry 7 · mapped 7/7 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatSettingsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

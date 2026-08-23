@@ -1,0 +1,165 @@
+{
+  "module": "bs_user",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/bs_user.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "UserStatus",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "active",
+            "type": "UserStatus",
+            "required": false
+          },
+          {
+            "name": "suspended",
+            "type": "UserStatus",
+            "required": false
+          },
+          {
+            "name": "pending",
+            "type": "UserStatus",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 3 values: active · suspended · pending"
+        ]
+      }
+    },
+    {
+      "entity": "BsUser",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "uid",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "phone",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "email",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "role",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "storeUid",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "orgId",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "status",
+            "type": "UserStatus",
+            "required": false,
+            "default": "UserStatus.pending"
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "lastSeen",
+            "type": "DateTime?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "isValid",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "uid",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "orgId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "status",
+            "ref": "UserStatus",
+            "kind": "enum"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [
+          "fromJson"
+        ],
+        "tolerantDecoder": true,
+        "methods": [
+          "toDoc",
+          "_nonEmptyString",
+          "_parseTime"
+        ]
+      },
+      "contract": {
+        "required": [
+          "uid"
+        ],
+        "defaults": {
+          "name": "''",
+          "role": "''",
+          "status": "UserStatus.pending"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

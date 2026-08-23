@@ -1,0 +1,862 @@
+{
+  "screen": "notif_settings_screen",
+  "source": "notif_settings_screen.dart",
+  "atomCount": 11,
+  "atoms": [
+    {
+      "name": "NotifSettingsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "הגדרות התראות",
+            "registryId": "notif_settings_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "איפוס הגדרות?",
+            "registryId": "notif_settings_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כל הגדרות ההתראות יוחזרו לברירת המחדל.",
+            "registryId": "notif_settings_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "notif_settings_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ביטול",
+            "registryId": "notif_settings_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "notif_settings_screen.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אפס",
+            "registryId": "notif_settings_screen.t05",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [],
+        "summary": "registry 7 · mapped 7/7 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "kbNotifSettingsNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_SnoozeBanner",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🔇 השתק התראות",
+            "registryId": "notif_settings_screen.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(notifSettingsProvider.notifier).cancelSnooze()",
+            "effect": "write → notifSettingsProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'השתקה בוטלה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ChannelsSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דורש חיבור שרת — לא זמין בגרסה זו",
+            "registryId": "notif_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "notif_settings_screen.t09",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_TypesSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דורש חיבור שרת — לא זמין בגרסה זו",
+            "registryId": "notif_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "notif_settings_screen.t09",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_QuietHoursSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דורש חיבור שרת — לא זמין בגרסה זו",
+            "registryId": "notif_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "notif_settings_screen.t09",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showTimePicker",
+            "target": "showTimePicker"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showTimePicker(context: context, initialTime: time, builder: (ctx, child) => …",
+            "effect": "open → showTimePicker"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_SoundSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דורש חיבור שרת — לא זמין בגרסה זו",
+            "registryId": "notif_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "notif_settings_screen.t09",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "notif_settings_screen.t10",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_ImportanceSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "notif_settings_screen.t10",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_PersonaSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דורש חיבור שרת — לא זמין בגרסה זו",
+            "registryId": "notif_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "notif_settings_screen.t09",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_SummariesSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דורש חיבור שרת — לא זמין בגרסה זו",
+            "registryId": "notif_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "notif_settings_screen.t09",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showTimePicker",
+            "target": "showTimePicker"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showTimePicker(context: context, initialTime: time, builder: (ctx, child) => …",
+            "effect": "open → showTimePicker"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_LockScreenSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דורש חיבור שרת — לא זמין בגרסה זו",
+            "registryId": "notif_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "notif_settings_screen.t09",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_QuickActionsSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "notif_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "notif_settings_screen.t10",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 10,
+    "total": 10,
+    "summary": "10/10",
+    "entries": [
+      {
+        "id": "notif_settings_screen.t01",
+        "ok": true,
+        "atom": "NotifSettingsScreen"
+      },
+      {
+        "id": "notif_settings_screen.t02",
+        "ok": true,
+        "atom": "NotifSettingsScreen"
+      },
+      {
+        "id": "notif_settings_screen.t03",
+        "ok": true,
+        "atom": "NotifSettingsScreen"
+      },
+      {
+        "id": "notif_settings_screen.t04",
+        "ok": true,
+        "atom": "NotifSettingsScreen"
+      },
+      {
+        "id": "notif_settings_screen.t05",
+        "ok": true,
+        "atom": "NotifSettingsScreen"
+      },
+      {
+        "id": "notif_settings_screen.t06",
+        "ok": true,
+        "atom": "_SnoozeBanner"
+      },
+      {
+        "id": "notif_settings_screen.t07",
+        "ok": true,
+        "atom": "_ChannelsSection"
+      },
+      {
+        "id": "notif_settings_screen.t08",
+        "ok": true,
+        "atom": "_ChannelsSection"
+      },
+      {
+        "id": "notif_settings_screen.t09",
+        "ok": true,
+        "atom": "_ChannelsSection"
+      },
+      {
+        "id": "notif_settings_screen.t10",
+        "ok": true,
+        "atom": "_SoundSection"
+      }
+    ]
+  }
+}

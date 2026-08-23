@@ -1,0 +1,896 @@
+{
+  "screen": "catalog_settings_screen",
+  "source": "catalog_settings_screen.dart",
+  "atomCount": 12,
+  "atoms": [
+    {
+      "name": "CatalogSettingsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "הגדרות",
+            "registryId": "catalog_settings_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "איפוס הגדרות?",
+            "registryId": "catalog_settings_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כל ההגדרות יוחזרו לברירת המחדל.",
+            "registryId": "catalog_settings_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "catalog_settings_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ביטול",
+            "registryId": "catalog_settings_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "catalog_settings_screen.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אפס",
+            "registryId": "catalog_settings_screen.t05",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [],
+        "summary": "registry 7 · mapped 7/7 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "appSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "kbCatalogSettingsNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [
+          "showProfileRow"
+        ],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_ProfileRow",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "👤"
+          },
+          {
+            "kind": "cfgText",
+            "text": "הפרופיל שלי",
+            "registryId": "catalog_settings_screen.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [
+          "👤"
+        ],
+        "summary": "registry 1 · mapped 1/1 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "ProfileScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(ProfileScreen.route())",
+            "effect": "navigate → ProfileScreen"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ThemeSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "סידור מסך הבית",
+            "registryId": "catalog_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "גרור לשנות את סדר המקטעים בבית",
+            "registryId": "catalog_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "catalog_settings_screen.t11",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "appSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "appSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "catalogProductSortProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "HomeContentReorder"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(HomeContentReorder.route())",
+            "effect": "navigate → HomeContentReorder"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onAppSettings(…) callback instead of direct appSettingsProvider write",
+          "onCatalogProductSort(…) callback instead of direct catalogProductSortProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_NotificationsSection",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_RegionSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "catalog_settings_screen.t11",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "appSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "appSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onAppSettings(…) callback instead of direct appSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_SearchSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "catalog_settings_screen.t12",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "clear",
+            "target": "recentSearchesProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(recentSearchesProvider.notifier).clear()",
+            "effect": "write → recentSearchesProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'ההיסטוריה נוקתה')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "confirmDestructive"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onCatalogSettings(…) callback instead of direct catalogSettingsProvider write",
+          "onRecentSearches(…) callback instead of direct recentSearchesProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_PricesSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "catalog_settings_screen.t11",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "catalog_settings_screen.t12",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onCatalogSettings(…) callback instead of direct catalogSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_UnitsSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "catalog_settings_screen.t11",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SuppliersSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "catalog_settings_screen.t11",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "catalog_settings_screen.t12",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_AiSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "catalog_settings_screen.t12",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_AccessibilitySection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "catalog_settings_screen.t11",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onCatalogSettings(…) callback instead of direct catalogSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_InfoSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "תנאי שימוש",
+            "registryId": "catalog_settings_screen.t09",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מדיניות פרטיות",
+            "registryId": "catalog_settings_screen.t10",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "LegalScreen"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.terms))",
+            "effect": "navigate → LegalScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.privacy))",
+            "effect": "navigate → LegalScreen"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 12,
+    "total": 12,
+    "summary": "12/12",
+    "entries": [
+      {
+        "id": "catalog_settings_screen.t01",
+        "ok": true,
+        "atom": "CatalogSettingsScreen"
+      },
+      {
+        "id": "catalog_settings_screen.t02",
+        "ok": true,
+        "atom": "CatalogSettingsScreen"
+      },
+      {
+        "id": "catalog_settings_screen.t03",
+        "ok": true,
+        "atom": "CatalogSettingsScreen"
+      },
+      {
+        "id": "catalog_settings_screen.t04",
+        "ok": true,
+        "atom": "CatalogSettingsScreen"
+      },
+      {
+        "id": "catalog_settings_screen.t05",
+        "ok": true,
+        "atom": "CatalogSettingsScreen"
+      },
+      {
+        "id": "catalog_settings_screen.t06",
+        "ok": true,
+        "atom": "_ProfileRow"
+      },
+      {
+        "id": "catalog_settings_screen.t07",
+        "ok": true,
+        "atom": "_ThemeSection"
+      },
+      {
+        "id": "catalog_settings_screen.t08",
+        "ok": true,
+        "atom": "_ThemeSection"
+      },
+      {
+        "id": "catalog_settings_screen.t11",
+        "ok": true,
+        "atom": "_ThemeSection"
+      },
+      {
+        "id": "catalog_settings_screen.t12",
+        "ok": true,
+        "atom": "_SearchSection"
+      },
+      {
+        "id": "catalog_settings_screen.t09",
+        "ok": true,
+        "atom": "_InfoSection"
+      },
+      {
+        "id": "catalog_settings_screen.t10",
+        "ok": true,
+        "atom": "_InfoSection"
+      }
+    ]
+  }
+}

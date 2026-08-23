@@ -1,0 +1,322 @@
+{
+  "screen": "worker_forms_screen",
+  "source": "worker_forms_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "WorkerFormsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📄 טפסים",
+            "registryId": "worker_forms_screen.forms_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "",
+            "registryId": "worker_forms_screen.form101_note",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "פרטי המעסיק",
+            "registryId": "worker_forms_screen.employer_details",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הבקשות שלי",
+            "registryId": "worker_forms_screen.my_requests",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "צלם את אישור המחלה — הצילום נשמר ברשימה כאן.",
+            "registryId": "worker_forms_screen.sick_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין אישורים שהועלו עדיין",
+            "registryId": "worker_forms_screen.no_uploads",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📷"
+          },
+          {
+            "kind": "cfgText",
+            "text": "חתום ✓",
+            "registryId": "worker_forms_screen.signed",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [
+          "📷"
+        ],
+        "summary": "registry 7 · mapped 7/7 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerFormsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "vacationRequestsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerProfileProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "employerProfileProvider(session.employerId)"
+          },
+          {
+            "kind": "action",
+            "via": "showSignatureSheet",
+            "target": "showSignatureSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "employerProfileProvider(session.employerId)"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "workerFormsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showDatePicker",
+            "target": "showDatePicker"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "vacationRequestsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showFullPhotoRefDialog",
+            "target": "showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showFullPhotoRefDialog(context, n.photo, label: 'אישור מחלה · ${_fmtDate(n.ts…",
+            "effect": "open → showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "floor": [
+        "buildPrintableHtml",
+        "confirmDestructive",
+        "decodeDataUrlPhoto",
+        "employerProfileProvider",
+        "imageProviderForRef",
+        "onChanged",
+        "pickTaskPhoto",
+        "printDocument",
+        "setState",
+        "sort",
+        "validIsraeliMobile"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_FormCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "title",
+          "children"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_PillButton",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "label",
+          "onPressed",
+          "filled"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_DateField",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "📅"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "📅"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "label",
+          "value",
+          "onPick"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_VacationRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "request"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 7,
+    "total": 7,
+    "summary": "7/7",
+    "entries": [
+      {
+        "id": "worker_forms_screen.forms_title",
+        "ok": true,
+        "atom": "WorkerFormsScreen"
+      },
+      {
+        "id": "worker_forms_screen.form101_note",
+        "ok": true,
+        "atom": "WorkerFormsScreen"
+      },
+      {
+        "id": "worker_forms_screen.employer_details",
+        "ok": true,
+        "atom": "WorkerFormsScreen"
+      },
+      {
+        "id": "worker_forms_screen.my_requests",
+        "ok": true,
+        "atom": "WorkerFormsScreen"
+      },
+      {
+        "id": "worker_forms_screen.sick_hint",
+        "ok": true,
+        "atom": "WorkerFormsScreen"
+      },
+      {
+        "id": "worker_forms_screen.no_uploads",
+        "ok": true,
+        "atom": "WorkerFormsScreen"
+      },
+      {
+        "id": "worker_forms_screen.signed",
+        "ok": true,
+        "atom": "WorkerFormsScreen"
+      }
+    ]
+  }
+}

@@ -1,0 +1,525 @@
+{
+  "screen": "chats_screen",
+  "source": "chats_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "ChatsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "שיחות",
+            "registryId": "chats_screen.appbar_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "tabHeaderHiddenProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "updatesChatOpenProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatLastReadProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "MaterialPageRoute<void>(builder: (_) …"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "afterThisFrame",
+        "consumePendingThread",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [
+          "persona",
+          "audience",
+          "embedded"
+        ],
+        "untangle": [
+          "onTabHeaderHidden(…) callback instead of direct tabHeaderHiddenProvider write",
+          "onUpdatesChatOpen(…) callback instead of direct updatesChatOpenProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_SearchBar",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "updatesChatSearchProvider.select((q) => q.isNotEmpty)"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "updatesChatSearchProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(updatesChatSearchProvider.notifier).state = ''",
+            "effect": "write → updatesChatSearchProvider"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onUpdatesChatSearch(…) callback instead of direct updatesChatSearchProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_FilterChipsRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "_audienceChipIndexProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "_audienceChipIndexProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "_chatFilterProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "_chatFilterProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(_audienceChipIndexProvider.notifier).state = i",
+            "effect": "write → _audienceChipIndexProvider"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "select"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [
+          "audience"
+        ],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_ThreadList",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "💬"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין שיחות",
+            "registryId": "chats_screen.empty_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כשיהיו שיחות — הן יופיעו כאן",
+            "registryId": "chats_screen.empty_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "שיחה הועברה לארכיון",
+            "registryId": "chats_screen.archived_snack",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [
+          "💬"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "updatesChatSearchProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "_chatFilterProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatArchivedIdsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatLastReadProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "_audienceChipIndexProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "currentUidProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatArchivedIdsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatMutedIdsProvider.select((ids) => ids.contains(thread.id))"
+          },
+          {
+            "kind": "action",
+            "via": "showOnlinePresence",
+            "target": "showOnlinePresence"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider.select((s) => s.lastSeenPrivacy)"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "MaterialPageRoute<void>(builder: (_) …"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => _ChatPage(…",
+            "effect": "navigate → MaterialPageRoute<void>(builder: (_) …"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "persona",
+          "audience"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ChatPage",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "העבר לארכיון",
+            "registryId": "chats_screen.menu_archive",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "חיפוש בשיחה",
+            "registryId": "chats_screen.menu_search",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "חסום איש קשר",
+            "registryId": "chats_screen.menu_block",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "פעיל כעת",
+            "registryId": "chats_screen.online_now",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🔒 ההודעות בשיחה זו מוצפנות מקצה לקצה. רק המשתתפים יכולים לקרוא אותן.",
+            "registryId": "chats_screen.privacy_notice",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מקליד...",
+            "registryId": "chats_screen.typing",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "chats_screen.retry",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "נסה שוב",
+            "registryId": "chats_screen.retry",
+            "registryOk": true
+          }
+        ],
+        "registered": 8,
+        "unregistered": [],
+        "summary": "registry 8 · mapped 8/8 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatLastReadProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatHistoryClearedProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatHistoryClearedProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "currentUidProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatMutedIdsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatArchivedIdsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showOnlinePresence",
+            "target": "showOnlinePresence"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider.select((s) => s.lastSeenPrivacy)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "userProfileProvider.select((p) => p.contact)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider.select((s) => s.readReceipts)"
+          },
+          {
+            "kind": "action",
+            "via": "openCameraSheet",
+            "target": "openCameraSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "openCameraSheet(context)",
+            "effect": "open → openCameraSheet"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "onSend",
+        "setState",
+        "useCustomKeyboard"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "view"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 11,
+    "total": 11,
+    "summary": "11/11",
+    "entries": [
+      {
+        "id": "chats_screen.appbar_title",
+        "ok": true,
+        "atom": "ChatsScreen"
+      },
+      {
+        "id": "chats_screen.empty_title",
+        "ok": true,
+        "atom": "_ThreadList"
+      },
+      {
+        "id": "chats_screen.empty_hint",
+        "ok": true,
+        "atom": "_ThreadList"
+      },
+      {
+        "id": "chats_screen.archived_snack",
+        "ok": true,
+        "atom": "_ThreadList"
+      },
+      {
+        "id": "chats_screen.menu_archive",
+        "ok": true,
+        "atom": "_ChatPage"
+      },
+      {
+        "id": "chats_screen.menu_search",
+        "ok": true,
+        "atom": "_ChatPage"
+      },
+      {
+        "id": "chats_screen.menu_block",
+        "ok": true,
+        "atom": "_ChatPage"
+      },
+      {
+        "id": "chats_screen.online_now",
+        "ok": true,
+        "atom": "_ChatPage"
+      },
+      {
+        "id": "chats_screen.privacy_notice",
+        "ok": true,
+        "atom": "_ChatPage"
+      },
+      {
+        "id": "chats_screen.typing",
+        "ok": true,
+        "atom": "_ChatPage"
+      },
+      {
+        "id": "chats_screen.retry",
+        "ok": true,
+        "atom": "_ChatPage"
+      }
+    ]
+  }
+}

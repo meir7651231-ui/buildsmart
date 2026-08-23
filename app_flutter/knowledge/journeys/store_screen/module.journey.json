@@ -1,0 +1,258 @@
+{
+  "module": "store_screen",
+  "source": "../../../app_flutter/lib/screens/store_screen.dart",
+  "nodeCount": 51,
+  "edgeCount": 5,
+  "nodes": [
+    {
+      "screen": "StoreFavoritesNotifier",
+      "line": 104
+    },
+    {
+      "screen": "StoreProjectsNotifier",
+      "line": 387
+    },
+    {
+      "screen": "StoreScreen",
+      "line": 493
+    },
+    {
+      "screen": "_StoreScreenState",
+      "line": 500
+    },
+    {
+      "screen": "_SummaryRow",
+      "line": 594
+    },
+    {
+      "screen": "_SummaryChip",
+      "line": 644
+    },
+    {
+      "screen": "_SectionChipsRow",
+      "line": 672,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_Pill",
+      "line": 740
+    },
+    {
+      "screen": "_QuickActionsRow",
+      "line": 773
+    },
+    {
+      "screen": "_QuickAction",
+      "line": 855
+    },
+    {
+      "screen": "_FavoritesSheet",
+      "line": 922,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_MoadimSheet",
+      "line": 958
+    },
+    {
+      "screen": "_TizmonSheet",
+      "line": 973
+    },
+    {
+      "screen": "_SichaSheet",
+      "line": 988
+    },
+    {
+      "screen": "_SheetScaffold",
+      "line": 1039
+    },
+    {
+      "screen": "_SheetTile",
+      "line": 1088
+    },
+    {
+      "screen": "_StoreList",
+      "line": 1114
+    },
+    {
+      "screen": "_StoreListState",
+      "line": 1121,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_AllList",
+      "line": 1153,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_GridHubCard",
+      "line": 1300
+    },
+    {
+      "screen": "_DismissibleStoreRow",
+      "line": 1415
+    },
+    {
+      "screen": "_StoreRow",
+      "line": 1460
+    },
+    {
+      "screen": "_EmptyState",
+      "line": 1576
+    },
+    {
+      "screen": "_CartView",
+      "line": 1617
+    },
+    {
+      "screen": "_CartViewState",
+      "line": 1624
+    },
+    {
+      "screen": "_ProjectSelector",
+      "line": 1783
+    },
+    {
+      "screen": "_ProjectChip",
+      "line": 1905
+    },
+    {
+      "screen": "_SmartCartRow",
+      "line": 1941
+    },
+    {
+      "screen": "_SmartQtyStepper",
+      "line": 2068
+    },
+    {
+      "screen": "_SupplierHeader",
+      "line": 2131
+    },
+    {
+      "screen": "_CartItemRow",
+      "line": 2163
+    },
+    {
+      "screen": "_StepBtn",
+      "line": 2292
+    },
+    {
+      "screen": "_DeliverySelector",
+      "line": 2437
+    },
+    {
+      "screen": "_DeliveryCard",
+      "line": 2474
+    },
+    {
+      "screen": "_NotesField",
+      "line": 2528
+    },
+    {
+      "screen": "_SummaryCard",
+      "line": 2571
+    },
+    {
+      "screen": "_SummaryLine",
+      "line": 2620
+    },
+    {
+      "screen": "_PaymentSelector",
+      "line": 2650
+    },
+    {
+      "screen": "_PaymentChip",
+      "line": 2703
+    },
+    {
+      "screen": "_CheckoutButton",
+      "line": 2747
+    },
+    {
+      "screen": "_CheckoutButtonState",
+      "line": 2756
+    },
+    {
+      "screen": "_CheckoutSheet",
+      "line": 2872
+    },
+    {
+      "screen": "_CheckoutSheetState",
+      "line": 2880
+    },
+    {
+      "screen": "_CartActionsRow",
+      "line": 3192
+    },
+    {
+      "screen": "_ServicesGrid",
+      "line": 3542
+    },
+    {
+      "screen": "_ServiceSheet",
+      "line": 3652
+    },
+    {
+      "screen": "_OrdersList",
+      "line": 3830
+    },
+    {
+      "screen": "_OrdersHidden",
+      "line": 3894
+    },
+    {
+      "screen": "_OrderRow",
+      "line": 3951
+    },
+    {
+      "screen": "_OrderSheet",
+      "line": 4059
+    },
+    {
+      "screen": "_OrderTimeline",
+      "line": 4324
+    }
+  ],
+  "edges": [
+    {
+      "from": "_SectionChipsRow",
+      "to": "Store/s",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 680,
+      "params": "s"
+    },
+    {
+      "from": "_FavoritesSheet",
+      "to": "Store/cart",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 944,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "_FavoritesSheet",
+      "to": "Store/orders",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 947,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "_AllList",
+      "to": "Store/cart",
+      "trigger": "_tapFor",
+      "kind": "provider-swap",
+      "line": 1166,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "_AllList",
+      "to": "Store/orders",
+      "trigger": "_tapFor",
+      "kind": "provider-swap",
+      "line": 1170,
+      "params": "StoreSection.orders"
+    }
+  ]
+}

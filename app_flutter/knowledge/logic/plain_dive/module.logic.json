@@ -1,0 +1,683 @@
+{
+  "module": "plain_dive",
+  "source": "/home/user/buildsmart/app_flutter/lib/features/ring_dive/plain_dive.dart",
+  "atomCount": 10,
+  "caches": [
+    "_cache",
+    "_pool",
+    "_treeCache"
+  ],
+  "atoms": [
+    {
+      "fn": "plainProductsFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(PlainNode n) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_pool"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_cache"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "_allNodes",
+          "_reaches"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "key = '${n.superCat}|${n.classification}|${n.technical}|${n.categoriesExact?.join(',') ?? ''}'"
+          },
+          {
+            "kind": "compute",
+            "detail": "cached = _cache[key]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cached != null → return cached"
+          },
+          {
+            "kind": "branch",
+            "detail": "if n.categoriesExact != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "ps = _pool.where((p) => catalogProductMatchesQuery(p, n.technical)).toList()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if RegExp(r'^\\d+$').hasMatch(n.technical)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if ps.isEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "_cache[key] = ps"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "catalogProductMatchesQuery",
+        "contains",
+        "hasMatch",
+        "join",
+        "toList",
+        "toSet",
+        "where"
+      ],
+      "contract": {
+        "input": "(PlainNode n)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if cached != null → return cached"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_reaches",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(PlainNode n) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_pool",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_cache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "plainProductsFor",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "plainClassifications",
+          "plainNodes",
+          "plainSuperCats"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "plainProductsFor(n).isNotEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(PlainNode n)",
+        "output": "bool",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_allNodes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<PlainNode>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlainCoverage"
+          },
+          {
+            "kind": "const",
+            "name": "kPlainDict"
+          },
+          {
+            "kind": "global",
+            "name": "_pool"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_cache",
+            "transitive": true
+          },
+          {
+            "kind": "cache",
+            "name": "_treeCache"
+          }
+        ],
+        "calls": [
+          {
+            "name": "plainProductsFor",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "plainClassifications",
+          "plainNodes",
+          "plainSuperCats"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "cached = _treeCache"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cached != null → return cached"
+          },
+          {
+            "kind": "init",
+            "detail": "curated = <PlainNode>[...kPlainDict, ...kPlainCoverage]"
+          },
+          {
+            "kind": "init",
+            "detail": "reached = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final n in curated"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in plainProductsFor(n)"
+          },
+          {
+            "kind": "init",
+            "detail": "leftover = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in _pool"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !reached.contains(p.sku)"
+          },
+          {
+            "kind": "init",
+            "detail": "auto = <PlainNode>[for (final cat in leftover.toList()..sort()) PlainNode(superCat: 'עוד', class…"
+          },
+          {
+            "kind": "return",
+            "detail": "_treeCache = <PlainNode>[...curated, ...auto]"
+          }
+        ]
+      },
+      "floor": [
+        "PlainNode",
+        "add",
+        "contains",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<PlainNode>",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if cached != null → return cached"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plainSuperCats",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlainCoverage",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPlainDict",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_pool",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_treeCache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_allNodes",
+            "module": true
+          },
+          {
+            "name": "_reaches",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final n in _allNodes()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !out.contains(n.superCat) && _reaches(n)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "contains"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<String>",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plainClassifications",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String superCat) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlainCoverage",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPlainDict",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_pool",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_treeCache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_allNodes",
+            "module": true
+          },
+          {
+            "name": "_reaches",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final n in _allNodes()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if n.superCat == superCat && !out.contains(n.classification) && _reaches(n)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "contains"
+      ],
+      "contract": {
+        "input": "(String superCat)",
+        "output": "List<String>",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plainNodes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String superCat, String classification) -> List<PlainNode>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlainCoverage",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPlainDict",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_pool",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_treeCache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_allNodes",
+            "module": true
+          },
+          {
+            "name": "_reaches",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final n in _allNodes()) if (n.superCat == superCat && n.classification == classific…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String superCat, String classification)",
+        "output": "List<PlainNode>",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plainAxisLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axis, String value) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_sizePlain"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "axis == 'size' ? (_sizePlain[value] ?? value) : value"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String axis, String value)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plainAxisTitle",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axis) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (axis) {'size' => 'איזה גודל?', 'material' => 'איזה חומר?', 'angle' => 'איזו זווית…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String axis)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plainNextAxis",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> products, {Set<String> usedAxes = const <String>{}}) -> ({String axis, List<String> values})?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_narrowAxes"
+          },
+          {
+            "kind": "const",
+            "name": "kRdOrder"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if products.length <= 1 → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final axis in _narrowAxes"
+          },
+          {
+            "kind": "branch",
+            "detail": "if usedAxes.contains(axis) → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if axis == 'size'"
+          },
+          {
+            "kind": "init",
+            "detail": "vals = <String>{}"
+          },
+          {
+            "kind": "compute",
+            "detail": "everyoneHasIt = true"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in products"
+          },
+          {
+            "kind": "branch",
+            "detail": "if vals.length >= 2 && everyoneHasIt"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "any",
+        "compareTo",
+        "contains",
+        "every",
+        "indexOf",
+        "productHasChip",
+        "rdAxesOf",
+        "sizeTokensIn",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> products, {Set<String> usedAxes = const <String>{}})",
+        "output": "({String axis, List<String> values})?",
+        "purity": "pure",
+        "precond": [
+          "if products.length <= 1 → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "products.length <= 1 · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "plainFilterBy",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> products, String axis, String value) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final p in products) if (axis == 'size' ? productHasChip(p, value) : (rdAxesOf(p)[a…"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "productHasChip",
+        "rdAxesOf"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> products, String axis, String value)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

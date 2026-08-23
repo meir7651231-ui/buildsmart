@@ -1,0 +1,66 @@
+{
+  "name": "LensSelectorRow",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "סדר לפי:",
+        "registryId": "lens_selector_row.sort_by",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "available.length < 2"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogLensProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogLensProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (available.length < 2)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogLensProvider.notifier).state = lens",
+        "effect": "write → catalogLensProvider"
+      }
+    ]
+  },
+  "floor": [
+    "availableLensesForSet",
+    "resolveActiveLens"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": false,
+    "props": [
+      "products"
+    ],
+    "untangle": [
+      "onCatalogLens(…) callback instead of direct catalogLensProvider write"
+    ]
+  }
+}

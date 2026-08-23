@@ -1,0 +1,1090 @@
+{
+  "screen": "manager_dashboard_screen",
+  "source": "manager_dashboard_screen.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "name": "ManagerDashboardScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "מרכז השליטה",
+            "registryId": "manager.dash.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מנהל המערכת",
+            "registryId": "manager.dash.subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "manager.dash.exit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ יציאה",
+            "registryId": "manager.dash.exit",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "orgConfigProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "managerTabProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "ChatsScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "ManagerProfileScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CatalogSettingsScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Chat…",
+            "effect": "navigate → ChatsScreen"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(ManagerProfileScreen.route())",
+            "effect": "navigate → ManagerProfileScreen"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(CatalogSettingsScreen.route(showProfileRow: false))",
+            "effect": "navigate → CatalogSettingsScreen"
+          }
+        ]
+      },
+      "floor": [
+        "kbManagerDashboardNodes",
+        "moduleOn"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom",
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_LivePill",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "connectionStatusProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ManagerToggle",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "orgConfigProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "managerTabProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(managerTabProvider.notifier).state = i",
+            "effect": "write → managerTabProvider"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "moduleOn",
+        "seg"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": false,
+        "props": [
+          "active"
+        ],
+        "untangle": [
+          "onManagerTab(…) callback instead of direct managerTabProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_DashboardTab",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🤖"
+          },
+          {
+            "kind": "cfgText",
+            "text": "שאל את העסק שלך",
+            "registryId": "manager.cockpit.copilot.title",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🎬"
+          },
+          {
+            "kind": "cfgText",
+            "text": "סטודיו — ערוך את האפליקציה",
+            "registryId": "manager_dashboard_screen.studio_hero_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ניסיוני",
+            "registryId": "manager_dashboard_screen.studio_experimental_badge",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🔔 דורש טיפול"
+          },
+          {
+            "kind": "cfgText",
+            "text": "צינור ההזמנות",
+            "registryId": "manager.dash.pipeline.title",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "🤖",
+          "🎬",
+          "🔔 דורש טיפול"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 3"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "managerAnalyticsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "ordersEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "screenSectionsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "screenSectionsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "ManagerCopilotScreen"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "studioCoEditorProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "!gate.manager"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "StudioScreen"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "attentionItemsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "items.isEmpty"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "managerTabProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "!elementVisible(ref, cfgId)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(ManagerCopilotScreen.route())",
+            "effect": "navigate → ManagerCopilotScreen"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (!gate.manager)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(StudioScreen.route())",
+            "effect": "navigate → StudioScreen"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (items.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(managerTabProvider.notifier).state = 1",
+            "effect": "write → managerTabProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(managerTabProvider.notifier).state = item.navTab",
+            "effect": "write → managerTabProvider"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (!elementVisible(ref, cfgId))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius",
+        "childrenFor",
+        "elementVisible",
+        "featEnabled",
+        "go"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onManagerTab(…) callback instead of direct managerTabProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_OrdersTab",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "לא נמצאו הזמנות תואמות.",
+            "registryId": "manager.orders.empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✓ הושלם",
+            "registryId": "manager_dashboard_screen.order_completed_badge",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📦"
+          },
+          {
+            "kind": "cfgText",
+            "text": "✓ ההזמנה הושלמה ונמסרה",
+            "registryId": "manager_dashboard_screen.order_completed_delivered",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🧾 הפק חשבונית"
+          },
+          {
+            "kind": "text",
+            "text": "💵 הפק קבלה"
+          },
+          {
+            "kind": "text",
+            "text": "📦 תעודת משלוח"
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "manager.orders.advance",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "קדם שלב ›",
+            "registryId": "manager.orders.advance",
+            "registryOk": true
+          }
+        ],
+        "registered": 5,
+        "unregistered": [
+          "📦",
+          "🧾 הפק חשבונית",
+          "💵 הפק קבלה",
+          "📦 תעודת משלוח"
+        ],
+        "summary": "registry 5 · mapped 5/5 · unregistered 4"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "ordersEngineProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "ordersEngineProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "order == null"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (order == null)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'הדפסה זמינה בדפדפן')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "buildDeliveryNoteRows",
+        "buildInvoiceRows",
+        "buildPrintableHtml",
+        "cfgRadius",
+        "chip",
+        "deliveryNoteTitle",
+        "featEnabled",
+        "invoiceTitle",
+        "onSelect",
+        "printDocument",
+        "row",
+        "setState",
+        "stat",
+        "tile"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CustomersTab",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "⬆️ ייבוא לקוחות מ-CSV"
+          },
+          {
+            "kind": "cfgText",
+            "text": "לא נמצאו קבלנים תואמים.",
+            "registryId": "manager.customers.empty",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🔔"
+          },
+          {
+            "kind": "text",
+            "text": "👷"
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "manager_dashboard_screen.credit_explain_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "💳"
+          },
+          {
+            "kind": "cfgText",
+            "text": "הסבר אשראי",
+            "registryId": "manager_dashboard_screen.credit_explain_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "⏳ ממתין"
+          },
+          {
+            "kind": "text",
+            "text": "💬"
+          },
+          {
+            "kind": "text",
+            "text": "צ'אט עם הלקוח"
+          },
+          {
+            "kind": "text",
+            "text": "אין פרטי לקוח שמורים עדיין"
+          },
+          {
+            "kind": "cfgText",
+            "text": "🧭 מסע הלקוח",
+            "registryId": "manager_dashboard_screen.journey_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "⬆️ ייבוא לקוחות מ-CSV",
+          "🔔",
+          "👷",
+          "💳",
+          "⏳ ממתין",
+          "💬",
+          "צ'אט עם הלקוח",
+          "אין פרטי לקוח שמורים עדיין"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 8"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "_customerViewsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "fleetCreditProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showCustomerImportSheet",
+            "target": "showCustomerImportSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "userApproverProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "directoryProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "pending.isEmpty"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "customerCreditProvider(c.name)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "customerScoreProvider(c.name)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "ordersEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CreditExplainScreen"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "orgConfigProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "intelLogProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "currentUidProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "action",
+            "via": "openChatThread",
+            "target": "openChatThread"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "usersLookupProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "savedCustomerForProvider(widget.customer.name)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "savedCustomerForProvider(displayName)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showCustomerImportSheet(context)",
+            "effect": "open → showCustomerImportSheet"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (pending.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(CreditExplainScreen.route(name: c.name, creditLimi…",
+            "effect": "navigate → CreditExplainScreen"
+          }
+        ]
+      },
+      "floor": [
+        "approver",
+        "bsOnAccent",
+        "cfgRadius",
+        "chip",
+        "customerCreditProvider",
+        "customerScoreProvider",
+        "featEnabled",
+        "fuzzyNameMatch",
+        "intelEventEmoji",
+        "intelEventHe",
+        "journeyConverted",
+        "journeyEventsFor",
+        "journeyRelTime",
+        "journeyRowStuck",
+        "moduleOn",
+        "onChanged",
+        "onSelect",
+        "orgTerm",
+        "pendingDirectoryEntries",
+        "resolveApproveTargets",
+        "row",
+        "savedCustomerForProvider",
+        "setState",
+        "stat",
+        "tile"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_ManageTab",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.",
+            "registryId": "manager.manage.intro",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🎉 אין משימות הממתינות לאישור.",
+            "registryId": "manager_dashboard_screen.approvals_empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין בקשות חופשה.",
+            "registryId": "manager_dashboard_screen.vacations_empty",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "שינוי שם קטגוריה מעדכן את כל המוצרים שבה."
+          },
+          {
+            "kind": "cfgText",
+            "text": "עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.",
+            "registryId": "manager_dashboard_screen.producttree_intro",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי)."
+          },
+          {
+            "kind": "cfgText",
+            "text": "",
+            "registryId": "manager_dashboard_screen.regression_intro",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "manager.manage.regression.open",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🔬 פתח מרכז בדיקות רגרסיה",
+            "registryId": "manager.manage.regression.open",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "",
+            "registryId": "manager_dashboard_screen.roleassign_intro",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "manager.manage.roles.open",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🔑 פתח שיוך תפקידים",
+            "registryId": "manager.manage.roles.open",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "",
+            "registryId": "manager_dashboard_screen.approvals_intro",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "manager.manage.approvals.open",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📋 פתח בקשות אישור",
+            "registryId": "manager.manage.approvals.open",
+            "registryOk": true
+          }
+        ],
+        "registered": 13,
+        "unregistered": [
+          "שינוי שם קטגוריה מעדכן את כל המוצרים שבה.",
+          "כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי)."
+        ],
+        "summary": "registry 13 · mapped 13/13 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "vacationRequestsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "workerNotifsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "managerAnalyticsProvider.select((a) => a.catalogCategories)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "pendingApprovalTasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "vacationRequestsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "featureFlagsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "RegressionPanelScreen"
+          },
+          {
+            "kind": "action",
+            "via": "showManagerRoleAssignSheet",
+            "target": "showManagerRoleAssignSheet"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "RoleRequestsInboxScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "TradeBuilderHomeScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "OrgSetupWizardScreen"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "pendingRoleRequestsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(TradeBuilderHomeScreen.route())",
+            "effect": "navigate → TradeBuilderHomeScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(OrgSetupWizardScreen.route())",
+            "effect": "navigate → OrgSetupWizardScreen"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "cfgRadius",
+        "onApprove",
+        "onReject",
+        "promptRejectReason",
+        "setState",
+        "sort",
+        "taskPhotoWidget"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 24,
+    "total": 24,
+    "summary": "24/24",
+    "entries": [
+      {
+        "id": "manager.dash.title",
+        "ok": true,
+        "atom": "ManagerDashboardScreen"
+      },
+      {
+        "id": "manager.dash.subtitle",
+        "ok": true,
+        "atom": "ManagerDashboardScreen"
+      },
+      {
+        "id": "manager.dash.exit",
+        "ok": true,
+        "atom": "ManagerDashboardScreen"
+      },
+      {
+        "id": "manager.cockpit.copilot.title",
+        "ok": true,
+        "atom": "_DashboardTab"
+      },
+      {
+        "id": "manager_dashboard_screen.studio_hero_title",
+        "ok": true,
+        "atom": "_DashboardTab"
+      },
+      {
+        "id": "manager_dashboard_screen.studio_experimental_badge",
+        "ok": true,
+        "atom": "_DashboardTab"
+      },
+      {
+        "id": "manager.dash.pipeline.title",
+        "ok": true,
+        "atom": "_DashboardTab"
+      },
+      {
+        "id": "manager.orders.empty",
+        "ok": true,
+        "atom": "_OrdersTab"
+      },
+      {
+        "id": "manager_dashboard_screen.order_completed_badge",
+        "ok": true,
+        "atom": "_OrdersTab"
+      },
+      {
+        "id": "manager_dashboard_screen.order_completed_delivered",
+        "ok": true,
+        "atom": "_OrdersTab"
+      },
+      {
+        "id": "manager.orders.advance",
+        "ok": true,
+        "atom": "_OrdersTab"
+      },
+      {
+        "id": "manager.customers.empty",
+        "ok": true,
+        "atom": "_CustomersTab"
+      },
+      {
+        "id": "manager_dashboard_screen.credit_explain_btn",
+        "ok": true,
+        "atom": "_CustomersTab"
+      },
+      {
+        "id": "manager_dashboard_screen.journey_title",
+        "ok": true,
+        "atom": "_CustomersTab"
+      },
+      {
+        "id": "manager.manage.intro",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager_dashboard_screen.approvals_empty",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager_dashboard_screen.vacations_empty",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager_dashboard_screen.producttree_intro",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager_dashboard_screen.regression_intro",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager.manage.regression.open",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager_dashboard_screen.roleassign_intro",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager.manage.roles.open",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager_dashboard_screen.approvals_intro",
+        "ok": true,
+        "atom": "_ManageTab"
+      },
+      {
+        "id": "manager.manage.approvals.open",
+        "ok": true,
+        "atom": "_ManageTab"
+      }
+    ]
+  }
+}

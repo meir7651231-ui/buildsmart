@@ -1,0 +1,965 @@
+{
+  "module": "card_projects",
+  "source": "lib/state/card_projects.dart",
+  "atomCount": 16,
+  "atoms": [
+    {
+      "fn": "projectItemsAfterAdd",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<ProjectItem> current, ProjectItem item) -> List<ProjectItem>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "CardProjectsNotifier.add",
+          "CardProjectsNotifier.addToLocations",
+          "CardProjectsNotifier.applyTemplate"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <ProjectItem>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "merged = false"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in current"
+          },
+          {
+            "kind": "branch",
+            "detail": "if e.id == item.id"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !merged"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(List<ProjectItem> current, ProjectItem item)",
+        "output": "List<ProjectItem>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "projectQuoteText",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String project, List<ProjectItem> items) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "lines = <String>['הצעת מחיר — פרויקט \"$project\"']"
+          },
+          {
+            "kind": "compute",
+            "detail": "total = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final it in items"
+          },
+          {
+            "kind": "compute",
+            "detail": "prod = catalogProductForSku(it.sku)"
+          },
+          {
+            "kind": "compute",
+            "detail": "unit = prod == null ? 0 : (priceFor(prod) ?? 0)"
+          },
+          {
+            "kind": "compute",
+            "detail": "sub = unit * it.qty"
+          },
+          {
+            "kind": "effect",
+            "detail": "total += sub"
+          },
+          {
+            "kind": "effect",
+            "detail": "lines.add('• ${it.location}: ${it.brandName} ×${it.qty} — ~₪$sub')"
+          },
+          {
+            "kind": "effect",
+            "detail": "lines.add('סה\"כ משוער: ~₪$total')"
+          },
+          {
+            "kind": "effect",
+            "detail": "lines.add('— נוצר ב-${AppBrand.name}')"
+          },
+          {
+            "kind": "return",
+            "detail": "lines.join('\\n')"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "catalogProductForSku",
+        "join",
+        "priceFor"
+      ],
+      "contract": {
+        "input": "(String project, List<ProjectItem> items)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "projectTemplates",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<({String name, List<SmartProduct> products})>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kProjectTemplates"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <({String name, List<SmartProduct> products})>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in _kProjectTemplates"
+          },
+          {
+            "kind": "init",
+            "detail": "products = <SmartProduct>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "seen = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final kw in t.keywords"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add((name: t.name, products: products))"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "allSmartProducts",
+        "catalogRepo",
+        "contains"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<({String name, List<SmartProduct> products})>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectItem.id",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "brandName"
+          },
+          {
+            "kind": "field",
+            "name": "location"
+          },
+          {
+            "kind": "field",
+            "name": "productKey"
+          },
+          {
+            "kind": "field",
+            "name": "project"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'$project|$location|$productKey|$brandName'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectItem.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({int? qty}) -> ProjectItem",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "brandName"
+          },
+          {
+            "kind": "field",
+            "name": "location"
+          },
+          {
+            "kind": "field",
+            "name": "productKey"
+          },
+          {
+            "kind": "field",
+            "name": "project"
+          },
+          {
+            "kind": "field",
+            "name": "sku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ProjectItem(project: project, location: location, productKey: productKey, brandName: bran…"
+          }
+        ]
+      },
+      "floor": [
+        "ProjectItem"
+      ],
+      "contract": {
+        "input": "({int? qty})",
+        "output": "ProjectItem",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProjectItem.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "brandName"
+          },
+          {
+            "kind": "field",
+            "name": "location"
+          },
+          {
+            "kind": "field",
+            "name": "productKey"
+          },
+          {
+            "kind": "field",
+            "name": "project"
+          },
+          {
+            "kind": "field",
+            "name": "qty"
+          },
+          {
+            "kind": "field",
+            "name": "sku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'project' : project, 'location' : location, 'productKey' : productKey, 'brandName' : bra…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (List<ProjectItem> value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<ProjectItem> value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(_key)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw != null"
+          }
+        ]
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "map",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "CardProjectsNotifier.add",
+          "CardProjectsNotifier.addToLocations",
+          "CardProjectsNotifier.applyTemplate",
+          "CardProjectsNotifier.removeProject"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setString(_key, jsonEncode(state.map((e) => e.toJson()).toList()))"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "map",
+        "setString",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier.add",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ProjectItem item) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "projectItemsAfterAdd",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = projectItemsAfterAdd(state, item)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProjectItem item)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier.addToLocations",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ProjectItem template, List<String> locations) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "projectItemsAfterAdd",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "next = state"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final loc in locations"
+          },
+          {
+            "kind": "effect",
+            "detail": "next = projectItemsAfterAdd(next, ProjectItem(project: template.project, location: loc, p…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "ProjectItem"
+      ],
+      "contract": {
+        "input": "(ProjectItem template, List<String> locations)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier.applyTemplate",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String project, String location, List<SmartProduct> products) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "projectItemsAfterAdd",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "next = state"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final sp in products"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = sp.recBrand"
+          },
+          {
+            "kind": "effect",
+            "detail": "next = projectItemsAfterAdd(next, ProjectItem(project: project, location: location, produ…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "ProjectItem"
+      ],
+      "contract": {
+        "input": "(String project, String location, List<SmartProduct> products)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier.removeProject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String project) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = state.where((e) => e.project != project).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String project)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier.forProject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String project) -> List<ProjectItem>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.where((e) => e.project == project).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String project)",
+        "output": "List<ProjectItem>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier.totalUnits",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.fold(0, (s, e) => s + e.qty)"
+          }
+        ]
+      },
+      "floor": [
+        "fold"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardProjectsNotifier.projects",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{for (final e in state) e.project}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

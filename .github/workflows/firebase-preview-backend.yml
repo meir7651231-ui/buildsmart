@@ -1,0 +1,96 @@
+# Preview build of the Flutter web app with the REAL Firebase backend enabled
+# (USE_FIREBASE_BACKEND=true), deployed to a temporary Hosting preview channel.
+# The main live site (firebase-hosting.yml) stays on the demo/_local data — this
+# is an isolated test URL so a backend bug never breaks buildsmart-il.com.
+name: Preview — Web with real Firebase backend
+
+on:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+  workflow_dispatch:
+
+concurrency:
+  group: firebase-preview-backend
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Install Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored)
+        run: bash scripts/gen_version.sh
+
+      # Match the phone test build (android-test-build.yml) EXACTLY: the orders
+      # read rule is per-document (ownsOrder / storeUid==uid / pool), so a
+      # contractor's whole-collection listen (UID_SCOPED_QUERIES OFF) is denied
+      # by Firestore — the synced order would never appear. UID_SCOPED_QUERIES=true
+      # makes the query `contractorUid == uid`, which the rules prove → sync shows.
+      # SERVER_CALLABLES=true keeps parity with the phone (stage-advance/setRole).
+      # FS_DIAG=true mounts the on-screen backend badge (🟢 server/🔴 demo + uid +
+      # a 4-step Firestore self-test) so a tester can SEE both devices are on the
+      # same server + same uid — the thing that must match for cross-device sync.
+      # GO-LIVE step 2 — also flip the SERVER CATALOG on this preview:
+      # CATALOG_BASE_URL (any non-empty value → `useServerCatalog` true; the real
+      # read is Firestore via FirebaseAuthoredProductsRepository, NOT this URL) +
+      # STORE_COMPARISON_UI (the C3.4 product-sheet comparison line). Guests are
+      # signed in anonymously by main.dart's gated bootstrap so the seeded catalog
+      # (3,614 docs) is readable. The LIVE site is untouched — this is the isolated
+      # preview channel only.
+      # Mirror the LIVE build (firebase-hosting.yml) EXACTLY — all the finder flags
+      # (מאתר-על AXIS_DIVE, RingDive, PlainDive, word-finder, global search, live-mirror
+      # keyboard) — so the preview is the SAME app the owner knows, PLUS the server
+      # catalog (USE_FIREBASE_BACKEND + CATALOG_BASE_URL → useServerCatalog) +
+      # STORE_COMPARISON_UI + the backend parity flags (uid-scoped/callables/diag).
+      # EXACTLY the live build (firebase-hosting.yml:65) — base-href, all finder flags,
+      # AND ${{ vars.STUDIO_DART_DEFINES }} — so the preview is the SAME app the owner
+      # knows. THEN append the server-catalog flags (last ⇒ they win over any conflict
+      # in STUDIO_DART_DEFINES): USE_FIREBASE_BACKEND + CATALOG_BASE_URL (→ useServerCatalog)
+      # + STORE_COMPARISON_UI + the backend parity flags (uid-scoped/callables/diag).
+      - name: Build Flutter web (LIVE build + SERVER CATALOG + comparison + diag)
+        working-directory: app_flutter
+        run: >-
+          flutter build web --release --base-href "/"
+          --dart-define=ENABLE_WORD_FINDER=true
+          --dart-define=KB_LIVE_MIRROR=true
+          --dart-define=KB_GLOBAL=true
+          --dart-define=ENABLE_RING_DIVE=true
+          --dart-define=PLAIN_DIVE=true
+          --dart-define=AXIS_DIVE=true
+          --dart-define=GLOBAL_SEARCH=true
+          --dart-define=STUDIO_SHARED_SYNC=true
+          ${{ vars.STUDIO_DART_DEFINES }}
+          --dart-define=USE_FIREBASE_BACKEND=true
+          --dart-define=CATALOG_BASE_URL=https://buildsmart-il.com
+          --dart-define=STORE_COMPARISON_UI=true
+          --dart-define=UID_SCOPED_QUERIES=true
+          --dart-define=SERVER_CALLABLES=true
+          --dart-define=FS_DIAG=true
+
+      - name: Deploy to Hosting preview channel
+        # When the backend-flagged build is byte-identical to the last one, the
+        # preview channel already holds that version → this action returns 400
+        # "version already active" (a harmless no-op). Non-blocking so an unchanged
+        # preview re-deploy can't red the branch; a real change yields a new hash
+        # and deploys normally.
+        continue-on-error: true
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: buildsmart-b0b78
+          channelId: backend-preview
+          expires: 30d

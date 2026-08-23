@@ -1,0 +1,391 @@
+{
+  "module": "courier_profile_store",
+  "source": "lib/state/courier_profile_store.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "CourierProfile.normalizeHaul",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? id) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVehicleRank"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "id is String && kVehicleRank.containsKey(id) ? id : ''"
+          }
+        ]
+      },
+      "floor": [
+        "containsKey"
+      ],
+      "contract": {
+        "input": "(Object? id)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CourierProfile.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? displayName, String? phone, String? preferredHaul, Object? photo = _sentinel}) -> CourierProfile",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sentinel"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CourierProfile(displayName: displayName ?? this.displayName, phone: phone ?? this.phone, …"
+          }
+        ]
+      },
+      "floor": [
+        "CourierProfile"
+      ],
+      "contract": {
+        "input": "({String? displayName, String? phone, String? preferredHaul, Object? photo = _sentinel})",
+        "output": "CourierProfile",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CourierProfile.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "displayName"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          },
+          {
+            "kind": "field",
+            "name": "photo"
+          },
+          {
+            "kind": "field",
+            "name": "preferredHaul"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'displayName' : displayName, 'phone' : phone, 'preferredHaul' : preferredHaul, 'photo' :…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CourierProfileStore._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCourierProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
+      },
+      "floor": [
+        "cast",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "load"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CourierProfileStore._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCourierProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "debugPersistOverride"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "CourierProfileStore.save"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "override = debugPersistOverride"
+          },
+          {
+            "kind": "precond",
+            "detail": "if override != null → return override()"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !persist → return true"
+          }
+        ]
+      },
+      "floor": [
+        "CourierProfile",
+        "getInstance",
+        "jsonEncode",
+        "override",
+        "save",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if override != null → return override()",
+          "if !persist → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CourierProfileStore.save",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username, CourierProfile profile) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCourierProfileKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "debugPersistOverride",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, username : profile.copyWith(preferredHaul: CourierProfile.normalizeHau…"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok && mounted"
+          },
+          {
+            "kind": "return",
+            "detail": "ok"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "normalizeHaul"
+      ],
+      "contract": {
+        "input": "(String username, CourierProfile profile)",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

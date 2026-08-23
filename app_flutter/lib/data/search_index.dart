@@ -2,6 +2,11 @@
 // Covers: bottom-nav tabs, BS personas + sub-trees, menu tabs + sub-trees,
 // settings groups + all deep leaves, catalog categories, search tools.
 
+import 'package:buildsmart/config/app_brand.dart';
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileEmptySeeds, kProfileRawShell;
+import 'package:buildsmart/state/under_construction.dart';
+
 enum SearchType {
   screen,
   persona,
@@ -40,7 +45,16 @@ class SearchEntry {
       };
 }
 
-const List<SearchEntry> kSearchIndex = [
+// ── ENGINE vs CONTENT segments (raw shell) ─────────────────────────────────
+// [kSearchIndex] is assembled from const segments so the raw shell
+// ([kProfileRawShell]) drops the two CONTENT blocks (BuildSmart taxonomy)
+// while every ENGINE row — screens · actions · settings · menu chrome —
+// stays typed-dive reachable. A third, SEED segment (the three demo project
+// rows) self-gates on [kProfileEmptySeeds] inside the tail, mirroring
+// [kProjects] (data/projects.dart). Off the raw shell the final concat
+// reproduces today's list element-for-element (demo byte-identical).
+
+const List<SearchEntry> _kEngineRowsHead = [
   // ── Bottom nav screens ─────────────────────────────────────────────────
   SearchEntry(emoji: '📋', title: 'קטלוג',  breadcrumb: '',  type: SearchType.screen),
   SearchEntry(emoji: '💬', title: 'שיחות',  breadcrumb: '',  type: SearchType.screen),
@@ -67,7 +81,13 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '⚙️', title: 'פילטרים',     breadcrumb: 'חיפוש', type: SearchType.action),
   SearchEntry(emoji: '↕️', title: 'מיון',        breadcrumb: 'חיפוש', type: SearchType.action),
   SearchEntry(emoji: '▦',  title: 'קטלוג',       breadcrumb: 'חיפוש', type: SearchType.action),
+];
 
+// CONTENT — the catalog category rows (BuildSmart plumbing taxonomy), dropped
+// on the raw shell. Derive-when-imported is DEFERRED: on raw the imported
+// company's categories stay reachable via the derived 'קטגוריות' browse, so
+// the typed-dive search chips stay engine-only for now.
+const List<SearchEntry> _kContentCategoryRows = [
   // ── Catalog categories (11 verbatim) ───────────────────────────────────
   SearchEntry(emoji: '🚰',  title: 'ברזים וכיורים',       breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🚽',  title: 'אסלות',               breadcrumb: 'קטלוג', type: SearchType.category),
@@ -81,7 +101,9 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🎨',  title: 'גמר',                 breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🧰',  title: 'אביזרים נלווים',       breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🌱',  title: 'גינון והשקיה',         breadcrumb: 'קטלוג', type: SearchType.category),
+];
 
+const List<SearchEntry> _kEngineRowsMid = [
   // ── Catalog sections (sortable / smart views) ──────────────────────────
   SearchEntry(emoji: '🔄',  title: 'וריאנטים',             breadcrumb: 'קטלוג', type: SearchType.menu),
   SearchEntry(emoji: '⭐',  title: 'מועדפים',              breadcrumb: 'קטלוג', type: SearchType.menu),
@@ -172,7 +194,6 @@ const List<SearchEntry> kSearchIndex = [
   // ── Menu tabs (L1) ────────────────────────────────────────────────────
   SearchEntry(emoji: '🏠',  title: 'בית',        breadcrumb: 'תפריט', type: SearchType.menu),
   SearchEntry(emoji: '🏗️', title: 'הפרויקטים', breadcrumb: 'תפריט', type: SearchType.menu),
-  SearchEntry(emoji: '🛒',  title: 'רכש',        breadcrumb: 'תפריט', type: SearchType.menu),
   SearchEntry(emoji: '⚙️',  title: 'הגדרות',     breadcrumb: 'תפריט', type: SearchType.menu),
 
   // ── Menu › בית ────────────────────────────────────────────────────────
@@ -180,17 +201,45 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '📦',  title: 'חיזוי מלאי',              breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '📷',  title: 'סורק ברקוד',              breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '🎙️', title: 'דיבור למשימה',            breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
-  SearchEntry(emoji: '💡',  title: 'חלופות זולות',             breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
-  SearchEntry(emoji: '📐',  title: 'סריקת תוכניות',           breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+  // completion round: these two name AI-hub tiles that are raw-hidden — the
+  // chips must not point at absent tools on the bare shell.
+  if (!kProfileRawShell) ...const <SearchEntry>[
+    SearchEntry(emoji: '💡',  title: 'חלופות זולות',             breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+    SearchEntry(emoji: '📐',  title: 'סריקת תוכניות',           breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+  ],
   SearchEntry(emoji: '🔗',  title: 'התאמה משולשת',             breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '🌦️', title: 'אוטומציית מזג אוויר',     breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '🔧',  title: 'זיהוי בלאי',              breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
-  SearchEntry(emoji: '📊',  title: 'Analytics חכם',            breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+  if (!kProfileRawShell)
+    SearchEntry(emoji: '📊',  title: 'Analytics חכם',            breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+];
+
+// CONTENT — the plan-scan rows (תפריט › בית): the sheet plus its four
+// BuildSmart discipline chips, dropped on the raw shell.
+const List<SearchEntry> _kContentPlanScanRows = [
   SearchEntry(emoji: '📐',  title: 'סרוק תוכנית עבודה',       breadcrumb: 'תפריט › בית',                           type: SearchType.menu),
   SearchEntry(emoji: '🚿',  title: 'אינסטלציה',               breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
   SearchEntry(emoji: '⚡',  title: 'חשמל',                    breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
   SearchEntry(emoji: '🏛️', title: 'אדריכלות',                breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
   SearchEntry(emoji: '🎨',  title: 'גמר',                     breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
+];
+
+// SEED — the three demo project-name rows (תפריט › הפרויקטים), mirroring
+// [kProjects] (data/projects.dart): clean/company2 ([kProfileEmptySeeds])
+// start with NO projects, so search must not surface them either;
+// demo/buildsmart keep the rows verbatim. Spread INSIDE the tail at their
+// exact position, so the order-preserving concat stays element-identical
+// off the gate.
+const List<SearchEntry> _kContentProjectRows = kProfileEmptySeeds
+    ? <SearchEntry>[]
+    : [
+  SearchEntry(emoji: '🏗️', title: 'מגדל הרצליה — קומה 4',  breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
+  SearchEntry(emoji: '🏗️', title: 'וילה כפר שמריהו',        breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
+  SearchEntry(emoji: '🏗️', title: 'שיפוץ משרדים — רעננה',  breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
+];
+
+const List<SearchEntry> _kEngineRowsTail = [
+  // ── Menu › בית (continued) ─────────────────────────────────────────────
   SearchEntry(emoji: '📦',  title: 'המלאי שלי',               breadcrumb: 'תפריט › בית',                           type: SearchType.menu),
   SearchEntry(emoji: '🏬',  title: 'המחסן',                   breadcrumb: 'תפריט › בית › המלאי שלי',               type: SearchType.menu),
   SearchEntry(emoji: '🏗️', title: 'האתר',                    breadcrumb: 'תפריט › בית › המלאי שלי',               type: SearchType.menu),
@@ -207,9 +256,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🗄️', title: 'ארכיון פרויקטים',         breadcrumb: 'תפריט › בית › משימות העבודה',            type: SearchType.menu),
 
   // ── Menu › הפרויקטים ──────────────────────────────────────────────────
-  SearchEntry(emoji: '🏗️', title: 'מגדל הרצליה — קומה 4',  breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
-  SearchEntry(emoji: '🏗️', title: 'וילה כפר שמריהו',        breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
-  SearchEntry(emoji: '🏗️', title: 'שיפוץ משרדים — רעננה',  breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
+  ..._kContentProjectRows,
   SearchEntry(emoji: '📊',  title: 'מרכז פיננסים',           breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
   SearchEntry(emoji: '📈',  title: 'הצמדה למדד',             breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
   SearchEntry(emoji: '🗓️', title: 'תנאי תשלום',             breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
@@ -221,16 +268,6 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '⏰',  title: 'פיצויים וקנסות',         breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
   SearchEntry(emoji: '📄',  title: 'דוחות PDF',               breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
   SearchEntry(emoji: '💱',  title: 'רכש במט״ח',              breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
-
-  // ── Menu › רכש ────────────────────────────────────────────────────────
-  SearchEntry(emoji: '🛒', title: 'הסל שלי',       breadcrumb: 'תפריט › רכש',                type: SearchType.menu),
-  SearchEntry(emoji: '📦', title: 'ההזמנות שלי',   breadcrumb: 'תפריט › רכש',                type: SearchType.menu),
-  SearchEntry(emoji: '🔧', title: 'השכרת כלים',    breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '💰', title: 'פקדונות',       breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '↩️', title: 'החזרה חדשה',   breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '📨', title: 'מכרז ספקים',    breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '🧪', title: 'גיליונות בטיחות', breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '📊', title: 'השוואת מחירים', breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
 
   // ── Settings groups (L1) ──────────────────────────────────────────────
   SearchEntry(emoji: '👤',  title: 'חשבון',             breadcrumb: 'הגדרות', type: SearchType.setting),
@@ -274,7 +311,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🛡️', title: 'אימות דו-שלבי', breadcrumb: 'הגדרות › אבטחה והרשאות › מרכז האבטחה', type: SearchType.setting),
   SearchEntry(emoji: '🛡️', title: 'הרשאות גישה',   breadcrumb: 'הגדרות › אבטחה והרשאות › מרכז האבטחה', type: SearchType.setting),
   SearchEntry(emoji: '👷', title: 'קבלן',           breadcrumb: 'הגדרות › אבטחה והרשאות › מרכז האבטחה › הרשאות גישה', type: SearchType.setting),
-  SearchEntry(emoji: '👔', title: 'מנהל מערכת',     breadcrumb: 'הגדרות › אבטחה והרשאות › מרכז האבטחה › הרשאות גישה', type: SearchType.setting),
+  SearchEntry(emoji: '👔', title: 'מנהל המערכת',     breadcrumb: 'הגדרות › אבטחה והרשאות › מרכז האבטחה › הרשאות גישה', type: SearchType.setting),
   SearchEntry(emoji: '🏪', title: 'ספק / חנות',     breadcrumb: 'הגדרות › אבטחה והרשאות › מרכז האבטחה › הרשאות גישה', type: SearchType.setting),
   SearchEntry(emoji: '🛵', title: 'שליח',           breadcrumb: 'הגדרות › אבטחה והרשאות › מרכז האבטחה › הרשאות גישה', type: SearchType.setting),
   SearchEntry(emoji: '🦺', title: 'עובד',           breadcrumb: 'הגדרות › אבטחה והרשאות › מרכז האבטחה › הרשאות גישה', type: SearchType.setting),
@@ -316,7 +353,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🎧', title: 'הזמנה',          breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
   SearchEntry(emoji: '🎧', title: 'תקציב',          breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
   SearchEntry(emoji: '🎧', title: 'משימות ואתר',    breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
-  SearchEntry(emoji: '🎧', title: 'מועדון BuildSmart', breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
+  SearchEntry(emoji: '🎧', title: AppBrand.club, breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
   SearchEntry(emoji: '🎧', title: 'מוכנים!',        breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
 
   // משלוח ותשלום leaves
@@ -348,7 +385,9 @@ const List<SearchEntry> kSearchIndex = [
   // ── Settings screens (top-level) ─────────────────────────────────────────
   SearchEntry(emoji: '🏪', title: 'הגדרות חנות',    breadcrumb: 'הגדרות', type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'הגדרות התראות',  breadcrumb: 'הגדרות', type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'הגדרות שיחות',   breadcrumb: 'הגדרות', type: SearchType.setting),
+  // 'הגדרות שיחות' (the dead call-settings tree) is REMOVED — it described
+  // read-receipts / typing / video-compression / call-ringtone / cloud-backup
+  // that don't exist. The real chat lives in the 'שיחות' screen entry above.
   SearchEntry(emoji: '📋', title: 'הגדרות קטלוג',   breadcrumb: 'הגדרות', type: SearchType.setting),
 
   // ── הגדרות חנות ──────────────────────────────────────────────────────────
@@ -407,7 +446,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🔔', title: 'סוגי התראות',                   breadcrumb: 'הגדרות התראות',                    type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'התראות הזמנות',                 breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'התראות משלוחים',                breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
-  SearchEntry(emoji: '🔔', title: 'מחירים במועדפים',               breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
+  SearchEntry(emoji: '🔔', title: 'התראות תקציב',                  breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'מבצעים',                        breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'הצעות ספקים',                   breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'חזר למלאי',                     breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
@@ -432,7 +471,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🏪', title: 'חנות — הזמנות + מלאי',          breadcrumb: 'הגדרות התראות › לפי תפקיד',       type: SearchType.setting),
   SearchEntry(emoji: '🛵', title: 'שליח — pickup + active',         breadcrumb: 'הגדרות התראות › לפי תפקיד',       type: SearchType.setting),
   SearchEntry(emoji: '🦺', title: 'עובד — משימות',                  breadcrumb: 'הגדרות התראות › לפי תפקיד',       type: SearchType.setting),
-  SearchEntry(emoji: '👔', title: 'מנהל מערכת — דשבורד',           breadcrumb: 'הגדרות התראות › לפי תפקיד',       type: SearchType.setting),
+  SearchEntry(emoji: '👔', title: 'מנהל המערכת — דשבורד',           breadcrumb: 'הגדרות התראות › לפי תפקיד',       type: SearchType.setting),
   SearchEntry(emoji: '📊', title: 'סיכומים תקופתיים',              breadcrumb: 'הגדרות התראות',                    type: SearchType.setting),
   SearchEntry(emoji: '📊', title: 'סיכום יומי',                    breadcrumb: 'הגדרות התראות › סיכומים תקופתיים', type: SearchType.setting),
   SearchEntry(emoji: '📊', title: 'דוח בוקר',                      breadcrumb: 'הגדרות התראות › סיכומים תקופתיים', type: SearchType.setting),
@@ -444,46 +483,11 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🔐', title: 'אישור ביומטרי לפתיחה',          breadcrumb: 'הגדרות התראות › פרטיות במסך נעול', type: SearchType.setting),
   SearchEntry(emoji: '🔐', title: 'אל תעבר לשעון/רכב',             breadcrumb: 'הגדרות התראות › פרטיות במסך נעול', type: SearchType.setting),
 
-  // ── הגדרות שיחות ─────────────────────────────────────────────────────────
-  SearchEntry(emoji: '💬', title: 'שיחות וחיווי',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'אישורי קריאה',                  breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'חיווי הקלדה',                   breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'תצוגה מקדימה בנעילה',           breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'מענה ראשוני',                   breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'זמן מקוון אחרון',               breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '🔔', title: 'התראות שיחה',                   breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🔔', title: 'צלצול שיחה נכנסת',              breadcrumb: 'הגדרות שיחות › התראות שיחה',      type: SearchType.setting),
-  SearchEntry(emoji: '🔔', title: 'התראת הודעה חדשה',              breadcrumb: 'הגדרות שיחות › התראות שיחה',      type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'מדיה ושמע',                    breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'הורדה אוטומטית',               breadcrumb: 'הגדרות שיחות › מדיה ושמע',        type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'איכות תמונות נשלחות',          breadcrumb: 'הגדרות שיחות › מדיה ושמע',        type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'דחיסת וידאו',                  breadcrumb: 'הגדרות שיחות › מדיה ושמע',        type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'ניהול אחסון',                  breadcrumb: 'הגדרות שיחות › מדיה ושמע',        type: SearchType.setting),
-  SearchEntry(emoji: '👥', title: 'פרטיות שיחות',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '👥', title: 'מי יכול לפתוח שיחה',            breadcrumb: 'הגדרות שיחות › פרטיות',           type: SearchType.setting),
-  SearchEntry(emoji: '👥', title: 'מחיקת היסטוריה',                breadcrumb: 'הגדרות שיחות › פרטיות',           type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'גיבוי וייצוא',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'גיבוי לענן',                    breadcrumb: 'הגדרות שיחות › גיבוי וייצוא',     type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'תדירות גיבוי',                  breadcrumb: 'הגדרות שיחות › גיבוי וייצוא',     type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'ייצוא היסטוריה (CSV)',           breadcrumb: 'הגדרות שיחות › גיבוי וייצוא',     type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'מחיקת גיבוי ענן',               breadcrumb: 'הגדרות שיחות › גיבוי וייצוא',     type: SearchType.setting),
-  SearchEntry(emoji: '🌐', title: 'שפה ותרגום (שיחות)',             breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🌐', title: 'שפת ממשק',                      breadcrumb: 'הגדרות שיחות › שפה ותרגום',       type: SearchType.setting),
-  SearchEntry(emoji: '🌐', title: 'תרגום אוטומטי',                 breadcrumb: 'הגדרות שיחות › שפה ותרגום',       type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'שיחות עסקיות',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'שעות פעילות עסקית',             breadcrumb: 'הגדרות שיחות › שיחות עסקיות',     type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'הודעת מחוץ לשעות',             breadcrumb: 'הגדרות שיחות › שיחות עסקיות',     type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'קטלוג מוצרים בשיחה',            breadcrumb: 'הגדרות שיחות › שיחות עסקיות',     type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'תשלום מתוך שיחה',               breadcrumb: 'הגדרות שיחות › שיחות עסקיות',     type: SearchType.setting),
-  SearchEntry(emoji: '🤖', title: 'בוט ואוטומציה',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🤖', title: 'בוט שאלות נפוצות',               breadcrumb: 'הגדרות שיחות › בוט ואוטומציה',    type: SearchType.setting),
-  SearchEntry(emoji: '🤖', title: 'ברכת פתיחה',                    breadcrumb: 'הגדרות שיחות › בוט ואוטומציה',    type: SearchType.setting),
-  SearchEntry(emoji: '🤖', title: 'טקסט הברכה',                    breadcrumb: 'הגדרות שיחות › בוט ואוטומציה',    type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'ארכיון וניקיון',               breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'ארכוב אוטומטי',                breadcrumb: 'הגדרות שיחות › ארכיון וניקיון',   type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'מחיקה אוטומטית',               breadcrumb: 'הגדרות שיחות › ארכיון וניקיון',   type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'סינון ספאם',                   breadcrumb: 'הגדרות שיחות › ארכיון וניקיון',   type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'גיבוי לפני מחיקה',             breadcrumb: 'הגדרות שיחות › ארכיון וניקיון',   type: SearchType.setting),
+  // ── הגדרות שיחות — REMOVED (dead call-settings tree) ─────────────────────
+  // This whole sub-tree (read receipts, typing indicator, call ringtone, video
+  // compression, cloud backup, …) described features that DO NOT EXIST, so it
+  // is gone from search. The working chat is the 'שיחות' screen entry near the
+  // top of this index; its real, wired settings stay reachable elsewhere.
 
   // ── הגדרות קטלוג ─────────────────────────────────────────────────────────
   SearchEntry(emoji: '🔍', title: 'חיפוש וסינון (קטלוג)',          breadcrumb: 'הגדרות קטלוג',                     type: SearchType.setting),
@@ -535,3 +539,32 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '📦', title: 'משלוח רגיל',                    breadcrumb: 'חנות › סל',    type: SearchType.action),
   SearchEntry(emoji: '🏪', title: 'איסוף עצמי',                    breadcrumb: 'חנות › סל',    type: SearchType.action),
 ];
+
+/// Const-gated: on the raw shell ([kProfileRawShell]) the two CONTENT
+/// segments (catalog categories + plan-scan rows — BuildSmart taxonomy) drop
+/// out, so typed-dive navigation chips stay engine-only; the SEED segment
+/// ([_kContentProjectRows], spread inside the tail) drops on
+/// [kProfileEmptySeeds]; otherwise the concat is today's full index
+/// element-for-element (demo byte-identical).
+const List<SearchEntry> kSearchIndex = kProfileRawShell
+    ? [..._kEngineRowsHead, ..._kEngineRowsMid, ..._kEngineRowsTail]
+    : [
+        ..._kEngineRowsHead,
+        ..._kContentCategoryRows,
+        ..._kEngineRowsMid,
+        ..._kContentPlanScanRows,
+        ..._kEngineRowsTail,
+      ];
+
+/// The live search index actually shown to users. For Apple review
+/// ([kHideUnderConstruction]) it drops entries that point at a now-hidden,
+/// backend-blocked feature ([kHiddenSearchTitles] — the AI deferred tools), so
+/// a reviewer can't search-navigate to a hidden placeholder. With the flag off
+/// it is `kSearchIndex` verbatim. The full const list is never mutated, so the
+/// hide is fully reversible.
+List<SearchEntry> get kVisibleSearchIndex => kHideUnderConstruction
+    ? [
+        for (final e in kSearchIndex)
+          if (!kHiddenSearchTitles.contains(e.title)) e,
+      ]
+    : kSearchIndex;

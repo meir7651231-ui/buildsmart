@@ -1,0 +1,70 @@
+{
+  "name": "RejectReasonScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "הנוסח הועתק",
+        "registryId": "reject_reason_screen.copied",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✨ סיבת-דחייה",
+        "registryId": "reject_reason_screen.title",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📋"
+      },
+      {
+        "kind": "cfgText",
+        "text": "העתק",
+        "registryId": "reject_reason_screen.copy",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "reject_reason_screen.note",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [
+      "📋"
+    ],
+    "summary": "registry 4 · mapped 4/4 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "role",
+      "name"
+    ],
+    "untangle": []
+  }
+}

@@ -1,0 +1,471 @@
+{
+  "module": "component_palette",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/component_palette.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "componentTypeNames",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kComponentPalette"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{for (final t in kComponentPalette) t.type.name}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "templateFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ComponentType type) -> ComponentTemplate?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kComponentPalette"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "canPlace",
+          "componentHe",
+          "validateAddComponent"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final t in kComponentPalette"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t.type == type → return t"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ComponentType type)",
+        "output": "ComponentTemplate?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "templateForName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String name) -> ComponentTemplate?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kComponentPalette"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = name.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if n.isEmpty → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in kComponentPalette"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t.type.name == n → return t"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(String name)",
+        "output": "ComponentTemplate?",
+        "purity": "pure",
+        "precond": [
+          "if n.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "n.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "componentHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ComponentType type) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kComponentPalette",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "templateFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "templateFor(type)?.he"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ComponentType type)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchComponentTypeName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_paletteTypeView"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "matchComponentType(_paletteTypeView, reply)"
+          }
+        ]
+      },
+      "floor": [
+        "matchComponentType"
+      ],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "canPlace",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ComponentType type, ElementKind container) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kComponentPalette",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "templateFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = templateFor(type)"
+          },
+          {
+            "kind": "return",
+            "detail": "t != null && t.allowedContainers.contains(container)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(ComponentType type, ElementKind container)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_safeProp",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String key, String value) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBodyProps"
+          },
+          {
+            "kind": "const",
+            "name": "kLabelProps"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "validateAddComponent"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if kLabelProps.contains(key) → return promptSafeText(value, maxLen: 200, collapseWhitespace: true)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if kBodyProps.contains(key) → return promptSafeText(value)"
+          },
+          {
+            "kind": "return",
+            "detail": "value.trim()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "promptSafeText",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String key, String value)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if kLabelProps.contains(key) → return promptSafeText(value, maxLen: 200, collapseWhitespace: true)",
+          "if kBodyProps.contains(key) → return promptSafeText(value)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "validateAddComponent",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AddComponentRequest req, {required ElementKind container, int existingOfType = 0}) -> AddComponentVerdict",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBodyProps",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kComponentPalette",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kLabelProps",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "unmodifiable"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "templateFor",
+            "module": true
+          },
+          {
+            "name": "_safeProp",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = templateFor(req.type)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t == null → return const AddComponentVerdict.rejected('רכיב לא מוכר')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !t.allowedContainers.contains(container) → return AddComponentVerdict.rejected('לא ניתן להוסיף ${t.he} לתוך מיכל מסוג «${container.name}» —…"
+          },
+          {
+            "kind": "init",
+            "detail": "safe = <String, String>{for (final e in req.props.entries) e.key : _safeProp(e.key, e.value)}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final key in t.requiredProps"
+          },
+          {
+            "kind": "compute",
+            "detail": "value = key == 'actionId' ? (req.actionId ?? '').trim() : (safe[key] ?? '')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if value.isEmpty → return AddComponentVerdict.rejected('חסר שדה חובה «$key» עבור ${t.he}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "attached = (req.actionId ?? '').trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "groundedAction = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if attached.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "cap = t.maxPerContainer"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cap != null && existingOfType >= cap → return AddComponentVerdict.rejected('לא ניתן להוסיף עוד ${t.he} — מוגבל ל-$cap במיכל אחד')"
+          },
+          {
+            "kind": "return",
+            "detail": "AddComponentVerdict.accepted(t, safeProps: Map<String, String>.unmodifiable(safe), safeAc…"
+          }
+        ]
+      },
+      "floor": [
+        "Map",
+        "accepted",
+        "contains",
+        "matchCatalogActionId",
+        "rejected",
+        "trim"
+      ],
+      "contract": {
+        "input": "(AddComponentRequest req, {required ElementKind container, int existingOfType = 0})",
+        "output": "AddComponentVerdict",
+        "purity": "pure",
+        "precond": [
+          "if t == null → return const AddComponentVerdict.rejected('רכיב לא מוכר')",
+          "if !t.allowedContainers.contains(container) → return AddComponentVerdict.rejected('לא ניתן להוסיף ${t.he} לתוך מיכל מסוג «${container.name}» —…",
+          "if cap != null && existingOfType >= cap → return AddComponentVerdict.rejected('לא ניתן להוסיף עוד ${t.he} — מוגבל ל-$cap במיכל אחד')"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "module": "engine",
+  "source": "lib/test_harness/tests/engine.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "testEngine",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TestResult>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kLipskeyCatalog"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          },
+          {
+            "kind": "global",
+            "name": "needsConnectionSpec"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "results = <TestResult>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "specced = kLipskeyCatalog.where((p) => kVerifiedSpecs.containsKey(p.sku)).toList()"
+          },
+          {
+            "kind": "return",
+            "detail": "results"
+          }
+        ]
+      },
+      "floor": [
+        "TestCheck",
+        "TestResult",
+        "add",
+        "any",
+        "buildInstallation",
+        "clamp",
+        "compatibleProductsFor",
+        "compatibleWith",
+        "compliance",
+        "connectionExplainHe",
+        "contains",
+        "containsKey",
+        "directMatesWith",
+        "estimatePressureDrop",
+        "every",
+        "installKitFor",
+        "isPipe",
+        "join",
+        "map",
+        "pipeSharedWith",
+        "productSuitableForTemp",
+        "productSystems",
+        "reallyMates",
+        "take",
+        "toList",
+        "toStringAsFixed",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<TestResult>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

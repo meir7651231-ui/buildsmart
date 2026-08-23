@@ -1,0 +1,98 @@
+name: Android Google-login TEST APK (demo / flags-OFF, stable test key)
+
+# Builds an INSTALLABLE, DEMO (flags-OFF) APK signed with the committed stable
+# test keystore (app_flutter/android/app/bs-test-debug.keystore) so its SHA-1 is
+# FIXED — 68:F9:F1:3F:63:8A:0C:AA:6D:57:E4:6A:C2:A6:B3:C2:4D:57:68:52 — and can be
+# registered ONCE in Firebase (Project settings > Your apps > com.buildsmart.
+# buildsmart > Add fingerprint) for Google Sign-In.
+#
+# WHY flags-OFF: this exercises the manager "כניסה עם Google" CLIENT gate (שלב 2)
+# — flags-OFF keeps boardAuthProvider on the local path, so the owner-email gate
+# (loginManagerViaGoogle) is authoritative. The flags-ON android-test-build.yml
+# needs the server admin/manager CLAIM instead (שלב 4 / bootstrap-admin).
+#
+# The bs-test-debug.keystore is a TEST (debug-class) key committed on purpose —
+# NOT a Play upload key (it cannot publish to Play). For a real Play release wire
+# a real upload key via the ANDROID_KEYSTORE_BASE64 secret (android-package.yml
+# already supports it). No `flutter test` gate here on purpose — this job only
+# produces the install APK; the full protocol gate runs in protocol-enforce.yml.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - 'app_flutter/**'
+      - '.github/workflows/android-google-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use the committed stable test key for release signing (key.properties)
+        run: |
+          mkdir -p ~/.android
+          cp app_flutter/android/app/bs-test-debug.keystore ~/.android/debug.keystore
+          # EXPLICIT release signing — the release buildType uses signingConfigs.release
+          # when android/key.properties exists (android/app/build.gradle.kts), which is
+          # more reliable than the ~/.android/debug.keystore fallback.
+          printf 'storePassword=android\nkeyPassword=android\nkeyAlias=androiddebugkey\nstoreFile=bs-test-debug.keystore\n' > app_flutter/android/key.properties
+          echo "✅ key.properties -> app/bs-test-debug.keystore (expected SHA-1 68:F9:F1:3F:...:57:68:52)"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
+      - name: Analyze (0 errors required)
+        working-directory: app_flutter
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Build DEMO APK (flags OFF — manager Google gate is client-side)
+        working-directory: app_flutter
+        run: flutter build apk --release
+
+      - name: Print APK signing SHA-1 (diagnostic — must equal 68:F9:...:57:68:52)
+        run: |
+          APK=app_flutter/build/app/outputs/flutter-apk/app-release.apk
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          APKSIGNER=$(find "$SDK/build-tools" -name apksigner 2>/dev/null | sort | tail -1)
+          echo "apksigner=$APKSIGNER"
+          if [ -n "$APKSIGNER" ]; then "$APKSIGNER" verify --print-certs "$APK" | grep -iE "SHA-1|SHA-256" || true; fi
+          echo "--- keytool v1 fallback ---"
+          keytool -printcert -jarfile "$APK" 2>/dev/null | grep -iE "SHA1|SHA256" || echo "(v1 cert not present)"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-google-test-apk
+          path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      # App Distribution intentionally lives on the FLAGS-ON build
+      # (android-test-build.yml), NOT here: both share the package
+      # com.buildsmart.buildsmart, so only ONE may own the tester's auto-update
+      # stream. The owner tests the LIVE features (🟢/🔴 connection · ✓✓/❌
+      # delivery) on the real-backend build; this DEMO build stays artifact-only
+      # (manual download from the run).

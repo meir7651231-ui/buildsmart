@@ -1,0 +1,24 @@
+{
+  "module": "claude",
+  "source": "../../../functions/src/claude.ts",
+  "functionCount": 1,
+  "functions": [
+    {
+      "name": "askClaude",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 112,
+      "authGated": true,
+      "reads": [],
+      "writes": [],
+      "calls": [
+        "claude"
+      ],
+      "errorCodes": [
+        "internal",
+        "invalid-argument",
+        "unauthenticated"
+      ]
+    }
+  ]
+}

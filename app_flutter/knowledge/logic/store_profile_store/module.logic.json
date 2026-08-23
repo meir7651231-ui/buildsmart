@@ -1,0 +1,437 @@
+{
+  "module": "store_profile_store",
+  "source": "lib/state/store_profile_store.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "StoreProfile.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? businessName, String? phone, String? address, String? businessId, Object? logo = _sentinel}) -> StoreProfile",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sentinel"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "StoreProfile(businessName: businessName ?? this.businessName, phone: phone ?? this.phone,…"
+          }
+        ]
+      },
+      "floor": [
+        "StoreProfile"
+      ],
+      "contract": {
+        "input": "({String? businessName, String? phone, String? address, String? businessId, Object? logo = _sentinel})",
+        "output": "StoreProfile",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProfile.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "address"
+          },
+          {
+            "kind": "field",
+            "name": "businessId"
+          },
+          {
+            "kind": "field",
+            "name": "businessName"
+          },
+          {
+            "kind": "field",
+            "name": "logo"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'name' : businessName, 'phone' : phone, 'address' : address, 'bid' : businessId, if (log…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProfileStore._storeUsernames",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAccounts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final a in kBoardAccounts) if (a.role == BoardRole.store) a.username, 'demo']"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProfileStore._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kLegacySupplierSettingsKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStoreProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_readLegacy",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
+      },
+      "floor": [
+        "cast",
+        "containsKey",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "load"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProfileStore._readLegacy",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(SharedPreferences prefs) -> StoreProfile?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kLegacySupplierSettingsKey"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "StoreProfileStore._load"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "cast",
+        "fromJson",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "(SharedPreferences prefs)",
+        "output": "StoreProfile?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProfileStore._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStoreProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "debugPersistOverride"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "StoreProfileStore.save"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if debugPersistOverride != null → return debugPersistOverride!()"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !persist → return true"
+          }
+        ]
+      },
+      "floor": [
+        "StoreProfile",
+        "getInstance",
+        "jsonEncode",
+        "save",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if debugPersistOverride != null → return debugPersistOverride!()",
+          "if !persist → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "StoreProfileStore.save",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username, StoreProfile profile) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStoreProfileKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "debugPersistOverride",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, username : profile}"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok && mounted"
+          },
+          {
+            "kind": "return",
+            "detail": "ok"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String username, StoreProfile profile)",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,1104 @@
+{
+  "module": "browse_model",
+  "source": "../../../app_flutter/lib/features/catalog_config/browse_model.dart",
+  "atomCount": 20,
+  "atoms": [
+    {
+      "fn": "_pickRep",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> group) -> LipskeyCatalogProduct",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_tileForGroup",
+          "_typeTile"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "compute",
+            "detail": "bestB = -2"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in group"
+          },
+          {
+            "kind": "branch",
+            "detail": "if p.imageAsset == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = imageBrightness(p.imageAsset)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if b > bestB"
+          },
+          {
+            "kind": "return",
+            "detail": "best ?? group.first"
+          }
+        ]
+      },
+      "floor": [
+        "imageBrightness"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> group)",
+        "output": "LipskeyCatalogProduct",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_repImage",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct rep) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_tileForGroup",
+          "_typeTile"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "isBrightImage(rep.imageAsset) ? rep.imageAsset : null"
+          }
+        ]
+      },
+      "floor": [
+        "isBrightImage"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct rep)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_collapseTiles",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> products, String fallbackEmoji) -> List<ConfigTile>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_tileForGroup",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "browseSection"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "groups = <String, List<LipskeyCatalogProduct>>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "order = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final product in products"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = productCanonicalKey(product)"
+          },
+          {
+            "kind": "compute",
+            "detail": "list = groups[key]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if list == null"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final key in order) _tileForGroup(groups[key]!, fallbackEmoji)]"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "productCanonicalKey"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> products, String fallbackEmoji)",
+        "output": "List<ConfigTile>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_tileForGroup",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> group, String fallbackEmoji) -> ConfigTile",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pickRep",
+            "module": true
+          },
+          {
+            "name": "_repImage",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_collapseTiles"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "rep = _pickRep(group)"
+          },
+          {
+            "kind": "compute",
+            "detail": "frame = productFrame(rep)"
+          },
+          {
+            "kind": "compute",
+            "detail": "emoji = tileEmoji(rep.categoryEmoji.isNotEmpty ? rep.categoryEmoji : fallbackEmoji)"
+          },
+          {
+            "kind": "return",
+            "detail": "ConfigTile(sku: rep.sku, nameHe: frame.length >= 3 ? frame : rep.nameHe, emoji: emoji, im…"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigTile",
+        "productFrame",
+        "tileEmoji"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> group, String fallbackEmoji)",
+        "output": "ConfigTile",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "browseSection",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CatalogNode section, List<LipskeyCatalogProduct> products) -> ConfigBrowse",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_collapseTiles",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "byCategory = <String, List<LipskeyCatalogProduct>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final product in products"
+          },
+          {
+            "kind": "effect",
+            "detail": "byCategory.putIfAbsent(product.categoryHe, () => <LipskeyCatalogProduct>[]).add(product)"
+          },
+          {
+            "kind": "init",
+            "detail": "families = <ConfigFamily>[]"
+          },
+          {
+            "kind": "effect",
+            "detail": "walk(section)"
+          },
+          {
+            "kind": "return",
+            "detail": "ConfigBrowse(titleHe: section.title, families: families)"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigBrowse",
+        "ConfigFamily",
+        "add",
+        "putIfAbsent",
+        "walk"
+      ],
+      "contract": {
+        "input": "(CatalogNode section, List<LipskeyCatalogProduct> products)",
+        "output": "ConfigBrowse",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "browseAll",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> products) -> ConfigBrowse",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_byMaterialThenType",
+            "module": true
+          },
+          {
+            "name": "_typeTile",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "familyGroups = <String, List<String>>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "byGroup = <String, List<LipskeyCatalogProduct>>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "groupMaterial = <String, String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "familyOrder = <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "familyEmoji = <String, String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final product in products"
+          },
+          {
+            "kind": "compute",
+            "detail": "family = familyGroupOf(product)"
+          },
+          {
+            "kind": "compute",
+            "detail": "material = materialOf(product)"
+          },
+          {
+            "kind": "compute",
+            "detail": "groupKey = '$material${typeKeyOf(product)}'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !familyGroups.containsKey(family)"
+          },
+          {
+            "kind": "compute",
+            "detail": "list = byGroup[groupKey]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if list == null"
+          },
+          {
+            "kind": "return",
+            "detail": "ConfigBrowse(titleHe: 'כל הקטלוג', families: [for (final family in familyOrder) ConfigFam…"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigBrowse",
+        "ConfigFamily",
+        "add",
+        "containsKey",
+        "familyGroupOf",
+        "fold",
+        "materialOf",
+        "tileEmoji",
+        "typeKeyOf"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> products)",
+        "output": "ConfigBrowse",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_materialRank",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String material) -> int",
+        "constants": [
+          "1 << 20",
+          "1 << 10"
+        ]
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kMaterialOrder"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_byMaterialThenType"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if material.isEmpty → return 1 << 20"
+          },
+          {
+            "kind": "compute",
+            "detail": "i = _kMaterialOrder.indexOf(material)"
+          },
+          {
+            "kind": "return",
+            "detail": "i < 0 ? 1 << 10 : i"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(String material)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if material.isEmpty → return 1 << 20"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_byMaterialThenType",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> keys, Map<String, String> groupMaterial) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kMaterialOrder",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_materialRank",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "browseAll"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "indexed = [for (var i = 0; i < keys.length; i++) (i, keys[i])]..sort((a, b) {final ra = _materialRa…"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final e in indexed) e.$2]"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<String> keys, Map<String, String> groupMaterial)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_typeTile",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> group, [String material = '']) -> ConfigTile",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pickRep",
+            "module": true
+          },
+          {
+            "name": "_repImage",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "browseAll"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "rep = _pickRep(group)"
+          },
+          {
+            "kind": "return",
+            "detail": "ConfigTile(sku: rep.sku, nameHe: typeWordOf(rep), emoji: tileEmoji(rep.categoryEmoji), im…"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigTile",
+        "tileEmoji",
+        "typeWordOf"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> group, [String material = ''])",
+        "output": "ConfigTile",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "pilotSectionNode",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> CatalogNode?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final section in kCatalogTree"
+          },
+          {
+            "kind": "branch",
+            "detail": "if section.id == 'endparts' → return section"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "CatalogNode?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigTile.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "imageAsset"
+          },
+          {
+            "kind": "field",
+            "name": "materialHe"
+          },
+          {
+            "kind": "field",
+            "name": "nameHe"
+          },
+          {
+            "kind": "field",
+            "name": "sku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is ConfigTile && other.sku == sku && other.nameHe == nameHe && other.emoji == emoji…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigTile.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "imageAsset"
+          },
+          {
+            "kind": "field",
+            "name": "materialHe"
+          },
+          {
+            "kind": "field",
+            "name": "nameHe"
+          },
+          {
+            "kind": "field",
+            "name": "sku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(sku, nameHe, emoji, imageAsset, materialHe)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigFamily.representativeImage",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "tiles"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final tile in tiles"
+          },
+          {
+            "kind": "branch",
+            "detail": "if isBrightImage(tile.imageAsset) → return tile.imageAsset"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final tile in tiles"
+          },
+          {
+            "kind": "branch",
+            "detail": "if tile.imageAsset != null → return tile.imageAsset"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "isBrightImage"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigFamily.count",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "productCount"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "productCount"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigFamily.materials",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "tiles"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "seen = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final tile in tiles"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !seen.contains(tile.materialHe)"
+          },
+          {
+            "kind": "return",
+            "detail": "seen"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "contains"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigFamily.tilesFor",
+      "kind": "method",
+      "object": {
+        "signature": "(String material) -> List<ConfigTile>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "tiles"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final tile in tiles) if (tile.materialHe == material) tile]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String material)",
+        "output": "List<ConfigTile>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigFamily.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "productCount"
+          },
+          {
+            "kind": "field",
+            "name": "tiles"
+          },
+          {
+            "kind": "field",
+            "name": "titleHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is ConfigFamily && other.id == id && other.titleHe == titleHe && other.emoji == emo…"
+          }
+        ]
+      },
+      "floor": [
+        "listEquals"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigFamily.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "productCount"
+          },
+          {
+            "kind": "field",
+            "name": "tiles"
+          },
+          {
+            "kind": "field",
+            "name": "titleHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(id, titleHe, emoji, productCount, Object.hashAll(tiles))"
+          }
+        ]
+      },
+      "floor": [
+        "hash",
+        "hashAll"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigBrowse.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "families"
+          },
+          {
+            "kind": "field",
+            "name": "titleHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is ConfigBrowse && other.titleHe == titleHe && listEquals(other.families, families)"
+          }
+        ]
+      },
+      "floor": [
+        "listEquals"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigBrowse.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "families"
+          },
+          {
+            "kind": "field",
+            "name": "titleHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(titleHe, Object.hashAll(families))"
+          }
+        ]
+      },
+      "floor": [
+        "hash",
+        "hashAll"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,410 @@
+{
+  "screen": "lipskey_products_screen",
+  "source": "lipskey_products_screen.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "LipskeyProductsList",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "📦"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין מוצרים להצגה",
+            "registryId": "lipskey_products_screen.empty_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "נסו לבחור קטגוריה אחרת בקטלוג",
+            "registryId": "lipskey_products_screen.empty_hint",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [
+          "📦"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogRepositoryProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogLensProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "availableLensesForSet",
+        "groupByLens",
+        "resolveActiveLens",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": false,
+        "props": [
+          "products"
+        ],
+        "untangle": [
+          "CustomScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_LensGroupHeader",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🌳"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🌳"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "title",
+          "count",
+          "smartTree"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "LipskeyProductGridCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "✓"
+          },
+          {
+            "kind": "cfgText",
+            "text": "מחיר לפי ספק",
+            "registryId": "lipskey_products_screen.price_by_supplier_grid",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "לסל",
+            "registryId": "lipskey_products_screen.to_cart",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [
+          "✓"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "smartCartProvider.select((lines) => lines.where((l) => l.productKey == _key).fold<int>(0, (s, l) => s + l.productQty))"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showQtyWheel",
+            "target": "showQtyWheel"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showLipskeyProductSheet(context, product, products)",
+            "effect": "open → showLipskeyProductSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showQtyWheel(context, qty, (n) => cart.setQtyForKey(_line(n)))",
+            "effect": "open → showQtyWheel"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "label = icon == Icons.add ? … : …",
+            "effect": "text: 'הוסף כמות' | 'הפחת כמות'"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "productImage"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "product",
+          "products"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ProductRow",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "✓"
+          },
+          {
+            "kind": "cfgText",
+            "text": "מחיר לפי ספק",
+            "registryId": "lipskey_products_screen.price_by_supplier_row",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מק\"ט הועתק",
+            "registryId": "lipskey_products_screen.sku_copied",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "+"
+          },
+          {
+            "kind": "text",
+            "text": "‹"
+          },
+          {
+            "kind": "cfgText",
+            "text": "מידה",
+            "registryId": "lipskey_products_screen.size_label",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [
+          "✓",
+          "+",
+          "‹"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 3"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogRepositoryProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "action",
+            "via": "openSmartProductSheet",
+            "target": "openSmartProductSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider.select((s) => s.compactMode)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "smartCartProvider.select((lines) => lines.where((l) => l.productKey == 'lip:${p.sku}').fold<int>(0, (s, l) => s + l.productQty))"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider.select((s) => s.imageSize)"
+          },
+          {
+            "kind": "action",
+            "via": "showQtyWheel",
+            "target": "showQtyWheel"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "shown.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: CfgText('lipskey…",
+            "effect": "open → showSnackBar"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "label = s == '+' ? … : …",
+            "effect": "text: 'הוסף כמות' | 'הפחת כמות'"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showQtyWheel(context, _qty, _setQty)",
+            "effect": "open → showQtyWheel"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (shown.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "LipskeyProductsScreen.openWordSearch(context, w)",
+            "effect": "open → openWordSearch"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "btn",
+        "cb",
+        "chipLabelDirection",
+        "confirmDestructive",
+        "displaySizeLabel",
+        "findHierarchySiblings",
+        "isSelected",
+        "label",
+        "max",
+        "onTap",
+        "opt",
+        "parseChips",
+        "parseSizeTokens",
+        "productImage",
+        "setState",
+        "sort",
+        "tokensFromDims"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": false,
+        "props": [
+          "product",
+          "categoryProducts",
+          "familySiblings",
+          "onCycle",
+          "smartLens"
+        ],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 7,
+    "total": 7,
+    "summary": "7/7",
+    "entries": [
+      {
+        "id": "lipskey_products_screen.empty_title",
+        "ok": true,
+        "atom": "LipskeyProductsList"
+      },
+      {
+        "id": "lipskey_products_screen.empty_hint",
+        "ok": true,
+        "atom": "LipskeyProductsList"
+      },
+      {
+        "id": "lipskey_products_screen.price_by_supplier_grid",
+        "ok": true,
+        "atom": "LipskeyProductGridCard"
+      },
+      {
+        "id": "lipskey_products_screen.to_cart",
+        "ok": true,
+        "atom": "LipskeyProductGridCard"
+      },
+      {
+        "id": "lipskey_products_screen.price_by_supplier_row",
+        "ok": true,
+        "atom": "_ProductRow"
+      },
+      {
+        "id": "lipskey_products_screen.sku_copied",
+        "ok": true,
+        "atom": "_ProductRow"
+      },
+      {
+        "id": "lipskey_products_screen.size_label",
+        "ok": true,
+        "atom": "_ProductRow"
+      }
+    ]
+  }
+}

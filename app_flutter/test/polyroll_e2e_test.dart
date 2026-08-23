@@ -8,6 +8,7 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/related_info.dart';
@@ -172,5 +173,93 @@ void main() {
     expect(checked, greaterThan(700));
     expect(withTips / checked, greaterThanOrEqualTo(0.99),
         reason: '$withTips/$checked have tips');
+  });
+
+  // ── P6: Huliot SmartLock brand-wiring into the shared product functions ──
+  // Without these branches, Huliot fell through to defaults: no "נמצא ב"
+  // group, no engineering-spec card, no standards row. These guard the wiring.
+  group('P6 · Huliot brand-wiring', () {
+    LipskeyCatalogProduct huliot(String sku) =>
+        kHuliotCatalog.firstWhere((p) => p.sku == sku);
+
+    test('finderGroupFor → דלוחין SmartLock (not null/אספקת מים)', () {
+      for (final sku in ['64032300', '70940160', '61230060']) {
+        final g = finderGroupFor(huliot(sku));
+        expect(g, isNotNull, reason: '$sku must have a finder group');
+        expect(g!.label, 'דלוחין SmartLock', reason: '$sku label');
+        expect(g.emoji, '🟢');
+      }
+    });
+
+    test('engineeringSpecFor → drainage snapshot (PP, no PN, 95°C)', () {
+      final eng = engineeringSpecFor(huliot('64051300'))!; // צינור חלק 50
+      expect(eng.material.contains('PP'), isTrue, reason: eng.material);
+      expect(eng.pressureRating, isNull,
+          reason: 'gravity drainage — no PN (R8: no PN column)');
+      expect(eng.maxTempC, 95);
+      expect(eng.waterSystem.contains('דלוחין'), isTrue);
+      expect(eng.minBoreMm, 50, reason: 'DN50 → bore 50');
+    });
+
+    test('complianceTriggersFor → Huliot ת"י standards present', () {
+      final labels =
+          complianceTriggersFor(huliot('70145960')).map((t) => t.label).toList();
+      expect(labels.any((l) => l.contains('958-1')), isTrue);
+      expect(labels.any((l) => l.contains('5694')), isTrue);
+      expect(labels.any((l) => l.contains('14020')), isTrue);
+      expect(labels.any((l) => l.contains('EN-1451')), isTrue);
+      // Must NOT leak the PPR supply standards (wrong system).
+      expect(labels.any((l) => l.contains('EN ISO 15874')), isFalse,
+          reason: 'drainage product must not carry PPR supply compliance');
+    });
+
+    test('every Huliot product gets a finder group (no orphans)', () {
+      final orphans =
+          kHuliotCatalog.where((p) => finderGroupFor(p) == null).toList();
+      expect(orphans, isEmpty,
+          reason: 'Huliot products without a group: '
+              '${orphans.take(5).map((p) => p.sku).join(",")}');
+    });
+  });
+
+  // ── P11: install-kit parity. Without these branches Huliot fell through to
+  // the empty default (no ערכת התקנה strip), so a plumber browsing a SmartLock
+  // product saw nothing about the cutter or bayonet wrench they need.
+  group('P11 · Huliot installKit parity', () {
+    LipskeyCatalogProduct huliot(String sku) =>
+        kHuliotCatalog.firstWhere((p) => p.sku == sku);
+
+    test('installKitFor pipe → both cutter + wrench (tools≥2)', () {
+      final kit = installKitFor(huliot('64032300')); // צינור 32
+      expect(kit, isNotNull, reason: 'pipe must surface an install-kit strip');
+      expect(kit!.tools, greaterThanOrEqualTo(2),
+          reason: 'pipe needs cutter + wrench');
+    });
+
+    test('installKitFor fitting → wrench only (tools=1)', () {
+      final kit = installKitFor(huliot('70033460')); // ברך 45° 32
+      expect(kit, isNotNull);
+      expect(kit!.tools, 1,
+          reason: 'fitting installs with the wrench; cutter belongs to the pipe');
+    });
+
+    test('recommendedKitForProduct wrench bracket follows DN', () {
+      // Small bracket: DN 32-40 → 61040360.
+      final smallKit = recommendedKitForProduct(huliot('70033460')); // ברך 32
+      expect(smallKit.any((k) => k.label.contains('61040360')), isTrue,
+          reason: 'DN 32 → small-bracket wrench');
+      // Large bracket: DN 50-63 → 61060560.
+      final largeKit = recommendedKitForProduct(huliot('70055460')); // ברך 50
+      expect(largeKit.any((k) => k.label.contains('61060560')), isTrue,
+          reason: 'DN 50 → large-bracket wrench');
+    });
+
+    test('every Huliot SmartLock product surfaces an install-kit', () {
+      final missing =
+          kHuliotCatalog.where((p) => installKitFor(p) == null).toList();
+      expect(missing, isEmpty,
+          reason: 'Huliot products without an install-kit strip: '
+              '${missing.take(5).map((p) => p.sku).join(",")}');
+    });
   });
 }

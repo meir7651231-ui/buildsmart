@@ -1,0 +1,134 @@
+{
+  "module": "directory",
+  "source": "lib/state/directory.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "parseBsRole",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> BsRole?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! String → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final r in BsRole.values"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != BsRole.bot && r.name == raw → return r"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "BsRole?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! String → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! String · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "pendingDirectoryEntries",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<DirectoryEntry> entries) -> List<DirectoryEntry>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDirectoryStatusPending"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final e in entries) if (e.status == kDirectoryStatusPending) e]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<DirectoryEntry> entries)",
+        "output": "List<DirectoryEntry>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "resolveApproveTargets",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required bool all, required List<String> pendingUids, required Set<String> checked}) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "of"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "all ? List<String>.of(pendingUids) : [for (final u in pendingUids) if (checked.contains(u…"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "contains"
+      ],
+      "contract": {
+        "input": "({required bool all, required List<String> pendingUids, required Set<String> checked})",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

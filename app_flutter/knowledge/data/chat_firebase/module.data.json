@@ -1,0 +1,242 @@
+{
+  "module": "chat_firebase",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/chat_firebase.dart",
+  "entityCount": 3,
+  "entities": [
+    {
+      "entity": "_ChatThreadHead",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "participants",
+            "type": "List<BsRole>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "participantUids",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "avatar",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "isBot",
+            "type": "bool",
+            "required": true
+          },
+          {
+            "name": "lastMsg",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "lastTs",
+            "type": "DateTime?",
+            "required": true,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "participants",
+            "ref": "BsRole",
+            "kind": "enum",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "participants",
+          "name",
+          "avatar",
+          "isBot",
+          "lastMsg",
+          "lastTs"
+        ],
+        "defaults": {
+          "participantUids": "const []"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "_PerThreadChatMessagesSource",
+      "kind": "mutable",
+      "object": {
+        "fields": [
+          {
+            "name": "_sourceFor",
+            "type": "RemoteCollectionSource Function(String threadId)",
+            "required": true
+          },
+          {
+            "name": "_writer",
+            "type": "RemoteCollectionSource",
+            "required": true
+          },
+          {
+            "name": "_out",
+            "type": "StreamController<List<RemoteDoc>>",
+            "required": false
+          },
+          {
+            "name": "_subs",
+            "type": "Map<String, StreamSubscription<List<RemoteDoc>>>",
+            "required": false,
+            "collection": true
+          },
+          {
+            "name": "_latest",
+            "type": "Map<String, List<RemoteDoc>>",
+            "required": false,
+            "collection": true
+          },
+          {
+            "name": "_closed",
+            "type": "bool",
+            "required": false
+          },
+          {
+            "name": "isScoped",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_sourceFor",
+            "ref": "RemoteCollectionSource Function(String threadId)",
+            "kind": "embed"
+          },
+          {
+            "field": "_writer",
+            "ref": "RemoteCollectionSource",
+            "kind": "embed"
+          },
+          {
+            "field": "_out",
+            "ref": "StreamController<List<RemoteDoc>>",
+            "kind": "embed"
+          },
+          {
+            "field": "_subs",
+            "ref": "StreamSubscription<List<RemoteDoc>>",
+            "kind": "embed"
+          },
+          {
+            "field": "_latest",
+            "ref": "List<RemoteDoc>",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "setThreadIds",
+          "_emit",
+          "snapshots",
+          "set",
+          "delete",
+          "dispose"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_sourceFor",
+          "_writer"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirebaseChatRepository",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_threads",
+            "type": "_ChatThreadsRepo",
+            "required": true
+          },
+          {
+            "name": "_messages",
+            "type": "_ChatMessagesRepo",
+            "required": true
+          },
+          {
+            "name": "_perThreadMessages",
+            "type": "_PerThreadChatMessagesSource?",
+            "required": false,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "_forward",
+          "_syncMessageThreadIds",
+          "attach",
+          "threads",
+          "_mk",
+          "send",
+          "_upsertUserMessage",
+          "createOrGetThread",
+          "resetToSeed",
+          "setParticipantUids",
+          "retry",
+          "dispose"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_threads",
+          "_messages"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+{
+  "screen": "worker_task_detail_sheet",
+  "source": "worker_task_detail_sheet.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "WorkerTaskDetailSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "מה להביא"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין המלצת ערכת התקנה למוצרי המשימה",
+            "registryId": "worker_task_detail_sheet.t09",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "המשימה לא נמצאה",
+            "registryId": "worker_task_detail_sheet.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "משימה בתור — תעבור לביצוע אוטומטית כשתוגש המשימה הנוכחית.",
+            "registryId": "worker_task_detail_sheet.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "תיאור והוראות"
+          },
+          {
+            "kind": "text",
+            "text": "שלבי ביצוע"
+          },
+          {
+            "kind": "cfgText",
+            "text": "לא הוגדרו שלבים למשימה זו",
+            "registryId": "worker_task_detail_sheet.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "תמונת ביצוע"
+          },
+          {
+            "kind": "text",
+            "text": "הערת העובד"
+          },
+          {
+            "kind": "text",
+            "text": "דווח על הביצוע"
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "מה להביא",
+          "תיאור והוראות",
+          "שלבי ביצוע",
+          "תמונת ביצוע",
+          "הערת העובד",
+          "דווח על הביצוע"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 6"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "keyboardJobSkusProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showLipskeyProductSheet(context, p, catalogSiblingsFor(p))",
+            "effect": "open → showLipskeyProductSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(tasksProvider.notifier).startWork(t.id)",
+            "effect": "write → tasksProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '⏱️ שעון העבודה הופעל')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'לא צולמה תמונה')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(tasksProvider.notifier).attachPhoto(t.id, dataUrl)",
+            "effect": "write → tasksProvider"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, '📷 תמונת ההוכחה צורפה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "catalogSiblingsFor",
+        "pickTaskPhoto",
+        "productsForTask",
+        "recommendedKitForProduct",
+        "setState",
+        "taskClockLabel"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": false,
+        "props": [
+          "taskId"
+        ],
+        "untangle": [
+          "onKeyboardJobSkus(…) callback instead of direct keyboardJobSkusProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_SecH",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "text"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_PrimaryBtn",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "label",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_KitRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "item"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "worker_task_detail_sheet.t09",
+        "ok": true,
+        "atom": "WorkerTaskDetailSheet"
+      },
+      {
+        "id": "worker_task_detail_sheet.t06",
+        "ok": true,
+        "atom": "WorkerTaskDetailSheet"
+      },
+      {
+        "id": "worker_task_detail_sheet.t07",
+        "ok": true,
+        "atom": "WorkerTaskDetailSheet"
+      },
+      {
+        "id": "worker_task_detail_sheet.t08",
+        "ok": true,
+        "atom": "WorkerTaskDetailSheet"
+      }
+    ]
+  }
+}

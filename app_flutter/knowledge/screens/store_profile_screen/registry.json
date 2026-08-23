@@ -1,0 +1,62 @@
+{
+  "matched": 11,
+  "total": 11,
+  "summary": "11/11",
+  "entries": [
+    {
+      "id": "store_profile_screen.settings_row",
+      "ok": true,
+      "atom": "StoreProfileBody"
+    },
+    {
+      "id": "store_profile_screen.logout_row",
+      "ok": true,
+      "atom": "StoreProfileBody"
+    },
+    {
+      "id": "store_profile_screen.demo_chip",
+      "ok": true,
+      "atom": "_StoreIdentityCard"
+    },
+    {
+      "id": "store_profile_screen.stats_title",
+      "ok": true,
+      "atom": "_StoreStatsCard"
+    },
+    {
+      "id": "store_profile_screen.stats_note",
+      "ok": true,
+      "atom": "_StoreStatsCard"
+    },
+    {
+      "id": "store_profile_screen.profile_row",
+      "ok": true,
+      "atom": "_StorePersonalAreaCard"
+    },
+    {
+      "id": "store_profile_screen.profile_row_sub",
+      "ok": true,
+      "atom": "_StorePersonalAreaCard"
+    },
+    {
+      "id": "store_profile_screen.certs_row",
+      "ok": true,
+      "atom": "_StorePersonalAreaCard"
+    },
+    {
+      "id": "store_profile_screen.certs_row_sub",
+      "ok": true,
+      "atom": "_StorePersonalAreaCard"
+    },
+    {
+      "id": "store_profile_screen.docs_row",
+      "ok": true,
+      "atom": "_StorePersonalAreaCard"
+    },
+    {
+      "id": "store_profile_screen.docs_row_sub",
+      "ok": true,
+      "atom": "_StorePersonalAreaCard"
+    }
+  ]
+}

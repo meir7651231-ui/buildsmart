@@ -1,0 +1,104 @@
+{
+  "name": "ManagerDashboardScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "מרכז השליטה",
+        "registryId": "manager.dash.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מנהל המערכת",
+        "registryId": "manager.dash.subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "manager.dash.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ יציאה",
+        "registryId": "manager.dash.exit",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [],
+    "summary": "registry 4 · mapped 4/4 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "orgConfigProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "managerTabProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "ChatsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "ManagerProfileScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "CatalogSettingsScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Chat…",
+        "effect": "navigate → ChatsScreen"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(ManagerProfileScreen.route())",
+        "effect": "navigate → ManagerProfileScreen"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(CatalogSettingsScreen.route(showProfileRow: false))",
+        "effect": "navigate → CatalogSettingsScreen"
+      }
+    ]
+  },
+  "floor": [
+    "kbManagerDashboardNodes",
+    "moduleOn"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "KbScreen = shared component → separate atom",
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

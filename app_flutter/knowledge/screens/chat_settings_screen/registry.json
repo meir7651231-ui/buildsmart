@@ -1,0 +1,92 @@
+{
+  "matched": 17,
+  "total": 17,
+  "summary": "17/17",
+  "entries": [
+    {
+      "id": "chat_settings_screen.t01",
+      "ok": true,
+      "atom": "ChatSettingsScreen"
+    },
+    {
+      "id": "chat_settings_screen.t02",
+      "ok": true,
+      "atom": "ChatSettingsScreen"
+    },
+    {
+      "id": "chat_settings_screen.t03",
+      "ok": true,
+      "atom": "ChatSettingsScreen"
+    },
+    {
+      "id": "chat_settings_screen.t04",
+      "ok": true,
+      "atom": "ChatSettingsScreen"
+    },
+    {
+      "id": "chat_settings_screen.t05",
+      "ok": true,
+      "atom": "ChatSettingsScreen"
+    },
+    {
+      "id": "chat_settings_screen.t06",
+      "ok": true,
+      "atom": "_QuickReplyBanner"
+    },
+    {
+      "id": "chat_settings_screen.t07",
+      "ok": true,
+      "atom": "_QuickReplyBanner"
+    },
+    {
+      "id": "chat_settings_screen.t08",
+      "ok": true,
+      "atom": "_QuickReplyBanner"
+    },
+    {
+      "id": "chat_settings_screen.t09",
+      "ok": true,
+      "atom": "_QuickReplyBanner"
+    },
+    {
+      "id": "chat_settings_screen.t14",
+      "ok": true,
+      "atom": "_PresenceSection"
+    },
+    {
+      "id": "chat_settings_screen.t15",
+      "ok": true,
+      "atom": "_PresenceSection"
+    },
+    {
+      "id": "chat_settings_screen.t16",
+      "ok": true,
+      "atom": "_PresenceSection"
+    },
+    {
+      "id": "chat_settings_screen.t17",
+      "ok": true,
+      "atom": "_ChatNotifSection"
+    },
+    {
+      "id": "chat_settings_screen.t10",
+      "ok": true,
+      "atom": "_ChatPrivacySection"
+    },
+    {
+      "id": "chat_settings_screen.t11",
+      "ok": true,
+      "atom": "_ChatPrivacySection"
+    },
+    {
+      "id": "chat_settings_screen.t12",
+      "ok": true,
+      "atom": "_ChatPrivacySection"
+    },
+    {
+      "id": "chat_settings_screen.t13",
+      "ok": true,
+      "atom": "_ChatPrivacySection"
+    }
+  ]
+}

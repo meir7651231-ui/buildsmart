@@ -1,0 +1,439 @@
+{
+  "module": "connection_status",
+  "source": "lib/state/connection_status.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "ConnectionStatusNotifier._resultsOnline",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(List<ConnectivityResult> results) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConnectionStatusNotifier._onConnectivity",
+          "ConnectionStatusNotifier._seedConnectivity"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "results.any((r) => r != ConnectivityResult.none)"
+          }
+        ]
+      },
+      "floor": [
+        "any"
+      ],
+      "contract": {
+        "input": "(List<ConnectivityResult> results)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionStatusNotifier._seedConnectivity",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_active",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_firestoreCacheOnly",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_signedIn",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_networkOnline"
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_resultsOnline",
+            "module": true
+          },
+          {
+            "name": "_recompute",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "Connectivity",
+        "checkConnectivity",
+        "debugPrint"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionStatusNotifier._onConnectivity",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(List<ConnectivityResult> results) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_active",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_firestoreCacheOnly",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_signedIn",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_networkOnline"
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_resultsOnline",
+            "module": true
+          },
+          {
+            "name": "_recompute",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_networkOnline = _resultsOnline(results)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_recompute()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<ConnectivityResult> results)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionStatusNotifier._bindFirestoreProbe",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_active"
+          },
+          {
+            "kind": "field",
+            "name": "_networkOnline",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_signedIn",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          },
+          {
+            "kind": "global",
+            "name": "mounted",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_firestoreCacheOnly"
+          },
+          {
+            "kind": "field",
+            "name": "_fsSub"
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_recompute",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_fsSub?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_fsSub = null"
+          },
+          {
+            "kind": "compute",
+            "detail": "uid = _uid"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !_active || uid == null"
+          }
+        ]
+      },
+      "floor": [
+        "cancel",
+        "collection",
+        "debugPrint",
+        "doc",
+        "listen",
+        "snapshots"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionStatusNotifier._recompute",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_active"
+          },
+          {
+            "kind": "field",
+            "name": "_firestoreCacheOnly"
+          },
+          {
+            "kind": "field",
+            "name": "_networkOnline"
+          },
+          {
+            "kind": "field",
+            "name": "_signedIn"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "ConnectionStatusNotifier._bindFirestoreProbe",
+          "ConnectionStatusNotifier._onConnectivity",
+          "ConnectionStatusNotifier._seedConnectivity"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "next = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if !_active"
+          },
+          {
+            "kind": "branch",
+            "detail": "if next != state"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionStatusNotifier.dispose",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_authRemove"
+          },
+          {
+            "kind": "field",
+            "name": "_connSub"
+          },
+          {
+            "kind": "field",
+            "name": "_fsSub"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_authRemove?.call()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_authRemove = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_connSub?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_connSub = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_fsSub?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_fsSub = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "call",
+        "cancel",
+        "dispose"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

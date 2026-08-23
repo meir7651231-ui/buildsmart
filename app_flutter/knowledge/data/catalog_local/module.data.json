@@ -1,0 +1,52 @@
+{
+  "module": "catalog_local",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/catalog_local.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "LocalCatalogRepository",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "_authoredDoc",
+            "type": "TradesDoc Function()?",
+            "required": false,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_authoredDoc",
+            "ref": "TradesDoc Function()",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "allProducts",
+          "productForSku",
+          "productForBrand",
+          "productForSmart",
+          "allSmartProducts",
+          "smartProductByKey",
+          "smartProductForSku",
+          "smartProductsForCat",
+          "smartTreeCats",
+          "catalogCategories",
+          "categoryTree"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

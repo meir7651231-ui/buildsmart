@@ -1,0 +1,104 @@
+{
+  "name": "_WorkerNotifsSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🔔 התראות",
+        "registryId": "worker_notifs_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.",
+        "registryId": "worker_notifs_sheet.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_notifs_sheet.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סמן הכל כנקרא",
+        "registryId": "worker_notifs_sheet.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_notifs_sheet.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נקה הכל",
+        "registryId": "worker_notifs_sheet.t04",
+        "registryOk": true
+      }
+    ],
+    "registered": 6,
+    "unregistered": [],
+    "summary": "registry 6 · mapped 6/6 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "currentWorkerNotifsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerNotifsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "clear",
+        "target": "workerNotifsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(workerNotifsProvider.notifier).markAllRead(username)",
+        "effect": "write → workerNotifsProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(workerNotifsProvider.notifier).clear(username)",
+        "effect": "write → workerNotifsProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(workerNotifsProvider.notifier).markRead(username, n.id)",
+        "effect": "write → workerNotifsProvider"
+      }
+    ]
+  },
+  "floor": [
+    "confirmDestructive"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onWorkerNotifs(…) callback instead of direct workerNotifsProvider write"
+    ]
+  }
+}

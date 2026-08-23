@@ -12,7 +12,7 @@ void main() {
   final ball = _find('HW-BALL-CU-20');
   final faucet = _find('779096G');
 
-  group('auto-compliance (autoCompliance:true) — 10 בדיקות', () {
+  group('auto-compliance (autoCompliance:true) — 12 בדיקות', () {
     test('1. tempC=20 לא מוסיף PRV', () {
       final plan = buildInstallation([ball, faucet],
           tempC: 20, autoCompliance: true);
@@ -99,6 +99,46 @@ void main() {
       );
       expect(plan.quantities.containsKey('HW-PRV-34'), isTrue,
           reason: 'tree hot install must also auto-include PRV');
+    });
+
+    test('11. buildTreeInstallation loop:true מוסיף את קבוצת-הבטיחות של המחזור', () {
+      // Regression (POLISH run-3, HIGH safety): a recirculation-loop tree (a
+      // hot-water ring feeding a manifold) used to lose ALL loop safety fittings
+      // because buildTreeInstallation never forwarded `loop` to _autoAddCompliance.
+      final inlet = _find('HW-BALL-INLET-1');
+      final manif = _find('HW-MANIFOLD-4');
+      final bv1 = _find('HW-BALL-1');
+      final bv2 = _find('HW-BALL-15');
+      final plan = buildTreeInstallation(
+        [inlet, manif], [bv1, bv2],
+        tempC: 60, autoCompliance: true, loop: true,
+      );
+      final q = plan.quantities;
+      expect(q.containsKey('HW-CHECK-15'), isTrue,
+          reason: 'recirc loop needs a check valve');
+      expect(q.containsKey('HW-BALANCE-15'), isTrue,
+          reason: 'recirc loop needs a balancing valve');
+      expect(q.containsKey('HW-AIRVENT'), isTrue,
+          reason: 'recirc loop needs an air vent');
+      expect(q.containsKey('HW-SAMPLE'), isTrue,
+          reason: 'recirc loop needs a Legionella sampling point');
+    });
+
+    test('12. buildTreeInstallation loop:false לא מוסיף פריטי-מחזור (guard)', () {
+      final inlet = _find('HW-BALL-INLET-1');
+      final manif = _find('HW-MANIFOLD-4');
+      final bv1 = _find('HW-BALL-1');
+      final bv2 = _find('HW-BALL-15');
+      final plan = buildTreeInstallation(
+        [inlet, manif], [bv1, bv2],
+        tempC: 60, autoCompliance: true, // loop defaults to false
+      );
+      final q = plan.quantities;
+      // The loop-only items must NOT appear when it isn't a recirculation design.
+      expect(q.containsKey('HW-CHECK-15'), isFalse);
+      expect(q.containsKey('HW-BALANCE-15'), isFalse);
+      expect(q.containsKey('HW-AIRVENT'), isFalse);
+      expect(q.containsKey('HW-SAMPLE'), isFalse);
     });
   });
 }

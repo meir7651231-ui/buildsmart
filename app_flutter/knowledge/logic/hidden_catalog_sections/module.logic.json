@@ -1,0 +1,242 @@
+{
+  "module": "hidden_catalog_sections",
+  "source": "/home/user/buildsmart/app_flutter/lib/state/hidden_catalog_sections.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "HiddenCatalogSectionsNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_key"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HiddenCatalogSectionsNotifier.hide",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String label) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "HiddenCatalogSectionsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state.contains(label) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, label}"
+          },
+          {
+            "kind": "effect",
+            "detail": "persistToPrefs()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "persistToPrefs"
+      ],
+      "contract": {
+        "input": "(String label)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.contains(label) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HiddenCatalogSectionsNotifier.show",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String label) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "HiddenCatalogSectionsNotifier.toggle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.contains(label) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state}..remove(label)"
+          },
+          {
+            "kind": "effect",
+            "detail": "persistToPrefs()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "persistToPrefs",
+        "remove"
+      ],
+      "contract": {
+        "input": "(String label)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.contains(label) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HiddenCatalogSectionsNotifier.toggle",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String label) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "show",
+            "module": true
+          },
+          {
+            "name": "hide",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.contains(label) ? show(label) : hide(label)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String label)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HiddenCatalogSectionsNotifier.isHidden",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String label) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.contains(label)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String label)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

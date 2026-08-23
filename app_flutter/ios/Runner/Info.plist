@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>BuildSmart משתמש במצלמה לסריקת ברקוד של מוצרים ולצילום תמונות — הוכחת-מסירה, תמונת-פרופיל ותעודות. אין צילום ברקע.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>BuildSmart משתמש במיקרופון לחיפוש קולי של מוצרים בלבד. אין הקלטה ברקע.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>BuildSmart משתמש בזיהוי-דיבור כדי להמיר את החיפוש הקולי שלך לטקסט.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>BuildSmart ניגש לגלריה כדי לצרף תמונות קיימות — הוכחת-מסירה, תמונת-פרופיל ותעודות.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>BuildSmart משתמש במיקום בזמן שהאפליקציה פתוחה כדי לתייג את נוכחות ה-GPS באתר ואת החתמת הכניסה/יציאה. אין איסוף מיקום ברקע.</string>
 </dict>
 </plist>

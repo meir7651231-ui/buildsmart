@@ -1,4 +1,3 @@
-import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
@@ -71,14 +70,20 @@ void main() {
           final finder = finderSizeChipsFor(p.nameHe);
           final missing = finder.difference(card);
           if (missing.isNotEmpty) {
-            orphans.add('sku=${p.sku}  name="${p.nameHe}"  '
-                'finder=$finder  card=$card  missing=$missing');
+            orphans.add(
+              'sku=${p.sku}  name="${p.nameHe}"  '
+              'finder=$finder  card=$card  missing=$missing',
+            );
           }
         }
-        expect(orphans, isEmpty,
-            reason: 'finder chips with no matching card chip '
-                '(would be orphan filter clicks):\n'
-                '${orphans.take(8).join("\n")}');
+        expect(
+          orphans,
+          isEmpty,
+          reason:
+              'finder chips with no matching card chip '
+              '(would be orphan filter clicks):\n'
+              '${orphans.take(8).join("\n")}',
+        );
       },
     );
 
@@ -91,12 +96,16 @@ void main() {
         for (final t in parseSizeTokens(p.nameHe)) {
           if (t.label.contains('×')) {
             final parts = t.label.split('×');
-            expect(parts.length, 2,
-                reason: 'cross-dim label "${t.label}" should have exactly one ×');
             expect(
-                double.tryParse(parts.first.replaceAll(RegExp(r'[^\d.]'), '')),
-                isNotNull,
-                reason: 'first half of cross-dim "${t.label}" should be numeric');
+              parts.length,
+              2,
+              reason: 'cross-dim label "${t.label}" should have exactly one ×',
+            );
+            expect(
+              double.tryParse(parts.first.replaceAll(RegExp(r'[^\d.]'), '')),
+              isNotNull,
+              reason: 'first half of cross-dim "${t.label}" should be numeric',
+            );
           }
         }
       }
@@ -115,6 +124,54 @@ void main() {
     });
     test('P15: card chip `020 מ"מ` normalizes to `20 מ"מ`', () {
       expect(parseSizeTokens('זרוע 020 מ"מ').first.label, '20 מ"מ');
+    });
+  });
+
+  // The size axis is guarded above (finder ⊆ card). The three SECONDARY axes —
+  // זווית (angle), מידה (letter S/M/L), עובי (wall) — are derived ONLY from the
+  // product name (never from dims), so every secondary chip the finder surfaces
+  // must be visible on the card too: its label/value is literally present in the
+  // name. (Audit 2026-06-02: 0 violations across the whole catalog.) This locks
+  // that in — if a future tokenizer normalisation drifts the label away from the
+  // source text, the chip would become an orphan and this guard fires.
+  group('secondary axes ⊆ card name — no orphan angle/letter/wall chips', () {
+    test('every angle chip label is literally in the name', () {
+      final orphans = <String>[];
+      for (final p in kCatalogProducts) {
+        for (final t in parseAngleTokens(p.nameHe)) {
+          if (!p.nameHe.contains(t.label)) {
+            orphans.add('sku=${p.sku} "${p.nameHe}" angle=${t.label}');
+          }
+        }
+      }
+      expect(orphans, isEmpty, reason: orphans.take(8).join('\n'));
+    });
+
+    test('every letter-size chip is a standalone word in the name', () {
+      final orphans = <String>[];
+      for (final p in kCatalogProducts) {
+        for (final l in letterSizeTokens(p.nameHe)) {
+          final asWord = RegExp(
+            '(^|\\s)${RegExp.escape(l)}(\\s|\$)',
+          ).hasMatch(p.nameHe);
+          if (!asWord) {
+            orphans.add('sku=${p.sku} "${p.nameHe}" letter=$l');
+          }
+        }
+      }
+      expect(orphans, isEmpty, reason: orphans.take(8).join('\n'));
+    });
+
+    test('every wall-thickness value is present in the name (cross-dim)', () {
+      final orphans = <String>[];
+      for (final p in kCatalogProducts) {
+        for (final w in wallTokens(p.nameHe)) {
+          if (!p.nameHe.contains(w)) {
+            orphans.add('sku=${p.sku} "${p.nameHe}" wall=$w');
+          }
+        }
+      }
+      expect(orphans, isEmpty, reason: orphans.take(8).join('\n'));
     });
   });
 }

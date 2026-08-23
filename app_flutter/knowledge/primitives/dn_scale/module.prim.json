@@ -1,0 +1,41 @@
+{
+  "module": "dn_scale",
+  "source": "../../../app_flutter/lib/features/catalog_config/dn_scale.dart",
+  "primitiveCount": 3,
+  "primitives": [
+    {
+      "name": "snapOdToDn",
+      "line": 37,
+      "signature": "(num od) → int",
+      "returns": "int",
+      "pure": true,
+      "edges": [
+        {
+          "signal": ".abs()",
+          "note": "negative input → absolute value (caller prepends the sign)"
+        }
+      ]
+    },
+    {
+      "name": "canonicalDn",
+      "line": 57,
+      "signature": "(String token) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": [
+        {
+          "signal": ".trim()",
+          "note": "surrounding whitespace trimmed"
+        }
+      ]
+    },
+    {
+      "name": "dnNumber",
+      "line": 70,
+      "signature": "(String label) → int",
+      "returns": "int",
+      "pure": true,
+      "edges": []
+    }
+  ]
+}

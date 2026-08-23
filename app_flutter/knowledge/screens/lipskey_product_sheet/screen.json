@@ -1,0 +1,921 @@
+{
+  "screen": "lipskey_product_sheet",
+  "source": "lipskey_product_sheet.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "name": "LipskeyProductSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "נוסף לסל ✓",
+            "registryId": "lipskey_product_sheet.added_to_cart",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🔗 קשור",
+            "registryId": "lipskey_product_sheet.related_rail_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🔌 מה מתחבר לזה",
+            "registryId": "lipskey_product_sheet.connects_rail_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הוסף לקו",
+            "registryId": "lipskey_product_sheet.add_to_line",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "נוסף לקו ✓",
+            "registryId": "lipskey_product_sheet.added_to_line",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📋 רשימת חומרים — קו",
+            "registryId": "lipskey_product_sheet.line_bom_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "לא נמצאו פריטים לפתרון — בחר מוצרים אחרים לקו",
+            "registryId": "lipskey_product_sheet.line_bom_empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מק\"ט הועתק",
+            "registryId": "lipskey_product_sheet.sku_copied",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "חזרה למוצר הקודם",
+            "registryId": "lipskey_product_sheet.hop_back",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💡 צ׳יפ כתום ▾ — הקש להחלפת גודל/צבע/דגם",
+            "registryId": "lipskey_product_sheet.chip_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🧩"
+          },
+          {
+            "kind": "cfgText",
+            "text": "ערכת התקנה מומלצת",
+            "registryId": "lipskey_product_sheet.recommended_kit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "+ ערכה",
+            "registryId": "lipskey_product_sheet.add_kit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אביזרים נבחרים:",
+            "registryId": "lipskey_product_sheet.selected_accessories",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הוסף לסל",
+            "registryId": "lipskey_product_sheet.add_to_cart_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🌡️"
+          },
+          {
+            "kind": "cfgText",
+            "text": "מתאים לתנאים שלי?",
+            "registryId": "lipskey_product_sheet.spec_copilot_cta",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מה עוד צריך להתקנה?",
+            "registryId": "lipskey_product_sheet.paired_explain_cta",
+            "registryOk": true
+          }
+        ],
+        "registered": 16,
+        "unregistered": [
+          "🧩",
+          "🌡️"
+        ],
+        "summary": "registry 16 · mapped 16/16 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "add",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "featureFlagsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "neighbours.isEmpty"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "connects.isEmpty"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "cardPicksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "cardPicksProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "writes",
+            "via": "clear",
+            "target": "cardPicksProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "seed"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "q"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "SpecCopilotScreen"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "pairedTypes.isEmpty"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "ref.watch(claudeGatewayProvider) == null"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "PairedExplainScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (neighbours.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (connects.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: CfgText('l…",
+            "effect": "open → showSnackBar"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showLipskeyProductSheet(context, g.parts[i], _scanPool.where((x) => x.categor…",
+            "effect": "open → showLipskeyProductSheet"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(SpecCopilotScreen.route(p))",
+            "effect": "navigate → SpecCopilotScreen"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (pairedTypes.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (ref.watch(claudeGatewayProvider) == null)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(PairedExplainScreen.route(product: p.nameHe, types…",
+            "effect": "navigate → PairedExplainScreen"
+          }
+        ]
+      },
+      "floor": [
+        "addParts",
+        "cardReadinessScore",
+        "chip",
+        "dataCompletenessScore",
+        "formatDimValue",
+        "frequentlyPairedTypesFor",
+        "genderRank",
+        "lipskeyAccFor",
+        "lipskeyStagesFor",
+        "max",
+        "methodRank",
+        "planLineFromPicks",
+        "scoreBandColors",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": false,
+        "props": [
+          "product",
+          "categoryProducts",
+          "forceLive",
+          "hopSeedForTest"
+        ],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_QtyStepper",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "b",
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "qty",
+          "onChanged"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_UnitToggle",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "onChanged",
+        "opt"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "unit",
+          "hasPack",
+          "hasPallet",
+          "onChanged"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RelatedCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "productImage"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "product",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_HeroImage",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "חזרה למוצר",
+            "registryId": "lipskey_product_sheet.back_to_product",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "PPR-CT",
+            "registryId": "lipskey_product_sheet.ppr_ct_badge",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "פרטים / מפרט",
+            "registryId": "lipskey_product_sheet.details_spec",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הגדלה",
+            "registryId": "lipskey_product_sheet.zoom",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "productImage",
+        "rotateY",
+        "setEntry",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "product",
+          "screenH"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_StageRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "stage",
+          "index",
+          "isActive",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SectionTitle",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "emoji",
+          "title",
+          "subtitle"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Divider",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_QuickInfoStrips",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "אין קבוצה"
+          },
+          {
+            "kind": "text",
+            "text": "אין מוצרים אחרים בקבוצה"
+          },
+          {
+            "kind": "text",
+            "text": "אין מפרט תואם"
+          },
+          {
+            "kind": "text",
+            "text": "לא נמצאו מוצרים שמשלימים את הקצוות"
+          },
+          {
+            "kind": "text",
+            "text": "אין מוצרים משלימים"
+          },
+          {
+            "kind": "text",
+            "text": "אין רשימת ערכת התקנה"
+          },
+          {
+            "kind": "cfgText",
+            "text": "חובה (עץ חכם)",
+            "registryId": "lipskey_product_sheet.must_smart_tree",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אופציונלי (עץ חכם)",
+            "registryId": "lipskey_product_sheet.optional_smart_tree",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כלים ואיטומים (אוטומטי)",
+            "registryId": "lipskey_product_sheet.tools_auto",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "חובה",
+            "registryId": "lipskey_product_sheet.must_badge",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "אין וריאנטים נוספים"
+          },
+          {
+            "kind": "text",
+            "text": "אין דרישות תקינות מיוחדות"
+          },
+          {
+            "kind": "cfgText",
+            "text": "חובה",
+            "registryId": "lipskey_product_sheet.must_badge_compliance",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "אין מפרט הנדסי מאומת"
+          },
+          {
+            "kind": "cfgText",
+            "text": "צנרת PPR לאספקת מים חמים וקרים",
+            "registryId": "lipskey_product_sheet.ppr_caption",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "SMART LOCK — מערכת דלוחין, צנרת ואביזרים מפוליפרופילן בקטרים 32-63 מ\"מ בצבע שחור",
+            "registryId": "lipskey_product_sheet.smartlock_caption",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "אין הערכת מחיר לקטגוריה זו"
+          },
+          {
+            "kind": "cfgText",
+            "text": "ליחידה",
+            "registryId": "lipskey_product_sheet.per_unit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הערכה",
+            "registryId": "lipskey_product_sheet.estimate_badge",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הערכה לפי קטגוריה — מחיר אמיתי תלוי בספק, מותג ומידה ספציפית.",
+            "registryId": "lipskey_product_sheet.price_note",
+            "registryOk": true
+          }
+        ],
+        "registered": 10,
+        "unregistered": [
+          "אין קבוצה",
+          "אין מוצרים אחרים בקבוצה",
+          "אין מפרט תואם",
+          "לא נמצאו מוצרים שמשלימים את הקצוות",
+          "אין מוצרים משלימים",
+          "אין רשימת ערכת התקנה",
+          "אין וריאנטים נוספים",
+          "אין דרישות תקינות מיוחדות",
+          "אין מפרט הנדסי מאומת",
+          "אין הערכת מחיר לקטגוריה זו"
+        ],
+        "summary": "registry 10 · mapped 10/10 · unregistered 10"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "rows.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (rows.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "bsSuccess",
+        "companyComplementsFor",
+        "compatibleProductsCount",
+        "compatibleProductsFor",
+        "complianceTriggersFor",
+        "connectionExplainHe",
+        "currencySymbol",
+        "engineeringSpecFor",
+        "finderGroupFor",
+        "formatCatalogPrice",
+        "installKitFor",
+        "onPickProduct",
+        "priceFor",
+        "priceWithVat",
+        "productImage",
+        "recommendedKitForProduct",
+        "row",
+        "setState",
+        "smartProductForSku",
+        "variantSiblingsCountFor",
+        "variantSiblingsOf"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "product",
+          "onPickProduct"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_InteractiveChips",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "entries.isEmpty"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "options.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (entries.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (options.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "kindOf",
+        "onChipTap",
+        "onSelect",
+        "sort",
+        "variantValue"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "product",
+          "openPickerKey",
+          "onChipTap",
+          "onVariantSelect"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 30,
+    "total": 30,
+    "summary": "30/30",
+    "entries": [
+      {
+        "id": "lipskey_product_sheet.added_to_cart",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.related_rail_title",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.connects_rail_title",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.add_to_line",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.added_to_line",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.line_bom_title",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.line_bom_empty",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.sku_copied",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.hop_back",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.chip_hint",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.recommended_kit",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.add_kit",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.selected_accessories",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.add_to_cart_btn",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.spec_copilot_cta",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.paired_explain_cta",
+        "ok": true,
+        "atom": "LipskeyProductSheet"
+      },
+      {
+        "id": "lipskey_product_sheet.back_to_product",
+        "ok": true,
+        "atom": "_HeroImage"
+      },
+      {
+        "id": "lipskey_product_sheet.ppr_ct_badge",
+        "ok": true,
+        "atom": "_HeroImage"
+      },
+      {
+        "id": "lipskey_product_sheet.details_spec",
+        "ok": true,
+        "atom": "_HeroImage"
+      },
+      {
+        "id": "lipskey_product_sheet.zoom",
+        "ok": true,
+        "atom": "_HeroImage"
+      },
+      {
+        "id": "lipskey_product_sheet.must_smart_tree",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.optional_smart_tree",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.tools_auto",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.must_badge",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.must_badge_compliance",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.ppr_caption",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.smartlock_caption",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.per_unit",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.estimate_badge",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      },
+      {
+        "id": "lipskey_product_sheet.price_note",
+        "ok": true,
+        "atom": "_QuickInfoStrips"
+      }
+    ]
+  }
+}

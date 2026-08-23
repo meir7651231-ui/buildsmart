@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/carts_repository.dart';
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,6 +40,7 @@ class SmartCartLine {
     required this.brandPrice,
     required this.productQty,
     required this.accessories,
+    this.selection = const {},
   });
   final String productKey;
   final String productName;
@@ -46,6 +49,12 @@ class SmartCartLine {
   final int brandPrice;
   final int productQty;
   final List<SmartCartAcc> accessories;
+
+  /// The configurator selection this line carries (plan E.1 — "הקונפיג נשמר
+  /// בשורה"), keyed by attribute (e.g. `{'angle': '45°'}`). EMPTY for every
+  /// ordinary (non-configured) line — so its JSON stays byte-identical: the key
+  /// is serialized only when non-empty and decoded tolerantly (old lines → {}).
+  final Map<String, String> selection;
 
   int get total {
     var t = brandPrice * productQty;
@@ -63,6 +72,9 @@ class SmartCartLine {
         'brandPrice': brandPrice,
         'productQty': productQty,
         'accessories': accessories.map((a) => a.toJson()).toList(),
+        // Emitted ONLY when non-empty ⇒ every legacy (unconfigured) line encodes
+        // byte-for-byte as before (no new key in the payload).
+        if (selection.isNotEmpty) 'selection': selection,
       };
 
   factory SmartCartLine.fromJson(Map<String, dynamic> j) => SmartCartLine(
@@ -75,38 +87,69 @@ class SmartCartLine {
         accessories: (j['accessories'] as List<dynamic>)
             .map((e) => SmartCartAcc.fromJson(e as Map<String, dynamic>))
             .toList(),
+        // TOLERANT: an old line with no `selection` key → the empty map.
+        selection: (j['selection'] as Map?)?.map(
+              (k, v) => MapEntry('$k', '$v'),
+            ) ??
+            const {},
       );
 }
 
-class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
-  SmartCartNotifier() : super(const []) {
+class SmartCartNotifier extends StateNotifier<List<SmartCartLine>>
+    with PersistOnWrite<List<SmartCartLine>> {
+  SmartCartNotifier([this._carts]) : super(const []) {
     _load();
   }
 
+  /// The server store for the active cart (`carts/{uid}`) when USER_DATA_SERVER
+  /// is on for a real signed-in user; null (the default) ⇒ the SharedPreferences
+  /// path below, byte-identical to before. Injected by [smartCartProvider].
+  final CartsRepository? _carts;
+
   static const _prefsKey = 'bs.smart-cart.v1';
 
-  // Persist the cart on every change so it survives app restarts.
-  @override
-  set state(List<SmartCartLine> value) {
-    super.state = value;
-    _persist();
-  }
+  // The set-state auto-persist invariant + the `_loaded` load-clobber latch are
+  // provided by PersistOnWrite; this engine keeps its own persistState + _load.
 
   Future<void> _load() async {
+    final carts = _carts;
+    if (carts != null) {
+      // Server path (USER_DATA_SERVER): the active cart lives at `carts/{uid}`.
+      try {
+        seedIfUnloaded(await carts.load(carts.currentUid));
+      } catch (_) {
+        // Absent/unreadable — start empty (the corrupt-payload latch below).
+        markLoaded();
+      }
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_prefsKey);
-      if (raw == null || raw.isEmpty) return;
+      if (raw == null || raw.isEmpty) {
+        markLoaded();
+        return;
+      }
       final list = (jsonDecode(raw) as List<dynamic>)
           .map((e) => SmartCartLine.fromJson(e as Map<String, dynamic>))
           .toList();
-      super.state = list; // bypass re-persisting the value we just loaded
+      seedIfUnloaded(list);
     } catch (_) {
       // Corrupt/old payload — ignore and start empty.
+      markLoaded();
     }
   }
 
-  Future<void> _persist() async {
+  @override
+  Future<void> persistState() async {
+    final carts = _carts;
+    if (carts != null) {
+      // Server path (USER_DATA_SERVER): mirror the whole cart to `carts/{uid}`.
+      try {
+        await carts.save(carts.currentUid, state);
+      } catch (_) {}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -146,6 +189,7 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
             brandPrice: l.brandPrice,
             productQty: qty,
             accessories: l.accessories,
+            selection: l.selection, // a qty change must not drop the config
           )
         else
           state[i],
@@ -166,9 +210,18 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
   }
 
   void clear() => state = const [];
+
+  /// Replace every cart line with [lines] (a project's stashed snapshot). Used
+  /// by the cart-per-project switch: the incoming project's snapshot becomes the
+  /// live cart. Reassigns `state` (new list) so it rebuilds + persists via the
+  /// setter — `SmartCartLine` is immutable so sharing the line objects is safe.
+  void loadSnapshot(List<SmartCartLine> lines) => state = [...lines];
 }
 
 final smartCartProvider =
     StateNotifierProvider<SmartCartNotifier, List<SmartCartLine>>(
-  (_) => SmartCartNotifier(),
+  // Injects the server store (`carts/{uid}`) when USER_DATA_SERVER is on for a
+  // real signed-in user; null (the default) ⇒ the SharedPreferences path,
+  // byte-identical to before (the provider value stays null → no rebuild).
+  (ref) => SmartCartNotifier(ref.watch(cartsRepositoryProvider)),
 );

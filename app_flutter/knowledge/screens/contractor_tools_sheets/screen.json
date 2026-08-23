@@ -1,0 +1,36 @@
+{
+  "screen": "contractor_tools_sheets",
+  "source": "contractor_tools_sheets.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "_SheetHandle",
+      "role": "composer",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 0,
+    "total": 0,
+    "summary": "0/0",
+    "entries": []
+  }
+}

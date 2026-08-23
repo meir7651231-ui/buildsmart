@@ -1,0 +1,104 @@
+{
+  "module": "persona_data",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/persona_data.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "PersonaTask",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "worker",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "days",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "steps",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "note",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "orderId",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "employerId",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "assignedWorkerUid",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "orderId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "employerId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "worker",
+          "status",
+          "days",
+          "steps"
+        ],
+        "defaults": {
+          "note": "''",
+          "employerId": "''",
+          "assignedWorkerUid": "''"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

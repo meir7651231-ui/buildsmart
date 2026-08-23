@@ -1,0 +1,78 @@
+{
+  "module": "calendar_days",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/calendar_days.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "fn": "daysBetweenDst",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime from, DateTime to) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "DateTime.utc(to.year, to.month, to.day).difference(DateTime.utc(from.year, from.month, fr…"
+          }
+        ]
+      },
+      "floor": [
+        "difference",
+        "utc"
+      ],
+      "contract": {
+        "input": "(DateTime from, DateTime to)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "startOfWeekSunday",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime d) -> DateTime",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "DateTime(d.year, d.month, d.day - (d.weekday % 7))"
+          }
+        ]
+      },
+      "floor": [
+        "DateTime"
+      ],
+      "contract": {
+        "input": "(DateTime d)",
+        "output": "DateTime",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

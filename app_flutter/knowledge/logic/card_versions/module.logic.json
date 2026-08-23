@@ -1,0 +1,326 @@
+{
+  "module": "card_versions",
+  "source": "/home/user/buildsmart/app_flutter/lib/state/card_versions.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "ConfigVersion.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "brandName"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "label"
+          },
+          {
+            "kind": "field",
+            "name": "productKey"
+          },
+          {
+            "kind": "field",
+            "name": "savedAt"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'label' : label, 'productKey' : productKey, 'brandName' : brandName, 'savedAt…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardVersionsNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_key"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardVersionsNotifier.decodeElement",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Map<String, dynamic> json) -> ConfigVersion",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ConfigVersion.fromJson(json)"
+          }
+        ]
+      },
+      "floor": [
+        "fromJson"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> json)",
+        "output": "ConfigVersion",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardVersionsNotifier.encodeElement",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ConfigVersion element) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "element.toJson()"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "(ConfigVersion element)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardVersionsNotifier.save",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String label, required String productKey, required String brandName}) -> ConfigVersion",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "now = DateTime.now()"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = '$productKey|$label|${now.microsecondsSinceEpoch}'"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = ConfigVersion(id: id, label: label, productKey: productKey, brandName: brandName, savedAt…"
+          },
+          {
+            "kind": "compute",
+            "detail": "filtered = state.where((x) => !(x.productKey == productKey && x.label == label)).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...filtered, v]"
+          },
+          {
+            "kind": "effect",
+            "detail": "persistToPrefs()"
+          },
+          {
+            "kind": "return",
+            "detail": "v"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigVersion",
+        "now",
+        "persistToPrefs",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "({required String label, required String productKey, required String brandName})",
+        "output": "ConfigVersion",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardVersionsNotifier.remove",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = state.where((x) => x.id != id).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "persistToPrefs()"
+          }
+        ]
+      },
+      "floor": [
+        "persistToPrefs",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardVersionsNotifier.forProduct",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey) -> List<ConfigVersion>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.where((x) => x.productKey == productKey).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String productKey)",
+        "output": "List<ConfigVersion>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "module": "chip_hierarchy",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/chip_hierarchy.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "ChipPath",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "type",
+            "type": "String?",
+            "required": true,
+            "nullable": true
+          },
+          {
+            "name": "level1",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "level2",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "level3",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "level4",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "level5",
+            "type": "String?",
+            "required": true,
+            "nullable": true
+          },
+          {
+            "name": "leftover",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "path",
+            "type": "List<String>",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "levelLabelOf"
+        ]
+      },
+      "contract": {
+        "required": [
+          "type",
+          "level1",
+          "level2",
+          "level3",
+          "level4",
+          "level5",
+          "leftover"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

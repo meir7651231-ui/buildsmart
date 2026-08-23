@@ -1,0 +1,94 @@
+{
+  "screen": "company_catalog_import_sheet",
+  "source": "company_catalog_import_sheet.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "_CompanyCatalogImportSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "📦 טעינת קטלוג החברה"
+          },
+          {
+            "kind": "text",
+            "text": "המערכת עובדת על הקטלוג שתטענו — חיפוש, סל והזמנות. מחירים והשוואת-חנויות יתווספו בשלב חיבור-השרת."
+          },
+          {
+            "kind": "text",
+            "text": "🔄 רענן להחלת הקטלוג בכל המסכים"
+          },
+          {
+            "kind": "text",
+            "text": "⬇️ הורד תבנית לדוגמה"
+          },
+          {
+            "kind": "text",
+            "text": "⬆️ העלה נתונים"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "📦 טעינת קטלוג החברה",
+          "המערכת עובדת על הקטלוג שתטענו — חיפוש, סל והזמנות. מחירים והשוואת-חנויות יתווספו בשלב חיבור-השרת.",
+          "🔄 רענן להחלת הקטלוג בכל המסכים",
+          "⬇️ הורד תבנית לדוגמה",
+          "⬆️ העלה נתונים"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 5"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "downloadTextFileProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "pickTextFileProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "reloadAppProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "auditRows",
+        "bsOnAccent",
+        "companyCatalogTemplateCsv",
+        "featEnabled",
+        "parseCompanyCatalogCsv",
+        "persistCompanyCatalog",
+        "registerCompanySpecs",
+        "setCompanyCatalog",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 0,
+    "total": 0,
+    "summary": "0/0",
+    "entries": []
+  }
+}

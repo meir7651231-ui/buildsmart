@@ -1,0 +1,71 @@
+{
+  "module": "site_local",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/site_local.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "LocalSiteRepository",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "_ref",
+            "type": "Ref",
+            "required": true
+          },
+          {
+            "name": "_stage",
+            "type": "StageProgressNotifier",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "_tasks",
+            "type": "WorkerTasksNotifier",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_ref",
+            "ref": "Ref",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "seed",
+          "seedActiveId",
+          "projects",
+          "projectById",
+          "activeProjectId",
+          "siteToolsTree",
+          "planTypes",
+          "safetyTips",
+          "budgetLevel",
+          "stageIsDone",
+          "stageDoneCount",
+          "toggleStage",
+          "workerTasks",
+          "pendingApprovals",
+          "submitForReview",
+          "approve",
+          "reject"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_ref"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

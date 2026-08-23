@@ -1,0 +1,27 @@
+{
+  "matched": 4,
+  "total": 4,
+  "summary": "4/4",
+  "entries": [
+    {
+      "id": "quote_polish_screen.copied_toast",
+      "ok": true,
+      "atom": "QuotePolishScreen"
+    },
+    {
+      "id": "quote_polish_screen.title",
+      "ok": true,
+      "atom": "QuotePolishScreen"
+    },
+    {
+      "id": "quote_polish_screen.copy_btn",
+      "ok": true,
+      "atom": "QuotePolishScreen"
+    },
+    {
+      "id": "quote_polish_screen.footer_note",
+      "ok": true,
+      "atom": "QuotePolishScreen"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "name": "ManagerRoleAssignSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🔑"
+      },
+      {
+        "kind": "cfgText",
+        "text": "שיוך תפקיד למשתמש",
+        "registryId": "manager_role_assign_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אתר משתמש לפי טלפון (או הדבק מזהה uid) ובחר תפקיד להקצאה.",
+        "registryId": "manager_role_assign_sheet.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "תפקיד",
+        "registryId": "manager_role_assign_sheet.t03",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [
+      "🔑"
+    ],
+    "summary": "registry 3 · mapped 3/3 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "usersLookupProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "authStateProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "telemetryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "authGatewayProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState",
+    "unawaited"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

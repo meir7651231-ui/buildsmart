@@ -1,0 +1,98 @@
+{
+  "name": "CatalogSettingsScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "הגדרות",
+        "registryId": "catalog_settings_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "איפוס הגדרות?",
+        "registryId": "catalog_settings_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כל ההגדרות יוחזרו לברירת המחדל.",
+        "registryId": "catalog_settings_screen.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_settings_screen.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "catalog_settings_screen.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_settings_screen.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אפס",
+        "registryId": "catalog_settings_screen.t05",
+        "registryOk": true
+      }
+    ],
+    "registered": 7,
+    "unregistered": [],
+    "summary": "registry 7 · mapped 7/7 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "appSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "kbCatalogSettingsNodes"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [
+      "showProfileRow"
+    ],
+    "untangle": [
+      "KbScreen = shared component → separate atom"
+    ]
+  }
+}

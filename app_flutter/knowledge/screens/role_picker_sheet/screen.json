@@ -1,0 +1,125 @@
+{
+  "screen": "role_picker_sheet",
+  "source": "role_picker_sheet.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "_RolePickerCard",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "מי אתה?",
+            "registryId": "role_picker_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בחר תפקיד כדי להיכנס",
+            "registryId": "role_picker_sheet.t02",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "modOn",
+            "target": "manager"
+          },
+          {
+            "kind": "gated-by",
+            "via": "modOn",
+            "target": "supplier"
+          },
+          {
+            "kind": "gated-by",
+            "via": "modOn",
+            "target": "courier"
+          },
+          {
+            "kind": "gated-by",
+            "via": "modOn",
+            "target": "worker"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RoleRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "activePersonaProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(activePersonaProvider.notifier).state = null",
+            "effect": "write → activePersonaProvider"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": false,
+        "props": [
+          "persona"
+        ],
+        "untangle": [
+          "CourierDashboardScreen = shared component → separate atom",
+          "ManagerDashboardScreen = shared component → separate atom",
+          "StoreDashboardScreen = shared component → separate atom",
+          "WorkerAppScreen = shared component → separate atom",
+          "_pushBoard = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 2,
+    "total": 2,
+    "summary": "2/2",
+    "entries": [
+      {
+        "id": "role_picker_sheet.t01",
+        "ok": true,
+        "atom": "_RolePickerCard"
+      },
+      {
+        "id": "role_picker_sheet.t02",
+        "ok": true,
+        "atom": "_RolePickerCard"
+      }
+    ]
+  }
+}

@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'card_detail_mode.dart';
+import 'package:buildsmart/state/prefs_persisted.dart';
+import 'user_profile.dart';
 
 /// Who's using the card — affects which detail level is the *sensible default*
 /// and (in the future) which sections show by default. Orthogonal to
@@ -40,35 +44,75 @@ ProfessionMode nextProfessionMode(ProfessionMode current) {
   }
 }
 
-class ProfessionModeNotifier extends StateNotifier<ProfessionMode> {
+/// Derive an initial [ProfessionMode] from the onboarding trade string stored
+/// in [UserProfile.profession].  Used only when the user has not yet made an
+/// explicit manual choice (i.e. [ProfessionModeNotifier._key] is absent).
+///
+/// Mapping:
+///   'אינסטלטור' | 'חשמלאי'  → [ProfessionMode.pro]   (specialist trades)
+///   'קבלן שיפוצים'           → [ProfessionMode.contractor]
+///   empty / unknown           → [ProfessionMode.contractor]  (safe default)
+ProfessionMode professionModeFromTrade(String trade) {
+  switch (trade.trim()) {
+    case 'אינסטלטור':
+    case 'חשמלאי':
+      return ProfessionMode.pro;
+    case 'קבלן שיפוצים':
+      return ProfessionMode.contractor;
+    default:
+      return ProfessionMode.contractor;
+  }
+}
+
+class ProfessionModeNotifier extends StateNotifier<ProfessionMode>
+    with EnumPrefsPersisted<ProfessionMode> {
   ProfessionModeNotifier() : super(ProfessionMode.contractor) {
     _load();
   }
 
   static const _key = 'bs.profession-mode.v1';
 
+  // Bespoke [_load] below (derives from onboarding + seeds cardDetailMode) is a
+  // genuine variant — kept verbatim; only persist/set come from the mixin.
+  @override
+  String get persistKey => _key;
+  @override
+  List<ProfessionMode> get persistValues => ProfessionMode.values;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final s = prefs.getString(_key);
-    if (s == null) return;
-    for (final m in ProfessionMode.values) {
-      if (m.name == s) {
-        state = m;
-        return;
+    if (s != null) {
+      // Explicit manual choice — always wins.
+      for (final m in ProfessionMode.values) {
+        if (m.name == s) {
+          state = m;
+          return;
+        }
       }
+    }
+    // No explicit choice yet: derive from the onboarding trade selection.
+    final profileRaw = prefs.getString(kUserProfileKey);
+    if (profileRaw == null) return;
+    try {
+      final profile = UserProfile.fromJson(
+        jsonDecode(profileRaw) as Map<String, dynamic>,
+      );
+      if (profile.profession.isNotEmpty) {
+        final derived = professionModeFromTrade(profile.profession);
+        state = derived;
+        // Seed cardDetailModeProvider if the user hasn't explicitly set it.
+        const detailKey = 'bs.card-detail-mode.v1';
+        if (prefs.getString(detailKey) == null) {
+          await prefs.setString(detailKey, defaultDetailFor(derived).name);
+        }
+      }
+    } on Object catch (_) {
+      // Corrupt profile — keep default.
     }
   }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, state.name);
-  }
-
-  void set(ProfessionMode mode) {
-    if (state == mode) return;
-    state = mode;
-    _persist();
-  }
+  void set(ProfessionMode mode) => setPersisted(mode);
 }
 
 final professionModeProvider =

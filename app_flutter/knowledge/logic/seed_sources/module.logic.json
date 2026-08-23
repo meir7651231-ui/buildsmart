@@ -1,0 +1,352 @@
+{
+  "module": "seed_sources",
+  "source": "lib/features/card_keyboard/seed_sources.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "wordSeeds",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WordLexicon lexicon, {bool expanded = false}) -> List<CardSeed>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFirstWordCount"
+          },
+          {
+            "kind": "const",
+            "name": "kWordMouth"
+          },
+          {
+            "kind": "const",
+            "name": "kWordSeedAxis"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_admitsSkus",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "entries = wordsByFrequency(lexicon)"
+          },
+          {
+            "kind": "compute",
+            "detail": "visible = expanded ? entries : entries.take(kFirstWordCount).toList()"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final e in visible) CardSeed(mouthId: kWordMouth, displayLabel: e.word, seedAxisLab…"
+          }
+        ]
+      },
+      "floor": [
+        "CardSeed",
+        "take",
+        "toList",
+        "wordsByFrequency"
+      ],
+      "contract": {
+        "input": "(WordLexicon lexicon, {bool expanded = false})",
+        "output": "List<CardSeed>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_admitsSkus",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> skus) -> bool Function(LipskeyCatalogProduct)",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "jobSeeds",
+          "wordSeeds"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "set = skus.toSet()"
+          },
+          {
+            "kind": "return",
+            "detail": "(p) => set.contains(p.sku)"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(List<String> skus)",
+        "output": "bool Function(LipskeyCatalogProduct)",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "materialSeeds",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<CardSeed>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMaterialMouth"
+          },
+          {
+            "kind": "const",
+            "name": "kMaterialSeedAxis"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_admitsMaterial",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "[for (final m in materialsInPoolEnriched(pool)) CardSeed(mouthId: kMaterialMouth, display…"
+          }
+        ]
+      },
+      "floor": [
+        "CardSeed",
+        "materialsInPoolEnriched"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<CardSeed>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_admitsMaterial",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String material) -> bool Function(LipskeyCatalogProduct)",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "materialSeeds"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(p) => materialOfEnriched(p) == material"
+          }
+        ]
+      },
+      "floor": [
+        "materialOfEnriched"
+      ],
+      "contract": {
+        "input": "(String material)",
+        "output": "bool Function(LipskeyCatalogProduct)",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "jobSeeds",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<CardSeed>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kJobMouth"
+          },
+          {
+            "kind": "const",
+            "name": "kJobSeedAxis"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_admitsSkus",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "[for (final recipe in kSmartProducts) CardSeed(mouthId: kJobMouth, displayLabel: recipe.n…"
+          }
+        ]
+      },
+      "floor": [
+        "CardSeed"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<CardSeed>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "categorySeeds",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<CardSeed>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCategoryMouth"
+          },
+          {
+            "kind": "const",
+            "name": "kCategorySeedAxis"
+          },
+          {
+            "kind": "global",
+            "name": "groupOf"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_admitsGroup",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "groups = pool.map(groupOf).toSet().toList()..sort()"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final g in groups) CardSeed(mouthId: kCategoryMouth, displayLabel: g, seedAxisLabel…"
+          }
+        ]
+      },
+      "floor": [
+        "CardSeed",
+        "map",
+        "sort",
+        "toList",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<CardSeed>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_admitsGroup",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String group) -> bool Function(LipskeyCatalogProduct)",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "categorySeeds"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(p) => groupOf(p) == group"
+          }
+        ]
+      },
+      "floor": [
+        "groupOf"
+      ],
+      "contract": {
+        "input": "(String group)",
+        "output": "bool Function(LipskeyCatalogProduct)",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

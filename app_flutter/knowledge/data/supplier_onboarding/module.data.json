@@ -1,0 +1,229 @@
+{
+  "module": "supplier_onboarding",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/supplier_onboarding.dart",
+  "entityCount": 3,
+  "entities": [
+    {
+      "entity": "SupplierDraft",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "storeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "sku",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "categoryHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameEn",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "categoryEn",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "categoryEmoji",
+            "type": "String",
+            "required": false,
+            "default": "'📦'"
+          },
+          {
+            "name": "brand",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "color",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "dims",
+            "type": "Map<String, dynamic>?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "imageFile",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "barcode",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "price",
+            "type": "num?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "stock",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "storeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "toProduct"
+        ]
+      },
+      "contract": {
+        "required": [
+          "storeId",
+          "sku",
+          "nameHe",
+          "categoryHe"
+        ],
+        "defaults": {
+          "nameEn": "''",
+          "categoryEn": "''",
+          "categoryEmoji": "'📦'",
+          "brand": "''",
+          "updatedAt": "''"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FacetSuggestion",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "type",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "gender",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "method",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "sizes",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {
+          "sizes": "const []"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "DraftValidation",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "errors",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "warnings",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "ok",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "errors",
+          "warnings"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "module": "upload_functions",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/upload_functions.dart",
+  "entityCount": 3,
+  "entities": [
+    {
+      "entity": "UploadTarget",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "uploadUrl",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "publicUrl",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "uploadUrl",
+          "publicUrl"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "UploadFunctionsException",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "code",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "message",
+            "type": "String?",
+            "required": true,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirebaseUploadFunctionsGateway",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_injectedFunctions",
+            "type": "FirebaseFunctions?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_functions",
+            "type": "FirebaseFunctions",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_injectedFunctions",
+            "ref": "FirebaseFunctions",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "getUploadUrl",
+          "_publicUrlFor",
+          "_asMap",
+          "_str"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

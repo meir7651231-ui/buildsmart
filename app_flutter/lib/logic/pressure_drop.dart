@@ -20,8 +20,9 @@
 // for warning the user about long or twisty chains, not a certification.
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_hotwater.dart' show chainUniverse;
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart';
 
 /// Loss coefficient K for a single fitting, by Hebrew product type.
 /// Returns 0 when the part contributes no measurable loss (gaskets, caps).
@@ -82,11 +83,7 @@ double? _boreMeters(ConnectorEnd e) {
   if (e.type == EndType.bspMale || e.type == EndType.bspFemale) {
     final s = e.size.replaceAll('"', '').trim();
     // common conversions: 1/2 ≈ 15, 3/4 ≈ 20, 1 ≈ 25, 1-1/2 ≈ 40, 2 ≈ 50
-    const inchToMm = {
-      '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
-      '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
-    };
-    final mm = inchToMm[s];
+    final mm = kBspInchToMm[s];
     if (mm != null) return mm / 1000.0;
   }
   return null;
@@ -237,8 +234,12 @@ class PressureDropResult {
     verticalRiseMeters: verticalRiseMeters,
   );
   if (pd2.dropBar > 1.0) {
+    // HW-PUMP-40 lives in the hot-water catalog, so resolve against the full
+    // chainUniverse (imported company catalog when active, else kCompatCatalog
+    // verbatim) — the Lipskey-only subset never found it, so this auto-prepend
+    // silently no-op'd on every high-ΔP chain (the auto-fix was dead).
     final pump =
-        kLipskeyCatalog.where((p) => p.sku == 'HW-PUMP-40').toList();
+        chainUniverse.where((p) => p.sku == 'HW-PUMP-40').toList();
     if (pump.isNotEmpty && !working.any((p) => p.sku == 'HW-PUMP-40')) {
       working = [pump.first, ...working];
       changes.add(
@@ -285,7 +286,8 @@ LipskeyCatalogProduct? widerSiblingOf(LipskeyCatalogProduct p) {
   // Unified catalog (Lipskey + Polyroll) so PPR products can also surface
   // a wider-bore upgrade. The brand/category filters below ensure we only
   // suggest same-vendor same-family upgrades — no cross-vendor noise.
-  for (final q in kCatalogProducts) {
+  // T6.3: routed through the catalog repository (same const `kCatalogProducts`).
+  for (final q in catalogRepo().allProducts()) {
     if (q.sku == p.sku) continue;
     if (q.productType != p.productType) continue;
     if (q.brand != p.brand) continue;

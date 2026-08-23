@@ -1,0 +1,1065 @@
+{
+  "module": "pressure_drop",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/pressure_drop.dart",
+  "atomCount": 14,
+  "atoms": [
+    {
+      "fn": "_kForType",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? productType) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "estimatePressureDrop"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch productType"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String? productType)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_boreMeters",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConnectorEnd e) -> double?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBspInchToMm"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_minBoreOf",
+          "widerSiblingOf"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if e.type == EndType.hdpeCompression || e.type == EndType.pexPress || e.type == EndType.copp…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if e.type == EndType.bspMale || e.type == EndType.bspFemale"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "replaceAll",
+        "trim",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(ConnectorEnd e)",
+        "output": "double?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_minBoreOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> double?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBspInchToMm",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_boreMeters",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "estimatePressureDrop"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "spec = kVerifiedSpecs[p.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if spec == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "min = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in spec.ends"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = _boreMeters(e)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if b == null → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if min == null || b < min"
+          },
+          {
+            "kind": "return",
+            "detail": "min"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "double?",
+        "purity": "pure",
+        "precond": [
+          "if spec == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "spec == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "autoFlowFix",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> chain, {double pipeLengthMeters = 5.0, double flowRateLPS = 0.3, double verticalRiseMeters = 0.0}) -> ({List<LipskeyCatalogProduct> chain, List<String> changes})",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kOffLineSkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "chainUniverse"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "estimatePressureDrop",
+            "module": true
+          },
+          {
+            "name": "widerSiblingOf",
+            "module": true
+          },
+          {
+            "name": "_swapMatesWithNeighbours",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if chain.length < 2 → return (chain: chain, changes: const [])"
+          },
+          {
+            "kind": "init",
+            "detail": "changes = <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "working = [...chain]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var safety = 0; safety < 5; safety++"
+          },
+          {
+            "kind": "compute",
+            "detail": "pd = estimatePressureDrop(working, pipeLengthMeters: pipeLengthMeters, flowRateLPS: flowRateLP…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if pd.bottleneck == null → break"
+          },
+          {
+            "kind": "branch",
+            "detail": "if pd.minBoreMm >= 13 && (pd.dropBar <= 1.0) → break"
+          },
+          {
+            "kind": "compute",
+            "detail": "bottleneck = pd.bottleneck!"
+          },
+          {
+            "kind": "compute",
+            "detail": "idx = working.indexWhere((p) => p.sku == bottleneck.sku)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if idx < 0 → break"
+          },
+          {
+            "kind": "compute",
+            "detail": "wider = widerSiblingOf(bottleneck)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if wider == null → break"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !_swapMatesWithNeighbours(working, idx, wider) → break"
+          },
+          {
+            "kind": "effect",
+            "detail": "working[idx] = wider"
+          },
+          {
+            "kind": "effect",
+            "detail": "changes.add('🔄 הוחלף \"${bottleneck.nameHe}\" ב-\"${wider.nameHe}\" לפתיחת צוואר-בקבוק')"
+          },
+          {
+            "kind": "compute",
+            "detail": "pd2 = estimatePressureDrop(working, pipeLengthMeters: pipeLengthMeters, flowRateLPS: flowRateLP…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if pd2.dropBar > 1.0"
+          },
+          {
+            "kind": "return",
+            "detail": "(chain: working, changes: changes)"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "any",
+        "indexWhere",
+        "toList",
+        "toStringAsFixed",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> chain, {double pipeLengthMeters = 5.0, double flowRateLPS = 0.3, double verticalRiseMeters = 0.0})",
+        "output": "({List<LipskeyCatalogProduct> chain, List<String> changes})",
+        "purity": "pure",
+        "precond": [
+          "if chain.length < 2 → return (chain: chain, changes: const [])"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_swapMatesWithNeighbours",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> chain, int idx, LipskeyCatalogProduct candidate) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "autoFlowFix"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "candSpec = kVerifiedSpecs[candidate.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if candSpec == null → return false"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final ni in [idx - 1, idx + 1]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if ni < 0 || ni >= chain.length → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "neighborSpec = kVerifiedSpecs[chain[ni].sku]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if neighborSpec == null → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !candSpec.compatibleWith(neighborSpec) → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "compatibleWith"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> chain, int idx, LipskeyCatalogProduct candidate)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if candSpec == null → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "widerSiblingOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> LipskeyCatalogProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBspInchToMm",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_boreMeters",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "autoFlowFix",
+          "estimatePressureDrop"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "spec = kVerifiedSpecs[p.sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if spec == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "myMin = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in spec.ends"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = _boreMeters(e)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if b == null → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if myMin == null || b < myMin"
+          },
+          {
+            "kind": "precond",
+            "detail": "if myMin == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "compute",
+            "detail": "bestBore = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final q in catalogRepo().allProducts()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if q.sku == p.sku → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if q.productType != p.productType → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if q.brand != p.brand → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if q.categoryHe != p.categoryHe → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "qSpec = kVerifiedSpecs[q.sku]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if qSpec == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "qMin = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in qSpec.ends"
+          },
+          {
+            "kind": "branch",
+            "detail": "if qMin == null → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if qMin <= myMin → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if bestBore == null || qMin < bestBore"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "allProducts",
+        "catalogRepo"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "LipskeyCatalogProduct?",
+        "purity": "pure",
+        "precond": [
+          "if spec == null → return null",
+          "if myMin == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "spec == null · myMin == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_frictionFactor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double reynolds) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pow025",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "estimatePressureDrop"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if reynolds < 100 → return 0.64"
+          },
+          {
+            "kind": "precond",
+            "detail": "if reynolds < 2300 → return 64.0 / reynolds"
+          },
+          {
+            "kind": "return",
+            "detail": "0.316 / _pow025(reynolds)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(double reynolds)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [
+          "if reynolds < 100 → return 0.64",
+          "if reynolds < 2300 → return 64.0 / reynolds"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pow025",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double x) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_sqrt",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_frictionFactor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = x > 0 ? x : 1e-9"
+          },
+          {
+            "kind": "compute",
+            "detail": "r1 = _sqrt(s)"
+          },
+          {
+            "kind": "return",
+            "detail": "_sqrt(r1)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(double x)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_sqrt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double x) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_pow025"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = x / 2"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < 5; i++"
+          },
+          {
+            "kind": "effect",
+            "detail": "r = 0.5 * (r + x / r)"
+          },
+          {
+            "kind": "return",
+            "detail": "r"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(double x)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "estimatePressureDrop",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> chain, {double pipeLengthMeters = 5.0, double flowRateLPS = 0.3, double verticalRiseMeters = 0.0}) -> PressureDropResult",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kOffLineSkus"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_kForType",
+            "module": true
+          },
+          {
+            "name": "_minBoreOf",
+            "module": true
+          },
+          {
+            "name": "_frictionFactor",
+            "module": true
+          },
+          {
+            "name": "widerSiblingOf",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "autoFlowFix"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "totalK = 0.0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in chain"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _kOffLineSkus.contains(p.sku) → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "totalK += _kForType(p.productType)"
+          },
+          {
+            "kind": "compute",
+            "detail": "minBore = "
+          },
+          {
+            "kind": "compute",
+            "detail": "bottleneck = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in chain"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _kOffLineSkus.contains(p.sku) → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = _minBoreOf(p)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if b == null → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if minBore == null || b < minBore"
+          },
+          {
+            "kind": "effect",
+            "detail": "minBore ??= 0.020"
+          },
+          {
+            "kind": "compute",
+            "detail": "rho = 1000.0"
+          },
+          {
+            "kind": "compute",
+            "detail": "mu = 0.001"
+          },
+          {
+            "kind": "compute",
+            "detail": "g = 9.81"
+          },
+          {
+            "kind": "compute",
+            "detail": "area = 3.14159265 * minBore * minBore / 4.0"
+          },
+          {
+            "kind": "compute",
+            "detail": "q = flowRateLPS / 1000.0"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = q / area"
+          },
+          {
+            "kind": "compute",
+            "detail": "reynolds = rho * v * minBore / mu"
+          },
+          {
+            "kind": "compute",
+            "detail": "f = _frictionFactor(reynolds)"
+          },
+          {
+            "kind": "compute",
+            "detail": "frictionTerm = f * pipeLengthMeters / minBore"
+          },
+          {
+            "kind": "compute",
+            "detail": "dynamicPa = (totalK + frictionTerm) * (rho * v * v / 2.0)"
+          },
+          {
+            "kind": "compute",
+            "detail": "staticPa = rho * g * verticalRiseMeters"
+          },
+          {
+            "kind": "compute",
+            "detail": "dropPa = dynamicPa + staticPa"
+          },
+          {
+            "kind": "compute",
+            "detail": "dropBar = dropPa / 1e5"
+          },
+          {
+            "kind": "init",
+            "detail": "suggestions = <FlowSuggestion>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "wider = bottleneck == null ? null : widerSiblingOf(bottleneck)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if minBore * 1000 < 13 && flowRateLPS >= 0.3"
+          },
+          {
+            "kind": "branch",
+            "detail": "if dropBar > 1.0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if verticalRiseMeters >= 10"
+          },
+          {
+            "kind": "branch",
+            "detail": "if reynolds < 2300 && flowRateLPS >= 0.2 && bottleneck != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if suggestions.isEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "PressureDropResult(dropBar: dropBar, totalK: totalK, frictionMetres: pipeLengthMeters, mi…"
+          }
+        ]
+      },
+      "floor": [
+        "FlowSuggestion",
+        "PressureDropResult",
+        "add",
+        "contains",
+        "toStringAsFixed"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> chain, {double pipeLengthMeters = 5.0, double flowRateLPS = 0.3, double verticalRiseMeters = 0.0})",
+        "output": "PressureDropResult",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "checkDrainageSlope",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required double horizontalRunMeters, required double verticalDropMeters}) -> ({double slopePercent, bool ok, String message})?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if horizontalRunMeters <= 0 → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "slope = (verticalDropMeters / horizontalRunMeters) * 100"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = slope >= 2.0"
+          },
+          {
+            "kind": "compute",
+            "detail": "msg = ok ? 'שיפוע ${slope.toStringAsFixed(1)}% — תקין (≥ 2% לפי ת\"י 1205)' : 'שיפוע ${slope.toS…"
+          },
+          {
+            "kind": "return",
+            "detail": "(slopePercent: slope, ok: ok, message: msg)"
+          }
+        ]
+      },
+      "floor": [
+        "toStringAsFixed"
+      ],
+      "contract": {
+        "input": "({required double horizontalRunMeters, required double verticalDropMeters})",
+        "output": "({double slopePercent, bool ok, String message})?",
+        "purity": "pure",
+        "precond": [
+          "if horizontalRunMeters <= 0 → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "horizontalRunMeters <= 0 · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "PressureDropResult.warnings",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "suggestions"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "suggestions.where((s) => s.actionKind != SuggestionKind.ok).map((s) => s.problem).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PressureDropResult.exceedsBudget",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "dropBar"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "dropBar > 1.0"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PressureDropResult.toString",
+      "kind": "method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "bottleneck"
+          },
+          {
+            "kind": "field",
+            "name": "dropBar"
+          },
+          {
+            "kind": "field",
+            "name": "frictionMetres"
+          },
+          {
+            "kind": "field",
+            "name": "minBoreMm"
+          },
+          {
+            "kind": "field",
+            "name": "totalK"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'ΔP = ${dropBar.toStringAsFixed(2)} bar (K=${totalK.toStringAsFixed(2)}, ' 'L=${frictionM…"
+          }
+        ]
+      },
+      "floor": [
+        "toStringAsFixed"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

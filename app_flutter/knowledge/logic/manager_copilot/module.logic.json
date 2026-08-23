@@ -1,0 +1,154 @@
+{
+  "module": "manager_copilot",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/manager_copilot.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "buildManagerContext",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required ManagerAnalytics analytics, required List<ManagerCustomer> customers, required Map<String, int> stageCounts}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCopilotStageLabel"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "revenue = customers.fold<int>(0, (s, c) => s + c.totalSpend)"
+          },
+          {
+            "kind": "compute",
+            "detail": "totalOrders = customers.fold<int>(0, (s, c) => s + c.orderCount)"
+          },
+          {
+            "kind": "init",
+            "detail": "pipe = [for (final e in kCopilotStageLabel.entries) if ((stageCounts[e.key] ?? 0) > 0) '${e.valu…"
+          },
+          {
+            "kind": "init",
+            "detail": "top = [for (final c in customers.take(5)) ' - ${promptSafeText(c.name, maxLen: 40, collapseWhit…"
+          },
+          {
+            "kind": "compute",
+            "detail": "creditLimitTotal = customers.fold<int>(0, (s, c) => s + c.creditLimit)"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = StringBuffer()..writeln('— הזמנות: סה\"כ $totalOrders · פתוחות ${analytics.openOrders} · מ…"
+          },
+          {
+            "kind": "return",
+            "detail": "b.toString()"
+          }
+        ]
+      },
+      "floor": [
+        "StringBuffer",
+        "abs",
+        "clamp",
+        "fold",
+        "join",
+        "money",
+        "promptSafeText",
+        "round",
+        "take",
+        "toString",
+        "write",
+        "writeln"
+      ],
+      "contract": {
+        "input": "({required ManagerAnalytics analytics, required List<ManagerCustomer> customers, required Map<String, int> stageCounts})",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "managerCopilotPrompt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String context, String question) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "q = promptSafeText(question, maxLen: 400)"
+          },
+          {
+            "kind": "return",
+            "detail": "'מצב-העסק כעת (נתוני-אמת):\\n$context\\n\\n' 'שאלת-הבעלים: \"$q\"\\n' 'ענה בעברית, אך ורק לפי ה…"
+          }
+        ]
+      },
+      "floor": [
+        "promptSafeText"
+      ],
+      "contract": {
+        "input": "(String context, String question)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "managerMorningBriefPrompt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String context) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "'מצב-העסק כעת (נתוני-אמת):\\n$context\\n\\n' 'כתוב תדריך-בוקר קצר לבעלים: 3-4 נקודות-תבליט ע…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String context)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,870 @@
+{
+  "module": "intel_sink",
+  "source": "lib/state/intel/intel_sink.dart",
+  "atomCount": 15,
+  "atoms": [
+    {
+      "fn": "FirestoreIntelBatchWriter._db",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> FirebaseFirestore",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_injected"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_injected ?? FirebaseFirestore.instance"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "FirebaseFirestore",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelBatchWriter.writeBatch",
+      "kind": "method",
+      "object": {
+        "signature": "(List<Map<String, Object?>> docs) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "collectionPath"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if docs.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "db = _db"
+          },
+          {
+            "kind": "compute",
+            "detail": "col = db.collection(collectionPath)"
+          },
+          {
+            "kind": "compute",
+            "detail": "batch = db.batch()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final doc in docs"
+          },
+          {
+            "kind": "effect",
+            "detail": "batch.set(col.doc(), doc)"
+          },
+          {
+            "kind": "effect",
+            "detail": "await batch.commit()"
+          }
+        ]
+      },
+      "floor": [
+        "batch",
+        "collection",
+        "commit",
+        "doc",
+        "set"
+      ],
+      "contract": {
+        "input": "(List<Map<String, Object?>> docs)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [
+          "if docs.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreActorStitchWriter._db",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> FirebaseFirestore",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_injected"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_injected ?? FirebaseFirestore.instance"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "FirebaseFirestore",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreActorStitchWriter.writeStitch",
+      "kind": "method",
+      "object": {
+        "signature": "({required String uid, required String anonKey}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "collectionPath"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "_db.collection(collectionPath).doc(uid).set"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "await _db.collection(collectionPath).doc(uid).set(<String, Object?>{'anonKeys' : FieldVal…"
+          }
+        ]
+      },
+      "floor": [
+        "SetOptions",
+        "arrayUnion",
+        "collection",
+        "doc",
+        "serverTimestamp",
+        "set"
+      ],
+      "contract": {
+        "input": "({required String uid, required String anonKey})",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestorePresenceWriter._db",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> FirebaseFirestore",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_injected"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_injected ?? FirebaseFirestore.instance"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "FirebaseFirestore",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestorePresenceWriter.upsert",
+      "kind": "method",
+      "object": {
+        "signature": "({required String actorKey, required String screen, required Duration ttl, String? uid}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "collectionPath"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "_db.collection(collectionPath).doc(actorKey).set"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "expireAt = Timestamp.fromDate(DateTime.now().toUtc().add(ttl))"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _db.collection(collectionPath).doc(actorKey).set(<String, Object?>{'actor_key' : ac…"
+          }
+        ]
+      },
+      "floor": [
+        "SetOptions",
+        "add",
+        "collection",
+        "doc",
+        "fromDate",
+        "now",
+        "serverTimestamp",
+        "set",
+        "toUtc"
+      ],
+      "contract": {
+        "input": "({required String actorKey, required String screen, required Duration ttl, String? uid})",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestorePresenceWriter.remove",
+      "kind": "method",
+      "object": {
+        "signature": "({required String actorKey}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "collectionPath"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "await _db.collection(collectionPath).doc(actorKey).delete()"
+          }
+        ]
+      },
+      "floor": [
+        "collection",
+        "delete",
+        "doc"
+      ],
+      "contract": {
+        "input": "({required String actorKey})",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelSink.queueLength",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_queue"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_queue.length"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelSink.enqueue",
+      "kind": "method",
+      "object": {
+        "signature": "(IntelEvent e) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_batchSize"
+          },
+          {
+            "kind": "field",
+            "name": "_flushInterval",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_queueCap",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_writer",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "of",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_flushing",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_timer",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "_queue"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_enforceCap",
+            "module": true
+          },
+          {
+            "name": "flush",
+            "module": true
+          },
+          {
+            "name": "_ensureTimer",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_queue.add(e)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_enforceCap()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _queue.length >= _batchSize"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(IntelEvent e)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelSink.flush",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_flushInterval",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_writer"
+          },
+          {
+            "kind": "global",
+            "name": "of"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_flushing"
+          },
+          {
+            "kind": "field",
+            "name": "_timer"
+          },
+          {
+            "kind": "state",
+            "name": "_queue"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_requeue",
+            "module": true
+          },
+          {
+            "name": "_ensureTimer",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "FirestoreIntelSink._ensureTimer",
+          "FirestoreIntelSink.enqueue",
+          "FirestoreIntelSink.pause"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _flushing → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_timer?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_timer = null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _queue.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_flushing = true"
+          },
+          {
+            "kind": "init",
+            "detail": "batch = List<IntelEvent>.of(_queue)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_queue.clear()"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "cancel",
+        "clear",
+        "debugPrint",
+        "map",
+        "toList",
+        "toWire",
+        "writeBatch"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if _flushing → return (void)",
+          "if _queue.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelSink.pause",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_writer",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "of",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_flushing",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_timer",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "_queue",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "flush",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "flush()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelSink._requeue",
+      "kind": "method",
+      "object": {
+        "signature": "(List<IntelEvent> batch) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_queue"
+          },
+          {
+            "kind": "field",
+            "name": "_queueCap",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_enforceCap",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "FirestoreIntelSink.flush"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_queue.insertAll(0, batch)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_enforceCap()"
+          }
+        ]
+      },
+      "floor": [
+        "insertAll"
+      ],
+      "contract": {
+        "input": "(List<IntelEvent> batch)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelSink._enforceCap",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_queue"
+          },
+          {
+            "kind": "field",
+            "name": "_queueCap"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirestoreIntelSink._requeue",
+          "FirestoreIntelSink.enqueue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if _queue.length > _queueCap"
+          }
+        ]
+      },
+      "floor": [
+        "removeRange"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelSink._ensureTimer",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_flushInterval"
+          },
+          {
+            "kind": "field",
+            "name": "_writer",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "of",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_flushing",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_timer"
+          },
+          {
+            "kind": "state",
+            "name": "_queue",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "flush",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "FirestoreIntelSink.enqueue",
+          "FirestoreIntelSink.flush"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_timer ??= Timer(_flushInterval, () {_timer = null; unawaited(flush());})"
+          }
+        ]
+      },
+      "floor": [
+        "Timer",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirestoreIntelSink.dispose",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_timer"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_timer?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_timer = null"
+          }
+        ]
+      },
+      "floor": [
+        "cancel"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "name": "CourierProfileBody",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "מסירות — סטטיסטיקה",
+        "registryId": "courier_profile_screen.stats_heading",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "⚙️"
+      },
+      {
+        "kind": "cfgText",
+        "text": "הגדרות שליח",
+        "registryId": "courier.profile.settings_title",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🔁"
+      },
+      {
+        "kind": "cfgText",
+        "text": "החלפת תפקיד",
+        "registryId": "courier.profile.role_switch_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מוגן בקוד",
+        "registryId": "courier_profile_screen.role_switch_subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🚪"
+      },
+      {
+        "kind": "cfgText",
+        "text": "יציאה מהחשבון",
+        "registryId": "courier.profile.logout_title",
+        "registryOk": true
+      }
+    ],
+    "registered": 5,
+    "unregistered": [
+      "⚙️",
+      "🔁",
+      "🚪"
+    ],
+    "summary": "registry 5 · mapped 5/5 · unregistered 3"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "session == null || session.role != BoardRole.courier"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "courierProfileProvider.select((m) => m[session.username] ?? const CourierProfile())"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "fulfillmentProvider.select((m) {var delivered = 0; var pod = 0; var sum = 0; var unattributed = 0; for (final o in orders) {if (o.stage != OrderStage.delivered) continue; final f = m[o.id]; if (f != null && f.courierUser == session.username) {delivered++; sum += o.sum; if (f.podCaptured) pod++;} else if (f == null || f.courierUser == null) {unattributed++;}} return (delivered: delivered, pod: pod, sum: sum, unattributed: unattributed);})"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "CourierSettingsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "action",
+        "via": "showRolePicker",
+        "target": "showRolePicker"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (session == null || session.role != BoardRole.courier)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(CourierSettingsScreen.route())",
+        "effect": "navigate → CourierSettingsScreen"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "confirmDestructive",
+    "fMoney"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [
+      "standalone",
+      "vehicle"
+    ],
+    "untangle": []
+  }
+}

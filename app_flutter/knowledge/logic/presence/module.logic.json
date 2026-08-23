@@ -1,0 +1,405 @@
+{
+  "module": "presence",
+  "source": "lib/state/intel/presence.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "presenceLive",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime now, DateTime lastBeat, {Duration heartbeat = kHeartbeat}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "now.difference(lastBeat) < heartbeat * 2.5"
+          }
+        ]
+      },
+      "floor": [
+        "difference"
+      ],
+      "contract": {
+        "input": "(DateTime now, DateTime lastBeat, {Duration heartbeat = kHeartbeat})",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NoopPresenceWriter.upsert",
+      "kind": "method",
+      "object": {
+        "signature": "({required String actorKey, required String screen, required Duration ttl, String? uid}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [],
+      "contract": {
+        "input": "({required String actorKey, required String screen, required Duration ttl, String? uid})",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NoopPresenceWriter.remove",
+      "kind": "method",
+      "object": {
+        "signature": "({required String actorKey}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [],
+      "contract": {
+        "input": "({required String actorKey})",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Presence.isBeating",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_timer"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_timer != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Presence.start",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_heartbeat"
+          },
+          {
+            "kind": "field",
+            "name": "_screenOf",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ttl",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_writer",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "actorKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "uid",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_started"
+          },
+          {
+            "kind": "field",
+            "name": "_timer"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_beat",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _started → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_started = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_beat()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_timer = Timer.periodic(_heartbeat, (_) => _beat())"
+          }
+        ]
+      },
+      "floor": [
+        "periodic"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if _started → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Presence._beat",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_screenOf"
+          },
+          {
+            "kind": "field",
+            "name": "_ttl"
+          },
+          {
+            "kind": "field",
+            "name": "_writer"
+          },
+          {
+            "kind": "field",
+            "name": "actorKey"
+          },
+          {
+            "kind": "field",
+            "name": "uid"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "Presence.start"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "unawaited(_guard(() => _writer.upsert(actorKey: actorKey, uid: uid, screen: _screenOf(), …"
+          }
+        ]
+      },
+      "floor": [
+        "_screenOf",
+        "unawaited",
+        "upsert"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Presence.stop",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "actorKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_stopped"
+          },
+          {
+            "kind": "field",
+            "name": "_timer"
+          },
+          {
+            "kind": "state",
+            "name": "_writer"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_guard",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _stopped → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_stopped = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_timer?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_timer = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _guard(() => _writer.remove(actorKey: actorKey))"
+          }
+        ]
+      },
+      "floor": [
+        "cancel",
+        "remove"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if _stopped → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Presence._guard",
+      "kind": "method",
+      "object": {
+        "signature": "(Future<void> Function() op) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "Presence._beat",
+          "Presence.stop"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "debugPrint",
+        "op"
+      ],
+      "contract": {
+        "input": "(Future<void> Function() op)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

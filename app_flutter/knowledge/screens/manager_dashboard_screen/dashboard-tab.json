@@ -1,0 +1,181 @@
+{
+  "name": "_DashboardTab",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🤖"
+      },
+      {
+        "kind": "cfgText",
+        "text": "שאל את העסק שלך",
+        "registryId": "manager.cockpit.copilot.title",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🎬"
+      },
+      {
+        "kind": "cfgText",
+        "text": "סטודיו — ערוך את האפליקציה",
+        "registryId": "manager_dashboard_screen.studio_hero_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ניסיוני",
+        "registryId": "manager_dashboard_screen.studio_experimental_badge",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🔔 דורש טיפול"
+      },
+      {
+        "kind": "cfgText",
+        "text": "צינור ההזמנות",
+        "registryId": "manager.dash.pipeline.title",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [
+      "🤖",
+      "🎬",
+      "🔔 דורש טיפול"
+    ],
+    "summary": "registry 4 · mapped 4/4 · unregistered 3"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "managerAnalyticsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "ordersEngineProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "ManagerCopilotScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "studioCoEditorProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "!gate.manager"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "StudioScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "attentionItemsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "items.isEmpty"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "managerTabProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "!elementVisible(ref, cfgId)"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(ManagerCopilotScreen.route())",
+        "effect": "navigate → ManagerCopilotScreen"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (!gate.manager)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(StudioScreen.route())",
+        "effect": "navigate → StudioScreen"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (items.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(managerTabProvider.notifier).state = 1",
+        "effect": "write → managerTabProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(managerTabProvider.notifier).state = item.navTab",
+        "effect": "write → managerTabProvider"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (!elementVisible(ref, cfgId))",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "childrenFor",
+    "elementVisible",
+    "featEnabled",
+    "go"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onManagerTab(…) callback instead of direct managerTabProvider write"
+    ]
+  }
+}

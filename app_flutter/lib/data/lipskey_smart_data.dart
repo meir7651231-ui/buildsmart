@@ -65,12 +65,12 @@ const List<LipskeySection> kLipskeySections = [
     emoji: '🔧',
     nameEn: 'Plumbing',
     entries: [
-      LipskeyCatEntry(name: 'מחסומים (סיפונים) גלויים', emoji: '🚰'),
+      LipskeyCatEntry(name: 'מחסומים גלויים', emoji: '🚰'),
       LipskeyCatEntry(name: 'אמבט ואגנית',               emoji: '🛁'),
       LipskeyCatEntry(name: 'אביזרי תבריג',              emoji: '🔩'),
       LipskeyCatEntry(name: 'מחסומי רצפה',               emoji: '⬇️'),
       LipskeyCatEntry(name: 'מאספים וקולטים',            emoji: '🕳️'),
-      LipskeyCatEntry(name: 'אטמים אומים ופקקים',        emoji: '🔧'),
+      LipskeyCatEntry(name: 'אטמים ופקקים',        emoji: '🔧'),
       LipskeyCatEntry(name: 'אביזרי שקע-תקע',            emoji: '🔌'),
       LipskeyCatEntry(name: 'ברכיים',                    emoji: '↩️'),
       LipskeyCatEntry(name: 'מסעפים וחיבורי אסלה',       emoji: '⑂'),
@@ -95,7 +95,7 @@ const List<LipskeySection> kLipskeySections = [
 
 // ── Accessories per Lipskey category ─────────────────────────────────────────
 const Map<String, List<LipskeyCatAcc>> kLipskeyAccByCategory = {
-  'מחסומים (סיפונים) גלויים': [
+  'מחסומים גלויים': [
     LipskeyCatAcc(name: 'סרט טפלון', emoji: '🎗️', price: 4,
         why: 'אוטם את ההברגה — חובה', must: true),
     LipskeyCatAcc(name: 'אטם גומי 32/50mm', emoji: '⚫', price: 8,
@@ -151,7 +151,7 @@ const Map<String, List<LipskeyCatAcc>> kLipskeyAccByCategory = {
     LipskeyCatAcc(name: 'מפתח ברגים', emoji: '🔩', price: 25,
         why: 'לחיבור', must: true),
   ],
-  'אטמים אומים ופקקים': [
+  'אטמים ופקקים': [
     LipskeyCatAcc(name: 'סרט טפלון', emoji: '🎗️', price: 4,
         why: 'לאיטום נוסף', must: false),
   ],
@@ -205,7 +205,7 @@ const Map<String, List<LipskeyCatAcc>> kLipskeyAccByCategory = {
 
 // ── Installation stages per Lipskey category ─────────────────────────────────
 const Map<String, List<LipskeyCatStage>> kLipskeyStagesByCategory = {
-  'מחסומים (סיפונים) גלויים': [
+  'מחסומים גלויים': [
     LipskeyCatStage(emoji: '🔩', label: 'הכנה', desc: 'כרוך טפלון על החיבור'),
     LipskeyCatStage(emoji: '🌀', label: 'הברגה', desc: 'הברג את הסיפון ידנית'),
     LipskeyCatStage(emoji: '🔧', label: 'הידוק', desc: 'הדק עם מפתח צינורות'),
@@ -257,7 +257,7 @@ const Map<String, List<LipskeyCatStage>> kLipskeyStagesByCategory = {
     LipskeyCatStage(emoji: '✅', label: 'בדיקה',
         desc: 'הפעל מים — בדוק ניקוז', isFinal: true),
   ],
-  'אטמים אומים ופקקים': [
+  'אטמים ופקקים': [
     LipskeyCatStage(emoji: '🔧', label: 'הכנסה', desc: 'הכנס אטם/פקק לחיבור'),
     LipskeyCatStage(emoji: '✅', label: 'אישור',
         desc: 'ודא הידוק תקין', isFinal: true),

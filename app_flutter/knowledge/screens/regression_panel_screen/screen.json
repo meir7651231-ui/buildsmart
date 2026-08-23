@@ -1,0 +1,208 @@
+{
+  "screen": "regression_panel_screen",
+  "source": "regression_panel_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "RegressionPanelScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🔬 מרכז בדיקות רגרסיה",
+            "registryId": "regression_panel_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring",
+            "registryId": "regression_panel_screen.t02",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "regressionStatusProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "filteredSummaryProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "summaryByCategoryProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "regressionFilterProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "filteredResultsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RunButton",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "runRegression"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "status",
+          "ref"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SummaryCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "summary",
+          "byCat"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_FilterRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "regressionFilterProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(regressionFilterProvider.notifier).state = f.id",
+            "effect": "write → regressionFilterProvider"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": false,
+        "props": [
+          "active"
+        ],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_ResultCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "result"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 2,
+    "total": 2,
+    "summary": "2/2",
+    "entries": [
+      {
+        "id": "regression_panel_screen.t01",
+        "ok": true,
+        "atom": "RegressionPanelScreen"
+      },
+      {
+        "id": "regression_panel_screen.t02",
+        "ok": true,
+        "atom": "RegressionPanelScreen"
+      }
+    ]
+  }
+}

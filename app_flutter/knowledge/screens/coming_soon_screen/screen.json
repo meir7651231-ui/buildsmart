@@ -1,0 +1,102 @@
+{
+  "screen": "coming_soon_screen",
+  "source": "coming_soon_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "ComingSoonScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "coming_soon_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "coming_soon_screen.back",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ חזרה",
+            "registryId": "coming_soon_screen.back",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🚧"
+          },
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "coming_soon_screen.heading",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "coming_soon_screen.back_to_picker",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ חזור לבחירת מקצוע",
+            "registryId": "coming_soon_screen.back_to_picker",
+            "registryOk": true
+          }
+        ],
+        "registered": 6,
+        "unregistered": [
+          "🚧"
+        ],
+        "summary": "registry 6 · mapped 6/6 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "profession"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "coming_soon_screen.title",
+        "ok": true,
+        "atom": "ComingSoonScreen"
+      },
+      {
+        "id": "coming_soon_screen.back",
+        "ok": true,
+        "atom": "ComingSoonScreen"
+      },
+      {
+        "id": "coming_soon_screen.heading",
+        "ok": true,
+        "atom": "ComingSoonScreen"
+      },
+      {
+        "id": "coming_soon_screen.back_to_picker",
+        "ok": true,
+        "atom": "ComingSoonScreen"
+      }
+    ]
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "module": "synonym_bridge",
+  "source": "lib/features/word_finder/synonym_bridge.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "fn": "normalizeQuery",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHebrewQuerySynonyms"
+          },
+          {
+            "kind": "const",
+            "name": "_kLatinQuerySynonyms"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "resolveQuery"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = raw"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in _kLatinQuerySynonyms.entries"
+          },
+          {
+            "kind": "effect",
+            "detail": "s = s.replaceAll(RegExp('\\\\b${e.key}\\\\b', caseSensitive: false), e.value)"
+          },
+          {
+            "kind": "compute",
+            "detail": "tokens = s.split(RegExp(r'\\s+')).where((t) => t.isNotEmpty).map((t) => _kHebrewQuerySynonyms[t] ??…"
+          },
+          {
+            "kind": "return",
+            "detail": "tokens.join(' ')"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "join",
+        "map",
+        "replaceAll",
+        "split",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String raw)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "resolveQuery",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw, WordLexicon lexicon) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHebrewQuerySynonyms",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kLatinQuerySynonyms",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          },
+          {
+            "kind": "const",
+            "name": "kMaterials"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "normalizeQuery",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "tokens = normalizeQuery(raw).split(RegExp(r'\\s+')).where((t) => t.isNotEmpty).toList()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if tokens.isEmpty → return const <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "perToken = <Set<String>>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final tok in tokens"
+          },
+          {
+            "kind": "compute",
+            "detail": "products = kMaterials.containsKey(tok) ? productsOfMaterial(kDivePool, tok) : resolveWord(tok, lexic…"
+          },
+          {
+            "kind": "effect",
+            "detail": "perToken.add({for (final p in products) p.sku})"
+          },
+          {
+            "kind": "compute",
+            "detail": "hits = perToken.first"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final s in perToken.skip(1)"
+          },
+          {
+            "kind": "effect",
+            "detail": "hits = hits.intersection(s)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if hits.isEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final p in kDivePool) if (hits.contains(p.sku)) p.sku]"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "add",
+        "contains",
+        "containsKey",
+        "intersection",
+        "productsOfMaterial",
+        "resolveWord",
+        "skip",
+        "split",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String raw, WordLexicon lexicon)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [
+          "if tokens.isEmpty → return const <String>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

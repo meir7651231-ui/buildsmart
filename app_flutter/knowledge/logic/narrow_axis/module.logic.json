@@ -1,0 +1,491 @@
+{
+  "module": "narrow_axis",
+  "source": "lib/features/word_finder/narrow_axis.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "productSizeTokens",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> List<SizeToken>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "productHasChip",
+          "sizeTokensIn"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <SizeToken>{...parseSizeTokens(p.nameHe)}"
+          },
+          {
+            "kind": "compute",
+            "detail": "d = p.dims"
+          },
+          {
+            "kind": "branch",
+            "detail": "if d != null"
+          },
+          {
+            "kind": "return",
+            "detail": "out.toList()"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "parseSizeTokens",
+        "toList",
+        "tokensFromDims"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "List<SizeToken>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "sizeTokensIn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> ps) -> List<SizeToken>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "productSizeTokens",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "narrowAxis"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "all = <SizeToken>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in ps"
+          },
+          {
+            "kind": "effect",
+            "detail": "all.addAll(productSizeTokens(p))"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = dedupLengthByMm(all.toList())"
+          },
+          {
+            "kind": "effect",
+            "detail": "sortSizeTokens(out)"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "dedupLengthByMm",
+        "sortSizeTokens",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> ps)",
+        "output": "List<SizeToken>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "angleTokensIn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> ps) -> List<SizeToken>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "narrowAxis"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "all = <SizeToken>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in ps"
+          },
+          {
+            "kind": "effect",
+            "detail": "all.addAll(parseAngleTokens(p.nameHe))"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = all.toList()..sort((a, b) => a.mm.compareTo(b.mm))"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "compareTo",
+        "parseAngleTokens",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> ps)",
+        "output": "List<SizeToken>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wordOptions",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "narrowAxis"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if pool.length <= 1 → return const []"
+          },
+          {
+            "kind": "init",
+            "detail": "lists = [for (final p in pool) toks(p.nameHe)]"
+          },
+          {
+            "kind": "compute",
+            "detail": "shared = lists.first.toSet()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in lists.skip(1)"
+          },
+          {
+            "kind": "effect",
+            "detail": "shared.retainAll(t.toSet())"
+          },
+          {
+            "kind": "init",
+            "detail": "counts = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in lists"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final w in t"
+          },
+          {
+            "kind": "compute",
+            "detail": "entries = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value))"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final e in entries.take(12)) e.key]"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "compareTo",
+        "contains",
+        "hasMatch",
+        "retainAll",
+        "skip",
+        "sort",
+        "split",
+        "take",
+        "toList",
+        "toSet",
+        "toks",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [
+          "if pool.length <= 1 → return const []"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "colorOptions",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "narrowAxis"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "cols = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in pool"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = p.color"
+          },
+          {
+            "kind": "branch",
+            "detail": "if c != null && c.trim().isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "cols.length > 1 ? (cols.toList()..sort()) : const []"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "sort",
+        "toList",
+        "trim"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "narrowAxis",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, String? subtype) -> ({String label, List<String> chips})",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFinderFacets"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "sizeTokensIn",
+            "module": true
+          },
+          {
+            "name": "angleTokensIn",
+            "module": true
+          },
+          {
+            "name": "colorOptions",
+            "module": true
+          },
+          {
+            "name": "wordOptions",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "curated = subtype == null ? null : kFinderFacets[subtype]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if curated != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "sizes = sizeTokensIn(pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if sizes.length > 1 → return (label: 'גודל', chips: sizes.map((t) => t.label).toList())"
+          },
+          {
+            "kind": "compute",
+            "detail": "angles = angleTokensIn(pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if angles.length > 1 → return (label: 'זווית', chips: angles.map((t) => t.label).toList())"
+          },
+          {
+            "kind": "compute",
+            "detail": "colors = colorOptions(pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if colors.length > 1 → return (label: 'צבע', chips: colors)"
+          },
+          {
+            "kind": "compute",
+            "detail": "words = wordOptions(pool)"
+          },
+          {
+            "kind": "return",
+            "detail": "words.length > 1 ? (label: 'דגם', chips: words) : (label: '', chips: const <String>[])"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "contains",
+        "map",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, String? subtype)",
+        "output": "({String label, List<String> chips})",
+        "purity": "pure",
+        "precond": [
+          "if sizes.length > 1 → return (label: 'גודל', chips: sizes.map((t) => t.label).toList())",
+          "if angles.length > 1 → return (label: 'זווית', chips: angles.map((t) => t.label).toList())",
+          "if colors.length > 1 → return (label: 'צבע', chips: colors)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "productHasChip",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, String chipLabel) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "productSizeTokens",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final t in productSizeTokens(p)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t.label == chipLabel → return true"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in parseAngleTokens(p.nameHe)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t.label == chipLabel → return true"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !RegExp(r'\\d').hasMatch(chipLabel) && p.nameHe.contains(chipLabel) → return true"
+          },
+          {
+            "kind": "return",
+            "detail": "p.color == chipLabel"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "contains",
+        "hasMatch",
+        "parseAngleTokens"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, String chipLabel)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if !RegExp(r'\\d').hasMatch(chipLabel) && p.nameHe.contains(chipLabel) → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

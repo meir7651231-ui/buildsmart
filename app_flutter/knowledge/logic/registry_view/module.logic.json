@@ -1,0 +1,899 @@
+{
+  "module": "registry_view",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/registry_view.dart",
+  "atomCount": 19,
+  "atoms": [
+    {
+      "fn": "_matchClosed",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Set<String> closed, String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "matchActionId",
+          "matchComponentType",
+          "matchElementId",
+          "matchPropKey",
+          "matchValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = reply.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r.isEmpty → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final k in closed"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r == k → return k"
+          },
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final k in closed"
+          },
+          {
+            "kind": "branch",
+            "detail": "if k.isNotEmpty && r.contains(k) && (best == null || k.length > best.length)"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "trim"
+      ],
+      "contract": {
+        "input": "(Set<String> closed, String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if r.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "r.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_matchAllClosed",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Set<String> closed, String reply) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "matchAllElementIds"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = reply.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r.isEmpty → return const <String>{}"
+          },
+          {
+            "kind": "return",
+            "detail": "{for (final k in closed) if (k.isNotEmpty && r.contains(k)) k}"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "trim"
+      ],
+      "contract": {
+        "input": "(Set<String> closed, String reply)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [
+          "if r.isEmpty → return const <String>{}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchElementId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(reg.elementIds(), reply)"
+          }
+        ]
+      },
+      "floor": [
+        "elementIds"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchPropKey",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String id, String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(reg.propKeysFor(id), reply)"
+          }
+        ]
+      },
+      "floor": [
+        "propKeysFor"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String id, String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String id, String propKey, String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(reg.allowedValues(id, propKey), reply)"
+          }
+        ]
+      },
+      "floor": [
+        "allowedValues"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String id, String propKey, String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchActionId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String id, String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(reg.actionIdsFor(id), reply)"
+          }
+        ]
+      },
+      "floor": [
+        "actionIdsFor"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String id, String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchComponentType",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(reg.componentTypes(), reply)"
+          }
+        ]
+      },
+      "floor": [
+        "componentTypes"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchAllElementIds",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String reply) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchAllClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchAllClosed(reg.elementIds(), reply)"
+          }
+        ]
+      },
+      "floor": [
+        "elementIds"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String reply)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RegistryView.frozen",
+      "kind": "method",
+      "object": {
+        "signature": "() -> RegistryView",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ids = elementIds()"
+          },
+          {
+            "kind": "init",
+            "detail": "propKeys = <String, Set<String>>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "allowed = <String, Map<String, Set<String>>>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "actions = <String, Set<String>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final id in ids"
+          },
+          {
+            "kind": "compute",
+            "detail": "pk = propKeysFor(id)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if pk.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "acts = actionIdsFor(id)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if acts.isNotEmpty"
+          },
+          {
+            "kind": "init",
+            "detail": "byProp = <String, Set<String>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final k in pk"
+          },
+          {
+            "kind": "branch",
+            "detail": "if byProp.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "FakeRegistryView.of(ids: ids, propKeys: propKeys, allowedValues: allowed, actionIds: acti…"
+          }
+        ]
+      },
+      "floor": [
+        "actionIdsFor",
+        "allowedValues",
+        "componentTypes",
+        "elementIds",
+        "of",
+        "propKeysFor"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "RegistryView",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FakeRegistryView.elementIds",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ids"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ids"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FakeRegistryView.propKeysFor",
+      "kind": "method",
+      "object": {
+        "signature": "(String id) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_empty"
+          },
+          {
+            "kind": "field",
+            "name": "_propKeys"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_propKeys[id] ?? _empty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FakeRegistryView.allowedValues",
+      "kind": "method",
+      "object": {
+        "signature": "(String id, String propKey) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_allowedValues"
+          },
+          {
+            "kind": "field",
+            "name": "_empty"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_allowedValues[id]?[propKey] ?? _empty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id, String propKey)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FakeRegistryView.actionIdsFor",
+      "kind": "method",
+      "object": {
+        "signature": "(String id) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_actionIds"
+          },
+          {
+            "kind": "field",
+            "name": "_empty"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_actionIds[id] ?? _empty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FakeRegistryView.componentTypes",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_componentTypes"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_componentTypes"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ElementRegistryView.elementIds",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_descriptors"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{for (final d in _descriptors) d.id}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ElementRegistryView.propKeysFor",
+      "kind": "method",
+      "object": {
+        "signature": "(String id) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_descriptors"
+          },
+          {
+            "kind": "field",
+            "name": "_empty"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "d = findDescriptor(_descriptors, id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if d == null → return _empty"
+          },
+          {
+            "kind": "return",
+            "detail": "{for (final a in d.editableProps) a.name}"
+          }
+        ]
+      },
+      "floor": [
+        "findDescriptor"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [
+          "if d == null → return _empty"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ElementRegistryView.allowedValues",
+      "kind": "method",
+      "object": {
+        "signature": "(String id, String propKey) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_descriptors"
+          },
+          {
+            "kind": "field",
+            "name": "_empty"
+          },
+          {
+            "kind": "global",
+            "name": "of"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "vals = findDescriptor(_descriptors, id)?.allowedValues[propKey]"
+          },
+          {
+            "kind": "return",
+            "detail": "vals == null ? _empty : Set<String>.of(vals)"
+          }
+        ]
+      },
+      "floor": [
+        "Set",
+        "findDescriptor"
+      ],
+      "contract": {
+        "input": "(String id, String propKey)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ElementRegistryView.actionIdsFor",
+      "kind": "method",
+      "object": {
+        "signature": "(String id) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_descriptors"
+          },
+          {
+            "kind": "field",
+            "name": "_empty"
+          },
+          {
+            "kind": "global",
+            "name": "of"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "acts = findDescriptor(_descriptors, id)?.allowedActions"
+          },
+          {
+            "kind": "return",
+            "detail": "acts == null ? _empty : Set<String>.of(acts)"
+          }
+        ]
+      },
+      "floor": [
+        "Set",
+        "findDescriptor"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ElementRegistryView.componentTypes",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_empty"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_empty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

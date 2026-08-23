@@ -1,0 +1,41 @@
+{
+  "name": "_StageRow",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showWorkerTaskDetailSheet",
+        "target": "showWorkerTaskDetailSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showWorkerTaskDetailSheet(context, taskId: stage.taskId)",
+        "effect": "open → showWorkerTaskDetailSheet"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "stage",
+      "tag",
+      "emphasized",
+      "onMarkDone"
+    ],
+    "untangle": []
+  }
+}

@@ -2,6 +2,9 @@
 // smart-tree / variants. Used by the unified product card to render four
 // informational strips: מאתר · תאימות · ערכת התקנה · דומים.
 
+import 'package:buildsmart/config/app_brand.dart';
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
@@ -51,6 +54,7 @@ const List<_FinderGroup> _kFinderGroups = [
 /// Layman category info for [p]: emoji + label (or null when "אחר").
 ({String emoji, String label})? finderGroupFor(LipskeyCatalogProduct p) {
   if (p.brand == 'פולירול') return (emoji: '🚰', label: 'אספקת מים');
+  if (p.brand == 'חוליות') return (emoji: '🟢', label: 'דלוחין SmartLock');
   for (final g in _kFinderGroups) {
     if (g.cats.contains(p.categoryHe)) {
       return (emoji: g.emoji, label: g.label);
@@ -65,10 +69,25 @@ const List<_FinderGroup> _kFinderGroups = [
 // points at, so a unified card can pull the catalog's spec / chips / compat for
 // the brand the user picked. Memoised sku→product map for O(1) lookups.
 Map<String, LipskeyCatalogProduct>? _skuToProduct;
-Map<String, LipskeyCatalogProduct> get _skuIndex =>
-    // Index the UNIFIED catalog (Lipskey + Polyroll) so a SmartBrand SKU
-    // resolves regardless of which catalog the product lives in.
-    _skuToProduct ??= {for (final p in kCatalogProducts) p.sku: p};
+
+/// v2 barcode alias — dims['ברקוד'] resolves alongside the sku.
+Map<String, LipskeyCatalogProduct> get _skuIndex {
+  // Index the UNIFIED catalog (Lipskey + Polyroll) so a SmartBrand SKU
+  // resolves regardless of which catalog the product lives in.
+  // stage-3.1 — the bridge follows the ACTIVE catalog source (v2-aware),
+  // not the v1 list.
+  if (_skuToProduct != null) return _skuToProduct!;
+  final products = resolvedCatalogProducts;
+  final m = {for (final p in products) p.sku: p};
+  // Alias keys join the SAME map, pointing at the SAME product objects (never
+  // copies) — and only where the key isn't taken, so sku entries win on
+  // collision.
+  for (final p in products) {
+    final barcode = p.dims?['ברקוד']?.toString().trim() ?? '';
+    if (barcode.isNotEmpty && !m.containsKey(barcode)) m[barcode] = p;
+  }
+  return _skuToProduct = m;
+}
 
 /// The unified catalog product with this [sku], or null when unknown.
 LipskeyCatalogProduct? catalogProductForSku(String? sku) =>
@@ -82,6 +101,23 @@ LipskeyCatalogProduct? catalogProductForBrand(SmartBrand brand) =>
 /// The catalog product behind a SmartProduct's recommended brand (null if none).
 LipskeyCatalogProduct? catalogProductForSmart(SmartProduct sp) =>
     sp.brands.isEmpty ? null : catalogProductForBrand(sp.recBrand);
+
+// ─── אינדקס משפחות וריאנטים (canonical-key → family size) ────────────────────
+// `productCanonicalKey` runs a `RegExp(r'\s+')` split per product, so counting a
+// product's family by rescanning all of `resolvedCatalogProducts` per call is O(catalog)
+// with a regex on every element. Build the key→count tally ONCE (single
+// O(catalog) group-by) and look it up in O(1). Byte-equivalent: the count for a
+// key is exactly how many catalog rows share that canonical key.
+Map<String, int>? _canonKeyCount;
+Map<String, int> get _canonKeyCountIndex {
+  if (_canonKeyCount != null) return _canonKeyCount!;
+  final m = <String, int>{};
+  for (final p in resolvedCatalogProducts) {
+    final k = productCanonicalKey(p);
+    m[k] = (m[k] ?? 0) + 1;
+  }
+  return _canonKeyCount = m;
+}
 
 // ─── פילטר מותג מהיר (Roadmap step 65) ──────────────────────────────────────
 /// Whether a brand's product is rated for hot water at [tempC] (default 60°C).
@@ -172,14 +208,23 @@ int compatibleProductsCount(LipskeyCatalogProduct p) {
   var n = 0;
   for (final entry in kVerifiedSpecs.entries) {
     if (entry.key == p.sku) continue;
-    // Polyroll bridge — search across the unified catalog (Lipskey + Polyroll)
-    // so PPR products can mate with each other after `registerPolyrollSpecs`.
-    final q = kCatalogProducts.where((x) => x.sku == entry.key);
-    if (q.isEmpty) continue;
-    if (_reallyMates(p, mySpec, q.first, entry.value)) n++;
+    // O(1) unified-catalog (Lipskey + Polyroll) lookup via the memoised
+    // `_skuIndex` — PPR products still mate after `registerPolyrollSpecs`, without
+    // the old O(catalog) rescan per spec that made this sweep O(n²).
+    final q = _skuIndex[entry.key];
+    if (q == null) continue;
+    if (_reallyMates(p, mySpec, q, entry.value)) n++;
   }
   return n;
 }
+
+// ─── זיכרון תאימות (compatibleProductsFor memo) ─────────────────────────────
+// `compatibleProductsFor` is a pure function of the COMPILE-TIME-const catalog
+// (kVerifiedSpecs + the memoised `_skuIndex`), yet the card/sheet/finder call it
+// repeatedly for the same SKU — each call re-runs the O(catalog) mate-sweep plus
+// a sort. Memoise the result per SKU: byte-identical list (same elements, same
+// order). Never invalidated because the catalog is `const`.
+final Map<String, List<LipskeyCatalogProduct>> _compatCache = {};
 
 /// The actual list of products that attach to [p] directly, ordered so the
 /// most natural matches come first:
@@ -188,8 +233,10 @@ int compatibleProductsCount(LipskeyCatalogProduct p) {
 ///   3. same productType
 /// Within the same rank, products are kept in catalog order (stable).
 List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
+  final cached = _compatCache[p.sku];
+  if (cached != null) return cached;
   final mySpec = kVerifiedSpecs[p.sku];
-  if (mySpec == null) return const [];
+  if (mySpec == null) return _compatCache[p.sku] = const [];
   final myMat = mySpec.material;
   final myCat = p.categoryHe;
   final myType = p.productType ?? '';
@@ -197,12 +244,12 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
   final out = <LipskeyCatalogProduct>[];
   for (final entry in kVerifiedSpecs.entries) {
     if (entry.key == p.sku) continue;
-    // Polyroll bridge — search across the unified catalog (Lipskey + Polyroll)
-    // so PPR products can mate with each other after `registerPolyrollSpecs`.
-    final q = kCatalogProducts.where((x) => x.sku == entry.key);
-    if (q.isEmpty) continue;
-    if (!_reallyMates(p, mySpec, q.first, entry.value)) continue;
-    out.add(q.first);
+    // O(1) unified-catalog lookup via the memoised `_skuIndex` (was an
+    // O(catalog) rescan per spec).
+    final q = _skuIndex[entry.key];
+    if (q == null) continue;
+    if (!_reallyMates(p, mySpec, q, entry.value)) continue;
+    out.add(q);
   }
 
   int rank(LipskeyCatalogProduct q) {
@@ -224,6 +271,33 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
     // tie-break by catalog page so adjacent SKUs stay together
     return a.page.compareTo(b.page);
   });
+  return _compatCache[p.sku] = out;
+}
+
+/// D4 · how many physical connector ends [p] has (0 when no verified spec).
+int verifiedEndsCountFor(LipskeyCatalogProduct p) =>
+    kVerifiedSpecs[p.sku]?.ends.length ?? 0;
+
+/// D4 · per-SIDE compatibility — the products that mate the SINGLE end
+/// [endIndex] of [p] (not the whole product). Powers the card's left/right
+/// swipe rail: each physical end can accept a different set of fittings. A
+/// product mates this end when any of its own ends `directMatesWith` it.
+/// Empty when [p] has no verified spec or [endIndex] is out of range.
+List<LipskeyCatalogProduct> compatibleProductsForEnd(
+    LipskeyCatalogProduct p, int endIndex) {
+  final mySpec = kVerifiedSpecs[p.sku];
+  if (mySpec == null || endIndex < 0 || endIndex >= mySpec.ends.length) {
+    return const [];
+  }
+  final myEnd = mySpec.ends[endIndex];
+  final out = <LipskeyCatalogProduct>[];
+  for (final entry in kVerifiedSpecs.entries) {
+    if (entry.key == p.sku) continue;
+    final q = _skuIndex[entry.key];
+    if (q == null) continue;
+    if (entry.value.ends.any(myEnd.directMatesWith)) out.add(q);
+  }
+  out.sort((a, b) => a.page.compareTo(b.page));
   return out;
 }
 
@@ -417,6 +491,11 @@ String gapAdviceHe(LipskeyCatalogProduct from, LipskeyCatalogProduct to) {
   } else if (p.brand == 'פולירול') {
     // PPR socket-fusion tooling (welder, fusion die, cutter).
     tools = recommendedKitForProduct(p).length;
+  } else if (p.brand == 'חוליות') {
+    // Huliot SmartLock — snap-fit; cutter (pipes only) + dedicated bayonet
+    // wrench for the SmartLock nut. Same shape as Polyroll: count what
+    // recommendedKitForProduct emits for this product (P11 parity).
+    tools = recommendedKitForProduct(p).length;
   }
 
   if (must == 0 && opt == 0 && tools == 0) return null;
@@ -427,21 +506,19 @@ String gapAdviceHe(LipskeyCatalogProduct from, LipskeyCatalogProduct to) {
 /// How many catalog rows share [p]'s canonical key (same family, different
 /// attribute — size/color/model/subtype). Returns the FULL family size,
 /// including [p] itself. 1 means "no siblings".
-int variantSiblingsCountFor(LipskeyCatalogProduct p) {
-  final key = productCanonicalKey(p);
-  var n = 0;
-  for (final q in kCatalogProducts) {
-    if (productCanonicalKey(q) == key) n++;
-  }
-  return n;
-}
+int variantSiblingsCountFor(LipskeyCatalogProduct p) =>
+    // O(1) lookup via the memoised canonical-key tally (was an O(catalog)
+    // rescan with a `productCanonicalKey` regex per element). Byte-equivalent:
+    // a catalog [p] matches itself (count ≥ 1); a synthetic [p] not in the
+    // catalog has no key entry → 0, exactly as the old scan returned.
+    _canonKeyCountIndex[productCanonicalKey(p)] ?? 0;
 
 /// The actual variant family members of [p] — the products that share its
 /// canonical key. Includes [p] itself. Ordered by SKU so the result is stable.
 List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
   final key = productCanonicalKey(p);
   final out = <LipskeyCatalogProduct>[];
-  for (final q in kCatalogProducts) {
+  for (final q in resolvedCatalogProducts) {
     if (productCanonicalKey(q) == key) out.add(q);
   }
   out.sort((a, b) => a.sku.compareTo(b.sku));
@@ -488,6 +565,22 @@ List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
         minBoreMm: bore,
       );
     }
+    // Huliot SmartLock — gravity drainage; no verified-spec row. Snapshot from
+    // the page-4 spec table + page-6 envelope (verbatim): PP multilayer (PPMD),
+    // softening 155-162°C, long-term up to 95°C, ratchet-tooth + TPE seal join.
+    // Gravity drainage → no pressure rating (R8: no PN column in the catalog).
+    if (p.brand == 'חוליות') {
+      final dn = p.dims?['DN']?.toString();
+      final bore = dn == null ? null : double.tryParse(dn);
+      return (
+        material: 'PP רב-שכבתי (PPMD)',
+        pressureRating: null,
+        maxTempC: 95,
+        waterSystem: 'דלוחין (שפכים)',
+        endsSummary: 'נעילת שיניים ראטצ\'ט + אטם TPE',
+        minBoreMm: bore,
+      );
+    }
     return null;
   }
 
@@ -517,11 +610,7 @@ List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
         e.type == EndType.drainOpening) {
       mm = double.tryParse(e.size);
     } else {
-      const inchToMm = {
-        '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
-        '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
-      };
-      final v = inchToMm[e.size.replaceAll('"', '').trim()];
+      final v = kBspInchToMm[e.size.replaceAll('"', '').trim()];
       mm = v?.toDouble();
     }
     if (mm != null && (minBore == null || mm < minBore)) minBore = mm;
@@ -594,6 +683,31 @@ List<({String label, String reason})> complianceTriggersFor(
       (
         label: '🛡 PN16 · SDR7.4 · עד 90°C',
         reason: 'לחץ נומינלי 16 bar · מים חמים וקרים',
+      ),
+    ]);
+  }
+  // Huliot SmartLock — drainage standards (verbatim, page 6: היתרים).
+  if (p.brand == 'חוליות') {
+    out.addAll(const [
+      (
+        label: '🛡 ת"י 958-1',
+        reason: 'צנרת PP לסילוק שפכים בתוך הבניין — היתר מספר 737',
+      ),
+      (
+        label: '🛡 ת"י 71253-1/2',
+        reason: 'מחסום ריחות + מאסף מפלסטיק להתקנה ברצפה — היתר 114782',
+      ),
+      (
+        label: '🛡 ת"י 5694',
+        reason: 'אביזרי ניקוז, מחסומים גלויה וסיפונים — היתר 114783',
+      ),
+      (
+        label: '🛡 תו ירוק ת"י 14020',
+        reason: 'מוצרי PP — היתר מספר 70304',
+      ),
+      (
+        label: '🛡 EN-1451 · DIN 8078',
+        reason: 'תקן בנייה בינלאומי · עמידות כימית PH2 עד PH12',
       ),
     ]);
   }
@@ -686,6 +800,22 @@ String? complianceWhyHe(String label) {
   }
   if (label.contains('PEX')) {
     return 'PEX מתרחב ומתכווץ עם הטמפ׳; מפצה התפשטות מסיר מתח מהחיבורים.';
+  }
+  // Huliot SmartLock — drainage standards (page-6 היתרים).
+  if (label.contains('958-1')) {
+    return 'התקן לצנרת פלסטיק PP לסילוק שפכים חמים בתוך הבניין — מבטיח עמידות חום וכימית.';
+  }
+  if (label.contains('71253')) {
+    return 'התקן למחסום-ריחות ולמאסף מפלסטיק להתקנה ברצפה — אטימות ריח ומים.';
+  }
+  if (label.contains('5694')) {
+    return 'התקן לאביזרי ניקוז, מחסומים גלויה וסיפונים — התאמה לשימוש סניטרי.';
+  }
+  if (label.contains('תו ירוק') || label.contains('14020')) {
+    return 'תו ירוק למוצרי PP — עמידה בדרישות סביבה ומיחזוריות.';
+  }
+  if (label.contains('EN-1451') || label.contains('DIN 8078')) {
+    return 'תקן בנייה בינלאומי ל-PP + עמידות כימית רחבה (PH2–PH12).';
   }
   return null;
 }
@@ -812,9 +942,26 @@ List<({String code, String scope})> israeliStandardsFor(
 /// derived purely from its verified-spec end types (thread → wrench+teflon,
 /// compression → adjustable wrench, press → press tool + cutter, drain → saw +
 /// solvent). De-duplicated and order-stable. Empty when [p] has no spec.
+/// Wall-mounted auxiliaries (pipe clamps / hangers / grab bars) have NO water-
+/// path connection, so they carry no verified spec — but they DO have real
+/// mounting tools and steps. Surfacing those by category gives their card honest
+/// install guidance (and lifts their install-readiness chip) without ever
+/// implying a false plumbing connection. NOT consumed by the install-studio
+/// routing engine (which uses verified specs), so no false mate can result.
+const kMountAuxCats = {'חבקי תליה', 'חבקי צינור', 'ידיות אחיזה'};
+
 List<String> installToolsFor(LipskeyCatalogProduct p) {
   final spec = kVerifiedSpecs[p.sku];
-  if (spec == null) return const [];
+  if (spec == null) {
+    if (kMountAuxCats.contains(p.categoryHe)) {
+      return const [
+        '🔩 מקדחה + מקדח לקיר',
+        '🔩 דיבל + בורג מתאים',
+        '📏 פלס / סימון',
+      ];
+    }
+    return const [];
+  }
   final tools = <String>[];
   final seen = <String>{};
   void add(String t) {
@@ -908,7 +1055,15 @@ List<String> installToolsFor(LipskeyCatalogProduct p) {
 /// and material. De-duplicated, order-stable, empty without a spec.
 List<String> installTipsFor(LipskeyCatalogProduct p) {
   final spec = kVerifiedSpecs[p.sku];
-  if (spec == null) return const [];
+  if (spec == null) {
+    if (kMountAuxCats.contains(p.categoryHe)) {
+      return const [
+        '📏 סמן את גובה/מרווח הקיבוע לפי קוטר הצינור',
+        '🔩 קדח, הכנס דיבל וקבע — ודא עיגון יציב בקיר',
+      ];
+    }
+    return const [];
+  }
   final tips = <String>[];
   final seen = <String>{};
   void add(String t) {
@@ -1089,7 +1244,7 @@ String? pairConnectionWarningHe(
 /// `https://buildsmart.app/p/<key>?brand=<name>`. Pure & URL-encoded.
 String deepLinkFor(SmartProduct sp, [int? brandIndex]) {
   final buf =
-      StringBuffer('https://buildsmart.app/p/${Uri.encodeComponent(sp.key)}');
+      StringBuffer('${AppBrand.shareDomain}/p/${Uri.encodeComponent(sp.key)}');
   if (brandIndex != null &&
       brandIndex >= 0 &&
       brandIndex < sp.brands.length) {
@@ -1117,7 +1272,7 @@ String quoteTextFor(SmartProduct sp, int brandIndex) {
     lines.add('מחיר: ~₪${b.price}');
   }
   lines.add('🔗 ${deepLinkFor(sp, idx)}');
-  lines.add('— נוצר ב-BuildSmart');
+  lines.add('— נוצר ב-${AppBrand.name}');
   return lines.join('\n');
 }
 
@@ -1184,33 +1339,97 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
 /// product (a spec'd, connectable PPR/supply fitting) approaches the top, while
 /// a fixture endpoint (no spec, no connections) stays low.
 ///
-/// Weights (sum = 100):
-///   • engineering spec (VerifiedSpec)            +25
-///   • connectivity (mates: ≥20→20 / ≥5→13 / >0→7) +20
-///   • Israeli standard tagged                    +12
-///   • install guidance (tools derived from spec) +13
-///   • acceptance checklist present                +5
-///   • compliance triggers present                 +5
-///   • discoverable in the finder                  +5
-///   • priced                                      +5
-///   • variant choice (>1 in family)              +10
-({int score, String label}) cardReadinessScore(LipskeyCatalogProduct p) {
-  var score = 0;
-  if (kVerifiedSpecs[p.sku] != null) score += 25;
+/// COMPOSITE — the score integrates TWO complementary views of a product's
+/// knowledge (ציון משוכלל משני הצירים), each worth up to 50:
+///
+///   • BREADTH (≤50): how many DISTINCT KINDS of knowledge the product carries
+///     (variety). Weighted presence — a verified spec counts more than a price.
+///     Answers "is it well-rounded?".
+///   • DEPTH (≤50): how MUCH knowledge it carries within the measurable kinds
+///     (`dims` fields, mate count, tips / acceptance / compliance counts).
+///     Answers "how deep does it go?".
+///
+/// composite = breadth + depth. So a product that is broad-but-shallow (many
+/// kinds, little of each) or deep-but-narrow (e.g. a PPR faser pipe rich in
+/// `dims` but with 0 mates) lands in the middle; only products that are BOTH
+/// broad AND deep reach the top band. The two sub-scores are returned alongside
+/// the composite so callers can show the split.
+///
+/// BREADTH weights (sum 50): spec 10 · connects 8 · has-dims 6 · standard 6 ·
+///   install 5 · variants 4 · tips 4 · acceptance 3 · compliance 2 · finder 1 ·
+///   price 1.
+/// DEPTH grades (sum 50): dims (≥8→18 / 4-7→12 / 1-3→6) · mates (≥20→16 / ≥5→10
+///   / >0→5) · tips (≥3→6 / 1-2→3) · acceptance (≥3→5 / >0→2) · compliance
+///   (≥3→5 / >0→2).
+({int score, String label, int breadth, int depth}) cardReadinessScore(
+    LipskeyCatalogProduct p) {
+  // Shared measurements (each feeds breadth as presence + depth as quantity).
+  final hasSpec = kVerifiedSpecs[p.sku] != null;
+  final dims = p.dims?.length ?? 0;
   final compat = compatibleProductsCount(p);
-  score += compat >= 20 ? 20 : (compat >= 5 ? 13 : (compat > 0 ? 7 : 0));
-  if (israeliStandardsFor(p).isNotEmpty) score += 12;
-  if (installToolsFor(p).isNotEmpty) score += 13;
-  if (acceptanceChecklistFor(p).isNotEmpty) score += 5;
-  if (complianceTriggersFor(p).isNotEmpty) score += 5;
-  if (finderGroupFor(p) != null) score += 5;
-  if (priceFor(p) != null) score += 5;
-  if (variantSiblingsCountFor(p) > 1) score += 10;
+  final tips = installTipsFor(p).length;
+  final acc = acceptanceChecklistFor(p).length;
+  final comp = complianceTriggersFor(p).length;
+  final hasStandard = israeliStandardsFor(p).isNotEmpty;
+  final hasInstall = installToolsFor(p).isNotEmpty;
+  final hasVariants = variantSiblingsCountFor(p) > 1;
+  final hasFinder = finderGroupFor(p) != null;
+  final hasPrice = priceFor(p) != null;
+
+  // ── BREADTH (≤50): weighted variety of knowledge KINDS present.
+  var breadth = 0;
+  if (hasSpec) breadth += 10; // foundational verified connection spec
+  if (compat > 0) breadth += 8; // it connects to something
+  if (dims >= 1) breadth += 6; // carries dimensional data at all
+  if (hasStandard) breadth += 6; // tied to an Israeli standard
+  if (hasInstall) breadth += 5; // has install guidance
+  if (hasVariants) breadth += 4; // part of a choosable family
+  if (tips > 0) breadth += 4; // has install tips
+  if (acc > 0) breadth += 3; // has acceptance checks
+  if (comp > 0) breadth += 2; // has compliance triggers
+  if (hasFinder) breadth += 1; // discoverable in the finder
+  if (hasPrice) breadth += 1; // priced
+
+  // ── DEPTH (≤50): graded QUANTITY within the measurable kinds.
+  var depth = 0;
+  depth += dims >= 8 ? 18 : (dims >= 4 ? 12 : (dims >= 1 ? 6 : 0));
+  depth += compat >= 20 ? 16 : (compat >= 5 ? 10 : (compat > 0 ? 5 : 0));
+  depth += tips >= 3 ? 6 : (tips >= 1 ? 3 : 0);
+  depth += acc >= 3 ? 5 : (acc > 0 ? 2 : 0);
+  depth += comp >= 3 ? 5 : (comp > 0 ? 2 : 0);
+
+  var score = breadth + depth; // composite of both axes
   if (score > 100) score = 100;
   final label = score >= 80
       ? 'מצוין'
       : (score >= 55 ? 'טוב' : (score >= 30 ? 'בסיסי' : 'חלקי'));
-  return (score: score, label: label);
+  return (score: score, label: label, breadth: breadth, depth: depth);
+}
+
+/// Pure CATALOG-DATA completeness (0..100) — how full a product's *listing* is,
+/// using ONLY spec-free signals (dims richness, image, price, pack/pallet qty,
+/// variant family, finder). It deliberately does NOT look at kVerifiedSpecs or
+/// connectivity, so a richly-documented part that genuinely does NOT join the
+/// water system (a pipe clamp, grab bar, toilet seat, grate) reads HIGH here —
+/// the honest counterpart to its low install-readiness ([cardReadinessScore]).
+/// This is why the card shows TWO chips: "שלמות נתונים" (this) answers "is the
+/// listing complete?", while "מוכנות התקנה" answers "can I plumb with it?".
+/// Same 80/55/30 band fences/labels so both chips read consistently.
+({int score, String label}) dataCompletenessScore(LipskeyCatalogProduct p) {
+  final dims = p.dims?.length ?? 0;
+  var s = 0;
+  // Dimensional spec depth — the richest catalog signal.
+  s += dims >= 8 ? 40 : (dims >= 4 ? 30 : (dims >= 1 ? 18 : 0));
+  if ((p.imageFile ?? p.specImageFile) != null) s += 15; // has a product image
+  if (priceFor(p) != null) s += 12; // priced
+  if (p.qtyPack != null || p.qtyPallet != null) s += 12; // pack/pallet qty
+  if (variantSiblingsCountFor(p) > 1) s += 11; // part of a choosable family
+  if (finderGroupFor(p) != null) s += 10; // discoverable in the finder
+  if (s > 100) s = 100;
+  final label = s >= 80
+      ? 'מצוין'
+      : (s >= 55 ? 'טוב' : (s >= 30 ? 'בסיסי' : 'חלקי'));
+  return (score: s, label: label);
 }
 
 // ─── יצרן + מק"ט יצרן (Roadmap step 20) ─────────────────────────────────────

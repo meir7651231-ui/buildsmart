@@ -1,0 +1,121 @@
+{
+  "screen": "onboarding_screen",
+  "source": "onboarding_screen.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "OnboardingGate",
+      "role": "composer",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "welcomeSeenProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "authStateProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "guestBrowsingProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_OpeningFlow",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "דלג",
+            "registryId": "onboarding_screen.skip",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "startupStepProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "startupStepProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "welcomeSeenProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "helpModeProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "persistWelcomeSeen",
+        "setState",
+        "unawaited"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "ProfessionScreen = shared component → separate atom",
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 1,
+    "total": 1,
+    "summary": "1/1",
+    "entries": [
+      {
+        "id": "onboarding_screen.skip",
+        "ok": true,
+        "atom": "_OpeningFlow"
+      }
+    ]
+  }
+}

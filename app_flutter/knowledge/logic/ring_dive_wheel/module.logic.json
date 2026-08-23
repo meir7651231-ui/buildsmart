@@ -1,0 +1,927 @@
+{
+  "module": "ring_dive_wheel",
+  "source": "/home/user/buildsmart/app_flutter/lib/features/ring_dive/ring_dive_wheel.dart",
+  "atomCount": 15,
+  "atoms": [
+    {
+      "fn": "RingDiveWheel.createState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> State<RingDiveWheel>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_RingDiveWheelState()"
+          }
+        ]
+      },
+      "floor": [
+        "_RingDiveWheelState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "State<RingDiveWheel>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._n",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "widget.labels.isEmpty ? 1 : widget.labels.length"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._step",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "360 / _n"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._reduceMotion",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "context"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "MediaQuery.maybeOf(context)?.disableAnimations ?? false"
+          }
+        ]
+      },
+      "floor": [
+        "maybeOf"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState.didUpdateWidget",
+      "kind": "method",
+      "object": {
+        "signature": "(RingDiveWheel old) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_focus"
+          },
+          {
+            "kind": "field",
+            "name": "_moved"
+          },
+          {
+            "kind": "field",
+            "name": "_rot"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.didUpdateWidget(old)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !listEquals(old.labels, widget.labels)"
+          }
+        ]
+      },
+      "floor": [
+        "didUpdateWidget",
+        "listEquals"
+      ],
+      "contract": {
+        "input": "(RingDiveWheel old)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._angleAt",
+      "kind": "method",
+      "object": {
+        "signature": "(Offset local) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_center"
+          },
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_RingDiveWheelState._onPanStart",
+          "_RingDiveWheelState._onPanUpdate"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "d = local - _center"
+          },
+          {
+            "kind": "return",
+            "detail": "math.atan2(d.dy, d.dx) * 180 / math.pi"
+          }
+        ]
+      },
+      "floor": [
+        "atan2"
+      ],
+      "contract": {
+        "input": "(Offset local)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._norm",
+      "kind": "method",
+      "object": {
+        "signature": "(double a) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_RingDiveWheelState._onPanUpdate"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "((a + 180) % 360 + 360) % 360 - 180"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(double a)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._focusIndex",
+      "kind": "method",
+      "object": {
+        "signature": "(double rot) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_RingDiveWheelState._onPanEnd",
+          "_RingDiveWheelState._onPanUpdate"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = _n"
+          },
+          {
+            "kind": "return",
+            "detail": "(((-rot / _step).round() % n) + n) % n"
+          }
+        ]
+      },
+      "floor": [
+        "round"
+      ],
+      "contract": {
+        "input": "(double rot)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._onPanStart",
+      "kind": "method",
+      "object": {
+        "signature": "(DragStartDetails d) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_center",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "math",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_dragging"
+          },
+          {
+            "kind": "field",
+            "name": "_moved"
+          },
+          {
+            "kind": "field",
+            "name": "_startAngle"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_angleAt",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_dragging = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_startAngle = _angleAt(d.localPosition)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_moved = 0"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(DragStartDetails d)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._onPanUpdate",
+      "kind": "method",
+      "object": {
+        "signature": "(DragUpdateDetails d) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_center",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_dragging"
+          },
+          {
+            "kind": "global",
+            "name": "math",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_focus"
+          },
+          {
+            "kind": "field",
+            "name": "_moved"
+          },
+          {
+            "kind": "field",
+            "name": "_rot"
+          },
+          {
+            "kind": "field",
+            "name": "_startAngle"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_angleAt",
+            "module": true
+          },
+          {
+            "name": "_norm",
+            "module": true
+          },
+          {
+            "name": "_focusIndex",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_dragging → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "cur = _angleAt(d.localPosition)"
+          },
+          {
+            "kind": "compute",
+            "detail": "delta = _norm(cur - _startAngle)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_startAngle = cur"
+          },
+          {
+            "kind": "effect",
+            "detail": "_moved += delta.abs()"
+          },
+          {
+            "kind": "compute",
+            "detail": "rot = _rot + delta"
+          },
+          {
+            "kind": "compute",
+            "detail": "focus = _focusIndex(rot)"
+          },
+          {
+            "kind": "compute",
+            "detail": "changed = focus != _focus"
+          },
+          {
+            "kind": "branch",
+            "detail": "if changed && !_reduceMotion"
+          },
+          {
+            "kind": "effect",
+            "detail": "setState(() {_rot = rot; _focus = focus;})"
+          },
+          {
+            "kind": "branch",
+            "detail": "if changed"
+          }
+        ]
+      },
+      "floor": [
+        "abs",
+        "call",
+        "selectionClick",
+        "setState"
+      ],
+      "contract": {
+        "input": "(DragUpdateDetails d)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !_dragging → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._onPanEnd",
+      "kind": "method",
+      "object": {
+        "signature": "(DragEndDetails d) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_moved"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_dragging"
+          },
+          {
+            "kind": "field",
+            "name": "_focus"
+          },
+          {
+            "kind": "field",
+            "name": "_rot"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_focusIndex",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_dragging → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_dragging = false"
+          },
+          {
+            "kind": "compute",
+            "detail": "snapped = (_rot / _step).round() * _step"
+          },
+          {
+            "kind": "compute",
+            "detail": "focus = _focusIndex(snapped)"
+          },
+          {
+            "kind": "effect",
+            "detail": "setState(() {_rot = snapped; _focus = focus;})"
+          },
+          {
+            "kind": "effect",
+            "detail": "widget.onFocusChanged?.call(focus)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _moved <= 8 && widget.labels.isNotEmpty"
+          }
+        ]
+      },
+      "floor": [
+        "call",
+        "mediumImpact",
+        "round",
+        "setState"
+      ],
+      "contract": {
+        "input": "(DragEndDetails d)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !_dragging → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._onTap",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_focus"
+          },
+          {
+            "kind": "field",
+            "name": "_moved"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _moved > 8 || widget.labels.isEmpty → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !_reduceMotion"
+          },
+          {
+            "kind": "effect",
+            "detail": "widget.onSelect?.call(_focus)"
+          }
+        ]
+      },
+      "floor": [
+        "call",
+        "mediumImpact"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if _moved > 8 || widget.labels.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._stepFocus",
+      "kind": "method",
+      "object": {
+        "signature": "(int dir) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_focus"
+          },
+          {
+            "kind": "field",
+            "name": "_rot"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "_RingDiveWheelState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if widget.labels.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = _n"
+          },
+          {
+            "kind": "compute",
+            "detail": "next = (((_focus + dir) % n) + n) % n"
+          },
+          {
+            "kind": "precond",
+            "detail": "if next == _focus → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !_reduceMotion"
+          },
+          {
+            "kind": "effect",
+            "detail": "setState(() {_focus = next; _rot = -next * _step;})"
+          },
+          {
+            "kind": "effect",
+            "detail": "widget.onFocusChanged?.call(next)"
+          }
+        ]
+      },
+      "floor": [
+        "call",
+        "selectionClick",
+        "setState"
+      ],
+      "contract": {
+        "input": "(int dir)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if widget.labels.isEmpty → return (void)",
+          "if next == _focus → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_focus",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_moved"
+          },
+          {
+            "kind": "field",
+            "name": "_rot",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_stepFocus",
+            "module": true
+          },
+          {
+            "name": "_buildHub",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "hasLabels = widget.labels.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = widget.labels.length"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasMulti = n > 1"
+          },
+          {
+            "kind": "compute",
+            "detail": "f = hasLabels ? _focus.clamp(0, n - 1) : 0"
+          },
+          {
+            "kind": "return",
+            "detail": "Semantics(container: true, slider: true, label: widget.hubHint, value: hasLabels ? widget…"
+          }
+        ]
+      },
+      "floor": [
+        "GestureDetector",
+        "RingDiveDial",
+        "Semantics",
+        "Stack",
+        "call",
+        "clamp"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_RingDiveWheelState._buildHub",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_focus"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_RingDiveWheelState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "focus = _focus.clamp(0, widget.labels.length - 1)"
+          },
+          {
+            "kind": "compute",
+            "detail": "big = widget.labels[focus]"
+          },
+          {
+            "kind": "compute",
+            "detail": "title = focus < widget.sublabels.length ? widget.sublabels[focus] : ''"
+          },
+          {
+            "kind": "compute",
+            "detail": "bigSize = big.length > 5 ? 15.0 : (big.length > 3 ? 19.0 : 23.0)"
+          },
+          {
+            "kind": "return",
+            "detail": "IgnorePointer(child: Container(width: 112, height: 112, padding: const EdgeInsets.symmetr…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "BoxShadow",
+        "Color",
+        "Column",
+        "Container",
+        "IgnorePointer",
+        "Offset",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "all",
+        "clamp",
+        "symmetric"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

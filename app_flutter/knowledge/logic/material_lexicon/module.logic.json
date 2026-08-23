@@ -1,0 +1,287 @@
+{
+  "module": "material_lexicon",
+  "source": "lib/features/word_finder/material_lexicon.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "materialOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCategoryMaterial"
+          },
+          {
+            "kind": "const",
+            "name": "kMaterials"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "materialsInPool",
+          "productsOfMaterial"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "haystack = '${p.nameHe} ${p.categoryHe}'"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final entry in kMaterials.entries"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final term in entry.value"
+          },
+          {
+            "kind": "return",
+            "detail": "kCategoryMaterial[p.categoryHe]"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "materialOfEnriched",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCategoryMaterial"
+          },
+          {
+            "kind": "const",
+            "name": "kMaterials"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "materialsInPoolEnriched"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "haystack = '${p.nameHe} ${p.categoryHe}'"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final entry in kMaterials.entries"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final term in entry.value"
+          },
+          {
+            "kind": "compute",
+            "detail": "dim = p.dims?['חומר']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if dim is String && dim.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "kCategoryMaterial[p.categoryHe]"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "materialsInPool",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCategoryMaterial",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kMaterials"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "materialOf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "[for (final material in kMaterials.keys) if (pool.any((p) => materialOf(p) == material)) …"
+          }
+        ]
+      },
+      "floor": [
+        "any"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "materialsInPoolEnriched",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCategoryMaterial",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kMaterials"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "materialOfEnriched",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "[for (final material in kMaterials.keys) if (pool.any((p) => materialOfEnriched(p) == mat…"
+          }
+        ]
+      },
+      "floor": [
+        "any"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "productsOfMaterial",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool, String material) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCategoryMaterial",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kMaterials",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "materialOf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "pool.where((p) => materialOf(p) == material).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool, String material)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

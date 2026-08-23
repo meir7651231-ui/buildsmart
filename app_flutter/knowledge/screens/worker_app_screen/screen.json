@@ -1,0 +1,572 @@
+{
+  "screen": "worker_app_screen",
+  "source": "worker_app_screen.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "WorkerAppScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🦺 עובד",
+            "registryId": "worker.section.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.action.exit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ יציאה",
+            "registryId": "worker.action.exit",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "docsGateOverrideProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerDocsReadyProvider(session.username)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "taskRejectionLogProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "taskRejectionLogProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "modOn",
+            "target": "chat"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "WorkerTaskBoardScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "WorkerSettingsScreen"
+          },
+          {
+            "kind": "action",
+            "via": "openBarcodeScanner",
+            "target": "openBarcodeScanner"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(WorkerTaskBoardScreen.route())",
+            "effect": "navigate → WorkerTaskBoardScreen"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(WorkerSettingsScreen.route())",
+            "effect": "navigate → WorkerSettingsScreen"
+          }
+        ]
+      },
+      "floor": [
+        "catalogSiblingsFor",
+        "kbWorkerAppNodes",
+        "productBySku",
+        "setState",
+        "submitWithProofPhoto",
+        "workerDocsReadyProvider",
+        "workerIndexForSession"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "ChatsScreen = shared component → separate atom",
+          "KbScreen = shared component → separate atom",
+          "WelcomeScreen = shared component → separate atom",
+          "WorkerProfileScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_TasksTab",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📅 היומן שלי",
+            "registryId": "worker.section.journal",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.action.fullMonth",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "חודש מלא ›",
+            "registryId": "worker.action.fullMonth",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_app_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✓ נרשמה נוכחות להיום",
+            "registryId": "worker_app_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "לא נרשמה נוכחות ביום זה",
+            "registryId": "worker_app_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_app_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דמו",
+            "registryId": "worker_app_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.action.checkEquipment",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🧰"
+          },
+          {
+            "kind": "cfgText",
+            "text": "בדוק ציוד נדרש",
+            "registryId": "worker.action.checkEquipment",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.action.employerStock",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📦"
+          },
+          {
+            "kind": "cfgText",
+            "text": "מלאי הקבלן",
+            "registryId": "worker.action.employerStock",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.action.addTask",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "➕"
+          },
+          {
+            "kind": "cfgText",
+            "text": "הוסף משימה",
+            "registryId": "worker.action.addTask",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.action.gantt",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📊"
+          },
+          {
+            "kind": "cfgText",
+            "text": "גאנט משימות",
+            "registryId": "worker.action.gantt",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.action.defects",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🔧"
+          },
+          {
+            "kind": "cfgText",
+            "text": "ליקויים",
+            "registryId": "worker.action.defects",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "➕ הצעת משימה לקבלן",
+            "registryId": "worker.section.proposeTitle",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "המשימה תישלח לקבלן לאישור",
+            "registryId": "worker.propose.subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "שם המשימה"
+          },
+          {
+            "kind": "text",
+            "text": "תיאור"
+          },
+          {
+            "kind": "text",
+            "text": "שלבי ביצוע — שלב בכל שורה"
+          },
+          {
+            "kind": "text",
+            "text": "משך משוער (ימים)"
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.action.submit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📸 שלח לאישור",
+            "registryId": "worker.action.submit",
+            "registryOk": true
+          }
+        ],
+        "registered": 22,
+        "unregistered": [
+          "🧰",
+          "📦",
+          "➕",
+          "📊",
+          "🔧",
+          "שם המשימה",
+          "תיאור",
+          "שלבי ביצוע — שלב בכל שורה",
+          "משך משוער (ימים)"
+        ],
+        "summary": "registry 22 · mapped 22/22 · unregistered 9"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerAttendanceProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "WorkerAttendanceScreen"
+          },
+          {
+            "kind": "action",
+            "via": "showEquipmentChecklistSheet",
+            "target": "showEquipmentChecklistSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showEmployerStockSheet",
+            "target": "showEmployerStockSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showTasksGanttSheet",
+            "target": "showTasksGanttSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showDefectsSheet",
+            "target": "showDefectsSheet"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "workerAttendanceProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "openNavSheet",
+            "target": "openNavSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "taskClockProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showWorkerTaskDetailSheet",
+            "target": "showWorkerTaskDetailSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showEquipmentChecklistSheet(context, ref, tasks: current)",
+            "effect": "open → showEquipmentChecklistSheet"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showEmployerStockSheet(context)",
+            "effect": "open → showEmployerStockSheet"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showTasksGanttSheet(context)",
+            "effect": "open → showTasksGanttSheet"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showDefectsSheet(context)",
+            "effect": "open → showDefectsSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showWorkerTaskDetailSheet(context, taskId: task.id)",
+            "effect": "open → showWorkerTaskDetailSheet"
+          }
+        ]
+      },
+      "floor": [
+        "attendanceDateKey",
+        "bsOnAccent",
+        "buildDayStages",
+        "cfgRadius",
+        "currentGeoFix",
+        "hasDot",
+        "mapsQueryForDay",
+        "onSelect",
+        "setState",
+        "workerShortName"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "worker",
+          "username",
+          "demo",
+          "onSubmit"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_WorkerNav",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "onTap"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "currentIndex",
+          "onTap",
+          "chatOn"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 15,
+    "total": 15,
+    "summary": "15/15",
+    "entries": [
+      {
+        "id": "worker.section.title",
+        "ok": true,
+        "atom": "WorkerAppScreen"
+      },
+      {
+        "id": "worker.action.exit",
+        "ok": true,
+        "atom": "WorkerAppScreen"
+      },
+      {
+        "id": "worker.section.journal",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.action.fullMonth",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker_app_screen.t01",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker_app_screen.t02",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker_app_screen.t03",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.action.checkEquipment",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.action.employerStock",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.action.addTask",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.action.gantt",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.action.defects",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.section.proposeTitle",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.propose.subtitle",
+        "ok": true,
+        "atom": "_TasksTab"
+      },
+      {
+        "id": "worker.action.submit",
+        "ok": true,
+        "atom": "_TasksTab"
+      }
+    ]
+  }
+}

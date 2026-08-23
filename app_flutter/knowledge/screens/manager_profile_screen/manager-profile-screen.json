@@ -1,0 +1,34 @@
+{
+  "name": "ManagerProfileScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "אזור אישי — מנהל המערכת",
+        "registryId": "manager_profile_screen.t01",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "kbManagerProfileNodes"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "KbScreen = shared component → separate atom"
+    ]
+  }
+}

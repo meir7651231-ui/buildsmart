@@ -1,0 +1,335 @@
+{
+  "module": "profession_mode",
+  "source": "/home/user/buildsmart/app_flutter/lib/state/profession_mode.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "defaultDetailFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProfessionMode p) -> CardDetailMode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ProfessionModeNotifier._load"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "p == ProfessionMode.diy ? CardDetailMode.simple : CardDetailMode.expert"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProfessionMode p)",
+        "output": "CardDetailMode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "nextProfessionMode",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProfessionMode current) -> ProfessionMode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch current"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProfessionMode current)",
+        "output": "ProfessionMode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "labelForProfession",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProfessionMode p) -> ({String emoji, String label})",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch p"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProfessionMode p)",
+        "output": "({String emoji, String label})",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "professionModeFromTrade",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String trade) -> ProfessionMode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ProfessionModeNotifier._load"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch trade.trim()"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(String trade)",
+        "output": "ProfessionMode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProfessionModeNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_key"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProfessionModeNotifier.persistValues",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<ProfessionMode>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ProfessionMode.values"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<ProfessionMode>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProfessionModeNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kUserProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "professionModeFromTrade",
+            "module": true
+          },
+          {
+            "name": "defaultDetailFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = prefs.getString(_key)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "profileRaw = prefs.getString(kUserProfileKey)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if profileRaw == null → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "setString"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if profileRaw == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ProfessionModeNotifier.set",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ProfessionMode mode) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "setPersisted(mode)"
+          }
+        ]
+      },
+      "floor": [
+        "setPersisted"
+      ],
+      "contract": {
+        "input": "(ProfessionMode mode)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

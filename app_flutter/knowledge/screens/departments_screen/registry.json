@@ -1,0 +1,32 @@
+{
+  "matched": 5,
+  "total": 5,
+  "summary": "5/5",
+  "entries": [
+    {
+      "id": "departments_screen.t01",
+      "ok": true,
+      "atom": "DepartmentsScreen"
+    },
+    {
+      "id": "departments_screen.t02",
+      "ok": true,
+      "atom": "_DeptTile"
+    },
+    {
+      "id": "departments_screen.t03",
+      "ok": true,
+      "atom": "_DeptScopeBar"
+    },
+    {
+      "id": "departments_screen.t04",
+      "ok": true,
+      "atom": "_DeptCatGroups"
+    },
+    {
+      "id": "departments_screen.t05",
+      "ok": true,
+      "atom": "_DeptCatGroups"
+    }
+  ]
+}

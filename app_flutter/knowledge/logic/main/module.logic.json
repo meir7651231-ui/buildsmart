@@ -1,0 +1,1213 @@
+{
+  "module": "main",
+  "source": "lib/main.dart",
+  "atomCount": 18,
+  "atoms": [
+    {
+      "fn": "firebaseMessagingBackgroundHandler",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RemoteMessage message) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "debugPrint"
+      ],
+      "contract": {
+        "input": "(RemoteMessage message)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "installCrashlyticsHandlers",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required void Function(bool enabled) setCollectionEnabled, required void Function(FlutterErrorDetails details) recordFlutterError, required void Function(Object error, StackTrace stack) recordError, bool isDebug = kDebugMode}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "main"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "setCollectionEnabled(!isDebug)"
+          },
+          {
+            "kind": "effect",
+            "detail": "FlutterError.onError = (details) {FlutterError.presentError(details); recordFlutterError(…"
+          },
+          {
+            "kind": "effect",
+            "detail": "PlatformDispatcher.instance.onError = (error, stack) {recordError(error, stack); return t…"
+          }
+        ]
+      },
+      "floor": [
+        "presentError",
+        "recordError",
+        "recordFlutterError",
+        "setCollectionEnabled"
+      ],
+      "contract": {
+        "input": "({required void Function(bool enabled) setCollectionEnabled, required void Function(FlutterErrorDetails details) recordFlutterError, required void Function(Object error, StackTrace stack) recordError, bool isDebug = kDebugMode})",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "appCheckProvidersFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required bool prod}) -> ({AndroidProvider android, AppleProvider apple})",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "main"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "prod ? (android: AndroidProvider.playIntegrity, apple: AppleProvider.appAttestWithDeviceC…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "({required bool prod})",
+        "output": "({AndroidProvider android, AppleProvider apple})",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "main",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAppCheckProd"
+          },
+          {
+            "kind": "const",
+            "name": "kAppCheckRecaptchaSiteKey"
+          },
+          {
+            "kind": "const",
+            "name": "kFittingEngine"
+          },
+          {
+            "kind": "const",
+            "name": "kIsWeb"
+          },
+          {
+            "kind": "const",
+            "name": "kOrgCompanyJson"
+          },
+          {
+            "kind": "global",
+            "name": "fb"
+          },
+          {
+            "kind": "global",
+            "name": "guestBrowsingProvider"
+          },
+          {
+            "kind": "global",
+            "name": "orgConfigProvider"
+          },
+          {
+            "kind": "global",
+            "name": "shipToPromptedProvider"
+          },
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend"
+          },
+          {
+            "kind": "global",
+            "name": "useServerCatalog"
+          },
+          {
+            "kind": "global",
+            "name": "welcomeSeenProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "appCheckProvidersFor",
+            "module": true
+          },
+          {
+            "name": "installCrashlyticsHandlers",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "WidgetsFlutterBinding.ensureInitialized()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if Firebase.apps.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if useServerCatalog && Firebase.apps.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if Firebase.apps.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !kIsWeb && useFirebaseBackend"
+          },
+          {
+            "kind": "effect",
+            "detail": "registerPolyrollSpecs()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if kFittingEngine"
+          },
+          {
+            "kind": "compute",
+            "detail": "welcomeSeen = await loadWelcomeSeen()"
+          },
+          {
+            "kind": "compute",
+            "detail": "guestBrowsing = await loadGuestBrowsing()"
+          },
+          {
+            "kind": "compute",
+            "detail": "shipToPrompted = await loadShipToPrompted()"
+          },
+          {
+            "kind": "compute",
+            "detail": "orgCfg = await hydrateOrgConfig(companyJson: kOrgCompanyJson.isEmpty ? null : kOrgCompanyJson)"
+          },
+          {
+            "kind": "effect",
+            "detail": "await hydrateCompanyCatalog()"
+          },
+          {
+            "kind": "effect",
+            "detail": "runApp(ProviderScope(overrides: [welcomeSeenProvider.overrideWith((ref) => welcomeSeen), …"
+          }
+        ]
+      },
+      "floor": [
+        "BuildSmartApp",
+        "Duration",
+        "ProviderScope",
+        "ReCaptchaV3Provider",
+        "Settings",
+        "activate",
+        "authStateChanges",
+        "ensureAnonAuthForServerCatalog",
+        "ensureInitialized",
+        "hydrateCompanyCatalog",
+        "hydrateOrgConfig",
+        "initializeApp",
+        "loadGuestBrowsing",
+        "loadShipToPrompted",
+        "loadWelcomeSeen",
+        "onBackgroundMessage",
+        "overrideWith",
+        "recordError",
+        "registerFamilySpecs",
+        "registerPolyrollSpecs",
+        "runApp",
+        "setCrashlyticsCollectionEnabled",
+        "setTokenAutoRefreshEnabled",
+        "timeout",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "debugOverlayChildren",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required bool isDebug, bool fsDiag = kFsDiag}) -> List<Widget>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "BuildSmartApp.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(isDebug || fsDiag) ? const [BackendDebugBadge()] : const []"
+          }
+        ]
+      },
+      "floor": [
+        "BackendDebugBadge"
+      ],
+      "contract": {
+        "input": "({required bool isDebug, bool fsDiag = kFsDiag})",
+        "output": "List<Widget>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_UserDocSync.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context, WidgetRef ref) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "child"
+          },
+          {
+            "kind": "global",
+            "name": "authStateProvider"
+          },
+          {
+            "kind": "global",
+            "name": "userProfileProvider"
+          },
+          {
+            "kind": "global",
+            "name": "userSystemSyncProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "ref.listen<AuthSnapshot>(authStateProvider, (prev, next) {final user = next.user; if (use…"
+          },
+          {
+            "kind": "return",
+            "detail": "child"
+          }
+        ]
+      },
+      "floor": [
+        "listen",
+        "now",
+        "onRegisteredLogin",
+        "read",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(BuildContext context, WidgetRef ref)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogout.createState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> ConsumerState<_AutoLogout>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_AutoLogoutState()"
+          }
+        ]
+      },
+      "floor": [
+        "_AutoLogoutState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "ConsumerState<_AutoLogout>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState._idleLimit",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Duration",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (widget.timeout) {BsSessionTimeout.m5 => const Duration(minutes: 5), BsSessionTime…"
+          }
+        ]
+      },
+      "floor": [
+        "Duration"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Duration",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState.initState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_timer",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_arm",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.initState()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_arm()"
+          },
+          {
+            "kind": "effect",
+            "detail": "HardwareKeyboard.instance.addHandler(_onKey)"
+          }
+        ]
+      },
+      "floor": [
+        "addHandler",
+        "initState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState._onKey",
+      "kind": "method",
+      "object": {
+        "signature": "(KeyEvent _) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_timer",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_arm",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_arm()"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(KeyEvent _)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState.didUpdateWidget",
+      "kind": "method",
+      "object": {
+        "signature": "(_AutoLogout oldWidget) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_timer",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_arm",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "super.didUpdateWidget(oldWidget)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if oldWidget.timeout != widget.timeout"
+          }
+        ]
+      },
+      "floor": [
+        "didUpdateWidget"
+      ],
+      "contract": {
+        "input": "(_AutoLogout oldWidget)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState._arm",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_timer"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "_AutoLogoutState._bump",
+          "_AutoLogoutState._onKey",
+          "_AutoLogoutState.didUpdateWidget",
+          "_AutoLogoutState.initState"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_timer?.cancel()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !useFirebaseBackend → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_timer = Timer(_idleLimit, _expire)"
+          }
+        ]
+      },
+      "floor": [
+        "Timer",
+        "cancel"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !useFirebaseBackend → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState._bump",
+      "kind": "method",
+      "object": {
+        "signature": "(PointerEvent _) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_timer",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_arm",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_arm()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(PointerEvent _)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState._expire",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "authStateProvider"
+          },
+          {
+            "kind": "global",
+            "name": "context"
+          },
+          {
+            "kind": "global",
+            "name": "guestBrowsingProvider"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          },
+          {
+            "kind": "global",
+            "name": "ref"
+          },
+          {
+            "kind": "global",
+            "name": "welcomeSeenProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "user = ref.read(authStateProvider).user"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !(user?.isRealUser ?? false) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "await ref.read(authStateProvider.notifier).signOut()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "ref.read(welcomeSeenProvider.notifier).state = false"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(clearWelcomeSeen())"
+          },
+          {
+            "kind": "effect",
+            "detail": "ref.read(guestBrowsingProvider.notifier).state = false"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(clearGuestBrowsing())"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "showToast(context, 'נותקת עקב חוסר פעילות — יש להתחבר מחדש')"
+          }
+        ]
+      },
+      "floor": [
+        "clearGuestBrowsing",
+        "clearWelcomeSeen",
+        "read",
+        "showToast",
+        "signOut",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [
+          "if !mounted → return (void)",
+          "if !(user?.isRealUser ?? false) → return (void)",
+          "if !mounted → return (void)",
+          "if !mounted → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState.dispose",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_timer"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "HardwareKeyboard.instance.removeHandler(_onKey)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_timer?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "cancel",
+        "dispose",
+        "removeHandler"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_AutoLogoutState.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !useFirebaseBackend → return widget.child"
+          },
+          {
+            "kind": "return",
+            "detail": "Listener(behavior: HitTestBehavior.translucent, onPointerDown: _bump, onPointerMove: _bum…"
+          }
+        ]
+      },
+      "floor": [
+        "Listener"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [
+          "if !useFirebaseBackend → return widget.child"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BuildSmartApp.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context, WidgetRef ref) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAppKbOnly"
+          },
+          {
+            "kind": "const",
+            "name": "kDebugMode"
+          },
+          {
+            "kind": "const",
+            "name": "kKbGlobal"
+          },
+          {
+            "kind": "const",
+            "name": "kStudioFlag"
+          },
+          {
+            "kind": "const",
+            "name": "kUserSystem"
+          },
+          {
+            "kind": "global",
+            "name": "appSettingsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "bsMessengerKey"
+          },
+          {
+            "kind": "global",
+            "name": "bsNavigatorKey"
+          },
+          {
+            "kind": "global",
+            "name": "catalogSettingsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "configThemeProvider"
+          },
+          {
+            "kind": "global",
+            "name": "intelBusProvider"
+          },
+          {
+            "kind": "global",
+            "name": "intelRouteObserver"
+          },
+          {
+            "kind": "global",
+            "name": "pendingPushThreadProvider"
+          },
+          {
+            "kind": "global",
+            "name": "pushControllerProvider"
+          },
+          {
+            "kind": "global",
+            "name": "sessionTrackerProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "debugOverlayChildren",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "ref.watch(pushControllerProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "launchThread = threadIdFromLaunchUrl(Uri.base.toString())"
+          },
+          {
+            "kind": "branch",
+            "detail": "if launchThread != null && ref.read(pendingPushThreadProvider) != launchThread"
+          },
+          {
+            "kind": "effect",
+            "detail": "intelRouteObserver.bind(ref.read(intelBusProvider))"
+          },
+          {
+            "kind": "effect",
+            "detail": "ref.read(sessionTrackerProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "settings = ref.watch(appSettingsProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "catalogSettings = ref.watch(catalogSettingsProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "textScale = switch (catalogSettings.textSize) {CatalogTextSize.small => 0.9, CatalogTextSize.medium =…"
+          },
+          {
+            "kind": "compute",
+            "detail": "highContrast = catalogSettings.highContrast"
+          },
+          {
+            "kind": "compute",
+            "detail": "cfgTheme = ref.watch(configThemeProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "locale = switch (settings.lang) {BsLang.he => const Locale('he', 'IL'), BsLang.ar => const Locale(…"
+          },
+          {
+            "kind": "return",
+            "detail": "MaterialApp(title: orgTerm(ref, 'brand.name', AppBrand.name), scaffoldMessengerKey: bsMes…"
+          }
+        ]
+      },
+      "floor": [
+        "AppKeyboardInsets",
+        "AppKeyboardOnlyLayer",
+        "ConnectionIndicator",
+        "Directionality",
+        "FocusTraversalGroup",
+        "Locale",
+        "MaterialApp",
+        "MediaQuery",
+        "OnboardingGate",
+        "Overlay",
+        "OverlayEntry",
+        "SizedBox",
+        "Stack",
+        "StudioOverlay",
+        "WidgetOrderTraversalPolicy",
+        "_AutoLogout",
+        "_GlobalKeyboardOverlay",
+        "_UserDocSync",
+        "afterThisFrame",
+        "bind",
+        "combinedTextScale",
+        "copyWith",
+        "dark",
+        "fill",
+        "light",
+        "linear",
+        "of",
+        "orgTerm",
+        "read",
+        "scale",
+        "threadIdFromLaunchUrl",
+        "toString",
+        "watch"
+      ],
+      "contract": {
+        "input": "(BuildContext context, WidgetRef ref)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_GlobalKeyboardOverlay.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context, WidgetRef ref) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHomeNavHeight"
+          },
+          {
+            "kind": "const",
+            "name": "kStudioFlag"
+          },
+          {
+            "kind": "global",
+            "name": "editModeProvider"
+          },
+          {
+            "kind": "global",
+            "name": "keyboardOverlayOpenProvider"
+          },
+          {
+            "kind": "global",
+            "name": "keyboardScreenToolsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "studioCanEditProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "ref.watch(keyboardScreenToolsProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "navOffset = _kHomeNavHeight"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ref.watch(keyboardOverlayOpenProvider)"
+          },
+          {
+            "kind": "return",
+            "detail": "Align(alignment: Alignment.bottomCenter, child: SafeArea(top: false, child: Padding(paddi…"
+          }
+        ]
+      },
+      "floor": [
+        "Align",
+        "FloatingActionButton",
+        "FloatingCardKeyboard",
+        "GestureDetector",
+        "Icon",
+        "Padding",
+        "SafeArea",
+        "fromLTRB",
+        "only",
+        "read",
+        "toggleEdit",
+        "watch"
+      ],
+      "contract": {
+        "input": "(BuildContext context, WidgetRef ref)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "module": "store_repo",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/store_repo.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "StoreInventoryRepository",
+      "kind": "mutable",
+      "object": {
+        "fields": [
+          {
+            "name": "_source",
+            "type": "StoreInventorySource",
+            "required": true
+          },
+          {
+            "name": "_stores",
+            "type": "List<Store>?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "_invBySku",
+            "type": "Map<String, List<InventoryItem>>",
+            "required": false,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_source",
+            "ref": "StoreInventorySource",
+            "kind": "embed"
+          },
+          {
+            "field": "_stores",
+            "ref": "Store",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "_invBySku",
+            "ref": "List<InventoryItem>",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "stores",
+          "inventoryForSku",
+          "comparison",
+          "cheapestPrice",
+          "compareMany",
+          "invalidate"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_source"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

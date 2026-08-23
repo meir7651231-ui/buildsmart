@@ -1,0 +1,71 @@
+{
+  "name": "_WizardFindReplaceScreen",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "מצא והחלף בטקסטים"
+      },
+      {
+        "kind": "text",
+        "text": "פורסם — חי בכל האפליקציה ✓"
+      },
+      {
+        "kind": "text",
+        "text": "פרסם לכולם (חי)"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "מצא והחלף בטקסטים",
+      "פורסם — חי בכל האפליקציה ✓",
+      "פרסם לכולם (חי)"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 3"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "configStoreProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "studioOwnerEmailProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "criticalIdsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(configStoreProvider.notifier).publish(note: 'מצא-והחלף · אשף', byEma…",
+        "effect": "write → configStoreProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('פורס…",
+        "effect": "open → showSnackBar"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "FindReplacePane = shared component → separate atom"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/app_settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,11 +11,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String _kStorageKey = 'bs.settings.v1';
 
 enum BsTheme { light, dark }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsTextSize { small, medium, large }
 enum BsLang { he, ar, en }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsUnits { metric, imperial }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsCurrency { ils, usd }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsHaulSize { small, van, truck }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsSessionTimeout { m5, m15, m30, m60 }
 
 class AppSettings {
@@ -40,29 +46,58 @@ class AppSettings {
     required this.privLocation,
     required this.privMarketing,
     required this.privCrashReports,
+    required this.privPresence,
+    required this.consentedPolicyVersion,
   });
 
   final BsTheme theme;
+  // DEAD — not consumed (v6.14); real write/read moved to CatalogSettings
   final BsTextSize textSize;
+  // DEAD — not consumed (v6.14); real write/read moved to CatalogSettings
   final bool reduceMotion;
   final BsLang lang;
+  // DEAD — not consumed (v6.14); placeholder field
   final BsUnits units;
+  // DEAD — not consumed (v6.14); placeholder field
   final BsCurrency currency;
+  // DEAD — not consumed (v6.14); placeholder field
   final BsHaulSize haul;
+  // DEAD — not consumed (v6.14); placeholder field
   final bool express;
+  // DEAD — not consumed (v6.14); real write/read moved to CatalogSettings
   final bool highContrast;
+  // DEAD — not consumed (v6.14); placeholder field
   final bool twoFA;
+  // DEAD — not consumed (v6.14); placeholder field
   final bool biometric;
+  // DEAD — not consumed (v6.14); placeholder field
   final bool locationPerm;
+  // DEAD — not consumed (v6.14); placeholder field
   final BsSessionTimeout sessionTimeout;
+  // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifShipments;
+  // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifDeals;
+  // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifBudget;
+  // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifOrders;
   final bool privAnalytics;
   final bool privLocation;
   final bool privMarketing;
   final bool privCrashReports;
+
+  /// §9 (R1-2) — DENY-default presence toggle (customer online-presence). A
+  /// SEPARATE consent axis from [privAnalytics] so all privacy defaults land
+  /// together in step 86; the presence forward ANDs it with the consent
+  /// version + backend (never staff — governance #84).
+  final bool privPresence;
+
+  /// The policy version the user has consented to (0 = never consented, the
+  /// default). The analytics/presence forward requires
+  /// `consentedPolicyVersion >= kCurrentPolicyVersion`, so a policy bump
+  /// de-facto resets consent to DENY until re-opt-in (Amendment-13 re-notice).
+  final int consentedPolicyVersion;
 
   static const AppSettings defaults = AppSettings(
     theme: BsTheme.light,
@@ -82,10 +117,12 @@ class AppSettings {
     notifDeals: true,
     notifBudget: true,
     notifOrders: true,
-    privAnalytics: true,
+    privAnalytics: false,
     privLocation: true,
     privMarketing: false,
     privCrashReports: true,
+    privPresence: false,
+    consentedPolicyVersion: 0,
   );
 
   AppSettings copyWith({
@@ -110,6 +147,8 @@ class AppSettings {
     bool? privLocation,
     bool? privMarketing,
     bool? privCrashReports,
+    bool? privPresence,
+    int? consentedPolicyVersion,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -133,6 +172,9 @@ class AppSettings {
       privLocation: privLocation ?? this.privLocation,
       privMarketing: privMarketing ?? this.privMarketing,
       privCrashReports: privCrashReports ?? this.privCrashReports,
+      privPresence: privPresence ?? this.privPresence,
+      consentedPolicyVersion:
+          consentedPolicyVersion ?? this.consentedPolicyVersion,
     );
   }
 
@@ -170,6 +212,8 @@ class AppSettings {
             'location': privLocation,
             'marketing': privMarketing,
             'crashReports': privCrashReports,
+            'presence': privPresence,
+            'consentedPolicyVersion': consentedPolicyVersion,
           },
         },
       };
@@ -213,10 +257,13 @@ class AppSettings {
       notifDeals:     notif['deals']     != false,
       notifBudget:    notif['budget']    != false,
       notifOrders:    notif['orders']    != false,
-      privAnalytics:    priv['analytics']    != false,
+      privAnalytics:    priv['analytics']    == true,
       privLocation:     priv['location']     != false,
       privMarketing:    priv['marketing']    == true,
       privCrashReports: priv['crashReports'] != false,
+      privPresence:     priv['presence']     == true,
+      consentedPolicyVersion:
+          (priv['consentedPolicyVersion'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -249,11 +296,32 @@ BsSessionTimeout _intToTimeout(Object? raw) {
 
 /// Notifier that persists every change to SharedPreferences.
 class AppSettingsNotifier extends StateNotifier<AppSettings> {
-  AppSettingsNotifier() : super(AppSettings.defaults) {
+  AppSettingsNotifier([this._repo, AppSettings? initial])
+      : _seeded = initial != null,
+        super(initial ?? AppSettings.defaults) {
     unawaited(_load());
   }
 
+  /// The server store (`appSettings/{uid}`) when USER_DATA_SERVER is on for a real
+  /// signed-in user; null (the default) ⇒ the SharedPreferences path below.
+  final AppSettingsRepository? _repo;
+
+  /// True when [main] pre-hydrated the initial value from prefs BEFORE the first
+  /// frame (theme-flash fix): the local re-read in [_load] is then skipped (we
+  /// already have it), but a signed-in user's SERVER value still loads.
+  final bool _seeded;
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      // Server path: the settings live at `appSettings/{uid}`. Absent ⇒ keep
+      // defaults (mirrors the local `raw == null` → return; the repo never throws).
+      final s = await repo.load(repo.currentUid);
+      if (s != null) state = s;
+      return;
+    }
+    // Local path already hydrated before the first frame — nothing to re-read.
+    if (_seeded) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -266,6 +334,13 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
@@ -281,6 +356,13 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> reset() async {
     state = AppSettings.defaults;
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, AppSettings.defaults);
+      } on Object catch (_) {/* ignore */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kStorageKey);
@@ -290,5 +372,22 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
 final appSettingsProvider =
     StateNotifierProvider<AppSettingsNotifier, AppSettings>(
-  (_) => AppSettingsNotifier(),
+  (ref) => AppSettingsNotifier(ref.watch(appSettingsRepositoryProvider)),
 );
+
+/// Read the persisted [AppSettings] from SharedPreferences BEFORE the first frame
+/// — the theme-flash fix. [main] awaits this and seeds [appSettingsProvider] via an
+/// override, so a dark-theme user never renders a light frame first (the notifier
+/// otherwise starts at [AppSettings.defaults] and hydrates a frame later). Returns
+/// [AppSettings.defaults] when absent/corrupt. Mirrors the notifier's local load;
+/// the SERVER path (signed-in) still loads async as before.
+Future<AppSettings> loadAppSettings() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kStorageKey);
+    if (raw == null) return AppSettings.defaults;
+    return AppSettings.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+  } on Object catch (_) {
+    return AppSettings.defaults;
+  }
+}

@@ -1,0 +1,442 @@
+{
+  "module": "polyroll_specs",
+  "source": "lib/data/polyroll_specs.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "_portCountFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "polyrollSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = p.productType ?? ''"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t.contains('צינור') → return 2"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t.contains('פקק') → return 1"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t.contains('מסעף') || t.contains('רוכב') → return 3"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t.contains('אומגה') → return 2"
+          },
+          {
+            "kind": "return",
+            "detail": "2"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if t.contains('צינור') → return 2",
+          "if t.contains('פקק') → return 1",
+          "if t.contains('מסעף') || t.contains('רוכב') → return 3",
+          "if t.contains('אומגה') → return 2"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pprMaterial",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPprPipesAC"
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesFiber"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "polyrollSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "dimsMaterial = p.dims?['חומר']?.toString()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if dimsMaterial != null && dimsMaterial.contains('faser') → return 'PPR · מחוזק בסיבי זכוכית (faser)'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if p.categoryHe == kPprPipesFiber || p.categoryHe == kPprPipesAC → return 'PPR · מחוזק בסיבי זכוכית (faser)'"
+          },
+          {
+            "kind": "return",
+            "detail": "'PPR'"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "toString"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if dimsMaterial != null && dimsMaterial.contains('faser') → return 'PPR · מחוזק בסיבי זכוכית (faser)'",
+          "if p.categoryHe == kPprPipesFiber || p.categoryHe == kPprPipesAC → return 'PPR · מחוזק בסיבי זכוכית (faser)'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_parsePprDn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "polyrollSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final key in const ['dn נומינלי', 'מידה נומינלית', 'd', 'de קוטר חיצוני', 'D']"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = p.dims?[key]?.toString()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v != null && v.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "size = p.dims?['מידה']?.toString()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if size != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = RegExp(r'(\\d{2,3})\\s*$').firstMatch(p.nameHe.replaceAll('°', ''))"
+          },
+          {
+            "kind": "precond",
+            "detail": "if m != null → return m.group(1)"
+          },
+          {
+            "kind": "compute",
+            "detail": "m2 = RegExp(r'(\\d{2,3})\\s*[×x]').firstMatch(p.nameHe)"
+          },
+          {
+            "kind": "return",
+            "detail": "m2?.group(1)"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "firstMatch",
+        "group",
+        "replaceAll",
+        "toInt",
+        "toString",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if m != null → return m.group(1)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "polyrollSpecFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> VerifiedSpec?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kElectroCats"
+          },
+          {
+            "kind": "const",
+            "name": "_kFusionCats"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprMaxTempC"
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesAC",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesFiber",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_parsePprDn",
+            "module": true
+          },
+          {
+            "name": "_pprMaterial",
+            "module": true
+          },
+          {
+            "name": "_portCountFor",
+            "module": true
+          },
+          {
+            "name": "_pressureFromDims",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "registerPolyrollSpecs"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_kFusionCats.contains(p.categoryHe) && !_kElectroCats.contains(p.categoryHe) → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "dn = _parsePprDn(p)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if dn == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "material = _pprMaterial(p)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ports = _portCountFor(p)"
+          },
+          {
+            "kind": "init",
+            "detail": "ends = List<ConnectorEnd>.generate(ports, (_) => ConnectorEnd(EndType.hdpeCompression, dn))"
+          },
+          {
+            "kind": "return",
+            "detail": "VerifiedSpec(sku: p.sku, ends: ends, material: material, pressureRating: _pressureFromDim…"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorEnd",
+        "List",
+        "VerifiedSpec",
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "VerifiedSpec?",
+        "purity": "pure",
+        "precond": [
+          "if !_kFusionCats.contains(p.categoryHe) && !_kElectroCats.contains(p.categoryHe) → return null",
+          "if dn == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "!_kFusionCats.contains(p.categoryHe) && !_kElectroCats.contains(p.categoryHe) · dn == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pressureFromDims",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "polyrollSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "pn = p.dims?['PN']?.toString()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if pn != null && pn.isNotEmpty → return 'PN$pn'"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "toString"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if pn != null && pn.isNotEmpty → return 'PN$pn'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "registerPolyrollSpecs",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kElectroCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kFusionCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprMaxTempC",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPolyrollCatalog"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "calls": [
+          {
+            "name": "polyrollSpecFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final p in kPolyrollCatalog"
+          },
+          {
+            "kind": "compute",
+            "detail": "spec = polyrollSpecFor(p)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if spec == null → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "kVerifiedSpecs.putIfAbsent(p.sku, () => spec)"
+          }
+        ]
+      },
+      "floor": [
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,224 @@
+{
+  "module": "firestore_cached_repo",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/firestore_cached_repo.dart",
+  "entityCount": 3,
+  "entities": [
+    {
+      "entity": "RemoteDoc",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "data",
+            "type": "Map<String, dynamic>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "data"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirestoreCollectionSource",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "collectionPath",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "_injected",
+            "type": "FirebaseFirestore?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_scope",
+            "type": "Query<Map<String, dynamic>> Function(CollectionReference<Map<String, dynamic>>)?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_bound",
+            "type": "Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_db",
+            "type": "FirebaseFirestore",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "_col",
+            "type": "CollectionReference<Map<String, dynamic>>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "_ref",
+            "type": "Query<Map<String, dynamic>>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "isScoped",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_injected",
+            "ref": "FirebaseFirestore",
+            "kind": "embed"
+          },
+          {
+            "field": "_scope",
+            "ref": "Query<Map<String, dynamic>> Function(CollectionReference<Map<String, dynamic>>)",
+            "kind": "embed"
+          },
+          {
+            "field": "_bound",
+            "ref": "Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "snapshots",
+          "set",
+          "delete"
+        ]
+      },
+      "contract": {
+        "required": [
+          "collectionPath"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirestoreCachedRepo",
+      "kind": "mutable",
+      "object": {
+        "fields": [
+          {
+            "name": "_source",
+            "type": "RemoteCollectionSource",
+            "required": true
+          },
+          {
+            "name": "_cache",
+            "type": "List<T>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "_firstSnapshotSeen",
+            "type": "bool",
+            "required": false
+          },
+          {
+            "name": "_sub",
+            "type": "StreamSubscription<List<RemoteDoc>>?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "seed",
+            "type": "List<T>",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_source",
+            "ref": "RemoteCollectionSource",
+            "kind": "embed"
+          },
+          {
+            "field": "_cache",
+            "ref": "T",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "_sub",
+            "ref": "StreamSubscription<List<RemoteDoc>>",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "fromDoc",
+          "toDoc",
+          "idOf",
+          "sortBy",
+          "onFirstSnapshotEmpty",
+          "cached",
+          "attach",
+          "_onSnapshot",
+          "upsert",
+          "replaceAll",
+          "upsertLocalOnly",
+          "removeById",
+          "pushCacheToRemote",
+          "guardWrite",
+          "_sorted",
+          "dispose"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_source",
+          "_cache"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

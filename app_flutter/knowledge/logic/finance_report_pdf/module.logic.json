@@ -1,0 +1,147 @@
+{
+  "module": "finance_report_pdf",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/finance_report_pdf.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "fn": "_pdfSafe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildFinanceReportPdf"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "buf = StringBuffer()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final rune in s.runes"
+          },
+          {
+            "kind": "compute",
+            "detail": "keep = (rune >= 0x0590 && rune <= 0x05FF) || (rune >= 0x0020 && rune <= 0x007E) || rune == 0x20AA"
+          },
+          {
+            "kind": "branch",
+            "detail": "if keep"
+          },
+          {
+            "kind": "return",
+            "detail": "buf.toString().trim()"
+          }
+        ]
+      },
+      "floor": [
+        "StringBuffer",
+        "toString",
+        "trim",
+        "writeCharCode"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildFinanceReportPdf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(FinanceReportData data) -> Future<pw.Document>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "pw"
+          },
+          {
+            "kind": "global",
+            "name": "rootBundle"
+          },
+          {
+            "kind": "global",
+            "name": "symmetric"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pdfSafe",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "regular = pw.Font.ttf(await rootBundle.load('assets/fonts/Heebo-Regular.ttf'))"
+          },
+          {
+            "kind": "compute",
+            "detail": "bold = pw.Font.ttf(await rootBundle.load('assets/fonts/Heebo-Bold.ttf'))"
+          },
+          {
+            "kind": "compute",
+            "detail": "doc = pw.Document(theme: pw.ThemeData.withFont(base: regular, bold: bold))"
+          },
+          {
+            "kind": "effect",
+            "detail": "doc.addPage(pw.Page(pageFormat: PdfPageFormat.a4, textDirection: pw.TextDirection.rtl, bu…"
+          },
+          {
+            "kind": "return",
+            "detail": "doc"
+          }
+        ]
+      },
+      "floor": [
+        "Column",
+        "Divider",
+        "Document",
+        "EdgeInsets",
+        "Padding",
+        "Page",
+        "Row",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "addPage",
+        "fMoney",
+        "kv",
+        "load",
+        "ttf",
+        "withFont"
+      ],
+      "contract": {
+        "input": "(FinanceReportData data)",
+        "output": "Future<pw.Document>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

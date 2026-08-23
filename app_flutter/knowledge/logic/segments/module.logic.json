@@ -1,0 +1,686 @@
+{
+  "module": "segments",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/intel/segments.dart",
+  "atomCount": 12,
+  "atoms": [
+    {
+      "fn": "segmentKeyOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(IntelEvent e) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAnonymousSegmentKey"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "retentionCohorts",
+          "segmentsByActor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "uid = e.uid"
+          },
+          {
+            "kind": "precond",
+            "detail": "if uid != null && uid.isNotEmpty → return uid"
+          },
+          {
+            "kind": "compute",
+            "detail": "actorKey = e.actorKey"
+          },
+          {
+            "kind": "precond",
+            "detail": "if actorKey != null && actorKey.isNotEmpty → return actorKey"
+          },
+          {
+            "kind": "return",
+            "detail": "kAnonymousSegmentKey"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(IntelEvent e)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if uid != null && uid.isNotEmpty → return uid",
+          "if actorKey != null && actorKey.isNotEmpty → return actorKey"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "segmentsByActor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<IntelEvent> events, {DateTime? now}) -> Map<String, ActorSegment>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAnonymousSegmentKey",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "segmentKeyOf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if events.isEmpty → return <String, ActorSegment>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "byActor = <String, List<IntelEvent>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in events"
+          },
+          {
+            "kind": "effect",
+            "detail": "(byActor[segmentKeyOf(e)] ??= <IntelEvent>[]).add(e)"
+          },
+          {
+            "kind": "compute",
+            "detail": "resolvedNow = now ?? events.map((e) => e.at).reduce((a, b) => a.isAfter(b) ? a : b)"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, ActorSegment>{}"
+          },
+          {
+            "kind": "effect",
+            "detail": "byActor.forEach((key, evs) {final sessions = <String>{}; final screens = <String>{}; var …"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "ActorSegment",
+        "add",
+        "detectCheckoutAbandon",
+        "detectDeadEndLoop",
+        "detectRepeatedNoResult",
+        "forEach",
+        "isAfter",
+        "map",
+        "reduce"
+      ],
+      "contract": {
+        "input": "(List<IntelEvent> events, {DateTime? now})",
+        "output": "Map<String, ActorSegment>",
+        "purity": "pure",
+        "precond": [
+          "if events.isEmpty → return <String, ActorSegment>{}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "retentionCohorts",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<IntelEvent> events, {Duration localOffset = Duration.zero}) -> List<RetentionCohort>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAnonymousSegmentKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "mutation",
+            "name": "at.add",
+            "transitive": true
+          },
+          {
+            "kind": "mutation",
+            "name": "day.add",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "segmentKeyOf",
+            "module": true
+          },
+          {
+            "name": "_dayBucket",
+            "module": true
+          },
+          {
+            "name": "_buildCohort",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "daysByActor = <String, Set<DateTime>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in events"
+          },
+          {
+            "kind": "effect",
+            "detail": "(daysByActor[segmentKeyOf(e)] ??= <DateTime>{}).add(_dayBucket(e.at, localOffset))"
+          },
+          {
+            "kind": "init",
+            "detail": "membersByCohort = <DateTime, List<Set<DateTime>>>{}"
+          },
+          {
+            "kind": "effect",
+            "detail": "daysByActor.forEach((_, days) {final first = days.reduce((a, b) => a.isBefore(b) ? a : b)…"
+          },
+          {
+            "kind": "init",
+            "detail": "cohorts = <RetentionCohort>[for (final entry in membersByCohort.entries) _buildCohort(entry.key, en…"
+          },
+          {
+            "kind": "return",
+            "detail": "cohorts"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "compareTo",
+        "forEach",
+        "isBefore",
+        "reduce",
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<IntelEvent> events, {Duration localOffset = Duration.zero})",
+        "output": "List<RetentionCohort>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_buildCohort",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime day, List<Set<DateTime>> members) -> RetentionCohort",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "mutation",
+            "name": "day.add"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "retentionCohorts"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "maxOffset = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final days in members"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final d in days"
+          },
+          {
+            "kind": "init",
+            "detail": "returningByDay = <int, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var n = 0; n <= maxOffset; n++"
+          },
+          {
+            "kind": "compute",
+            "detail": "target = day.add(Duration(days: n))"
+          },
+          {
+            "kind": "compute",
+            "detail": "count = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final days in members"
+          },
+          {
+            "kind": "effect",
+            "detail": "returningByDay[n] = count"
+          },
+          {
+            "kind": "return",
+            "detail": "RetentionCohort(cohortDay: day, size: members.length, returningByDay: returningByDay)"
+          }
+        ]
+      },
+      "floor": [
+        "Duration",
+        "RetentionCohort",
+        "add",
+        "contains",
+        "difference"
+      ],
+      "contract": {
+        "input": "(DateTime day, List<Set<DateTime>> members)",
+        "output": "RetentionCohort",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_dayBucket",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime at, Duration offset) -> DateTime",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "mutation",
+            "name": "at.add"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "retentionCohorts"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "shifted = at.toUtc().add(offset)"
+          },
+          {
+            "kind": "return",
+            "detail": "DateTime.utc(shifted.year, shifted.month, shifted.day)"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "toUtc",
+        "utc"
+      ],
+      "contract": {
+        "input": "(DateTime at, Duration offset)",
+        "output": "DateTime",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "joinSegmentsToCustomers",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, ActorSegment> segments, List<ManagerCustomer> customers, {required String? Function(ManagerCustomer customer) uidOf}) -> List<ActorCustomerJoin>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "byUid = <String, ManagerCustomer>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in customers"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = uidOf(c)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if id == null || id.isEmpty → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "byUid[id] = c"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <ActorCustomerJoin>[for (final entry in segments.entries) ActorCustomerJoin(segment: entr…"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "ActorCustomerJoin",
+        "compareTo",
+        "sort",
+        "uidOf"
+      ],
+      "contract": {
+        "input": "(Map<String, ActorSegment> segments, List<ManagerCustomer> customers, {required String? Function(ManagerCustomer customer) uidOf})",
+        "output": "List<ActorCustomerJoin>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ActorSegment.isAnonymous",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAnonymousSegmentKey"
+          },
+          {
+            "kind": "field",
+            "name": "key"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "key == kAnonymousSegmentKey"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RetentionCohort.returning",
+      "kind": "method",
+      "object": {
+        "signature": "(int dayOffset) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "returningByDay"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "RetentionCohort.retentionPct"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "returningByDay[dayOffset] ?? 0"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int dayOffset)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RetentionCohort.retentionPct",
+      "kind": "method",
+      "object": {
+        "signature": "(int dayOffset) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPercentScale"
+          },
+          {
+            "kind": "field",
+            "name": "returningByDay",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "size"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "returning",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "size == 0 ? 0 : returning(dayOffset) / size * _kPercentScale"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int dayOffset)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ActorCustomerJoin.key",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "segment"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "segment.key"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ActorCustomerJoin.matched",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "customer"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "customer != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ActorCustomerJoin.resolvedLabel",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "customer"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "customer?.name"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    }
+  ]
+}

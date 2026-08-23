@@ -1,0 +1,74 @@
+{
+  "module": "brands",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/brands.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "Brand",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "color",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "tagline",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "productCount",
+            "type": "int",
+            "required": false,
+            "default": "0"
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "emoji",
+          "color"
+        ],
+        "defaults": {
+          "tagline": "''",
+          "productCount": "0"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "matched": 5,
+  "total": 5,
+  "summary": "5/5",
+  "entries": [
+    {
+      "id": "ai_assistant_screen.title",
+      "ok": true,
+      "atom": "AiAssistantScreen"
+    },
+    {
+      "id": "ai_assistant_screen.offline",
+      "ok": true,
+      "atom": "AiAssistantScreen"
+    },
+    {
+      "id": "ai_assistant_screen.empty_prompt",
+      "ok": true,
+      "atom": "AiAssistantScreen"
+    },
+    {
+      "id": "ai_assistant_screen.empty_examples",
+      "ok": true,
+      "atom": "AiAssistantScreen"
+    },
+    {
+      "id": "ai_assistant_screen.added",
+      "ok": true,
+      "atom": "AiAssistantScreen"
+    }
+  ]
+}

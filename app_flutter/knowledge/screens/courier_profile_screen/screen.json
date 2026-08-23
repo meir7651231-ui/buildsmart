@@ -1,0 +1,533 @@
+{
+  "screen": "courier_profile_screen",
+  "source": "courier_profile_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "CourierProfileBody",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "מסירות — סטטיסטיקה",
+            "registryId": "courier_profile_screen.stats_heading",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "⚙️"
+          },
+          {
+            "kind": "cfgText",
+            "text": "הגדרות שליח",
+            "registryId": "courier.profile.settings_title",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🔁"
+          },
+          {
+            "kind": "cfgText",
+            "text": "החלפת תפקיד",
+            "registryId": "courier.profile.role_switch_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מוגן בקוד",
+            "registryId": "courier_profile_screen.role_switch_subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🚪"
+          },
+          {
+            "kind": "cfgText",
+            "text": "יציאה מהחשבון",
+            "registryId": "courier.profile.logout_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 5,
+        "unregistered": [
+          "⚙️",
+          "🔁",
+          "🚪"
+        ],
+        "summary": "registry 5 · mapped 5/5 · unregistered 3"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "session == null || session.role != BoardRole.courier"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "courierProfileProvider.select((m) => m[session.username] ?? const CourierProfile())"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "fulfillmentProvider.select((m) {var delivered = 0; var pod = 0; var sum = 0; var unattributed = 0; for (final o in orders) {if (o.stage != OrderStage.delivered) continue; final f = m[o.id]; if (f != null && f.courierUser == session.username) {delivered++; sum += o.sum; if (f.podCaptured) pod++;} else if (f == null || f.courierUser == null) {unattributed++;}} return (delivered: delivered, pod: pod, sum: sum, unattributed: unattributed);})"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CourierSettingsScreen"
+          },
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "action",
+            "via": "showRolePicker",
+            "target": "showRolePicker"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "boardAuthProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (session == null || session.role != BoardRole.courier)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(CourierSettingsScreen.route())",
+            "effect": "navigate → CourierSettingsScreen"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius",
+        "confirmDestructive",
+        "fMoney"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [
+          "standalone",
+          "vehicle"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CourierIdentityCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier_profile_screen.demo_chip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דמו",
+            "registryId": "courier_profile_screen.demo_chip",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🛵"
+          }
+        ],
+        "registered": 2,
+        "unregistered": [
+          "🛵"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showCourierProfileEditSheet",
+            "target": "showCourierProfileEditSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showCourierProfileEditSheet(context, session: session)",
+            "effect": "open → showCourierProfileEditSheet"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius",
+        "haulInfo",
+        "imageProviderForRef"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "session",
+          "profile"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CourierPersonalAreaCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🕐"
+          },
+          {
+            "kind": "cfgText",
+            "text": "נוכחות",
+            "registryId": "courier.personal.attendance_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כניסה/יציאה ודוח חודשי",
+            "registryId": "courier_profile_screen.attendance_subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📄"
+          },
+          {
+            "kind": "cfgText",
+            "text": "טפסים",
+            "registryId": "courier.personal.forms_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "טופס 101 · בקשת חופשה · אישור מחלה",
+            "registryId": "courier_profile_screen.forms_subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🪪"
+          },
+          {
+            "kind": "cfgText",
+            "text": "תעודות נהג",
+            "registryId": "courier.personal.certs_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "רישיון נהיגה · ביטוח רכב · רישיון רכב",
+            "registryId": "courier_profile_screen.certs_subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "💰"
+          },
+          {
+            "kind": "cfgText",
+            "text": "תלושי שכר",
+            "registryId": "courier.personal.payslips_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "יחובר עם חיבור השרת",
+            "registryId": "courier_profile_screen.payslips_subtitle",
+            "registryOk": true
+          }
+        ],
+        "registered": 8,
+        "unregistered": [
+          "🕐",
+          "📄",
+          "🪪",
+          "💰"
+        ],
+        "summary": "registry 8 · mapped 8/8 · unregistered 4"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CourierAttendanceScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CourierFormsScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CourierCertsScreen"
+          },
+          {
+            "kind": "action",
+            "via": "showWorkerPayslipsSheet",
+            "target": "showWorkerPayslipsSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(CourierAttendanceScreen.route())",
+            "effect": "navigate → CourierAttendanceScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(CourierFormsScreen.route())",
+            "effect": "navigate → CourierFormsScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(CourierCertsScreen.route())",
+            "effect": "navigate → CourierCertsScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showWorkerPayslipsSheet(context)",
+            "effect": "open → showWorkerPayslipsSheet"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RoleSwitchCodeDialog",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "החלפת תפקיד",
+            "registryId": "courier_profile_screen.role_switch_dialog_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:",
+            "registryId": "courier_profile_screen.role_switch_dialog_body",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier_profile_screen.dialog_cancel",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ביטול",
+            "registryId": "courier_profile_screen.dialog_cancel",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier_profile_screen.dialog_confirm",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אישור",
+            "registryId": "courier_profile_screen.dialog_confirm",
+            "registryOk": true
+          }
+        ],
+        "registered": 6,
+        "unregistered": [],
+        "summary": "registry 6 · mapped 6/6 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_PStat",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "value",
+          "label"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 18,
+    "total": 18,
+    "summary": "18/18",
+    "entries": [
+      {
+        "id": "courier_profile_screen.stats_heading",
+        "ok": true,
+        "atom": "CourierProfileBody"
+      },
+      {
+        "id": "courier.profile.settings_title",
+        "ok": true,
+        "atom": "CourierProfileBody"
+      },
+      {
+        "id": "courier.profile.role_switch_title",
+        "ok": true,
+        "atom": "CourierProfileBody"
+      },
+      {
+        "id": "courier_profile_screen.role_switch_subtitle",
+        "ok": true,
+        "atom": "CourierProfileBody"
+      },
+      {
+        "id": "courier.profile.logout_title",
+        "ok": true,
+        "atom": "CourierProfileBody"
+      },
+      {
+        "id": "courier_profile_screen.demo_chip",
+        "ok": true,
+        "atom": "_CourierIdentityCard"
+      },
+      {
+        "id": "courier.personal.attendance_title",
+        "ok": true,
+        "atom": "_CourierPersonalAreaCard"
+      },
+      {
+        "id": "courier_profile_screen.attendance_subtitle",
+        "ok": true,
+        "atom": "_CourierPersonalAreaCard"
+      },
+      {
+        "id": "courier.personal.forms_title",
+        "ok": true,
+        "atom": "_CourierPersonalAreaCard"
+      },
+      {
+        "id": "courier_profile_screen.forms_subtitle",
+        "ok": true,
+        "atom": "_CourierPersonalAreaCard"
+      },
+      {
+        "id": "courier.personal.certs_title",
+        "ok": true,
+        "atom": "_CourierPersonalAreaCard"
+      },
+      {
+        "id": "courier_profile_screen.certs_subtitle",
+        "ok": true,
+        "atom": "_CourierPersonalAreaCard"
+      },
+      {
+        "id": "courier.personal.payslips_title",
+        "ok": true,
+        "atom": "_CourierPersonalAreaCard"
+      },
+      {
+        "id": "courier_profile_screen.payslips_subtitle",
+        "ok": true,
+        "atom": "_CourierPersonalAreaCard"
+      },
+      {
+        "id": "courier_profile_screen.role_switch_dialog_title",
+        "ok": true,
+        "atom": "_RoleSwitchCodeDialog"
+      },
+      {
+        "id": "courier_profile_screen.role_switch_dialog_body",
+        "ok": true,
+        "atom": "_RoleSwitchCodeDialog"
+      },
+      {
+        "id": "courier_profile_screen.dialog_cancel",
+        "ok": true,
+        "atom": "_RoleSwitchCodeDialog"
+      },
+      {
+        "id": "courier_profile_screen.dialog_confirm",
+        "ok": true,
+        "atom": "_RoleSwitchCodeDialog"
+      }
+    ]
+  }
+}

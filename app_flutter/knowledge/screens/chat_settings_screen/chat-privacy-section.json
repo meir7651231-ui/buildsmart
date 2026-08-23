@@ -1,0 +1,126 @@
+{
+  "name": "_ChatPrivacySection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "מחיקת היסטוריית שיחות",
+        "registryId": "chat_settings_screen.t10",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "היסטוריית השיחות תימחק והשיחות ייפתחו ריקות.",
+        "registryId": "chat_settings_screen.t11",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "chat_settings_screen.t12",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "chat_settings_screen.t12",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "chat_settings_screen.t13",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מחק",
+        "registryId": "chat_settings_screen.t13",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+        "registryId": "chat_settings_screen.t14",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — עדיין לא משפיע",
+        "registryId": "chat_settings_screen.t16",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה",
+        "registryId": "chat_settings_screen.t17",
+        "registryOk": true
+      }
+    ],
+    "registered": 9,
+    "unregistered": [],
+    "summary": "registry 9 · mapped 9/9 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "chatSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "chatSettingsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatHistoryClearedProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '$label — בבנייה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "onChanged"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+    ]
+  }
+}

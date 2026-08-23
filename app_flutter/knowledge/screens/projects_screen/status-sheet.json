@@ -1,0 +1,97 @@
+{
+  "name": "_StatusSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "✏️ הקש לעריכת הפרטים",
+        "registryId": "projects_screen.edit_hint",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "projects_screen.edit_site",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✏️ עריכת פרטי האתר",
+        "registryId": "projects_screen.edit_site",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "projectsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "projectsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(projectsProvider.notifier).switchProject(p.id, outgoingCart: outgoing)",
+        "effect": "write → projectsProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(smartCartProvider.notifier).loadSnapshot(incoming)",
+        "effect": "write → smartCartProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'עברת לפרויקט: ${p.name}')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showModalBottomSheet<void>(context: context, backgroundColor: Colors.transpar…",
+        "effect": "open → showModalBottomSheet"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "projectId"
+    ],
+    "untangle": []
+  }
+}

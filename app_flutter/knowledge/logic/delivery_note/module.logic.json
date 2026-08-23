@@ -1,0 +1,147 @@
+{
+  "module": "delivery_note",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/delivery_note.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "_fmtDate",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime d) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildDeliveryNoteRows"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'${d.day}/${d.month}/${d.year}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(DateTime d)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildDeliveryNoteRows",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Order order) -> List<({String label, String value})>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_fmtDate",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "rows = <({String label, String value})>[(label: 'מספר הזמנה', value: order.id), (label: 'לקוח', …"
+          },
+          {
+            "kind": "branch",
+            "detail": "if order.site.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if order.shipTo.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if order.createdAt != null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final l in order.lines"
+          },
+          {
+            "kind": "compute",
+            "detail": "head = l.emoji.isEmpty ? l.name : '${l.emoji} ${l.name}'"
+          },
+          {
+            "kind": "effect",
+            "detail": "rows.add((label: head, value: '${l.qty} יח\\''))"
+          },
+          {
+            "kind": "branch",
+            "detail": "if order.notes.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "rows"
+          }
+        ]
+      },
+      "floor": [
+        "add"
+      ],
+      "contract": {
+        "input": "(Order order)",
+        "output": "List<({String label, String value})>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "deliveryNoteTitle",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Order order) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'תעודת משלוח — ${order.id}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Order order)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

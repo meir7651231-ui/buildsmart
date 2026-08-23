@@ -1,0 +1,421 @@
+{
+  "screen": "courier_dashboard_screen",
+  "source": "courier_dashboard_screen.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "name": "CourierDashboardScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🛵 שליח",
+            "registryId": "courier.dash.appbar_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier.dash.exit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ יציאה",
+            "registryId": "courier.dash.exit",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🛵"
+          },
+          {
+            "kind": "cfgText",
+            "text": "הרכב שלי היום",
+            "registryId": "courier.gate.vehicle_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בחר רכב כדי להתחיל את המשמרת — רשימת המשלוחים תסונן לפי הקיבולת",
+            "registryId": "courier.gate.vehicle_sub",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "המשלוחים שלך להיום",
+            "registryId": "courier.dash.subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הרכב שלי היום",
+            "registryId": "courier.dash.vehicle_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [
+          "🛵"
+        ],
+        "summary": "registry 7 · mapped 7/7 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "workerNotifsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "docsGateOverrideProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "courierDocsReadyProvider(session.username)"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "courierProfileProvider.select((m) => m[session.username]?.preferredHaul ?? '')"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CourierProfileScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "CourierSettingsScreen"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "visibleOrderIdsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "fulfillmentProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "courierProfileProvider.select((m) => m[session.username]?.displayName ?? '')"
+          },
+          {
+            "kind": "action",
+            "via": "showPodSheet",
+            "target": "showPodSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showCourierDeliveryDetailSheet",
+            "target": "showCourierDeliveryDetailSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "rewardsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "fulfillmentProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(CourierProfileScreen.route())",
+            "effect": "navigate → CourierProfileScreen"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(CourierSettingsScreen.route())",
+            "effect": "navigate → CourierSettingsScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showCourierDeliveryDetailSheet(context, o.id)",
+            "effect": "open → showCourierDeliveryDetailSheet"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius",
+        "confirmDestructive",
+        "courierDocsReadyProvider",
+        "haulInfo",
+        "jsonDecode",
+        "jsonEncode",
+        "kbCourierDashboardNodes",
+        "setState",
+        "stampCourierClock",
+        "vehicleCanCarry"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom",
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_VehicleButton",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "★ מועדף",
+            "registryId": "courier.vehicle.preferred",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "haul",
+          "on",
+          "onTap",
+          "preferred"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CourierJobCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "cfgRadius",
+        "fMoney",
+        "haulInfo",
+        "onAdvance"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "order",
+          "podCaptured",
+          "splitInto",
+          "onAdvance",
+          "onPod",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_FlatCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "child"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CourierNotifsBell",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "_courierUnreadCountProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showCourierNotifsSheet",
+            "target": "showCourierNotifsSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showCourierNotifsSheet(context)",
+            "effect": "open → showCourierNotifsSheet"
+          }
+        ]
+      },
+      "floor": [
+        "playInAppNotifFeedback"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Stat",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "value",
+          "label"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 7,
+    "total": 7,
+    "summary": "7/7",
+    "entries": [
+      {
+        "id": "courier.dash.appbar_title",
+        "ok": true,
+        "atom": "CourierDashboardScreen"
+      },
+      {
+        "id": "courier.dash.exit",
+        "ok": true,
+        "atom": "CourierDashboardScreen"
+      },
+      {
+        "id": "courier.gate.vehicle_title",
+        "ok": true,
+        "atom": "CourierDashboardScreen"
+      },
+      {
+        "id": "courier.gate.vehicle_sub",
+        "ok": true,
+        "atom": "CourierDashboardScreen"
+      },
+      {
+        "id": "courier.dash.subtitle",
+        "ok": true,
+        "atom": "CourierDashboardScreen"
+      },
+      {
+        "id": "courier.dash.vehicle_title",
+        "ok": true,
+        "atom": "CourierDashboardScreen"
+      },
+      {
+        "id": "courier.vehicle.preferred",
+        "ok": true,
+        "atom": "_VehicleButton"
+      }
+    ]
+  }
+}

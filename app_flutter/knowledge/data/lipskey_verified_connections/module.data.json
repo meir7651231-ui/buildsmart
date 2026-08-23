@@ -1,0 +1,235 @@
+{
+  "module": "lipskey_verified_connections",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/lipskey_verified_connections.dart",
+  "entityCount": 4,
+  "entities": [
+    {
+      "entity": "EndType",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "hdpeCompression",
+            "type": "EndType",
+            "required": false
+          },
+          {
+            "name": "pexPress",
+            "type": "EndType",
+            "required": false
+          },
+          {
+            "name": "copperPress",
+            "type": "EndType",
+            "required": false
+          },
+          {
+            "name": "bspMale",
+            "type": "EndType",
+            "required": false
+          },
+          {
+            "name": "bspFemale",
+            "type": "EndType",
+            "required": false
+          },
+          {
+            "name": "drainOpening",
+            "type": "EndType",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 6 values: hdpeCompression · pexPress · copperPress · bspMale · bspFemale · drainOpening"
+        ]
+      }
+    },
+    {
+      "entity": "WaterSystem",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "supply",
+            "type": "WaterSystem",
+            "required": false
+          },
+          {
+            "name": "drainage",
+            "type": "WaterSystem",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 2 values: supply · drainage"
+        ]
+      }
+    },
+    {
+      "entity": "ConnectorEnd",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "type",
+            "type": "EndType",
+            "required": true
+          },
+          {
+            "name": "size",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "system",
+            "type": "WaterSystem",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "type",
+            "ref": "EndType",
+            "kind": "enum"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "directMatesWith",
+          "pipeSharedWith"
+        ]
+      },
+      "contract": {
+        "required": [
+          "type",
+          "size"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "VerifiedSpec",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "sku",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "ends",
+            "type": "List<ConnectorEnd>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "material",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "pressureRating",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "pexType",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "maxTempC",
+            "type": "double",
+            "required": false,
+            "default": "40"
+          },
+          {
+            "name": "systemOverride",
+            "type": "WaterSystem?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "endSystems",
+            "type": "Set<WaterSystem>",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "ends",
+            "ref": "ConnectorEnd",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "systemOverride",
+            "ref": "WaterSystem",
+            "kind": "enum"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "compatibleWith",
+          "suitableForTemp"
+        ]
+      },
+      "contract": {
+        "required": [
+          "sku",
+          "ends",
+          "material"
+        ],
+        "defaults": {
+          "maxTempC": "40"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

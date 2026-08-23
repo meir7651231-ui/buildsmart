@@ -1,6 +1,15 @@
+import 'package:buildsmart/data/contractor_seeds.dart';
+import 'package:buildsmart/data/repositories/backend.dart'
+    show useFirebaseBackend;
+import 'package:buildsmart/screens/store_screen.dart'
+    show StoreSection, storeSectionProvider;
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +54,10 @@ class PersistedIdSet extends StateNotifier<Set<String>> {
     state = {...state}..remove(id);
     _persist();
   }
+
+  /// Re-reads the persisted set from SharedPreferences — the honest
+  /// pull-to-refresh path (no artificial delay).
+  Future<void> reload() => _load();
 }
 
 final notifSectionProvider =
@@ -57,14 +70,25 @@ final notifDismissedIdsProvider =
     StateNotifierProvider<PersistedIdSet, Set<String>>(
   (_) => PersistedIdSet('bs.notif-dismissed.v1'),
 );
+
+/// Shipment notifications the user follows ('עקוב' chip) — a real local
+/// follow toggle, persisted so it survives restarts.
+final notifFollowedIdsProvider =
+    StateNotifierProvider<PersistedIdSet, Set<String>>(
+  (_) => PersistedIdSet('bs.notif-followed.v1'),
+);
 final notifSearchQueryProvider = StateProvider<String>((_) => '');
 final notifExpandedGroupsProvider = StateProvider<Set<String>>((_) => {});
 
 // Derived provider — used by home_shell badge.
 final notifUnreadCountProvider = Provider<int>((ref) {
+  // ערוץ 'התראות בתוך האפליקציה' כבוי → חיווי ההתראות החדשות בתוך
+  // האפליקציה (בדג' ה'עדכונים' + מונה 'חדשות') מושתק — האפקט הכן של
+  // מתג ערוצי-הקבלה (notif_settings_screen).
+  if (!ref.watch(notifSettingsProvider).pushEnabled) return 0;
   final readIds = ref.watch(notifReadIdsProvider);
   final dismissedIds = ref.watch(notifDismissedIdsProvider);
-  return _kNotifs
+  return _activeNotifs
       .where(
         (n) =>
             n.badge > 0 &&
@@ -86,6 +110,20 @@ typedef _Notif = ({
   int badge,
   NotifSection type,
   bool highPriority,
+});
+
+/// PUBLIC, leaf-ownable projection of one active notification — the four fields
+/// the floating keyboard's deriver needs to build a phase-4 individual-notif chip
+/// (label glyph + title + the type filter it belongs to). A deliberate SUBSET of
+/// the private [_Notif] (no preview/time/badge/dateGroup/highPriority): the
+/// keyboard mirrors WHICH notifications exist, not their full row chrome, and a
+/// leaf file cannot import the private `_Notif` shape. Projected by
+/// [activeNotifViewsProvider]; see that provider for the empty-feed contract.
+typedef NotifLite = ({
+  String id,
+  String emoji,
+  String title,
+  NotifSection type,
 });
 
 class _ShowMore {
@@ -210,16 +248,46 @@ const List<_Notif> _kNotifs = [
   ),
 ];
 
+/// S2 (launch demo-seed-isolation) — the feed actually consumed by the badge,
+/// the list, and the read/dismiss-all actions. `_kNotifs` is 100% FABRICATED
+/// demo content (hardcoded order #1234 / shipment #892 / …) that MUST NOT be
+/// shown to a real signed-in user as if it were their own. When the live backend
+/// is ON there is no notifications source yet, so the honest answer is an EMPTY
+/// feed (mirrors `site_firebase` `projects() => const []`); when it is OFF (demo)
+/// the verbatim `_kNotifs` is returned unchanged, so the demo path is identical.
+/// clean/company2 ([kProfileEmptySeeds]) start with the same honest EMPTY feed.
+List<_Notif> get _activeNotifs =>
+    (useFirebaseBackend || kProfileEmptySeeds) ? const [] : _kNotifs;
+
+/// PUBLIC projection of the active feed to [NotifLite] views — the load-bearing
+/// seam (plan section 10) the floating keyboard's deriver consumes to build the
+/// phase-4 INDIVIDUAL-notification chips (Tier 1) alongside the 6 static type
+/// chips (Tier 2). Mirrors the SAME `_activeNotifs` source the badge, the list,
+/// and the read/dismiss-all actions consume, so it can never diverge from what
+/// the screen shows: when the live backend is ON `_activeNotifs` is already
+/// `const []` (the honest empty feed — no notifications source yet, mirroring
+/// `site_firebase`'s `projects() => const []`), so this emits `const []` too;
+/// when it is OFF (demo) it projects the verbatim `_kNotifs` to lite views, so
+/// the demo path stays identical. Pure derived `Provider` (reads no other
+/// provider), so it never churns: `_activeNotifs` is a compile-time-stable
+/// getter, so the projection is recomputed only when the provider is first read.
+final activeNotifViewsProvider = Provider<List<NotifLite>>(
+  (_) => <NotifLite>[
+    for (final n in _activeNotifs)
+      (id: n.id, emoji: n.emoji, title: n.title, type: n.type),
+  ],
+);
+
 /// Marks every notification as read. Called from AppBar 3-dot menu.
 void markAllNotifsRead(WidgetRef ref) {
   ref.read(notifReadIdsProvider.notifier).set(
-      _kNotifs.map((n) => n.id).toSet());
+      _activeNotifs.map((n) => n.id).toSet());
 }
 
 /// Dismisses every notification. Called from AppBar 3-dot menu.
 void dismissAllNotifs(WidgetRef ref) {
   ref.read(notifDismissedIdsProvider.notifier).set(
-      _kNotifs.map((n) => n.id).toSet());
+      _activeNotifs.map((n) => n.id).toSet());
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -270,7 +338,7 @@ List<_Notif> _filtered({
   required Set<NotifSection> mutedTypes,
   required NotifImportance importance,
 }) =>
-    _kNotifs
+    _activeNotifs
         .where((n) =>
             passesImportance(importance, n.highPriority) &&
             notifPasses(
@@ -331,6 +399,79 @@ String? _actionLabel(NotifSection type) => switch (type) {
       _ => null,
     };
 
+/// T6 — replaces the prior "בבנייה" toast on safety/budget notification actions
+/// with real inline content (R9 sheet). Consumes T0 seeds from `data/`:
+/// `kSafetyTips` (§5) + `kBudgetThresholds` (§3/§4).
+void showNotifActionSheet(
+  BuildContext context,
+  NotifSection section,
+  String preview,
+) {
+  final isSafety = section == NotifSection.safety;
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetCtx) => SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                isSafety ? 'תדריך בטיחות יומי' : 'התראת תקציב',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              if (isSafety) ...[
+                for (final tip in kSafetyTips)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Text(
+                      tip,
+                      style: const TextStyle(fontSize: 14, height: 1.4),
+                    ),
+                  ),
+                const SizedBox(height: 14),
+                // composite-hide: the whole "אשר תדריך" button hides on this
+                // element id (a sheet action, not navigation → critical:false).
+                CfgVisible(
+                  'notifications_screen.approve_brief',
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.of(sheetCtx).pop();
+                      showToast(context, 'התדריך אושר');
+                    },
+                    child: const CfgText(
+                      'notifications_screen.approve_brief',
+                      'אשר תדריך',
+                    ),
+                  ),
+                ),
+              ] else ...[
+                Text(preview, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 12),
+                const CfgText(
+                  'notifications_screen.budget_note',
+                  'התראות תקציב מופעלות אוטומטית בעת חציית הספים:',
+                  style: TextStyle(fontSize: 13, color: Color(0xFF666666)),
+                ),
+                const SizedBox(height: 8),
+                for (final t in kBudgetThresholds)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(t.label, style: const TextStyle(fontSize: 14)),
+                  ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 // ─── screen ──────────────────────────────────────────────────────────────────
 
 class NotificationsScreen extends ConsumerStatefulWidget {
@@ -379,7 +520,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             child: _headerVisible
                 ? const Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [_Header(), _NotifSearchBar(), _SectionChipsRow()],
+                    children: [_Header()],
                   )
                 : const SizedBox.shrink(),
           ),
@@ -405,7 +546,7 @@ class _Header extends ConsumerWidget {
     final readIds = ref.watch(notifReadIdsProvider);
     final dismissedIds = ref.watch(notifDismissedIdsProvider);
     final unread = ref.watch(notifUnreadCountProvider);
-    final hasReadNotDismissed = _kNotifs.any(
+    final hasReadNotDismissed = _activeNotifs.any(
       (n) => readIds.contains(n.id) && !dismissedIds.contains(n.id),
     );
 
@@ -414,10 +555,11 @@ class _Header extends ConsumerWidget {
       child: Row(
         children: [
           const Expanded(
-            child: Text(
+            child: CfgText(
+              'notifications_screen.screen_title',
               'התראות',
               style: TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -448,7 +590,7 @@ class _Header extends ConsumerWidget {
               tooltip: 'סמן הכל כנקרא',
               onPressed: () {
                 ref.read(notifReadIdsProvider.notifier).set(
-                    _kNotifs.map((n) => n.id).toSet());
+                    _activeNotifs.map((n) => n.id).toSet());
               },
             ),
           ],
@@ -460,7 +602,14 @@ class _Header extends ConsumerWidget {
                 size: 22,
               ),
               tooltip: 'נקה נקראו',
-              onPressed: () {
+              onPressed: () async {
+                final ok = await confirmDestructive(
+                  context,
+                  title: 'ניקוי התראות שנקראו?',
+                  message: 'ההתראות שנקראו יוסרו מהרשימה לצמיתות.',
+                  confirmLabel: 'נקה',
+                );
+                if (!ok || !context.mounted) return;
                 ref.read(notifDismissedIdsProvider.notifier).set(
                     Set<String>.from(ref.read(notifDismissedIdsProvider))
                       ..addAll(ref.read(notifReadIdsProvider)));
@@ -472,181 +621,18 @@ class _Header extends ConsumerWidget {
   }
 }
 
-// ─── search bar ──────────────────────────────────────────────────────────────
-
-class _NotifSearchBar extends ConsumerStatefulWidget {
-  const _NotifSearchBar();
-
-  @override
-  ConsumerState<_NotifSearchBar> createState() => _NotifSearchBarState();
-}
-
-class _NotifSearchBarState extends ConsumerState<_NotifSearchBar> {
-  late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final hasText = ref.watch(notifSearchQueryProvider).isNotEmpty;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-      child: TextField(
-        controller: _controller,
-        textDirection: TextDirection.rtl,
-        onChanged: (v) =>
-            ref.read(notifSearchQueryProvider.notifier).state = v,
-        decoration: InputDecoration(
-          hintText: 'חיפוש התראות...',
-          hintStyle: const TextStyle(color: Color(0xFF888888)),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Color(0xFF888888),
-            size: 20,
-          ),
-          suffixIcon: hasText
-              ? IconButton(
-                  icon: const Icon(
-                    Icons.close,
-                    color: Color(0xFF888888),
-                    size: 18,
-                  ),
-                  onPressed: () {
-                    _controller.clear();
-                    ref.read(notifSearchQueryProvider.notifier).state = '';
-                  },
-                )
-              : null,
-          filled: true,
-          fillColor: const Color(0xFFF5F5F5),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: const BorderSide(color: BsTokens.brand, width: 1.5),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── section chips ───────────────────────────────────────────────────────────
-
-class _SectionChipsRow extends ConsumerWidget {
-  const _SectionChipsRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final section = ref.watch(notifSectionProvider);
-
-    void select(NotifSection s) =>
-        ref.read(notifSectionProvider.notifier).state = s;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _Pill(
-              label: 'הכל',
-              active: section == NotifSection.all,
-              onTap: () => select(NotifSection.all),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '📦 משלוחים',
-              active: section == NotifSection.shipments,
-              onTap: () => select(NotifSection.shipments),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '🛒 הזמנות',
-              active: section == NotifSection.orders,
-              onTap: () => select(NotifSection.orders),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '🦺 בטיחות',
-              active: section == NotifSection.safety,
-              onTap: () => select(NotifSection.safety),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '💰 תקציב',
-              active: section == NotifSection.budget,
-              onTap: () => select(NotifSection.budget),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '🎁 מבצעים',
-              active: section == NotifSection.deals,
-              onTap: () => select(NotifSection.deals),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: active ? Colors.white : const Color(0xFFAAAAAA),
-              fontSize: 13,
-              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ─── list ────────────────────────────────────────────────────────────────────
+
+/// Honest pull-to-refresh: re-reads the persisted notification state (read /
+/// dismissed / followed id-sets) from SharedPreferences and completes when
+/// the re-read is done — no artificial delay, no fake network spinner.
+Future<void> _reloadNotifState(WidgetRef ref) async {
+  await Future.wait([
+    ref.read(notifReadIdsProvider.notifier).reload(),
+    ref.read(notifDismissedIdsProvider.notifier).reload(),
+    ref.read(notifFollowedIdsProvider.notifier).reload(),
+  ]);
+}
 
 class _NotifList extends ConsumerWidget {
   const _NotifList();
@@ -671,11 +657,102 @@ class _NotifList extends ConsumerWidget {
       expandedKeys,
     );
 
+    // Snooze suppression: when snoozed, hide all rows and show a muted banner.
+    if (ns.isSnoozedNow) {
+      final until = DateTime.fromMillisecondsSinceEpoch(ns.snoozeUntilMs);
+      final untilLabel =
+          '${until.hour.toString().padLeft(2, '0')}:${until.minute.toString().padLeft(2, '0')}';
+      return RefreshIndicator(
+        color: BsTokens.brand,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        onRefresh: () => _reloadNotifState(ref),
+        child: LayoutBuilder(
+          builder: (_, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🔕', style: TextStyle(fontSize: 48)),
+                    const SizedBox(height: 12),
+                    const CfgText(
+                      'notifications_screen.snooze_title',
+                      'התראות מושתקות',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'מושתק עד $untilLabel',
+                      style: const TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Quiet-hours suppression: when inside the configured quiet window, hide all
+    // rows and show a dedicated muted banner.
+    if (ns.isInQuietHours) {
+      return RefreshIndicator(
+        color: BsTokens.brand,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        onRefresh: () => _reloadNotifState(ref),
+        child: LayoutBuilder(
+          builder: (_, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🌙', style: TextStyle(fontSize: 48)),
+                    const SizedBox(height: 12),
+                    const CfgText(
+                      'notifications_screen.quiet_title',
+                      'שעות שקט פעילות',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const CfgText(
+                      'notifications_screen.quiet_sub',
+                      'מושתק בשעות השקט',
+                      style: TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     if (items.isEmpty) {
       return RefreshIndicator(
         color: BsTokens.brand,
-        backgroundColor: const Color(0xFFFFFFFF),
-        onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        onRefresh: () => _reloadNotifState(ref),
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -687,16 +764,18 @@ class _NotifList extends ConsumerWidget {
                   children: [
                     Text('🔔', style: TextStyle(fontSize: 48)),
                     SizedBox(height: 12),
-                    Text(
+                    CfgText(
+                      'notifications_screen.empty_title',
                       'אין התראות',
                       style: TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(height: 6),
-                    Text(
+                    CfgText(
+                      'notifications_screen.empty_sub',
                       'כשיהיו עדכונים — הם יופיעו כאן',
                       style: TextStyle(
                         color: Color(0xFF888888),
@@ -714,8 +793,8 @@ class _NotifList extends ConsumerWidget {
 
     return RefreshIndicator(
       color: BsTokens.brand,
-      backgroundColor: const Color(0xFFFFFFFF),
-      onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      onRefresh: () => _reloadNotifState(ref),
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: items.length,
@@ -782,7 +861,7 @@ class _ShowMoreRow extends ConsumerWidget {
               ..add(showMore.groupKey);
       },
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(76, 8, 16, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(76, 8, 16, 8),
         child: Text(
           'הצג עוד ${showMore.hiddenCount} ↓',
           style: const TextStyle(
@@ -822,8 +901,11 @@ class _DismissibleRow extends ConsumerWidget {
         notifier.add(id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('התראה נמחקה'),
-            backgroundColor: const Color(0xFFF5F5F5),
+            content: const CfgText(
+              'notifications_screen.deleted_toast',
+              'התראה נמחקה',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'ביטול',
@@ -838,28 +920,6 @@ class _DismissibleRow extends ConsumerWidget {
   }
 }
 
-class _MiniPill extends StatelessWidget {
-  const _MiniPill({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-        height: 36,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        alignment: Alignment.center,
-        child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
-      ),
-    );
-  }
-}
-
 class _NotifRow extends ConsumerWidget {
   const _NotifRow({required this.notif});
 
@@ -870,6 +930,8 @@ class _NotifRow extends ConsumerWidget {
     final readIds = ref.watch(notifReadIdsProvider);
     final isRead = readIds.contains(notif.id);
     final isUnread = notif.badge > 0 && !isRead;
+    final isFollowed =
+        ref.watch(notifFollowedIdsProvider).contains(notif.id);
     final actionLabel = _actionLabel(notif.type);
 
     Future<void> showLongPressMenu() async {
@@ -895,9 +957,10 @@ class _NotifRow extends ConsumerWidget {
                 children: [
                   Icon(Icons.done, color: Colors.black54, size: 20),
                   SizedBox(width: 12),
-                  Text(
+                  CfgText(
+                    'notifications_screen.mark_read',
                     'סמן כנקרא',
-                    style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                    style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
                   ),
                 ],
               ),
@@ -908,7 +971,8 @@ class _NotifRow extends ConsumerWidget {
               children: [
                 Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
                 SizedBox(width: 12),
-                Text(
+                CfgText(
+                  'notifications_screen.menu_delete',
                   'מחק',
                   style: TextStyle(color: Colors.redAccent, fontSize: 15),
                 ),
@@ -923,7 +987,15 @@ class _NotifRow extends ConsumerWidget {
       if (choice == 'read') {
         ref.read(notifReadIdsProvider.notifier).add(notif.id);
       } else if (choice == 'delete') {
-        ref.read(notifDismissedIdsProvider.notifier).add(notif.id);
+        final ok = await confirmDestructive(
+          context,
+          title: 'מחיקת התראה?',
+          message: 'ההתראה תימחק לצמיתות.',
+          confirmLabel: 'מחק',
+        );
+        if (ok && context.mounted) {
+          ref.read(notifDismissedIdsProvider.notifier).add(notif.id);
+        }
       }
     }
 
@@ -978,7 +1050,7 @@ class _NotifRow extends ConsumerWidget {
                             style: TextStyle(
                               color: notif.highPriority
                                   ? Colors.redAccent
-                                  : const Color(0xFF1A1A1A),
+                                  : BsTokens.inkLight,
                               fontSize: 16,
                               fontWeight: isUnread
                                   ? FontWeight.w700
@@ -1016,36 +1088,96 @@ class _NotifRow extends ConsumerWidget {
                         ),
                         if (actionLabel != null) ...[
                           const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              if (isUnread) {
-                                ref
-                                    .read(notifReadIdsProvider.notifier)
-                                    .add(notif.id);
-                              }
-                              showToast(context, '$actionLabel — בבנייה');
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: BsTokens.brand.withValues(alpha: 0.7),
+                          // 'עקוב' (shipments) — real local follow toggle,
+                          // persisted via notifFollowedIdsProvider
+                          // (bs.notif-followed.v1).
+                          if (notif.type == NotifSection.shipments)
+                            GestureDetector(
+                              onTap: () {
+                                final notifier = ref.read(
+                                  notifFollowedIdsProvider.notifier,
+                                );
+                                if (isFollowed) {
+                                  notifier.remove(notif.id);
+                                } else {
+                                  notifier.add(notif.id);
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
                                 ),
-                                borderRadius: BorderRadius.circular(10),
+                                decoration: BoxDecoration(
+                                  color: isFollowed
+                                      ? BsTokens.brand
+                                      : Colors.transparent,
+                                  border: Border.all(
+                                    color:
+                                        BsTokens.brand.withValues(alpha: 0.7),
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  isFollowed ? 'עוקב ✓' : actionLabel,
+                                  style: TextStyle(
+                                    color: isFollowed
+                                        ? Colors.white
+                                        : BsTokens.brand,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
-                              child: Text(
-                                actionLabel,
-                                style: const TextStyle(
-                                  color: BsTokens.brand,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                            )
+                          else
+                            GestureDetector(
+                              onTap: () {
+                                if (isUnread) {
+                                  ref
+                                      .read(notifReadIdsProvider.notifier)
+                                      .add(notif.id);
+                                }
+                                if (notif.type == NotifSection.safety ||
+                                    notif.type == NotifSection.budget) {
+                                  showNotifActionSheet(
+                                    context,
+                                    notif.type,
+                                    notif.preview,
+                                  );
+                                } else if (notif.type ==
+                                    NotifSection.orders) {
+                                  // 'אשר איסוף' → open Store → הזמנות tab.
+                                  ref
+                                      .read(storeSectionProvider.notifier)
+                                      .state = StoreSection.orders;
+                                  ref
+                                      .read(mainTabProvider.notifier)
+                                      .state = 3;
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color:
+                                        BsTokens.brand.withValues(alpha: 0.7),
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  actionLabel,
+                                  style: const TextStyle(
+                                    color: BsTokens.brand,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
                         ],
                         if (isUnread) ...[
                           const SizedBox(width: 8),

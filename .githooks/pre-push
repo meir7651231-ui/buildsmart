@@ -5,6 +5,14 @@
 REMOTE="$1"
 URL="$2"
 
+# ═══ ענפי-פרוטוקול — build web רץ רק על ענפים שבחרו לפרוטוקול ═══
+_PP_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+_PP_PROTO_BRANCHES=("claude/whats-happening-LyY9G")
+_PP_IS_PROTO=0
+for _pb in "${_PP_PROTO_BRANCHES[@]}"; do
+    [[ "$_PP_BRANCH" == "$_pb" ]] && _PP_IS_PROTO=1 && break
+done
+
 PROTECTED_REMOTES="main|master|production"
 
 while read local_ref local_sha remote_ref remote_sha; do
@@ -36,5 +44,33 @@ while read local_ref local_sha remote_ref remote_sha; do
         fi
     fi
 done
+
+# ═══ fast-gate: רץ רק על ענפי-פרוטוקול ═══
+if [[ "$_PP_IS_PROTO" -eq 0 ]]; then
+    exit 0
+fi
+
+# ═══ fast-gate (לקח #72): build web המלא רץ כאן (תנאי-יציאה-מהתור), לא ב-commit ═══
+# build web release (~2-4 דק') הוצא מ-pre-commit כדי לא להרוג איטרציה. כאן הוא רץ
+# פעם אחת לפני push — תופס שגיאות-build שלא נתפסו ב-analyze/test המקומי.
+REPO_ROOT_PP="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [[ -n "$REPO_ROOT_PP" && -z "${BUILDSMART_SKIP_BUILD:-}" ]]; then
+    for cand in "/home/user/flutter/bin" "/c/flutter/bin" "$HOME/flutter/bin" \
+                "/usr/local/flutter/bin" "/opt/homebrew/opt/flutter/bin" "/opt/flutter/bin"; do
+        [[ -d "$cand" ]] && PATH="$cand:$PATH"
+    done
+    if command -v flutter >/dev/null 2>&1 && [[ -d "$REPO_ROOT_PP/app_flutter" ]]; then
+        echo "  🏗️  pre-push: flutter build web --release ..."
+        if ( cd "$REPO_ROOT_PP/app_flutter" \
+             && bash "$REPO_ROOT_PP/scripts/gen_version.sh" 2>/dev/null \
+             && BUILD_PP=$(flutter build web --release --no-pub 2>&1) \
+             && ! echo "$BUILD_PP" | grep -qE "^Error|Failed to" ); then
+            echo "  ✅ build web עבר"
+        else
+            echo "❌ pre-push: build web נכשל — תקן לפני push (חירום: BUILDSMART_SKIP_BUILD=1)" >&2
+            exit 1
+        fi
+    fi
+fi
 
 exit 0

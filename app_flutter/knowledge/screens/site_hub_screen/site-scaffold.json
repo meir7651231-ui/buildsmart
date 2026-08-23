@@ -1,0 +1,45 @@
+{
+  "name": "_SiteScaffold",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "site_hub_screen.back",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ חזרה",
+        "registryId": "site_hub_screen.back",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": false,
+    "props": [
+      "appTitle",
+      "icon",
+      "title",
+      "sub",
+      "children",
+      "kbTools"
+    ],
+    "untangle": [
+      "KbScreen = shared component → separate atom"
+    ]
+  }
+}

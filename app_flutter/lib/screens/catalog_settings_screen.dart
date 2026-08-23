@@ -1,29 +1,59 @@
+import 'package:buildsmart/screens/home_content_reorder.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbCatalogSettingsNodes;
+import 'package:buildsmart/screens/legal_screen.dart';
+import 'package:buildsmart/screens/profile_screen.dart';
+import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/recent_searches.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Full-screen Catalog settings — 9 categories, ~40 leaves.
-/// All 22 new fields persisted via [catalogSettingsProvider].
+/// All 23 fields persisted via [catalogSettingsProvider].
 class CatalogSettingsScreen extends ConsumerWidget {
-  const CatalogSettingsScreen({super.key});
+  const CatalogSettingsScreen({super.key, this.showProfileRow = true});
 
-  static Route<void> route() =>
-      MaterialPageRoute<void>(builder: (_) => const CatalogSettingsScreen());
+  /// Whether to show the personal "הפרופיל שלי" row (→ contractor [ProfileScreen]).
+  /// Contractors see it (default true); the MANAGER opens the SAME No-Code
+  /// catalog/app admin WITHOUT it — a platform-admin must not land in a
+  /// contractor's profile context (governance #84: manager ≠ a contractor
+  /// persona). The S0 settings-button fix from MANAGER-BUILD-PLAN.md.
+  final bool showProfileRow;
+
+  static Route<void> route({bool showProfileRow = true}) =>
+      MaterialPageRoute<void>(
+        builder: (_) => CatalogSettingsScreen(showProfileRow: showProfileRow),
+      );
+
+  /// STABLE [KbScreen] tool list — built once so the floating-keyboard mirror
+  /// never re-registers on rebuild. Tree-shaken with the [KbScreen] path off-flag.
+  static final List<KbToolNode> _kbNodes = kbCatalogSettingsNodes();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+    // KbScreen: while this pushed route is front-most under [kKbGlobal], the
+    // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
+    // Pure pass-through (byte-identical) when the flag is off.
+    final Widget body = Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: const Text(
-          'הגדרות קטלוג',
+        title: const CfgText(
+          'catalog_settings_screen.t01',
+          'הגדרות',
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -38,20 +68,26 @@ class CatalogSettingsScreen extends ConsumerWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        children: const [
-          _SearchSection(),
-          _DisplaySection(),
-          _PricesSection(),
-          _FavoritesSection(),
-          _CatalogNotifSection(),
-          _UnitsSection(),
-          _SuppliersSection(),
-          _AiSection(),
-          _AccessibilitySection(),
-          SizedBox(height: 24),
+        children: [
+          // Personal profile row — hidden for the manager (platform-admin),
+          // shown for contractors (default). The rest is global No-Code config
+          // the manager legitimately owns (theme/region/prices/suppliers/AI/…).
+          if (showProfileRow) const _ProfileRow(),
+          const _ThemeSection(),
+          const _NotificationsSection(),
+          const _RegionSection(),
+          const _SearchSection(),
+          const _PricesSection(),
+          const _UnitsSection(),
+          const _SuppliersSection(),
+          const _AiSection(),
+          const _AccessibilitySection(),
+          const _InfoSection(),
+          const SizedBox(height: 24),
         ],
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
@@ -59,32 +95,279 @@ class CatalogSettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
+            title: const CfgText(
+              'catalog_settings_screen.t02',
               'איפוס הגדרות?',
-              style: TextStyle(color: Color(0xFF1A1A1A)),
+              style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
-              'כל הגדרות הקטלוג יוחזרו לברירת המחדל.',
+            content: const CfgText(
+              'catalog_settings_screen.t03',
+              'כל ההגדרות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+              // composite hide: whole cancel button vanishes, not just its label.
+              CfgVisible(
+                'catalog_settings_screen.t04',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const CfgText('catalog_settings_screen.t04', 'ביטול'),
+                ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text('אפס'),
+              // composite hide: whole reset button vanishes, not just its label.
+              CfgVisible(
+                'catalog_settings_screen.t05',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                  ),
+                  child: const CfgText('catalog_settings_screen.t05', 'אפס'),
+                ),
               ),
             ],
           ),
     );
     if ((ok ?? false) && context.mounted) {
       await ref.read(catalogSettingsProvider.notifier).reset();
+      await ref.read(appSettingsProvider.notifier).reset();
+      await ref.read(notifSettingsProvider.notifier).reset();
       if (context.mounted) showToast(context, 'הגדרות אופסו');
     }
+  }
+}
+
+// ─── 0. profile (account home — always visible, guest path) ──────────────────
+
+/// Tappable account row at the very top — opens [ProfileScreen] for everyone,
+/// including guests (so a guest can open the profile and register). Ported from
+/// the menu-dial ⚙️ → 👤 חשבון group, now surfaced as the settings home header.
+class _ProfileRow extends StatelessWidget {
+  const _ProfileRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      color: Theme.of(context).colorScheme.surface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: const Text('👤', style: TextStyle(fontSize: 22)),
+        title: const CfgText(
+          'catalog_settings_screen.t06',
+          'הפרופיל שלי',
+          style: TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_left, color: Colors.black54),
+        onTap: () => Navigator.of(context).push(ProfileScreen.route()),
+      ),
+    );
+  }
+}
+
+// ─── 0a. theme (ported from menu-dial — display → ערכת נושא) ──────────────────
+
+class _ThemeSection extends ConsumerWidget {
+  const _ThemeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider);
+    final catalog = ref.watch(catalogSettingsProvider);
+    final catalogN = ref.read(catalogSettingsProvider.notifier);
+    // #50 — ONE 'תצוגה ומיון' section: theme + home-order (appSettings) folded
+    // together with the catalog view/sort/grid/image controls (catalogSettings)
+    // from the former separate 'תצוגה ומיון' section.
+    return _SectionTile(
+      emoji: '📊',
+      title: 'תצוגה ומיון',
+      children: [
+        _RadioGroupRow<BsTheme>(
+          label: 'ערכת נושא',
+          value: settings.theme,
+          options: const [
+            _RadioOption(value: BsTheme.light, label: 'בהיר'),
+            _RadioOption(value: BsTheme.dark, label: 'כהה'),
+          ],
+          onChanged:
+              (v) => ref
+                  .read(appSettingsProvider.notifier)
+                  .update((s) => s.copyWith(theme: v)),
+        ),
+        _RadioGroupRow<CatalogViewMode>(
+          label: 'סוג תצוגה',
+          value: catalog.viewMode,
+          options: const [
+            _RadioOption(
+              value: CatalogViewMode.grid,
+              label: 'רשת (Grid)',
+              icon: Icons.grid_view,
+            ),
+            _RadioOption(
+              value: CatalogViewMode.list,
+              label: 'רשימה (List)',
+              icon: Icons.view_list_rounded,
+            ),
+          ],
+          onChanged: (v) => catalogN.update((s) => s.copyWith(viewMode: v)),
+        ),
+        // 🟢 WIRED — persisted default catalog ordering (real ProductSort set).
+        // Writing it persists the default AND updates the live catalog sort
+        // (catalogProductSortProvider) so the change is visible immediately.
+        _RadioGroupRow<ProductSort>(
+          label: 'מיון ברירת מחדל',
+          value: catalog.productSortDefault,
+          options: const [
+            _RadioOption(value: ProductSort.byOrder, label: 'ברירת מחדל'),
+            _RadioOption(value: ProductSort.nameAZ, label: 'שם א-ת'),
+            _RadioOption(value: ProductSort.nameZA, label: 'שם ת-א'),
+            _RadioOption(value: ProductSort.sku, label: 'מק"ט'),
+          ],
+          onChanged: (v) {
+            catalogN.update((s) => s.copyWith(productSortDefault: v));
+            ref.read(catalogProductSortProvider.notifier).state = v;
+          },
+        ),
+        _NumberRow(
+          label: 'עמודות בתצוגת רשת',
+          value: catalog.gridColumns,
+          min: 1,
+          max: 4,
+          suffix: '',
+          onChanged: (v) => catalogN.update((s) => s.copyWith(gridColumns: v)),
+        ),
+        _RadioGroupRow<CatalogImageSize>(
+          label: 'גודל תמונות',
+          value: catalog.imageSize,
+          // Each label renders at its own size so the difference is visible.
+          options: const [
+            _RadioOption(
+              value: CatalogImageSize.small,
+              label: 'קטן',
+              labelFontSize: 13,
+            ),
+            _RadioOption(
+              value: CatalogImageSize.medium,
+              label: 'בינוני',
+              labelFontSize: 15,
+            ),
+            _RadioOption(
+              value: CatalogImageSize.large,
+              label: 'גדול',
+              labelFontSize: 18,
+            ),
+          ],
+          onChanged: (v) => catalogN.update((s) => s.copyWith(imageSize: v)),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.swap_vert, color: BsTokens.brandDark),
+          title: const CfgText('catalog_settings_screen.t07', 'סידור מסך הבית'),
+          subtitle: const CfgText(
+            'catalog_settings_screen.t08',
+            'גרור לשנות את סדר המקטעים בבית',
+          ),
+          trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          onTap: () => Navigator.of(context).push(HomeContentReorder.route()),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── 0b. notifications (ported from menu-dial — 🔔 התראות) ────────────────────
+
+class _NotificationsSection extends ConsumerWidget {
+  const _NotificationsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notif = ref.watch(notifSettingsProvider);
+    final catalog = ref.watch(catalogSettingsProvider);
+    final catalogN = ref.read(catalogSettingsProvider.notifier);
+    // #50 — ONE 'התראות' section. The catalog-alert family folded in from the
+    // former separate 'התראות קטלוג'; the duplicate price-drop collapsed to the
+    // single canonical catalogSettings.notifPriceDrop ('ירידת מחיר במועדפים'),
+    // so the old typePriceDrops 'התראות תקציב' toggle is gone. Order/shipment
+    // updates moved to the orders world (#52) and are not shown here.
+    return _SectionTile(
+      emoji: '🔔',
+      title: 'התראות',
+      children: [
+        _SwitchRow(
+          label: 'מבצעים והטבות',
+          value: notif.typeDeals,
+          onChanged:
+              (v) => ref
+                  .read(notifSettingsProvider.notifier)
+                  .update((s) => s.copyWith(typeDeals: v)),
+        ),
+        _SwitchRow(
+          label: 'ירידת מחיר במועדפים',
+          value: catalog.notifPriceDrop,
+          onChanged:
+              (v) => catalogN.update((s) => s.copyWith(notifPriceDrop: v)),
+        ),
+        _SwitchRow(
+          label: 'חזר למלאי',
+          value: catalog.notifBackInStock,
+          onChanged:
+              (v) => catalogN.update((s) => s.copyWith(notifBackInStock: v)),
+        ),
+        _SwitchRow(
+          label: 'מלאי נמוך',
+          value: catalog.notifLowStock,
+          onChanged:
+              (v) => catalogN.update((s) => s.copyWith(notifLowStock: v)),
+        ),
+        _SwitchRow(
+          label: 'מוצרים חדשים בקטגוריה',
+          value: catalog.notifNewProducts,
+          onChanged:
+              (v) => catalogN.update((s) => s.copyWith(notifNewProducts: v)),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── 0c. region & language (ported from menu-dial — 🌐 אזור ושפה) ─────────────
+
+class _RegionSection extends ConsumerWidget {
+  const _RegionSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider);
+    return _SectionTile(
+      emoji: '🌐',
+      title: 'אזור ושפה',
+      children: [
+        _RadioGroupRow<BsLang>(
+          label: 'שפה',
+          // Only Hebrew is actually implemented (no real l10n yet); Arabic +
+          // English stay non-selectable and carry a "בקרוב" badge so the
+          // picker never fakes a language switch.
+          value: settings.lang,
+          options: const [
+            _RadioOption(value: BsLang.he, label: 'עברית'),
+            _RadioOption(value: BsLang.ar, label: 'العربية', enabled: false),
+            _RadioOption(value: BsLang.en, label: 'English', enabled: false),
+          ],
+          onChanged:
+              (v) => ref
+                  .read(appSettingsProvider.notifier)
+                  .update((s) => s.copyWith(lang: v)),
+        ),
+      ],
+    );
   }
 }
 
@@ -116,21 +399,21 @@ class _SearchSection extends ConsumerWidget {
                   .read(catalogSettingsProvider.notifier)
                   .update((s) => s.copyWith(quickFilterBar: v)),
         ),
-        _NumberRow(
-          label: 'רדיוס חיפוש',
-          value: settings.searchRadius,
-          min: 5,
-          max: 500,
-          suffix: 'ק"מ',
-          step: 25,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(searchRadius: v)),
-        ),
+        // 🔑 deferred — products carry no geo/location data and there is no
+        // device-location source wired, so a search radius would filter nothing.
+        // (searchRadius is persisted in CatalogSettings but kept unbound until a
+        // location source + per-product geo exist.)
+        const _PlaceholderRow(label: 'רדיוס חיפוש'),
         _ActionRow(
           label: 'ניקוי היסטוריה',
-          onTap: () {
+          onTap: () async {
+            final ok = await confirmDestructive(
+              context,
+              title: 'ניקוי היסטוריית חיפוש?',
+              message: 'היסטוריית החיפושים תימחק לצמיתות.',
+              confirmLabel: 'נקה',
+            );
+            if (!ok || !context.mounted) return;
             ref.read(recentSearchesProvider.notifier).clear();
             showToast(context, 'ההיסטוריה נוקתה');
           },
@@ -142,70 +425,7 @@ class _SearchSection extends ConsumerWidget {
 
 // ─── 2. display & sort ───────────────────────────────────────────────────────
 
-class _DisplaySection extends ConsumerWidget {
-  const _DisplaySection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(catalogSettingsProvider);
-    return _SectionTile(
-      emoji: '📊',
-      title: 'תצוגה ומיון',
-      children: [
-        _RadioGroupRow<CatalogViewMode>(
-          label: 'סוג תצוגה',
-          value: settings.viewMode,
-          options: const [
-            (value: CatalogViewMode.grid, label: 'רשת (Grid)'),
-            (value: CatalogViewMode.list, label: 'רשימה (List)'),
-          ],
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(viewMode: v)),
-        ),
-        _RadioGroupRow<CatalogSort>(
-          label: 'מיון ברירת מחדל',
-          value: settings.sortDefault,
-          options: const [
-            (value: CatalogSort.relevance, label: 'רלוונטיות'),
-            (value: CatalogSort.priceAsc, label: 'מחיר: זול → יקר'),
-            (value: CatalogSort.rating, label: 'דירוג גבוה'),
-            (value: CatalogSort.newest, label: 'חדש ביותר'),
-          ],
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(sortDefault: v)),
-        ),
-        _NumberRow(
-          label: 'עמודות בתצוגת רשת',
-          value: settings.gridColumns,
-          min: 1,
-          max: 4,
-          suffix: '',
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(gridColumns: v)),
-        ),
-        _RadioGroupRow<CatalogImageSize>(
-          label: 'גודל תמונות',
-          value: settings.imageSize,
-          options: const [
-            (value: CatalogImageSize.small, label: 'קטן'),
-            (value: CatalogImageSize.medium, label: 'בינוני'),
-            (value: CatalogImageSize.large, label: 'גדול'),
-          ],
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(imageSize: v)),
-        ),
-      ],
-    );
-  }
-}
+// (Former _DisplaySection merged into _ThemeSection · 'תצוגה ומיון' — #50.)
 
 // ─── 3. prices & currency ────────────────────────────────────────────────────
 
@@ -231,9 +451,9 @@ class _PricesSection extends ConsumerWidget {
           label: 'מטבע',
           value: settings.currency,
           options: const [
-            (value: CatalogCurrency.ils, label: '₪ שקל'),
-            (value: CatalogCurrency.usd, label: '\$ דולר'),
-            (value: CatalogCurrency.eur, label: '€ יורו'),
+            _RadioOption(value: CatalogCurrency.ils, label: '₪ שקל'),
+            _RadioOption(value: CatalogCurrency.usd, label: r'$ דולר'),
+            _RadioOption(value: CatalogCurrency.eur, label: '€ אירו'),
           ],
           onChanged:
               (v) => ref
@@ -248,110 +468,23 @@ class _PricesSection extends ConsumerWidget {
                   .read(catalogSettingsProvider.notifier)
                   .update((s) => s.copyWith(showUnitPrice: v)),
         ),
-        _SwitchRow(
-          label: 'השוואת מחירים בין ספקים',
-          value: settings.priceComparison,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(priceComparison: v)),
-        ),
+        // השוואת מחירים בין ספקים — needs live per-supplier price feeds
+        // (external service). Persisted via priceComparison but kept honest
+        // until the feed exists, so it stays a placeholder for now.
+        const _PlaceholderRow(label: 'השוואת מחירים בין ספקים'),
       ],
     );
   }
 }
 
-// ─── 4. favorites & lists ────────────────────────────────────────────────────
-
-class _FavoritesSection extends ConsumerWidget {
-  const _FavoritesSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(catalogSettingsProvider);
-    return _SectionTile(
-      emoji: '❤️',
-      title: 'מועדפים ורשימות',
-      children: [
-        _SwitchRow(
-          label: 'סנכרון מועדפים בין מכשירים',
-          value: settings.syncFavorites,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(syncFavorites: v)),
-        ),
-        _SwitchRow(
-          label: 'רשימות קנייה לפי פרויקט',
-          value: settings.listsPerProject,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(listsPerProject: v)),
-        ),
-        const _PlaceholderRow(label: 'שיתוף רשימה עם צוות'),
-        const _PlaceholderRow(label: 'יבוא / ייצוא רשימה'),
-        _SwitchRow(
-          label: 'התראה על שינוי מחיר במועדפים',
-          value: settings.priceChangeAlert,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(priceChangeAlert: v)),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── 5. catalog notifications ────────────────────────────────────────────────
-
-class _CatalogNotifSection extends ConsumerWidget {
-  const _CatalogNotifSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(catalogSettingsProvider);
-    return _SectionTile(
-      emoji: '🔔',
-      title: 'התראות קטלוג',
-      children: [
-        _SwitchRow(
-          label: 'ירידת מחיר במועדפים',
-          value: settings.notifPriceDrop,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(notifPriceDrop: v)),
-        ),
-        _SwitchRow(
-          label: 'חזר למלאי',
-          value: settings.notifBackInStock,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(notifBackInStock: v)),
-        ),
-        _SwitchRow(
-          label: 'מלאי נמוך',
-          value: settings.notifLowStock,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(notifLowStock: v)),
-        ),
-        _SwitchRow(
-          label: 'מוצרים חדשים בקטגוריה',
-          value: settings.notifNewProducts,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(notifNewProducts: v)),
-        ),
-      ],
-    );
-  }
-}
+// ─── 4. favorites & lists — REMOVED (#54) ───────────────────────────────────
+// The standalone 'מועדפים ורשימות' settings category was removed (owner #54).
+// Its price-alert is served by the canonical price-drop in 'התראות' (#50,
+// catalogSettings.notifPriceDrop); the four backend leaves (sync / share /
+// import-export / per-project lists) belong at the real favorites & lists
+// surfaces as server-ready seams, not a settings card — deferred until those
+// surfaces expose a settings slot. The catalogSettings.priceChangeAlert field
+// stays (back-compat), now without a toggle here.
 
 // ─── 6. units of measure ─────────────────────────────────────────────────────
 
@@ -361,6 +494,7 @@ class _UnitsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(catalogSettingsProvider);
+    final notifier = ref.read(catalogSettingsProvider.notifier);
     return _SectionTile(
       emoji: '📏',
       title: 'יחידות מידה',
@@ -369,26 +503,49 @@ class _UnitsSection extends ConsumerWidget {
           label: 'מערכת מידה',
           value: settings.unit,
           options: const [
-            (value: CatalogUnit.metric, label: 'מטרי (ס"מ / ק"ג)'),
-            (value: CatalogUnit.imperial, label: "אימפריאלי (אינץ' / לב')"),
+            _RadioOption(value: CatalogUnit.metric, label: 'מטרי (מ"מ / ס"מ)'),
+            _RadioOption(
+              value: CatalogUnit.imperial,
+              label: 'אימפריאלי (אינץ\')',
+            ),
+          ],
+          onChanged: (v) => notifier.update((s) => s.copyWith(unit: v)),
+        ),
+        // Both rows control the SAME persisted dimension format
+        // ([decimalFormat]): "פורמט מידות בכרטיס מוצר" is the on-card view of it
+        // and "פורמט הצגה" the general display format. They share one source of
+        // truth so they can never drift, and both genuinely re-render the card.
+        _RadioGroupRow<CatalogDecimalFormat>(
+          label: 'פורמט מידות בכרטיס מוצר',
+          value: settings.decimalFormat,
+          options: const [
+            _RadioOption(
+              value: CatalogDecimalFormat.decimal,
+              label: 'עשרוני (1.5)',
+            ),
+            _RadioOption(
+              value: CatalogDecimalFormat.fraction,
+              label: 'שבר (1½)',
+            ),
           ],
           onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(unit: v)),
+              (v) => notifier.update((s) => s.copyWith(decimalFormat: v)),
         ),
-        const _PlaceholderRow(label: 'פורמט מידות בכרטיס מוצר'),
         _RadioGroupRow<CatalogDecimalFormat>(
           label: 'פורמט הצגה',
           value: settings.decimalFormat,
           options: const [
-            (value: CatalogDecimalFormat.decimal, label: 'עשרוני (1.5)'),
-            (value: CatalogDecimalFormat.fraction, label: 'שברי (1½)'),
+            _RadioOption(
+              value: CatalogDecimalFormat.decimal,
+              label: 'עשרוני (1.5)',
+            ),
+            _RadioOption(
+              value: CatalogDecimalFormat.fraction,
+              label: 'שבר (1½)',
+            ),
           ],
           onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(decimalFormat: v)),
+              (v) => notifier.update((s) => s.copyWith(decimalFormat: v)),
         ),
       ],
     );
@@ -400,49 +557,52 @@ class _UnitsSection extends ConsumerWidget {
 class _SuppliersSection extends ConsumerWidget {
   const _SuppliersSection();
 
+  // #49 — the three BACKED preferences (maxDistance / minRating /
+  // localSuppliersOnly, fields already in CatalogSettings) are now REAL,
+  // persisted controls: the user's choice is remembered locally and is
+  // SERVER-READY — the catalog filter applies it automatically the moment the
+  // supplier side feeds per-product distance/rating identity. Storing the
+  // intent now is NOT faking: it is the preference the future filter honours.
+  // The two LIST rows (preferred / blocked suppliers) stay honest placeholders —
+  // they need per-supplier identity no local data carries yet; they auto-connect
+  // when that supplier feed exists.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(catalogSettingsProvider);
+    final notifier = ref.read(catalogSettingsProvider.notifier);
     return _SectionTile(
       emoji: '🏪',
       title: 'ספקים מועדפים',
       children: [
-        const _PlaceholderRow(label: 'ספקים מסומנים כמועדפים'),
-        const _PlaceholderRow(label: 'ספקים חסומים'),
         _NumberRow(
           label: 'מרחק מקסימלי',
           value: settings.maxDistance,
           min: 5,
-          max: 500,
-          suffix: 'ק"מ',
-          step: 25,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(maxDistance: v)),
+          max: 300,
+          suffix: ' ק"מ',
+          onChanged: (v) => notifier.update((s) => s.copyWith(maxDistance: v)),
         ),
         _RadioGroupRow<CatalogMinRating>(
           label: 'דירוג מינימלי',
           value: settings.minRating,
           options: const [
-            (value: CatalogMinRating.any, label: 'ללא הגבלה'),
-            (value: CatalogMinRating.three, label: '3+ כוכבים'),
-            (value: CatalogMinRating.four, label: '4+ כוכבים'),
-            (value: CatalogMinRating.five, label: '5 כוכבים'),
+            _RadioOption(value: CatalogMinRating.any, label: 'הכל'),
+            _RadioOption(value: CatalogMinRating.three, label: '3+'),
+            _RadioOption(value: CatalogMinRating.four, label: '4+'),
+            _RadioOption(value: CatalogMinRating.five, label: '5'),
           ],
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(minRating: v)),
+          onChanged: (v) => notifier.update((s) => s.copyWith(minRating: v)),
         ),
         _SwitchRow(
           label: 'ספקים מקומיים בלבד',
           value: settings.localSuppliersOnly,
           onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(localSuppliersOnly: v)),
+              (v) => notifier.update((s) => s.copyWith(localSuppliersOnly: v)),
         ),
+        // 🌐 server-ready seams — need per-supplier identity (none in local data
+        // yet); the picker activates when a supplier feed exists.
+        const _PlaceholderRow(label: 'ספקים מסומנים כמועדפים'),
+        const _PlaceholderRow(label: 'ספקים חסומים'),
       ],
     );
   }
@@ -450,48 +610,19 @@ class _SuppliersSection extends ConsumerWidget {
 
 // ─── 8. AI & recommendations ─────────────────────────────────────────────────
 
-class _AiSection extends ConsumerWidget {
+class _AiSection extends StatelessWidget {
   const _AiSection();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(catalogSettingsProvider);
-    return _SectionTile(
+  Widget build(BuildContext context) {
+    return const _SectionTile(
       emoji: '🤖',
-      title: 'AI והמלצות',
+      title: 'בינה מלאכותית והמלצות',
       children: [
-        _SwitchRow(
-          label: 'המלצות מבוססות AI',
-          value: settings.aiRecommendations,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(aiRecommendations: v)),
-        ),
-        _SwitchRow(
-          label: 'התאמה לפי היסטוריית הזמנות',
-          value: settings.historyBased,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(historyBased: v)),
-        ),
-        _SwitchRow(
-          label: 'סינון לפי פרויקט פעיל',
-          value: settings.activeProjectFilter,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(activeProjectFilter: v)),
-        ),
-        _SwitchRow(
-          label: 'חלופות זולות אוטומטיות',
-          value: settings.cheapAlternatives,
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(cheapAlternatives: v)),
-        ),
+        _PlaceholderRow(label: 'המלצות מבוססות בינה מלאכותית'),
+        _PlaceholderRow(label: 'התאמה לפי היסטוריית הזמנות'),
+        _PlaceholderRow(label: 'סינון לפי פרויקט פעיל'),
+        _PlaceholderRow(label: 'חלופות זולות אוטומטיות'),
       ],
     );
   }
@@ -521,9 +652,9 @@ class _AccessibilitySection extends ConsumerWidget {
           label: 'גודל טקסט (כל האפליקציה)',
           value: settings.textSize,
           options: const [
-            (value: CatalogTextSize.small, label: 'קטן'),
-            (value: CatalogTextSize.medium, label: 'בינוני'),
-            (value: CatalogTextSize.large, label: 'גדול'),
+            _RadioOption(value: CatalogTextSize.small, label: 'קטן'),
+            _RadioOption(value: CatalogTextSize.medium, label: 'בינוני'),
+            _RadioOption(value: CatalogTextSize.large, label: 'גדול'),
           ],
           onChanged:
               (v) => ref
@@ -551,6 +682,48 @@ class _AccessibilitySection extends ConsumerWidget {
   }
 }
 
+// ─── 10. info & legal (הגדרות › מידע — task #26) ─────────────────────────────
+
+class _InfoSection extends StatelessWidget {
+  const _InfoSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionTile(
+      emoji: 'ℹ️',
+      title: 'מידע',
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          title: const CfgText(
+            'catalog_settings_screen.t09',
+            'תנאי שימוש',
+            style: TextStyle(color: BsTokens.inkLight),
+          ),
+          trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          onTap:
+              () => Navigator.of(
+                context,
+              ).push(LegalScreen.route(initialTab: LegalTab.terms)),
+        ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          title: const CfgText(
+            'catalog_settings_screen.t10',
+            'מדיניות פרטיות',
+            style: TextStyle(color: BsTokens.inkLight),
+          ),
+          trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          onTap:
+              () => Navigator.of(
+                context,
+              ).push(LegalScreen.route(initialTab: LegalTab.privacy)),
+        ),
+      ],
+    );
+  }
+}
+
 // ─── shared widgets ──────────────────────────────────────────────────────────
 
 class _SectionTile extends StatelessWidget {
@@ -567,15 +740,25 @@ class _SectionTile extends StatelessWidget {
   // Count only functional rows — exclude "בבנייה" placeholders.
   int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
 
+  // For Apple review (kHideUnderConstruction) we render only the functional
+  // rows; the _PlaceholderRow tiles stay defined in code (reversible) but are
+  // hidden from the visible list.
+  List<Widget> get _visibleChildren =>
+      kHideUnderConstruction
+          ? children.where((w) => w is! _PlaceholderRow).toList()
+          : children;
+
   @override
   Widget build(BuildContext context) {
+    // A section whose every row is a hidden placeholder disappears entirely.
+    if (kHideUnderConstruction && _visibleChildren.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -609,12 +792,12 @@ class _SectionTile extends StatelessWidget {
           title: Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
           ),
-          children: children,
+          children: _visibleChildren,
         ),
       ),
     );
@@ -636,7 +819,7 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -654,7 +837,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
 
   final String label;
   final T value;
-  final List<({T value, String label})> options;
+  final List<_RadioOption<T>> options;
   final ValueChanged<T> onChanged;
 
   @override
@@ -669,24 +852,76 @@ class _RadioGroupRow<T> extends StatelessWidget {
             style: const TextStyle(color: Colors.black54, fontSize: 13),
           ),
         ),
-        ...options.map(
-          (o) => RadioListTile<T>(
+        ...options.map((o) {
+          final enabled = o.enabled;
+          // Disabled options stay un-selectable and carry a "בקרוב" badge so
+          // the picker is honest about what is actually implemented.
+          return RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Text(
-              o.label,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+            // Optional leading icon (e.g. grid/list view glyph) — null = no icon.
+            secondary:
+                o.icon == null
+                    ? null
+                    : Icon(
+                      o.icon,
+                      color: enabled ? BsTokens.inkLight : BsTokens.mutedLight,
+                    ),
+            title: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    o.label,
+                    // Per-option font size lets size pickers render their own
+                    // label at its own scale; defaults to the inherited size.
+                    style: TextStyle(
+                      color: enabled ? BsTokens.inkLight : BsTokens.mutedLight,
+                      fontSize: o.labelFontSize,
+                    ),
+                  ),
+                ),
+                if (!enabled) ...[
+                  const SizedBox(width: 8),
+                  const CfgText(
+                    'catalog_settings_screen.t11',
+                    'בקרוב',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                ],
+              ],
             ),
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
-            onChanged: (v) {
-              if (v != null) onChanged(v);
-            },
-          ),
-        ),
+            onChanged:
+                enabled
+                    ? (v) {
+                      if (v != null) onChanged(v);
+                    }
+                    : null,
+          );
+        }),
       ],
     );
   }
+}
+
+/// One option in a [_RadioGroupRow]. [enabled] gates selection (a disabled
+/// option shows a "בקרוב" badge); [icon] adds a leading glyph; [labelFontSize]
+/// renders the label at its own scale.
+class _RadioOption<T> {
+  const _RadioOption({
+    required this.value,
+    required this.label,
+    this.enabled = true,
+    this.icon,
+    this.labelFontSize,
+  });
+
+  final T value;
+  final String label;
+  final bool enabled;
+  final IconData? icon;
+  final double? labelFontSize;
 }
 
 class _PlaceholderRow extends StatelessWidget {
@@ -697,10 +932,11 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
-      trailing: const Text(
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      trailing: const CfgText(
+        'catalog_settings_screen.t12',
         'בבנייה',
-        style: TextStyle(color: Color(0xFF666666), fontSize: 12),
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),
       onTap: () => showToast(context, '$label — בבנייה'),
     );
@@ -730,11 +966,12 @@ class _NumberRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
+            tooltip: 'הפחת',
             icon: const Icon(Icons.remove, color: Colors.black54, size: 20),
             onPressed:
                 value > min
@@ -746,6 +983,7 @@ class _NumberRow extends StatelessWidget {
             style: const TextStyle(color: Colors.black54, fontSize: 14),
           ),
           IconButton(
+            tooltip: 'הוסף',
             icon: const Icon(Icons.add, color: Colors.black54, size: 20),
             onPressed:
                 value < max

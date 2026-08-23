@@ -1,0 +1,196 @@
+{
+  "name": "CourierDashboardScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🛵 שליח",
+        "registryId": "courier.dash.appbar_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "courier.dash.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ יציאה",
+        "registryId": "courier.dash.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🛵"
+      },
+      {
+        "kind": "cfgText",
+        "text": "הרכב שלי היום",
+        "registryId": "courier.gate.vehicle_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בחר רכב כדי להתחיל את המשמרת — רשימת המשלוחים תסונן לפי הקיבולת",
+        "registryId": "courier.gate.vehicle_sub",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "המשלוחים שלך להיום",
+        "registryId": "courier.dash.subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הרכב שלי היום",
+        "registryId": "courier.dash.vehicle_title",
+        "registryOk": true
+      }
+    ],
+    "registered": 7,
+    "unregistered": [
+      "🛵"
+    ],
+    "summary": "registry 7 · mapped 7/7 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerNotifsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "docsGateOverrideProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "courierDocsReadyProvider(session.username)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "courierProfileProvider.select((m) => m[session.username]?.preferredHaul ?? '')"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "CourierProfileScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "CourierSettingsScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "visibleOrderIdsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "fulfillmentProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "courierProfileProvider.select((m) => m[session.username]?.displayName ?? '')"
+      },
+      {
+        "kind": "action",
+        "via": "showPodSheet",
+        "target": "showPodSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showCourierDeliveryDetailSheet",
+        "target": "showCourierDeliveryDetailSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "rewardsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "fulfillmentProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(CourierProfileScreen.route())",
+        "effect": "navigate → CourierProfileScreen"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(CourierSettingsScreen.route())",
+        "effect": "navigate → CourierSettingsScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showCourierDeliveryDetailSheet(context, o.id)",
+        "effect": "open → showCourierDeliveryDetailSheet"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "confirmDestructive",
+    "courierDocsReadyProvider",
+    "haulInfo",
+    "jsonDecode",
+    "jsonEncode",
+    "kbCourierDashboardNodes",
+    "setState",
+    "stampCourierClock",
+    "vehicleCanCarry"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "KbScreen = shared component → separate atom",
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

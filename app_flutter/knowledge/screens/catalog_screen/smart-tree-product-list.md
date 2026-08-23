@@ -1,0 +1,242 @@
+# _SmartTreeProductList
+
+- **screen:** `catalog_screen`
+- **role:** section
+
+## עצם · object (43)
+
+> registry 42 · mapped 42/42 · **unregistered 1**
+
+- **text** "🌳 " · — לא-רשום
+- **cfgVisible** · `catalog_screen.t23` ✅
+- **cfgText** "מומלץ" · `catalog_screen.t23` ✅
+- **cfgVisible** · `catalog_screen.t24` ✅
+- **cfgText** "סגור" · `catalog_screen.t24` ✅
+- **cfgVisible** · `catalog_screen.t25` ✅
+- **cfgText** "סגור" · `catalog_screen.t25` ✅
+- **cfgText** "אין מותג תואם לסינון שנבחר" · `catalog_screen.t26` ✅
+- **cfgText** "📦 נתוני קטלוג" · `catalog.detail.dataHeader` ✅
+- **cfgVisible** · `catalog.action.proposal` ✅
+- **cfgText** "הצעת המחיר הועתקה" · `catalog_screen.t27` ✅
+- **cfgText** "📋 הצעה" · `catalog.action.proposal` ✅
+- **cfgVisible** · `catalog.action.draft` ✅
+- **cfgText** "✨ נסח" · `catalog.action.draft` ✅
+- **cfgVisible** · `catalog.action.howToBridge` ✅
+- **cfgText** "🔌 איך לגשר?" · `catalog.action.howToBridge` ✅
+- **cfgVisible** · `catalog.action.buildBom` ✅
+- **cfgText** "🔧 בנה לי קו (BOM)" · `catalog.action.buildBom` ✅
+- **cfgVisible** · `catalog_screen.t28` ✅
+- **cfgText** "🛒 + בטיחות לסל" · `catalog_screen.t28` ✅
+- **cfgVisible** · `catalog.action.addToProject` ✅
+- **cfgText** "➕ הוסף לפרויקט" · `catalog.action.addToProject` ✅
+- **cfgVisible** · `catalog_screen.t30` ✅
+- **cfgText** "נוסף ל-3 חדרים" · `catalog_screen.t29` ✅
+- **cfgText** "×3 חדרים" · `catalog_screen.t30` ✅
+- **cfgText** "תבניות:" · `catalog.templates.label` ✅
+- **cfgVisible** · `catalog_screen.t31` ✅
+- **cfgText** "📋 BOM פרויקט מלא" · `catalog_screen.t31` ✅
+- **cfgVisible** · `catalog_screen.t33` ✅
+- **cfgText** "הצעת מחיר לפרויקט הועתקה" · `catalog_screen.t32` ✅
+- **cfgText** "📋 הצעת מחיר לפרויקט" · `catalog_screen.t33` ✅
+- **cfgText** "תקינות נדרשת" · `catalog.detail.requiredStandards` ✅
+- **cfgText** "מה הקו צריך לחיבור" · `catalog.detail.connectionNeeds` ✅
+- **cfgText** "בדיקת קבלה (סיום התקנה)" · `catalog.detail.acceptanceCheck` ✅
+- **cfgText** "תקן ישראלי רלוונטי" · `catalog.detail.israeliStandard` ✅
+- **cfgText** "טעויות נפוצות וטיפים" · `catalog.detail.commonMistakes` ✅
+- **cfgVisible** · `catalog.action.saveVersion` ✅
+- **cfgText** "💾 שמור גרסה" · `catalog.action.saveVersion` ✅
+- **cfgText** "מתי לבחור איזה מותג" · `catalog.detail.brandGuide` ✅
+- **cfgText** "נצפו לאחרונה" · `catalog.detail.recentlyViewed` ✅
+- **cfgText** "⚡ פריטי חובה" · `catalog_screen.t34` ✅
+- **cfgText** "💡 פריטים אופציונליים" · `catalog_screen.t35` ✅
+- **cfgText** "💡 הקש על שלב כדי להדגיש את האביזרים שלו" · `catalog_screen.t36` ✅
+
+## חיבורים · connections (70)
+
+- **action** · `showModalBottomSheet` → `showModalBottomSheet`
+- **reads** · `read` → `smartTreeQueryProvider`
+- **writes** · `state=` → `smartTreeQueryProvider`
+- **writes** · `state=` → `smartTreeCatProvider`
+- **reads** · `watch` → `smartTreeQueryProvider.select((q) => q.trim())`
+- **reads** · `watch` → `catalogRepositoryProvider`
+- **reads** · `watch` → `catalogSystemFilterProvider`
+- **reads** · `read` → `cardSelectionProvider`
+- **reads** · `read` → `brandHistoryProvider`
+- **reads** · `read` → `cardAccStateProvider`
+- **reads** · `read` → `cardFilterStateProvider`
+- **reads** · `read` → `recentlyViewedProvider`
+- **reads** · `read` → `smartCartProvider`
+- **reads** · `read` → `catalogRepositoryProvider`
+- **reads** · `read` → `cardProjectsProvider`
+- **action** · `showDialog` → `showDialog`
+- **reads** · `watch` → `stageProgressProvider`
+- **reads** · `read` → `stageProgressProvider`
+- **gated-by** · `guard` → `prod == null`
+- **reads** · `watch` → `cardDetailModeProvider`
+- **reads** · `watch` → `projectModeProvider`
+- **writes** · `set` → `projectModeProvider`
+- **reads** · `watch` → `professionModeProvider`
+- **writes** · `set` → `professionModeProvider`
+- **reads** · `watch` → `savedConfigsProvider`
+- **reads** · `read` → `savedConfigsProvider`
+- **writes** · `toggle` → `savedConfigsProvider`
+- **gated-by** · `guard` → `ref.watch(claudeGatewayProvider) == null`
+- **reads** · `watch` → `claudeGatewayProvider`
+- **action** · `push` → `QuotePolishScreen`
+- **writes** · `toggle` → `cardDetailModeProvider`
+- **gated-by** · `guard` → `tags.isEmpty`
+- **gated-by** · `guard` → `note == null`
+- **gated-by** · `guard` → `warn == null`
+- **action** · `push` → `AdapterExplainScreen`
+- **reads** · `watch` → `smartCartProvider`
+- **gated-by** · `guard` → `cart.isEmpty`
+- **reads** · `watch` → `displayTempProvider`
+- **gated-by** · `guard` → `hw.total < 2`
+- **writes** · `state=` → `displayTempProvider`
+- **gated-by** · `guard` → `d == null`
+- **gated-by** · `guard` → `eff == null`
+- **gated-by** · `guard` → `mi == null`
+- **gated-by** · `guard` → `alt == null`
+- **gated-by** · `guard` → `c == null`
+- **gated-by** · `guard` → `types.isEmpty`
+- **gated-by** · `guard` → `line.isEmpty`
+- **gated-by** · `guard` → `text.isEmpty`
+- **gated-by** · `guard` → `anchors.length < 2`
+- **gated-by** · `const-flag` → `kit.isEmpty`
+- **writes** · `add` → `smartCartProvider`
+- **reads** · `watch` → `cardProjectsProvider`
+- **gated-by** · `guard` → `triggers.isEmpty`
+- **gated-by** · `guard` → `needs.isEmpty`
+- **gated-by** · `guard` → `checks.isEmpty`
+- **gated-by** · `guard` → `stds.isEmpty`
+- **gated-by** · `guard` → `tools.isEmpty`
+- **gated-by** · `guard` → `tips.isEmpty`
+- **gated-by** · `guard` → `fam.isEmpty`
+- **reads** · `watch` → `cardVersionsProvider`
+- **reads** · `read` → `cardVersionsProvider`
+- **gated-by** · `guard` → `guide.length < 2`
+- **reads** · `watch` → `recentlyViewedProvider`
+- **gated-by** · `guard` → `recent.isEmpty`
+- **gated-by** · `guard` → `rp == null`
+- **reads** · `read` → `intelBusProvider`
+- **action** · `showToast` → `showToast`
+- **reads** · `read` → `catalogSettingsProvider`
+- **gated-by** · `guard` → `p.stages.isEmpty`
+- **gated-by** · `guard` → `widget.items.isEmpty`
+
+## התנהגות · behaviour (46)
+
+- **onTap** → _verb_ `ref.read(cardSelectionProvider.notifier).setBrand(widget.product.key, b.name)` → write → cardSelectionProvider
+- **onTap** → _verb_ `ref.read(brandHistoryProvider.notifier).record(widget.product.key, b.name)` → write → brandHistoryProvider
+- **build** → _rule_ `if (prod == null)` → hidden (SizedBox.shrink)
+- **onTap** → _verb_ `ref.read(projectModeProvider.notifier).set(nextProjectMode(m))` → write → projectModeProvider
+- **onTap** → _verb_ `ref.read(professionModeProvider.notifier).set(nextProfessionMode(prof))` → write → professionModeProvider
+- **onTap** → _verb_ `ref.read(savedConfigsProvider.notifier).toggle(p.key, brand.name)` → write → savedConfigsProvider
+- **onTap** → _verb_ `ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: CfgText('c…` → open → showSnackBar
+- **build** → _rule_ `if (ref.watch(claudeGatewayProvider) == null)` → hidden (SizedBox.shrink)
+- **onTap** → _verb_ `Navigator.of(context).push(QuotePolishScreen.route(rawQuote: quoteTextFor(p, …` → navigate → QuotePolishScreen
+- **onTap** → _verb_ `ref.read(cardDetailModeProvider.notifier).toggle()` → write → cardDetailModeProvider
+- **build** → _rule_ `if (tags.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (note == null)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (warn == null)` → hidden (SizedBox.shrink)
+- **onTap** → _verb_ `Navigator.of(context).push(AdapterExplainScreen.route(productName: prod.nameH…` → navigate → AdapterExplainScreen
+- **build** → _rule_ `if (cart.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (hw.total < 2)` → hidden (SizedBox.shrink)
+- **onTap** → _verb_ `ref.read(displayTempProvider.notifier).state = cycleDisplayTemp(tempC)` → write → displayTempProvider
+- **build** → _rule_ `if (d == null)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (eff == null)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (mi == null)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (alt == null)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (c == null)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (types.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (line.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (text.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (anchors.length < 2)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (kit.isEmpty)` → hidden (SizedBox.shrink)
+- **onTap** → _verb_ `ref.read(smartCartProvider.notifier).add(SmartCartLine(productKey: p.key, pro…` → write → smartCartProvider
+- **onTap** → _verb_ `ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('הקו נוסף ל…` → open → showSnackBar
+- **onTap** → _verb_ `ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('נוסף ל"$pr…` → open → showSnackBar
+- **onTap** → _verb_ `ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('הוחלה תבני…` → open → showSnackBar
+- **build** → _rule_ `if (triggers.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (needs.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (checks.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (stds.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (tools.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (tips.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (fam.isEmpty)` → hidden (SizedBox.shrink)
+- **onTap** → _verb_ `ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('נשמר: "${b…` → open → showSnackBar
+- **build** → _rule_ `if (guide.length < 2)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (recent.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (rp == null)` → hidden (SizedBox.shrink)
+- **onPressed** → _verb_ `ref.read(smartCartProvider.notifier).add(SmartCartLine(productKey: p.key, pro…` → write → smartCartProvider
+- **onPressed** → _verb_ `showToast(context, '${p.name} · ${brand.name} (+${selectedAcc.length} אביזרים…` → toast
+- **build** → _rule_ `if (p.stages.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _rule_ `if (widget.items.isEmpty)` → hidden (SizedBox.shrink)
+
+## floor · external functions (50)
+
+- `acceptanceChecklistFor`
+- `adapterSuggestionFor`
+- `brandDecisionGuide`
+- `brandIsMetallic`
+- `brandSuitableForHot`
+- `bsOnAccent`
+- `buildInstallation`
+- `buildSafetyAccessories`
+- `catRow`
+- `chainArrowText`
+- `cheaperAlternativeBrand`
+- `complianceTriggersFor`
+- `complianceWhyHe`
+- `connectionExplainHe`
+- `connectionNeedsHe`
+- `connectionWarningHe`
+- `cycleDisplayTemp`
+- `discoveryTagsFor`
+- `durabilityRatingFor`
+- `estimatePressureDrop`
+- `filterSmartBySystem`
+- `frequentlyPairedTypesFor`
+- `groupThousands`
+- `hotWaterSuitabilityFor`
+- `installEffortFor`
+- `installTipsFor`
+- `installToolsFor`
+- `israeliStandardsFor`
+- `labelForProfession`
+- `labelForProjectMode`
+- `lineCostEstimateFor`
+- `lineFitFor`
+- `lineReadinessFromCounts`
+- `manufacturerInfoFor`
+- `mk`
+- `nextProfessionMode`
+- `nextProjectMode`
+- `onQtyChanged`
+- `onSelect`
+- `priceFor`
+- `projectQuoteText`
+- `projectTemplates`
+- `quoteTextFor`
+- `resolveDefaultBrandIndex`
+- `safetyKitItems`
+- `scoreBandColors`
+- `setState`
+- `smartCardSummaryHe`
+- `systemSafetyNoteHe`
+- `variantSiblingsOf`
+
+## חוזה-רכיב · contract + gaps
+
+- **extractable:** `needs-untangle`
+- **props:** `cat`
+- **untangle:**
+  - onCardDetailMode(…) callback instead of direct cardDetailModeProvider write
+  - onDisplayTemp(…) callback instead of direct displayTempProvider write
+  - onProfessionMode(…) callback instead of direct professionModeProvider write
+  - onProjectMode(…) callback instead of direct projectModeProvider write
+  - onSavedConfigs(…) callback instead of direct savedConfigsProvider write
+  - onSmartCart(…) callback instead of direct smartCartProvider write
+  - onSmartTreeCat(…) callback instead of direct smartTreeCatProvider write
+  - onSmartTreeQuery(…) callback instead of direct smartTreeQueryProvider write
+- **gaps:** 1 unregistered — "🌳 "

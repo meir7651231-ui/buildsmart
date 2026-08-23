@@ -1,0 +1,37 @@
+{
+  "matched": 6,
+  "total": 6,
+  "summary": "6/6",
+  "entries": [
+    {
+      "id": "smart_home_screen.add_to_cart",
+      "ok": true,
+      "atom": "_SmartTreeRow"
+    },
+    {
+      "id": "smart_home_screen.workpath_badge",
+      "ok": true,
+      "atom": "_WorkPath"
+    },
+    {
+      "id": "smart_home_screen.workpath_title",
+      "ok": true,
+      "atom": "_WorkPath"
+    },
+    {
+      "id": "smart_home_screen.workpath_sub",
+      "ok": true,
+      "atom": "_WorkPath"
+    },
+    {
+      "id": "smart_home_screen.install_title",
+      "ok": true,
+      "atom": "_InstallStudioHero"
+    },
+    {
+      "id": "smart_home_screen.install_sub",
+      "ok": true,
+      "atom": "_InstallStudioHero"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "name": "DescribeToCartScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🗣️ תאר עבודה → סל",
+        "registryId": "describe_to_cart_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💡 הפיצ'ר דורש חיבור לשרת.",
+        "registryId": "describe_to_cart_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ספר במילים שלך מה אתה צריך:",
+        "registryId": "describe_to_cart_screen.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "describe_to_cart_screen.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🔎"
+      },
+      {
+        "kind": "cfgText",
+        "text": "מצא לי את הסל",
+        "registryId": "describe_to_cart_screen.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "משהו השתבש — נסה שוב.",
+        "registryId": "describe_to_cart_screen.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "זוהתה העבודה, אך לחלקיה עדיין אין מק\"ט מקושר.",
+        "registryId": "describe_to_cart_screen.t06",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "לא זוהתה עבודה מתאימה — נסה לתאר אחרת.",
+        "registryId": "describe_to_cart_screen.t07",
+        "registryOk": true
+      }
+    ],
+    "registered": 8,
+    "unregistered": [
+      "🔎"
+    ],
+    "summary": "registry 8 · mapped 8/8 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "name": "_Body",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "מסך הבית שלי",
+        "registryId": "home_content_reorder.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "home_content_reorder.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "איפוס",
+        "registryId": "home_content_reorder.t04",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הסדר וההסתרות אופסו לברירת מחדל')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "setState",
+    "smartHomeSectionFor"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "ReorderableListView = shared component → separate atom"
+    ]
+  }
+}

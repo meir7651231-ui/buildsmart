@@ -1,0 +1,27 @@
+{
+  "matched": 4,
+  "total": 4,
+  "summary": "4/4",
+  "entries": [
+    {
+      "id": "daily_report_screen.copied",
+      "ok": true,
+      "atom": "DailyReportScreen"
+    },
+    {
+      "id": "daily_report_screen.title",
+      "ok": true,
+      "atom": "DailyReportScreen"
+    },
+    {
+      "id": "daily_report_screen.copy_send",
+      "ok": true,
+      "atom": "DailyReportScreen"
+    },
+    {
+      "id": "daily_report_screen.footer_note",
+      "ok": true,
+      "atom": "DailyReportScreen"
+    }
+  ]
+}

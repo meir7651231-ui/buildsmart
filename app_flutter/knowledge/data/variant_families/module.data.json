@@ -1,0 +1,139 @@
+{
+  "module": "variant_families",
+  "source": "../../../app_flutter/lib/data/variant_families.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "AttrKind",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "size",
+            "type": "AttrKind",
+            "required": false
+          },
+          {
+            "name": "color",
+            "type": "AttrKind",
+            "required": false
+          },
+          {
+            "name": "model",
+            "type": "AttrKind",
+            "required": false
+          },
+          {
+            "name": "subtype",
+            "type": "AttrKind",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 4 values: size · color · model · subtype"
+        ]
+      }
+    },
+    {
+      "entity": "VariantFamily",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "frame",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "kind",
+            "type": "AttrKind",
+            "required": true
+          },
+          {
+            "name": "brand",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "categoryHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "products",
+            "type": "List<LipskeyCatalogProduct>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "label",
+            "type": "String",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "count",
+            "type": "int",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "kind",
+            "ref": "AttrKind",
+            "kind": "enum"
+          },
+          {
+            "field": "products",
+            "ref": "LipskeyCatalogProduct",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "frame",
+          "kind",
+          "brand",
+          "categoryHe",
+          "page",
+          "products"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

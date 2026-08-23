@@ -1,0 +1,1170 @@
+{
+  "module": "plumbing_trade_seed",
+  "source": "lib/domain/seeds/plumbing_trade_seed.dart",
+  "atomCount": 19,
+  "caches": [
+    "_lipskeyCategoryToIdCache",
+    "_smartKeyToIdCache"
+  ],
+  "atoms": [
+    {
+      "fn": "_categoryId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String key) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_buildCategoryResolvers",
+          "plumbingCategories"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'$kPlumbingTradeId.cat.$key'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String key)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_systemId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WaterSystem s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "plumbingConnectorTypes"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'$kPlumbingTradeId.sys.${s.name}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(WaterSystem s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_connTypeId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(EndType e) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "plumbingCompatRules",
+          "plumbingConnectorTypes",
+          "plumbingProductSpecs"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'$kPlumbingTradeId.conn.${e.name}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(EndType e)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_galvanicGroup",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String m) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "plumbingProductSpecs"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "copper = {'נחושת', 'פליז'}"
+          },
+          {
+            "kind": "init",
+            "detail": "iron = {'פלדה', 'נירוסטה'}"
+          },
+          {
+            "kind": "precond",
+            "detail": "if copper.contains(m) → return 'copper-group'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if iron.contains(m) → return 'iron-group'"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String m)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if copper.contains(m) → return 'copper-group'",
+          "if iron.contains(m) → return 'iron-group'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_systemOfEndType",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(EndType e) -> WaterSystem",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "plumbingConnectorTypes"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ConnectorEnd(e, '').system"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorEnd"
+      ],
+      "contract": {
+        "input": "(EndType e)",
+        "output": "WaterSystem",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_buildCategoryResolvers",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          },
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_lipskeyCategoryToIdCache"
+          },
+          {
+            "kind": "cache",
+            "name": "_smartKeyToIdCache"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_categoryId",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_lipskeyCategoryToId",
+          "_smartKeyToId"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "lipskey = <String, String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "smart = <String, String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final n in kCatalogTree"
+          },
+          {
+            "kind": "effect",
+            "detail": "walk(n)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_lipskeyCategoryToIdCache = lipskey"
+          },
+          {
+            "kind": "effect",
+            "detail": "_smartKeyToIdCache = smart"
+          }
+        ]
+      },
+      "floor": [
+        "walk"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_lipskeyCategoryToId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Map<String, String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_lipskeyCategoryToIdCache",
+            "transitive": true
+          },
+          {
+            "kind": "cache",
+            "name": "_smartKeyToIdCache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_buildCategoryResolvers",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "plumbingProducts"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if _lipskeyCategoryToIdCache == null"
+          },
+          {
+            "kind": "return",
+            "detail": "_lipskeyCategoryToIdCache!"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, String>",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_smartKeyToId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Map<String, String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_lipskeyCategoryToIdCache",
+            "transitive": true
+          },
+          {
+            "kind": "cache",
+            "name": "_smartKeyToIdCache",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_buildCategoryResolvers",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "plumbingAccessories",
+          "plumbingFixtures"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if _smartKeyToIdCache == null"
+          },
+          {
+            "kind": "return",
+            "detail": "_smartKeyToIdCache!"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, String>",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingTrade",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Trade",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBrands"
+          },
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Trade(id: kPlumbingTradeId, nameHe: 'אינסטלציה', emoji: '🔧', color: kBrands.isEmpty ? 0x…"
+          }
+        ]
+      },
+      "floor": [
+        "Trade",
+        "map",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Trade",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingCategories",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TradeCategory>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          },
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          },
+          {
+            "kind": "const",
+            "name": "kUncategorizedCategoryId"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_categoryId",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <TradeCategory>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < kCatalogTree.length; i++"
+          },
+          {
+            "kind": "effect",
+            "detail": "walk(kCatalogTree[i], null, i)"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.add(TradeCategory(id: kUncategorizedCategoryId, tradeId: kPlumbingTradeId, titleHe: '…"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.sort((a, b) => a.id.compareTo(b.id))"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "TradeCategory",
+        "add",
+        "compareTo",
+        "sort",
+        "walk"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<TradeCategory>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingProducts",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TradeProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogProducts"
+          },
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          },
+          {
+            "kind": "const",
+            "name": "kUncategorizedCategoryId"
+          },
+          {
+            "kind": "global",
+            "name": "_lipskeyCategoryToIdCache",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_lipskeyCategoryToId",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "lipskeyMap = _lipskeyCategoryToId()"
+          },
+          {
+            "kind": "return",
+            "detail": "kCatalogProducts.map((p) => tradeProductFromLegacy(p, tradeId: kPlumbingTradeId, category…"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "map",
+        "sort",
+        "toList",
+        "tradeProductFromLegacy"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<TradeProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingAccessories",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<AccessoryRule>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          },
+          {
+            "kind": "const",
+            "name": "kUncategorizedCategoryId"
+          },
+          {
+            "kind": "global",
+            "name": "_smartKeyToIdCache",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_smartKeyToId",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "smartKeyMap = _smartKeyToId()"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <AccessoryRule>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final sp in kSmartProducts"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < sp.acc.length; i++"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.sort((a, b) => a.id.compareTo(b.id))"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "AccessoryRule",
+        "add",
+        "compareTo",
+        "sort"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<AccessoryRule>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingFixtures",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<SmartFixture>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          },
+          {
+            "kind": "const",
+            "name": "kUncategorizedCategoryId"
+          },
+          {
+            "kind": "global",
+            "name": "_smartKeyToIdCache",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_smartKeyToId",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "smartKeyMap = _smartKeyToId()"
+          },
+          {
+            "kind": "return",
+            "detail": "kSmartProducts.map((sp) => SmartFixture(id: '$kPlumbingTradeId.fixture.${sp.key}', tradeI…"
+          }
+        ]
+      },
+      "floor": [
+        "InstallStage",
+        "SmartBrandRef",
+        "SmartFixture",
+        "compareTo",
+        "map",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<SmartFixture>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingSystems",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<SystemDef>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<SystemDef>[SystemDef(id: '$kPlumbingTradeId.sys.supply', tradeId: kPlumbingTradeId, name…"
+          }
+        ]
+      },
+      "floor": [
+        "SystemDef",
+        "compareTo",
+        "sort"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<SystemDef>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingConnectorTypes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<ConnectorType>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_connTypeId",
+            "module": true
+          },
+          {
+            "name": "_systemId",
+            "module": true
+          },
+          {
+            "name": "_systemOfEndType",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "nameHe = <EndType, String>{EndType.hdpeCompression : 'הידוק HDPE', EndType.pexPress : 'PEX פרס', E…"
+          },
+          {
+            "kind": "init",
+            "detail": "sizesByType = <EndType, Set<String>>{for (final e in EndType.values) e : <String>{}}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final spec in kVerifiedSpecs.values"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final end in spec.ends"
+          },
+          {
+            "kind": "return",
+            "detail": "<ConnectorType>[for (final e in EndType.values) ConnectorType(id: _connTypeId(e), tradeId…"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorType",
+        "add",
+        "compareTo",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<ConnectorType>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingProductSpecs",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<ProductConnectorSpec>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_connTypeId",
+            "module": true
+          },
+          {
+            "name": "_galvanicGroup",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<ProductConnectorSpec>[for (final spec in kVerifiedSpecs.values) ProductConnectorSpec(pro…"
+          }
+        ]
+      },
+      "floor": [
+        "ProductConnectorSpec",
+        "ProductEnd",
+        "compareTo",
+        "sort"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<ProductConnectorSpec>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingCompatRules",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<CompatibilityRule>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_connTypeId",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "pairs = <(EndType, EndType, String)>[(EndType.bspMale, EndType.bspFemale, 'תבריג + PTFE'), (EndTy…"
+          },
+          {
+            "kind": "return",
+            "detail": "<CompatibilityRule>[for (final (a, b, label) in pairs) CompatibilityRule(id: '$kPlumbingT…"
+          }
+        ]
+      },
+      "floor": [
+        "CompatibilityRule",
+        "compareTo",
+        "sort"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<CompatibilityRule>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "plumbingCompletionRules",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<CompletionRule>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildPlumbingSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<CompletionRule>[CompletionRule(id: '$kPlumbingTradeId.completion.galvanic', tradeId: kPl…"
+          }
+        ]
+      },
+      "floor": [
+        "CompletionRule"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<CompletionRule>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildPlumbingSeed",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> TradesDoc",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBrands",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogProducts",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogTree",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPlumbingTradeId",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kUncategorizedCategoryId",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "plumbingTrade",
+            "module": true
+          },
+          {
+            "name": "plumbingCategories",
+            "module": true
+          },
+          {
+            "name": "plumbingProducts",
+            "module": true
+          },
+          {
+            "name": "plumbingAccessories",
+            "module": true
+          },
+          {
+            "name": "plumbingFixtures",
+            "module": true
+          },
+          {
+            "name": "plumbingConnectorTypes",
+            "module": true
+          },
+          {
+            "name": "plumbingSystems",
+            "module": true
+          },
+          {
+            "name": "plumbingProductSpecs",
+            "module": true
+          },
+          {
+            "name": "plumbingCompatRules",
+            "module": true
+          },
+          {
+            "name": "plumbingCompletionRules",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TradesDoc(trades: [plumbingTrade()], categories: plumbingCategories(), products: plumbing…"
+          }
+        ]
+      },
+      "floor": [
+        "TradesDoc"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TradesDoc",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

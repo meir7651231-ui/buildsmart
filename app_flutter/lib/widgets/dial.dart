@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -29,7 +30,7 @@ class DialRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bg = active ? BsTokens.brand : theme.colorScheme.surface;
-    final fg = active ? Colors.white : BsTokens.brand;
+    final fg = active ? bsOnAccent(context) : BsTokens.brand;
 
     return Semantics(
       label: label,
@@ -38,7 +39,7 @@ class DialRow extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(BsTokens.radiusCircle),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: BsTokens.space1),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -76,7 +77,8 @@ class DialRow extends StatelessWidget {
                 child: Text(
                   label,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: active ? Colors.white : theme.colorScheme.onSurface,
+                    color:
+                        active ? bsOnAccent(context) : theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -106,7 +108,7 @@ class DialColumn extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: BsTokens.space3),
             child: _StaggerIn(
-              delay: Duration(milliseconds: 28 * (reversed.length - 1 - i)),
+              delay: BsTokens.dialStaggerStep * (reversed.length - 1 - i),
               child: reversed[i],
             ),
           ),

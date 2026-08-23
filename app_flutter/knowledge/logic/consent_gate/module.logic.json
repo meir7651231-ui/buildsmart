@@ -1,0 +1,268 @@
+{
+  "module": "consent_gate",
+  "source": "lib/state/intel/consent_gate.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "analyticsConsentCurrent",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AppSettings s) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCurrentPolicyVersion"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "analyticsForwardEnabled"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "s.consentedPolicyVersion >= kCurrentPolicyVersion && s.privAnalytics"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(AppSettings s)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "needsConsentPrompt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AppSettings s) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCurrentPolicyVersion"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "s.consentedPolicyVersion < kCurrentPolicyVersion"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(AppSettings s)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "analyticsForwardEnabled",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AppSettings s) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCurrentPolicyVersion",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kIntelLive"
+          },
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "analyticsConsentCurrent",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "analyticsConsentCurrent(s) && useFirebaseBackend && kIntelLive"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(AppSettings s)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "presenceConsentCurrent",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AppSettings s) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCurrentPolicyVersion"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "presenceForwardEnabled"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "s.consentedPolicyVersion >= kCurrentPolicyVersion && s.privPresence"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(AppSettings s)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "presenceAllowedForRole",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? role) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "presenceForwardEnabled"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "role == null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String? role)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "presenceForwardEnabled",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AppSettings s, String? role) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCurrentPolicyVersion",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kIntelLive"
+          },
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "presenceConsentCurrent",
+            "module": true
+          },
+          {
+            "name": "presenceAllowedForRole",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "presenceConsentCurrent(s) && presenceAllowedForRole(role) && useFirebaseBackend && kIntel…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(AppSettings s, String? role)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "_StockRow",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "idLine = item.sku != null ? … : …",
+        "effect": "text: '🏷️ מק\"ט ${item.sku}${item.category != null ? ' · ${item.category}' : ''}' | 'ללא מק\"ט בקטלוג'"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "onToggle"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "item",
+      "available",
+      "onToggle",
+      "onRemove"
+    ],
+    "untangle": []
+  }
+}

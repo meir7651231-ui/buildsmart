@@ -1,0 +1,57 @@
+{
+  "name": "RoleRequestsInboxScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בקשות תפקיד",
+        "registryId": "role_requests_inbox_screen.t01",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "roleReviewerProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "pendingRoleRequestsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "authStateProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "clearAllRoleRequests",
+    "confirmDestructive",
+    "isOwnerEmail",
+    "reviewer",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

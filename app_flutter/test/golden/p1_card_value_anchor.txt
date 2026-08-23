@@ -1,0 +1,5 @@
+# flag-ON card value golden — evolves with P1 data edits
+cardColors=אדום|אפור|בז'|גרפיטי|ירוק|כחול|כתום|לבן|מט שחור|פרגמון|שחור|שחור ירוק|שחור מט
+materialsEnriched=נחושת|PPR|HDPE|רב-שכבתי|פקס|נירוסטה
+canonicalSizes=DN10|DN100|DN102|DN104|DN110|DN111|DN117|DN125|DN130|DN133|DN15|DN150|DN160|DN20|DN200|DN25|DN250|DN30|DN32|DN40|DN46|DN49|DN50|DN576|DN60|DN63|DN65|DN75|DN8|DN80|DN90|DN98
+categoryGroups=אחר|אטמים ומצופים|אסלות|ברזים ושסתומים|חיבורים ומחברים|מחלקים ונקודות מים|מקלחת ואמבטיה|ניקוז וסיפונים|סניטריים ושונות|ציוד וכלים|צינורות|תליה והתקנה

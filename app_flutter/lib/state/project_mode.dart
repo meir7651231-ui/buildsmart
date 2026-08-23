@@ -1,5 +1,5 @@
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Active project type — which "world" the user is shopping for. Persisted
 /// so the card can later hide irrelevant content (e.g. hide hot-water-only
@@ -7,35 +7,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// `commercial`). Roadmap step 52 (state layer; UI filter wiring TBD).
 enum ProjectMode { any, cold, hot, commercial }
 
-class ProjectModeNotifier extends StateNotifier<ProjectMode> {
+class ProjectModeNotifier extends StateNotifier<ProjectMode>
+    with EnumPrefsPersisted<ProjectMode> {
   ProjectModeNotifier() : super(ProjectMode.any) {
     _load();
   }
 
-  static const _key = 'bs.project-mode.v1';
+  @override
+  String get persistKey => 'bs.project-mode.v1';
+  @override
+  List<ProjectMode> get persistValues => ProjectMode.values;
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final s = prefs.getString(_key);
-    if (s == null) return;
-    for (final m in ProjectMode.values) {
-      if (m.name == s) {
-        state = m;
-        return;
-      }
-    }
+    final v = await readPersistedEnum();
+    if (v != null) state = v;
   }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, state.name);
-  }
-
-  void set(ProjectMode mode) {
-    if (state == mode) return;
-    state = mode;
-    _persist();
-  }
+  void set(ProjectMode mode) => setPersisted(mode);
 
   bool get isFiltering => state != ProjectMode.any;
 }

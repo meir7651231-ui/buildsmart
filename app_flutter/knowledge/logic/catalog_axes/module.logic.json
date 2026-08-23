@@ -1,0 +1,715 @@
+{
+  "module": "catalog_axes",
+  "source": "/home/user/buildsmart/app_flutter/lib/features/ring_dive/catalog_axes.dart",
+  "atomCount": 10,
+  "caches": [
+    "_pool",
+    "kCatAxisLabel"
+  ],
+  "atoms": [
+    {
+      "fn": "_methodHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String m) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "catAxesOf"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (m) {'thread' => 'הברגה', 'glue' => 'הדבקה/הלחמה', 'electrofusion' => 'ריתוך חשמלי…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String m)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "catAxesOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> Map<String, Set<String>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_methodHe",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "base = rdAxesOf(p)"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, Set<String>>{}"
+          },
+          {
+            "kind": "branch",
+            "detail": "if base['dept'] != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if base['cat'] != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if base['type'] != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if base['angle'] != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if base['color'] != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if base['brand'] != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "mat = materialOfEnriched(p)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if mat != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "put('group', <String>[groupOf(p)])"
+          },
+          {
+            "kind": "init",
+            "detail": "diamInch = <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "diamDn = <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "diamMm = <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "length = <String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "transition = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in productSizeTokens(p)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t.label.contains('×')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if diamInch.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if diamDn.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if diamMm.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if length.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if transition.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "dims = p.dims"
+          },
+          {
+            "kind": "branch",
+            "detail": "if dims != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "g = p.connectionGender"
+          },
+          {
+            "kind": "branch",
+            "detail": "if g != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = p.connectionMethod"
+          },
+          {
+            "kind": "branch",
+            "detail": "if m != null"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "contains",
+        "groupOf",
+        "materialOfEnriched",
+        "productSizeTokens",
+        "put",
+        "rdAxesOf",
+        "toString",
+        "trim"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "Map<String, Set<String>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "catPool",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<CatProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_pool"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_pool ??= <CatProduct>[for (final p in kDivePool) CatProduct(p)]"
+          }
+        ]
+      },
+      "floor": [
+        "CatProduct"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<CatProduct>",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "catMatching",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, String> cons, [List<CatProduct>? pool]) -> List<CatProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "catFindAxes",
+          "catOptsFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ps = pool ?? catPool"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cons.isEmpty → return ps"
+          },
+          {
+            "kind": "return",
+            "detail": "<CatProduct>[for (final rp in ps) if (cons.entries.every((e) => rp.has(e.key, e.value))) …"
+          }
+        ]
+      },
+      "floor": [
+        "every",
+        "has"
+      ],
+      "contract": {
+        "input": "(Map<String, String> cons, [List<CatProduct>? pool])",
+        "output": "List<CatProduct>",
+        "purity": "pure",
+        "precond": [
+          "if cons.isEmpty → return ps"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_sizeRank",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axis, String value) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_sizeAxes"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "catOptsFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_sizeAxes.contains(axis) → return -1"
+          },
+          {
+            "kind": "compute",
+            "detail": "t = parseSizeTokens(value)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t.isEmpty → return -1"
+          },
+          {
+            "kind": "return",
+            "detail": "(t.first.family.index * 100000) + t.first.mm.round()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "parseSizeTokens",
+        "round"
+      ],
+      "contract": {
+        "input": "(String axis, String value)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if !_sizeAxes.contains(axis) → return -1",
+          "if t.isEmpty → return -1"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "catOptsFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axis, Map<String, String> cons, [List<CatProduct>? pool, List<CatProduct>? matched]) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_sizeAxes",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kRdOrder"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "catMatching",
+            "module": true
+          },
+          {
+            "name": "_sizeRank",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "catFindAxes"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "base = matched ?? catMatching(cons, pool)"
+          },
+          {
+            "kind": "init",
+            "detail": "counts = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final rp in base"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = rp.axes[axis]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "ord = kRdOrder[axis] ?? const <String>[]"
+          },
+          {
+            "kind": "return",
+            "detail": "counts.keys.toList()..sort((a, b) {final sa = _sizeRank(axis, a); final sb = _sizeRank(ax…"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "indexOf",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(String axis, Map<String, String> cons, [List<CatProduct>? pool, List<CatProduct>? matched])",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "catAxisGain",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String axis, List<CatProduct> base) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "catFindAxes"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if base.isEmpty → return 0"
+          },
+          {
+            "kind": "init",
+            "detail": "counts = <String, int>{}"
+          },
+          {
+            "kind": "compute",
+            "detail": "total = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "present = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in base"
+          },
+          {
+            "kind": "compute",
+            "detail": "vals = p.axes[axis]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if vals == null → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "present++"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final v in vals"
+          },
+          {
+            "kind": "precond",
+            "detail": "if total == 0 || counts.length < 2 → return 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "h = 0.0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in counts.values"
+          },
+          {
+            "kind": "compute",
+            "detail": "pr = c / total"
+          },
+          {
+            "kind": "effect",
+            "detail": "h -= pr * (log(pr) / log(2))"
+          },
+          {
+            "kind": "return",
+            "detail": "h * (present / base.length)"
+          }
+        ]
+      },
+      "floor": [
+        "log"
+      ],
+      "contract": {
+        "input": "(String axis, List<CatProduct> base)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [
+          "if base.isEmpty → return 0",
+          "if total == 0 || counts.length < 2 → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "catFindAxes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, String> cons, [List<CatProduct>? pool]) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatAxes"
+          },
+          {
+            "kind": "const",
+            "name": "kRdOrder",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "catMatching",
+            "module": true
+          },
+          {
+            "name": "catOptsFor",
+            "module": true
+          },
+          {
+            "name": "catAxisGain",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "base = catMatching(cons, pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if base.length <= 1 → return const <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final ax in kCatAxes"
+          },
+          {
+            "kind": "branch",
+            "detail": "if cons.containsKey(ax.id) → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if catOptsFor(ax.id, cons, base, base).length >= 2"
+          },
+          {
+            "kind": "init",
+            "detail": "gain = <String, double>{for (final ax in out) ax : catAxisGain(ax, base)}"
+          },
+          {
+            "kind": "effect",
+            "detail": "out.sort((a, b) => gain[b]!.compareTo(gain[a]!))"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "compareTo",
+        "containsKey",
+        "sort"
+      ],
+      "contract": {
+        "input": "(Map<String, String> cons, [List<CatProduct>? pool])",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [
+          "if base.length <= 1 → return const <String>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatProduct.sku",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "product"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "product.sku"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatProduct.has",
+      "kind": "method",
+      "object": {
+        "signature": "(String ax, String value) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "axes"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "axes[ax]?.contains(value) ?? false"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String ax, String value)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

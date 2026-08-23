@@ -1,0 +1,118 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// BuildSmart Studio · Pillar 1 · Step 23 — CfgTheme (owner-overridable app theme).
+//
+// A [ThemeExtension] for the app-wide design the owner can override: brand /
+// surface / ink / radius / fontScale. Added to [AppTheme]'s extensions; its
+// DEFAULTS equal the current [BsTokens], so with no override the look is
+// byte-identical (answer-equivalent / golden-render). Read via the `cfg*`
+// accessors, each falling back to BsTokens when the extension is absent.
+//
+// (Placed in lib/theme/ — not state/studio — to keep the theme self-contained and
+// avoid a theme→state import; it is a pure theme object. The config→CfgTheme wiring
+// + the live editor are step 24.)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import 'package:buildsmart/theme/tokens.dart' show BsTokens;
+import 'package:flutter/material.dart';
+
+@immutable
+class CfgTheme extends ThemeExtension<CfgTheme> {
+  const CfgTheme({
+    this.brand = BsTokens.brand,
+    this.surface = BsTokens.cardLight,
+    this.ink = BsTokens.inkLight,
+    this.radius = BsTokens.radiusCard,
+    this.fontScale = 1.0,
+  });
+
+  /// Tolerant decode from the config structure layer (unknown/garbage ⇒ defaults).
+  factory CfgTheme.fromJson(Map<String, dynamic> j) => CfgTheme(
+        brand: _color(j['brand'], BsTokens.brand),
+        surface: _color(j['surface'], BsTokens.cardLight),
+        ink: _color(j['ink'], BsTokens.inkLight),
+        radius: (j['radius'] is num)
+            ? (j['radius'] as num).toDouble().clamp(0.0, 64.0)
+            : BsTokens.radiusCard,
+        fontScale: (j['fontScale'] is num)
+            ? (j['fontScale'] as num).toDouble().clamp(0.8, 1.6)
+            : 1.0,
+      );
+
+  final Color brand;
+  final Color surface;
+  final Color ink;
+  final double radius;
+  final double fontScale;
+
+  /// The inert default — exactly the current palette.
+  static const CfgTheme fallback = CfgTheme();
+
+  @override
+  CfgTheme copyWith({
+    Color? brand,
+    Color? surface,
+    Color? ink,
+    double? radius,
+    double? fontScale,
+  }) =>
+      CfgTheme(
+        brand: brand ?? this.brand,
+        surface: surface ?? this.surface,
+        ink: ink ?? this.ink,
+        // Defensive clamp at the choke-point: any owner/programmatic radius or
+        // fontScale stays in a sane range even if a caller passes out-of-bounds.
+        radius: (radius ?? this.radius).clamp(0.0, 64.0),
+        fontScale: (fontScale ?? this.fontScale).clamp(0.8, 1.6),
+      );
+
+  @override
+  CfgTheme lerp(ThemeExtension<CfgTheme>? other, double t) {
+    if (other is! CfgTheme) return this;
+    return CfgTheme(
+      brand: Color.lerp(brand, other.brand, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      ink: Color.lerp(ink, other.ink, t)!,
+      radius: radius + (other.radius - radius) * t,
+      fontScale: fontScale + (other.fontScale - fontScale) * t,
+    );
+  }
+
+  /// JSON for the config structure layer (Color → ARGB int).
+  Map<String, dynamic> toJson() => {
+        'brand': brand.toARGB32(),
+        'surface': surface.toARGB32(),
+        'ink': ink.toARGB32(),
+        'radius': radius,
+        'fontScale': fontScale,
+      };
+
+  static Color _color(Object? v, Color fallback) =>
+      v is int ? Color(v) : fallback;
+}
+
+/// Brand color — owner override, else [BsTokens.brand].
+Color cfgBrand(BuildContext context) =>
+    Theme.of(context).extension<CfgTheme>()?.brand ?? BsTokens.brand;
+
+/// Card/surface color — owner override, else [BsTokens.cardLight].
+Color cfgSurface(BuildContext context) =>
+    Theme.of(context).extension<CfgTheme>()?.surface ?? BsTokens.cardLight;
+
+/// Ink/text color — owner override, else [BsTokens.inkLight].
+Color cfgInk(BuildContext context) =>
+    Theme.of(context).extension<CfgTheme>()?.ink ?? BsTokens.inkLight;
+
+/// Corner radius — owner override, else [BsTokens.radiusCard].
+double cfgRadius(BuildContext context) =>
+    Theme.of(context).extension<CfgTheme>()?.radius ?? BsTokens.radiusCard;
+
+/// Global font scale — owner override, else 1.0.
+double cfgFontScale(BuildContext context) =>
+    Theme.of(context).extension<CfgTheme>()?.fontScale ?? 1.0;
+
+/// Fold the in-app text-size pref, the OS Dynamic-Type scale, and the owner's
+/// CfgTheme [ownerFontScale] into one clamped scaler (the range keeps RTL layouts
+/// intact). At all-1.0 it returns 1.0 ⇒ the owner's font-scale slider is identity
+/// until they move it (zero-regression). Pure, so the fold is unit-pinned.
+double combinedTextScale(double inApp, double os, double ownerFontScale) =>
+    (inApp * os * ownerFontScale).clamp(0.85, 1.35).toDouble();

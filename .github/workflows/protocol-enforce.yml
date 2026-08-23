@@ -4,7 +4,7 @@ name: Protocol Enforcement
 on:
   push:
     branches:
-      - 'claude/**'
+      - 'claude/whats-happening-LyY9G'
       - main
   pull_request:
     branches:
@@ -20,17 +20,24 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
+          flutter-version: '3.29.3'
           channel: 'stable'
 
       - name: Install dependencies
         working-directory: app_flutter
         run: flutter pub get
 
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
       - name: Gate 1 — Code analysis
         working-directory: app_flutter
         run: |
-          ANALYZE=$(flutter analyze --no-pub 2>&1)
+          # `flutter analyze` יוצא עם קוד 1 על *כל* lint (info/warning) של
+          # very_good_analysis, לא רק error. ה-shell כאן הוא `bash -e`, אז בלי
+          # `|| true` ההשמה הזו מתה לפני ה-grep וה-gate נכשל ללא שגיאת-קוד אמיתית.
+          # הגייט אוכף רק error אמיתי (`^error •`), כמו ה-pre-commit המקומי.
+          ANALYZE=$(flutter analyze --no-pub 2>&1 || true)
           if echo "$ANALYZE" | grep -qE "^error •"; then
             echo "❌ Code errors found:"
             echo "$ANALYZE" | grep -E "^error •"
@@ -40,7 +47,7 @@ jobs:
 
       - name: Gate 2 — All tests green
         working-directory: app_flutter
-        run: flutter test --no-pub
+        run: flutter test --no-pub --concurrency=4
 
       - name: Gate 3 — Web build succeeds
         working-directory: app_flutter
@@ -49,18 +56,21 @@ jobs:
       - name: Gate 4 — Versions synced
         working-directory: app_flutter
         run: |
-          V_SHELL=$(grep -oE "v[0-9]+\.[0-9]+" lib/screens/home_shell.dart | head -1)
+          # version.g.dart (אוטומטי, נוצר לעיל) ↔ STATUS (מקור-אמת) — לקח #72.
+          V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart | head -1)
           V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md | head -1)
-          if [[ "$V_SHELL" != "$V_STATUS" ]]; then
-            echo "❌ Version drift: home_shell=$V_SHELL, STATUS=$V_STATUS"
+          if [[ "$V_GEN" != "$V_STATUS" ]]; then
+            echo "❌ Version drift: version.g.dart=$V_GEN, STATUS=$V_STATUS"
             exit 1
           fi
-          echo "✅ Versions synced ($V_SHELL)"
+          echo "✅ Versions synced ($V_GEN)"
 
       - name: Gate 5 — No dark surfaces
         working-directory: app_flutter
         run: |
-          DARK=$(grep -rn "0xFF111111\|BsTokens.bgDark" lib/screens/ 2>/dev/null | grep -v "_test\|//")
+          # `|| true`: כשאין משטחים כהים (המצב התקין) grep מחזיר 1, ותחת `bash -e`
+          # ההשמה הזו הייתה הורגת את ה-gate. שורש זהה ל-Gate 1.
+          DARK=$(grep -rn "0xFF111111\|BsTokens.bgDark" lib/screens/ 2>/dev/null | grep -v "_test\|//" || true)
           if [[ -n "$DARK" ]]; then
             echo "❌ Dark surfaces found:"
             echo "$DARK"
@@ -91,3 +101,7 @@ jobs:
             exit 1
           fi
           echo "✅ Claude settings intact"
+
+      - name: Gate 8 — Android release build (לקח בנצי — debug מדלג על permission enforcement)
+        working-directory: app_flutter
+        run: flutter build appbundle --release --no-pub

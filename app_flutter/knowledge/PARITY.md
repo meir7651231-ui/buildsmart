@@ -99,11 +99,18 @@
 ## H · קטלוג והגדרות (חזק — בעיקר פערים)
 | ידע | Flutter | הטמעה |
 |---|---|---|
-| קטלוג 935 + חיפוש + גיליון + chips | ✅ | — |
+| קטלוג 3-brand (Lipskey 935 + Polyroll 774 + Huliot 170 = 1,879) + חיפוש + גיליון + chips | ✅ | brand #3 (חוליות SmartLock) נוסף 2026-06-01 — `REPORT_KATALGAN_HULIOT_2026-06-01.md` |
 | סטודיו-התקנות + BOM | ✅ (עמוק מהפרוטוטייפ) | — |
 | ~150 הגדרות | 🟡 ~20 פעילות | לחבר מה שיש נתון; השאר ⛔ ביושר |
 | מועדפים | 🟡 אין כפתור הוספה | להוסיף affordance |
 | מחירים | ⛔ `brandPrice=0` | חסום עד מקור-מחירים |
+
+### Brand catalogs (3 brands ingested, 17 leaves each tree)
+| brand | מוצרים | קטגוריות | מקור | קובץ |
+|---|---|---|---|---|
+| ליפסקי ברקן | 935 | 21 | Auto-extracted PDF (255 product range) | `lipskey_catalog.dart` |
+| פולירול / הלירומה | 774 | 14 | PolyrollHeliroma_HE_020325.pdf (96 עמ') | `polyroll_catalog.dart` |
+| חוליות SmartLock | 170 | 17 | Huliot_SmartLock_HE_150226.pdf (44 עמ') | `huliot_smartlock_catalog.dart` |
 
 ## I · חוצה-מערכת
 | ידע | מקור | Flutter | הטמעה |

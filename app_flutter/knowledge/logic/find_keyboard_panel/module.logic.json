@@ -1,0 +1,592 @@
+{
+  "module": "find_keyboard_panel",
+  "source": "lib/features/card_keyboard/find_keyboard_panel.dart",
+  "atomCount": 11,
+  "atoms": [
+    {
+      "fn": "FindKeyboardPanel.createState",
+      "kind": "method",
+      "object": {
+        "signature": "() -> ConsumerState<FindKeyboardPanel>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_FindKeyboardPanelState()"
+          }
+        ]
+      },
+      "floor": [
+        "_FindKeyboardPanelState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "ConsumerState<FindKeyboardPanel>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._onWord",
+      "kind": "method",
+      "object": {
+        "signature": "(String w) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_find"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_FindKeyboardPanelState._grid"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "setState(() => _find.pushWord(w))"
+          }
+        ]
+      },
+      "floor": [
+        "pushWord",
+        "setState"
+      ],
+      "contract": {
+        "input": "(String w)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._onChip",
+      "kind": "method",
+      "object": {
+        "signature": "(SignalChip c) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_find"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_FindKeyboardPanelState._grid"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "setState(() => _find.pushChip(c))"
+          }
+        ]
+      },
+      "floor": [
+        "pushChip",
+        "setState"
+      ],
+      "contract": {
+        "input": "(SignalChip c)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._back",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_find"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "setState(_find.pop)"
+          }
+        ]
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._reset",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_find"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "setState(_find.reset)"
+          }
+        ]
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._openProduct",
+      "kind": "method",
+      "object": {
+        "signature": "(LipskeyCatalogProduct product, List<LipskeyCatalogProduct> siblings) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "context"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_FindKeyboardPanelState._grid"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "open = widget.onOpenProduct"
+          },
+          {
+            "kind": "branch",
+            "detail": "if open != null"
+          }
+        ]
+      },
+      "floor": [
+        "open",
+        "showLipskeyProductSheet"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct product, List<LipskeyCatalogProduct> siblings)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_find"
+          },
+          {
+            "kind": "global",
+            "name": "widget",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_selectionRow",
+            "module": true
+          },
+          {
+            "name": "_topRow",
+            "module": true
+          },
+          {
+            "name": "_grid",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "v = _find.verdict"
+          },
+          {
+            "kind": "compute",
+            "detail": "cs = Theme.of(context).colorScheme"
+          },
+          {
+            "kind": "return",
+            "detail": "Directionality(textDirection: TextDirection.rtl, child: Padding(padding: const EdgeInsets…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxConstraints",
+        "Column",
+        "ConstrainedBox",
+        "Directionality",
+        "Padding",
+        "SingleChildScrollView",
+        "SizedBox",
+        "all",
+        "of"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._selectionRow",
+      "kind": "method",
+      "object": {
+        "signature": "(ColorScheme cs) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_find"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_FindKeyboardPanelState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "sel = _find.selection"
+          },
+          {
+            "kind": "return",
+            "detail": "Container(width: double.infinity, constraints: const BoxConstraints(minHeight: 44), paddi…"
+          }
+        ]
+      },
+      "floor": [
+        "BorderSide",
+        "BoxConstraints",
+        "BoxDecoration",
+        "Chip",
+        "Container",
+        "Text",
+        "TextStyle",
+        "Wrap",
+        "circular",
+        "symmetric",
+        "withValues"
+      ],
+      "contract": {
+        "input": "(ColorScheme cs)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._topRow",
+      "kind": "method",
+      "object": {
+        "signature": "(ColorScheme cs, CardVerdict v) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_find"
+          },
+          {
+            "kind": "global",
+            "name": "widget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_FindKeyboardPanelState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "hint = switch (v) {CardAskWords(: final questionHe) => questionHe, MergedKeys() => 'בחר כדי לצמצ…"
+          },
+          {
+            "kind": "return",
+            "detail": "Row(children: [TextButton(onPressed: () => widget.onExit?.call(), child: const Text('אבג'…"
+          }
+        ]
+      },
+      "floor": [
+        "Flexible",
+        "Icon",
+        "Row",
+        "Spacer",
+        "Text",
+        "TextButton",
+        "TextStyle",
+        "call",
+        "icon"
+      ],
+      "contract": {
+        "input": "(ColorScheme cs, CardVerdict v)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._grid",
+      "kind": "method",
+      "object": {
+        "signature": "(ColorScheme cs, CardVerdict v) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_find",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "context",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "widget",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_key",
+            "module": true
+          },
+          {
+            "name": "_onWord",
+            "module": true
+          },
+          {
+            "name": "_onChip",
+            "module": true
+          },
+          {
+            "name": "_openProduct",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_FindKeyboardPanelState.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "keys = <Widget>[]"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch v"
+          },
+          {
+            "kind": "return",
+            "detail": "Container(width: double.infinity, constraints: const BoxConstraints(minHeight: 140), padd…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxConstraints",
+        "BoxDecoration",
+        "Container",
+        "Wrap",
+        "add",
+        "all",
+        "circular",
+        "withValues"
+      ],
+      "contract": {
+        "input": "(ColorScheme cs, CardVerdict v)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_FindKeyboardPanelState._key",
+      "kind": "method",
+      "object": {
+        "signature": "(ColorScheme cs, String label, VoidCallback onTap, {bool accent = false, bool product = false}) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "context"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_FindKeyboardPanelState._grid"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "border = product || accent ? cs.primary : cs.outlineVariant"
+          },
+          {
+            "kind": "return",
+            "detail": "Material(color: cs.surface, borderRadius: BorderRadius.circular(8), child: InkWell(onTap:…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxConstraints",
+        "BoxDecoration",
+        "Container",
+        "Flexible",
+        "Icon",
+        "InkWell",
+        "Material",
+        "Row",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "all",
+        "circular",
+        "of",
+        "symmetric"
+      ],
+      "contract": {
+        "input": "(ColorScheme cs, String label, VoidCallback onTap, {bool accent = false, bool product = false})",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

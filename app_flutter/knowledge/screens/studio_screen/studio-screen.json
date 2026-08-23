@@ -1,0 +1,52 @@
+{
+  "name": "StudioScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🎬 סטודיו",
+        "registryId": "studio_screen_old.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ערוך את האפליקציה — עורך ניסיוני",
+        "registryId": "studio_screen_old.t02",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "studioCoEditorProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "StudioRulesScreen = shared component → separate atom",
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

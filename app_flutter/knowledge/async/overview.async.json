@@ -1,0 +1,2226 @@
+{
+  "providerCount": 310,
+  "asyncProviders": 10,
+  "syncProviders": 300,
+  "consumerCount": 2,
+  "errorFoldedConsumers": 2,
+  "exceptionCount": 4,
+  "providers": [
+    {
+      "name": "analyticsRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 196
+    },
+    {
+      "name": "catalogRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 182
+    },
+    {
+      "name": "catalogPagedBrowseProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 232
+    },
+    {
+      "name": "chatRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 98
+    },
+    {
+      "name": "claudeGatewayProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 133
+    },
+    {
+      "name": "customersRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 152
+    },
+    {
+      "name": "financeRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 215
+    },
+    {
+      "name": "ordersRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 155
+    },
+    {
+      "name": "visibleOrderIdsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 280
+    },
+    {
+      "name": "presenceRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 349
+    },
+    {
+      "name": "searchRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 62
+    },
+    {
+      "name": "siteRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 155
+    },
+    {
+      "name": "stockRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 96
+    },
+    {
+      "name": "studioConfigRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 53
+    },
+    {
+      "name": "usersLookupProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 150
+    },
+    {
+      "name": "usersRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 183
+    },
+    {
+      "name": "currentUserProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 218
+    },
+    {
+      "name": "cardKeyboardStackProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 18
+    },
+    {
+      "name": "cardPicksProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 52
+    },
+    {
+      "name": "compatGenderProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 38
+    },
+    {
+      "name": "compatSizeProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 39
+    },
+    {
+      "name": "compatMethodProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 40
+    },
+    {
+      "name": "compatSearchProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 41
+    },
+    {
+      "name": "chainProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 45
+    },
+    {
+      "name": "lineMaxTempProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 49
+    },
+    {
+      "name": "lineAccessoriesProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 53
+    },
+    {
+      "name": "connectivityProbeProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 74
+    },
+    {
+      "name": "offlineOrderQueueProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 342
+    },
+    {
+      "name": "studioCoEditorProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 36
+    },
+    {
+      "name": "catalogSystemFilterProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 17
+    },
+    {
+      "name": "budgetProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 156
+    },
+    {
+      "name": "catalogSectionProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 112
+    },
+    {
+      "name": "catalogSectionsListProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 115
+    },
+    {
+      "name": "catalogListItemsProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 121
+    },
+    {
+      "name": "searchQueryProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 129
+    },
+    {
+      "name": "smartTreeCatProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 310
+    },
+    {
+      "name": "smartTreeQueryProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 313
+    },
+    {
+      "name": "catalogDrillCatProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 380
+    },
+    {
+      "name": "catalogTreePathProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 384
+    },
+    {
+      "name": "catalogTreeQueryProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 388
+    },
+    {
+      "name": "catalogFacetProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 391
+    },
+    {
+      "name": "keyboardDiveQueryProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 400
+    },
+    {
+      "name": "diveResultsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 406
+    },
+    {
+      "name": "categorySummaryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 2050
+    },
+    {
+      "name": "variantsKindFilterProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6807
+    },
+    {
+      "name": "variantsValueFilterProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6808
+    },
+    {
+      "name": "variantsSizePatternProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6809
+    },
+    {
+      "name": "variantsSizeDiameterProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6810
+    },
+    {
+      "name": "variantsSizeSystemProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6811
+    },
+    {
+      "name": "variantsSizeGenderProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6812
+    },
+    {
+      "name": "variantsValuesExpandedProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6813
+    },
+    {
+      "name": "variantsActiveFamilyProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6814
+    },
+    {
+      "name": "variantsActiveSubGroupProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6817
+    },
+    {
+      "name": "variantsSizeSortAxisProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6830
+    },
+    {
+      "name": "_audienceChipIndexProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 51
+    },
+    {
+      "name": "updatesChatSearchProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 225
+    },
+    {
+      "name": "_chatFilterProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 226
+    },
+    {
+      "name": "visibleThreadsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 247
+    },
+    {
+      "name": "updatesChatOpenProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 335
+    },
+    {
+      "name": "chatArchivedIdsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 437
+    },
+    {
+      "name": "chatMutedIdsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 481
+    },
+    {
+      "name": "chatLastReadProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 563
+    },
+    {
+      "name": "chatHistoryClearedProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 644
+    },
+    {
+      "name": "_consentPromptScheduledProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 27
+    },
+    {
+      "name": "_courierUnreadCountProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 1284
+    },
+    {
+      "name": "courierClockProvider",
+      "kind": "FutureProvider",
+      "async": true,
+      "backing": "local",
+      "line": 109
+    },
+    {
+      "name": "podPhotosProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 137
+    },
+    {
+      "name": "homeDepartmentProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 26
+    },
+    {
+      "name": "deptFlatProductsProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 49
+    },
+    {
+      "name": "finderChipTipDismissedProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 27
+    },
+    {
+      "name": "cartBubbleDismissedProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 55
+    },
+    {
+      "name": "installStudioActionsProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 403
+    },
+    {
+      "name": "_customerViewsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 2139
+    },
+    {
+      "name": "customerCreditProvider",
+      "kind": "FutureProvider",
+      "async": true,
+      "backing": "local",
+      "line": 2237
+    },
+    {
+      "name": "fleetCreditProvider",
+      "kind": "FutureProvider",
+      "async": true,
+      "backing": "local",
+      "line": 2250
+    },
+    {
+      "name": "notifSectionProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 63
+    },
+    {
+      "name": "notifReadIdsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 65
+    },
+    {
+      "name": "notifDismissedIdsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 69
+    },
+    {
+      "name": "notifFollowedIdsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 76
+    },
+    {
+      "name": "notifSearchQueryProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 80
+    },
+    {
+      "name": "notifExpandedGroupsProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 81
+    },
+    {
+      "name": "notifUnreadCountProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 84
+    },
+    {
+      "name": "activeNotifViewsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 274
+    },
+    {
+      "name": "stockProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 99
+    },
+    {
+      "name": "stockTabProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 115
+    },
+    {
+      "name": "supplierSettingsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 1430
+    },
+    {
+      "name": "storeSectionProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 89
+    },
+    {
+      "name": "storeSearchQueryProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 92
+    },
+    {
+      "name": "storeOrderOpenProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 100
+    },
+    {
+      "name": "storeFavoritesProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 151
+    },
+    {
+      "name": "cartQtysProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 162
+    },
+    {
+      "name": "cartDeliveryProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 173
+    },
+    {
+      "name": "cartProjectProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 182
+    },
+    {
+      "name": "shipToProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 188
+    },
+    {
+      "name": "shipToPromptedProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 198
+    },
+    {
+      "name": "cartPaymentProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 208
+    },
+    {
+      "name": "cartNotesProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 213
+    },
+    {
+      "name": "storeProjectsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 418
+    },
+    {
+      "name": "storeOrdersProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 3820
+    },
+    {
+      "name": "supplierSubmitProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 27
+    },
+    {
+      "name": "updatesSubTabProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 12
+    },
+    {
+      "name": "taskClockProvider",
+      "kind": "FutureProvider",
+      "async": true,
+      "backing": "local",
+      "line": 94
+    },
+    {
+      "name": "taskRejectNotesProvider",
+      "kind": "FutureProvider",
+      "async": true,
+      "backing": "local",
+      "line": 118
+    },
+    {
+      "name": "taskRejectionLogProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 205
+    },
+    {
+      "name": "downloadTextFileProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 59
+    },
+    {
+      "name": "pickTextFileProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 64
+    },
+    {
+      "name": "reloadAppProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 68
+    },
+    {
+      "name": "taskPhotoPickerProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 122
+    },
+    {
+      "name": "weatherForecastProvider",
+      "kind": "FutureProvider",
+      "async": true,
+      "backing": "local",
+      "line": 93
+    },
+    {
+      "name": "abExperimentsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 75
+    },
+    {
+      "name": "analyticsLogProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 63
+    },
+    {
+      "name": "appSettingsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 337
+    },
+    {
+      "name": "attentionInputProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 24
+    },
+    {
+      "name": "attentionItemsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 53
+    },
+    {
+      "name": "authGatewayProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 780
+    },
+    {
+      "name": "authStateProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 795
+    },
+    {
+      "name": "currentUidProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 813
+    },
+    {
+      "name": "currentOrgIdProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 821
+    },
+    {
+      "name": "roleProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 831
+    },
+    {
+      "name": "roleSwitchLockedProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 846
+    },
+    {
+      "name": "usersProfileWriterProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 876
+    },
+    {
+      "name": "boardAuthProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 376
+    },
+    {
+      "name": "brandHistoryProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 66
+    },
+    {
+      "name": "cardAccStateProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 109
+    },
+    {
+      "name": "cardDetailModeProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 42
+    },
+    {
+      "name": "cardFilterStateProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 107
+    },
+    {
+      "name": "cardProjectsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 240
+    },
+    {
+      "name": "cardSelectionProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 44
+    },
+    {
+      "name": "cardVersionsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 103
+    },
+    {
+      "name": "cartListsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 141
+    },
+    {
+      "name": "catalogLensProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 13
+    },
+    {
+      "name": "catalogLocationProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 226
+    },
+    {
+      "name": "catalogSettingsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 405
+    },
+    {
+      "name": "catalogProductSortProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 417
+    },
+    {
+      "name": "chatSettingsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 367
+    },
+    {
+      "name": "comparisonSetProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 61
+    },
+    {
+      "name": "connectionStatusProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 224
+    },
+    {
+      "name": "courierAttendanceProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 76
+    },
+    {
+      "name": "courierFormsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 84
+    },
+    {
+      "name": "courierCertsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 91
+    },
+    {
+      "name": "courierProfileProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 188
+    },
+    {
+      "name": "crashLogProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 46
+    },
+    {
+      "name": "customerScoreProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 21
+    },
+    {
+      "name": "savedCustomersProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 197
+    },
+    {
+      "name": "savedCustomerForProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 202
+    },
+    {
+      "name": "deptLocationProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 104
+    },
+    {
+      "name": "activePersonaProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 5
+    },
+    {
+      "name": "mainTabProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 9
+    },
+    {
+      "name": "tabHeaderHiddenProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 13
+    },
+    {
+      "name": "directorySourceProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 125
+    },
+    {
+      "name": "directoryProvider",
+      "kind": "StreamProvider",
+      "async": true,
+      "backing": "firestore",
+      "line": 146
+    },
+    {
+      "name": "displayTempProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 6
+    },
+    {
+      "name": "workerDocsReadyProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 167
+    },
+    {
+      "name": "courierDocsReadyProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 190
+    },
+    {
+      "name": "docsGateOverrideProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 210
+    },
+    {
+      "name": "draftQuoteProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 103
+    },
+    {
+      "name": "employerProfileProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 50
+    },
+    {
+      "name": "employerStockProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 40
+    },
+    {
+      "name": "featureFlagsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 240
+    },
+    {
+      "name": "activePaymentTermProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 27
+    },
+    {
+      "name": "approvalQueueProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 114
+    },
+    {
+      "name": "penaltyLedgerProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 163
+    },
+    {
+      "name": "securityRoleProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 205
+    },
+    {
+      "name": "auditTrailProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 238
+    },
+    {
+      "name": "helpModeProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 12
+    },
+    {
+      "name": "hiddenCatalogSectionsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 44
+    },
+    {
+      "name": "homeContentOrderProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 150
+    },
+    {
+      "name": "anonActorKeyProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 134
+    },
+    {
+      "name": "actorKeyProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 144
+    },
+    {
+      "name": "actorStitchWriterProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 183
+    },
+    {
+      "name": "actorStitchProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 249
+    },
+    {
+      "name": "intelSinkProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 83
+    },
+    {
+      "name": "intelBusProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 198
+    },
+    {
+      "name": "intelLogProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 86
+    },
+    {
+      "name": "_gatedIntelEventsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 55
+    },
+    {
+      "name": "intelInsightsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 65
+    },
+    {
+      "name": "intelSegmentsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 72
+    },
+    {
+      "name": "intelRetentionProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 80
+    },
+    {
+      "name": "intelPresenceProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 126
+    },
+    {
+      "name": "presenceWriterProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 184
+    },
+    {
+      "name": "sessionIdProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 64
+    },
+    {
+      "name": "sessionTrackerProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 247
+    },
+    {
+      "name": "keyboardJobSkusProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 17
+    },
+    {
+      "name": "keyboardOverlayOpenProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 41
+    },
+    {
+      "name": "keyboardSearchModeProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 47
+    },
+    {
+      "name": "keyboardScreenToolsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 125
+    },
+    {
+      "name": "lastActionProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 50
+    },
+    {
+      "name": "managerTabProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 9
+    },
+    {
+      "name": "materialRequestsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 339
+    },
+    {
+      "name": "requestsForEmployer",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 359
+    },
+    {
+      "name": "requestsForWorker",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 375
+    },
+    {
+      "name": "notifSettingsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 541
+    },
+    {
+      "name": "offlineCacheProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 116
+    },
+    {
+      "name": "welcomeSeenProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 18
+    },
+    {
+      "name": "startupStepProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 24
+    },
+    {
+      "name": "guestBrowsingProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 70
+    },
+    {
+      "name": "onboardingProgressProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 60
+    },
+    {
+      "name": "orderFunctionsGatewayProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 666
+    },
+    {
+      "name": "ordersEngineProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 677
+    },
+    {
+      "name": "managerAnalyticsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 737
+    },
+    {
+      "name": "managerCustomersProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 761
+    },
+    {
+      "name": "orgConfigProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 38
+    },
+    {
+      "name": "pdfPrintProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 32
+    },
+    {
+      "name": "fulfillmentProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 575
+    },
+    {
+      "name": "productFavoritesProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 80
+    },
+    {
+      "name": "professionModeProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 118
+    },
+    {
+      "name": "projectModeProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 72
+    },
+    {
+      "name": "projectsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 308
+    },
+    {
+      "name": "activeProjectProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 330
+    },
+    {
+      "name": "pendingPushThreadProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 34
+    },
+    {
+      "name": "pushGatewayProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 692
+    },
+    {
+      "name": "localNotificationsGatewayProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 702
+    },
+    {
+      "name": "pushTokenWriterProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 715
+    },
+    {
+      "name": "pushControllerProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 727
+    },
+    {
+      "name": "bsRoleProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 195
+    },
+    {
+      "name": "pendingApprovalProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 206
+    },
+    {
+      "name": "recentSearchesProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 66
+    },
+    {
+      "name": "recentlyViewedProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 79
+    },
+    {
+      "name": "requiredDocsPolicyProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 145
+    },
+    {
+      "name": "requiredDocsForEmployer",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 153
+    },
+    {
+      "name": "rewardsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 356
+    },
+    {
+      "name": "roleRequestWriterProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 39
+    },
+    {
+      "name": "roleRequestsInboxProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 105
+    },
+    {
+      "name": "pendingRoleRequestsProvider",
+      "kind": "StreamProvider",
+      "async": true,
+      "backing": "firestore",
+      "line": 119
+    },
+    {
+      "name": "roleReviewerProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "functions",
+      "line": 135
+    },
+    {
+      "name": "userApproverProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "functions",
+      "line": 161
+    },
+    {
+      "name": "promptRoleRequestProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 180
+    },
+    {
+      "name": "myRoleRequestSourceProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 216
+    },
+    {
+      "name": "myRoleRequestProvider",
+      "kind": "StreamProvider",
+      "async": true,
+      "backing": "firestore",
+      "line": 228
+    },
+    {
+      "name": "roleChipStateProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 238
+    },
+    {
+      "name": "savedConfigsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 69
+    },
+    {
+      "name": "savedProjectsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 154
+    },
+    {
+      "name": "screenSectionsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 207
+    },
+    {
+      "name": "shareLogProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 112
+    },
+    {
+      "name": "shareTextProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 24
+    },
+    {
+      "name": "siteSnagsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 91
+    },
+    {
+      "name": "siteInspectionsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 156
+    },
+    {
+      "name": "siteAttendanceProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 257
+    },
+    {
+      "name": "siteDiaryProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 306
+    },
+    {
+      "name": "smartCartProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 205
+    },
+    {
+      "name": "smartInputUsageProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 90
+    },
+    {
+      "name": "smartProjectProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 134
+    },
+    {
+      "name": "smartProjectProgressProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 141
+    },
+    {
+      "name": "stageProgressProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 49
+    },
+    {
+      "name": "storeLocationProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 145
+    },
+    {
+      "name": "storeCertsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 70
+    },
+    {
+      "name": "storeProfileProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 264
+    },
+    {
+      "name": "storeSettingsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 465
+    },
+    {
+      "name": "storeOosProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 77
+    },
+    {
+      "name": "storeProductsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 263
+    },
+    {
+      "name": "storeProductNamesProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 271
+    },
+    {
+      "name": "cfgActionRegistryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 183
+    },
+    {
+      "name": "configSinkProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 673
+    },
+    {
+      "name": "configStoreProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 677
+    },
+    {
+      "name": "resolvedNodeProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 688
+    },
+    {
+      "name": "configThemeProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 713
+    },
+    {
+      "name": "studioActiveProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 49
+    },
+    {
+      "name": "studioOwnerEmailProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 61
+    },
+    {
+      "name": "studioInManagerContextProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 69
+    },
+    {
+      "name": "studioOwnerManagerProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 79
+    },
+    {
+      "name": "studioCanEditProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 102
+    },
+    {
+      "name": "editModeProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 237
+    },
+    {
+      "name": "domainElementsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 2358
+    },
+    {
+      "name": "elementRegistryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 2365
+    },
+    {
+      "name": "criticalIdsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 2372
+    },
+    {
+      "name": "descriptorProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 2390
+    },
+    {
+      "name": "studioScopePersonaProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 32
+    },
+    {
+      "name": "studioSelectedIdProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 35
+    },
+    {
+      "name": "chatEngineProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 816
+    },
+    {
+      "name": "sysOrdersProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 160
+    },
+    {
+      "name": "tasksProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 992
+    },
+    {
+      "name": "tasksPendingReviewProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 997
+    },
+    {
+      "name": "defectsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 1008
+    },
+    {
+      "name": "workLogProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 1062
+    },
+    {
+      "name": "telemetryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 132
+    },
+    {
+      "name": "tradesStoreProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 403
+    },
+    {
+      "name": "publishedTradeIdsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 413
+    },
+    {
+      "name": "activeTradeProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 430
+    },
+    {
+      "name": "resolvedActiveTradeIdProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 438
+    },
+    {
+      "name": "activeTradeObjProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 446
+    },
+    {
+      "name": "tradeSwitcherVisibleProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 457
+    },
+    {
+      "name": "updatesLocationProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 186
+    },
+    {
+      "name": "urlLauncherProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 27
+    },
+    {
+      "name": "userProfileProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 217
+    },
+    {
+      "name": "userSystemSyncProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 71
+    },
+    {
+      "name": "vacationRequestsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 283
+    },
+    {
+      "name": "requestsForEmployer",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 294
+    },
+    {
+      "name": "workerAttendanceProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 294
+    },
+    {
+      "name": "attendanceForEmployer",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 305
+    },
+    {
+      "name": "workerCertsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 208
+    },
+    {
+      "name": "certsForEmployer",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 218
+    },
+    {
+      "name": "workerFormsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 381
+    },
+    {
+      "name": "workerNotifsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 215
+    },
+    {
+      "name": "currentWorkerNotifsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 238
+    },
+    {
+      "name": "currentWorkerUnreadCountProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 248
+    },
+    {
+      "name": "workerProfileProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 198
+    },
+    {
+      "name": "workerTasksProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 101
+    },
+    {
+      "name": "pendingApprovalTasksProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 111
+    },
+    {
+      "name": "pendingProposalsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 127
+    },
+    {
+      "name": "workerTrainingsProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 354
+    },
+    {
+      "name": "trainingsForEmployer",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 362
+    },
+    {
+      "name": "regressionFilterProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 5
+    },
+    {
+      "name": "regressionStatusProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 7
+    },
+    {
+      "name": "regressionResultsProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 10
+    },
+    {
+      "name": "filteredResultsProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 13
+    },
+    {
+      "name": "filteredSummaryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 20
+    },
+    {
+      "name": "summaryByCategoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "local",
+      "line": 28
+    },
+    {
+      "name": "appKeyboardInsetProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 69
+    },
+    {
+      "name": "storeInventoryRepositoryProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 40
+    },
+    {
+      "name": "storeComparisonForSkuProvider",
+      "kind": "FutureProvider",
+      "async": true,
+      "backing": "local",
+      "line": 54
+    }
+  ],
+  "consumers": [
+    {
+      "source": "dir",
+      "line": 1459,
+      "states": [
+        "loading",
+        "error",
+        "data"
+      ],
+      "errorFoldsToEmpty": true,
+      "emptyInData": true
+    },
+    {
+      "source": "async",
+      "line": 115,
+      "states": [
+        "loading",
+        "error",
+        "data"
+      ],
+      "errorFoldsToEmpty": true,
+      "emptyInData": true
+    }
+  ],
+  "exceptions": [
+    {
+      "name": "ClaudeException",
+      "line": 42,
+      "throwSites": 2
+    },
+    {
+      "name": "OrderFunctionsException",
+      "line": 94,
+      "throwSites": 2
+    },
+    {
+      "name": "UploadFunctionsException",
+      "line": 64,
+      "throwSites": 2
+    },
+    {
+      "name": "AuthGatewayException",
+      "line": 116,
+      "throwSites": 2
+    }
+  ]
+}

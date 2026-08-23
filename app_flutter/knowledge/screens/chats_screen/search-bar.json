@@ -1,0 +1,43 @@
+{
+  "name": "_SearchBar",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "updatesChatSearchProvider.select((q) => q.isNotEmpty)"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "updatesChatSearchProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(updatesChatSearchProvider.notifier).state = ''",
+        "effect": "write → updatesChatSearchProvider"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onUpdatesChatSearch(…) callback instead of direct updatesChatSearchProvider write"
+    ]
+  }
+}

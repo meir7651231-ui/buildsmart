@@ -1,0 +1,40 @@
+{
+  "screen": "persona_portal",
+  "source": "persona_portal.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "PortalTileButton",
+      "role": "composer",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "title",
+          "sub",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 0,
+    "total": 0,
+    "summary": "0/0",
+    "entries": []
+  }
+}

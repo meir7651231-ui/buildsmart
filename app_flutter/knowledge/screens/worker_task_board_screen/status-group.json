@@ -1,0 +1,48 @@
+{
+  "name": "_StatusGroup",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "אין משימות במצב זה",
+        "registryId": "worker_task_board_screen.empty_group",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showWorkerTaskDetailSheet",
+        "target": "showWorkerTaskDetailSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showWorkerTaskDetailSheet(context, taskId: task.id)",
+        "effect": "open → showWorkerTaskDetailSheet"
+      }
+    ]
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "title",
+      "tasks"
+    ],
+    "untangle": []
+  }
+}

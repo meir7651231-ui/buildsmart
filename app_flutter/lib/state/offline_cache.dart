@@ -40,13 +40,24 @@ class OfflineCacheNotifier extends StateNotifier<Map<String, CacheEntry>> {
 
   static const _key = 'bs.offline-cache.v1';
 
+  /// `true` once any mutating method (put/sweep/clearAll) has written state.
+  /// The provider is lazy, so the constructor's async `_load()` can resolve
+  /// AFTER a synchronous user write and clobber it. This one-shot guard makes a
+  /// late `_load()` non-destructive once the cache has been touched.
+  bool _userTouched = false;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
+    if (_userTouched) return;
     if (raw != null) {
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      state = m.map((k, v) =>
-          MapEntry(k, CacheEntry.fromJson(v as Map<String, dynamic>)));
+      try {
+        final m = jsonDecode(raw) as Map<String, dynamic>;
+        state = m.map((k, v) =>
+            MapEntry(k, CacheEntry.fromJson(v as Map<String, dynamic>)));
+      } catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
     }
   }
 
@@ -67,6 +78,7 @@ class OfflineCacheNotifier extends StateNotifier<Map<String, CacheEntry>> {
   /// Store [value] under [key] with a freshness window.
   void put(String key, String value,
       {Duration ttl = const Duration(hours: 24)}) {
+    _userTouched = true;
     final next = Map<String, CacheEntry>.from(state);
     next[key] = CacheEntry(value: value, savedAt: DateTime.now(), ttl: ttl);
     state = next;
@@ -75,6 +87,7 @@ class OfflineCacheNotifier extends StateNotifier<Map<String, CacheEntry>> {
 
   /// Drop entries that are no longer fresh. Returns the number dropped.
   int sweep({DateTime? now}) {
+    _userTouched = true;
     final at = now ?? DateTime.now();
     final survivors = <String, CacheEntry>{};
     var dropped = 0;
@@ -93,6 +106,7 @@ class OfflineCacheNotifier extends StateNotifier<Map<String, CacheEntry>> {
   }
 
   void clearAll() {
+    _userTouched = true;
     if (state.isEmpty) return;
     state = const {};
     _persist();

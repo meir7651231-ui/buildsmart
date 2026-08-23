@@ -1,5 +1,4 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -58,11 +57,22 @@ void main(){
       expect(plan.gaps, isNotEmpty);
     });
 
-    // 10. branches > outlets ניתן לזיהוי
-    test('10. 4 ענפים על מחלק 2-יציאות → חריגה', () {
-      final outlets = manifoldOutlets(_p('76032202'));
-      const branches = 4;
-      expect(branches > outlets, isTrue);
+    // 10. 4 ענפים על מחלק 2-יציאות → נחסם ל-2 + חריגה (E5: cap + gap + warning)
+    test('10. 4 ענפים על מחלק 2-יציאות → חסום ב-2 + חריגה', () {
+      final plan = buildTreeInstallation(
+        ['77777313', '76032202'].map(_p).toList(), // הזנה → מחלק 2-יציאות
+        ['77777311', '77777201', '77777341', '779096G'].map(_p).toList(), // 4 ענפים
+        tempC: 20,
+      );
+      expect(manifoldOutlets(_p('76032202')), 2);
+      // נחסם ל-2 יציאות פיזיות → לכל היותר 2 זונות-ענף
+      final branchZones =
+          plan.zones.keys.where((z) => z.startsWith('ענף')).length;
+      expect(branchZones, lessThanOrEqualTo(2));
+      // 2 העודפים → gaps → התקנה לא-שלמה + אזהרת-חריגה מפורשת
+      expect(plan.gaps, isNotEmpty);
+      expect(plan.isComplete, isFalse);
+      expect(plan.warnings.any((w) => w.contains('יציאות')), isTrue);
     });
   });
 }

@@ -2,6 +2,72 @@
 
 Short records of notable choices. Newest first.
 
+## D-017 · Studio GA-lock — "built 100%, dormant, one owner-gated flip from live" · Gate #123
+**Trigger:** Step 100 closes the No-Code Studio at 100% (all five pillars end-to-end).
+"Done" for a feature this large needed a precise, machine-checkable definition —
+otherwise "complete" silently drifts into "accidentally armed in production".
+**Decision:** "Complete" = **built AND provably safe-by-default**, NOT "live". The
+distinction is pinned by a governance doc + a gate, not left to prose.
+1. **Dormancy is the shipped invariant** — every pillar sits behind a compile-const
+   flag (`STUDIO`/`STUDIO_LIVE`/`CATALOG_SERVER_SEARCH`/`CATALOG_BASE_URL`/
+   `STUDIO_CO_EDITOR`/`INTEL_LIVE`), all default OFF/empty, so a no-`--dart-define`
+   build tree-shakes the whole surface → `main.dart.js` byte-identical to today.
+2. **Gate #123 (`test/studio/gate_123_ga_safety_test.dart`)** proves it three ways:
+   (A) each flag const folds to its safe default; the composed `useCatalogServerSearch`
+   guard is false without a live backend (Firebase never inits in tests → nothing
+   activates); (B) a **self-maintaining** source scan fails the suite if any future
+   pillar flag is added without a default-OFF assertion — the safety net can't rot;
+   (C) anti-vacuous. Enforced via the TEST, not the 57 KB pre-commit hook (same
+   choice as #119/#120).
+3. **Go-live is owner-gated, never autonomous** — the arm sequence (merge→main →
+   Flutter cutover → backend deploy → staged flag-flip → per-step owner approval) is
+   documented in `knowledge/STUDIO_GA.md` and is a set of owner decisions. The agent
+   builds and proves-dormant; it does not flip production.
+**Consequence:** `STUDIO_GA.md` is the source of truth for "built vs live"; the next
+free gate advances to 124.
+
+## D-016 · Customer-intelligence privacy model — consent-gated · uid-keyed · erasable · Gate #120
+**Trigger:** Studio Pillar-3 (steps 86–99) added a live analytics layer
+(`lib/state/intel/` + `lib/logic/intel/`). An analytics layer is the classic PII
+leak / GDPR-erasure trap, so the privacy properties are pinned as a decision, not
+left implicit.
+**Rules (all four enforced by tests):**
+1. **Consent-gated, default-DENY** — the forward sink / stitch / presence are the
+   inert `Noop*` impls unless `consentedPolicyVersion >= kCurrentPolicyVersion &&
+   privAnalytics && useFirebaseBackend && kIntelLive` (`consent_gate.dart`, D-scoped
+   per axis). The whole visible layer is compile-gated behind const `kIntelLive`
+   (default OFF) → the demo is byte-identical.
+2. **Pseudonymous / uid-keyed, never a name** — every event is stamped with a
+   pseudonymous `actor_key` (uid when signed-in, else a per-install uuid); joins
+   (journey, segments, presence) are BY uid/actorKey, never a display name
+   (R2-#12). `IntelEvent.toWire()` OMITS `displayName` by construction (R1-4) — names
+   are resolved OWNER-SIDE only.
+3. **Gate #120 (analytics-PII)** — `test/studio/gate_120_test.dart` scans the intel
+   layer and fails the suite if any wire/prop key looks like PII or if `displayName`
+   ever reaches a wire path; the serialization surface is a closed pseudonymous
+   allowlist. Registered ✅ in `GATE_REGISTRY.md`. Enforced via the TEST (not the
+   57 KB pre-commit hook — the same choice as Gate #119 in Pillar-4).
+4. **Erasable (right-to-erasure)** — `erasure.dart` is a pure, testable multi-key
+   sweep (`eraseSubject` over `{uid, ...anonKeys}` from `actorStitch/{uid}`, R1-3),
+   proven complete by `erasure_completeness_test.dart` (zero residue incl. pre-stitch
+   anon events); production runs the IDENTICAL key-set in the `deleteAccount` Cloud
+   Function (`functions/src/deleteAccount.ts`, `purgeIntelForSubject`).
+
+## D-015 · Proposal lifecycle (draft→implemented→stub) — מונע יתום+כפילות
+**Trigger:** `PROPOSAL_version_friction.md` נוצר כיתום (לא ב-README, לקח #59), ואין
+ב-knowledge-base class למסמך-הצעה transient (ליטוש, לקח #72).
+**Rule:** מסמך-הצעה נולד עם (א) שורה ב-`README.md`, (ב) שדה-סטטוס בראש
+(`draft→accepted→implemented→archived`). **ביום-implemented — באותו commit-סיום
+אטומית:** ההכרעות עוברות ל-`DECISIONS.md`/`adr/` + לקח ב-`CARRY_FORWARD`, והמסמך
+הופך ל-stub עם pointer. מאחד #58 (מקור-אמת-יחיד) + #59 (אין יתום) + #61 (verdict).
+
+## D-014 · `generated≠gitignored` כברירת-מחדל — חריג ל-build בלבד
+**Trigger:** `version.g.dart` נכנס ל-`.gitignore` (לקח #72). סכנת-תקדים: החלת
+"generated→gitignore" על asset-manifests שה-app **טוען** מהם → build שבור (קטלגן).
+**Rule:** קובץ-generated **נשאר tracked כברירת-מחדל**. gitignore הוא חריג מתוחם רק
+ל-`version.g.dart` (build-number, לא-נכונות-קריטי, נוצר-מ-git בכל build). כל
+asset-manifest / generated-data שה-app קורא ב-runtime — **tracked**.
+
 ## D-013 · Progressive dock UX (3-state)
 **Problem:** The dock at the bottom of Install Studio showed a flat "הוסף / השלם" row
 at all times, regardless of whether the chain was empty.  

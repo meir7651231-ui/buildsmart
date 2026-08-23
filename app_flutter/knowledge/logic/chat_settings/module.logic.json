@@ -1,0 +1,697 @@
+{
+  "module": "chat_settings",
+  "source": "lib/state/chat_settings.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "fn": "_enum",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw, List<T> values, T fallback) -> T",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ChatSettings.fromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if raw is String"
+          },
+          {
+            "kind": "return",
+            "detail": "fallback"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? raw, List<T> values, T fallback)",
+        "output": "T",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettings.businessStart",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> TimeOfDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "businessStartHour"
+          },
+          {
+            "kind": "field",
+            "name": "businessStartMin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TimeOfDay(hour: businessStartHour, minute: businessStartMin)"
+          }
+        ]
+      },
+      "floor": [
+        "TimeOfDay"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TimeOfDay",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettings.businessEnd",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> TimeOfDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "businessEndHour"
+          },
+          {
+            "kind": "field",
+            "name": "businessEndMin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TimeOfDay(hour: businessEndHour, minute: businessEndMin)"
+          }
+        ]
+      },
+      "floor": [
+        "TimeOfDay"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TimeOfDay",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettings.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({bool? readReceipts, bool? typingIndicator, bool? lockScreenPreview, ChatMediaDownload? mediaDownload, ChatPrivacy? chatPrivacy, bool? backupEnabled, ChatBackupFreq? backupFreq, ChatLang? lang, bool? businessHoursEnabled, int? businessStartHour, int? businessStartMin, int? businessEndHour, int? businessEndMin, String? autoReplyMessage, bool? initialResponseEnabled, ChatLastSeen? lastSeenPrivacy, bool? callRingEnabled, bool? messageAlertEnabled, bool? chatVibration, ChatImageQuality? imageQuality, bool? compressVideo, bool? autoTranslate, bool? catalogInChat, bool? paymentInChat, bool? botEnabled, bool? greetingEnabled, String? greetingMessage, bool? autoArchive, ChatAutoDelete? autoDeletePolicy, bool? spamFilter, bool? backupBeforeDelete}) -> ChatSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "ChatSettings(readReceipts: readReceipts ?? this.readReceipts, typingIndicator: typingIndi…"
+          }
+        ]
+      },
+      "floor": [
+        "ChatSettings"
+      ],
+      "contract": {
+        "input": "({bool? readReceipts, bool? typingIndicator, bool? lockScreenPreview, ChatMediaDownload? mediaDownload, ChatPrivacy? chatPrivacy, bool? backupEnabled, ChatBackupFreq? backupFreq, ChatLang? lang, bool? businessHoursEnabled, int? businessStartHour, int? businessStartMin, int? businessEndHour, int? businessEndMin, String? autoReplyMessage, bool? initialResponseEnabled, ChatLastSeen? lastSeenPrivacy, bool? callRingEnabled, bool? messageAlertEnabled, bool? chatVibration, ChatImageQuality? imageQuality, bool? compressVideo, bool? autoTranslate, bool? catalogInChat, bool? paymentInChat, bool? botEnabled, bool? greetingEnabled, String? greetingMessage, bool? autoArchive, ChatAutoDelete? autoDeletePolicy, bool? spamFilter, bool? backupBeforeDelete})",
+        "output": "ChatSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettings.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "autoArchive"
+          },
+          {
+            "kind": "field",
+            "name": "autoDeletePolicy"
+          },
+          {
+            "kind": "field",
+            "name": "autoReplyMessage"
+          },
+          {
+            "kind": "field",
+            "name": "autoTranslate"
+          },
+          {
+            "kind": "field",
+            "name": "backupBeforeDelete"
+          },
+          {
+            "kind": "field",
+            "name": "backupEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "backupFreq"
+          },
+          {
+            "kind": "field",
+            "name": "botEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "businessEndHour"
+          },
+          {
+            "kind": "field",
+            "name": "businessEndMin"
+          },
+          {
+            "kind": "field",
+            "name": "businessHoursEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "businessStartHour"
+          },
+          {
+            "kind": "field",
+            "name": "businessStartMin"
+          },
+          {
+            "kind": "field",
+            "name": "callRingEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "catalogInChat"
+          },
+          {
+            "kind": "field",
+            "name": "chatPrivacy"
+          },
+          {
+            "kind": "field",
+            "name": "chatVibration"
+          },
+          {
+            "kind": "field",
+            "name": "compressVideo"
+          },
+          {
+            "kind": "field",
+            "name": "greetingEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "greetingMessage"
+          },
+          {
+            "kind": "field",
+            "name": "imageQuality"
+          },
+          {
+            "kind": "field",
+            "name": "initialResponseEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "lang"
+          },
+          {
+            "kind": "field",
+            "name": "lastSeenPrivacy"
+          },
+          {
+            "kind": "field",
+            "name": "lockScreenPreview"
+          },
+          {
+            "kind": "field",
+            "name": "mediaDownload"
+          },
+          {
+            "kind": "field",
+            "name": "messageAlertEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "paymentInChat"
+          },
+          {
+            "kind": "field",
+            "name": "readReceipts"
+          },
+          {
+            "kind": "field",
+            "name": "spamFilter"
+          },
+          {
+            "kind": "field",
+            "name": "typingIndicator"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'readReceipts' : readReceipts, 'typingIndicator' : typingIndicator, 'lockScreenPreview' …"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettings.fromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Map<String, dynamic> j) -> ChatSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "autoArchive"
+          },
+          {
+            "kind": "field",
+            "name": "autoDeletePolicy"
+          },
+          {
+            "kind": "field",
+            "name": "autoReplyMessage"
+          },
+          {
+            "kind": "field",
+            "name": "autoTranslate"
+          },
+          {
+            "kind": "field",
+            "name": "backupBeforeDelete"
+          },
+          {
+            "kind": "field",
+            "name": "backupEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "backupFreq"
+          },
+          {
+            "kind": "field",
+            "name": "botEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "businessEndHour"
+          },
+          {
+            "kind": "field",
+            "name": "businessEndMin"
+          },
+          {
+            "kind": "field",
+            "name": "businessHoursEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "businessStartHour"
+          },
+          {
+            "kind": "field",
+            "name": "businessStartMin"
+          },
+          {
+            "kind": "field",
+            "name": "callRingEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "catalogInChat"
+          },
+          {
+            "kind": "field",
+            "name": "chatPrivacy"
+          },
+          {
+            "kind": "field",
+            "name": "chatVibration"
+          },
+          {
+            "kind": "field",
+            "name": "compressVideo"
+          },
+          {
+            "kind": "field",
+            "name": "greetingEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "greetingMessage"
+          },
+          {
+            "kind": "field",
+            "name": "imageQuality"
+          },
+          {
+            "kind": "field",
+            "name": "initialResponseEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "lang"
+          },
+          {
+            "kind": "field",
+            "name": "lastSeenPrivacy"
+          },
+          {
+            "kind": "field",
+            "name": "lockScreenPreview"
+          },
+          {
+            "kind": "field",
+            "name": "mediaDownload"
+          },
+          {
+            "kind": "field",
+            "name": "messageAlertEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "paymentInChat"
+          },
+          {
+            "kind": "field",
+            "name": "readReceipts"
+          },
+          {
+            "kind": "field",
+            "name": "spamFilter"
+          },
+          {
+            "kind": "field",
+            "name": "typingIndicator"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_enum",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "ChatSettings(readReceipts: j['readReceipts'] != false, typingIndicator: j['typingIndicato…"
+          }
+        ]
+      },
+      "floor": [
+        "ChatSettings",
+        "i",
+        "toInt"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> j)",
+        "output": "ChatSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettingsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettingsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "ChatSettingsNotifier.update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettingsNotifier.update",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ChatSettings Function(ChatSettings) f) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = f(state)"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          }
+        ]
+      },
+      "floor": [
+        "f",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(ChatSettings Function(ChatSettings) f)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ChatSettingsNotifier.reset",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = ChatSettings.defaults"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "remove"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "module": "invoice",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/invoice.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "invoiceVatOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int grossTotal) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVatRate"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildInvoiceRows"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "grossTotal - (grossTotal / (1 + kVatRate)).round()"
+          }
+        ]
+      },
+      "floor": [
+        "round"
+      ],
+      "contract": {
+        "input": "(int grossTotal)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildInvoiceRows",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Order order) -> List<({String label, String value})>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVatRate"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "invoiceVatOf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "rows = <({String label, String value})>[(label: 'מספר הזמנה', value: order.id), (label: 'לקוח', …"
+          },
+          {
+            "kind": "branch",
+            "detail": "if order.site.isNotEmpty"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final l in order.lines"
+          },
+          {
+            "kind": "compute",
+            "detail": "head = l.emoji.isEmpty ? l.name : '${l.emoji} ${l.name}'"
+          },
+          {
+            "kind": "effect",
+            "detail": "rows.add((label: '$head × ${l.qty}', value: formatNis(l.price)))"
+          },
+          {
+            "kind": "effect",
+            "detail": "rows.add((label: 'סה\"כ לתשלום (כולל מע\"מ)', value: formatNis(order.sum)))"
+          },
+          {
+            "kind": "effect",
+            "detail": "rows.add((label: 'מזה מע\"מ ${(kVatRate * 100).round()}%', value: formatNis(invoiceVatOf(o…"
+          },
+          {
+            "kind": "return",
+            "detail": "rows"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "formatNis",
+        "round"
+      ],
+      "contract": {
+        "input": "(Order order)",
+        "output": "List<({String label, String value})>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "invoiceTitle",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Order order, {required bool receipt}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'${receipt ? 'קבלה' : 'חשבונית'} — ${order.id}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Order order, {required bool receipt})",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

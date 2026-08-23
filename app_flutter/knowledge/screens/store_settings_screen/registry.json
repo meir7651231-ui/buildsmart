@@ -1,0 +1,62 @@
+{
+  "matched": 11,
+  "total": 11,
+  "summary": "11/11",
+  "entries": [
+    {
+      "id": "store_settings_screen.screen_title",
+      "ok": true,
+      "atom": "StoreSettingsScreen"
+    },
+    {
+      "id": "store_settings_screen.reset_title",
+      "ok": true,
+      "atom": "StoreSettingsScreen"
+    },
+    {
+      "id": "store_settings_screen.reset_body",
+      "ok": true,
+      "atom": "StoreSettingsScreen"
+    },
+    {
+      "id": "store_settings_screen.cancel",
+      "ok": true,
+      "atom": "StoreSettingsScreen"
+    },
+    {
+      "id": "store_settings_screen.reset_ok",
+      "ok": true,
+      "atom": "StoreSettingsScreen"
+    },
+    {
+      "id": "store_settings_screen.section_wip",
+      "ok": true,
+      "atom": "_ShippingSection"
+    },
+    {
+      "id": "store_settings_screen.inline_wip",
+      "ok": true,
+      "atom": "_ShippingSection"
+    },
+    {
+      "id": "store_settings_screen.radio_wip",
+      "ok": true,
+      "atom": "_ShippingSection"
+    },
+    {
+      "id": "store_settings_screen.switch_wip",
+      "ok": true,
+      "atom": "_ShippingSection"
+    },
+    {
+      "id": "store_settings_screen.placeholder_wip",
+      "ok": true,
+      "atom": "_PaymentSection"
+    },
+    {
+      "id": "store_settings_screen.number_wip",
+      "ok": true,
+      "atom": "_CartSection"
+    }
+  ]
+}

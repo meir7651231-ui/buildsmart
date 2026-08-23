@@ -1,0 +1,772 @@
+{
+  "module": "edit_safety",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/edit_safety.dart",
+  "atomCount": 14,
+  "atoms": [
+    {
+      "fn": "_criticalBusinessKind",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ElementDescriptor d) -> _CriticalKind?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_reasonToBlock"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "id = d.id.toLowerCase()"
+          },
+          {
+            "kind": "compute",
+            "detail": "label = d.labelHe"
+          },
+          {
+            "kind": "precond",
+            "detail": "if label.contains('אשר הזמנה') || id.contains('confirmorder') || id.contains('approveorder') → return _CriticalKind.confirmOrder"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id.contains('price') || label.contains('מחיר') → return _CriticalKind.price"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "toLowerCase"
+      ],
+      "contract": {
+        "input": "(ElementDescriptor d)",
+        "output": "_CriticalKind?",
+        "purity": "pure",
+        "precond": [
+          "if label.contains('אשר הזמנה') || id.contains('confirmorder') || id.contains('approveorder') → return _CriticalKind.confirmOrder",
+          "if id.contains('price') || label.contains('מחיר') → return _CriticalKind.price"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_isNavStructural",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ElementDescriptor d) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_roleFloorBlock"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "d.area == 'nav' || d.kind == ElementKind.container"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ElementDescriptor d)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_roleFloorBlock",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ElementDescriptor d, String? persona) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kRoleContractor"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_isNavStructural",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_reasonToBlock"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "floor = d.kRoleFloor"
+          },
+          {
+            "kind": "compute",
+            "detail": "isGlobal = persona == null || persona.isEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if isGlobal"
+          },
+          {
+            "kind": "precond",
+            "detail": "if persona == floor && floor != _kRoleContractor → return 'אי-אפשר להסתיר «${d.labelHe}» מהתפקיד «$floor» — קריטי לתפקיד זה'"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ElementDescriptor d, String? persona)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if persona == floor && floor != _kRoleContractor → return 'אי-אפשר להסתיר «${d.labelHe}» מהתפקיד «$floor» — קריטי לתפקיד זה'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_colorForToken",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? token) -> Color?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_reasonToBlock"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch token"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String? token)",
+        "output": "Color?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_contrastRatio",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Color a, Color b) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_reasonToBlock"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "la = a.computeLuminance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "lb = b.computeLuminance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "hi = la > lb ? la : lb"
+          },
+          {
+            "kind": "compute",
+            "detail": "lo = la > lb ? lb : la"
+          },
+          {
+            "kind": "return",
+            "detail": "(hi + 0.05) / (lo + 0.05)"
+          }
+        ]
+      },
+      "floor": [
+        "computeLuminance"
+      ],
+      "contract": {
+        "input": "(Color a, Color b)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "validateSafe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<ConfigOp> ops, {List<ElementDescriptor> registry = kElementRegistry, RegistryView? view, String? persona, int priorSessionOps = 0}) -> SafetyVerdict",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kRefSurface",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMaxBatch",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMaxRegistryFraction",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMinContrast",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStudioSessionBudget",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_batchCeilingReason",
+            "module": true
+          },
+          {
+            "name": "_reasonToBlock",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "grounding = view ?? ElementRegistryView(registry)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ceiling = _batchCeilingReason(ops, grounding, priorSessionOps)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if ceiling != null → return SafetyVerdict(applied: const [], blocked: [for (final op in ops) BlockedEntry(op, ceiling…"
+          },
+          {
+            "kind": "init",
+            "detail": "applied = <ConfigOp>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "blocked = <BlockedEntry>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final op in ops"
+          },
+          {
+            "kind": "compute",
+            "detail": "reason = _reasonToBlock(op, registry, grounding, persona)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if reason == null"
+          },
+          {
+            "kind": "return",
+            "detail": "SafetyVerdict(applied: applied, blocked: blocked)"
+          }
+        ]
+      },
+      "floor": [
+        "BlockedEntry",
+        "ElementRegistryView",
+        "SafetyVerdict",
+        "add"
+      ],
+      "contract": {
+        "input": "(List<ConfigOp> ops, {List<ElementDescriptor> registry = kElementRegistry, RegistryView? view, String? persona, int priorSessionOps = 0})",
+        "output": "SafetyVerdict",
+        "purity": "pure",
+        "precond": [
+          "if ceiling != null → return SafetyVerdict(applied: const [], blocked: [for (final op in ops) BlockedEntry(op, ceiling…"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_batchCeilingReason",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<ConfigOp> ops, RegistryView grounding, int priorSessionOps) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStudioMaxBatch"
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMaxRegistryFraction"
+          },
+          {
+            "kind": "const",
+            "name": "kStudioSessionBudget"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "validateSafe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if ops.isEmpty → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if ops.length > kStudioMaxBatch → return 'השינוי נרחב מדי — ${ops.length} פעולות (מעל התקרה ' '$kStudioMaxBatch). צמצם את הטווח.'"
+          },
+          {
+            "kind": "compute",
+            "detail": "cumulative = priorSessionOps + ops.length"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cumulative > kStudioSessionBudget → return 'השינוי נרחב מדי לסשן — $cumulative פעולות מצטברות ' '(מעל $kStudioSessionBudget). צמצם.'"
+          },
+          {
+            "kind": "compute",
+            "detail": "size = grounding.elementIds().length"
+          },
+          {
+            "kind": "init",
+            "detail": "distinct = <String>{for (final op in ops) op.id}.length"
+          },
+          {
+            "kind": "branch",
+            "detail": "if size > 0 && distinct > size * kStudioMaxRegistryFraction"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "elementIds",
+        "round"
+      ],
+      "contract": {
+        "input": "(List<ConfigOp> ops, RegistryView grounding, int priorSessionOps)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if ops.isEmpty → return null",
+          "if ops.length > kStudioMaxBatch → return 'השינוי נרחב מדי — ${ops.length} פעולות (מעל התקרה ' '$kStudioMaxBatch). צמצם את הטווח.'",
+          "if cumulative > kStudioSessionBudget → return 'השינוי נרחב מדי לסשן — $cumulative פעולות מצטברות ' '(מעל $kStudioSessionBudget). צמצם.'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "ops.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "softBatchWarnHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int opCount) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStudioMaxBatch"
+          },
+          {
+            "kind": "const",
+            "name": "kStudioSoftBatchWarn"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(opCount >= kStudioSoftBatchWarn && opCount <= kStudioMaxBatch) ? 'שים לב — $opCount פעול…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int opCount)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_reasonToBlock",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOp op, List<ElementDescriptor> registry, RegistryView grounding, String? persona) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kRefSurface"
+          },
+          {
+            "kind": "const",
+            "name": "_kRoleContractor",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMinContrast"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_criticalBusinessKind",
+            "module": true
+          },
+          {
+            "name": "_roleFloorBlock",
+            "module": true
+          },
+          {
+            "name": "_colorForToken",
+            "module": true
+          },
+          {
+            "name": "_contrastRatio",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "validateSafe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "d = findDescriptor(registry, op.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if d == null → return 'רכיב לא מוכר במרשם — חסום מטעמי בטיחות (fail-closed)'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if d.kImmutable → return 'רכיב נעול (ניווט/הזדהות) — «${d.labelHe}» אינו ניתן לעריכה'"
+          },
+          {
+            "kind": "compute",
+            "detail": "crit = _criticalBusinessKind(d)"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch op"
+          }
+        ]
+      },
+      "floor": [
+        "actionIdsFor",
+        "allowedValues",
+        "contains",
+        "findDescriptor",
+        "toStringAsFixed"
+      ],
+      "contract": {
+        "input": "(ConfigOp op, List<ElementDescriptor> registry, RegistryView grounding, String? persona)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if d == null → return 'רכיב לא מוכר במרשם — חסום מטעמי בטיחות (fail-closed)'",
+          "if d.kImmutable → return 'רכיב נעול (ניווט/הזדהות) — «${d.labelHe}» אינו ניתן לעריכה'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_opTag",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOp op) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "auditLine"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (op) {SetText() => 'setText', SetEmoji() => 'setEmoji', SetHidden() => 'setHidden'…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ConfigOp op)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "auditLine",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BlockedEntry e) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_opTag",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "auditTrail"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'⛔ ${_opTag(e.op)} · ${e.op.id} · ${e.reasonHe}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(BlockedEntry e)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "auditTrail",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(SafetyVerdict verdict) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "auditLine",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "renderAuditTrail"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final e in verdict.blocked) auditLine(e)]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(SafetyVerdict verdict)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "renderAuditTrail",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(SafetyVerdict verdict) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "auditTrail",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "auditTrail(verdict).join('\\n')"
+          }
+        ]
+      },
+      "floor": [
+        "join"
+      ],
+      "contract": {
+        "input": "(SafetyVerdict verdict)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SafetyVerdict.allApplied",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "blocked"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "blocked.isEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,811 @@
+{
+  "module": "edit_prompt",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/edit_prompt.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "fn": "_namespaceOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "scopeElementIds",
+          "studioScopeTokens"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = id.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "dot = s.indexOf('.')"
+          },
+          {
+            "kind": "return",
+            "detail": "dot < 0 ? s : s.substring(0, dot)"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf",
+        "substring",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "studioScopeTokens",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView registry) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeAll"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_namespaceOf",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "classifyScope",
+          "studioScopePrompt"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "tokens = <String>{kScopeAll}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final id in registry.elementIds()"
+          },
+          {
+            "kind": "compute",
+            "detail": "ns = _namespaceOf(id)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if ns.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "tokens"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "elementIds"
+      ],
+      "contract": {
+        "input": "(RegistryView registry)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "classifyScope",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply, RegistryView registry) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeAll",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeSinglePrefix"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "studioScopeTokens",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = reply.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "tokens = studioScopeTokens(registry)"
+          },
+          {
+            "kind": "compute",
+            "detail": "t = matchElementId(FakeRegistryView.of(ids: tokens), r)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t != null → return t"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r.contains(kScopeSinglePrefix)"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "matchElementId",
+        "of",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String reply, RegistryView registry)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if r.isEmpty → return null",
+          "if t != null → return t"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "r.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "scopeElementIds",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String scope, RegistryView registry) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeAll"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeSinglePrefix"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_namespaceOf",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "studioEditPrompt"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ids = registry.elementIds()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if scope == kScopeAll → return ids"
+          },
+          {
+            "kind": "branch",
+            "detail": "if scope.startsWith(kScopeScreenPrefix)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if scope.startsWith(kScopeSinglePrefix)"
+          },
+          {
+            "kind": "return",
+            "detail": "const <String>{}"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "elementIds",
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String scope, RegistryView registry)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [
+          "if scope == kScopeAll → return ids"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "scopeLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String scope) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeAll"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeSinglePrefix"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "studioEditPrompt"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if scope == kScopeAll → return 'מתוך: כל האלמנטים'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if scope.startsWith(kScopeScreenPrefix) → return 'מתוך: מרחב «${scope.substring(kScopeScreenPrefix.length)}»'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if scope.startsWith(kScopeSinglePrefix) → return 'מתוך: האלמנט «${scope.substring(kScopeSinglePrefix.length)}»'"
+          },
+          {
+            "kind": "return",
+            "detail": "'מתוך: (טווח לא מזוהה)'"
+          }
+        ]
+      },
+      "floor": [
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String scope)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if scope == kScopeAll → return 'מתוך: כל האלמנטים'",
+          "if scope.startsWith(kScopeScreenPrefix) → return 'מתוך: מרחב «${scope.substring(kScopeScreenPrefix.length)}»'",
+          "if scope.startsWith(kScopeSinglePrefix) → return 'מתוך: האלמנט «${scope.substring(kScopeSinglePrefix.length)}»'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_scopeTokenHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String token) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeAll"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "studioScopePrompt"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if token == kScopeAll → return 'כל האלמנטים'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if token.startsWith(kScopeScreenPrefix) → return 'מרחב «${token.substring(kScopeScreenPrefix.length)}»'"
+          },
+          {
+            "kind": "return",
+            "detail": "token"
+          }
+        ]
+      },
+      "floor": [
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String token)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if token == kScopeAll → return 'כל האלמנטים'",
+          "if token.startsWith(kScopeScreenPrefix) → return 'מרחב «${token.substring(kScopeScreenPrefix.length)}»'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "studioScopePrompt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView registry, String utterance) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeAll",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeSinglePrefix"
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMaxUtteranceChars"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "studioScopeTokens",
+            "module": true
+          },
+          {
+            "name": "_scopeTokenHe",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "safe = promptSafeText(utterance, maxLen: kStudioMaxUtteranceChars, collapseWhitespace: true)"
+          },
+          {
+            "kind": "compute",
+            "detail": "tokens = studioScopeTokens(registry).toList()..sort()"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = StringBuffer()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('טווחי-עריכה זמינים (token = תיאור):')"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in tokens"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('$t = ${_scopeTokenHe(t)}')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('$kScopeSinglePrefix<id> = אלמנט בודד (id אמיתי מהרישום)')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('בקשת המנהל: \"$safe\".')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('בחר token אחד בלבד מהרשימה הסגורה שמתאר את טווח-העריכה, או השב ' 'AMBIGUOUS אם…"
+          },
+          {
+            "kind": "return",
+            "detail": "b.toString()"
+          }
+        ]
+      },
+      "floor": [
+        "StringBuffer",
+        "promptSafeText",
+        "sort",
+        "toList",
+        "toString",
+        "writeln"
+      ],
+      "contract": {
+        "input": "(RegistryView registry, String utterance)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_elementLine",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView registry, String id) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "studioEditPrompt"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "props = registry.propKeysFor(id).toList()..sort()"
+          },
+          {
+            "kind": "compute",
+            "detail": "actions = registry.actionIdsFor(id).toList()..sort()"
+          },
+          {
+            "kind": "init",
+            "detail": "rhs = <String>[]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if props.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if actions.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "rhs.isEmpty ? id : '$id = ${rhs.join(' · ')}'"
+          }
+        ]
+      },
+      "floor": [
+        "actionIdsFor",
+        "add",
+        "join",
+        "propKeysFor",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(RegistryView registry, String id)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_fewShotExample",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> slice, RegistryView registry) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "studioEditPrompt"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if slice.isEmpty → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final id in slice"
+          },
+          {
+            "kind": "branch",
+            "detail": "if registry.propKeysFor(id).contains('text') → return '[{\"op\":\"setText\",\"id\":\"$id\",\"text\":\"טקסט לדוגמה\"}]'"
+          },
+          {
+            "kind": "return",
+            "detail": "'[{\"op\":\"setHidden\",\"id\":\"${slice.first}\",\"hidden\":false}]'"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "propKeysFor"
+      ],
+      "contract": {
+        "input": "(List<String> slice, RegistryView registry)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if slice.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "slice.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "studioEditPrompt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required RegistryView registry, required String utterance, required String scope}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kOpsGrammar"
+          },
+          {
+            "kind": "const",
+            "name": "kActionCatalog"
+          },
+          {
+            "kind": "const",
+            "name": "kComponentPalette"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeAll",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeSinglePrefix",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMaxUtteranceChars"
+          },
+          {
+            "kind": "const",
+            "name": "kStudioPromptCharBudget"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "scopeElementIds",
+            "module": true
+          },
+          {
+            "name": "scopeLabel",
+            "module": true
+          },
+          {
+            "name": "_elementLine",
+            "module": true
+          },
+          {
+            "name": "_fewShotExample",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "safe = promptSafeText(utterance, maxLen: kStudioMaxUtteranceChars, collapseWhitespace: true)"
+          },
+          {
+            "kind": "compute",
+            "detail": "slice = scopeElementIds(scope, registry).toList()..sort()"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = StringBuffer()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln(scopeLabel(scope))"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('אלמנטים בטווח (id = מה ניתן לערוך):')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if slice.isEmpty"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('פעולות מותרות ל-setAction (id = תיאור):')"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final a in kActionCatalog"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('${a.id} = ${a.he}')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('רכיבים שניתן להוסיף (type = תיאור):')"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in kComponentPalette"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('${t.type.name} = ${t.he}')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('בקשת המנהל: \"$safe\".')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln(_kOpsGrammar)"
+          },
+          {
+            "kind": "compute",
+            "detail": "example = _fewShotExample(slice, registry)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if example != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "prompt = b.toString()"
+          },
+          {
+            "kind": "return",
+            "detail": "prompt"
+          }
+        ]
+      },
+      "floor": [
+        "StringBuffer",
+        "promptSafeText",
+        "sort",
+        "toList",
+        "toString",
+        "writeln"
+      ],
+      "contract": {
+        "input": "({required RegistryView registry, required String utterance, required String scope})",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -84,6 +84,31 @@ List<KitItem> recommendedKitForProduct(LipskeyCatalogProduct p) {
       ),
     ];
   }
+  // Huliot SmartLock — PP drainage with snap-fit/bayonet nuts. The system is
+  // intentionally tool-light (a single bayonet wrench tightens every nut), but
+  // pipe segments still need a clean perpendicular cut and the field uses a
+  // dedicated cutter rather than a generic saw. Size-bucket the wrench by DN.
+  if (p.brand == 'חוליות') {
+    final dn = double.tryParse(p.dims?['DN']?.toString() ?? '') ?? 0;
+    final isPipe = p.categoryHe.contains('צינור');
+    final wrenchLabel = dn <= 40
+        ? 'מפתח לאום SmartLock 32-40 (מק"ט 61040360)'
+        : 'מפתח לאום SmartLock 50-63 (מק"ט 61060560)';
+    return [
+      if (isPipe)
+        const KitItem(
+          kind: KitKind.tool,
+          label: 'חותך צינורות SmartLock',
+          reason: 'חיתוך ניצב ונקי לצינור PP במידות 32-63',
+        ),
+      KitItem(
+        kind: KitKind.tool,
+        label: wrenchLabel,
+        reason: 'הידוק/שחרור אום SmartLock — מפתח ייעודי מבטיח מומנט נכון',
+        severity: Severity.recommended,
+      ),
+    ];
+  }
   if (spec == null) return const [];
   final out = <String, KitItem>{};
   void add(String key, KitItem item) => out.putIfAbsent(key, () => item);

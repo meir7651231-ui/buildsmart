@@ -1,0 +1,24 @@
+{
+  "module": "directory",
+  "source": "../../../app_flutter/lib/state/directory.dart",
+  "providerCount": 2,
+  "consumerCount": 0,
+  "providers": [
+    {
+      "name": "directorySourceProvider",
+      "kind": "Provider",
+      "async": false,
+      "backing": "firestore",
+      "line": 125
+    },
+    {
+      "name": "directoryProvider",
+      "kind": "StreamProvider",
+      "async": true,
+      "backing": "firestore",
+      "line": 146
+    }
+  ],
+  "consumers": [],
+  "exceptions": []
+}

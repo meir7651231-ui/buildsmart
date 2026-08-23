@@ -1,0 +1,36 @@
+{
+  "name": "_AssignButton",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "שייך תפקיד",
+        "registryId": "manager_role_assign_sheet.t04",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "enabled",
+      "busy",
+      "onPressed"
+    ],
+    "untangle": []
+  }
+}

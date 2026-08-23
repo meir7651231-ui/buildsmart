@@ -1,0 +1,1025 @@
+{
+  "module": "catalog_settings",
+  "source": "lib/state/catalog_settings.dart",
+  "atomCount": 16,
+  "atoms": [
+    {
+      "fn": "catalogProductSortLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProductSort s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (s) {ProductSort.byOrder => 'ברירת מחדל', ProductSort.nameAZ => 'שם א-ת', ProductS…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProductSort s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_enum",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw, List<T> values, T fallback) -> T",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "CatalogSettings.fromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if raw is String"
+          },
+          {
+            "kind": "return",
+            "detail": "fallback"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? raw, List<T> values, T fallback)",
+        "output": "T",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "priceWithVat",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int base, {required bool showVat}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVatRate"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "formatCatalogPrice"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "showVat ? (base * (1 + kVatRate)).round() : base"
+          }
+        ]
+      },
+      "floor": [
+        "round"
+      ],
+      "contract": {
+        "input": "(int base, {required bool showVat})",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "currencySymbol",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CatalogCurrency c) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "formatCatalogPrice"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (c) {CatalogCurrency.ils => '₪', CatalogCurrency.usd => r'$', CatalogCurrency.eur …"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(CatalogCurrency c)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "formatCatalogPrice",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int base, CatalogSettings s, {String prefix = ''}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVatRate",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "priceWithVat",
+            "module": true
+          },
+          {
+            "name": "currencySymbol",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "amount = priceWithVat(base, showVat: s.showVat)"
+          },
+          {
+            "kind": "return",
+            "detail": "'$prefix${currencySymbol(s.currency)}${groupThousands(amount)}'"
+          }
+        ]
+      },
+      "floor": [
+        "groupThousands"
+      ],
+      "contract": {
+        "input": "(int base, CatalogSettings s, {String prefix = ''})",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_mmToInch",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw) -> double?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "formatDimValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "m = RegExp(r'-?\\d+(?:\\.\\d+)?').firstMatch(raw)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if m == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "double.parse(m.group(0)!) / 25.4"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "firstMatch",
+        "group",
+        "parse"
+      ],
+      "contract": {
+        "input": "(String raw)",
+        "output": "double?",
+        "purity": "pure",
+        "precond": [
+          "if m == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "m == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_formatInch",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double inch, CatalogDecimalFormat fmt) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "formatDimValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if fmt == CatalogDecimalFormat.decimal"
+          },
+          {
+            "kind": "compute",
+            "detail": "sixteenths = (inch * 16).round()"
+          },
+          {
+            "kind": "compute",
+            "detail": "whole = sixteenths ~/ 16"
+          },
+          {
+            "kind": "compute",
+            "detail": "num = sixteenths % 16"
+          },
+          {
+            "kind": "compute",
+            "detail": "den = 16"
+          },
+          {
+            "kind": "loop",
+            "detail": "while num != 0 && num % 2 == 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "num ~/= 2"
+          },
+          {
+            "kind": "effect",
+            "detail": "den ~/= 2"
+          },
+          {
+            "kind": "precond",
+            "detail": "if num == 0 → return '$whole\"'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if whole == 0 → return '$num/$den\"'"
+          },
+          {
+            "kind": "return",
+            "detail": "'$whole $num/$den\"'"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "contains",
+        "replaceAll",
+        "round",
+        "toStringAsFixed"
+      ],
+      "contract": {
+        "input": "(double inch, CatalogDecimalFormat fmt)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if num == 0 → return '$whole\"'",
+          "if whole == 0 → return '$num/$den\"'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_isMmDimKey",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String key) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "formatDimValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "k = key.toLowerCase()"
+          },
+          {
+            "kind": "return",
+            "detail": "k == 'mm' || key.contains('מ\"מ') || key.contains('מ”מ') || k.contains('mm')"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "toLowerCase"
+      ],
+      "contract": {
+        "input": "(String key)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "formatDimValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String unitHint, String value, CatalogSettings s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_isMmDimKey",
+            "module": true
+          },
+          {
+            "name": "_mmToInch",
+            "module": true
+          },
+          {
+            "name": "_formatInch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if s.unit == CatalogUnit.metric → return value"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !_isMmDimKey(unitHint) → return value"
+          },
+          {
+            "kind": "compute",
+            "detail": "inch = _mmToInch(value)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if inch == null → return value"
+          },
+          {
+            "kind": "return",
+            "detail": "_formatInch(inch, s.decimalFormat)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String unitHint, String value, CatalogSettings s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if s.unit == CatalogUnit.metric → return value",
+          "if !_isMmDimKey(unitHint) → return value",
+          "if inch == null → return value"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatalogSettings.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({bool? searchHistoryEnabled, CatalogViewMode? viewMode, CatalogSort? sortDefault, bool? showVat, CatalogCurrency? currency, bool? notifPriceDrop, bool? notifBackInStock, CatalogUnit? unit, bool? aiRecommendations, bool? quickFilterBar, int? searchRadius, int? gridColumns, CatalogImageSize? imageSize, ProductSort? productSortDefault, bool? showUnitPrice, bool? priceComparison, bool? syncFavorites, bool? listsPerProject, bool? priceChangeAlert, bool? notifLowStock, bool? notifNewProducts, CatalogDecimalFormat? decimalFormat, int? maxDistance, CatalogMinRating? minRating, bool? localSuppliersOnly, bool? historyBased, bool? activeProjectFilter, bool? cheapAlternatives, bool? compactMode, CatalogTextSize? textSize, bool? highContrast, bool? reducedMotion}) -> CatalogSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "CatalogSettings(searchHistoryEnabled: searchHistoryEnabled ?? this.searchHistoryEnabled, …"
+          }
+        ]
+      },
+      "floor": [
+        "CatalogSettings"
+      ],
+      "contract": {
+        "input": "({bool? searchHistoryEnabled, CatalogViewMode? viewMode, CatalogSort? sortDefault, bool? showVat, CatalogCurrency? currency, bool? notifPriceDrop, bool? notifBackInStock, CatalogUnit? unit, bool? aiRecommendations, bool? quickFilterBar, int? searchRadius, int? gridColumns, CatalogImageSize? imageSize, ProductSort? productSortDefault, bool? showUnitPrice, bool? priceComparison, bool? syncFavorites, bool? listsPerProject, bool? priceChangeAlert, bool? notifLowStock, bool? notifNewProducts, CatalogDecimalFormat? decimalFormat, int? maxDistance, CatalogMinRating? minRating, bool? localSuppliersOnly, bool? historyBased, bool? activeProjectFilter, bool? cheapAlternatives, bool? compactMode, CatalogTextSize? textSize, bool? highContrast, bool? reducedMotion})",
+        "output": "CatalogSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatalogSettings.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "activeProjectFilter"
+          },
+          {
+            "kind": "field",
+            "name": "aiRecommendations"
+          },
+          {
+            "kind": "field",
+            "name": "cheapAlternatives"
+          },
+          {
+            "kind": "field",
+            "name": "compactMode"
+          },
+          {
+            "kind": "field",
+            "name": "currency"
+          },
+          {
+            "kind": "field",
+            "name": "decimalFormat"
+          },
+          {
+            "kind": "field",
+            "name": "gridColumns"
+          },
+          {
+            "kind": "field",
+            "name": "highContrast"
+          },
+          {
+            "kind": "field",
+            "name": "historyBased"
+          },
+          {
+            "kind": "field",
+            "name": "imageSize"
+          },
+          {
+            "kind": "field",
+            "name": "listsPerProject"
+          },
+          {
+            "kind": "field",
+            "name": "localSuppliersOnly"
+          },
+          {
+            "kind": "field",
+            "name": "maxDistance"
+          },
+          {
+            "kind": "field",
+            "name": "minRating"
+          },
+          {
+            "kind": "field",
+            "name": "notifBackInStock"
+          },
+          {
+            "kind": "field",
+            "name": "notifLowStock"
+          },
+          {
+            "kind": "field",
+            "name": "notifNewProducts"
+          },
+          {
+            "kind": "field",
+            "name": "notifPriceDrop"
+          },
+          {
+            "kind": "field",
+            "name": "priceChangeAlert"
+          },
+          {
+            "kind": "field",
+            "name": "priceComparison"
+          },
+          {
+            "kind": "field",
+            "name": "productSortDefault"
+          },
+          {
+            "kind": "field",
+            "name": "quickFilterBar"
+          },
+          {
+            "kind": "field",
+            "name": "reducedMotion"
+          },
+          {
+            "kind": "field",
+            "name": "searchHistoryEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "searchRadius"
+          },
+          {
+            "kind": "field",
+            "name": "showUnitPrice"
+          },
+          {
+            "kind": "field",
+            "name": "showVat"
+          },
+          {
+            "kind": "field",
+            "name": "sortDefault"
+          },
+          {
+            "kind": "field",
+            "name": "syncFavorites"
+          },
+          {
+            "kind": "field",
+            "name": "textSize"
+          },
+          {
+            "kind": "field",
+            "name": "unit"
+          },
+          {
+            "kind": "field",
+            "name": "viewMode"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'searchHistoryEnabled' : searchHistoryEnabled, 'viewMode' : viewMode.name, 'sortDefault'…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatalogSettings.fromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Map<String, dynamic> j) -> CatalogSettings",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "activeProjectFilter"
+          },
+          {
+            "kind": "field",
+            "name": "aiRecommendations"
+          },
+          {
+            "kind": "field",
+            "name": "cheapAlternatives"
+          },
+          {
+            "kind": "field",
+            "name": "compactMode"
+          },
+          {
+            "kind": "field",
+            "name": "currency"
+          },
+          {
+            "kind": "field",
+            "name": "decimalFormat"
+          },
+          {
+            "kind": "field",
+            "name": "gridColumns"
+          },
+          {
+            "kind": "field",
+            "name": "highContrast"
+          },
+          {
+            "kind": "field",
+            "name": "historyBased"
+          },
+          {
+            "kind": "field",
+            "name": "imageSize"
+          },
+          {
+            "kind": "field",
+            "name": "listsPerProject"
+          },
+          {
+            "kind": "field",
+            "name": "localSuppliersOnly"
+          },
+          {
+            "kind": "field",
+            "name": "maxDistance"
+          },
+          {
+            "kind": "field",
+            "name": "minRating"
+          },
+          {
+            "kind": "field",
+            "name": "notifBackInStock"
+          },
+          {
+            "kind": "field",
+            "name": "notifLowStock"
+          },
+          {
+            "kind": "field",
+            "name": "notifNewProducts"
+          },
+          {
+            "kind": "field",
+            "name": "notifPriceDrop"
+          },
+          {
+            "kind": "field",
+            "name": "priceChangeAlert"
+          },
+          {
+            "kind": "field",
+            "name": "priceComparison"
+          },
+          {
+            "kind": "field",
+            "name": "productSortDefault"
+          },
+          {
+            "kind": "field",
+            "name": "quickFilterBar"
+          },
+          {
+            "kind": "field",
+            "name": "reducedMotion"
+          },
+          {
+            "kind": "field",
+            "name": "searchHistoryEnabled"
+          },
+          {
+            "kind": "field",
+            "name": "searchRadius"
+          },
+          {
+            "kind": "field",
+            "name": "showUnitPrice"
+          },
+          {
+            "kind": "field",
+            "name": "showVat"
+          },
+          {
+            "kind": "field",
+            "name": "sortDefault"
+          },
+          {
+            "kind": "field",
+            "name": "syncFavorites"
+          },
+          {
+            "kind": "field",
+            "name": "textSize"
+          },
+          {
+            "kind": "field",
+            "name": "unit"
+          },
+          {
+            "kind": "field",
+            "name": "viewMode"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_enum",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "CatalogSettings(searchHistoryEnabled: b('searchHistoryEnabled'), viewMode: _enum(j['viewM…"
+          }
+        ]
+      },
+      "floor": [
+        "CatalogSettings",
+        "b",
+        "i",
+        "toInt"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> j)",
+        "output": "CatalogSettings",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatalogSettingsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatalogSettingsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "CatalogSettingsNotifier.update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatalogSettingsNotifier.update",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(CatalogSettings Function(CatalogSettings) f) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = f(state)"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(_persist())"
+          }
+        ]
+      },
+      "floor": [
+        "f",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "(CatalogSettings Function(CatalogSettings) f)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CatalogSettingsNotifier.reset",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStorageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = CatalogSettings.defaults"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "remove"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "module": "home_shell",
+  "source": "../../../app_flutter/lib/screens/home_shell.dart",
+  "providerCount": 1,
+  "consumerCount": 1,
+  "providers": [
+    {
+      "name": "cartBubbleDismissedProvider",
+      "kind": "StateProvider",
+      "async": false,
+      "backing": "local",
+      "line": 55
+    }
+  ],
+  "consumers": [
+    {
+      "source": "dir",
+      "line": 1459,
+      "states": [
+        "loading",
+        "error",
+        "data"
+      ],
+      "errorFoldsToEmpty": true,
+      "emptyInData": true
+    }
+  ],
+  "exceptions": []
+}

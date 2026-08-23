@@ -1,0 +1,102 @@
+{
+  "matched": 19,
+  "total": 19,
+  "summary": "19/19",
+  "entries": [
+    {
+      "id": "welcome_screen.mgr_login_title",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.mgr_login_subtitle",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.mgr_continue_google",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.mgr_needs_connection",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.mgr_or_code_login",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.board_existing_login_btn",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.board_demo_mode",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome.hero.title",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome.hero.tagline",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.owner_google_login",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.existing_login_btn",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome.signup.divider",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome.signup.heading",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome.signup.subtitle",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.terms_prefix",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.terms_of_use",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.terms_and",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.privacy_policy",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    },
+    {
+      "id": "welcome_screen.terms_suffix",
+      "ok": true,
+      "atom": "WelcomeScreen"
+    }
+  ]
+}

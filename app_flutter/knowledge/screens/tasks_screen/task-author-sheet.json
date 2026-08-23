@@ -1,0 +1,78 @@
+{
+  "name": "_TaskAuthorSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "שם המשימה"
+      },
+      {
+        "kind": "text",
+        "text": "תיאור"
+      },
+      {
+        "kind": "text",
+        "text": "שלבי ביצוע — שלב בכל שורה"
+      },
+      {
+        "kind": "text",
+        "text": "משך משוער (ימים)"
+      },
+      {
+        "kind": "text",
+        "text": "📅 תאריך התחלה (לגאנט)"
+      },
+      {
+        "kind": "text",
+        "text": "שיוך לעובד"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "שם המשימה",
+      "תיאור",
+      "שלבי ביצוע — שלב בכל שורה",
+      "משך משוער (ימים)",
+      "📅 תאריך התחלה (לגאנט)",
+      "שיוך לעובד"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 6"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showDatePicker",
+        "target": "showDatePicker"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "onSelect",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [
+      "edit",
+      "initialWorker"
+    ],
+    "untangle": []
+  }
+}

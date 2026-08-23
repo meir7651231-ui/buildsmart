@@ -1,0 +1,106 @@
+{
+  "name": "_OrderSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "📍"
+      },
+      {
+        "kind": "text",
+        "text": "📝"
+      },
+      {
+        "kind": "cfgText",
+        "text": "פרטי הפריטים אינם זמינים",
+        "registryId": "store_screen.order_no_items",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סכום ביניים",
+        "registryId": "store_screen.order_subtotal",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מע\"מ + משלוח",
+        "registryId": "store_screen.order_vat_delivery",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סה\"כ",
+        "registryId": "store_screen.order_total",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🚛 מעקב הזמנה",
+        "registryId": "shop.tracking.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.order_scan_delivery",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📄"
+      },
+      {
+        "kind": "cfgText",
+        "text": "סרוק תעודת-משלוח",
+        "registryId": "store_screen.order_scan_delivery",
+        "registryOk": true
+      }
+    ],
+    "registered": 7,
+    "unregistered": [
+      "📍",
+      "📝",
+      "📄"
+    ],
+    "summary": "registry 7 · mapped 7/7 · unregistered 3"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "ordersEngineProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'סריקת תעודת-משלוח (OCR) — בקרוב')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": false,
+    "props": [
+      "order"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

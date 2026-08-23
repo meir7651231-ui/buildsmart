@@ -1,0 +1,44 @@
+{
+  "module": "search_firebase",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/search_firebase.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "FirebaseSearchRepository",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "_index",
+            "type": "CatalogTokenIndex?",
+            "required": false,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_index",
+            "ref": "CatalogTokenIndex",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "search",
+          "_serverSearch",
+          "_layerA"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

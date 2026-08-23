@@ -57,34 +57,6 @@ List<TestResult> testTabs(WidgetRef ref) {
       },
     ),
     _runOne(
-      id: 'tabs:menu',
-      label: 'menuTab — 4 טאבים של תפריט',
-      area: 'תפריט',
-      run: () {
-        final checks = <TestCheck>[];
-        final before = ref.read(menuTabProvider);
-        for (final t in MenuTab.values) {
-          ref.read(menuTabProvider.notifier).state = t;
-          final got = ref.read(menuTabProvider);
-          checks.add(TestCheck(
-            name: 'מעבר ל-${t.name}',
-            pass: got == t,
-            expected: t.name,
-            got: '${got?.name}',
-          ));
-        }
-        ref.read(menuTabProvider.notifier).state = null;
-        checks.add(TestCheck(
-          name: 'איפוס לשורש (null)',
-          pass: ref.read(menuTabProvider) == null,
-          expected: 'null',
-          got: '${ref.read(menuTabProvider)?.name}',
-        ));
-        ref.read(menuTabProvider.notifier).state = before;
-        return checks;
-      },
-    ),
-    _runOne(
       id: 'tabs:catalogSection',
       label: 'catalogSection — מעבר בין סקשנים',
       area: 'קטלוג',

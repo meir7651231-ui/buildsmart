@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "orchestrator/report.schema.json",
+  "title": "Orchestrator run report",
+  "description": "Shape of a fix-fleet run report. NOTE: report-lint.sh is the runtime enforcer (pure jq — there is no jsonschema dependency in this environment); this file documents the contract and can be fed to any JSON-Schema validator where one exists. The 'all discrepancies resolved when CLEAN' rule is enforced by report-lint.sh and best-effort here.",
+  "type": "object",
+  "required": ["run", "status", "fixed", "deferred", "discrepancies"],
+  "additionalProperties": true,
+  "properties": {
+    "run":    { "type": "string", "description": "run label, e.g. v6.17" },
+    "status": { "enum": ["CLEAN", "PARTIAL", "FAILED"] },
+    "reason": { "type": "string", "description": "required (non-empty) iff status=FAILED" },
+    "fixed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "change"],
+        "properties": {
+          "file":   { "type": "string" },
+          "line":   { "type": ["integer", "string"] },
+          "change": { "type": "string" }
+        }
+      }
+    },
+    "deferred": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item", "reason"],
+        "properties": {
+          "item":   { "type": "string" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "discrepancies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim", "resolved"],
+        "properties": {
+          "claim":    { "type": "string" },
+          "resolved": { "type": "boolean" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if":   { "properties": { "status": { "const": "FAILED" } }, "required": ["status"] },
+      "then": { "required": ["reason"], "properties": { "reason": { "minLength": 1 } } }
+    },
+    {
+      "if":   { "properties": { "status": { "const": "CLEAN" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "deferred": { "maxItems": 0 },
+          "discrepancies": { "items": { "required": ["resolved"], "properties": { "resolved": { "const": true } } } }
+        }
+      }
+    }
+  ]
+}
