@@ -41,9 +41,9 @@ class _LegalScreenState extends State<LegalScreen> {
   Widget build(BuildContext context) {
     final doc = _tab == LegalTab.terms ? kTermsOfUse : kPrivacyPolicy;
     return Scaffold(
-      backgroundColor: BsTokens.bgLightAlt,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: const CfgText(
           'legal_screen.t01',
@@ -185,7 +185,7 @@ class _SegmentedToggle extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(BsTokens.space1),
       decoration: BoxDecoration(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(BsTokens.space3),
       ),
       child: Row(

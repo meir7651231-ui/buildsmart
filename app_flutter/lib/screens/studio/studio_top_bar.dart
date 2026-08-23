@@ -40,7 +40,7 @@ class StudioTopBar extends ConsumerWidget {
     // somehow renders (defence-in-depth, not only the route guard).
     final canEdit = ref.watch(studioCanEditProvider);
     return Material(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: BsTokens.space3,
@@ -98,7 +98,7 @@ class _DraftBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: has
             ? BsTokens.brand.withValues(alpha: 0.12)
-            : BsTokens.surfaceMid,
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
       ),
       child: Text(
@@ -121,7 +121,7 @@ Future<void> _confirmDiscard(
   final notifier = ref.read(configStoreProvider.notifier);
   final ok = await showModalBottomSheet<bool>(
     context: context,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     builder: (sheetCtx) => Padding(
       padding: const EdgeInsets.all(BsTokens.space4),
       child: Column(
@@ -172,7 +172,7 @@ Future<void> _confirmDiscard(
 Future<void> _openPublish(BuildContext context, int count) => showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (_) => _PublishSheet(count: count),
     );
 

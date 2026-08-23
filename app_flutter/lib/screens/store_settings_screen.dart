@@ -33,9 +33,9 @@ class StoreSettingsScreen extends ConsumerWidget {
     // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
     // Pure pass-through (byte-identical) when the flag is off.
     final Widget body = Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: const CfgText(
           'store_settings_screen.screen_title',
@@ -78,7 +78,7 @@ class StoreSettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
             title: const CfgText(
               'store_settings_screen.reset_title',
               'איפוס הגדרות?',
@@ -729,7 +729,7 @@ class _SectionTile extends StatelessWidget {
     }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(

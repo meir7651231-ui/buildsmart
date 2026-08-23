@@ -61,7 +61,7 @@ class IntelTab extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: ColoredBox(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: ListView(
           padding: const EdgeInsetsDirectional.fromSTEB(
             BsTokens.space4,
@@ -466,7 +466,7 @@ class _IntelCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsetsDirectional.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: BsTokens.divider),
       ),
@@ -524,7 +524,7 @@ class _IntelStat extends StatelessWidget {
             vertical: BsTokens.space3,
           ),
           decoration: BoxDecoration(
-            color: BsTokens.bgLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(BsTokens.radiusCard),
             border: Border.all(color: BsTokens.divider),
           ),
@@ -583,7 +583,7 @@ class _IntelBar extends StatelessWidget {
         child: LinearProgressIndicator(
           value: (pct / 100).clamp(0.0, 1.0),
           minHeight: 7,
-          backgroundColor: BsTokens.surfaceMid,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           valueColor: AlwaysStoppedAnimation<Color>(color),
         ),
       ),

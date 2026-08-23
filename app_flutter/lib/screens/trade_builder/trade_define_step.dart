@@ -101,7 +101,7 @@ class _TradeDefineStepState extends ConsumerState<TradeDefineStepScreen> {
         labelText: label,
         hintText: hint,
         filled: true,
-        fillColor: BsTokens.cardLight,
+        fillColor: Theme.of(context).colorScheme.surface,
         labelStyle:
             const TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
         hintStyle: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
@@ -131,9 +131,9 @@ class _TradeDefineStepState extends ConsumerState<TradeDefineStepScreen> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: BsTokens.bgLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: BsTokens.cardLight,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
             title: const CfgText(
@@ -174,7 +174,7 @@ class _TradeDefineStepState extends ConsumerState<TradeDefineStepScreen> {
               const SizedBox(height: BsTokens.space4),
               DropdownButtonFormField<String>(
                 value: _personaId,
-                dropdownColor: BsTokens.cardLight,
+                dropdownColor: Theme.of(context).colorScheme.surface,
                 style:
                     const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 decoration: _dec('פרסונה'),
