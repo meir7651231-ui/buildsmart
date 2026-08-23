@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 Future<void> showStoreDocumentsSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius:
@@ -159,7 +159,7 @@ class _MonthRow extends StatelessWidget {
           vertical: BsTokens.space2,
         ),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),

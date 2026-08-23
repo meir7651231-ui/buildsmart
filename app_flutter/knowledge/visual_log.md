@@ -2738,3 +2738,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave14 — 8 files (ring_dive/welcome/worker_reports/worker_task_detail/courier_delivery_detail/lipskey_products/contractor_material_requests/persona_pod) (2026-08-23)
 **גל 14 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. cardLight/white→`colorScheme.surface` · bgLight→`scaffoldBackgroundColor`/`surface`. כל ה-offenders במתודות-build/State (context ישיר). `flutter analyze` 0 errors. **אטלס 97→81** (‎-16). מצטבר 659→81 (578 תוקנו).
+
+## #darkmode-wave15 — 8 files (worker_notifs/worker_payslips/role_request/store_documents/audit/profession/consent_modal/role_picker) (2026-08-23)
+**גל 15 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. cardLight/white→`colorScheme.surface` · bgLight/bgLightAlt/FAFAFA→`scaffoldBackgroundColor`/`surface` · F5F5F5→`surfaceContainerHighest`. **אימות נוסף:** role_picker_sheet מרונדר ב-manager_dashboard_screen_test (ניתוב showRolePicker) — הרצנו, 31/31 עוברים. `flutter analyze` 0 errors. **אטלס 81→65** (‎-16). מצטבר 659→65 (594 תוקנו).

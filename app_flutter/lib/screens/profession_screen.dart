@@ -51,7 +51,7 @@ class ProfessionScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: BsTokens.bgLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: HelpModeScaffold(
         child: SafeArea(
           child: Padding(
@@ -137,7 +137,7 @@ class _TradeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),

@@ -76,9 +76,9 @@ class _RoleRequestSheetState extends ConsumerState<_RoleRequestSheet> {
           BsTokens.space4,
           BsTokens.space5,
         ),
-        decoration: const BoxDecoration(
-          color: BsTokens.cardLight,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
         ),
         child: SafeArea(
           top: false,
@@ -233,8 +233,8 @@ class _RoleRequestRow extends StatelessWidget {
                   width: 44,
                   height: 44,
                   alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFFFFF),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
                     shape: BoxShape.circle,
                   ),
                   child: Text(

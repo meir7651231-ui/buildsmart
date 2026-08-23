@@ -129,10 +129,10 @@ class _WorkerNotifsSheet extends ConsumerWidget {
         maxChildSize: 0.95,
         expand: false,
         builder:
-            (_, scroll) => Container(
-              decoration: const BoxDecoration(
-                color: BsTokens.cardLight,
-                borderRadius: BorderRadius.vertical(
+            (context, scroll) => Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(BsTokens.radiusCard),
                 ),
               ),
@@ -296,7 +296,10 @@ class _NotifRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: notif.read ? BsTokens.cardLight : const Color(0xFFFFF8F2),
+      color:
+          notif.read
+              ? Theme.of(context).colorScheme.surface
+              : const Color(0xFFFFF8F2),
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),

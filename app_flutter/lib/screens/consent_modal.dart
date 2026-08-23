@@ -99,7 +99,7 @@ class _ConsentDialog extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: AlertDialog(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         ),
@@ -135,7 +135,7 @@ class _ConsentDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(BsTokens.space3),
                   decoration: BoxDecoration(
-                    color: BsTokens.bgLightAlt,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(BsTokens.space2),
                     border: Border.all(color: BsTokens.divider),
                   ),

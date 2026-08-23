@@ -93,7 +93,7 @@ class _RolePickerCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
@@ -195,8 +195,8 @@ class _RoleRow extends ConsumerWidget {
                   width: 44,
                   height: 44,
                   alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFFFFF),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
                     shape: BoxShape.circle,
                   ),
                   child: Text(
