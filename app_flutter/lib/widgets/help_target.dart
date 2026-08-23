@@ -254,7 +254,10 @@ class _HelpBubble extends StatelessWidget {
 
     final tail = CustomPaint(
       size: const Size(_tailW, _tailH),
-      painter: _TailPainter(pointUp: below),
+      painter: _TailPainter(
+        pointUp: below,
+        surface: Theme.of(context).colorScheme.surface,
+      ),
     );
 
     final card = Container(
@@ -440,9 +443,10 @@ class HelpModeScaffold extends ConsumerWidget {
 
 /// Small triangular tail for the speech bubble.
 class _TailPainter extends CustomPainter {
-  _TailPainter({required this.pointUp});
+  _TailPainter({required this.pointUp, required this.surface});
 
   final bool pointUp;
+  final Color surface;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -461,9 +465,10 @@ class _TailPainter extends CustomPainter {
     path.close();
     canvas
       ..drawShadow(path, const Color(0x33000000), 3, false)
-      ..drawPath(path, Paint()..color = BsTokens.cardLight);
+      ..drawPath(path, Paint()..color = surface);
   }
 
   @override
-  bool shouldRepaint(covariant _TailPainter old) => old.pointUp != pointUp;
+  bool shouldRepaint(covariant _TailPainter old) =>
+      old.pointUp != pointUp || old.surface != surface;
 }

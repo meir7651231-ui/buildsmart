@@ -4457,3 +4457,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave20 — 8 files theme-aware (2026-08-23)
 **גל 20:** 9 משטחים ב-reject_reason_dialog·confirm_dialog·quick_pad_screen·word_finder_home·studio_entry·quick_pad_keyboard·word_keyboard·sudoku_grid(2) → theme. analyze 0 · אטלס 22→13. מצטבר dark-mode 659→13 (646 תוקנו). **fan-out הסתיים** — 13 נותרים = golden/theme-file/canvas/painter/reference בלבד.
+
+### #darkmode-wave21 — golden keyboards + painter + engine → ATLAS 0 🏁 (2026-08-23)
+**גל 21 (סיום):** bs_keyboard(4)+smart_chip_strip(1)→surface (golden חודש תחת AppTheme.light() + אומת ויזואלית) · help_target `_TailPainter` קיבל Color param · מנוע-האטלס לומד להחריג lib/theme/ + מרקר `// atlas:ignore` (signature canvas ×2, edit_safety reference). analyze 0 · signature 8/8 · goldens 4/4. **אטלס 7→0.** מצטבר: 652 משטחים theme-aware ב-21 גלים, 7 החרגות-לגיטימיות מתועדות. **מצב-כהה הושלם.**

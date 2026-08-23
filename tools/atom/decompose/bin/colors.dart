@@ -67,6 +67,28 @@ bool _isLight(String token) {
   return _lightHexes.hasMatch(token);
 }
 
+/// A light SURFACE that is legitimately allowed to stay a fixed light color —
+/// NOT a dark-mode bug. Two cases, both principled:
+///  1. Non-widget source dirs — `lib/theme/` (the theme DEFINITION: a light
+///     constant there IS the source of the light theme, e.g.
+///     `ColorScheme.surface: isDark ? … : white`, or a `ThemeExtension`'s
+///     owner-overridable light default), and `lib/logic/` + `lib/data/` (pure
+///     logic/models that render NO widget — a color constant there is a
+///     reference/default value, e.g. the contrast-check baseline, never a
+///     painted app-chrome background).
+///  2. An explicit author opt-out inside a widget file: `// atlas:ignore` on the
+///     line or the line above it — used for a genuine non-chrome surface such as
+///     a signature ink-capture canvas that must stay white for the exported PNG.
+bool _isExcludedSurface(String file, List<String> lines, int i) {
+  final f = file.replaceAll(r'\', '/');
+  for (final dir in const ['/theme/', '/logic/', '/data/']) {
+    if (f.contains('lib$dir')) return true;
+  }
+  final here = lines[i];
+  final above = i > 0 ? lines[i - 1] : '';
+  return here.contains('atlas:ignore') || above.contains('atlas:ignore');
+}
+
 List<ColorHit> _scan(File f) {
   final rel = f.path.replaceFirst(RegExp(r'^\./'), '');
   final hits = <ColorHit>[];
@@ -83,7 +105,10 @@ List<ColorHit> _scan(File f) {
     for (final m in _colorTok.allMatches(line)) {
       final tok = m.group(1)!;
       final role = _roleFor(effLine, tok);
-      hits.add(ColorHit(rel, i + 1, tok, role, role == 'surface' && _isLight(tok)));
+      final offender = role == 'surface' &&
+          _isLight(tok) &&
+          !_isExcludedSurface(rel, lines, i);
+      hits.add(ColorHit(rel, i + 1, tok, role, offender));
     }
   }
   return hits;

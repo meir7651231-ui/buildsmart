@@ -203,6 +203,9 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
             aspectRatio: kSignatureCanvasSize.width / kSignatureCanvasSize.height,
             child: DecoratedBox(
               decoration: BoxDecoration(
+                // atlas:ignore — ink-capture canvas: dark ink is drawn on this
+                // and the exported PNG bakes an opaque white bg, so it must stay
+                // white in every theme (not app chrome).
                 color: const Color(0xFFFFFFFF),
                 borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                 border: Border.all(color: const Color(0xFFD8D8D8)),
@@ -437,6 +440,8 @@ Future<String?> showSignatureSheet(
               Container(
                 key: padKey,
                 decoration: BoxDecoration(
+                  // atlas:ignore — signing canvas: dark ink on white, exported
+                  // as an opaque-white PNG, so it must stay white in every theme.
                   color: const Color(0xFFFFFFFF),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFFE2E2E2)),

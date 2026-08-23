@@ -69,7 +69,7 @@ class _Chip extends StatelessWidget {
     final fg = primary ? Colors.white : BsTokens.inkLight;
 
     return Material(
-      color: primary ? BsTokens.brand : BsTokens.cardLight,
+      color: primary ? BsTokens.brand : Theme.of(context).colorScheme.surface,
       shape: StadiumBorder(
         side: primary
             ? BorderSide.none

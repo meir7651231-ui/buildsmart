@@ -949,7 +949,7 @@ class _PredictionChip extends StatelessWidget {
     // white Material, hairline divider border, centered single Text, no glyph.
     if (!isDestination) {
       return Material(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
         child: InkWell(
           onTap: onTap,
@@ -977,7 +977,7 @@ class _PredictionChip extends StatelessWidget {
     // (the label stays Flexible inside a centered, min-width Row).
     final radius = BorderRadius.circular(BsTokens.radiusCard / 2);
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: radius,
       child: InkWell(
         onTap: onTap,
@@ -1040,7 +1040,7 @@ class _ToolTile extends StatelessWidget {
     // minHeight 44 dominates either way there, so desktop is byte-identical).
     final double vpad = m.cellHeight >= 44 ? BsTokens.space2 : BsTokens.spaceHair;
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
       child: InkWell(
         onTap: onTap,
@@ -1127,7 +1127,7 @@ class _BackTile extends StatelessWidget {
     final KbCellMetrics m = BsKbScale.of(context);
     final double vpad = m.cellHeight >= 44 ? BsTokens.space2 : BsTokens.spaceHair;
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
       child: InkWell(
         onTap: onTap,

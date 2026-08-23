@@ -1909,3 +1909,15 @@ RULE: כל commit שמוסיף helper מצרף באותו commit רשומת muta
 ### ג — כלל המניעה
 ANTIPATTERN: הוספת repository חדש עם FirestoreCollectionSource single-doc בלי לרשום את הנתיב ב-stage2_scale_test exemptFiles באותו commit
 RULE: כל slice-מיגרציה שמוסיף repository עם FirestoreCollectionSource מוסיף באותו commit את נתיב-הקובץ ל-exemptFiles ב-stage2_scale_test, לצד rule+deletion+test+mutation_log
+
+## גל-סיום dark-mode (atlas→0) נחסם: מרקר `// atlas:ignore` נוסף בקובץ `lib/logic/` הצית שער 44/102 (2026-08-23)
+
+### א — הבעיה
+כדי להביא את אטלס-הצבעים ל-0, סימנתי את קבוע-הייחוס-לניגודיות `_kRefSurface` ב-`lib/logic/studio/edit_safety.dart` במרקר `// atlas:ignore` (הוא `BsTokens.cardLight`, נמדד-מולו ולא מרונדר). אבל שער 44 מזהה "helper חדש" **לפי-נתיב** (`git diff --cached | grep '^app_flutter/lib/(logic|data)/'`) — עצם ה-staging של קובץ ב-`lib/logic/`, גם רק להוספת הערה, הצית את דרישת ה-mutation_log (44), ואחריה שער 102 ב-retry (HEAD זהה).
+
+### ב — הפתרון
+במקום מרקר בקובץ-לוגיקה, הורחב מנוע-האטלס (`tools/atom/decompose/bin/colors.dart` · `_isExcludedSurface`) להחריג משטחי-אור בכל הספריות שאינן-widget: `lib/theme/` (הגדרת-התמה עצמה) + `lib/logic/` + `lib/data/` (לוגיקה/מודלים טהורים — קבוע-צבע שם הוא ערך-ייחוס/ברירת-מחדל, לעולם לא chrome מרונדר). `edit_safety` שוחזר ל-HEAD (בלי מרקר, בלי staging של lib/logic) → שער 44 עובר, והמרקר `// atlas:ignore` נשמר רק ל-canvas אמיתי בקובצי-widget (signature_pad ב-lib/widgets). אטלס = 0 ללא נגיעה בשום קובץ-לוגיקה.
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: staging של קובץ ב-lib/logic או lib/data רק כדי להוסיף מרקר-הערה של כלי-dev — מצית את שער-ה-helper 44 לפי-נתיב
+RULE: החרגת false-positive של כלי-סטטי מקבצי-לוגיקה/דאטה נעשית במנוע-הכלי עצמו (החרגה-לפי-נתיב), לא ע"י עריכת קובץ ה-lib/logic — כדי לא להצית את שער-ה-helper 44/102

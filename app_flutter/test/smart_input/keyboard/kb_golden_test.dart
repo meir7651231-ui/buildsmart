@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart';
 import 'package:buildsmart/widgets/smart_input/models.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/widgets/smart_input/smart_chip_strip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +66,11 @@ Future<void> _loadIcons() async {
 
 Widget _frame(Widget child) => MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'Heebo', useMaterial3: true),
+      // Pump under the app's REAL light theme so the keyboard's theme-aware
+      // surfaces (colorScheme.surface == white in light) render exactly as the
+      // historical hardcoded white — the goldens stay pixel-identical while the
+      // widget is now dark-mode ready.
+      theme: AppTheme.light(),
       home: Scaffold(
         backgroundColor: const Color(0xFFECE5DD),
         body: Align(
