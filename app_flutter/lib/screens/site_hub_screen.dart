@@ -630,7 +630,7 @@ class _SiteLocations extends StatelessWidget {
         const _SiteServerNote(
             '⚙️ בפרודקשן: מבנה האתר מסונכרן מהשרת — כאן מבנה דמו'),
         const SizedBox(height: BsTokens.space3),
-        for (final f in kSiteTree) _floor(f),
+        for (final f in kSiteTree) _floor(context, f),
       ],
     );
   }
@@ -660,13 +660,13 @@ class _SiteLocations extends StatelessWidget {
           ),
       ];
 
-  Widget _floor(SiteFloor f) {
+  Widget _floor(BuildContext context, SiteFloor f) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 9),
       padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         border: Border.all(color: const Color(0xFFE6E6E6)),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -682,19 +682,19 @@ class _SiteLocations extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          for (final a in f.apts) _apt(a),
+          for (final a in f.apts) _apt(context, a),
         ],
       ),
     );
   }
 
-  Widget _apt(SiteApartment a) {
+  Widget _apt(BuildContext context, SiteApartment a) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.all(9),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(9),
       ),
       child: Column(
@@ -713,7 +713,7 @@ class _SiteLocations extends StatelessWidget {
             spacing: 5,
             runSpacing: 5,
             children: [
-              for (final r in a.rooms) _room(r),
+              for (final r in a.rooms) _room(context, r),
             ],
           ),
         ],
@@ -721,10 +721,10 @@ class _SiteLocations extends StatelessWidget {
     );
   }
 
-  Widget _room(String r) => Container(
+  Widget _room(BuildContext context, String r) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           border: Border.all(color: const Color(0xFFE6E6E6)),
           borderRadius: BorderRadius.circular(6),
         ),
@@ -945,7 +945,7 @@ class _SiteSafetyState extends State<_SiteSafety> {
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(9),
         ),
         child: Text(
@@ -986,12 +986,12 @@ class _SiteDeps extends StatelessWidget {
         const _SiteServerNote(
             '⚙️ בפרודקשן: תלויות מחושבות מלוח המשימות החי — כאן נתוני דמו'),
         const SizedBox(height: BsTokens.space3),
-        for (final d in kSiteDeps) _dep(d),
+        for (final d in kSiteDeps) _dep(context, d),
       ],
     );
   }
 
-  Widget _dep(SiteDep d) {
+  Widget _dep(BuildContext context, SiteDep d) {
     return Opacity(
       opacity: d.ready ? 1 : .62, // .sc-dep opacity:.62 → .ready opacity:1
       child: Container(
@@ -999,7 +999,7 @@ class _SiteDeps extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 9),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           border: Border.all(
             color: d.ready ? _kOk : const Color(0xFFE6E6E6),
           ),
@@ -1085,7 +1085,7 @@ class _SitePhotosState extends State<_SitePhotos> {
       margin: const EdgeInsets.only(bottom: 9),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         border: Border.all(color: const Color(0xFFE6E6E6)),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -1130,7 +1130,7 @@ class _SitePhotosState extends State<_SitePhotos> {
             height: 70,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: BsTokens.bgLight,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(9),
             ),
             child: Text(glyph, style: const TextStyle(fontSize: 32)),

@@ -4421,3 +4421,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave11 — studio_screen ×2 theme-aware + test fix (2026-08-23)
 **גל 11:** 9 משטחים בשני קבצי studio_screen.dart (root 7 · studio/ 2) → theme. חוזה-טסט: studio_screen_test עודכן ל-pump תחת AppTheme.light() (ה-assertion cardLight נשאר — surface(light)==white==cardLight). studio_screen_test 4/4 · behavior 10/10 · analyze 0 · אטלס 137→128. מצטבר dark-mode 659→128 (531 תוקנו).
+
+### #darkmode-wave12 — site_hub context-threading (2026-08-23)
+**גל 12:** 7 offenders דחויים של site_hub_screen.dart נפתרו. 4 ב-StatelessWidget (_floor/_apt/_room/_dep) → context הושחל כפרמטר דרך build→helper→helper. 3 מתודות-State (_safetyRow/_pair/_photo) → State.context getter ישיר. site_hub_state_test 23/23 · analyze 0 · אטלס 128→121. מצטבר dark-mode 659→121 (538 תוקנו).
