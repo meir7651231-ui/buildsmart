@@ -623,7 +623,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       if (_size != null) _size!,
     ];
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: InkWell(
         onTap: () => setState(() {
           if (_angle != null) {

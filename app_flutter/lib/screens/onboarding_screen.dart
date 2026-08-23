@@ -219,7 +219,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final showHelp = !widget.isTour;
     final helpMode = showHelp && ref.watch(helpModeProvider);
     return Scaffold(
-      backgroundColor: BsTokens.bgLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           if (helpMode) const HelpModeBanner(),

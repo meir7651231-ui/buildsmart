@@ -79,7 +79,8 @@ class _TreePaneState extends ConsumerState<TreePane> {
                 )
               : ListView.builder(
                   itemCount: rows.length,
-                  itemBuilder: (_, i) => _rowWidget(ref, rows[i], selected),
+                  itemBuilder: (context, i) =>
+                      _rowWidget(context, ref, rows[i], selected),
                 ),
         ),
       ],
@@ -87,11 +88,16 @@ class _TreePaneState extends ConsumerState<TreePane> {
   }
 }
 
-Widget _rowWidget(WidgetRef ref, _Row row, String? selected) {
+Widget _rowWidget(
+  BuildContext context,
+  WidgetRef ref,
+  _Row row,
+  String? selected,
+) {
   switch (row) {
     case _ScreenRow(:final screen):
       return Container(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         padding: const EdgeInsets.symmetric(
           horizontal: BsTokens.space3,
           vertical: 6,

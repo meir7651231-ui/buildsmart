@@ -546,7 +546,7 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           border: Border.all(color: const Color(0x17000000)),
           borderRadius: BorderRadius.circular(10),
         ),

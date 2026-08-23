@@ -4451,3 +4451,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave18 — arrow-method threading + 4 files (2026-08-23)
 **גל 18:** 8 משטחים → theme. 4 דחויי-arrow נפתרו ב-threading (persona_picking:777 · courier_portal_tab:359 [9 call-sites] · legal:209 · persona_portal:325 [11 call-sites]) + full_internal_card · company_catalog_import · customer_import · worker_today_strip. analyze 0 · אטלס 38→30. מצטבר dark-mode 659→30 (629 תוקנו).
+
+### #darkmode-wave19 — 8 files theme-aware (2026-08-23)
+**גל 19:** 8 משטחים ב-onboarding·nav_launch·tree_pane·finder·catalog_wheel·home_atoms·updates·order_notif → theme. tree_pane threaded context. analyze 0 · אטלס 30→22. מצטבר dark-mode 659→22 (637 תוקנו). החרגה קבועה: edit_safety:132 (קבוע-ייחוס-ניגודיות, לא משטח).

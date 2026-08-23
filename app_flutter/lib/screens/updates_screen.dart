@@ -111,7 +111,7 @@ class _UpdatesToggle extends ConsumerWidget {
     }
 
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: Row(
         children: [
           seg(0, Icons.notifications_outlined, 'התראות'),

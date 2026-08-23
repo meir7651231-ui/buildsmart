@@ -99,7 +99,7 @@ class _NavSheet extends StatelessWidget {
         margin: const EdgeInsets.all(BsTokens.space3),
         padding: const EdgeInsets.all(BsTokens.space5),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         ),
         child: Column(

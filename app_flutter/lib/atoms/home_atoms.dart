@@ -135,7 +135,7 @@ class AtomBreadcrumb extends StatelessWidget {
       if (size != null) size!,
     ];
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: InkWell(
         onTap: onBack,
         child: Padding(
