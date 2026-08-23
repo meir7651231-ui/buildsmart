@@ -107,16 +107,21 @@ void main() {
     });
 
     test('the ONLY public reads are the published-config docs '
-        '(studioConfigLive + orgConfigLive)', () {
-      // Two public reads exist by design — both are owner-write-only published
+        '(studioConfigLive + orgConfigLive + screenSectionsLive)', () {
+      // Three public reads exist by design — all owner-write-only published
       // config docs that clients read live (studioConfigLive · orgConfigLive,
-      // the giant-system per-org live config). ANY OTHER `allow read: if true;`
-      // is a new leak surface and must fail here.
+      // the giant-system per-org live config · screenSectionsLive, the manager's
+      // shared screen layout — non-sensitive UI config every client renders).
+      // ANY OTHER `allow read: if true;` is a new leak surface and must fail here.
       final matches = 'allow read: if true;'.allMatches(rules).length;
-      expect(matches, 2, reason: 'a third public read = a new leak surface');
+      expect(matches, 3, reason: 'a fourth public read = a new leak surface');
       // each public read must sit immediately inside its config-doc block: the
       // first `allow read: if true;` after the block declaration is that block's.
-      for (final block in ['studioConfigLive', 'orgConfigLive']) {
+      for (final block in [
+        'studioConfigLive',
+        'orgConfigLive',
+        'screenSectionsLive',
+      ]) {
         final decl = rules.indexOf('match /$block/');
         expect(decl, isNot(-1), reason: '$block block exists');
         final declEnd = decl + 'match /$block/'.length;

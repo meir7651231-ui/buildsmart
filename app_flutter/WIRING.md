@@ -1,5 +1,14 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-sections-live-sync — 🖥️ ניהול-מסך מגיע לכל המשתמשים · סנכרון-שרת חי (בעלים-מפרסם · מגודר) — 2026-08-23
+"ניהול מסכים" (`screen_sections.dart`) שמר עד היום **מקומית בלבד** (SharedPreferences `bs.screen-sections.v1`) ⇒ סידור/הסתרה/שינוי-שם של סקציות מסך שהמנהל עשה **השפיע רק על המכשיר שלו**. הפרוסה מחווטת סנכרון-שרת חי במירור-מדויק של org-config-live המוכח: המנהל עורך → מפרסם ל**מסמך-שרת אחד ניתן-לכתיבה-ע"י-הבעלים** (`screenSectionsLive/current`), וכל קליינט קורא אותו **חי** ⇒ הפריסה שהמנהל בחר פעילה אצל כולם. **זה מה שסוגר את "ניהול מסך משפיע רק עליי".**
+- **`screen_sections_sink_firebase.dart` (חדש):** seam `ScreenSectionsDocPort` (read/write/remove/snapshots · Firebase-free-testable) + adapter Firestore lazy + `publishScreenSections` (ריק→remove · best-effort · **לעולם לא זורק**). דגלים+getters: `kScreenSectionsLive` (`SCREEN_SECTIONS_LIVE`) · `useScreenSectionsLive`/`canPublishScreenSections` = `kScreenSectionsLive && Firebase.apps.isNotEmpty`.
+- **`screen_sections_live.dart` (חדש):** `screenSectionsLiveProvider` (Provider<void>) — מנוי ל-`screenSectionsLive/current` → מזין כל snapshot ל-`adoptRemote`. כבוי ⇒ חוזר בלי מנוי (אפס-I/O).
+- **`screen_sections.dart`:** hook פרסום `_publish` בכל עריכה (כל ה-mutators עוברים דרך `_set`) + `adoptRemote(encoded)` **טולרנטי** (decode-כושל → שומר last-good · **בלי echo חזרה לשרת** → אין לולאה) + פיצול `_encodeState`/`_persistLocal`. ה-provider מזריק publisher רק ב-build חמוש (אחרת null ⇒ **זהה-בייטים**).
+- **`main.dart`:** מזיין את הנתיב ב-`ref.watch(screenSectionsLiveProvider)` אחד (ליד `orgConfigLive`).
+- **`firestore.rules`:** בלוק `screenSectionsLive/{docId}` — קריאה **פומבית**, כתיבה **לבעלים-בלבד** דרך `isOwnerEmail()` (אותו חוזה כמו `orgConfigLive`).
+- **DoD:** `SCREEN_SECTIONS_LIVE` default-OFF ⇒ null publisher + אין מנוי ⇒ **זהה-בייטים** בכל build ללא-define / בכל הבדיקות. 12/12 `screen_sections` (כולל 4 חדשות: publish-on-edit · adopt-without-echo · decode-טולרנטי · reset-broadcast) · analyze 0.
+
 ## #org-config-publish-decouple — 📤 הפרסום מנותק מהדגל-החי — 2026-08-13
 `_save` באשף מפרסם עכשיו לפי `canPublishOrgConfig` (`kOrgConfigFlag && Firebase.apps.isNotEmpty`) במקום `useOrgConfigLive` — הכתיבה **לא דורשת** את דגל-הקריאה-החי (`ORG_CONFIG_LIVE`). כך "שמור" מפרסם בכל build חמוש-`ORG_CONFIG` שבו Firebase למעלה + הבעלים מחובר, גם אם המנוי-החי כבוי. אבחון-שדה הראה בדיוק את הפער: בעלים ✅ + כתיבה-לשרת ✅ אבל `ORG_CONFIG_LIVE` ❌ → הפרסום לא נקרא. (כללי-השרת עדיין חוסמים כתיבה למי-שאינו-בעלים.) האבחון מפריד עכשיו "פרסום מופעל" (`canPublishOrgConfig`) מ"מנוי-חי" (`useOrgConfigLive`).
 

@@ -1191,6 +1191,19 @@ service cloud.firestore {
       allow write: if isOwnerEmail();
     }
 
+    // `screenSectionsLive/current` mirrors the manager's PUBLISHED screen layout
+    // (the section ORDER / HIDE / rename map → app_flutter/lib/state/
+    // screen_sections_sink_firebase.dart, gated by the SCREEN_SECTIONS_LIVE build
+    // flag). SAME contract as orgConfigLive above: PUBLIC read — the layout (which
+    // sections render, in what order, under what label) is non-sensitive UI config
+    // every client needs to render; WRITE is OWNER-ONLY via isOwnerEmail() (the
+    // un-spoofable Google email), so only the owner/manager can publish a layout
+    // that reaches ALL users. No Cloud Function — self-contained, like orgConfigLive.
+    match /screenSectionsLive/{docId} {
+      allow read: if true;
+      allow write: if isOwnerEmail();
+    }
+
     // ═════════════════════════════════════════════════════════════════════════
     // catalog-to-server (SPEC-catalog-to-server · C0.4 / C5.3) — the migrated data
     // families + the multi-store INVENTORY. Every collection gets an explicit rule

@@ -41,6 +41,8 @@ import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/push_routing.dart'
     show afterThisFrame, pendingPushThreadProvider, threadIdFromLaunchUrl;
 import 'package:buildsmart/state/push_state.dart';
+import 'package:buildsmart/state/screen_sections_live.dart'
+    show screenSectionsLiveProvider;
 import 'package:buildsmart/state/server_catalog_auth.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configThemeProvider;
@@ -546,6 +548,12 @@ class BuildSmartApp extends ConsumerWidget {
     // client live. Inert — returns without subscribing — unless ORG_CONFIG_LIVE is
     // armed AND Firebase is initialised, so it is a no-op in today's builds/tests.
     ref.watch(orgConfigLiveProvider);
+    // Arm the screen-management LIVE lane (same shape): subscribe to the shared
+    // `screenSectionsLive/current` doc so a manager's screen-layout edit reaches
+    // this client live. Inert unless SCREEN_SECTIONS_LIVE is armed AND Firebase
+    // is initialised ⇒ a no-op in today's builds/tests. This is the arm that
+    // makes "ניהול מסך" reach ALL users, not just the manager's own device.
+    ref.watch(screenSectionsLiveProvider);
     // The web arm of the same tap. When no tab is open the service worker
     // cannot postMessage into a page that does not exist, so it launches one
     // with `?thread=` in the url; this is where that is picked up. Read ONCE

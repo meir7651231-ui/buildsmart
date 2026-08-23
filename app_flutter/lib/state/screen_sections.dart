@@ -13,6 +13,11 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/state/screen_sections_sink_firebase.dart'
+    show
+        FirestoreScreenSectionsDocPort,
+        canPublishScreenSections,
+        publishScreenSections;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,9 +66,16 @@ class ScreenLayout {
 /// Per-screen section layouts, keyed by screen id. Canonical-minimal: a screen
 /// with no customization is ABSENT from the map (⇒ default order, nothing hidden).
 class ScreenSectionsNotifier extends StateNotifier<Map<String, ScreenLayout>> {
-  ScreenSectionsNotifier() : super(const {}) {
+  ScreenSectionsNotifier({Future<void> Function(String encoded)? publish})
+      : _publish = publish,
+        super(const {}) {
     _load();
   }
+
+  /// Best-effort "reach everyone" hook: after a local edit persists, the manager's
+  /// full layout map is pushed to the shared doc. Null in every define-less /
+  /// non-owner build ⇒ publish never fires ⇒ byte-identical to today.
+  final Future<void> Function(String encoded)? _publish;
 
   static const _key = 'bs.screen-sections.v1';
 
@@ -80,20 +92,48 @@ class ScreenSectionsNotifier extends StateNotifier<Map<String, ScreenLayout>> {
     } catch (_) {}
   }
 
-  Future<void> _persist() async {
+  /// The canonical-minimal encoding of the current state: drop empty layouts so a
+  /// reset screen leaves no trace. Returns `''` when nothing is customized (⇒ the
+  /// prefs key is removed / the shared doc is deleted). Shared by the local
+  /// persist and the shared-doc publish so both lanes carry byte-identical bytes.
+  String _encodeState() {
+    final map = <String, dynamic>{
+      for (final e in state.entries)
+        if (!e.value.isEmpty) e.key: e.value.toJson(),
+    };
+    return map.isEmpty ? '' : jsonEncode(map);
+  }
+
+  Future<void> _persistLocal(String encoded) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      // canonical-minimal: drop empty layouts so a reset screen leaves no trace.
-      final map = <String, dynamic>{
-        for (final e in state.entries)
-          if (!e.value.isEmpty) e.key: e.value.toJson(),
-      };
-      if (map.isEmpty) {
+      if (encoded.isEmpty) {
         await prefs.remove(_key);
       } else {
-        await prefs.setString(_key, jsonEncode(map));
+        await prefs.setString(_key, encoded);
       }
     } catch (_) {}
+  }
+
+  /// Adopt a layout map PUBLISHED by the manager (the live lane —
+  /// screen_sections_live.dart feeds every snapshot here). Sets the state and
+  /// caches it locally, but does NOT re-publish, so a received snapshot can never
+  /// loop back to the server. Decoding is tolerant: a malformed doc is ignored,
+  /// leaving the last-good layout in force (never blanks the app).
+  void adoptRemote(String encoded) {
+    try {
+      if (encoded.isEmpty) {
+        state = const {};
+        _persistLocal('');
+        return;
+      }
+      final map = jsonDecode(encoded) as Map<String, dynamic>;
+      state = {
+        for (final e in map.entries)
+          e.key: ScreenLayout.fromJson(e.value as Map<String, dynamic>),
+      };
+      _persistLocal(encoded);
+    } catch (_) {/* keep last-good */}
   }
 
   ScreenLayout _of(String screen) => state[screen] ?? const ScreenLayout();
@@ -106,7 +146,12 @@ class ScreenSectionsNotifier extends StateNotifier<Map<String, ScreenLayout>> {
       next[screen] = layout;
     }
     state = next;
-    _persist();
+    final encoded = _encodeState();
+    _persistLocal(encoded);
+    // Reach everyone: armed/owner builds push the manager's layout to the shared
+    // doc. Best-effort — a null hook (default) or a swallowed write changes
+    // nothing locally. This is the line that makes "ניהול מסך" reach all users.
+    _publish?.call(encoded);
   }
 
   /// The section ids for [screen] in effective display order: the stored order
@@ -206,5 +251,12 @@ class ScreenSectionsNotifier extends StateNotifier<Map<String, ScreenLayout>> {
 
 final screenSectionsProvider =
     StateNotifierProvider<ScreenSectionsNotifier, Map<String, ScreenLayout>>(
-  (_) => ScreenSectionsNotifier(),
+  (_) => ScreenSectionsNotifier(
+    // Inject the shared-doc publisher only in an armed+Firebase build; every
+    // define-less / test / non-owner build gets a null hook ⇒ byte-identical.
+    publish: canPublishScreenSections
+        ? (encoded) => publishScreenSections(
+            const FirestoreScreenSectionsDocPort(), encoded)
+        : null,
+  ),
 );

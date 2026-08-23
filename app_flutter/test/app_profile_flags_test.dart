@@ -107,6 +107,13 @@ const Set<String> kArmingLayer = {
   // SharedPreferences path until armed. Owner-staged, per-flag rollback = drop
   // the define — the USER_DATA_SERVER / backend-coordinated arming shape.
   'TASKS_SERVER',
+  // SCREEN_SECTIONS_LIVE (screen-management local→server) — arms the owner-
+  // published shared screen layout (screenSectionsLive/current) + its live
+  // subscription, so a manager's section order/hide/rename reaches ALL users.
+  // Default-OFF ⇒ byte-identical: screen_sections keeps its SharedPreferences
+  // path until armed. Owner-staged twin of ORG_CONFIG_LIVE, per-flag rollback =
+  // drop the define — the backend-coordinated arming shape.
+  'SCREEN_SECTIONS_LIVE',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must

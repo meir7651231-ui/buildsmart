@@ -119,4 +119,61 @@ void main() {
     expect(n.orderedIds('home', defs), defs);
     expect(n.visibleIds('home', defs), defs);
   });
+
+  // ── server-sync (screen_sections_sink_firebase.dart) — Firebase-free via a
+  //    fake publish hook. Proves the manager's edit reaches "everyone" and a
+  //    received snapshot adopts without echoing back to the server. ────────────
+  group('server-sync — publish on edit + adopt from remote', () {
+    test('every edit pushes the canonical-minimal map to the publish hook; '
+        'reset pushes the empty string (⇒ shared-doc remove)', () {
+      final pushed = <String>[];
+      final n = ScreenSectionsNotifier(
+        publish: (encoded) {
+          pushed.add(encoded);
+          return Future<void>.value();
+        },
+      );
+      addTearDown(n.dispose);
+      n.hide(home, 'b');
+      expect(pushed, isNotEmpty);
+      expect(pushed.last, contains('hidden'));
+      expect(pushed.last, contains(home));
+      n.resetScreen(home);
+      expect(pushed.last, ''); // empty ⇒ remove the shared doc (back to defaults)
+    });
+
+    test('adoptRemote sets state from an encoded map WITHOUT re-publishing '
+        '(a received snapshot never loops back to the server)', () {
+      final pushed = <String>[];
+      final n = ScreenSectionsNotifier(
+        publish: (encoded) {
+          pushed.add(encoded);
+          return Future<void>.value();
+        },
+      );
+      addTearDown(n.dispose);
+      n.adoptRemote('{"home":{"hidden":["b"]}}');
+      expect(n.isHidden('home', 'b'), isTrue);
+      expect(n.visibleIds('home', defs), ['a', 'c']);
+      expect(pushed, isEmpty); // adopt must NOT publish (no echo loop)
+    });
+
+    test('adoptRemote is tolerant — a malformed doc keeps the last-good layout',
+        () {
+      final n = ScreenSectionsNotifier();
+      addTearDown(n.dispose);
+      n.adoptRemote('{"home":{"hidden":["b"]}}');
+      n.adoptRemote('}{ not json');
+      expect(n.isHidden('home', 'b'), isTrue); // unchanged, never blanked
+    });
+
+    test('adoptRemote("") clears to canonical-minimal (a reset broadcast)', () {
+      final n = ScreenSectionsNotifier();
+      addTearDown(n.dispose);
+      n.hide('home', 'b');
+      n.adoptRemote('');
+      expect(n.isHidden('home', 'b'), isFalse);
+      expect(n.visibleIds('home', defs), defs);
+    });
+  });
 }
