@@ -88,9 +88,9 @@ class WorkerTaskBoardScreen extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           titleSpacing: BsTokens.space4,
           iconTheme: const IconThemeData(color: BsTokens.mutedLight),
@@ -157,7 +157,7 @@ class _StatusGroupState extends State<_StatusGroup> {
     return Container(
       margin: const EdgeInsets.only(bottom: BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         boxShadow: const [
           BoxShadow(

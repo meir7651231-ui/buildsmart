@@ -83,7 +83,7 @@ Future<void> showManagerRoleAssignSheet(
 }) {
   return showModalBottomSheet<void>(
     context: context,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius:
@@ -435,7 +435,7 @@ class _TargetSubject extends StatelessWidget {
         vertical: BsTokens.space3,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: const Color(0xFFE2E2E2)),
       ),
@@ -477,7 +477,7 @@ class _RoleChip extends StatelessWidget {
       child: Opacity(
         opacity: enabled ? 1 : 0.5,
         child: Material(
-          color: selected ? BsTokens.brand : BsTokens.cardLight,
+          color: selected ? BsTokens.brand : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
           child: InkWell(
             key: ValueKey('role-chip-${option.id}'),

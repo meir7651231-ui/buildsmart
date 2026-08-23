@@ -105,7 +105,7 @@ Future<void> showHelpInfo(
                   width: 300,
                   padding: const EdgeInsets.all(BsTokens.space4),
                   decoration: BoxDecoration(
-                    color: BsTokens.cardLight,
+                    color: Theme.of(ctx).colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: const [
                       BoxShadow(
@@ -261,7 +261,7 @@ class _HelpBubble extends StatelessWidget {
       width: _bubbleW,
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(

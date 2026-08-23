@@ -4415,3 +4415,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave9 — 8 screens theme-aware (2026-08-23)
 **גל 9:** 31 משטחים ב-intel_tab(4)·store_settings(4)·courier_attendance(4)·studio_top_bar(4)·worker_settings(4)·trade_define_step(4)·suppliers(4)·legal(3) → theme. 1 offender ב-legal:209 דולג (helper בלי context). bs_keyboard נדחה (golden-PNG test). analyze 0 · אטלס 191→160. מצטבר dark-mode 659→160 (499 תוקנו).
+
+### #darkmode-wave10 — 8 files theme-aware (2026-08-23)
+**גל 10:** 23 משטחים ב-contractor_tools(3)·defects(3)·worker_task_board(3)·docs_readiness(3)·manager_role_assign(3)·contractor_attendance(3)·tasks_gantt(3)·help_target(2) → theme. 1 offender ב-help_target:464 דולג (CustomPainter בלי context). analyze 0 · אטלס 160→137. מצטבר dark-mode 659→137 (522 תוקנו).
