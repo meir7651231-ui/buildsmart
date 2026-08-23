@@ -135,9 +135,9 @@ class TradePublishSheet extends ConsumerWidget {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: BsTokens.bgLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: BsTokens.cardLight,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
             title: const CfgText(
@@ -164,7 +164,7 @@ class TradePublishSheet extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(BsTokens.space4),
                 decoration: BoxDecoration(
-                  color: BsTokens.cardLight,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(cfgRadius(context)),
                   border: Border.all(color: const Color(0xFFEDEDED)),
                 ),

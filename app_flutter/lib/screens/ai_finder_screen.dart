@@ -205,9 +205,9 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: CfgText(
             'ai_finder_screen.t01',
@@ -261,7 +261,7 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       decoration: InputDecoration(
                         hintText: 'לדוגמה: ברז למטבח / חיבור לצינור ביוב',
                         filled: true,
-                        fillColor: BsTokens.cardLight,
+                        fillColor: Theme.of(context).colorScheme.surface,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(
                             BsTokens.radiusCard,

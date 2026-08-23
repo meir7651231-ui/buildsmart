@@ -86,10 +86,10 @@ class _RoleRequestsInboxScreenState
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: CfgText('role_requests_inbox_screen.t01', 'בקשות תפקיד'),
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           foregroundColor: BsTokens.inkLight,
           actions: [
             if (isOwner && count > 0)
@@ -169,7 +169,7 @@ class _RequestCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(color: Color(0x14000000), blurRadius: 12, offset: Offset(0, 4)),

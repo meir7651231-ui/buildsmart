@@ -132,9 +132,9 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: const CfgText(
               'spec_copilot_screen.t01', '🌡️ מתאים לתנאים שלי?',
@@ -226,7 +226,7 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
                 Container(
                   padding: const EdgeInsets.all(BsTokens.space3),
                   decoration: BoxDecoration(
-                    color: BsTokens.cardLight,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                     border: Border.all(color: const Color(0xFFEDEDED)),
                   ),

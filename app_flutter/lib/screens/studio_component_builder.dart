@@ -298,7 +298,7 @@ class _StudioComponentBuilderState
             vertical: 5,
           ),
           decoration: BoxDecoration(
-            color: BsTokens.surfaceMid,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
           ),
           child: Text(
@@ -645,7 +645,7 @@ class _StudioComponentBuilderState
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: Column(
@@ -764,7 +764,7 @@ class _StudioComponentBuilderState
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: BsTokens.divider),
       ),

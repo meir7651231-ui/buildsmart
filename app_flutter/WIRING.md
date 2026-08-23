@@ -4424,3 +4424,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave12 — site_hub context-threading (2026-08-23)
 **גל 12:** 7 offenders דחויים של site_hub_screen.dart נפתרו. 4 ב-StatelessWidget (_floor/_apt/_room/_dep) → context הושחל כפרמטר דרך build→helper→helper. 3 מתודות-State (_safetyRow/_pair/_photo) → State.context getter ישיר. site_hub_state_test 23/23 · analyze 0 · אטלס 128→121. מצטבר dark-mode 659→121 (538 תוקנו).
+
+### #darkmode-wave13 — 8 screens theme-aware (2026-08-23)
+**גל 13:** 24 משטחים ב-studio_component_builder(3)·home_content_reorder(3)·trade_publish(3)·spec_copilot(3)·courier_settings(3)·role_requests_inbox(3)·ai_finder(3)·describe_to_cart(3) → theme, 0 דולגו. analyze 0 · אטלס 121→97. מצטבר dark-mode 659→97 (562 תוקנו).

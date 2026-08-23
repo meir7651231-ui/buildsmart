@@ -33,9 +33,9 @@ class HomeContentReorder extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
@@ -215,7 +215,7 @@ class _SectionSlot extends ConsumerWidget {
       margin: const EdgeInsets.fromLTRB(
           BsTokens.space4, BsTokens.space1, BsTokens.space4, BsTokens.space1),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),

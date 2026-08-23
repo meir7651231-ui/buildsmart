@@ -160,9 +160,9 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: CfgText('describe_to_cart_screen.t01', '🗣️ תאר עבודה → סל',
               style: TextStyle(
@@ -188,7 +188,7 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
                 decoration: InputDecoration(
                   hintText: 'לדוגמה: יש לי נזילה מתחת לכיור במטבח',
                   filled: true,
-                  fillColor: BsTokens.cardLight,
+                  fillColor: Theme.of(context).colorScheme.surface,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(BsTokens.radiusCard)),
                 ),
