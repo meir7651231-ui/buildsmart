@@ -4445,3 +4445,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave16 — 8 files theme-aware (2026-08-23)
 **גל 16:** 16 משטחים ב-alt_explain(2)·quote_polish(2)·coming_soon(2)·adapter_explain(2)·paired_explain(2)·daily_report(2)·credit_explain(2)·manager_screens(2) → theme. analyze 0 · אטלס 65→49. מצטבר dark-mode 659→49 (610 תוקנו).
+
+### #darkmode-wave17 — 8 files theme-aware (2026-08-23)
+**גל 17:** 11 משטחים ב-supplier_onboarding(2)·reject_reason(2)·business_summary(2)·worker_report_drilldowns(1)·login_sheet(1)·worker_equipment_checklist(1)·camera_sheet(1)·word_finder(1) → theme. camera_sheet=confirm-dialog (chrome). analyze 0 · אטלס 49→38. מצטבר dark-mode 659→38 (621 תוקנו).

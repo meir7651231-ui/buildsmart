@@ -319,10 +319,10 @@ class _EquipmentChecklistSheetState
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(BsTokens.radiusCard)),
           ),
           child: ListView(
             controller: scroll,

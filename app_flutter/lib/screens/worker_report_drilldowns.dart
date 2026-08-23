@@ -59,7 +59,7 @@ Future<void> _showReportSheet(
 }) {
   return showModalBottomSheet<void>(
     context: context,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     isScrollControlled: true,
     showDragHandle: true,
     shape: const RoundedRectangleBorder(

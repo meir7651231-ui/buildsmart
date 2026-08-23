@@ -401,7 +401,7 @@ Future<bool> _confirmCapture(BuildContext context, String dataUrl) async {
     builder: (dialogCtx) => Directionality(
       textDirection: TextDirection.rtl,
       child: AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(dialogCtx).colorScheme.surface,
         title: const CfgText('camera_sheet.t02', '📸 תצוגה מקדימה'),
         content: SizedBox(
           width: 320,

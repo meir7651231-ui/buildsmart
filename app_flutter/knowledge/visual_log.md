@@ -2744,3 +2744,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave16 — 8 files (alt/quote_polish/coming_soon/adapter/paired/daily_report/credit/manager_screens) (2026-08-23)
 **גל 16 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. משפחת מסכי-explain (alt/adapter/paired/credit) + quote_polish + coming_soon + daily_report + manager_screens — כולם דפוס Scaffold(bgLight)+AppBar(cardLight). bgLight→`scaffoldBackgroundColor` · cardLight/white→`colorScheme.surface`. `flutter analyze` 0 errors. **אטלס 65→49** (‎-16). מצטבר 659→49 (610 תוקנו).
+
+## #darkmode-wave17 — 8 files (supplier_onboarding/reject_reason/business_summary/worker_report_drilldowns/login_sheet/worker_equipment_checklist/camera_sheet/word_finder) (2026-08-23)
+**גל 17 (8 fixers מקבילים):** 11 light-surfaces → תמה, 0 דולגו. cardLight/white→`colorScheme.surface` · bgLight→`scaffoldBackgroundColor` · surfaceMid→`surfaceContainerHighest`. **camera_sheet:404** אומת כדיאלוג-אישור (chrome) ולא preview-מצלמה → הומר בבטחה. `flutter analyze` 0 errors. **אטלס 49→38** (‎-11). מצטבר 659→38 (621 תוקנו).

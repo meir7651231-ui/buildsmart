@@ -136,7 +136,7 @@ class _SupplierOnboardingState extends ConsumerState<SupplierOnboardingScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: BsTokens.brandDark,
           foregroundColor: Colors.white,
@@ -267,7 +267,7 @@ class _SupplierOnboardingState extends ConsumerState<SupplierOnboardingScreen> {
           labelText: label,
           labelStyle: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Theme.of(context).colorScheme.surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide.none,

@@ -1568,7 +1568,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Material(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

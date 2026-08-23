@@ -105,9 +105,9 @@ class _BusinessSummaryState extends ConsumerState<BusinessSummaryScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: const CfgText('business_summary_screen.t01', '✨ סיכום עסקי',
               style: TextStyle(
