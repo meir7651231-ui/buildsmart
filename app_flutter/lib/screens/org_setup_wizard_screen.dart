@@ -370,7 +370,7 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
   InputDecoration _dec(String label) => InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: BsTokens.cardLight,
+        fillColor: Theme.of(context).colorScheme.surface,
         labelStyle:
             const TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
         border: OutlineInputBorder(
@@ -525,7 +525,7 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (_) => _ElementInspectorSheet(descriptor: d),
     );
   }
@@ -650,7 +650,7 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: BsTokens.bgLight,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 border: Border.all(color: const Color(0xFFEDEDED)),
               ),
@@ -695,7 +695,7 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: BsTokens.space2),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -858,9 +858,9 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: BsTokens.bgLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: BsTokens.cardLight,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
             // Text רגיל בכוונה (לא CfgText) — ראה חוקי-הבית בכותרת-הקובץ.
@@ -1216,7 +1216,7 @@ class _ElementInspectorSheetState
         labelText: label,
         isDense: true,
         filled: true,
-        fillColor: BsTokens.cardLight,
+        fillColor: Theme.of(context).colorScheme.surface,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       );
 
@@ -1292,7 +1292,7 @@ class _ElementInspectorSheetState
                 width: double.infinity,
                 padding: const EdgeInsets.all(BsTokens.space3),
                 decoration: BoxDecoration(
-                  color: BsTokens.bgLight,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: const Color(0xFFEDEDED)),
                 ),
@@ -1375,7 +1375,7 @@ class _WizardFindReplaceScreen extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: BsTokens.brand,
           foregroundColor: Colors.white,
@@ -1421,7 +1421,7 @@ class _WizardHistoryScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: BsTokens.brand,
           foregroundColor: Colors.white,
@@ -1493,7 +1493,7 @@ class _SectionManagerList extends ConsumerWidget {
       margin: const EdgeInsets.fromLTRB(
           BsTokens.space4, BsTokens.space1, BsTokens.space4, BsTokens.space1),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
@@ -1582,7 +1582,7 @@ class _RenameDialogState extends State<_RenameDialog> {
   Widget build(BuildContext context) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           title: const Text('ערוך שם'),
           content: TextField(
             controller: _ctrl,
@@ -1617,7 +1617,7 @@ class _ScreenManagerScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: BsTokens.brand,
           foregroundColor: Colors.white,
@@ -1656,7 +1656,7 @@ class _ScreenSectionEditor extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: BsTokens.brand,
           foregroundColor: Colors.white,
@@ -1718,7 +1718,7 @@ class _ScreenKeyboardEditor extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: BsTokens.brand,
           foregroundColor: Colors.white,

@@ -56,9 +56,9 @@ class WorkerSafetyScreen extends ConsumerWidget {
       ..sort((a, b) => a.expiry.compareTo(b.expiry));
 
     return Scaffold(
-      backgroundColor: BsTokens.bgLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: const CfgText(
           'worker_safety_screen.appbar_title',
@@ -157,7 +157,7 @@ class WorkerSafetyScreen extends ConsumerWidget {
 
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius:
@@ -274,7 +274,7 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     const SizedBox(height: BsTokens.space3),
                     // Date picker row (≥48dp).
                     Material(
-                      color: BsTokens.bgLight,
+                      color: Theme.of(ctx).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
@@ -319,7 +319,7 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     const SizedBox(height: BsTokens.space3),
                     // Optional document via the camera seam.
                     Material(
-                      color: BsTokens.cardLight,
+                      color: Theme.of(ctx).colorScheme.surface,
                       borderRadius:
                           BorderRadius.circular(BsTokens.radiusPill),
                       child: InkWell(
@@ -458,7 +458,7 @@ class WorkerSafetyScreen extends ConsumerWidget {
 
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius:
@@ -580,7 +580,7 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     const SizedBox(height: BsTokens.space3),
                     // Expiry picker row (≥48dp).
                     Material(
-                      color: BsTokens.bgLight,
+                      color: Theme.of(ctx).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
@@ -625,7 +625,7 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     const SizedBox(height: BsTokens.space3),
                     // Optional photo via the camera seam.
                     Material(
-                      color: BsTokens.cardLight,
+                      color: Theme.of(ctx).colorScheme.surface,
                       borderRadius:
                           BorderRadius.circular(BsTokens.radiusPill),
                       child: InkWell(
@@ -775,7 +775,7 @@ class _TrainingsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         boxShadow: const [
           BoxShadow(
@@ -892,7 +892,7 @@ class _TrainingRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -1052,7 +1052,7 @@ class _CertsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         boxShadow: const [
           BoxShadow(
@@ -1148,7 +1148,7 @@ class _CertRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),

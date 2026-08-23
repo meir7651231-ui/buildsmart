@@ -47,7 +47,7 @@ class RewardsHubScreen extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: _hubAppBar(context, '🎮 ${orgTerm(ref, 'brand.club', AppBrand.club)}'),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -123,7 +123,7 @@ class _RewardsFeatureScreen extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: _hubAppBar(context, '🎮 מועדון'),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -329,7 +329,7 @@ class _Referral extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(
-            color: BsTokens.cardLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: Border.all(color: const Color(0xFFEEEEEE)),
           ),
@@ -465,7 +465,7 @@ class _Redeem extends ConsumerWidget {
 // ════════════════════════════════════════════════════════════════════════════
 
 PreferredSizeWidget _hubAppBar(BuildContext context, String title) => AppBar(
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: BsTokens.space4,
@@ -577,7 +577,7 @@ class _FinTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
         borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -625,7 +625,7 @@ class _CaCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: BsTokens.space2),
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: overdue ? const Color(0xFFE57373) : const Color(0xFFEEEEEE),
@@ -715,7 +715,7 @@ class _Bar extends StatelessWidget {
       child: LinearProgressIndicator(
         value: pct / 100,
         minHeight: 8,
-        backgroundColor: const Color(0xFFEEEEEE),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         valueColor: const AlwaysStoppedAnimation<Color>(BsTokens.brand),
       ),
     );
@@ -795,7 +795,7 @@ class _LbRow extends StatelessWidget {
         vertical: BsTokens.space3,
       ),
       decoration: BoxDecoration(
-        color: me ? const Color(0xFFFFF3E0) : BsTokens.cardLight,
+        color: me ? const Color(0xFFFFF3E0) : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: me ? const Color(0xFFFFB74D) : const Color(0xFFEEEEEE),
@@ -840,7 +840,7 @@ class _BadgeRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: BsTokens.space2),
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: badge.earned ? const Color(0xFFE8F5E9) : BsTokens.cardLight,
+        color: badge.earned ? const Color(0xFFE8F5E9) : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: badge.earned ? const Color(0xFFA5D6A7) : const Color(0xFFEEEEEE),
@@ -891,7 +891,7 @@ class _VipCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: BsTokens.space2),
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: current ? const Color(0xFFFFF3E0) : BsTokens.cardLight,
+        color: current ? const Color(0xFFFFF3E0) : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: current
@@ -927,7 +927,7 @@ class _Callout extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEEEEEE)),
       ),
@@ -986,7 +986,7 @@ class _ServerNote extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
       ),
       child: Text(text,

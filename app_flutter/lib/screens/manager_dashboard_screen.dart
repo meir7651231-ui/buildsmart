@@ -163,9 +163,9 @@ class ManagerDashboardScreen extends ConsumerWidget {
             : rawTab;
 
     final Widget scaffold = Scaffold(
-      backgroundColor: BsTokens.bgLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         titleSpacing: BsTokens.space4,
@@ -450,7 +450,7 @@ class _ManagerToggle extends ConsumerWidget {
             title: _kManagerTabHelp[i].$1,
             body: _kManagerTabHelp[i].$2,
             child: Material(
-              color: on ? BsTokens.brand : BsTokens.cardLight,
+              color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               child: InkWell(
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -488,7 +488,7 @@ class _ManagerToggle extends ConsumerWidget {
     }
 
     return Container(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
       // (gate 62 — no hard-coded edge inset).
       padding: const EdgeInsetsDirectional.fromSTEB(
@@ -737,7 +737,7 @@ class _StudioHero extends ConsumerWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: BsTokens.cardLight,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(
                                 BsTokens.radiusPill,
                               ),
@@ -792,7 +792,7 @@ class _AttentionCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: BsTokens.space4),
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -973,7 +973,7 @@ class _MetricTile extends ConsumerWidget {
         vertical: BsTokens.space4,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -1070,7 +1070,7 @@ class _OrderPipeline extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -1156,7 +1156,7 @@ class _PipelineRow extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: fraction,
                 minHeight: 7,
-                backgroundColor: const Color(0xFFF0F0F0),
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
             ),
@@ -1343,7 +1343,7 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
   void _openDetail(Order o) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
@@ -1406,7 +1406,7 @@ class _OrderSummary extends StatelessWidget {
         vertical: BsTokens.space4,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -1449,7 +1449,7 @@ class _OrderStageChips extends StatelessWidget {
             'מסנן את רשימת ההזמנות לשלב שנבחר; ׳הכל׳ מציג את כולן. רק שלבים '
             'שיש בהם הזמנות מופיעים. סינון תצוגה בלבד — אינו משנה דאטה.',
         child: Material(
-          color: on ? BsTokens.brand : BsTokens.cardLight,
+          color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
           child: InkWell(
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -1520,7 +1520,7 @@ class _OrderRow extends StatelessWidget {
             'פותח את גיליון פרטי ההזמנה: מעקב 6 שלבים, פריטים/סכום, '
             'קבלן/אתר/סטטוס ופעולת קידום שלב.',
         child: Material(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           child: InkWell(
             borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -1757,7 +1757,7 @@ class _OrderDetailSheet extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -2073,7 +2073,7 @@ void showCustomerDetailSheet(WidgetRef ref, BuildContext context, String name) {
   if (match.isEmpty) return;
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius:
@@ -2506,7 +2506,7 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
   void _openDetail(_CustomerView view) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
@@ -2563,7 +2563,7 @@ class _CustomerSummary extends StatelessWidget {
         vertical: BsTokens.space4,
       ),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -2615,7 +2615,7 @@ class _CustomerStatusChips extends StatelessWidget {
             'מסנן את רשימת הקבלנים לפי סטטוס אשראי (פעיל / אשראי גבוה); '
             '׳הכל׳ מציג את כולם. סינון תצוגה בלבד.',
         child: Material(
-          color: on ? BsTokens.brand : BsTokens.cardLight,
+          color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
           child: InkWell(
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -2679,7 +2679,7 @@ class _AccountFilterChips extends StatelessWidget {
     Widget chip(String key, String label) {
       final on = active == key;
       return Material(
-        color: on ? BsTokens.brand : BsTokens.cardLight,
+        color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
         child: InkWell(
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -2804,7 +2804,7 @@ class _CustomerCard extends ConsumerWidget {
             'פותח את גיליון פרטי הקבלן: מסגרת אשראי, נוצל, יתרה זמינה, אתרי '
             'בנייה ורשימת ההזמנות שלו. תצוגה בלבד.',
         child: Material(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           child: InkWell(
             borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -2924,7 +2924,7 @@ class _CreditBar extends StatelessWidget {
         child: LinearProgressIndicator(
           value: (pct / 100).clamp(0.0, 1.0),
           minHeight: 8,
-          backgroundColor: const Color(0xFFF0F0F0),
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           valueColor: AlwaysStoppedAnimation<Color>(color),
         ),
       ),
@@ -2995,7 +2995,7 @@ class _CustomerDetailSheet extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
@@ -3664,7 +3664,7 @@ class _PendingApprovalPanelState extends ConsumerState<_PendingApprovalPanel> {
       margin: const EdgeInsets.only(bottom: BsTokens.space4),
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         // Amber outline — this card asks for an action (accounts are waiting).
         border: Border.all(color: const Color(0xFFF2A516)),
@@ -3904,7 +3904,7 @@ class JourneyTimeline extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsetsDirectional.all(BsTokens.space3),
             decoration: BoxDecoration(
-              color: BsTokens.cardLight,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: BsTokens.divider),
             ),
@@ -4043,7 +4043,7 @@ void _openSavedCustomerEditor(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     builder: (_) => _SavedCustomerEditor(displayName: displayName, existing: existing),
   );
 }
@@ -4647,7 +4647,7 @@ class _ManageSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -4860,7 +4860,7 @@ class _ApprovalRow extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -4925,7 +4925,7 @@ class _ApprovalRow extends ConsumerWidget {
                   child: _ApprovalButton(
                     key: ValueKey('reject-${task.id}'),
                     label: '↩️ דחה',
-                    color: BsTokens.cardLight,
+                    color: Theme.of(context).colorScheme.surface,
                     textColor: BsTokens.inkLight,
                     bordered: true,
                     onPressed: onReject,
@@ -5082,7 +5082,7 @@ class _VacationRequestRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.bgLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
@@ -5154,7 +5154,7 @@ class _VacationRequestRow extends StatelessWidget {
                     child: _ApprovalButton(
                       key: ValueKey('vac-reject-${request.id}'),
                       label: '❌ דחה',
-                      color: BsTokens.cardLight,
+                      color: Theme.of(context).colorScheme.surface,
                       textColor: BsTokens.inkLight,
                       bordered: true,
                       onPressed: onReject ?? () {},

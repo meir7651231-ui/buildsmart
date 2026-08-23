@@ -883,12 +883,14 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     // with its own "שיחות" AppBar + a back button that only pops to its
     // dashboard.
     if (!_standalone) {
-      return _inHomeShell ? body : ColoredBox(color: Colors.white, child: body);
+      return _inHomeShell
+          ? body
+          : ColoredBox(color: Theme.of(context).colorScheme.surface, child: body);
     }
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           tooltip: 'חזרה',
@@ -971,7 +973,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                   )
                   : null,
           filled: true,
-          fillColor: const Color(0xFFF5F5F5),
+          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 8,
@@ -1085,7 +1087,10 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
+      color:
+          active
+              ? BsTokens.brand
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -1213,9 +1218,9 @@ class _DismissibleThread extends ConsumerWidget {
     return Dismissible(
       key: ValueKey(thread.id),
       direction: DismissDirection.endToStart,
-      background: const ColoredBox(
-        color: Color(0xFFF5F5F5),
-        child: Align(
+      background: ColoredBox(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: const Align(
           alignment: AlignmentDirectional.centerStart,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
@@ -1234,7 +1239,7 @@ class _DismissibleThread extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const CfgText('chats_screen.archived_snack', 'שיחה הועברה לארכיון'),
-            backgroundColor: const Color(0xFFF5F5F5),
+            backgroundColor: Theme.of(context).colorScheme.surface,
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'ביטול',
@@ -1824,7 +1829,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
     final muted = ref.read(chatMutedIdsProvider).contains(id);
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1924,7 +1929,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFECE5DD),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         titleSpacing: 0,
         leading: IconButton(
@@ -1939,8 +1944,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F5F5),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -2246,15 +2251,15 @@ class _TypingBubble extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 3),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFFFFF),
-          borderRadius: BorderRadiusDirectional.only(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadiusDirectional.only(
             topStart: Radius.circular(16),
             topEnd: Radius.circular(16),
             bottomStart: Radius.circular(16),
             bottomEnd: Radius.circular(4),
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Color(0x18000000),
               blurRadius: 2,
@@ -2389,7 +2394,7 @@ void _showVoiceUnavailable(BuildContext context) {
 void _showAttachSheet(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -2493,7 +2498,7 @@ const List<String> _kChatEmojis = [
 void _showEmojiPicker(BuildContext context, TextEditingController controller) {
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -2593,7 +2598,7 @@ class _InputBar extends ConsumerWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(26),
                 ),
                 child: Row(
@@ -2756,9 +2761,9 @@ class ChatsArchiveScreen extends ConsumerWidget {
     // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
     // Pure pass-through (byte-identical) when the flag is off.
     final Widget body = Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         titleSpacing: 0,
         leading: IconButton(

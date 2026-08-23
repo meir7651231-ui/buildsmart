@@ -137,9 +137,9 @@ class _SiteScaffold extends StatelessWidget {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
@@ -237,7 +237,7 @@ class _CaCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: BsTokens.space2),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         border: Border.all(
           color: overdue ? const Color(0xFFF2A516) : const Color(0xFFE6E6E6),
         ),
@@ -329,7 +329,7 @@ class _SiteServerNote extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -464,7 +464,7 @@ Future<String?> _promptInput(
     builder: (ctx) => Directionality(
       textDirection: TextDirection.rtl,
       child: AlertDialog(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(ctx).colorScheme.surface,
         title: Text(
           title,
           style: const TextStyle(color: BsTokens.inkLight, fontSize: 16),
@@ -566,7 +566,7 @@ class _HubTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),

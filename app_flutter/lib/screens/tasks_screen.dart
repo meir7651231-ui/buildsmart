@@ -149,9 +149,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
@@ -438,7 +438,9 @@ class _WorkerPick extends StatelessWidget {
           if (i > 0) const SizedBox(width: BsTokens.space2),
           Expanded(
             child: Material(
-              color: i == selected ? BsTokens.brandDark : BsTokens.cardLight,
+              color: i == selected
+                  ? BsTokens.brandDark
+                  : Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               child: InkWell(
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -492,7 +494,7 @@ class _DirWorkerPick extends StatelessWidget {
             Material(
               color: w.uid == selectedUid
                   ? BsTokens.brandDark
-                  : BsTokens.cardLight,
+                  : Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               child: InkWell(
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -543,7 +545,7 @@ class _LogButton extends StatelessWidget {
       CfgVisible(
         'tasks_screen.log_btn',
         child: Material(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           elevation: 1,
           shadowColor: Colors.black26,
@@ -623,7 +625,7 @@ class _ApprovalCard extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: BsTokens.space2),
         child: Material(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           elevation: 1,
           shadowColor: Colors.black26,
@@ -701,7 +703,7 @@ class _ProposalCard extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: BsTokens.space2),
         child: Material(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           elevation: 1,
           shadowColor: Colors.black26,
@@ -821,7 +823,7 @@ class _Card extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
@@ -940,10 +942,10 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(BsTokens.radiusCard)),
           ),
           child: ListView(
             controller: scroll,
@@ -1196,10 +1198,10 @@ class _WorkLogSheet extends ConsumerWidget {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(BsTokens.radiusCard)),
           ),
           child: ListView(
             controller: scroll,
@@ -1427,10 +1429,10 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(BsTokens.radiusCard)),
           ),
           child: ListView(
             controller: scroll,

@@ -254,14 +254,14 @@ class _CourierDashboardScreenState
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: _appBar(),
         body: _tabBody(session, vehicle),
         // #31 — each tab wrapped in HelpTarget so help mode highlights it +
         // pops a bubble out of the tab (consistent with the app-bar). Outside
         // help mode the BottomNavCell's InkWell switches tab as before.
         bottomNavigationBar: Material(
-          color: const Color(0xFFFFFFFF),
+          color: Theme.of(context).colorScheme.surface,
           elevation: 8,
           child: SafeArea(
             top: false,
@@ -374,7 +374,7 @@ class _CourierDashboardScreenState
   /// feed off the SAME [workerNotifsProvider] store.
   AppBar _appBar() {
     return AppBar(
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: BsTokens.space4,
@@ -453,7 +453,7 @@ class _CourierDashboardScreenState
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: _appBar(),
         body: Padding(
           padding: const EdgeInsets.all(BsTokens.space4),
@@ -700,7 +700,7 @@ class _CourierDashboardScreenState
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: Card(
           margin: EdgeInsets.zero,
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -739,7 +739,7 @@ class _CourierDashboardScreenState
                       width: double.infinity,
                       padding: const EdgeInsets.all(BsTokens.space3),
                       decoration: BoxDecoration(
-                        color: BsTokens.bgLight,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(
                           BsTokens.radiusCard,
                         ),
@@ -876,7 +876,7 @@ class _VehicleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: on ? BsTokens.brand : BsTokens.cardLight,
+      color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -990,7 +990,7 @@ class _CourierJobCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
@@ -1239,7 +1239,7 @@ class _FlatCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -1380,9 +1380,9 @@ class _CourierNotifsSheet extends ConsumerWidget {
         expand: false,
         builder:
             (_, scroll) => Container(
-              decoration: const BoxDecoration(
-                color: BsTokens.cardLight,
-                borderRadius: BorderRadius.vertical(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(BsTokens.radiusCard),
                 ),
               ),
@@ -1542,7 +1542,10 @@ class _CourierNotifRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: notif.read ? BsTokens.cardLight : const Color(0xFFFFF8F2),
+      color:
+          notif.read
+              ? Theme.of(context).colorScheme.surface
+              : const Color(0xFFFFF8F2),
       borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
         borderRadius: BorderRadius.circular(cfgRadius(context)),
@@ -1625,7 +1628,7 @@ class _Stat extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 3),
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
           boxShadow: const [
             BoxShadow(

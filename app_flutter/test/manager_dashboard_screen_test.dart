@@ -18,6 +18,7 @@ import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,9 +46,14 @@ void main() {
     await t.pumpWidget(
       ProviderScope(
         overrides: overrides,
-        child: const MaterialApp(
-          locale: Locale('he'),
-          home: ManagerDashboardScreen(),
+        // #darkmode: the screen is now theme-aware (Theme.of surfaces). Pump it
+        // under the app's real LIGHT theme so the light-frame assertions below
+        // resolve to the theme's canonical light colors (scaffold = bgLightAlt,
+        // surface = cardLight/white) instead of the bare-MaterialApp default.
+        child: MaterialApp(
+          locale: const Locale('he'),
+          theme: AppTheme.light(),
+          home: const ManagerDashboardScreen(),
         ),
       ),
     );
@@ -64,7 +70,7 @@ void main() {
 
       // Light scaffold.
       final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, BsTokens.bgLight);
+      expect(scaffold.backgroundColor, BsTokens.bgLightAlt);
 
       // White AppBar (cardLight) with dark title text.
       final appBar = t.widget<AppBar>(find.byType(AppBar));
@@ -282,7 +288,7 @@ void main() {
 
       // The scaffold + the tile/pipeline cards are the LIGHT tokens.
       final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, BsTokens.bgLight);
+      expect(scaffold.backgroundColor, BsTokens.bgLightAlt);
 
       // Every Container with a solid BoxDecoration colour in the cockpit body is
       // a LIGHT surface — none uses a dark token (bgDark/cardDark/inkDark).
@@ -486,7 +492,7 @@ void main() {
       await openOrdersTab(t);
 
       final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, BsTokens.bgLight);
+      expect(scaffold.backgroundColor, BsTokens.bgLightAlt);
 
       final decos = t
           .widgetList<Container>(find.byType(Container))
@@ -696,7 +702,7 @@ void main() {
       await openCustomersTab(t);
 
       final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, BsTokens.bgLight);
+      expect(scaffold.backgroundColor, BsTokens.bgLightAlt);
 
       final decos = t
           .widgetList<Container>(find.byType(Container))
@@ -877,7 +883,7 @@ void main() {
       await openManageTab(t);
 
       final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, BsTokens.bgLight);
+      expect(scaffold.backgroundColor, BsTokens.bgLightAlt);
 
       final decos = t
           .widgetList<Container>(find.byType(Container))

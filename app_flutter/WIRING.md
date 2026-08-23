@@ -4394,3 +4394,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave2 — store cluster theme-aware (2026-08-18)
 **גל 2:** 64 משטחים ב-`store_screen`(27)+`store_dashboard_screen`(20)+`store_profile_screen`(17) → `colorScheme.surface`/`scaffoldBackgroundColor` (כולל מיפוי `BsTokens.bgLight/cardLight`). analyze 0 · אטלס 625→561. מצטבר dark-mode: 659→561 (98 תוקנו). הבא: manager_dashboard(30)·chats(16)·org_setup(15)...
+
+### #darkmode-wave3 — 8 screens theme-aware (2026-08-18)
+**גל 3:** 114 משטחים ב-manager_dashboard(30)·chats(16)·org_setup(15)·worker_safety(12)·courier_dashboard(12)·rewards(12)·tasks(11)·site_hub(6) → theme. 7 offenders ב-site_hub דולגו (פונקציות-עזר בלי context — context-threading בהמשך). analyze 0 errors · אטלס 561→447. מצטבר dark-mode 659→447 (212 תוקנו).
