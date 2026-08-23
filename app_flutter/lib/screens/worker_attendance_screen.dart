@@ -98,9 +98,9 @@ class _WorkerAttendanceScreenState
     final byKey = {for (final d in monthDays) d.date: d};
 
     return Scaffold(
-      backgroundColor: BsTokens.bgLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: BsTokens.cardLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: CfgText(
           'worker_attendance_screen.title',
@@ -360,7 +360,7 @@ class _ClockCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -556,7 +556,7 @@ class _CalendarCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
@@ -792,7 +792,7 @@ class _DayDetailSheet extends StatelessWidget {
           margin: const EdgeInsets.all(BsTokens.space2),
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(
-            color: BsTokens.cardLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(cfgRadius(context)),
           ),
           child: Column(

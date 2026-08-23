@@ -125,9 +125,9 @@ class _ManagerCopilotState extends ConsumerState<ManagerCopilotScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +228,7 @@ class _Welcome extends StatelessWidget {
               ActionChip(
                 label: Text(q),
                 onPressed: () => onAsk(q),
-                backgroundColor: BsTokens.cardLight,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 labelStyle: const TextStyle(
                     color: BsTokens.inkLight, fontSize: 13),
               ),
@@ -255,7 +255,7 @@ class _Bubble extends StatelessWidget {
         constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.82),
         decoration: BoxDecoration(
-          color: turn.user ? BsTokens.brand : BsTokens.cardLight,
+          color: turn.user ? BsTokens.brand : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         ),
         // Dark ink on BOTH bubbles — white-on-brand was ~2.7:1 (fails WCAG AA);
@@ -299,9 +299,9 @@ class _InputBar extends StatelessWidget {
       top: false,
       child: Container(
         padding: const EdgeInsets.all(BsTokens.space3),
-        decoration: const BoxDecoration(
-          color: BsTokens.cardLight,
-          border: Border(top: BorderSide(color: BsTokens.divider)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: const Border(top: BorderSide(color: BsTokens.divider)),
         ),
         child: Row(
           children: [
@@ -316,7 +316,7 @@ class _InputBar extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'שאל את העסק שלך…',
                   filled: true,
-                  fillColor: BsTokens.bgLight,
+                  fillColor: Theme.of(context).colorScheme.surface,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: BsTokens.space4, vertical: BsTokens.space3),
                   border: OutlineInputBorder(

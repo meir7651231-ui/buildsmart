@@ -4406,3 +4406,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave6 — 8 screens theme-aware (2026-08-23)
 **גל 6:** 49 משטחים ב-category_tree_editor(7)·lipskey_brand(7)·budget(7)·smart_project(6)·studio_rules(6)·chat_settings(6)·notif_settings(6)·signature_pad(4) → theme. 2 offenders ב-signature_pad:206,440 דולגו לצמיתות (canvas לכידת-חתימה — חייב לבן). analyze 0 errors · אטלס 319→270. מצטבר dark-mode 659→270 (389 תוקנו).
+
+### #darkmode-wave7 — 8 screens theme-aware (2026-08-23)
+**גל 7:** 43 משטחים ב-manager_profile(6)·manager_copilot(6)·regression_panel(6)·finance_hub_sheets(5)·projects(5)·worker_attendance(5)·notifications(5)·courier_portal_tab(4) → theme (כולל תיקון-ידני של RefreshIndicator5 ב-notifications:796). 1 offender ב-courier_portal_tab:359 דולג (arrow-method בלי context). analyze 0 · אטלס 270→228. מצטבר dark-mode 659→228 (431 תוקנו).

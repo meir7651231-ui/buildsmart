@@ -37,9 +37,9 @@ class ManagerProfileScreen extends StatelessWidget {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: CfgText(
             'manager_profile_screen.t01',
@@ -91,7 +91,7 @@ class _ManagerProfileBody extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(
-            color: BsTokens.cardLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(BsTokens.radiusCard),
             boxShadow: const [
               BoxShadow(
@@ -187,7 +187,7 @@ class _ManagerProfileBody extends ConsumerWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(BsTokens.space3),
           decoration: BoxDecoration(
-            color: BsTokens.cardLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(BsTokens.radiusCard),
           ),
           child: Text(
@@ -200,7 +200,7 @@ class _ManagerProfileBody extends ConsumerWidget {
         // ── פעולות ─────────────────────────────────────────────────────────
         Card(
           margin: EdgeInsets.zero,
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(BsTokens.radiusCard),
@@ -261,7 +261,7 @@ class _PStat extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 3),
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
-          color: BsTokens.cardLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
           boxShadow: const [
             BoxShadow(

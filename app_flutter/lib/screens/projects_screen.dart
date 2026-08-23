@@ -50,9 +50,9 @@ class ProjectsScreen extends ConsumerWidget {
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
@@ -235,7 +235,7 @@ class _SiteCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
-        color: BsTokens.cardLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
@@ -387,9 +387,9 @@ class _StatusSheet extends ConsumerWidget {
         maxChildSize: 0.9,
         expand: false,
         builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.vertical(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(BsTokens.radiusCard)),
           ),
           child: ListView(
@@ -614,9 +614,9 @@ class _EditSheetState extends ConsumerState<_EditSheet> {
         padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.vertical(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(BsTokens.radiusCard)),
           ),
           padding: const EdgeInsets.all(BsTokens.space4),

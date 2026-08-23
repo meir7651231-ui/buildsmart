@@ -103,7 +103,7 @@ void _showFinSheet(BuildContext context, {required Widget child}) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -1420,7 +1420,7 @@ class _FinReportView extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: const Color(0xFFEDEEF0),
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           foregroundColor: BsTokens.inkLight,
           elevation: 0.5,
           title: const CfgText(
@@ -1465,7 +1465,7 @@ class _FinReportView extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(BsTokens.space5),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: const [
                     BoxShadow(
@@ -1739,7 +1739,7 @@ class _FxCalcState extends State<_FxCalc> {
                   ? null
                   : 'סכום לא תקין',
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Theme.of(context).colorScheme.surface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: BsTokens.space3,
                 vertical: 12,
@@ -1759,7 +1759,7 @@ class _FxCalcState extends State<_FxCalc> {
             value: _cur,
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Theme.of(context).colorScheme.surface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: BsTokens.space3,
                 vertical: 4,

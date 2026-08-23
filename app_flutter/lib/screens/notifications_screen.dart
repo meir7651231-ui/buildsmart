@@ -664,7 +664,7 @@ class _NotifList extends ConsumerWidget {
           '${until.hour.toString().padLeft(2, '0')}:${until.minute.toString().padLeft(2, '0')}';
       return RefreshIndicator(
         color: BsTokens.brand,
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         onRefresh: () => _reloadNotifState(ref),
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
@@ -708,7 +708,7 @@ class _NotifList extends ConsumerWidget {
     if (ns.isInQuietHours) {
       return RefreshIndicator(
         color: BsTokens.brand,
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         onRefresh: () => _reloadNotifState(ref),
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
@@ -751,7 +751,7 @@ class _NotifList extends ConsumerWidget {
     if (items.isEmpty) {
       return RefreshIndicator(
         color: BsTokens.brand,
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         onRefresh: () => _reloadNotifState(ref),
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
@@ -793,7 +793,7 @@ class _NotifList extends ConsumerWidget {
 
     return RefreshIndicator(
       color: BsTokens.brand,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       onRefresh: () => _reloadNotifState(ref),
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -905,7 +905,7 @@ class _DismissibleRow extends ConsumerWidget {
               'notifications_screen.deleted_toast',
               'התראה נמחקה',
             ),
-            backgroundColor: const Color(0xFFF5F5F5),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'ביטול',

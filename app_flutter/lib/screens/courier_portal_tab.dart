@@ -258,7 +258,7 @@ class CourierPortalTab extends ConsumerWidget {
                 vertical: BsTokens.space3,
               ),
               decoration: BoxDecoration(
-                color: BsTokens.bgLight,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(BsTokens.radiusCard),
               ),
               child: Row(
@@ -302,7 +302,7 @@ class CourierPortalTab extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -373,7 +373,7 @@ class CourierPortalTab extends ConsumerWidget {
   }) => Padding(
     padding: const EdgeInsets.only(bottom: BsTokens.space2),
     child: Material(
-      color: BsTokens.bgLight,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
@@ -463,7 +463,7 @@ class _DestinationCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(BsTokens.space4),
         decoration: BoxDecoration(
-          color: BsTokens.bgLight,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         ),
         child: Column(
