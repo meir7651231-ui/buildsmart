@@ -126,9 +126,9 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: const CfgText('quote_polish_screen.title', '✨ הצעה מקצועית',
               style: TextStyle(

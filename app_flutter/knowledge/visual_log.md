@@ -2741,3 +2741,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave15 — 8 files (worker_notifs/worker_payslips/role_request/store_documents/audit/profession/consent_modal/role_picker) (2026-08-23)
 **גל 15 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. cardLight/white→`colorScheme.surface` · bgLight/bgLightAlt/FAFAFA→`scaffoldBackgroundColor`/`surface` · F5F5F5→`surfaceContainerHighest`. **אימות נוסף:** role_picker_sheet מרונדר ב-manager_dashboard_screen_test (ניתוב showRolePicker) — הרצנו, 31/31 עוברים. `flutter analyze` 0 errors. **אטלס 81→65** (‎-16). מצטבר 659→65 (594 תוקנו).
+
+## #darkmode-wave16 — 8 files (alt/quote_polish/coming_soon/adapter/paired/daily_report/credit/manager_screens) (2026-08-23)
+**גל 16 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. משפחת מסכי-explain (alt/adapter/paired/credit) + quote_polish + coming_soon + daily_report + manager_screens — כולם דפוס Scaffold(bgLight)+AppBar(cardLight). bgLight→`scaffoldBackgroundColor` · cardLight/white→`colorScheme.surface`. `flutter analyze` 0 errors. **אטלס 65→49** (‎-16). מצטבר 659→49 (610 תוקנו).

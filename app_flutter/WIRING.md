@@ -4433,3 +4433,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave15 — 8 files theme-aware (2026-08-23)
 **גל 15:** 16 משטחים ב-worker_notifs(2)·worker_payslips(2)·role_request(2)·store_documents(2)·audit(2)·profession(2)·consent_modal(2)·role_picker(2) → theme. role_picker אומת דרך manager_dashboard_screen_test 31/31. analyze 0 · אטלס 81→65. מצטבר dark-mode 659→65 (594 תוקנו).
+
+### #darkmode-wave16 — 8 files theme-aware (2026-08-23)
+**גל 16:** 16 משטחים ב-alt_explain(2)·quote_polish(2)·coming_soon(2)·adapter_explain(2)·paired_explain(2)·daily_report(2)·credit_explain(2)·manager_screens(2) → theme. analyze 0 · אטלס 65→49. מצטבר dark-mode 659→49 (610 תוקנו).

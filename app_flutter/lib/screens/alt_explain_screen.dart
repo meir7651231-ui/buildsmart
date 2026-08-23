@@ -147,9 +147,9 @@ class _AltExplainState extends ConsumerState<AltExplainScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: const CfgText('alt_explain_screen.t01', '💡 למה החלופה שווה?',
               style: TextStyle(

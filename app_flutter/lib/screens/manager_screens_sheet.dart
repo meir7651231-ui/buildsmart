@@ -44,7 +44,7 @@ final List<_Dest> _kDests = [
 void showManagerScreensSheet(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -172,7 +172,7 @@ class _ImpersonationFrame extends ConsumerWidget {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: BsTokens.bgLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: SafeArea(
             bottom: false,
             child: Column(
