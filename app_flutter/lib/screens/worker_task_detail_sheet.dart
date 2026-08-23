@@ -146,7 +146,7 @@ Future<bool> _confirmProofPhoto(BuildContext context, String dataUrl) async {
     builder: (dialogCtx) => Directionality(
       textDirection: TextDirection.rtl,
       child: AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: CfgText(
           'worker_task_detail_sheet.t02',
           '📸 הוכחת ביצוע',
@@ -613,10 +613,10 @@ class _WorkerTaskDetailSheetState
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(BsTokens.radiusCard)),
           ),
           child: ListView(
             controller: scroll,

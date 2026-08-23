@@ -35,7 +35,7 @@ void showCourierDeliveryDetailSheet(BuildContext context, String orderId) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -217,7 +217,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                       vertical: BsTokens.space2,
                     ),
                     decoration: BoxDecoration(
-                      color: BsTokens.bgLight,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                     ),
                     child: Row(

@@ -269,7 +269,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   void _openCartSheet() {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
       ),
@@ -1626,7 +1626,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   void _openSheet(LipskeyCatalogProduct p) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
       ),

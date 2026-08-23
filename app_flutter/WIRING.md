@@ -4427,3 +4427,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave13 — 8 screens theme-aware (2026-08-23)
 **גל 13:** 24 משטחים ב-studio_component_builder(3)·home_content_reorder(3)·trade_publish(3)·spec_copilot(3)·courier_settings(3)·role_requests_inbox(3)·ai_finder(3)·describe_to_cart(3) → theme, 0 דולגו. analyze 0 · אטלס 121→97. מצטבר dark-mode 659→97 (562 תוקנו).
+
+### #darkmode-wave14 — 8 files theme-aware (2026-08-23)
+**גל 14:** 16 משטחים ב-ring_dive(2)·welcome(2)·worker_reports(2)·worker_task_detail(2)·courier_delivery_detail(2)·lipskey_products(2)·contractor_material_requests(2)·persona_pod(2) → theme. analyze 0 · אטלס 97→81. מצטבר dark-mode 659→81 (578 תוקנו).

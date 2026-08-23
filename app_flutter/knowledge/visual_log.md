@@ -2735,3 +2735,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave13 — 8 screens (studio_component_builder/home_content_reorder/trade_publish/spec_copilot/courier_settings/role_requests_inbox/ai_finder/describe_to_cart) (2026-08-23)
 **גל 13 (8 fixers מקבילים):** 24 light-surfaces → תמה, 3 בכל קובץ, 0 דולגו. אותם כללי-המרה (cardLight/white→`colorScheme.surface` · bgLight/F5F6FA→`scaffoldBackgroundColor` · surfaceMid→`surfaceContainerHighest`). כל ה-offenders היו במתודות-build או מתודות-State (context זמין ישירות). `flutter analyze` 0 errors. **אטלס 121→97** (‎-24; מתחת ל-100). מצטבר 659→97 (562 תוקנו).
+
+## #darkmode-wave14 — 8 files (ring_dive/welcome/worker_reports/worker_task_detail/courier_delivery_detail/lipskey_products/contractor_material_requests/persona_pod) (2026-08-23)
+**גל 14 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. cardLight/white→`colorScheme.surface` · bgLight→`scaffoldBackgroundColor`/`surface`. כל ה-offenders במתודות-build/State (context ישיר). `flutter analyze` 0 errors. **אטלס 97→81** (‎-16). מצטבר 659→81 (578 תוקנו).

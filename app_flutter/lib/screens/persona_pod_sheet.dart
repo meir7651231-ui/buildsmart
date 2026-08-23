@@ -56,7 +56,7 @@ void showPodSheet(BuildContext context, String orderId) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BsTokens.cardLight,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -202,7 +202,7 @@ class PersonaPodSheet extends ConsumerWidget {
                 height: 150,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: BsTokens.bgLight,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                   border: Border.all(color: const Color(0xFFE0E0E0)),
                 ),

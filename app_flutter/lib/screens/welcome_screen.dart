@@ -715,7 +715,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     return Scaffold(
       // White scaffold so any gap below the lifted sheet reads as one
       // continuous white surface.
-      backgroundColor: BsTokens.cardLight,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: HelpModeScaffold(
         child: Stack(
           children: [
@@ -804,10 +804,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     BsTokens.space5,
                     BsTokens.space4,
                   ),
-                  decoration: const BoxDecoration(
-                    color: BsTokens.cardLight,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(28)),
+                        const BorderRadius.vertical(top: Radius.circular(28)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,

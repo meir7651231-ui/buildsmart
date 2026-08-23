@@ -444,7 +444,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(img.pad),
                     child: product.imageAsset != null
@@ -1261,7 +1261,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             fit: StackFit.expand,
             children: [
               Container(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 alignment: Alignment.center,
                 child: p.imageAsset != null
                     ? productImage(p.imageAsset!,
