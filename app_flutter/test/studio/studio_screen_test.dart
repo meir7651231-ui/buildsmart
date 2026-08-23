@@ -7,6 +7,7 @@ import 'package:buildsmart/screens/studio/studio_screen.dart';
 import 'package:buildsmart/state/studio/config_doc.dart';
 import 'package:buildsmart/state/studio/config_store.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,7 +38,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: store(),
-        child: const MaterialApp(home: StudioScreen()),
+        child: MaterialApp(theme: AppTheme.light(), home: const StudioScreen()),
       ),
     );
 

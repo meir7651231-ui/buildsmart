@@ -4418,3 +4418,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave10 — 8 files theme-aware (2026-08-23)
 **גל 10:** 23 משטחים ב-contractor_tools(3)·defects(3)·worker_task_board(3)·docs_readiness(3)·manager_role_assign(3)·contractor_attendance(3)·tasks_gantt(3)·help_target(2) → theme. 1 offender ב-help_target:464 דולג (CustomPainter בלי context). analyze 0 · אטלס 160→137. מצטבר dark-mode 659→137 (522 תוקנו).
+
+### #darkmode-wave11 — studio_screen ×2 theme-aware + test fix (2026-08-23)
+**גל 11:** 9 משטחים בשני קבצי studio_screen.dart (root 7 · studio/ 2) → theme. חוזה-טסט: studio_screen_test עודכן ל-pump תחת AppTheme.light() (ה-assertion cardLight נשאר — surface(light)==white==cardLight). studio_screen_test 4/4 · behavior 10/10 · analyze 0 · אטלס 137→128. מצטבר dark-mode 659→128 (531 תוקנו).

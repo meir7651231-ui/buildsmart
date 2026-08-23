@@ -94,9 +94,9 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,7 +178,7 @@ class _StudioTabs extends StatelessWidget {
             end: i == _tabs.length - 1 ? 0 : BsTokens.space2 / 2,
           ),
           child: Material(
-            color: on ? BsTokens.brand : BsTokens.cardLight,
+            color: on ? BsTokens.brand : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
             child: InkWell(
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -212,7 +212,7 @@ class _StudioTabs extends StatelessWidget {
     }
 
     return Container(
-      color: BsTokens.cardLight,
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsetsDirectional.fromSTEB(
         BsTokens.space3,
         BsTokens.space2,
@@ -452,7 +452,7 @@ class _CoEditorPaneState extends ConsumerState<_CoEditorPane> {
           decoration: InputDecoration(
             hintText: 'לדוגמה: שנה את הכיתוב של כפתור ההזמנה ל"הזמן עכשיו"',
             filled: true,
-            fillColor: BsTokens.cardLight,
+            fillColor: Theme.of(context).colorScheme.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
             ),
@@ -519,7 +519,7 @@ class _CoEditorPaneState extends ConsumerState<_CoEditorPane> {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: Text(
@@ -540,7 +540,7 @@ class _CoEditorPaneState extends ConsumerState<_CoEditorPane> {
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.surfaceMid,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
       child: Column(
