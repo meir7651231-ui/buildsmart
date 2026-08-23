@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kiosk Video</string>
+    <string name="settings_title">הגדרות קיוסק</string>
+    <string name="device_admin_label">מנהל מכשיר — Kiosk Video</string>
+    <string name="device_admin_description">
+        מאפשר לאפליקציה לפעול כמסך קיוסק סגור: לנעול את המשתמש בתוך האפליקציה,
+        לחסום גישה למסך הבית ולהגדרות, ולוודא שהסרטון ממשיך לרוץ ברציפות.
+    </string>
+</resources>

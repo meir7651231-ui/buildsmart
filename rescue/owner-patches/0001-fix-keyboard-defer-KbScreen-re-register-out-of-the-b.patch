@@ -1,0 +1,53 @@
+From b557a581eea2f2c3354c6750cceff2c6bbf4a4eb Mon Sep 17 00:00:00 2001
+From: Cascade Developer <developer@cascade.local>
+Date: Mon, 6 Jul 2026 01:25:07 +0300
+Subject: [PATCH 1/2] fix(keyboard): defer KbScreen re-register out of the
+ build phase (owner)
+
+KbScreen.didUpdateWidget pushed to keyboardScreenToolsProvider SYNCHRONOUSLY
+during the parent's build. For a screen whose tools list changes identity each
+build (e.g. TasksScreen's live-count tree) this fired every rebuild, modifying
+the provider mid-build. Debug throws _debugCanModifyProviders; in RELEASE (assert
+stripped) the listener notifications inside buildScope corrupt the floating
+keyboard's rebuild scheduling, so a later route pop no longer rebuilds it and the
+live mirror STRANDS on the popped screen's tools ("dives in but not back out").
+
+Defer the re-push to a microtask (as initState's post-frame push and dispose's
+removeToken already do), with mounted guards so it is drop-safe if the screen
+unmounts first. Flag-gated (kKbGlobal) so a flag-off build is byte-identical.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+---
+ app_flutter/lib/state/keyboard_screen_tools.dart | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/app_flutter/lib/state/keyboard_screen_tools.dart b/app_flutter/lib/state/keyboard_screen_tools.dart
+index 1b4a4ed4..c96c6fe8 100644
+--- a/app_flutter/lib/state/keyboard_screen_tools.dart
++++ b/app_flutter/lib/state/keyboard_screen_tools.dart
+@@ -234,7 +234,21 @@ class _KbScreenState extends ConsumerState<KbScreen> {
+       // …).push` (a non-promotable field keeps its nullable type).
+       final notifier = ref.read(keyboardScreenToolsProvider.notifier);
+       _notifier = notifier;
+-      notifier.push(KbScreenToolsEntry(_token, widget.tools));
++      final entry = KbScreenToolsEntry(_token, widget.tools);
++      // DEFER via microtask (mirrors [initState]'s post-frame push). didUpdateWidget
++      // runs DURING the parent's build (updateChild → update → didUpdateWidget), so
++      // pushing SYNCHRONOUSLY modifies [keyboardScreenToolsProvider] mid-build — an
++      // illegal provider mutation: debug throws `_debugCanModifyProviders`, and in
++      // RELEASE (assert stripped) it fires listener notifications inside `buildScope`
++      // that CORRUPT the floating keyboard's rebuild scheduling — after which a later
++      // route pop no longer rebuilds it and the mirror STRANDS on the popped screen's
++      // tools. This bit any screen whose `tools` list changes identity each build
++      // (e.g. TasksScreen's live-count tree). The microtask runs right after this
++      // build, when provider mutation is allowed; the `mounted` guards keep it
++      // drop-safe if the screen unmounts first (dispose's own removeToken wins).
++      Future.microtask(() {
++        if (mounted && notifier.mounted) notifier.push(entry);
++      });
+     }
+   }
+ 
+-- 
+2.43.0
+
