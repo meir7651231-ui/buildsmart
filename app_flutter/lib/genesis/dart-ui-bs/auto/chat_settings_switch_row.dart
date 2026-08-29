@@ -40,6 +40,6 @@ class ChatSettingsSwitchRow extends StatelessWidget implements _Inert {
   }
 }
 
-class _Inert {
+abstract class _Inert {
   bool get underConstruction;
 }

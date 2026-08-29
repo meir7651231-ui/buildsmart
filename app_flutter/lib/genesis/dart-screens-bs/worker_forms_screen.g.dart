@@ -14,19 +14,22 @@ class WorkerFormsScreenTokens {
 }
 
 class WorkerFormsScreenComposed extends StatelessWidget {
-  const WorkerFormsScreenComposed({required this.onApprove, required this.onPressed, required this.children, required this.filled, required this.label, required this.label2, required this.label3, required this.label4, required this.reason, required this.status, required this.title, required this.t, super.key});
+  const WorkerFormsScreenComposed({required this.onApprove, required this.onPressed, required this.children, required this.filled, required this.id, required this.label, required this.label2, required this.label3, required this.label4, required this.range, required this.reason, required this.status, required this.title, required this.workerName, required this.t, super.key});
 
   final VoidCallback onApprove;
   final VoidCallback onPressed;
   final List<Widget> children;
   final bool filled;
+  final String id;
   final String label;
   final String label2;
   final String label3;
   final String label4;
+  final String range;
   final String reason;
   final String status;
   final String title;
+  final String workerName;
   final WorkerFormsScreenTokens t;
 
   @override
@@ -47,7 +50,10 @@ class WorkerFormsScreenComposed extends StatelessWidget {
             label: label,
             label2: label2,
             status: status,
+            workerName: workerName,
+            range: range,
             reason: reason,
+            id: id,
             label3: label3,
             label4: label4,
             onApprove: onApprove,

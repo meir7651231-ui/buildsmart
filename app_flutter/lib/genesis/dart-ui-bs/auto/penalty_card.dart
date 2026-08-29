@@ -1,5 +1,5 @@
 // 🧽 לוטש ע"י מנוע-המטרות (data-lift v3) — דאטה/מודל/תבנית הורמו ל-props לפי מטרתם, אל תערוך ידנית.
-// מוצא: screens__finance_hub_sheets:_PenaltyCard (בנייה-חכמה main) · צרור-2 · מודל-שוטח: 2 שדות · props-שורש: label, label2, id, amount
+// מוצא: screens__finance_hub_sheets:_PenaltyCard (בנייה-חכמה main) · צרור-2 · מודל-שוטח: 5 שדות · props-שורש: label, label2, id, amount, days, perDay, createdAt
 // התוכן: new/dart-data-bs/auto/screens__finance_hub_sheets_content.dart
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
@@ -7,11 +7,14 @@ import 'package:buildsmart/theme/config_theme.dart';
 import 'package:buildsmart/data/contractor_seeds.dart';
 
 class PenaltyCard extends StatelessWidget {
-  PenaltyCard({required this.label, required this.label2, required this.id, required this.amount, });
+  PenaltyCard({required this.label, required this.label2, required this.id, required this.amount, required this.days, required this.perDay, required this.createdAt, });
   final String label;
   final String label2;
   final String id;
   final int amount;
+  final int days;
+  final int perDay;
+  final String createdAt;
 
   @override
   Widget build(BuildContext context) {

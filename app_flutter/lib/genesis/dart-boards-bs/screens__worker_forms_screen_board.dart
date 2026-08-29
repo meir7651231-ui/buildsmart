@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_forms_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 10.
+// מקור-החיווט: screens__worker_forms_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 13.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/worker_forms_screen.dart';
@@ -33,13 +33,16 @@ class WorkerFormsScreenBoard extends ConsumerWidget {
       onPressed: () {} /* TODO-לוח */,
       children: const [] /* TODO-לוח: List<Widget> */,
       filled: false,
+      id: '' /* TODO-לוח: String */,
       label: '' /* TODO-לוח: String */,
       label2: '' /* TODO-לוח: String */,
       label3: '' /* TODO-לוח: String */,
       label4: '' /* TODO-לוח: String */,
+      range: '' /* TODO-לוח: String */,
       reason: '' /* TODO-לוח: String */,
       status: '' /* TODO-לוח: String */,
       title: '' /* TODO-לוח: String */,
+      workerName: '' /* TODO-לוח: String */,
       t: WorkerFormsScreenTokens(),
     );
   }

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__finance_hub_sheets.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 19.
+// מקור-החיווט: screens__finance_hub_sheets.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 22.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/finance_hub_sheets.dart';
@@ -27,6 +27,8 @@ class FinanceHubSheetsBoard extends ConsumerWidget {
       amount: 0 /* TODO-לוח: int */,
       big: false /* TODO-לוח: bool */,
       children: this.children,
+      createdAt: '' /* TODO-לוח: String */,
+      days: 0 /* TODO-לוח: int */,
       fallback: '' /* TODO-לוח: String */,
       ic: '' /* TODO-לוח: String */,
       id: '' /* TODO-לוח: String */,
@@ -34,6 +36,7 @@ class FinanceHubSheetsBoard extends ConsumerWidget {
       label2: '' /* TODO-לוח: String */,
       name: '' /* TODO-לוח: String */,
       note: null /* TODO-לוח: String? */,
+      perDay: 0 /* TODO-לוח: int */,
       secondLabel: null /* TODO-לוח: String? */,
       secondValue: null /* TODO-לוח: String? */,
       spent: 0 /* TODO-לוח: int */,

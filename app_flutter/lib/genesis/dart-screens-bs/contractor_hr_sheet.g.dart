@@ -21,14 +21,17 @@ class ContractorHrSheetTokens {
 }
 
 class ContractorHrSheetComposed extends StatelessWidget {
-  const ContractorHrSheetComposed({required this.onPressed, required this.bordered, required this.label, required this.reason, required this.status, required this.vacationRowItems, required this.t, super.key});
+  const ContractorHrSheetComposed({required this.onPressed, required this.bordered, required this.id, required this.label, required this.range, required this.reason, required this.status, required this.vacationRowItems, required this.workerName, required this.t, super.key});
 
   final VoidCallback onPressed;
   final bool bordered;
+  final String id;
   final String label;
+  final String range;
   final String reason;
   final String status;
   final List<VacationRowItem> vacationRowItems;
+  final String workerName;
   final ContractorHrSheetTokens t;
 
   @override
@@ -41,7 +44,10 @@ class ContractorHrSheetComposed extends StatelessWidget {
             label: vacation_row_label,
             label2: vacation_row_label2,
             status: status,
+            workerName: workerName,
+            range: range,
             reason: reason,
+            id: id,
             label3: vacation_row_label3,
             label4: vacation_row_label4,
             onApprove: r.onApprove,

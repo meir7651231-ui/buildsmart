@@ -1,5 +1,5 @@
 // 🧽 לוטש ע"י מנוע-המטרות (data-lift v3) — דאטה/מודל/תבנית הורמו ל-props לפי מטרתם, אל תערוך ידנית.
-// מוצא: screens__finance_hub_sheets:_SubRow (בנייה-חכמה main) · צרור-2 · מודל-שוטח: 2 שדות · props-שורש: label, label2, allocated, spent
+// מוצא: screens__finance_hub_sheets:_SubRow (בנייה-חכמה main) · צרור-2 · מודל-שוטח: 4 שדות · props-שורש: label, label2, allocated, spent, ic, name
 // התוכן: new/dart-data-bs/auto/screens__finance_hub_sheets_content.dart
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
@@ -7,11 +7,13 @@ import 'package:buildsmart/theme/config_theme.dart';
 import 'package:buildsmart/data/contractor_seeds.dart';
 
 class SubRow extends StatelessWidget {
-  SubRow({required this.label, required this.label2, required this.allocated, required this.spent, });
+  SubRow({required this.label, required this.label2, required this.allocated, required this.spent, required this.ic, required this.name, });
   final String label;
   final String label2;
   final int allocated;
   final int spent;
+  final String ic;
+  final String name;
 
   @override
   Widget build(BuildContext context) {

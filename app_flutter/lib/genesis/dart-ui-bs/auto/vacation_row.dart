@@ -1,19 +1,22 @@
 // 🧽 לוטש ע"י מנוע-המטרות (data-lift v3) — דאטה/מודל/תבנית הורמו ל-props לפי מטרתם, אל תערוך ידנית.
-// מוצא: screens__contractor_hr_sheet:_VacationRow (בנייה-חכמה main) · צרור-3 · מודל-שוטח: 2 שדות · props-שורש: label, label2, status, reason, label3, label4
+// מוצא: screens__contractor_hr_sheet:_VacationRow (בנייה-חכמה main) · צרור-3 · מודל-שוטח: 5 שדות · props-שורש: label, label2, status, workerName, range, reason, id, label3, label4
 // התוכן: new/dart-data-bs/auto/screens__contractor_hr_sheet_content.dart
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
 import 'package:buildsmart/state/vacation_requests.dart';
 
 class VacationRow extends StatelessWidget {
-  VacationRow({required this.label, required this.label2, required this.status, required this.reason, required this.label3, required this.label4, 
+  VacationRow({required this.label, required this.label2, required this.status, required this.workerName, required this.range, required this.reason, required this.id, required this.label3, required this.label4, 
     
     required this.onApprove,
     required this.onReject,});
   final String label;
   final String label2;
   final String status;
+  final String workerName;
+  final String range;
   final String reason;
+  final String id;
   final String label3;
   final String label4;
   final VoidCallback onApprove;

@@ -133,6 +133,6 @@ class _PlaceholderRow extends StatelessWidget {
   }
 }
 
-class _Inert {
+abstract class _Inert {
   bool get underConstruction;
 }
