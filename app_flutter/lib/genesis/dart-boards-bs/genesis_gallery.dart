@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/widgets/toast.dart' show bsNavigatorKey;
+import '../dart-gen-bs/gen_business.dart';
 import '../dart-gen-bs/gen_shipping.dart';
 import '../dart-gen-bs/gen_team.dart';
 import 'screens__ai_hub_screen_board.dart';
@@ -146,6 +147,7 @@ class GenesisGallery extends StatelessWidget {
   const GenesisGallery({super.key});
 
   static final List<_GEntry> _screens = [
+    _GEntry('🧬 פרופיל עסק', 'נוצר מהמחולל — חיווט-מלא', () => const GenBusinessScreen()),
     _GEntry('🧬 הגדרות משלוחים', 'נוצר מהמחולל — חיווט-מלא', () => const GenShippingScreen()),
     _GEntry('🧬 ניהול צוות', 'נוצר מהמחולל — חיווט-מלא', () => const GenTeamScreen()),
     _GEntry('ai hub screen', 'מחווט: 0 · ממתין-לחיווט: 1', () => const AiHubScreenBoard()),
