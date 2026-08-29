@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/buildsmart/genesis/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="בנייה חכמה — רכש חומרים וניהול משימות לאתרי בנייה. פלטפורמה אחת לקבלנים, ספקים ושליחים.">
+  <meta name="theme-color" content="#FF7A18">
+
+  <!-- Open Graph / social share (WhatsApp, Facebook, LinkedIn) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="בנייה חכמה">
+  <meta property="og:title" content="בנייה חכמה">
+  <meta property="og:description" content="רכש חומרים וניהול משימות לאתרי בנייה. פלטפורמה אחת לקבלנים, ספקים ושליחים.">
+  <meta property="og:image" content="https://buildsmart-b0b78.web.app/icons/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="בנייה חכמה">
+  <meta property="og:url" content="https://buildsmart-b0b78.web.app/">
+  <meta property="og:locale" content="he_IL">
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="בנייה חכמה">
+  <meta name="twitter:description" content="רכש חומרים וניהול משימות לאתרי בנייה. פלטפורמה אחת לקבלנים, ספקים ושליחים.">
+  <meta name="twitter:image" content="https://buildsmart-b0b78.web.app/icons/og-image.png">
+
+  <!-- PWA / iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="בנייה חכמה">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>בנייה חכמה</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Branded launch splash — shown until Flutter renders its first frame. */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #FF8A2B 0%, #F0620E 100%);
+      transition: opacity .35s ease;
+    }
+    #splash.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #splash .splash-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    #splash .splash-logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 22px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, .22);
+    }
+    #splash .splash-title {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .5px;
+    }
+    #splash .splash-spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid rgba(255, 255, 255, .35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: splash-spin .9s linear infinite;
+    }
+    @keyframes splash-spin { to { transform: rotate(360deg); } }
+
+    /* "Add to home screen" install banner. */
+    #a2hs {
+      position: fixed;
+      inset-inline: 12px;
+      bottom: 12px;
+      z-index: 2147483646;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1b1b1f;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .35);
+    }
+    #a2hs[hidden] { display: none; }
+    #a2hs .a2hs-msg { flex: 1; line-height: 1.35; }
+    #a2hs button {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    #a2hs-add { background: #FF7A18; color: #fff; }
+    #a2hs-x { background: transparent; color: rgba(255, 255, 255, .6); padding: 9px 8px; }
+  </style>
+</head>
+<body>
+  <!-- Branded launch splash (removed on Flutter's first frame). -->
+  <div id="splash">
+    <div class="splash-inner">
+      <img class="splash-logo" src="icons/Icon-192.png" alt="בנייה חכמה" width="96" height="96">
+      <div class="splash-title">בנייה חכמה</div>
+      <div class="splash-spinner"></div>
+    </div>
+  </div>
+
+  <!-- Install ("Add to home screen") prompt banner. -->
+  <div id="a2hs" hidden>
+    <span class="a2hs-msg">📲 התקן את בנייה חכמה למסך הבית</span>
+    <button id="a2hs-add" type="button">התקן</button>
+    <button id="a2hs-x" type="button" aria-label="סגור">✕</button>
+  </div>
+
+  <script>
+    // Dismiss the splash the moment Flutter paints, with a hard fallback so it
+    // can never get stuck if first-frame never fires.
+    (function () {
+      var splash = document.getElementById('splash');
+      function hideSplash() {
+        if (!splash) return;
+        splash.classList.add('hidden');
+        var el = splash;
+        splash = null;
+        setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 450);
+      }
+      window.addEventListener('flutter-first-frame', hideSplash);
+      setTimeout(hideSplash, 12000);
+    })();
+
+    // PWA install banner: capture beforeinstallprompt, offer install, respect dismissal.
+    (function () {
+      var deferred = null;
+      var banner = document.getElementById('a2hs');
+      var addBtn = document.getElementById('a2hs-add');
+      var closeBtn = document.getElementById('a2hs-x');
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferred = e;
+        var dismissed = false;
+        try { dismissed = localStorage.getItem('a2hs-dismissed') === '1'; } catch (err) {}
+        if (!dismissed) banner.hidden = false;
+      });
+      addBtn.addEventListener('click', function () {
+        banner.hidden = true;
+        if (!deferred) return;
+        deferred.prompt();
+        var choice = deferred.userChoice;
+        deferred = null;
+        if (choice && choice.finally) choice.finally(function () {});
+      });
+      closeBtn.addEventListener('click', function () {
+        banner.hidden = true;
+        try { localStorage.setItem('a2hs-dismissed', '1'); } catch (err) {}
+      });
+      window.addEventListener('appinstalled', function () {
+        banner.hidden = true;
+        try { localStorage.setItem('a2hs-dismissed', '1'); } catch (err) {}
+      });
+    })();
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
