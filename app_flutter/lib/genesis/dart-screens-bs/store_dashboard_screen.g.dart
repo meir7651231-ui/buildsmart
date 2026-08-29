@@ -24,7 +24,7 @@ class StoreDashboardScreenTokens {
 }
 
 class StoreDashboardScreenComposed extends StatelessWidget {
-  const StoreDashboardScreenComposed({required this.onTap, required this.badge, required this.child, required this.label, required this.on, required this.portalTileButtonItems, required this.sub, required this.title, required this.value, required this.t, super.key});
+  const StoreDashboardScreenComposed({required this.onTap,VoidCallback, required this.badge, required this.child, required this.label, required this.on, required this.portalTileButtonItems, required this.sub, required this.title, required this.value, required this.t, super.key});
 
   final VoidCallback onTap;
   final String badge;

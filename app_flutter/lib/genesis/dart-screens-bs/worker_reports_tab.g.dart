@@ -15,9 +15,9 @@ class WorkerReportsTabTokens {
 }
 
 class WorkerReportsTabComposed extends StatelessWidget {
-  const WorkerReportsTabComposed({required this.onTap, required this.children, required this.label, required this.title, required this.titleId, required this.value, required this.t, super.key});
+  const WorkerReportsTabComposed({required this.onTap,VoidCallback?, required this.children, required this.label, required this.title, required this.titleId, required this.value, required this.t, super.key});
 
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final List<Widget> children;
   final String label;
   final String title;

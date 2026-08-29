@@ -15,7 +15,7 @@ class CourierDashboardScreenTokens {
 }
 
 class CourierDashboardScreenComposed extends StatelessWidget {
-  const CourierDashboardScreenComposed({required this.onTap, required this.child, required this.ic, required this.label, required this.name, required this.on, required this.preferred, required this.value, required this.t, super.key});
+  const CourierDashboardScreenComposed({required this.onTap,VoidCallback, required this.child, required this.ic, required this.label, required this.name, required this.on, required this.preferred, required this.value, required this.t, super.key});
 
   final VoidCallback onTap;
   final Widget child;

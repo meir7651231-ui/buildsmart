@@ -15,7 +15,7 @@ class WorkerAttendanceScreenTokens {
 }
 
 class WorkerAttendanceScreenComposed extends StatelessWidget {
-  const WorkerAttendanceScreenComposed({required this.onPressed, required this.onTap, required this.enabled, required this.label, required this.query, required this.value, required this.t, super.key});
+  const WorkerAttendanceScreenComposed({required this.onPressed,VoidCallback, required this.onTap,VoidCallback, required this.enabled, required this.label, required this.query, required this.value, required this.t, super.key});
 
   final VoidCallback onPressed;
   final VoidCallback onTap;

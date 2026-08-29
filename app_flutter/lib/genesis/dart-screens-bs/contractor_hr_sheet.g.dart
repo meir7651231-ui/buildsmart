@@ -9,8 +9,9 @@ import '../dart-data-bs/auto/screens__contractor_hr_sheet_content.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class VacationRowItem {
-  const VacationRowItem({required this.onApprove});
+  const VacationRowItem({required this.onApprove, required this.onReject});
   final VoidCallback onApprove;
+  final Future<void> Function() onReject;
 }
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -21,7 +22,7 @@ class ContractorHrSheetTokens {
 }
 
 class ContractorHrSheetComposed extends StatelessWidget {
-  const ContractorHrSheetComposed({required this.onPressed, required this.bordered, required this.id, required this.label, required this.range, required this.reason, required this.status, required this.vacationRowItems, required this.workerName, required this.t, super.key});
+  const ContractorHrSheetComposed({required this.onPressed,VoidCallback, required this.bordered, required this.id, required this.label, required this.range, required this.reason, required this.status, required this.vacationRowItems, required this.workerName, required this.t, super.key});
 
   final VoidCallback onPressed;
   final bool bordered;
@@ -51,6 +52,7 @@ class ContractorHrSheetComposed extends StatelessWidget {
             label3: vacation_row_label3,
             label4: vacation_row_label4,
             onApprove: r.onApprove,
+            onReject: r.onReject,
           ),
           const SizedBox(height: 8),
         ],

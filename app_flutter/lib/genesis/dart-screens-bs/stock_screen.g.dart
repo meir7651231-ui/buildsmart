@@ -14,10 +14,11 @@ class StockScreenTokens {
 }
 
 class StockScreenComposed extends StatelessWidget {
-  const StockScreenComposed({required this.onMove, required this.onTap, required this.label, required this.name, required this.on, required this.warehouse, required this.t, super.key});
+  const StockScreenComposed({required this.onMove,VoidCallback, required this.onTap,VoidCallback, required this.info, required this.label, required this.name, required this.on, required this.warehouse, required this.t, super.key});
 
   final VoidCallback onMove;
   final VoidCallback onTap;
+  final ({String img, String why}) info;
   final String label;
   final String name;
   final bool on;
@@ -38,6 +39,7 @@ class StockScreenComposed extends StatelessWidget {
             label: stock_row_label,
             label2: stock_row_label2,
             name: name,
+            info: info,
             warehouse: warehouse,
             onMove: onMove,
           ),

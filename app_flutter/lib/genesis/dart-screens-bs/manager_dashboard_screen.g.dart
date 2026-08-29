@@ -45,7 +45,7 @@ class ManagerDashboardScreenTokens {
 }
 
 class ManagerDashboardScreenComposed extends StatelessWidget {
-  const ManagerDashboardScreenComposed({required this.onOpen, required this.onPressed, required this.onTap, required this.badge, required this.bordered, required this.categoryCount, required this.child, required this.count, required this.emoji, required this.manageRowItems, required this.max, required this.open, required this.pct, required this.pipelineRowItems, required this.productCount, required this.sectionKey, required this.stageIdx, required this.sub, required this.titleCfgId, required this.t, super.key});
+  const ManagerDashboardScreenComposed({required this.onOpen,VoidCallback, required this.onPressed,VoidCallback, required this.onTap,VoidCallback, required this.badge, required this.bordered, required this.categoryCount, required this.child, required this.count, required this.emoji, required this.manageRowItems, required this.max, required this.open, required this.pct, required this.pipelineRowItems, required this.productCount, required this.sectionKey, required this.stageIdx, required this.sub, required this.titleCfgId, required this.t, super.key});
 
   final VoidCallback onOpen;
   final VoidCallback onPressed;
@@ -169,7 +169,7 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
           const SizedBox(height: 8),
         ],
           ManageHint(
-            text: managerShellContent.text,
+            managerShellContent.text,
           ),
         ],
       );

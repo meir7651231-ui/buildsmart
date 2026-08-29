@@ -17,7 +17,7 @@ class TradeBuilderConnectionRuleStudioTokens {
 }
 
 class TradeBuilderConnectionRuleStudioComposed extends StatelessWidget {
-  const TradeBuilderConnectionRuleStudioComposed({required this.onDelete, required this.onPressed, required this.onPressed2, required this.onTap, required this.enabled, required this.label, required this.methodLabelHe, required this.nameHe, required this.title, required this.t, super.key});
+  const TradeBuilderConnectionRuleStudioComposed({required this.onDelete,VoidCallback, required this.onPressed,VoidCallback, required this.onPressed2,VoidCallback, required this.onTap,VoidCallback, required this.enabled, required this.label, required this.methodLabelHe, required this.nameHe, required this.title, required this.t, super.key});
 
   final VoidCallback onDelete;
   final VoidCallback onPressed;
@@ -44,7 +44,7 @@ class TradeBuilderConnectionRuleStudioComposed extends StatelessWidget {
             onPressed2: onPressed2,
           ),
           SectionHeader(
-            title: title,
+            title,
           ),
           EmptyConnectors(
             fallback: empty_connectors_fallback,

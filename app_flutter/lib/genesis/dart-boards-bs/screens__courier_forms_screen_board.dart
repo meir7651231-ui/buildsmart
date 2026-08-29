@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_forms_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 13.
+// מקור-החיווט: screens__courier_forms_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 14.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/courier_forms_screen.dart';
@@ -28,6 +28,7 @@ class CourierFormsScreenBoard extends ConsumerWidget {
     return CourierFormsScreenComposed(
       onApprove: () {} /* TODO-לוח */,
       onPressed: () {} /* TODO-לוח */,
+      onReject: () async {} /* TODO-לוח */,
       children: const [] /* TODO-לוח: List<Widget> */,
       filled: false,
       id: '' /* TODO-לוח: String */,

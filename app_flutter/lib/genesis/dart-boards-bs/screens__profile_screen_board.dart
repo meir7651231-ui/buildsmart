@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__profile_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 4.
+// מקור-החיווט: screens__profile_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 5.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
@@ -28,6 +28,7 @@ class ProfileScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ProfileScreenComposed(
       onTap: () {} /* TODO-לוח */,
+      validator: (_) {} /* TODO-לוח */,
       controller: TextEditingController() /* TODO-לוח: TextEditingController */,
       label: '' /* TODO-לוח: String */,
       number: false /* TODO-לוח: bool */,

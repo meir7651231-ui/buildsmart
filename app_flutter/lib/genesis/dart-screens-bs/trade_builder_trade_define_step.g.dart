@@ -14,7 +14,7 @@ class TradeBuilderTradeDefineStepTokens {
 }
 
 class TradeBuilderTradeDefineStepComposed extends StatelessWidget {
-  const TradeBuilderTradeDefineStepComposed({required this.onTap, required this.color, required this.enabled, required this.index, required this.selected, required this.t, super.key});
+  const TradeBuilderTradeDefineStepComposed({required this.onTap,VoidCallback, required this.color, required this.enabled, required this.index, required this.selected, required this.t, super.key});
 
   final VoidCallback onTap;
   final int color;

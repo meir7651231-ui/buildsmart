@@ -17,10 +17,10 @@ class ChatSettingsScreenTokens {
 }
 
 class ChatSettingsScreenComposed extends StatelessWidget {
-  const ChatSettingsScreenComposed({required this.onEditTap, required this.onTemplateTap, required this.templates, required this.t, super.key});
+  const ChatSettingsScreenComposed({required this.onEditTap,VoidCallback?, required this.onTemplateTap,ValueChanged<String>, required this.templates, required this.t, super.key});
 
-  final VoidCallback onEditTap;
-  final VoidCallback onTemplateTap;
+  final VoidCallback? onEditTap;
+  final ValueChanged<String> onTemplateTap;
   final List<String> templates;
   final ChatSettingsScreenTokens t;
 

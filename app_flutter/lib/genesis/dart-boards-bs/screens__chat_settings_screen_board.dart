@@ -20,7 +20,7 @@ class ChatSettingsScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ChatSettingsScreenComposed(
       onEditTap: () {} /* TODO-לוח */,
-      onTemplateTap: () {} /* TODO-לוח */,
+      onTemplateTap: (_) {} /* TODO-לוח */,
       templates: const [] /* TODO-לוח: List<String> */,
       t: ChatSettingsScreenTokens(accentColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, chipBorderColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, chipFillColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, inkColor: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );

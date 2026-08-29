@@ -13,7 +13,7 @@ class ConsentModalTokens {
 }
 
 class ConsentModalComposed extends StatelessWidget {
-  const ConsentModalComposed({required this.onAgree, required this.onDismiss, required this.onTap, required this.t, super.key});
+  const ConsentModalComposed({required this.onAgree,VoidCallback, required this.onDismiss,VoidCallback, required this.onTap,VoidCallback, required this.t, super.key});
 
   final VoidCallback onAgree;
   final VoidCallback onDismiss;

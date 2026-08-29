@@ -36,7 +36,7 @@ class SiteHubScreenTokens {
 }
 
 class SiteHubScreenComposed extends StatelessWidget {
-  const SiteHubScreenComposed({required this.onTap, required this.done, required this.hubTileItems, required this.icon, required this.label, required this.left, required this.overdue, required this.siteHubCaCardItems, required this.sub, required this.text, required this.title, required this.trailing, required this.t, super.key});
+  const SiteHubScreenComposed({required this.onTap,VoidCallback, required this.done, required this.hubTileItems, required this.icon, required this.label, required this.left, required this.overdue, required this.siteHubCaCardItems, required this.sub, required this.text, required this.title, required this.trailing, required this.t, super.key});
 
   final VoidCallback onTap;
   final bool done;
@@ -74,16 +74,16 @@ class SiteHubScreenComposed extends StatelessWidget {
             onTap: onTap,
           ),
           CaSubTitle(
-            text: text,
+            text,
           ),
           SiteHubCaEmpty(
             text,
           ),
           SiteServerNote(
-            text: text,
+            text,
           ),
           CaPill(
-            label: label,
+            label,
             done: done,
           ),
           CardTop(
@@ -95,7 +95,7 @@ class SiteHubScreenComposed extends StatelessWidget {
             onTap: onTap,
           ),
           CardDone(
-            text: text,
+            text,
           ),
           for (final t in hubTileItems) ...[
           HubTile(

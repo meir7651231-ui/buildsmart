@@ -26,7 +26,7 @@ class TradeBuilderAttributeSchemaEditorTokens {
 }
 
 class TradeBuilderAttributeSchemaEditorComposed extends StatelessWidget {
-  const TradeBuilderAttributeSchemaEditorComposed({required this.onTap, required this.enabled, required this.label, required this.matchChipItems, required this.text, required this.valueChipItems, required this.t, super.key});
+  const TradeBuilderAttributeSchemaEditorComposed({required this.onTap,VoidCallback, required this.enabled, required this.label, required this.matchChipItems, required this.text, required this.valueChipItems, required this.t, super.key});
 
   final VoidCallback onTap;
   final bool enabled;

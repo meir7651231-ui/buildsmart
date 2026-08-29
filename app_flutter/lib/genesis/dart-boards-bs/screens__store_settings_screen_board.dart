@@ -21,7 +21,7 @@ class StoreSettingsScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StoreSettingsScreenComposed(
-      onChanged: () {} /* TODO-לוח */,
+      onChanged: (_) {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,
       buttonLabel: '' /* TODO-לוח: String */,
       children: const [] /* TODO-לוח: List<Widget> */,

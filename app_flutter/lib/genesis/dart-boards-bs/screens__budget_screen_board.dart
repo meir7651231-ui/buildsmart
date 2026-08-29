@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__budget_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 7.
+// מקור-החיווט: screens__budget_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 8.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/budget_screen.dart';
@@ -19,6 +19,7 @@ class BudgetScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return BudgetScreenComposed(
       onTap: () {} /* TODO-לוח */,
+      validator: (_) {} /* TODO-לוח */,
       child: const SizedBox.shrink() /* TODO-לוח: Widget */,
       controller: TextEditingController() /* TODO-לוח: TextEditingController */,
       label: '' /* TODO-לוח: String */,

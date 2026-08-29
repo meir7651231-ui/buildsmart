@@ -14,7 +14,7 @@ class CourierProfileScreenTokens {
 }
 
 class CourierProfileScreenComposed extends StatelessWidget {
-  const CourierProfileScreenComposed({required this.onTap, required this.onTap2, required this.onTap3, required this.onTap4, required this.label, required this.value, required this.t, super.key});
+  const CourierProfileScreenComposed({required this.onTap,VoidCallback, required this.onTap2,VoidCallback, required this.onTap3,VoidCallback, required this.onTap4,VoidCallback, required this.label, required this.value, required this.t, super.key});
 
   final VoidCallback onTap;
   final VoidCallback onTap2;

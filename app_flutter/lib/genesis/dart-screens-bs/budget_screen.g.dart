@@ -15,9 +15,10 @@ class BudgetScreenTokens {
 }
 
 class BudgetScreenComposed extends StatelessWidget {
-  const BudgetScreenComposed({required this.onTap, required this.child, required this.controller, required this.label, required this.name, required this.number, required this.value, required this.t, super.key});
+  const BudgetScreenComposed({required this.onTap,VoidCallback, required this.validator,String? Function(String value)?, required this.child, required this.controller, required this.label, required this.name, required this.number, required this.value, required this.t, super.key});
 
   final VoidCallback onTap;
+  final String? Function(String value)? validator;
   final Widget child;
   final TextEditingController controller;
   final String label;
@@ -49,6 +50,7 @@ class BudgetScreenComposed extends StatelessWidget {
             label: label,
             controller: controller,
             number: number,
+            validator: validator,
           ),
         ],
       );

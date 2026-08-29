@@ -40,7 +40,7 @@ class TasksScreenTokens {
 }
 
 class TasksScreenComposed extends StatelessWidget {
-  const TasksScreenComposed({required this.onTap, required this.approvalCardItems, required this.children, required this.detail, required this.label, required this.proposalCardItems, required this.text, required this.title, required this.titleId, required this.t, super.key});
+  const TasksScreenComposed({required this.onTap,VoidCallback, required this.approvalCardItems, required this.children, required this.detail, required this.label, required this.proposalCardItems, required this.text, required this.title, required this.titleId, required this.t, super.key});
 
   final VoidCallback onTap;
   final List<ApprovalCardItem> approvalCardItems;
@@ -59,7 +59,7 @@ class TasksScreenComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           Intro(
-            text: text,
+            text,
           ),
           NewTaskButton(
             fallback: new_task_button_fallback,
@@ -70,7 +70,7 @@ class TasksScreenComposed extends StatelessWidget {
             onTap: onTap,
           ),
           DoneAll(
-            text: text,
+            text,
           ),
           for (final t in approvalCardItems) ...[
           ApprovalCard(
@@ -109,7 +109,7 @@ class TasksScreenComposed extends StatelessWidget {
             children: children,
           ),
           SecH(
-            text: text,
+            text,
           ),
         ],
       );

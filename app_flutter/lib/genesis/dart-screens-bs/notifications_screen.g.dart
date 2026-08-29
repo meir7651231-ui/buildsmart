@@ -13,7 +13,7 @@ class NotificationsScreenTokens {
 }
 
 class NotificationsScreenComposed extends StatelessWidget {
-  const NotificationsScreenComposed({required this.onTap, required this.fallback, required this.label, required this.t, super.key});
+  const NotificationsScreenComposed({required this.onTap,VoidCallback, required this.fallback, required this.label, required this.t, super.key});
 
   final VoidCallback onTap;
   final String fallback;

@@ -13,7 +13,7 @@ class TradeBuilderTradePublishSheetTokens {
 }
 
 class TradeBuilderTradePublishSheetComposed extends StatelessWidget {
-  const TradeBuilderTradePublishSheetComposed({required this.onTap, required this.enabled, required this.label, required this.pass, required this.t, super.key});
+  const TradeBuilderTradePublishSheetComposed({required this.onTap,VoidCallback, required this.enabled, required this.label, required this.pass, required this.t, super.key});
 
   final VoidCallback onTap;
   final bool enabled;

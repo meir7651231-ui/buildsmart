@@ -36,7 +36,7 @@ class StudioPanesThemePaneComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           Label(
-            text: text,
+            text,
           ),
           for (final c in swatchItems) ...[
           Swatch(

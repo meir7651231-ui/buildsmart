@@ -18,7 +18,7 @@ class ChatsScreenTokens {
 }
 
 class ChatsScreenComposed extends StatelessWidget {
-  const ChatsScreenComposed({required this.onSend, required this.onTap, required this.active, required this.controller, required this.date, required this.enabled, required this.hintText, required this.icon, required this.label, required this.semanticLabel, required this.tooltip, required this.t, super.key});
+  const ChatsScreenComposed({required this.onSend,VoidCallback, required this.onTap,VoidCallback, required this.active, required this.controller, required this.date, required this.enabled, required this.hintText, required this.icon, required this.label, required this.semanticLabel, required this.tooltip, required this.t, super.key});
 
   final VoidCallback onSend;
   final VoidCallback onTap;

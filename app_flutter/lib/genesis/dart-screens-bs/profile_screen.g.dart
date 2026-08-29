@@ -15,9 +15,10 @@ class ProfileScreenTokens {
 }
 
 class ProfileScreenComposed extends StatelessWidget {
-  const ProfileScreenComposed({required this.onTap, required this.controller, required this.label, required this.number, required this.text, required this.t, super.key});
+  const ProfileScreenComposed({required this.onTap,VoidCallback, required this.validator,String? Function(String value)?, required this.controller, required this.label, required this.number, required this.text, required this.t, super.key});
 
   final VoidCallback onTap;
+  final String? Function(String value)? validator;
   final TextEditingController controller;
   final String label;
   final bool number;
@@ -30,15 +31,16 @@ class ProfileScreenComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           SectionLabel(
-            text: text,
+            text,
           ),
           Field(
             label: label,
             controller: controller,
             number: number,
+            validator: validator,
           ),
           FieldLabel(
-            text: text,
+            text,
           ),
           LinkRow(
             label: label,

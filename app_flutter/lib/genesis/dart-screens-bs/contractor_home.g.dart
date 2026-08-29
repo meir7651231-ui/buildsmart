@@ -22,7 +22,7 @@ class ContractorHomeTokens {
 }
 
 class ContractorHomeComposed extends StatelessWidget {
-  const ContractorHomeComposed({required this.showEmptyOrders, required this.workPathOn, required this.onHeroTap, required this.t, super.key});
+  const ContractorHomeComposed({required this.showEmptyOrders, required this.workPathOn, required this.onHeroTap,VoidCallback, required this.t, super.key});
   final bool showEmptyOrders;
   final bool workPathOn;
   final VoidCallback onHeroTap;

@@ -26,9 +26,9 @@ class LipskeyProductSheetTokens {
 }
 
 class LipskeyProductSheetComposed extends StatelessWidget {
-  const LipskeyProductSheetComposed({required this.onChanged, required this.emoji, required this.pickerOptionItems, required this.qty, required this.subtitle, required this.text, required this.t, super.key});
+  const LipskeyProductSheetComposed({required this.onChanged,ValueChanged<int>, required this.emoji, required this.pickerOptionItems, required this.qty, required this.subtitle, required this.text, required this.t, super.key});
 
-  final VoidCallback onChanged;
+  final ValueChanged<int> onChanged;
   final String emoji;
   final List<PickerOptionItem> pickerOptionItems;
   final int qty;
@@ -57,7 +57,7 @@ class LipskeyProductSheetComposed extends StatelessWidget {
             fallback: zoom_hint_fallback,
           ),
           EmptyHint(
-            text: text,
+            text,
           ),
           for (final opt in pickerOptionItems) ...[
           PickerOption(

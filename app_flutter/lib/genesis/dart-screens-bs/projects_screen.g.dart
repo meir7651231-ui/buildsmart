@@ -12,7 +12,7 @@ class ProjectsScreenTokens {
 }
 
 class ProjectsScreenComposed extends StatelessWidget {
-  const ProjectsScreenComposed({required this.onTap, required this.label, required this.t, super.key});
+  const ProjectsScreenComposed({required this.onTap,VoidCallback, required this.label, required this.t, super.key});
 
   final VoidCallback onTap;
   final String label;

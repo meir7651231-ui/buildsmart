@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__stock_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
+// מקור-החיווט: screens__stock_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/stock_screen.dart';
@@ -21,6 +21,7 @@ class StockScreenBoard extends ConsumerWidget {
     return StockScreenComposed(
       onMove: () {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,
+      info: (null as dynamic) /* TODO-לוח: ({String img, String why}) */,
       label: '' /* TODO-לוח: String */,
       name: '' /* TODO-לוח: String */,
       on: false /* TODO-לוח: bool */,

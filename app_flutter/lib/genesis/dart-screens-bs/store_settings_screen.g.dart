@@ -25,9 +25,9 @@ class StoreSettingsScreenTokens {
 }
 
 class StoreSettingsScreenComposed extends StatelessWidget {
-  const StoreSettingsScreenComposed({required this.onChanged, required this.onTap, required this.buttonLabel, required this.children, required this.errorText, required this.fallback, required this.hint, required this.label, required this.subtitleNote, required this.underConstruction, required this.value, required this.value2, required this.value22, required this.t, super.key});
+  const StoreSettingsScreenComposed({required this.onChanged,ValueChanged<int>, required this.onTap,VoidCallback, required this.buttonLabel, required this.children, required this.errorText, required this.fallback, required this.hint, required this.label, required this.subtitleNote, required this.underConstruction, required this.value, required this.value2, required this.value22, required this.t, super.key});
 
-  final VoidCallback onChanged;
+  final ValueChanged<int> onChanged;
   final VoidCallback onTap;
   final String buttonLabel;
   final List<Widget> children;

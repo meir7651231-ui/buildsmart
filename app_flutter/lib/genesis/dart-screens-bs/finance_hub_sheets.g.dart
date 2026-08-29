@@ -31,7 +31,7 @@ class FinanceHubSheetsTokens {
 }
 
 class FinanceHubSheetsComposed extends StatelessWidget {
-  const FinanceHubSheetsComposed({required this.onApprove, required this.onReject, required this.onTap, required this.allocated, required this.amount, required this.big, required this.children, required this.createdAt, required this.days, required this.fallback, required this.ic, required this.id, required this.label, required this.label2, required this.name, required this.note, required this.perDay, required this.secondLabel, required this.secondValue, required this.spent, required this.sub, required this.text, required this.thrRowItems, required this.title, required this.value, required this.workerLabel, required this.t, super.key});
+  const FinanceHubSheetsComposed({required this.onApprove,VoidCallback, required this.onReject,VoidCallback, required this.onTap,VoidCallback, required this.allocated, required this.amount, required this.big, required this.children, required this.createdAt, required this.days, required this.fallback, required this.ic, required this.id, required this.label, required this.label2, required this.name, required this.note, required this.perDay, required this.rows, required this.secondLabel, required this.secondValue, required this.spent, required this.sub, required this.text, required this.thrRowItems, required this.title, required this.value, required this.workerLabel, required this.t, super.key});
 
   final VoidCallback onApprove;
   final VoidCallback onReject;
@@ -50,6 +50,7 @@ class FinanceHubSheetsComposed extends StatelessWidget {
   final String name;
   final String? note;
   final int perDay;
+  final List<(String, String, bool)> rows;
   final String? secondLabel;
   final String? secondValue;
   final int spent;
@@ -72,12 +73,12 @@ class FinanceHubSheetsComposed extends StatelessWidget {
             sub: sub,
           ),
           FinRow(
-            label: label,
-            value: value,
+            label,
+            value,
             valueColor: t.valueColor,
           ),
           FinRows(
-            children: children,
+            children,
           ),
           FinCallout(
             label: label,
@@ -107,7 +108,7 @@ class FinanceHubSheetsComposed extends StatelessWidget {
             name: name,
           ),
           CaEmpty(
-            text: text,
+            text,
           ),
           ApprovalCard(
             label: label,
@@ -135,10 +136,10 @@ class FinanceHubSheetsComposed extends StatelessWidget {
             createdAt: createdAt,
           ),
           ReportH2(
-            text: text,
+            text,
           ),
           ReportTable(
-            
+            rows: rows,
           ),
         ],
       );

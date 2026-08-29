@@ -17,7 +17,7 @@ class CameraSheetTokens {
 }
 
 class CameraSheetComposed extends StatelessWidget {
-  const CameraSheetComposed({required this.onTap, required this.busy, required this.emoji, required this.hint, required this.icon, required this.label, required this.t, super.key});
+  const CameraSheetComposed({required this.onTap,VoidCallback, required this.busy, required this.emoji, required this.hint, required this.icon, required this.label, required this.t, super.key});
 
   final VoidCallback onTap;
   final bool busy;

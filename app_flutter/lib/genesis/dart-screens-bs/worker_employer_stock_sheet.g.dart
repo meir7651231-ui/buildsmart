@@ -14,7 +14,7 @@ class WorkerEmployerStockSheetTokens {
 }
 
 class WorkerEmployerStockSheetComposed extends StatelessWidget {
-  const WorkerEmployerStockSheetComposed({required this.onSend, required this.onToggle, required this.composing, required this.itemsCtrl, required this.location, required this.name, required this.noteCtrl, required this.t, super.key});
+  const WorkerEmployerStockSheetComposed({required this.onSend,VoidCallback, required this.onToggle,VoidCallback, required this.composing, required this.itemsCtrl, required this.location, required this.name, required this.noteCtrl, required this.t, super.key});
 
   final VoidCallback onSend;
   final VoidCallback onToggle;

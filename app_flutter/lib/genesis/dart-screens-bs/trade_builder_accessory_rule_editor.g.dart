@@ -17,7 +17,7 @@ class TradeBuilderAccessoryRuleEditorTokens {
 }
 
 class TradeBuilderAccessoryRuleEditorComposed extends StatelessWidget {
-  const TradeBuilderAccessoryRuleEditorComposed({required this.onDelete, required this.onTap, required this.emoji, required this.enabled, required this.label, required this.mustHave, required this.nameHe, required this.price, required this.price2, required this.whyHe, required this.t, super.key});
+  const TradeBuilderAccessoryRuleEditorComposed({required this.onDelete,VoidCallback, required this.onTap,VoidCallback, required this.emoji, required this.enabled, required this.label, required this.mustHave, required this.nameHe, required this.price, required this.price2, required this.whyHe, required this.t, super.key});
 
   final VoidCallback onDelete;
   final VoidCallback onTap;

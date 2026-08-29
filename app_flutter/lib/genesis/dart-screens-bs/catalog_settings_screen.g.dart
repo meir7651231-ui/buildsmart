@@ -15,7 +15,7 @@ class CatalogSettingsScreenTokens {
 }
 
 class CatalogSettingsScreenComposed extends StatelessWidget {
-  const CatalogSettingsScreenComposed({required this.onTap, required this.onTap2, required this.t, super.key});
+  const CatalogSettingsScreenComposed({required this.onTap,VoidCallback, required this.onTap2,VoidCallback, required this.t, super.key});
 
   final VoidCallback onTap;
   final VoidCallback onTap2;

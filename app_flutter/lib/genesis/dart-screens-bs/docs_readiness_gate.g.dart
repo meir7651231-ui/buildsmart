@@ -13,7 +13,7 @@ class DocsReadinessGateTokens {
 }
 
 class DocsReadinessGateComposed extends StatelessWidget {
-  const DocsReadinessGateComposed({required this.onPressed, required this.emptyText, required this.label, required this.lines, required this.title, required this.t, super.key});
+  const DocsReadinessGateComposed({required this.onPressed,VoidCallback, required this.emptyText, required this.label, required this.lines, required this.title, required this.t, super.key});
 
   final VoidCallback onPressed;
   final String? emptyText;

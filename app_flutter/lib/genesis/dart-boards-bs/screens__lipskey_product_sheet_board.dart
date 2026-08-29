@@ -27,7 +27,7 @@ class LipskeyProductSheetBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return LipskeyProductSheetComposed(
-      onChanged: () {} /* TODO-לוח */,
+      onChanged: (_) {} /* TODO-לוח */,
       emoji: '' /* TODO-לוח: String */,
       pickerOptionItems: const [] /* TODO-לוח: List<PickerOptionItem> */,
       qty: 0 /* TODO-לוח: int */,
