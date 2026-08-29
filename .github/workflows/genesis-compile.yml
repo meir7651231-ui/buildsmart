@@ -1,0 +1,51 @@
+name: genesis-compile
+
+# 🧪 מבחן-הקומפילציה של המחצב: תוצרי-המנועים (אטומים · מסכים-מורכבים · לוחות)
+# חייבים לעבור flutter analyze אמיתי. אדום = לא-מתקמפל; הדוח נשמר כ-artifact.
+on:
+  push:
+    branches: ["claude/**"]
+    paths: ["app_flutter/lib/genesis/**", ".github/workflows/genesis-compile.yml"]
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Analyze genesis (הדוח המלא נשמר תמיד)
+        working-directory: app_flutter
+        run: |
+          set +e
+          dart analyze lib/genesis > genesis-analyze.txt 2>&1
+          CODE=$?
+          echo "── סיכום ──"
+          E=$(grep -c "^  error" genesis-analyze.txt || true)
+          W=$(grep -c "^  warning" genesis-analyze.txt || true)
+          I=$(grep -c "^  info" genesis-analyze.txt || true)
+          echo "errors=$E warnings=$W infos=$I exit=$CODE"
+          echo "── שגיאות לפי-סוג (טופ 20) ──"
+          grep "^  error" genesis-analyze.txt | sed 's/.*- //' | sort | uniq -c | sort -rn | head -20
+          echo "── שגיאות לפי-תיקייה ──"
+          grep "^  error" genesis-analyze.txt | grep -oE "lib/genesis/[a-z-]+" | sort | uniq -c | sort -rn
+          tail -5 genesis-analyze.txt
+          exit $CODE
+
+      - name: Upload full report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-analyze
+          path: app_flutter/genesis-analyze.txt

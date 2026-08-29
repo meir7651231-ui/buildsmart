@@ -1,0 +1,19 @@
+// 📦 דאטה · תוכן-שהורם ע"י data-lift מ-screens__catalog_screen — verbatim מהמקור, אל תערוך ידנית.
+const String acc_row_label = 'מידע על האביזר';
+const String acc_row_label2 = 'לפי ספק';
+const String acc_row_label3 = 'הוסף כמות';
+const String acc_row_label4 = 'הפחת כמות';
+const String company_catalog_import_card_label = '📦 טעינת קטלוג החברה';
+const String company_catalog_import_card_label2 = 'נטענו ';
+const String company_catalog_import_card_label3 = ' מוצרים';
+const String company_catalog_import_card_label4 = 'הורידו תבנית, מלאו והעלו — והאפליקציה תעבוד על הקטלוג שלכם';
+const String empty_section_fallback = 'אין פריטים להצגה.\nפתחו את ניהול הרשימות והקישו ✏️ כדי לבחור פריטים.';
+const String facet_row_label2 = ' מוצרים';
+const String mini_qty_btn_label = 'הוסף כמות';
+const String mini_qty_btn_label2 = 'הפחת כמות';
+const String saved_version_chip_message = 'טעינת גרסה — החלף למותג השמור';
+const String saved_version_chip_label2 = 'טען גרסה ';
+const String saved_version_chip_message2 = 'מחק גרסה';
+const String saved_version_chip_label3 = 'מחק גרסה ';
+const String tree_coming_soon_fallback = 'בקרוב';
+const String tree_coming_soon_fallback2 = 'הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב.';
