@@ -38,7 +38,7 @@ class StoreScreenTokens {
 }
 
 class StoreScreenComposed extends StatelessWidget {
-  const StoreScreenComposed({required this.onMinus,VoidCallback, required this.onPlus,VoidCallback, required this.onTap,VoidCallback?, required this.active, required this.badge, required this.bold, required this.children, required this.deliveryFee, required this.emoji, required this.icon, required this.label, required this.qty, required this.query, required this.storeProjectChipItems, required this.storeSupplierHeaderItems, required this.subtotal, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
+  const StoreScreenComposed({required this.onMinus, required this.onPlus, required this.onTap, required this.active, required this.badge, required this.bold, required this.children, required this.deliveryFee, required this.emoji, required this.icon, required this.label, required this.qty, required this.query, required this.storeProjectChipItems, required this.storeSupplierHeaderItems, required this.subtotal, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
 
   final VoidCallback onMinus;
   final VoidCallback onPlus;

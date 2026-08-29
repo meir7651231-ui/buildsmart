@@ -13,7 +13,7 @@ class WorkerEquipmentChecklistSheetTokens {
 }
 
 class WorkerEquipmentChecklistSheetComposed extends StatelessWidget {
-  const WorkerEquipmentChecklistSheetComposed({required this.onTap,VoidCallback?, required this.label, required this.text, required this.t, super.key});
+  const WorkerEquipmentChecklistSheetComposed({required this.onTap, required this.label, required this.text, required this.t, super.key});
 
   final VoidCallback? onTap;
   final String label;

@@ -13,7 +13,7 @@ class NotifSettingsScreenTokens {
 }
 
 class NotifSettingsScreenComposed extends StatelessWidget {
-  const NotifSettingsScreenComposed({required this.onTap,VoidCallback, required this.t, super.key});
+  const NotifSettingsScreenComposed({required this.onTap, required this.t, super.key});
 
   final VoidCallback onTap;
 

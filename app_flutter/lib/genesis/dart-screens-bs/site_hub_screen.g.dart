@@ -36,7 +36,7 @@ class SiteHubScreenTokens {
 }
 
 class SiteHubScreenComposed extends StatelessWidget {
-  const SiteHubScreenComposed({required this.onTap,VoidCallback, required this.done, required this.hubTileItems, required this.icon, required this.label, required this.left, required this.overdue, required this.siteHubCaCardItems, required this.sub, required this.text, required this.title, required this.trailing, required this.t, super.key});
+  const SiteHubScreenComposed({required this.onTap, required this.done, required this.hubTileItems, required this.icon, required this.label, required this.left, required this.overdue, required this.siteHubCaCardItems, required this.sub, required this.text, required this.title, required this.trailing, required this.t, super.key});
 
   final VoidCallback onTap;
   final bool done;

@@ -12,7 +12,7 @@ class CourierPortalTabTokens {
 }
 
 class CourierPortalTabComposed extends StatelessWidget {
-  const CourierPortalTabComposed({required this.onTap,VoidCallback, required this.sub, required this.title, required this.t, super.key});
+  const CourierPortalTabComposed({required this.onTap, required this.sub, required this.title, required this.t, super.key});
 
   final VoidCallback onTap;
   final String sub;

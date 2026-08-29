@@ -14,7 +14,7 @@ class ManagerRoleAssignSheetTokens {
 }
 
 class ManagerRoleAssignSheetComposed extends StatelessWidget {
-  const ManagerRoleAssignSheetComposed({required this.onPressed,VoidCallback, required this.busy, required this.enabled, required this.name, required this.t, super.key});
+  const ManagerRoleAssignSheetComposed({required this.onPressed, required this.busy, required this.enabled, required this.name, required this.t, super.key});
 
   final VoidCallback onPressed;
   final bool busy;

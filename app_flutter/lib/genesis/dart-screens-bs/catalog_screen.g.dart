@@ -50,7 +50,7 @@ class CatalogScreenTokens {
 }
 
 class CatalogScreenComposed extends StatelessWidget {
-  const CatalogScreenComposed({required this.onQtyChanged,ValueChanged<int>, required this.onSelect,void Function(String), required this.onTap,VoidCallback, required this.onToggle,ValueChanged<bool>?, required this.activeMatch, required this.axisChipItems, required this.child, required this.count, required this.emoji, required this.expanded, required this.facetRowItems, required this.icon, required this.isSelected, required this.label, required this.name, required this.options, required this.price, required this.qty, required this.savedVersionChipItems, required this.selected, required this.selected2, required this.text, required this.title, required this.value, required this.why, required this.t, super.key});
+  const CatalogScreenComposed({required this.onQtyChanged, required this.onSelect, required this.onTap, required this.onToggle, required this.activeMatch, required this.axisChipItems, required this.child, required this.count, required this.emoji, required this.expanded, required this.facetRowItems, required this.icon, required this.isSelected, required this.label, required this.name, required this.options, required this.price, required this.qty, required this.savedVersionChipItems, required this.selected, required this.selected2, required this.text, required this.title, required this.value, required this.why, required this.t, super.key});
 
   final ValueChanged<int> onQtyChanged;
   final void Function(String) onSelect;

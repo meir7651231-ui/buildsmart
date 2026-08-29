@@ -15,7 +15,7 @@ class ProfileScreenTokens {
 }
 
 class ProfileScreenComposed extends StatelessWidget {
-  const ProfileScreenComposed({required this.onTap,VoidCallback, required this.validator,String? Function(String value)?, required this.controller, required this.label, required this.number, required this.text, required this.t, super.key});
+  const ProfileScreenComposed({required this.onTap, required this.validator, required this.controller, required this.label, required this.number, required this.text, required this.t, super.key});
 
   final VoidCallback onTap;
   final String? Function(String value)? validator;

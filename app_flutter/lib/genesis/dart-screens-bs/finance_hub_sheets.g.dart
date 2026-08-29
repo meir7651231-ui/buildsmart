@@ -31,7 +31,7 @@ class FinanceHubSheetsTokens {
 }
 
 class FinanceHubSheetsComposed extends StatelessWidget {
-  const FinanceHubSheetsComposed({required this.onApprove,VoidCallback, required this.onReject,VoidCallback, required this.onTap,VoidCallback, required this.allocated, required this.amount, required this.big, required this.children, required this.createdAt, required this.days, required this.fallback, required this.ic, required this.id, required this.label, required this.label2, required this.name, required this.note, required this.perDay, required this.rows, required this.secondLabel, required this.secondValue, required this.spent, required this.sub, required this.text, required this.thrRowItems, required this.title, required this.value, required this.workerLabel, required this.t, super.key});
+  const FinanceHubSheetsComposed({required this.onApprove, required this.onReject, required this.onTap, required this.allocated, required this.amount, required this.big, required this.children, required this.createdAt, required this.days, required this.fallback, required this.ic, required this.id, required this.label, required this.label2, required this.name, required this.note, required this.perDay, required this.rows, required this.secondLabel, required this.secondValue, required this.spent, required this.sub, required this.text, required this.thrRowItems, required this.title, required this.value, required this.workerLabel, required this.t, super.key});
 
   final VoidCallback onApprove;
   final VoidCallback onReject;

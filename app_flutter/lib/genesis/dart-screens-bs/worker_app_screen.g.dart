@@ -21,7 +21,7 @@ class WorkerAppScreenTokens {
 }
 
 class WorkerAppScreenComposed extends StatelessWidget {
-  const WorkerAppScreenComposed({required this.onPressed,VoidCallback, required this.onTap,VoidCallback?, required this.chatOn, required this.currentIndex, required this.deliveryFee, required this.label, required this.label2, required this.label3, required this.label4, required this.label5, required this.subtotal, required this.text, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
+  const WorkerAppScreenComposed({required this.onPressed, required this.onTap, required this.chatOn, required this.currentIndex, required this.deliveryFee, required this.label, required this.label2, required this.label3, required this.label4, required this.label5, required this.subtotal, required this.text, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
 
   final VoidCallback onPressed;
   final VoidCallback? onTap;

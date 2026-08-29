@@ -22,7 +22,7 @@ class ContractorHrSheetTokens {
 }
 
 class ContractorHrSheetComposed extends StatelessWidget {
-  const ContractorHrSheetComposed({required this.onPressed,VoidCallback, required this.bordered, required this.id, required this.label, required this.range, required this.reason, required this.status, required this.vacationRowItems, required this.workerName, required this.t, super.key});
+  const ContractorHrSheetComposed({required this.onPressed, required this.bordered, required this.id, required this.label, required this.range, required this.reason, required this.status, required this.vacationRowItems, required this.workerName, required this.t, super.key});
 
   final VoidCallback onPressed;
   final bool bordered;

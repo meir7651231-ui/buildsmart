@@ -16,7 +16,7 @@ class TradeBuilderProductAuthoringScreenTokens {
 }
 
 class TradeBuilderProductAuthoringScreenComposed extends StatelessWidget {
-  const TradeBuilderProductAuthoringScreenComposed({required this.onDelete,VoidCallback, required this.onTap,VoidCallback, required this.categoryTitle, required this.enabled, required this.id, required this.label, required this.nameHe, required this.title, required this.t, super.key});
+  const TradeBuilderProductAuthoringScreenComposed({required this.onDelete, required this.onTap, required this.categoryTitle, required this.enabled, required this.id, required this.label, required this.nameHe, required this.title, required this.t, super.key});
 
   final VoidCallback onDelete;
   final VoidCallback onTap;

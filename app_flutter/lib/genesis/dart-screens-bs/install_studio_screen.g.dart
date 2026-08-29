@@ -15,7 +15,7 @@ class InstallStudioScreenTokens {
 }
 
 class InstallStudioScreenComposed extends StatelessWidget {
-  const InstallStudioScreenComposed({required this.onTap,VoidCallback, required this.broken, required this.flow, required this.t, super.key});
+  const InstallStudioScreenComposed({required this.onTap, required this.broken, required this.flow, required this.t, super.key});
 
   final VoidCallback onTap;
   final bool broken;

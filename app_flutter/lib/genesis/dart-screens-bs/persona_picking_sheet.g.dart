@@ -16,7 +16,7 @@ class PersonaPickingSheetTokens {
 }
 
 class PersonaPickingSheetComposed extends StatelessWidget {
-  const PersonaPickingSheetComposed({required this.onSelect,void Function(int), required this.splitInto, required this.text, required this.t, super.key});
+  const PersonaPickingSheetComposed({required this.onSelect, required this.splitInto, required this.text, required this.t, super.key});
 
   final void Function(int) onSelect;
   final int splitInto;

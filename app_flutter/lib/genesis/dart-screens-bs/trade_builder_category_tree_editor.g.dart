@@ -15,7 +15,7 @@ class TradeBuilderCategoryTreeEditorTokens {
 }
 
 class TradeBuilderCategoryTreeEditorComposed extends StatelessWidget {
-  const TradeBuilderCategoryTreeEditorComposed({required this.onDelete,VoidCallback, required this.onTap,VoidCallback, required this.emoji, required this.enabled, required this.fallback, required this.label, required this.titleHe, required this.t, super.key});
+  const TradeBuilderCategoryTreeEditorComposed({required this.onDelete, required this.onTap, required this.emoji, required this.enabled, required this.fallback, required this.label, required this.titleHe, required this.t, super.key});
 
   final VoidCallback onDelete;
   final VoidCallback onTap;

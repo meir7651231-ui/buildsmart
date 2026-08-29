@@ -13,7 +13,7 @@ class CourierSettingsScreenTokens {
 }
 
 class CourierSettingsScreenComposed extends StatelessWidget {
-  const CourierSettingsScreenComposed({required this.onTap,VoidCallback, required this.onTap2,VoidCallback, required this.t, super.key});
+  const CourierSettingsScreenComposed({required this.onTap, required this.onTap2, required this.t, super.key});
 
   final VoidCallback onTap;
   final VoidCallback onTap2;

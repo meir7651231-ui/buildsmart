@@ -14,7 +14,7 @@ class WorkerSettingsScreenTokens {
 }
 
 class WorkerSettingsScreenComposed extends StatelessWidget {
-  const WorkerSettingsScreenComposed({required this.onTap,VoidCallback, required this.onTap2,VoidCallback, required this.fallback, required this.fallback2, required this.title, required this.t, super.key});
+  const WorkerSettingsScreenComposed({required this.onTap, required this.onTap2, required this.fallback, required this.fallback2, required this.title, required this.t, super.key});
 
   final VoidCallback onTap;
   final VoidCallback onTap2;

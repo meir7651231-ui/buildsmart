@@ -13,7 +13,7 @@ class WorkerTaskDetailSheetTokens {
 }
 
 class WorkerTaskDetailSheetComposed extends StatelessWidget {
-  const WorkerTaskDetailSheetComposed({required this.onTap,VoidCallback, required this.label, required this.text, required this.t, super.key});
+  const WorkerTaskDetailSheetComposed({required this.onTap, required this.label, required this.text, required this.t, super.key});
 
   final VoidCallback onTap;
   final String label;

@@ -12,7 +12,7 @@ class SuppliersScreenTokens {
 }
 
 class SuppliersScreenComposed extends StatelessWidget {
-  const SuppliersScreenComposed({required this.onTap,VoidCallback, required this.emoji, required this.subtitle, required this.title, required this.t, super.key});
+  const SuppliersScreenComposed({required this.onTap, required this.emoji, required this.subtitle, required this.title, required this.t, super.key});
 
   final VoidCallback onTap;
   final String emoji;

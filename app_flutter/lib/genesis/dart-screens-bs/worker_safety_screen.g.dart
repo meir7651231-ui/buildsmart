@@ -12,7 +12,7 @@ class WorkerSafetyScreenTokens {
 }
 
 class WorkerSafetyScreenComposed extends StatelessWidget {
-  const WorkerSafetyScreenComposed({required this.onTap,VoidCallback, required this.icon, required this.label, required this.t, super.key});
+  const WorkerSafetyScreenComposed({required this.onTap, required this.icon, required this.label, required this.t, super.key});
 
   final VoidCallback onTap;
   final IconData icon;

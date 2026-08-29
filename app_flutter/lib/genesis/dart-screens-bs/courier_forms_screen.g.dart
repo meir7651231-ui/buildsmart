@@ -14,7 +14,7 @@ class CourierFormsScreenTokens {
 }
 
 class CourierFormsScreenComposed extends StatelessWidget {
-  const CourierFormsScreenComposed({required this.onApprove,VoidCallback, required this.onPressed,VoidCallback, required this.onReject,Future<void> Function(), required this.children, required this.filled, required this.id, required this.label, required this.label2, required this.label3, required this.label4, required this.range, required this.reason, required this.status, required this.title, required this.workerName, required this.t, super.key});
+  const CourierFormsScreenComposed({required this.onApprove, required this.onPressed, required this.onReject, required this.children, required this.filled, required this.id, required this.label, required this.label2, required this.label3, required this.label4, required this.range, required this.reason, required this.status, required this.title, required this.workerName, required this.t, super.key});
 
   final VoidCallback onApprove;
   final VoidCallback onPressed;

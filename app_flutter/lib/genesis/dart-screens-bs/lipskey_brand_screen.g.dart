@@ -14,7 +14,7 @@ class LipskeyBrandScreenTokens {
 }
 
 class LipskeyBrandScreenComposed extends StatelessWidget {
-  const LipskeyBrandScreenComposed({required this.onTap,VoidCallback, required this.catCount, required this.emoji, required this.name, required this.prodCount, required this.totalCats, required this.totalProducts, required this.t, super.key});
+  const LipskeyBrandScreenComposed({required this.onTap, required this.catCount, required this.emoji, required this.name, required this.prodCount, required this.totalCats, required this.totalProducts, required this.t, super.key});
 
   final VoidCallback onTap;
   final int catCount;

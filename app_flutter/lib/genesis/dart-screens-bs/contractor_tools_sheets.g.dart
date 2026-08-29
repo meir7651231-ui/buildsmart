@@ -13,7 +13,7 @@ class ContractorToolsSheetsTokens {
 }
 
 class ContractorToolsSheetsComposed extends StatelessWidget {
-  const ContractorToolsSheetsComposed({required this.onPressed,VoidCallback, required this.t, super.key});
+  const ContractorToolsSheetsComposed({required this.onPressed, required this.t, super.key});
 
   final VoidCallback onPressed;
 

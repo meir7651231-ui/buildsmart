@@ -15,7 +15,7 @@ class TradeBuilderTradeBuilderHomeTokens {
 }
 
 class TradeBuilderTradeBuilderHomeComposed extends StatelessWidget {
-  const TradeBuilderTradeBuilderHomeComposed({required this.onTap,VoidCallback, required this.fallback, required this.t, super.key});
+  const TradeBuilderTradeBuilderHomeComposed({required this.onTap, required this.fallback, required this.t, super.key});
 
   final VoidCallback onTap;
   final String fallback;

@@ -14,7 +14,7 @@ class ManagerCopilotScreenTokens {
 }
 
 class ManagerCopilotScreenComposed extends StatelessWidget {
-  const ManagerCopilotScreenComposed({required this.onSend,VoidCallback, required this.controller, required this.enabled, required this.t, super.key});
+  const ManagerCopilotScreenComposed({required this.onSend, required this.controller, required this.enabled, required this.t, super.key});
 
   final VoidCallback onSend;
   final TextEditingController controller;

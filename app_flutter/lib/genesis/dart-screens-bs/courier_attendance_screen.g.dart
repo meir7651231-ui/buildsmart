@@ -15,7 +15,7 @@ class CourierAttendanceScreenTokens {
 }
 
 class CourierAttendanceScreenComposed extends StatelessWidget {
-  const CourierAttendanceScreenComposed({required this.onPressed,VoidCallback, required this.date, required this.enabled, required this.header, required this.inText, required this.label, required this.outText, required this.totalText, required this.value, required this.t, super.key});
+  const CourierAttendanceScreenComposed({required this.onPressed, required this.date, required this.enabled, required this.header, required this.inText, required this.label, required this.outText, required this.totalText, required this.value, required this.t, super.key});
 
   final VoidCallback onPressed;
   final String date;
