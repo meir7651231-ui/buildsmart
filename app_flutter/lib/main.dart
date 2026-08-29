@@ -13,6 +13,8 @@ import 'package:buildsmart/data/repositories/catalog_paged.dart'
     show useServerCatalog;
 import 'package:buildsmart/features/fittings/fitting_flags.dart';
 import 'package:buildsmart/firebase_options.dart';
+import 'package:buildsmart/genesis/dart-boards-bs/genesis_gallery.dart'
+    show GenesisEntryButton, kGenesisScreens;
 import 'package:buildsmart/screens/access_lock_gate.dart' show AccessLockGate;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
@@ -664,6 +666,11 @@ class BuildSmartApp extends ConsumerWidget {
             // the owner has the Studio ACTIVE and is in edit-mode; same
             // always-mounted-inert pattern as ConnectionIndicator.
             const StudioOverlay(),
+            // 🧪 מסכי-הגנסיס (kGenesisScreens): שער-הצצה למסכים-המורכבים של המחצב,
+            // נטען-לצד מעל-הניווט. דגל-כבוי (ברירת-המחדל) ⇒ collection-if מעלים את
+            // הקוד כולו — זהות-ביט (חוק-7: החלפה-הפיכה). הדלקה:
+            // flutter run --dart-define=GENESIS_SCREENS=true
+            if (kGenesisScreens) const GenesisEntryButton(),
             // 🃏 "keyboard on every screen" (kKbGlobal): the floating keyboard
             // mounted ABOVE the Navigator so it floats over pushed routes too.
             // Omitted when the flag is off → HomeShell mounts it as today

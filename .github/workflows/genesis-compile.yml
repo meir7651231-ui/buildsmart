@@ -5,7 +5,7 @@ name: genesis-compile
 on:
   push:
     branches: ["claude/**"]
-    paths: ["app_flutter/lib/genesis/**", ".github/workflows/genesis-compile.yml"]
+    paths: ["app_flutter/lib/genesis/**", "app_flutter/lib/main.dart", ".github/workflows/genesis-compile.yml"]
   workflow_dispatch:
 
 jobs:
@@ -43,6 +43,10 @@ jobs:
           tail -5 genesis-analyze.txt
           # ירוק = אפס-שגיאות; הערות-סגנון (infos) אינן מפילות את השער
           [ "$E" -eq 0 ] && exit 0 || exit 1
+
+      - name: Build web with GENESIS_SCREENS=true (הוכחת-אינטגרציה מלאה)
+        working-directory: app_flutter
+        run: flutter build web --release --dart-define=GENESIS_SCREENS=true
 
       - name: Upload full report
         if: always()
