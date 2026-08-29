@@ -41,7 +41,7 @@ class _GenBusinessScreenState extends State<GenBusinessScreen> {
           children: [
           CaSubTitle(gen_business_header_text),
           InlineTextRow(label: gen_business_textfield_label, hint: gen_business_textfield_hint, value: _t1, onChanged: (v) => setState(() => _t1 = v)),
-          UnitSegmentToggle(options: const <({String label, bool enabled})>[(label: gen_business_radio_option, enabled: true), (label: gen_business_radio_option2, enabled: true), (label: gen_business_radio_option3, enabled: true)], selectedIndex: _n2, onSelect: (v) => setState(() => _n2 = v), selectedBgColor: BsTokens.cardLight, selectedFgColor: BsTokens.inkLight, enabledFgColor: BsTokens.inkLight, disabledFgColor: BsTokens.inkLight, borderColor: BsTokens.divider),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [UnitSegmentToggle(options: const <({String label, bool enabled})>[(label: gen_business_radio_option, enabled: true), (label: gen_business_radio_option2, enabled: true), (label: gen_business_radio_option3, enabled: true)], selectedIndex: _n2, onSelect: (v) => setState(() => _n2 = v), selectedBgColor: BsTokens.cardLight, selectedFgColor: BsTokens.inkLight, enabledFgColor: BsTokens.inkLight, disabledFgColor: BsTokens.inkLight, borderColor: BsTokens.divider)])),
           ChipWrap(options: const <String>[gen_business_chip_option, gen_business_chip_option2, gen_business_chip_option3], selected: _t3, onSelect: (v) => setState(() => _t3 = v)),
           SwitchRow(label: gen_business_switch_label, value: _v4, onChanged: (v) => setState(() => _v4 = v)),
           ActionRow(label: gen_business_button_label, onTap: () => _toast(gen_business_button_toast)),

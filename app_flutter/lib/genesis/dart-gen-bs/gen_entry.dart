@@ -38,9 +38,7 @@ class _GenEntryScreenState extends State<GenEntryScreen> {
           children: [
           HeroCard(glyph: gen_entry_card_glyph, title: gen_entry_card_title, sub: gen_entry_card_sub, onTap: () => _toast(gen_entry_card_toast), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           CaSubTitle(gen_entry_header_text),
-          RStat(value: gen_entry_stat_value, label: gen_entry_stat_label),
-          RStat(value: gen_entry_stat_value2, label: gen_entry_stat_label2),
-          RStat(value: gen_entry_stat_value3, label: gen_entry_stat_label3),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: gen_entry_stat_value, label: gen_entry_stat_label), RStat(value: gen_entry_stat_value2, label: gen_entry_stat_label2), RStat(value: gen_entry_stat_value3, label: gen_entry_stat_label3)])),
           CaSubTitle(gen_entry_header_text2),
           ChipWrap(options: const <String>[gen_entry_chip_option, gen_entry_chip_option2, gen_entry_chip_option3, gen_entry_chip_option4, gen_entry_chip_option5, gen_entry_chip_option6, gen_entry_chip_option7, gen_entry_chip_option8], selected: _t1, onSelect: (v) => setState(() => _t1 = v)),
           CoinBanner(coins: 0, sub: gen_entry_banner_sub),
