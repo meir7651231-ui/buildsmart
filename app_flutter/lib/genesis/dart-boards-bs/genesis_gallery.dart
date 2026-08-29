@@ -2,6 +2,7 @@
 // חוק-7 (החלפה-הפיכה): הדגל כבוי כברירת-מחדל ⇒ collection-if מעלים הכול — זהות-ביט.
 // הדלקה: flutter run --dart-define=GENESIS_SCREENS=true
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/widgets/toast.dart' show bsNavigatorKey;
 import 'screens__ai_hub_screen_board.dart';
 import 'screens__budget_screen_board.dart';
@@ -84,6 +85,29 @@ import 'screens__worker_settings_screen_board.dart';
 import 'screens__worker_task_detail_sheet_board.dart';
 
 const bool kGenesisScreens = bool.fromEnvironment('GENESIS_SCREENS');
+
+/// מצב מחצב-בלבד (GENESIS_ONLY): האפליקציה כולה = הגלריה — רק מה שהמנועים בנו,
+/// בלי האפליקציה-המקורית בכלל. הכרעת-בעלים 29.8 "אני רוצה לראות רק מה שהוא בנה".
+const bool kGenesisOnly = bool.fromEnvironment('GENESIS_ONLY');
+
+/// שורש עצמאי לגלריה — ProviderScope משלו (הלוחות הם ConsumerWidgets) + RTL.
+class GenesisApp extends StatelessWidget {
+  const GenesisApp({super.key});
+
+  @override
+  Widget build(BuildContext context) => ProviderScope(
+        child: MaterialApp(
+          title: 'המחצב — מסכי-הגנסיס',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF223047)),
+          builder: (context, child) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: child ?? const SizedBox.shrink(),
+          ),
+          home: const GenesisGallery(),
+        ),
+      );
+}
 
 /// כפתור-כניסה צף (🧪) — נטען-לצד מעל-הניווט; קיים רק כשהדגל דלוק.
 class GenesisEntryButton extends StatelessWidget {

@@ -14,7 +14,7 @@ import 'package:buildsmart/data/repositories/catalog_paged.dart'
 import 'package:buildsmart/features/fittings/fitting_flags.dart';
 import 'package:buildsmart/firebase_options.dart';
 import 'package:buildsmart/genesis/dart-boards-bs/genesis_gallery.dart'
-    show GenesisEntryButton, kGenesisScreens;
+    show GenesisApp, GenesisEntryButton, kGenesisOnly, kGenesisScreens;
 import 'package:buildsmart/screens/access_lock_gate.dart' show AccessLockGate;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
@@ -170,6 +170,13 @@ void installCrashlyticsHandlers({
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 🧪 מצב מחצב-בלבד (GENESIS_ONLY): כל האפליקציה = גלריית מסכי-הגנסיס —
+  // רק מה שהמנועים בנו, בלי האפליקציה-המקורית. דגל-כבוי (ברירת-מחדל) ⇒
+  // tree-shaken, זהות-ביט (חוק-7). משמש את תצוגת-ה-gh-pages ‏/genesis/ בלבד.
+  if (kGenesisOnly) {
+    runApp(const GenesisApp());
+    return;
+  }
   // 🌉 בוטסטרפ מצב-מסונן מה-URL — לפני כל קריאת-ספק. קישור `?filtered=1`
   // (או `#filtered`) מדליק מצב-מסונן אוטומטית, כך שהבעלים שולח ללקוח על קו-
   // מסונן (נטפרי/רימון) קישור אחד — בלי לחפש כפתור. חסר ⇒ הבחירה הקיימת

@@ -37,7 +37,8 @@ jobs:
 
       - name: Build web (המתג דלוק)
         working-directory: app_flutter
-        run: flutter build web --release --base-href "/buildsmart/genesis/" --dart-define=GENESIS_SCREENS=true --dart-define=KB_GLOBAL=true
+        # ‏GENESIS_ONLY: הקישור מציג רק את מה-שהמנועים-בנו (הגלריה כשורש) — בלי האפליקציה-המקורית
+        run: flutter build web --release --base-href "/buildsmart/genesis/" --dart-define=GENESIS_SCREENS=true --dart-define=GENESIS_ONLY=true --dart-define=KB_GLOBAL=true
 
       - name: Publish to gh-pages/genesis (additive — לא נוגע בשאר-האתר)
         run: |
