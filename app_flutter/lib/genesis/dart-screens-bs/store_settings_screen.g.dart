@@ -9,7 +9,6 @@ import '../dart-ui-bs/auto/store_settings_section_tile.dart';
 import '../dart-ui-bs/screens__store_settings_screen/settings_number_row.dart';
 import '../dart-ui-bs/screens__store_settings_screen/settings_validated_text_row.dart';
 import '../dart-data-bs/auto/screens__store_settings_screen_content.dart';
-import '../dart-data-bs/screens__store_settings_screen_content.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -25,17 +24,21 @@ class StoreSettingsScreenTokens {
 }
 
 class StoreSettingsScreenComposed extends StatelessWidget {
-  const StoreSettingsScreenComposed({required this.onChanged, required this.onTap, required this.buttonLabel, required this.children, required this.errorText, required this.fallback, required this.hint, required this.label, required this.subtitleNote, required this.underConstruction, required this.value, required this.value2, required this.value22, required this.t, super.key});
+  const StoreSettingsScreenComposed({required this.onChanged, required this.onChanged2, required this.onChanged3, required this.onTap, required this.buttonLabel, required this.children, required this.emoji, required this.errorText, required this.fallback, required this.hint, required this.label, required this.subtitleNote, required this.title, required this.underConstruction, required this.value, required this.value2, required this.value22, required this.t, super.key});
 
-  final ValueChanged<int> onChanged;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<bool> onChanged2;
+  final ValueChanged<int> onChanged3;
   final VoidCallback onTap;
   final String buttonLabel;
   final List<Widget> children;
+  final String emoji;
   final String? errorText;
   final String fallback;
   final String hint;
   final String label;
   final String? subtitleNote;
+  final String title;
   final bool underConstruction;
   final String value;
   final bool value2;
@@ -49,8 +52,8 @@ class StoreSettingsScreenComposed extends StatelessWidget {
           const SizedBox(height: 8),
           StoreSettingsSectionTile(
             fallback: store_settings_section_tile_fallback,
-            emoji: storeSettingsScreenContent.emoji,
-            title: storeSettingsScreenContent.title,
+            emoji: emoji,
+            title: title,
             children: children,
             underConstruction: underConstruction,
           ),
@@ -72,7 +75,7 @@ class StoreSettingsScreenComposed extends StatelessWidget {
             fallback: fallback,
             label: label,
             value: value2,
-            onChanged: onChanged,
+            onChanged: onChanged2,
             underConstruction: underConstruction,
           ),
           CatalogSettingsPlaceholderRow(
@@ -83,7 +86,7 @@ class StoreSettingsScreenComposed extends StatelessWidget {
           SettingsNumberRow(
             label: label,
             value: value22,
-            onChanged: onChanged,
+            onChanged: onChanged3,
             inkColor: t.inkColor,
             mutedColor: t.mutedColor,
             cursorColor: t.cursorColor,

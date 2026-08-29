@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__camera_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
+// מקור-החיווט: screens__camera_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -19,6 +19,7 @@ class CameraSheetBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return CameraSheetComposed(
       onTap: () {} /* TODO-לוח */,
+      onTap2: () {} /* TODO-לוח */,
       busy: false /* TODO-לוח: bool */,
       emoji: '' /* TODO-לוח: String */,
       hint: '' /* TODO-לוח: String */,

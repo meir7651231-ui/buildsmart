@@ -50,12 +50,14 @@ class CatalogScreenTokens {
 }
 
 class CatalogScreenComposed extends StatelessWidget {
-  const CatalogScreenComposed({required this.onQtyChanged, required this.onSelect, required this.onTap, required this.onToggle, required this.activeMatch, required this.axisChipItems, required this.child, required this.count, required this.emoji, required this.expanded, required this.facetRowItems, required this.icon, required this.isSelected, required this.label, required this.name, required this.options, required this.price, required this.qty, required this.savedVersionChipItems, required this.selected, required this.selected2, required this.text, required this.title, required this.value, required this.why, required this.t, super.key});
+  const CatalogScreenComposed({required this.onQtyChanged, required this.onSelect, required this.onTap, required this.onTap2, required this.onToggle, required this.onToggle2, required this.activeMatch, required this.axisChipItems, required this.child, required this.count, required this.emoji, required this.expanded, required this.facetRowItems, required this.icon, required this.isSelected, required this.label, required this.name, required this.options, required this.price, required this.qty, required this.savedVersionChipItems, required this.selected, required this.selected2, required this.text, required this.title, required this.value, required this.why, required this.t, super.key});
 
   final ValueChanged<int> onQtyChanged;
   final void Function(String) onSelect;
   final VoidCallback onTap;
-  final ValueChanged<bool>? onToggle;
+  final VoidCallback? onTap2;
+  final VoidCallback onToggle;
+  final ValueChanged<bool>? onToggle2;
   final List<String>? activeMatch;
   final List<AxisChipItem> axisChipItems;
   final Widget child;
@@ -156,7 +158,7 @@ class CatalogScreenComposed extends StatelessWidget {
             label4: acc_row_label4,
             selected: selected2,
             qty: qty,
-            onToggle: onToggle,
+            onToggle: onToggle2,
             onQtyChanged: onQtyChanged,
             activeMatch: activeMatch,
           ),
@@ -164,7 +166,7 @@ class CatalogScreenComposed extends StatelessWidget {
             label: mini_qty_btn_label,
             label2: mini_qty_btn_label2,
             icon: icon,
-            onTap: onTap,
+            onTap: onTap2,
           ),
           ValueChip(
             text: text,

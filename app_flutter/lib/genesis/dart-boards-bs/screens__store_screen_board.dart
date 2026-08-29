@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__store_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 19.
+// מקור-החיווט: screens__store_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 21.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/store_screen.dart';
@@ -41,6 +41,7 @@ class StoreScreenBoard extends ConsumerWidget {
       onMinus: () {} /* TODO-לוח */,
       onPlus: () {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,
+      onTap2: () {} /* TODO-לוח */,
       active: false /* TODO-לוח: bool */,
       badge: 0 /* TODO-לוח: int */,
       bold: false /* TODO-לוח: bool */,
@@ -54,6 +55,7 @@ class StoreScreenBoard extends ConsumerWidget {
       storeProjectChipItems: const [] /* TODO-לוח: List<StoreProjectChipItem> */,
       storeSupplierHeaderItems: const [] /* TODO-לוח: List<StoreSupplierHeaderItem> */,
       subtotal: 0 /* TODO-לוח: int */,
+      title: '' /* TODO-לוח: String */,
       total: 0 /* TODO-לוח: int */,
       value: '' /* TODO-לוח: String */,
       vat: 0 /* TODO-לוח: int */,

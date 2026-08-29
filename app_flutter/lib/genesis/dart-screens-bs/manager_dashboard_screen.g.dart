@@ -45,11 +45,12 @@ class ManagerDashboardScreenTokens {
 }
 
 class ManagerDashboardScreenComposed extends StatelessWidget {
-  const ManagerDashboardScreenComposed({required this.onOpen, required this.onPressed, required this.onTap, required this.badge, required this.bordered, required this.categoryCount, required this.child, required this.count, required this.emoji, required this.manageRowItems, required this.max, required this.open, required this.pct, required this.pipelineRowItems, required this.productCount, required this.sectionKey, required this.stageIdx, required this.sub, required this.titleCfgId, required this.t, super.key});
+  const ManagerDashboardScreenComposed({required this.onOpen, required this.onPressed, required this.onTap, required this.onTap2, required this.badge, required this.bordered, required this.categoryCount, required this.child, required this.count, required this.emoji, required this.manageRowItems, required this.max, required this.open, required this.pct, required this.pipelineRowItems, required this.productCount, required this.sectionKey, required this.stageIdx, required this.sub, required this.title, required this.titleCfgId, required this.t, super.key});
 
   final VoidCallback onOpen;
   final VoidCallback onPressed;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final VoidCallback onTap2;
   final int badge;
   final bool bordered;
   final int categoryCount;
@@ -65,6 +66,7 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
   final String sectionKey;
   final int stageIdx;
   final String sub;
+  final String title;
   final String titleCfgId;
   final ManagerDashboardScreenTokens t;
 
@@ -87,7 +89,7 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
           const SizedBox(height: 8),
         ],
           StagePill(
-            label: managerShellContent.label,
+            label: sheetAdvanceButtonContent.label,
             color: t.color,
           ),
           MiniTracker(
@@ -100,7 +102,7 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
           SheetAdvanceButton(
             title: sheet_advance_button_title,
             body: sheet_advance_button_body,
-            label: managerShellContent.label,
+            label: sheetAdvanceButtonContent.label,
             onPressed: onPressed,
           ),
           ManagerDashboardCreditBar(
@@ -109,7 +111,7 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
             color: t.color,
           ),
           JourneyEmpty(
-            text: managerShellContent.text,
+            text: manageIntroContent.text,
           ),
           ManageIntro(
             fallback: manage_intro_fallback,
@@ -121,10 +123,10 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
             sectionKey: sectionKey,
             titleCfgId: titleCfgId,
             emoji: emoji,
-            title: managerShellContent.title,
+            title: title,
             sub: sub,
             open: open,
-            onTap: onTap,
+            onTap: onTap2,
             child: child,
             badge: badge,
           ),
@@ -155,7 +157,7 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
             count: count,
           ),
           ApprovalButton(
-            label: managerShellContent.label,
+            label: sheetAdvanceButtonContent.label,
             color: t.color,
             textColor: t.textColor,
             bordered: bordered,
@@ -169,7 +171,7 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
           const SizedBox(height: 8),
         ],
           ManageHint(
-            managerShellContent.text,
+            manageIntroContent.text,
           ),
         ],
       );

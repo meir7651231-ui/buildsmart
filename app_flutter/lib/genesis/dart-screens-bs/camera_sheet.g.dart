@@ -17,9 +17,10 @@ class CameraSheetTokens {
 }
 
 class CameraSheetComposed extends StatelessWidget {
-  const CameraSheetComposed({required this.onTap, required this.busy, required this.emoji, required this.hint, required this.icon, required this.label, required this.t, super.key});
+  const CameraSheetComposed({required this.onTap, required this.onTap2, required this.busy, required this.emoji, required this.hint, required this.icon, required this.label, required this.t, super.key});
 
   final VoidCallback onTap;
+  final VoidCallback? onTap2;
   final bool busy;
   final String emoji;
   final String hint;
@@ -51,7 +52,7 @@ class CameraSheetComposed extends StatelessWidget {
             label: gallery_all_btn_label,
             message: gallery_all_btn_message,
             fallback: gallery_all_btn_fallback,
-            onTap: onTap,
+            onTap: onTap2,
           ),
           GalleryThumb(
             label2: gallery_thumb_label2,

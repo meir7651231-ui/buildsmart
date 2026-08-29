@@ -15,7 +15,6 @@ import '../dart-ui-bs/auto/store_summary_line.dart';
 import '../dart-ui-bs/auto/store_supplier_header.dart';
 import '../dart-ui-bs/auto/summary_card.dart';
 import '../dart-data-bs/auto/screens__store_screen_content.dart';
-import '../dart-data-bs/screens__store_screen_content.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class StoreSupplierHeaderItem {
@@ -38,11 +37,12 @@ class StoreScreenTokens {
 }
 
 class StoreScreenComposed extends StatelessWidget {
-  const StoreScreenComposed({required this.onMinus, required this.onPlus, required this.onTap, required this.active, required this.badge, required this.bold, required this.children, required this.deliveryFee, required this.emoji, required this.icon, required this.label, required this.qty, required this.query, required this.storeProjectChipItems, required this.storeSupplierHeaderItems, required this.subtotal, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
+  const StoreScreenComposed({required this.onMinus, required this.onPlus, required this.onTap, required this.onTap2, required this.active, required this.badge, required this.bold, required this.children, required this.deliveryFee, required this.emoji, required this.icon, required this.label, required this.qty, required this.query, required this.storeProjectChipItems, required this.storeSupplierHeaderItems, required this.subtotal, required this.title, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
 
   final VoidCallback onMinus;
   final VoidCallback onPlus;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
+  final VoidCallback? onTap2;
   final bool active;
   final int badge;
   final bool bold;
@@ -56,6 +56,7 @@ class StoreScreenComposed extends StatelessWidget {
   final List<StoreProjectChipItem> storeProjectChipItems;
   final List<StoreSupplierHeaderItem> storeSupplierHeaderItems;
   final int subtotal;
+  final String title;
   final int total;
   final String value;
   final int vat;
@@ -91,7 +92,7 @@ class StoreScreenComposed extends StatelessWidget {
             onTap: onTap,
           ),
           StoreSheetScaffold(
-            title: summaryChips.title,
+            title: title,
             emoji: emoji,
             children: children,
           ),
@@ -143,7 +144,7 @@ class StoreScreenComposed extends StatelessWidget {
             label: store_step_btn_label,
             label2: store_step_btn_label2,
             icon: icon,
-            onTap: onTap,
+            onTap: onTap2,
           ),
           StoreSummaryLine(
             label: label,

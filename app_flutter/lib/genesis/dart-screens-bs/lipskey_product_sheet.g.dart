@@ -46,7 +46,7 @@ class LipskeyProductSheetComposed extends StatelessWidget {
           ),
           SectionTitle(
             emoji: emoji,
-            title: sheetChrome.title,
+            title: lineBomSheet.title,
             subtitle: subtitle,
           ),
           QtyStepper(

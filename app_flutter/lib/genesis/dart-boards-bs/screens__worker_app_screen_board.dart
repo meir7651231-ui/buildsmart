@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_app_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 15.
+// מקור-החיווט: screens__worker_app_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 16.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
@@ -47,7 +47,8 @@ class WorkerAppScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerAppScreenComposed(
       onPressed: () {} /* TODO-לוח */,
-      onTap: () {} /* TODO-לוח */,
+      onTap: (_) {} /* TODO-לוח */,
+      onTap2: () {} /* TODO-לוח */,
       chatOn: false /* TODO-לוח: bool */,
       currentIndex: 0 /* TODO-לוח: int */,
       deliveryFee: 0 /* TODO-לוח: int */,

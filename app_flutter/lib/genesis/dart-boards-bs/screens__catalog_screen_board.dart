@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__catalog_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 23.
+// מקור-החיווט: screens__catalog_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 25.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
@@ -74,7 +74,9 @@ class CatalogScreenBoard extends ConsumerWidget {
       onQtyChanged: (_) {} /* TODO-לוח */,
       onSelect: (_) {} /* TODO-לוח */,
       onTap: () => showCompanyCatalogImportSheet(context),
-      onToggle: (_) {} /* TODO-לוח */,
+      onTap2: () {} /* TODO-לוח */,
+      onToggle: () {} /* TODO-לוח */,
+      onToggle2: (_) {} /* TODO-לוח */,
       activeMatch: null /* TODO-לוח: List<String>? */,
       axisChipItems: const [] /* TODO-לוח: List<AxisChipItem> */,
       child: const SizedBox.shrink() /* TODO-לוח: Widget */,

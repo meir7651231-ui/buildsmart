@@ -30,15 +30,15 @@ class ChatSettingsScreenComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           QuickReplyBanner(
-            leadingGlyph: chatSettingsScreenContent.leadingGlyph,
-            title: chatSettingsScreenContent.title,
+            leadingGlyph: quickReplyBannerContent.leadingGlyph,
+            title: quickReplyBannerContent.title,
             templates: templates,
             onTemplateTap: onTemplateTap,
             inkColor: t.inkColor,
             accentColor: t.accentColor,
             chipFillColor: t.chipFillColor,
             chipBorderColor: t.chipBorderColor,
-            editLabel: chatSettingsScreenContent.editLabel,
+            editLabel: quickReplyBannerContent.editLabel,
             onEditTap: onEditTap,
           ),
         ],
