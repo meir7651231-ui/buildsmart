@@ -1,0 +1,26 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_entry_card_glyph = '🧬';
+const String gen_entry_card_title = 'המחולל של המחצב';
+const String gen_entry_card_sub = 'משפט בעברית נהיה מסך עובד';
+const String gen_entry_card_toast = 'המחולל של המחצב';
+const String gen_entry_header_text = 'מה יש במפעל';
+const String gen_entry_stat_value = '381';
+const String gen_entry_stat_label = 'אטומים ויזואליים על המדף';
+const String gen_entry_stat_value2 = '996';
+const String gen_entry_stat_label2 = 'אטומי לוגיקה מומרים ומוכנים';
+const String gen_entry_stat_value3 = '79';
+const String gen_entry_stat_label3 = 'מסכים הורכבו מחדש מהלבנים';
+const String gen_entry_header_text2 = 'הצורות שהמחולל מבין';
+const String gen_entry_chip_option = 'מתג';
+const String gen_entry_chip_option2 = 'שדה';
+const String gen_entry_chip_option3 = 'מספר'; // t_c19510f4
+const String gen_entry_chip_option4 = 'בורר';
+const String gen_entry_chip_option5 = 'תגיות';
+const String gen_entry_chip_option6 = 'כרטיס'; // t_a0d9b485
+const String gen_entry_chip_option7 = 'כותרת';
+const String gen_entry_chip_option8 = 'כפתור';
+const String gen_entry_banner_sub = 'המסך הזה נוצר על ידי המחולל עצמו — מאטומים קיימים בלבד';
+const String gen_entry_button_label = 'צרו מסך חדש';
+const String gen_entry_button_button_label = 'צרו מסך חדש';
+const String gen_entry_button_toast = 'צרו מסך חדש';
+const String gen_entry_app_bar_title = 'המחולל';

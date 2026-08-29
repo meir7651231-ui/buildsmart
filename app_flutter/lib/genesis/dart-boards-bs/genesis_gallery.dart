@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/widgets/toast.dart' show bsNavigatorKey;
 import '../dart-gen-bs/gen_business.dart';
+import '../dart-gen-bs/gen_entry.dart';
 import '../dart-gen-bs/gen_shipping.dart';
 import '../dart-gen-bs/gen_team.dart';
 import 'screens__ai_hub_screen_board.dart';
@@ -107,10 +108,37 @@ class GenesisApp extends StatelessWidget {
             textDirection: TextDirection.rtl,
             child: child ?? const SizedBox.shrink(),
           ),
-          home: const GenesisGallery(),
+          home: const _GenEntryHost(),
         ),
       );
 }
+
+/// 🧬 מארח-הכניסה (הכרעה 18): מסך-הכניסה שהמחולל יצר לעצמו + כפתור-צף אל הגלריה.
+class _GenEntryHost extends StatelessWidget {
+  const _GenEntryHost();
+
+  @override
+  Widget build(BuildContext context) => Stack(children: [
+        const GenEntryScreen(),
+        SafeArea(
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: FloatingActionButton.small(
+                heroTag: 'genesis-enter',
+                tooltip: 'כל המסכים',
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const GenesisGallery()),
+                ),
+                child: const Text('🧪', style: TextStyle(fontSize: 18)),
+              ),
+            ),
+          ),
+        ),
+      ]);
+}
+
 
 /// כפתור-כניסה צף (🧪) — נטען-לצד מעל-הניווט; קיים רק כשהדגל דלוק.
 class GenesisEntryButton extends StatelessWidget {
@@ -148,6 +176,7 @@ class GenesisGallery extends StatelessWidget {
 
   static final List<_GEntry> _screens = [
     _GEntry('🧬 פרופיל עסק', 'נוצר מהמחולל — חיווט-מלא', () => const GenBusinessScreen()),
+    _GEntry('🧬 המחולל', 'נוצר מהמחולל — חיווט-מלא', () => const GenEntryScreen()),
     _GEntry('🧬 הגדרות משלוחים', 'נוצר מהמחולל — חיווט-מלא', () => const GenShippingScreen()),
     _GEntry('🧬 ניהול צוות', 'נוצר מהמחולל — חיווט-מלא', () => const GenTeamScreen()),
     _GEntry('ai hub screen', 'מחווט: 0 · ממתין-לחיווט: 1', () => const AiHubScreenBoard()),
