@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__store_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 18.
+// מקור-החיווט: screens__store_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 19.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/store_screen.dart';
@@ -30,7 +30,6 @@ import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_field.dart';
 import 'package:buildsmart/widgets/smart_input/nav/category_suggestion_strip.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:buildsmart/widgets/toast.dart';
 import '../dart-screens-bs/store_screen.g.dart';
 
 class StoreScreenBoard extends ConsumerWidget {
@@ -41,10 +40,7 @@ class StoreScreenBoard extends ConsumerWidget {
     return StoreScreenComposed(
       onMinus: () {} /* TODO-לוח */,
       onPlus: () {} /* TODO-לוח */,
-      onTap: () {
-                    Navigator.pop(context);
-                    showToast(context, 'שיחה עם ${c.name} — בבנייה');
-                  },
+      onTap: () {} /* TODO-לוח */,
       active: false /* TODO-לוח: bool */,
       badge: 0 /* TODO-לוח: int */,
       bold: false /* TODO-לוח: bool */,

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__site_hub_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 10.
+// מקור-החיווט: screens__site_hub_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 12.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/site_hub_screen.dart';
@@ -29,12 +29,12 @@ class SiteHubScreenBoard extends ConsumerWidget {
       done: false /* TODO-לוח: bool */,
       hubTileItems: const [] /* TODO-לוח: List<HubTileItem> */,
       icon: '' /* TODO-לוח: String */,
-      label: this.label,
+      label: '' /* TODO-לוח: String */,
       left: '' /* TODO-לוח: String */,
       overdue: false /* TODO-לוח: bool */,
       siteHubCaCardItems: const [] /* TODO-לוח: List<SiteHubCaCardItem> */,
       sub: '' /* TODO-לוח: String */,
-      text: this.text,
+      text: '' /* TODO-לוח: String */,
       title: '' /* TODO-לוח: String */,
       trailing: const SizedBox.shrink() /* TODO-לוח: Widget */,
       t: SiteHubScreenTokens(),
