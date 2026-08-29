@@ -1,0 +1,22 @@
+// 🗄️ שמות · חולצו מ-dart-maor/guide-sections-of.dart (מכונת-AST). מטרה→שם; מתחלף פר-וורטיקל.
+const Map<String, String> kTerms = {
+  'krtys-mshpchh': 'כרטיס משפחה',
+  'krtys': 'כרטיס ',
+  'mshpchh': 'משפחה',
+  'chdrym-chyym': 'חדרים חיים',
+  'chdrym': 'חדרים',
+  'chyym': ' חיים',
+  'al-chdr': 'על חדר',
+  'al': 'על ',
+  'chdr': 'חדר',
+  'btvk-chvg': 'בתוך חוג',
+  'btvk': 'בתוך ',
+  'chvg': 'חוג',
+  'tdpys-lmvrh': 'תדפיס למורה',
+  'tdpys-l': 'תדפיס ל',
+  'mvrh': 'מורה',
+  'trvmh': '＋ תרומה',
+  't16': 'תרומה',
+  'shyvk-lmshpchh': 'שיוך למשפחה',
+  'shyvk-l': 'שיוך ל',
+};
