@@ -35,6 +35,7 @@ import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
+import 'package:buildsmart/state/manager_dashboard_state.dart';
 import '../dart-screens-bs/manager_dashboard_screen.g.dart';
 
 class ManagerDashboardScreenBoard extends ConsumerStatefulWidget {

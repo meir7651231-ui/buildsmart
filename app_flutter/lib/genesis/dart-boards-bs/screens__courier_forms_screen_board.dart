@@ -18,6 +18,7 @@ import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import '../dart-screens-bs/courier_forms_screen.g.dart';
 
 class CourierFormsScreenBoard extends ConsumerWidget {

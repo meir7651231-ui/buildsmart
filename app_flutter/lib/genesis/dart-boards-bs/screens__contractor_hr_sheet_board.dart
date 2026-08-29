@@ -14,6 +14,9 @@ import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/state/material_requests_engine.dart';
+import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/required_docs_policy.dart';
 import '../dart-screens-bs/contractor_hr_sheet.g.dart';
 
 class ContractorHrSheetBoard extends ConsumerStatefulWidget {

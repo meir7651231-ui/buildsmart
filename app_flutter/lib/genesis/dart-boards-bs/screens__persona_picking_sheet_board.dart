@@ -13,6 +13,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/state/persona_fulfillment.dart';
 import '../dart-screens-bs/persona_picking_sheet.g.dart';
 
 class PersonaPickingSheetBoard extends ConsumerWidget {

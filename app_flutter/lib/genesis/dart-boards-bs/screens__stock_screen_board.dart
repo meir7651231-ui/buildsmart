@@ -11,6 +11,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/screens/stock_screen.dart';
 import '../dart-screens-bs/stock_screen.g.dart';
 
 class StockScreenBoard extends ConsumerWidget {

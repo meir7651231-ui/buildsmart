@@ -17,6 +17,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import '../dart-screens-bs/worker_attendance_screen.g.dart';
 
 class WorkerAttendanceScreenBoard extends ConsumerWidget {

@@ -14,6 +14,7 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/services.dart';
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/state/org_gates.dart';
+import 'package:buildsmart/state/rewards_state.dart';
 import '../dart-screens-bs/rewards_hub_screen.g.dart';
 
 class RewardsHubScreenBoard extends ConsumerWidget {

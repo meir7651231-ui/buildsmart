@@ -201,7 +201,7 @@ class GenesisGallery extends StatelessWidget {
     _GEntry('store dashboard screen', 'מחווט: 1 · ממתין-לחיווט: 6', () => const StoreDashboardScreenBoard()),
     _GEntry('store profile screen', 'מחווט: 1 · ממתין-לחיווט: 0', () => const StoreProfileScreenBoard()),
     _GEntry('store screen', 'מחווט: 2 · ממתין-לחיווט: 18', () => const StoreScreenBoard()),
-    _GEntry('store settings screen', 'מחווט: 5 · ממתין-לחיווט: 7', () => const StoreSettingsScreenBoard()),
+    _GEntry('store settings screen', 'מחווט: 4 · ממתין-לחיווט: 8', () => const StoreSettingsScreenBoard()),
     _GEntry('studio · panes · find replace pane', 'מחווט: 1 · ממתין-לחיווט: 1', () => const StudioPanesFindReplacePaneBoard()),
     _GEntry('studio · panes · theme pane', 'מחווט: 1 · ממתין-לחיווט: 2', () => const StudioPanesThemePaneBoard()),
     _GEntry('studio · studio top bar', 'מחווט: 0 · ממתין-לחיווט: 1', () => const StudioStudioTopBarBoard()),

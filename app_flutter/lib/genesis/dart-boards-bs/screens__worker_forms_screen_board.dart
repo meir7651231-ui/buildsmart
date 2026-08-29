@@ -21,6 +21,7 @@ import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/signature_pad.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import '../dart-screens-bs/worker_forms_screen.g.dart';
 
 class WorkerFormsScreenBoard extends ConsumerWidget {
@@ -29,7 +30,6 @@ class WorkerFormsScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(boardAuthProvider);
-    final employer = ref.watch(employerProfileProvider(session.employerId));
     return WorkerFormsScreenComposed(
       onApprove: () {} /* TODO-לוח */,
       onPressed: () {} /* TODO-לוח */,

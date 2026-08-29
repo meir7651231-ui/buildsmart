@@ -11,6 +11,7 @@ import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/state/rewards_state.dart';
 import '../dart-screens-bs/worker_report_drilldowns.g.dart';
 
 class WorkerReportDrilldownsBoard extends ConsumerWidget {
