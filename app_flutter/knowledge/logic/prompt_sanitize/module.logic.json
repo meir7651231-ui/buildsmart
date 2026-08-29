@@ -1,0 +1,57 @@
+{
+  "module": "prompt_sanitize",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/prompt_sanitize.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "promptSafeText",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw, {int maxLen = 600, bool collapseWhitespace = false}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = raw"
+          },
+          {
+            "kind": "branch",
+            "detail": "if collapseWhitespace"
+          },
+          {
+            "kind": "effect",
+            "detail": "s = s.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "s.length <= maxLen ? s : s.substring(0, maxLen).trim()"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "replaceAll",
+        "substring",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String raw, {int maxLen = 600, bool collapseWhitespace = false})",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

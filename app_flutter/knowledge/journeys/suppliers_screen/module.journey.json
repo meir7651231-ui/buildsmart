@@ -1,0 +1,26 @@
+{
+  "module": "suppliers_screen",
+  "source": "../../../app_flutter/lib/screens/suppliers_screen.dart",
+  "nodeCount": 2,
+  "edgeCount": 1,
+  "nodes": [
+    {
+      "screen": "SuppliersScreen",
+      "line": 14,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_SupplierTile",
+      "line": 99
+    }
+  ],
+  "edges": [
+    {
+      "from": "SuppliersScreen",
+      "to": "LipskeyBrandScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 89
+    }
+  ]
+}

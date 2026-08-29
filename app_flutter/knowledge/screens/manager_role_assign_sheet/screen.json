@@ -1,0 +1,202 @@
+{
+  "screen": "manager_role_assign_sheet",
+  "source": "manager_role_assign_sheet.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "ManagerRoleAssignSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🔑"
+          },
+          {
+            "kind": "cfgText",
+            "text": "שיוך תפקיד למשתמש",
+            "registryId": "manager_role_assign_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אתר משתמש לפי טלפון (או הדבק מזהה uid) ובחר תפקיד להקצאה.",
+            "registryId": "manager_role_assign_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "תפקיד",
+            "registryId": "manager_role_assign_sheet.t03",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [
+          "🔑"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "usersLookupProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "authStateProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "telemetryProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "authGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState",
+        "unawaited"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_NoBackendBanner",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RoleChip",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "option",
+          "selected",
+          "enabled",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_AssignButton",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "שייך תפקיד",
+            "registryId": "manager_role_assign_sheet.t04",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "enabled",
+          "busy",
+          "onPressed"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "manager_role_assign_sheet.t01",
+        "ok": true,
+        "atom": "ManagerRoleAssignSheet"
+      },
+      {
+        "id": "manager_role_assign_sheet.t02",
+        "ok": true,
+        "atom": "ManagerRoleAssignSheet"
+      },
+      {
+        "id": "manager_role_assign_sheet.t03",
+        "ok": true,
+        "atom": "ManagerRoleAssignSheet"
+      },
+      {
+        "id": "manager_role_assign_sheet.t04",
+        "ok": true,
+        "atom": "_AssignButton"
+      }
+    ]
+  }
+}

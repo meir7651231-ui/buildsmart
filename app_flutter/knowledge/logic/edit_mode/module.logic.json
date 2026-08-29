@@ -1,0 +1,640 @@
+{
+  "module": "edit_mode",
+  "source": "lib/state/studio/edit_mode.dart",
+  "atomCount": 13,
+  "atoms": [
+    {
+      "fn": "studioActive",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Ref ref) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "studioActiveProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ref.read(studioActiveProvider)"
+          }
+        ]
+      },
+      "floor": [
+        "read"
+      ],
+      "contract": {
+        "input": "(Ref ref)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeState.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({bool? isEditing, bool? previewDraft, String? selectedId, bool clearSelected = false}) -> EditModeState",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "EditModeState(isEditing: isEditing ?? this.isEditing, previewDraft: previewDraft ?? this.…"
+          }
+        ]
+      },
+      "floor": [
+        "EditModeState"
+      ],
+      "contract": {
+        "input": "({bool? isEditing, bool? previewDraft, String? selectedId, bool clearSelected = false})",
+        "output": "EditModeState",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeState.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "isEditing"
+          },
+          {
+            "kind": "field",
+            "name": "previewDraft"
+          },
+          {
+            "kind": "field",
+            "name": "selectedId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is EditModeState && other.isEditing == isEditing && other.previewDraft == previewDr…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeState.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "isEditing"
+          },
+          {
+            "kind": "field",
+            "name": "previewDraft"
+          },
+          {
+            "kind": "field",
+            "name": "selectedId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(isEditing, previewDraft, selectedId)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController.auditLog",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<EditAudit>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_audit"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "List.unmodifiable(_audit)"
+          }
+        ]
+      },
+      "floor": [
+        "unmodifiable"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<EditAudit>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController._gateOpen",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "studioCanEditProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ref.read(studioCanEditProvider)"
+          }
+        ]
+      },
+      "floor": [
+        "read"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController.canEdit",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_gateOpen"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController.enterEdit",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "studioOwnerEmailProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_audit",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_log",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "EditModeController.toggleEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_gateOpen → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if state.isEditing → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(isEditing: true, previewDraft: true)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_log('enter')"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !_gateOpen → return (void)",
+          "if state.isEditing → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController.exitEdit",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "studioOwnerEmailProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_audit",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_log",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "EditModeController.revalidate",
+          "EditModeController.toggleEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state == EditModeState.inert → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "wasEditing = state.isEditing"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = EditModeState.inert"
+          },
+          {
+            "kind": "branch",
+            "detail": "if wasEditing"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state == EditModeState.inert → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController.toggleEdit",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "exitEdit",
+            "module": true
+          },
+          {
+            "name": "enterEdit",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.isEditing ? exitEdit() : enterEdit()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController.select",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String? id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.isEditing → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = id == null ? state.copyWith(clearSelected: true) : state.copyWith(selectedId: id)"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String? id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.isEditing → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController.revalidate",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "exitEdit",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if state.isEditing && !_gateOpen"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "EditModeController._log",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String action) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "studioOwnerEmailProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_audit"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "EditModeController.enterEdit",
+          "EditModeController.exitEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_audit.add(EditAudit(action, _ref.read(studioOwnerEmailProvider), DateTime.now().millisec…"
+          }
+        ]
+      },
+      "floor": [
+        "EditAudit",
+        "add",
+        "now",
+        "read"
+      ],
+      "contract": {
+        "input": "(String action)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

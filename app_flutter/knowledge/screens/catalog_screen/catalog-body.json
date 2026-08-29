@@ -1,0 +1,436 @@
+{
+  "name": "_CatalogBody",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "⭐"
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog.search.clearAll",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נקה הכל",
+        "registryId": "catalog.search.clearAll",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "—"
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין משפחות וריאנטים",
+        "registryId": "catalog_screen.t40",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין פריטים להצגה.\nפתחו את ניהול הרשימות והקישו ✏️ כדי לבחור פריטים.",
+        "registryId": "catalog_screen.t18",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מיון לפי:",
+        "registryId": "catalog_screen.t41",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "|"
+      }
+    ],
+    "registered": 5,
+    "unregistered": [
+      "⭐",
+      "—",
+      "|"
+    ],
+    "summary": "registry 5 · mapped 5/5 · unregistered 3"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSectionProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "search"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "dive"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "featureFlagsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogListItemsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartTreeCatProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSystemFilterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "productFavoritesProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogRepositoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "recentSearchesProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "clear",
+        "target": "recentSearchesProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "remove",
+        "target": "recentSearchesProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsActiveFamilyProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsKindFilterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsValueFilterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsSizePatternProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsSizeDiameterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsSizeSystemProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsSizeGenderProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsValuesExpandedProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "smartTreeCatProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "categorySummaryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogTreePathProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showLipskeyProductSheet",
+        "target": "showLipskeyProductSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogRepositoryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsActiveFamilyProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsKindFilterProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsValueFilterProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsSizePatternProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsSizeDiameterProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsSizeSystemProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsSizeGenderProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsValuesExpandedProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "variantsKindFilterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "variantsValuesExpandedProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsSizeSortAxisProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsSizeSortAxisProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "variantsActiveSubGroupProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "variantsValueFilterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "variantsActiveSubGroupProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "provider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "provider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "group.isEmpty"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(recentSearchesProvider.notifier).clear()",
+        "effect": "write → recentSearchesProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(recentSearchesProvider.notifier).remove(q)",
+        "effect": "write → recentSearchesProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "LipskeyProductsScreen.openWordSearch(context, q)",
+        "effect": "open → openWordSearch"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(smartTreeCatProvider.notifier).state = cat",
+        "effect": "write → smartTreeCatProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogTreePathProvider.notifier).state = [node]",
+        "effect": "write → catalogTreePathProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showLipskeyProductSheet(context, product, ref.read(catalogRepositoryProvider)…",
+        "effect": "open → showLipskeyProductSheet"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsActiveFamilyProvider.notifier).state = null",
+        "effect": "write → variantsActiveFamilyProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsKindFilterProvider.notifier).state = kind",
+        "effect": "write → variantsKindFilterProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsValueFilterProvider.notifier).state = <String>{}",
+        "effect": "write → variantsValueFilterProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsSizePatternProvider.notifier).state = <String>{}",
+        "effect": "write → variantsSizePatternProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsSizeDiameterProvider.notifier).state = <String>{}",
+        "effect": "write → variantsSizeDiameterProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsSizeSystemProvider.notifier).state = <String>{}",
+        "effect": "write → variantsSizeSystemProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsSizeGenderProvider.notifier).state = <String>{}",
+        "effect": "write → variantsSizeGenderProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsValuesExpandedProvider.notifier).state = false",
+        "effect": "write → variantsValuesExpandedProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsSizeSortAxisProvider.notifier).state = axis",
+        "effect": "write → variantsSizeSortAxisProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsActiveSubGroupProvider.notifier).state = null",
+        "effect": "write → variantsActiveSubGroupProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsActiveFamilyProvider.notifier).state = family",
+        "effect": "write → variantsActiveFamilyProvider"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (group.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsActiveSubGroupProvider.notifier).state = isActive ? null : l…",
+        "effect": "write → variantsActiveSubGroupProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(variantsActiveSubGroupProvider.notifier).state = active == m.key ? n…",
+        "effect": "write → variantsActiveSubGroupProvider"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "confirmDestructive",
+    "familiesByKind",
+    "filterBySystem",
+    "filterSmartBySystem",
+    "genderPattern",
+    "productImage",
+    "productMaterial",
+    "sizeDiameterAtoms",
+    "sizeStructurePattern",
+    "sort",
+    "subGroupLabel",
+    "toggle",
+    "toggleAtom",
+    "toggleValue",
+    "valueSubGroupsForKind",
+    "variantValue"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [
+      "scrollCtrl"
+    ],
+    "untangle": [
+      "AtomHomeScreen = shared component → separate atom",
+      "CardKeyboardScreen = shared component → separate atom",
+      "CatalogWheelScreen = shared component → separate atom",
+      "FinderScreen = shared component → separate atom",
+      "InstallStudioScreen = shared component → separate atom",
+      "PlainDiveScreen = shared component → separate atom",
+      "RingDiveScreen = shared component → separate atom",
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

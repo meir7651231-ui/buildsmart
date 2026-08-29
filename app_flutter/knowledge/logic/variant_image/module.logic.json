@@ -1,0 +1,407 @@
+{
+  "module": "variant_image",
+  "source": "lib/features/catalog_config/variant_image.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "_isManifold",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_inFamily"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "p.nameHe.contains('מחלק') || p.nameHe.contains('סעפת')"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_inFamily",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProductConfigSchema schema, LipskeyCatalogProduct p) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kManifoldFamily"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_isManifold",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "familyFallbackImage",
+          "familyProducts",
+          "variantForSelection"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "familyOf(p) == schema.familyId || (schema.familyId == _kManifoldFamily && _isManifold(p))"
+          }
+        ]
+      },
+      "floor": [
+        "familyOf"
+      ],
+      "contract": {
+        "input": "(ProductConfigSchema schema, LipskeyCatalogProduct p)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_familyAngle",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? family) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_derivedValue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if family == null || !family.startsWith('ברך') → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "match = RegExp(r'\\d+').firstMatch(family)"
+          },
+          {
+            "kind": "return",
+            "detail": "match?.group(0)"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "firstMatch",
+        "group",
+        "startsWith"
+      ],
+      "contract": {
+        "input": "(String? family)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if family == null || !family.startsWith('ברך') → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "family == null || !family.startsWith('ברך') · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_derivedValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, String attrId) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_familyAngle",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "variantForSelection"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch attrId"
+          }
+        ]
+      },
+      "floor": [
+        "familyOf",
+        "od2Of",
+        "odOf",
+        "toString"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, String attrId)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "familyProducts",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProductConfigSchema schema, List<LipskeyCatalogProduct> universe) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kManifoldFamily",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_inFamily",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final p in universe) if (_inFamily(schema, p)) p]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProductConfigSchema schema, List<LipskeyCatalogProduct> universe)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "variantForSelection",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProductConfigSchema schema, Map<String, String> selection, List<LipskeyCatalogProduct> universe) -> LipskeyCatalogProduct?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kManifoldFamily",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_inFamily",
+            "module": true
+          },
+          {
+            "name": "_derivedValue",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "variantImageFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "compute",
+            "detail": "bestScore = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in universe"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !_inFamily(schema, p) → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "score = 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "selection.forEach((id, want) {if (_derivedValue(p, id) == want) {score++;}})"
+          },
+          {
+            "kind": "branch",
+            "detail": "if score > bestScore"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "forEach"
+      ],
+      "contract": {
+        "input": "(ProductConfigSchema schema, Map<String, String> selection, List<LipskeyCatalogProduct> universe)",
+        "output": "LipskeyCatalogProduct?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "variantImageFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProductConfigSchema schema, Map<String, String> selection, List<LipskeyCatalogProduct> universe) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "variantForSelection",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "variantForSelection(schema, selection, universe)?.imageAsset"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProductConfigSchema schema, Map<String, String> selection, List<LipskeyCatalogProduct> universe)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "familyFallbackImage",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ProductConfigSchema schema, List<LipskeyCatalogProduct> universe) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kManifoldFamily",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_inFamily",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final p in universe"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _inFamily(schema, p) && p.imageAsset != null → return p.imageAsset"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProductConfigSchema schema, List<LipskeyCatalogProduct> universe)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    }
+  ]
+}

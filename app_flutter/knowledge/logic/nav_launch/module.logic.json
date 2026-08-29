@@ -1,0 +1,390 @@
+{
+  "module": "nav_launch",
+  "source": "lib/services/nav_launch.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "_hasCoords",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double? lat, double? lng) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_googleMapsUri",
+          "_wazeUri"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "lat != null && lng != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(double? lat, double? lng)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_wazeUri",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required String label, double? lat, double? lng}) -> Uri",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_hasCoords",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_NavSheet.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_hasCoords(lat, lng) ? Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes') : Uri.h…"
+          }
+        ]
+      },
+      "floor": [
+        "https",
+        "parse"
+      ],
+      "contract": {
+        "input": "({required String label, double? lat, double? lng})",
+        "output": "Uri",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_googleMapsUri",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required String label, double? lat, double? lng}) -> Uri",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_hasCoords",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_NavSheet.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_hasCoords(lat, lng) ? Uri.https('www.google.com', '/maps/dir/', {'api' : '1', 'destinati…"
+          }
+        ]
+      },
+      "floor": [
+        "https"
+      ],
+      "contract": {
+        "input": "({required String label, double? lat, double? lng})",
+        "output": "Uri",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "openNavSheet",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BuildContext context, {required String label, double? lat, double? lng}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "showModalBottomSheet<void>(context: context, isScrollControlled: true, backgroundColor: C…"
+          }
+        ]
+      },
+      "floor": [
+        "Directionality",
+        "_NavSheet",
+        "showModalBottomSheet"
+      ],
+      "contract": {
+        "input": "(BuildContext context, {required String label, double? lat, double? lng})",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_NavSheet._launch",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context, Uri uri) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "urlLauncherProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "nav",
+            "name": "Navigator.of"
+          },
+          {
+            "kind": "nav",
+            "name": "Navigator.pop"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "_NavSheet.build"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "launcher = ProviderScope.containerOf(context, listen: false).read(urlLauncherProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await launcher(uri)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !context.mounted → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "Navigator.of(context).pop()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok"
+          }
+        ]
+      },
+      "floor": [
+        "containerOf",
+        "launcher",
+        "of",
+        "pop",
+        "read",
+        "showToast"
+      ],
+      "contract": {
+        "input": "(BuildContext context, Uri uri)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !context.mounted → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_NavSheet.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "label"
+          },
+          {
+            "kind": "field",
+            "name": "lat"
+          },
+          {
+            "kind": "field",
+            "name": "lng"
+          },
+          {
+            "kind": "global",
+            "name": "urlLauncherProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "nav",
+            "name": "Navigator.of",
+            "transitive": true
+          },
+          {
+            "kind": "nav",
+            "name": "Navigator.pop",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_launch",
+            "module": true
+          },
+          {
+            "name": "_wazeUri",
+            "module": true
+          },
+          {
+            "name": "_googleMapsUri",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "title = label.trim().isEmpty ? 'ניווט ליעד' : 'ניווט אל $label'"
+          },
+          {
+            "kind": "return",
+            "detail": "SafeArea(top: false, child: Container(margin: const EdgeInsets.all(BsTokens.space3), padd…"
+          }
+        ]
+      },
+      "floor": [
+        "BoxDecoration",
+        "Column",
+        "Container",
+        "SafeArea",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "_NavButton",
+        "all",
+        "circular",
+        "trim"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_NavButton.build",
+      "kind": "method",
+      "object": {
+        "signature": "(BuildContext context) -> Widget",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "icon"
+          },
+          {
+            "kind": "field",
+            "name": "label"
+          },
+          {
+            "kind": "field",
+            "name": "onTap"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "fg = bsOnAccent(context)"
+          },
+          {
+            "kind": "return",
+            "detail": "SizedBox(height: 52, child: ElevatedButton.icon(onPressed: onTap, icon: Icon(icon, color:…"
+          }
+        ]
+      },
+      "floor": [
+        "Icon",
+        "RoundedRectangleBorder",
+        "SizedBox",
+        "Text",
+        "TextStyle",
+        "bsOnAccent",
+        "circular",
+        "icon",
+        "styleFrom"
+      ],
+      "contract": {
+        "input": "(BuildContext context)",
+        "output": "Widget",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

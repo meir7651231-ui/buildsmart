@@ -23,6 +23,17 @@
 
 enum EndType { hdpeCompression, pexPress, copperPress, bspMale, bspFemale, drainOpening }
 
+/// BSP nominal thread size (inches, as written on an end's `size`, e.g. '1/2')
+/// → approximate inside bore in millimetres. Single source of truth: the bore
+/// engine (`install_engine`), the pressure-drop estimator (`pressure_drop`) and
+/// the spec sheet (`related_info`) all read THIS map instead of each keeping a
+/// hand-copied clone that could silently drift apart. Look up with the size
+/// string stripped of any `"` and trimmed.
+const Map<String, int> kBspInchToMm = {
+  '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
+  '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
+};
+
 /// The plumbing system an end belongs to. Pressure water-supply lines (threaded
 /// brass, PEX, copper press) and gravity drainage lines (HDPE push-fit, drain
 /// openings) are physically separate — they only ever meet *inside* a fixture
@@ -209,7 +220,7 @@ const Set<String> kSpecExemptSkus = {
   // ציוד גן — hose-end spray guns (attach to a hose, not the catalog network)
   '77000026', '77000027', '77980000', '77980001',
   // אטמים ופקקים — flat gaskets + a non-standard 2 3/8" plug
-  '506539', '506521', '610706', '610708',
+  '506539', '506521', '610708',
   // חלקים סניטריים — universal repair kit + generic spare parts
   '186466', '186666',
   // אביזרי מקלחת — adjustable holder (bracket)
@@ -1294,6 +1305,8 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '116229': VerifiedSpec(sku: '116229', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40'), _c('40')]),
   '116231': VerifiedSpec(sku: '116231', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
   '116689': VerifiedSpec(sku: '116689', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40'), _c('40')]),
+  // gate 117: 116589 added (was missing from kLipskeyCatalog; spec mirrors 116682's 90° pattern at DN 32).
+  '116589': VerifiedSpec(sku: '116589', material: 'PVC', maxTempC: 50, ends: [_c('32'), _c('32'), _c('32')]),
   '116682': VerifiedSpec(sku: '116682', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
   '116687': VerifiedSpec(sku: '116687', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
   '116209': VerifiedSpec(sku: '116209', material: 'PVC', maxTempC: 50, ends: [_c('32'), _c('32')]),
@@ -1305,10 +1318,10 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
 
   // ── מסעפים וחיבורי אסלה — toilet/drain branch tees ────────────────────────
   '220305': VerifiedSpec(sku: '220305', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
-  '218564': VerifiedSpec(sku: '218564', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '218564': VerifiedSpec(sku: '218564', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('50'), _c('50')]), // E3: מסעף כפול 110/50/50 (110 main + 2×50)
   '218176': VerifiedSpec(sku: '218176', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '116558': VerifiedSpec(sku: '116558', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
-  '217533': VerifiedSpec(sku: '217533', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '116558': VerifiedSpec(sku: '116558', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110'), _c('50')]), // E3: מסעף 87° 110/50 (run-through 110 + branch 50)
+  '217533': VerifiedSpec(sku: '217533', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('50')]), // E3: 75/50 reducing branch (restore erased DN75)
   '187463': VerifiedSpec(sku: '187463', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
   '118221': VerifiedSpec(sku: '118221', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40'), _c('40')]),
   '118222': VerifiedSpec(sku: '118222', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
@@ -1335,7 +1348,7 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '196762':  VerifiedSpec(sku: '196762',  material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
   '196575':  VerifiedSpec(sku: '196575',  material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '198517':  VerifiedSpec(sku: '198517',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('32')]),
-  '116680':  VerifiedSpec(sku: '116680',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('40')]),
+  '116680':  VerifiedSpec(sku: '116680',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('32')]), // B8: מצרה תבריג 50/32
   '119215':  VerifiedSpec(sku: '119215',  material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('50')]),
   '214533':  VerifiedSpec(sku: '214533',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '214534':  VerifiedSpec(sku: '214534',  material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
@@ -1348,17 +1361,17 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '217531':  VerifiedSpec(sku: '217531',  material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('50')]),
 
   // ── מצמדים וצינורות נוספים ────────────────────────────────────────────────
-  '218567': VerifiedSpec(sku: '218567', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '218569': VerifiedSpec(sku: '218569', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '218568': VerifiedSpec(sku: '218568', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '220316': VerifiedSpec(sku: '220316', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '194897': VerifiedSpec(sku: '194897', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '218567': VerifiedSpec(sku: '218567', material: 'PVC', maxTempC: 50, ends: [_c('160'), _c('160')]), // B8: מחבר כפול 160/160
+  '218569': VerifiedSpec(sku: '218569', material: 'PVC', maxTempC: 50, ends: [_c('110')]), // B8: פקק חיצוני 110 (קצה יחיד)
+  '218568': VerifiedSpec(sku: '218568', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('40')]), // B8: מצרה 50/40
+  '220316': VerifiedSpec(sku: '220316', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('32')]), // B8: מצרה 40/32
+  '194897': VerifiedSpec(sku: '194897', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('100')]), // B8: מצרה לתיקון 110/100
   '194898': VerifiedSpec(sku: '194898', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
 
   // ── פקקים וצינורות נוספים ────────────────────────────────────────────────
-  '218460': VerifiedSpec(sku: '218460', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '218560': VerifiedSpec(sku: '218560', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '220315': VerifiedSpec(sku: '220315', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '218460': VerifiedSpec(sku: '218460', material: 'PVC', maxTempC: 50, ends: [_c('50')]), // B8: פקק שקע-תקע 50 (קצה יחיד)
+  '218560': VerifiedSpec(sku: '218560', material: 'PVC', maxTempC: 50, ends: [_c('160')]), // B8: פקק שקע-תקע 160 (קצה יחיד)
+  '220315': VerifiedSpec(sku: '220315', material: 'PVC', maxTempC: 50, ends: [_c('40')]), // B8: פקק שקע-תקע 40 (קצה יחיד)
   '805024': VerifiedSpec(sku: '805024', material: 'PVC', maxTempC: 50, ends: [_c('75')]),
   '116628': VerifiedSpec(sku: '116628', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
 
@@ -1367,7 +1380,7 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '116074': VerifiedSpec(sku: '116074', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '116001': VerifiedSpec(sku: '116001', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
   '116155': VerifiedSpec(sku: '116155', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '224156': VerifiedSpec(sku: '224156', material: 'PP',  maxTempC: 80, ends: [_c('110'), _c('110')]),
+  '224156': VerifiedSpec(sku: '224156', material: 'PP',  maxTempC: 70, ends: [_c('110'), _c('110')]), // E6: 80→70 (sibling consensus)
   '116603': VerifiedSpec(sku: '116603', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
   '116606': VerifiedSpec(sku: '116606', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
   '116069': VerifiedSpec(sku: '116069', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
@@ -1615,19 +1628,27 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '77777400': VerifiedSpec(sku: '77777400', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
 
   // ── התקנה גבוהה / נמוכה / צמודה (toilet cistern installations) ───────────
+  // gate 117 — high installation (page 50): טיטאן + יהלום, 3 colors each.
+  '152785': VerifiedSpec(sku: '152785', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '152786': VerifiedSpec(sku: '152786', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '152787': VerifiedSpec(sku: '152787', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '145629': VerifiedSpec(sku: '145629', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '145630': VerifiedSpec(sku: '145630', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '145631': VerifiedSpec(sku: '145631', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  // gate 117 — close-coupled monoblock (page 52): כנרת ×2 + ברקת ×3.
+  '168525': VerifiedSpec(sku: '168525', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '169604': VerifiedSpec(sku: '169604', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '178864': VerifiedSpec(sku: '178864', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '178867': VerifiedSpec(sku: '178867', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '178870': VerifiedSpec(sku: '178870', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '124848': VerifiedSpec(sku: '124848', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '178862': VerifiedSpec(sku: '178862', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '116792': VerifiedSpec(sku: '116792', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '154068': VerifiedSpec(sku: '154068', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '124040': VerifiedSpec(sku: '124040', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '124050': VerifiedSpec(sku: '124050', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '124051': VerifiedSpec(sku: '124051', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '170862': VerifiedSpec(sku: '170862', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '170866': VerifiedSpec(sku: '170866', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '170869': VerifiedSpec(sku: '170869', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '116752': VerifiedSpec(sku: '116752', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  // gate 117: phantom SKUs 124040/124050/124051/170862/170866/170869/116752/154058
+  // removed — real SKUs 124848/124850/124851/178862/178866/178869/116792/154068
+  // already covered below.
   '116795': VerifiedSpec(sku: '116795', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '154058': VerifiedSpec(sku: '154058', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '154069': VerifiedSpec(sku: '154069', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '124850': VerifiedSpec(sku: '124850', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '178866': VerifiedSpec(sku: '178866', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),

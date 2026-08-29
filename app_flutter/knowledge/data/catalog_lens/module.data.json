@@ -1,0 +1,93 @@
+{
+  "module": "catalog_lens",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/catalog_lens.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "CatalogLens",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "category",
+            "type": "CatalogLens",
+            "required": false
+          },
+          {
+            "name": "variant",
+            "type": "CatalogLens",
+            "required": false
+          },
+          {
+            "name": "smartTree",
+            "type": "CatalogLens",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 3 values: category · variant · smartTree"
+        ]
+      }
+    },
+    {
+      "entity": "LensGroup",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "title",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "products",
+            "type": "List<LipskeyCatalogProduct>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "count",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "products",
+            "ref": "LipskeyCatalogProduct",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "title",
+          "products"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "module": "search_index",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/search_index.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "SearchType",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "screen",
+            "type": "SearchType",
+            "required": false
+          },
+          {
+            "name": "persona",
+            "type": "SearchType",
+            "required": false
+          },
+          {
+            "name": "category",
+            "type": "SearchType",
+            "required": false
+          },
+          {
+            "name": "setting",
+            "type": "SearchType",
+            "required": false
+          },
+          {
+            "name": "action",
+            "type": "SearchType",
+            "required": false
+          },
+          {
+            "name": "menu",
+            "type": "SearchType",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 6 values: screen · persona · category · setting · action · menu"
+        ]
+      }
+    },
+    {
+      "entity": "SearchEntry",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "title",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "breadcrumb",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "type",
+            "type": "SearchType",
+            "required": true
+          },
+          {
+            "name": "typeLabel",
+            "type": "String",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "type",
+            "ref": "SearchType",
+            "kind": "enum"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "matches"
+        ]
+      },
+      "contract": {
+        "required": [
+          "emoji",
+          "title",
+          "breadcrumb",
+          "type"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

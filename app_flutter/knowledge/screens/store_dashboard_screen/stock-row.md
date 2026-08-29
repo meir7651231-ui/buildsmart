@@ -1,0 +1,29 @@
+# _StockRow
+
+- **screen:** `store_dashboard_screen`
+- **role:** section
+
+## עצם · object (0)
+
+> registry 0 · mapped 0/0 · **unregistered 0**
+
+_(no text nodes)_
+
+## חיבורים · connections (0)
+
+_(no edges)_
+
+## התנהגות · behaviour (1)
+
+- **build** → _formula_ `idLine = item.sku != null ? … : …` → text: '🏷️ מק"ט ${item.sku}${item.category != null ? ' · ${item.category}' : ''}' | 'ללא מק"ט בקטלוג'
+
+## floor · external functions (2)
+
+- `cfgRadius`
+- `onToggle`
+
+## חוזה-רכיב · contract + gaps
+
+- **extractable:** `clean`
+- **props:** `item` · `available` · `onToggle` · `onRemove`
+- **gaps:** none (all registry-backed)

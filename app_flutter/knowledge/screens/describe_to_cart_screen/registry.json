@@ -1,0 +1,42 @@
+{
+  "matched": 7,
+  "total": 7,
+  "summary": "7/7",
+  "entries": [
+    {
+      "id": "describe_to_cart_screen.t01",
+      "ok": true,
+      "atom": "DescribeToCartScreen"
+    },
+    {
+      "id": "describe_to_cart_screen.t02",
+      "ok": true,
+      "atom": "DescribeToCartScreen"
+    },
+    {
+      "id": "describe_to_cart_screen.t03",
+      "ok": true,
+      "atom": "DescribeToCartScreen"
+    },
+    {
+      "id": "describe_to_cart_screen.t04",
+      "ok": true,
+      "atom": "DescribeToCartScreen"
+    },
+    {
+      "id": "describe_to_cart_screen.t05",
+      "ok": true,
+      "atom": "DescribeToCartScreen"
+    },
+    {
+      "id": "describe_to_cart_screen.t06",
+      "ok": true,
+      "atom": "DescribeToCartScreen"
+    },
+    {
+      "id": "describe_to_cart_screen.t07",
+      "ok": true,
+      "atom": "DescribeToCartScreen"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "matched": 8,
+  "total": 8,
+  "summary": "8/8",
+  "entries": [
+    {
+      "id": "courier.certs.title",
+      "ok": true,
+      "atom": "CourierCertsScreen"
+    },
+    {
+      "id": "courier.certs.sheet_title",
+      "ok": true,
+      "atom": "CourierCertsScreen"
+    },
+    {
+      "id": "courier_certs_screen.quick_fill_hint",
+      "ok": true,
+      "atom": "CourierCertsScreen"
+    },
+    {
+      "id": "courier_certs_screen.attach_photo",
+      "ok": true,
+      "atom": "CourierCertsScreen"
+    },
+    {
+      "id": "courier_certs_screen.photo_attached",
+      "ok": true,
+      "atom": "CourierCertsScreen"
+    },
+    {
+      "id": "courier.certs.save_button",
+      "ok": true,
+      "atom": "CourierCertsScreen"
+    },
+    {
+      "id": "courier.certs.empty",
+      "ok": true,
+      "atom": "_CertsCard"
+    },
+    {
+      "id": "courier.certs.add_button",
+      "ok": true,
+      "atom": "_CertsCard"
+    }
+  ]
+}

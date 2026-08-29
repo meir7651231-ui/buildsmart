@@ -1,0 +1,158 @@
+{
+  "name": "_TreeDrill",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_screen.t21",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בקרוב",
+        "registryId": "catalog_screen.t21",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב.",
+        "registryId": "catalog_screen.t22",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מוצרים",
+        "registryId": "catalog_screen.t19",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מיון לפי",
+        "registryId": "catalog_screen.t20",
+        "registryOk": true
+      }
+    ],
+    "registered": 5,
+    "unregistered": [],
+    "summary": "registry 5 · mapped 5/5 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogTreeQueryProvider.select((q) => q.trim())"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogFacetProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSystemFilterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogRepositoryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogTreeQueryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogFacetProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogTreePathProvider"
+      },
+      {
+        "kind": "action",
+        "via": "openSmartProductSheet",
+        "target": "openSmartProductSheet"
+      },
+      {
+        "kind": "action",
+        "via": "openNode",
+        "target": "openNode"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogProductSortProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider.select((s) => s.quickFilterBar)"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogProductSortProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogTreeQueryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogTreeQueryProvider.select((q) => q.isNotEmpty)"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogFacetProvider.notifier).state = [...facetSel, o.label]",
+        "effect": "write → catalogFacetProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "openNode(n)",
+        "effect": "open → openNode"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogTreeQueryProvider.notifier).state = ''",
+        "effect": "write → catalogTreeQueryProvider"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "catalogProductSortLabel",
+    "filterBySystem",
+    "jumpToFacet",
+    "jumpToTree",
+    "nodeHasSystem",
+    "resetFacets",
+    "resetQuery"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": false,
+    "props": [
+      "path"
+    ],
+    "untangle": [
+      "CustomScrollView = shared component → separate atom",
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

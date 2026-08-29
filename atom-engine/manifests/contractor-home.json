@@ -1,0 +1,18 @@
+{
+  "screen": "contractor-home",
+  "root": "finder",
+  "version": 1,
+  "description": "Contractor home = the product finder. 9 atoms + terminal results surface, assembled by the atom engine. See atom-engine/ENGINE-SPEC.md.",
+  "atoms": [
+    { "id": "type_grid",     "type": "type_grid",    "when": "landing", "expanded": true },
+    { "id": "breadcrumb",    "type": "breadcrumb",   "when": "drilled" },
+    { "id": "subtype_chips", "type": "chip_bar",     "when": "has_subs" },
+    { "id": "narrow_chips",  "type": "chip_bar",     "when": "has_narrow" },
+    { "id": "angle_chips",   "type": "chip_bar",     "when": "has_angles" },
+    { "id": "letter_chips",  "type": "chip_bar",     "when": "has_letters" },
+    { "id": "wall_chips",    "type": "chip_bar",     "when": "has_wall" },
+    { "id": "result_count",  "type": "result_count", "when": "has_results" },
+    { "id": "chip_tip",      "type": "chip_tip",     "when": "has_results_and_tip" },
+    { "id": "results",       "type": "product_list", "when": "drilled", "expanded": true }
+  ]
+}

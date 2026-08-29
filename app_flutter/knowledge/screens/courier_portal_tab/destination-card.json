@@ -1,0 +1,34 @@
+{
+  "name": "_DestinationCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🧭 פתח ניווט — יחובר עם חיבור השרת",
+        "registryId": "courier_portal_tab.t03",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "haulInfo"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "order"
+    ],
+    "untangle": []
+  }
+}

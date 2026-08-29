@@ -1,0 +1,59 @@
+{
+  "name": "_PickLine",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "persona_picking_sheet.t10",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מוצר חלופי",
+        "registryId": "persona_picking_sheet.t10",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "✓"
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "persona_picking_sheet.t11",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "חסר",
+        "registryId": "persona_picking_sheet.t11",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [
+      "✓"
+    ],
+    "summary": "registry 4 · mapped 4/4 · unregistered 1"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "line",
+      "status",
+      "onPick",
+      "onMiss"
+    ],
+    "untangle": []
+  }
+}

@@ -1,0 +1,303 @@
+{
+  "module": "config_op",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/config_op.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "configOpToJson",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOp op) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kConfigOpSchema"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "configOpsToJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<String, dynamic>{'schemaVersion' : kConfigOpSchema, ...op.toJson()}"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "(ConfigOp op)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "configOpFromJson",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> ConfigOp?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_strMap",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "configOpsFromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "j = raw.map((k, v) => MapEntry(k.toString(), v))"
+          },
+          {
+            "kind": "compute",
+            "detail": "rawId = j['id']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if rawId is! String || rawId.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = rawId"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch j['op']"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "SetAction",
+        "SetEmoji",
+        "SetHidden",
+        "SetOrder",
+        "SetStyle",
+        "SetText",
+        "fromJson",
+        "map",
+        "toInt",
+        "toString"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "ConfigOp?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if rawId is! String || rawId.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · rawId is! String || rawId.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "configOpsToJson",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<ConfigOp> ops) -> List<Map<String, dynamic>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kConfigOpSchema",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "configOpToJson",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final op in ops) configOpToJson(op)]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<ConfigOp> ops)",
+        "output": "List<Map<String, dynamic>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "configOpsFromJson",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> List<ConfigOp>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "configOpFromJson",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! List → return const []"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <ConfigOp>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in raw"
+          },
+          {
+            "kind": "compute",
+            "detail": "op = configOpFromJson(e)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if op != null"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "List<ConfigOp>",
+        "purity": "pure",
+        "precond": [
+          "if raw is! List → return const []"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "configOpEquals",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOp a, ConfigOp b) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch ((a, b)) {(final SetText x, final SetText y) => x.id == y.id && x.text == y.text, …"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ConfigOp a, ConfigOp b)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_strMap",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<dynamic, dynamic> m) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "configOpFromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "m.map((k, v) => MapEntry(k.toString(), v))"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "map",
+        "toString"
+      ],
+      "contract": {
+        "input": "(Map<dynamic, dynamic> m)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

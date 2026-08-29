@@ -1,0 +1,411 @@
+{
+  "screen": "departments_screen",
+  "source": "departments_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "DepartmentsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "מחלקות",
+            "registryId": "departments_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🗂️"
+          },
+          {
+            "kind": "text",
+            "text": "אין מחלקות עדיין — יופיעו עם טעינת קטלוג החברה"
+          }
+        ],
+        "registered": 1,
+        "unregistered": [
+          "🗂️",
+          "אין מחלקות עדיין — יופיעו עם טעינת קטלוג החברה"
+        ],
+        "summary": "registry 1 · mapped 1/1 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "homeDepartmentProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "deptFlatProductsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogTreePathProvider.select((p) => p.isNotEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "companyDepartments",
+        "isCatalogDept"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "CatalogScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_DeptTile",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "departments_screen.t02",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "catalogSystemFilterProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "catalogTreePathProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "deptFlatProductsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "homeDepartmentProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'בקרוב')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(catalogSystemFilterProvider.notifier).state = null",
+            "effect": "write → catalogSystemFilterProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(catalogTreePathProvider.notifier).state = _toolDeptPath(dept.name, t…",
+            "effect": "write → catalogTreePathProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(catalogTreePathProvider.notifier).state = const []",
+            "effect": "write → catalogTreePathProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(deptFlatProductsProvider.notifier).state = false",
+            "effect": "write → deptFlatProductsProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(homeDepartmentProvider.notifier).state = dept.name",
+            "effect": "write → homeDepartmentProvider"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": false,
+        "props": [
+          "dept"
+        ],
+        "untangle": [
+          "onCatalogSystemFilter(…) callback instead of direct catalogSystemFilterProvider write",
+          "onCatalogTreePath(…) callback instead of direct catalogTreePathProvider write",
+          "onDeptFlatProducts(…) callback instead of direct deptFlatProductsProvider write",
+          "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_CompanyDeptTile",
+      "role": "section",
+      "variant": "live",
+      "gate": "kProfileRawShell",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "homeDepartmentProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(homeDepartmentProvider.notifier).state = section.title",
+            "effect": "write → homeDepartmentProvider"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": false,
+        "props": [
+          "section"
+        ],
+        "untangle": [
+          "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_DeptScopeBar",
+      "role": "section",
+      "variant": "live",
+      "gate": "kProfileRawShell",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "כל המחלקות",
+            "registryId": "departments_screen.t03",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "deptFlatProductsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "deptFlatProductsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "homeDepartmentProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "catalogSystemFilterProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "catalogTreePathProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(deptFlatProductsProvider.notifier).state = !flat",
+            "effect": "write → deptFlatProductsProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(deptFlatProductsProvider.notifier).state = false",
+            "effect": "write → deptFlatProductsProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(homeDepartmentProvider.notifier).state = null",
+            "effect": "write → homeDepartmentProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(catalogSystemFilterProvider.notifier).state = null",
+            "effect": "write → catalogSystemFilterProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(catalogTreePathProvider.notifier).state = const []",
+            "effect": "write → catalogTreePathProvider"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": false,
+        "props": [
+          "name",
+          "system",
+          "showFlatToggle"
+        ],
+        "untangle": [
+          "onCatalogSystemFilter(…) callback instead of direct catalogSystemFilterProvider write",
+          "onCatalogTreePath(…) callback instead of direct catalogTreePathProvider write",
+          "onDeptFlatProducts(…) callback instead of direct deptFlatProductsProvider write",
+          "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_DeptCatGroups",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🗂️"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין קטגוריות במחלקה זו",
+            "registryId": "departments_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה",
+            "registryId": "departments_screen.t05",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [
+          "🗂️"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "catalogTreePathProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(catalogTreePathProvider.notifier).state = [node]",
+            "effect": "write → catalogTreePathProvider"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "catNodeProductCount",
+        "cfgRadius",
+        "resolveCatTitle"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": false,
+        "props": [
+          "deptName"
+        ],
+        "untangle": [
+          "onCatalogTreePath(…) callback instead of direct catalogTreePathProvider write"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 5,
+    "total": 5,
+    "summary": "5/5",
+    "entries": [
+      {
+        "id": "departments_screen.t01",
+        "ok": true,
+        "atom": "DepartmentsScreen"
+      },
+      {
+        "id": "departments_screen.t02",
+        "ok": true,
+        "atom": "_DeptTile"
+      },
+      {
+        "id": "departments_screen.t03",
+        "ok": true,
+        "atom": "_DeptScopeBar"
+      },
+      {
+        "id": "departments_screen.t04",
+        "ok": true,
+        "atom": "_DeptCatGroups"
+      },
+      {
+        "id": "departments_screen.t05",
+        "ok": true,
+        "atom": "_DeptCatGroups"
+      }
+    ]
+  }
+}

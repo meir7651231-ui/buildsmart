@@ -1,4 +1,14 @@
+import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/screens/company_catalog_import_sheet.dart'
+    show showCompanyCatalogImportSheet;
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbSuppliersNodes;
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 class SuppliersScreen extends StatelessWidget {
@@ -7,36 +17,82 @@ class SuppliersScreen extends StatelessWidget {
   static Route<void> route() =>
       MaterialPageRoute(builder: (_) => const SuppliersScreen());
 
+  static final List<KbToolNode> _kbNodes = kbSuppliersNodes();
+
   @override
   Widget build(BuildContext context) {
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFFFFFFF),
-          foregroundColor: const Color(0xFF1A1A1A),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          foregroundColor: BsTokens.inkLight,
           elevation: 0,
-          title: const Text(
+          title: const CfgText(
+            'suppliers_screen.title',
             'ספקים ומותגים',
             style: TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         body: ListView(
           children: [
-            _SupplierTile(
-              emoji: '🏭',
-              title: 'ליפסקי ברקן',
-              subtitle: 'אינסטלציה וסניטציה • 66 מוצרים',
-              onTap: () => Navigator.push(context, LipskeyBrandScreen.route()),
-            ),
+            // Clean shell: no catalog → no brand entry (the tile would open a
+            // brand screen with nothing behind it) — an honest empty state
+            // instead of a bare background.
+            if (kProfileEmptyCatalog)
+              Padding(
+                padding: const EdgeInsets.only(top: 120),
+                child: Column(
+                  children: [
+                    const Text('🏪', style: TextStyle(fontSize: 40)),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'אין ספקים עדיין',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'ספקים ומותגים יופיעו כשקטלוג החברה ייטען',
+                      style: TextStyle(color: Colors.black38, fontSize: 12),
+                    ),
+                    const SizedBox(height: 12),
+                    // Owner-approved import flow: opens the CSV template +
+                    // upload sheet — the clean shell's way to load a catalog.
+                    TextButton(
+                      onPressed: () => showCompanyCatalogImportSheet(context),
+                      child: const Text(
+                        '📦 טעינת קטלוג החברה',
+                        style: TextStyle(
+                          color: BsTokens.brandDark,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              _SupplierTile(
+                emoji: '🏭',
+                title: 'ליפסקי ברקן',
+                subtitle: 'אינסטלציה וסניטציה • $kLipskeyProductCount מוצרים',
+                onTap: () =>
+                    Navigator.push(context, LipskeyBrandScreen.route()),
+              ),
           ],
         ),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 
@@ -61,7 +117,7 @@ class _SupplierTile extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: const Color(0xFFEEEEEE),
@@ -73,8 +129,8 @@ class _SupplierTile extends StatelessWidget {
             Container(
               width: 48,
               height: 48,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -88,7 +144,7 @@ class _SupplierTile extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),

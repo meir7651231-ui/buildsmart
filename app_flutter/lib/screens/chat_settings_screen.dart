@@ -1,7 +1,12 @@
+import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/chat_settings.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Full-screen Chat settings — 9 categories, ~40 leaves.
@@ -16,14 +21,15 @@ class ChatSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: const Text(
+        title: CfgText(
+          'chat_settings_screen.t01',
           'הגדרות שיחות',
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -60,24 +66,36 @@ class ChatSettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
+            title: CfgText(
+              'chat_settings_screen.t02',
               'איפוס הגדרות?',
-              style: TextStyle(color: Color(0xFF1A1A1A)),
+              style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
+            content: CfgText(
+              'chat_settings_screen.t03',
               'כל הגדרות השיחות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+              // composite hide: whole cancel button vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t04',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: CfgText('chat_settings_screen.t04', 'ביטול'),
+                ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text('אפס'),
+              // composite hide: whole reset button vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t05',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                  ),
+                  child: CfgText('chat_settings_screen.t05', 'אפס'),
+                ),
               ),
             ],
           ),
@@ -101,12 +119,38 @@ class _QuickReplyBanner extends StatelessWidget {
     'נחזור אליך 📞',
   ];
 
+  /// Honest info: the quick-reply set is fixed in this build. Tapping a chip
+  /// copies it; custom templates aren't editable yet.
+  void _showEditInfo(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: CfgText('chat_settings_screen.t06', 'תשובות מהירות'),
+        content: const Text(
+          'התבניות קבועות בגרסה זו. הקש על תבנית כדי להעתיק אותה — '
+          'עריכת תבניות מותאמות אישית תתווסף בהמשך.',
+          textAlign: TextAlign.right,
+        ),
+        actions: [
+          // composite hide: whole "הבנתי" button vanishes, not just its label.
+          CfgVisible(
+            'chat_settings_screen.t07',
+            child: TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: CfgText('chat_settings_screen.t07', 'הבנתי'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(14),
@@ -117,24 +161,39 @@ class _QuickReplyBanner extends StatelessWidget {
             children: [
               const Text('⚡', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              const Flexible(
-                child: Text(
+              Flexible(
+                child: CfgText(
+                  'chat_settings_screen.t08',
                   'תשובות מהירות',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
                   ),
                 ),
               ),
               const Spacer(),
-              GestureDetector(
-                onTap: () => showToast(context, 'עריכת תבניות — בבנייה'),
-                child: const Text(
-                  'ערוך',
-                  style: TextStyle(color: BsTokens.brand, fontSize: 13),
+              // composite hide: whole "ערוך" tap-link vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t09',
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _showEditInfo(context),
+                  // ≥48dp tap target around the small link (a11y), without
+                  // enlarging the visible text.
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: CfgText(
+                        'chat_settings_screen.t09',
+                        'ערוך',
+                        style: TextStyle(color: BsTokens.brand, fontSize: 13),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -146,7 +205,14 @@ class _QuickReplyBanner extends StatelessWidget {
             children: [
               for (final t in _templates)
                 GestureDetector(
-                  onTap: () => showToast(context, 'תבנית — בבנייה'),
+                  // Real action: copy the template to the clipboard for pasting
+                  // into any chat (no chat is open from the settings screen).
+                  onTap: () async {
+                    await Clipboard.setData(ClipboardData(text: t));
+                    if (context.mounted) {
+                      showToast(context, 'התבנית הועתקה');
+                    }
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -160,7 +226,7 @@ class _QuickReplyBanner extends StatelessWidget {
                     child: Text(
                       t,
                       style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 12,
                       ),
                     ),
@@ -205,6 +271,7 @@ class _PresenceSection extends ConsumerWidget {
         _SwitchRow(
           label: 'תצוגה מקדימה בנעילה',
           value: settings.lockScreenPreview,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(chatSettingsProvider.notifier)
@@ -213,6 +280,7 @@ class _PresenceSection extends ConsumerWidget {
         _SwitchRow(
           label: 'פתיחת שיחה (מענה ראשוני)',
           value: settings.initialResponseEnabled,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(chatSettingsProvider.notifier)
@@ -251,6 +319,7 @@ class _ChatNotifSection extends ConsumerWidget {
         _SwitchRow(
           label: 'צלצול שיחה נכנסת',
           value: settings.callRingEnabled,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(chatSettingsProvider.notifier)
@@ -290,6 +359,7 @@ class _MediaSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🎙️',
       title: 'מדיה ושמע',
+      underConstruction: true,
       children: [
         _RadioGroupRow<ChatMediaDownload>(
           label: 'הורדה אוטומטית',
@@ -326,11 +396,7 @@ class _MediaSection extends ConsumerWidget {
                   .read(chatSettingsProvider.notifier)
                   .update((s) => s.copyWith(compressVideo: v)),
         ),
-        _ActionRow(
-          label: 'ניהול אחסון',
-          buttonLabel: 'נקה',
-          onTap: () => showToast(context, 'אחסון נוקה'),
-        ),
+        const _PlaceholderRow(label: 'ניהול אחסון'),
       ],
     );
   }
@@ -351,6 +417,7 @@ class _ChatPrivacySection extends ConsumerWidget {
         _RadioGroupRow<ChatPrivacy>(
           label: 'מי יכול לפתוח שיחה',
           value: settings.chatPrivacy,
+          underConstruction: true,
           options: const [
             (value: ChatPrivacy.everyone, label: 'כולם'),
             (value: ChatPrivacy.contacts, label: 'אנשי קשר בלבד'),
@@ -367,10 +434,55 @@ class _ChatPrivacySection extends ConsumerWidget {
           label: 'מחיקת היסטוריה',
           buttonLabel: 'מחק',
           destructive: true,
-          onTap: () => showToast(context, 'היסטוריה נמחקה'),
+          onTap: () => _confirmClearHistory(context, ref),
         ),
       ],
     );
+  }
+
+  Future<void> _confirmClearHistory(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            backgroundColor: Theme.of(ctx).colorScheme.surface,
+            title: CfgText(
+              'chat_settings_screen.t10',
+              'מחיקת היסטוריית שיחות',
+              style: TextStyle(color: BsTokens.inkLight),
+            ),
+            content: CfgText(
+              'chat_settings_screen.t11',
+              'היסטוריית השיחות תימחק והשיחות ייפתחו ריקות.',
+              style: TextStyle(color: Colors.black54),
+            ),
+            actions: [
+              // composite hide: whole cancel button vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t12',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: CfgText('chat_settings_screen.t12', 'ביטול'),
+                ),
+              ),
+              // composite hide: whole delete button vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t13',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                  ),
+                  child: CfgText('chat_settings_screen.t13', 'מחק'),
+                ),
+              ),
+            ],
+          ),
+    );
+    if ((ok ?? false) && context.mounted) {
+      ref.read(chatHistoryClearedProvider.notifier).clearAll();
+      if (context.mounted) showToast(context, 'ההיסטוריה נמחקה');
+    }
   }
 }
 
@@ -385,6 +497,7 @@ class _BackupSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '💾',
       title: 'גיבוי וייצוא',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'גיבוי לענן',
@@ -408,17 +521,8 @@ class _BackupSection extends ConsumerWidget {
                     .read(chatSettingsProvider.notifier)
                     .update((s) => s.copyWith(backupFreq: v)),
           ),
-        _ActionRow(
-          label: 'ייצוא היסטוריה (CSV)',
-          buttonLabel: 'ייצא',
-          onTap: () => showToast(context, 'מייצא...'),
-        ),
-        _ActionRow(
-          label: 'מחיקת גיבוי ענן',
-          buttonLabel: 'מחק',
-          destructive: true,
-          onTap: () => showToast(context, 'גיבוי נמחק'),
-        ),
+        const _PlaceholderRow(label: 'ייצוא היסטוריה (CSV)'),
+        const _PlaceholderRow(label: 'מחיקת גיבוי ענן'),
       ],
     );
   }
@@ -435,6 +539,7 @@ class _LangSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🌐',
       title: 'שפה ותרגום',
+      underConstruction: true,
       children: [
         _RadioGroupRow<ChatLang>(
           label: 'שפת ממשק',
@@ -474,6 +579,7 @@ class _BusinessSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🏪',
       title: 'שיחות עסקיות',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'שעות פעילות עסקית',
@@ -599,6 +705,7 @@ class _ArchiveSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🗂️',
       title: 'ארכיון וניקיון',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'ארכוב אוטומטי',
@@ -650,20 +757,44 @@ class _SectionTile extends StatelessWidget {
     required this.emoji,
     required this.title,
     required this.children,
+    this.underConstruction = false,
   });
 
   final String emoji;
   final String title;
   final List<Widget> children;
 
+  // When true: this section's persisted toggles have no engine yet — show an
+  // honest "בבנייה" subtitle and suppress the active-count badge (Wave 8 / D2).
+  final bool underConstruction;
+
+  // A row is a backend-blocked "under construction" placeholder when it is a
+  // _PlaceholderRow or an _Inert row flagged underConstruction. Single source of
+  // truth for both the active-count badge and the Apple-readiness hide-filter.
+  static bool _isUnderConstruction(Widget w) =>
+      w is _PlaceholderRow ||
+      (w is _Inert && (w as _Inert).underConstruction);
+
   // Count only functional rows — exclude "בבנייה" placeholders.
-  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+  int get _activeCount => children.where((w) => !_isUnderConstruction(w)).length;
+
+  // For Apple review (kHideUnderConstruction) we render only the functional
+  // rows; the placeholder rows stay defined in code (reversible) but are hidden.
+  List<Widget> get _visibleChildren => kHideUnderConstruction
+      ? children.where((w) => !_isUnderConstruction(w)).toList()
+      : children;
 
   @override
   Widget build(BuildContext context) {
+    // A whole section that is itself "under construction" — or one whose every
+    // row is a hidden placeholder — disappears entirely for Apple review.
+    if (kHideUnderConstruction &&
+        (underConstruction || _visibleChildren.isEmpty)) {
+      return const SizedBox.shrink();
+    }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -678,7 +809,7 @@ class _SectionTile extends StatelessWidget {
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           // Count badge replaces the default expand chevron.
           trailing:
-              _activeCount == 0
+              (underConstruction || _activeCount == 0)
                   ? null
                   : Container(
                     padding: const EdgeInsets.symmetric(
@@ -701,34 +832,60 @@ class _SectionTile extends StatelessWidget {
           title: Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
           ),
-          children: children,
+          subtitle: underConstruction
+              ? Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: CfgText(
+                    'chat_settings_screen.t14',
+                    'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                )
+              : null,
+          children: _visibleChildren,
         ),
       ),
     );
   }
 }
 
-class _SwitchRow extends StatelessWidget {
+/// Marker for settings rows that persist a value no engine consumes yet
+/// (honesty pass). Excluded from the section active-count badge.
+abstract interface class _Inert {
+  bool get underConstruction;
+}
+
+class _SwitchRow extends StatelessWidget implements _Inert {
   const _SwitchRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      subtitle: underConstruction
+          ? CfgText(
+              'chat_settings_screen.t15',
+              'בבנייה — עדיין לא משפיע',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            )
+          : null,
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -736,18 +893,21 @@ class _SwitchRow extends StatelessWidget {
   }
 }
 
-class _RadioGroupRow<T> extends StatelessWidget {
+class _RadioGroupRow<T> extends StatelessWidget implements _Inert {
   const _RadioGroupRow({
     required this.label,
     required this.value,
     required this.options,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final T value;
   final List<({T value, String label})> options;
   final ValueChanged<T> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
@@ -756,9 +916,23 @@ class _RadioGroupRow<T> extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            label,
-            style: const TextStyle(color: Colors.black54, fontSize: 13),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.black54, fontSize: 13),
+              ),
+              if (underConstruction)
+                Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: CfgText(
+                    'chat_settings_screen.t16',
+                    'בבנייה — עדיין לא משפיע',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                ),
+            ],
           ),
         ),
         ...options.map(
@@ -766,7 +940,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(
               o.label,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
             ),
             value: o.value,
             groupValue: value,
@@ -799,7 +973,7 @@ class _TimeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: Text(
         _formatted,
         style: const TextStyle(
@@ -879,7 +1053,7 @@ class _InlineTextRowState extends State<_InlineTextRow> {
           const SizedBox(height: 6),
           TextField(
             controller: _ctrl,
-            style: const TextStyle(color: Color(0xFF1A1A1A)),
+            style: const TextStyle(color: BsTokens.inkLight),
             cursorColor: BsTokens.brand,
             maxLines: 2,
             decoration: InputDecoration(
@@ -921,7 +1095,7 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: TextButton(
         onPressed: onTap,
         style: TextButton.styleFrom(
@@ -941,10 +1115,11 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
-      trailing: const Text(
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      trailing: CfgText(
+        'chat_settings_screen.t17',
         'בבנייה',
-        style: TextStyle(color: Color(0xFF666666), fontSize: 12),
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),
       onTap: () => showToast(context, '$label — בבנייה'),
     );

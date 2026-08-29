@@ -1,0 +1,1015 @@
+{
+  "module": "worker_forms",
+  "source": "lib/state/worker_forms.dart",
+  "atomCount": 15,
+  "atoms": [
+    {
+      "fn": "Form101.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? username, int? year, String? fullName, String? idNumber, String? phone, String? specialty, String? maritalStatus, DateTime? savedTs, DateTime? sentTs, String? signature, bool? declared, String? employerName, String? employerBusinessId, String? employerAddress}) -> Form101",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Form101(username: username ?? this.username, year: year ?? this.year, fullName: fullName …"
+          }
+        ]
+      },
+      "floor": [
+        "Form101"
+      ],
+      "contract": {
+        "input": "({String? username, int? year, String? fullName, String? idNumber, String? phone, String? specialty, String? maritalStatus, DateTime? savedTs, DateTime? sentTs, String? signature, bool? declared, String? employerName, String? employerBusinessId, String? employerAddress})",
+        "output": "Form101",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Form101.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "declared"
+          },
+          {
+            "kind": "field",
+            "name": "employerAddress"
+          },
+          {
+            "kind": "field",
+            "name": "employerBusinessId"
+          },
+          {
+            "kind": "field",
+            "name": "employerName"
+          },
+          {
+            "kind": "field",
+            "name": "fullName"
+          },
+          {
+            "kind": "field",
+            "name": "idNumber"
+          },
+          {
+            "kind": "field",
+            "name": "maritalStatus"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          },
+          {
+            "kind": "field",
+            "name": "savedTs"
+          },
+          {
+            "kind": "field",
+            "name": "sentTs"
+          },
+          {
+            "kind": "field",
+            "name": "signature"
+          },
+          {
+            "kind": "field",
+            "name": "specialty"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          },
+          {
+            "kind": "field",
+            "name": "year"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'username' : username, 'year' : year, 'fullName' : fullName, 'idNumber' : idNumber, 'pho…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Form101.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> Form101?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "declared"
+          },
+          {
+            "kind": "field",
+            "name": "employerAddress"
+          },
+          {
+            "kind": "field",
+            "name": "employerBusinessId"
+          },
+          {
+            "kind": "field",
+            "name": "employerName"
+          },
+          {
+            "kind": "field",
+            "name": "fullName"
+          },
+          {
+            "kind": "field",
+            "name": "idNumber"
+          },
+          {
+            "kind": "field",
+            "name": "maritalStatus"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          },
+          {
+            "kind": "field",
+            "name": "savedTs"
+          },
+          {
+            "kind": "field",
+            "name": "sentTs"
+          },
+          {
+            "kind": "field",
+            "name": "signature"
+          },
+          {
+            "kind": "field",
+            "name": "specialty"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "username = raw['username']"
+          },
+          {
+            "kind": "compute",
+            "detail": "year = raw['year']"
+          },
+          {
+            "kind": "compute",
+            "detail": "saved = DateTime.tryParse('${raw['savedTs']}')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if username is! String || year is! int || saved == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "Form101(username: username, year: year, fullName: s(raw['fullName']), idNumber: s(raw['id…"
+          }
+        ]
+      },
+      "floor": [
+        "Form101",
+        "s",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "Form101?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if username is! String || year is! int || saved == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · username is! String || year is! int || saved == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "SickNote.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "declared"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "photo"
+          },
+          {
+            "kind": "field",
+            "name": "signature"
+          },
+          {
+            "kind": "field",
+            "name": "ts"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'username' : username, 'ts' : ts.toIso8601String(), 'photo' : photo, 'signatu…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SickNote.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> SickNote?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "declared"
+          },
+          {
+            "kind": "field",
+            "name": "signature"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "username = raw['username']"
+          },
+          {
+            "kind": "compute",
+            "detail": "photo = raw['photo']"
+          },
+          {
+            "kind": "compute",
+            "detail": "ts = DateTime.tryParse('${raw['ts']}')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! String || username is! String || photo is! String || ts == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "SickNote(id: id, username: username, ts: ts, photo: photo, signature: raw['signature'] is…"
+          }
+        ]
+      },
+      "floor": [
+        "SickNote",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "SickNote?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if id is! String || username is! String || photo is! String || ts == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · id is! String || username is! String || photo is! String || ts == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsState.form101For",
+      "kind": "method",
+      "object": {
+        "signature": "(String username, int year) -> Form101?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "forms"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final f in forms"
+          },
+          {
+            "kind": "branch",
+            "detail": "if f.username == username && f.year == year → return f"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String username, int year)",
+        "output": "Form101?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsState.sickNotesFor",
+      "kind": "method",
+      "object": {
+        "signature": "(String username) -> List<SickNote>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "sickNotes"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "sickNotes.where((s) => s.username == username).toList()..sort((a, b) => b.ts.compareTo(a.…"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "sort",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String username)",
+        "output": "List<SickNote>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsState.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({List<Form101>? forms, List<SickNote>? sickNotes}) -> WorkerFormsState",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "WorkerFormsState(forms: forms ?? this.forms, sickNotes: sickNotes ?? this.sickNotes)"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerFormsState"
+      ],
+      "contract": {
+        "input": "({List<Form101>? forms, List<SickNote>? sickNotes})",
+        "output": "WorkerFormsState",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsState.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "forms"
+          },
+          {
+            "kind": "field",
+            "name": "sickNotes"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'forms' : [for (final f in forms) f.toJson()], 'sick' : [for (final s in sickNotes) s.to…"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
+            "name": "storageKey"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(storageKey)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw == null || _userTouched → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "load"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted → return (void)",
+          "if raw == null || _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          },
+          {
+            "kind": "field",
+            "name": "storageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "WorkerFormsNotifier.addSickNote",
+          "WorkerFormsNotifier.markForm101Sent",
+          "WorkerFormsNotifier.removeSickNote",
+          "WorkerFormsNotifier.saveForm101"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "save",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsNotifier.saveForm101",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Form101 form) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(forms: [for (final f in state.forms) if (!(f.username == form.user…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(Form101 form)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsNotifier.markForm101Sent",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username, int year) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(forms: [for (final f in state.forms) if (f.username == username &&…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "now"
+      ],
+      "contract": {
+        "input": "(String username, int year)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsNotifier.addSickNote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String username, required String photo, String signature = '', bool declared = false}) -> Future<SickNote?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_seq"
+          },
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "note = SickNote(id: 'sick-${DateTime.now().microsecondsSinceEpoch}-${_seq++}', username: usernam…"
+          },
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(sickNotes: [...state.sickNotes, note])"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok"
+          },
+          {
+            "kind": "return",
+            "detail": "note"
+          }
+        ]
+      },
+      "floor": [
+        "SickNote",
+        "copyWith",
+        "now"
+      ],
+      "contract": {
+        "input": "({required String username, required String photo, String signature = '', bool declared = false})",
+        "output": "Future<SickNote?>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerFormsNotifier.removeSickNote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(sickNotes: [for (final s in state.sickNotes) if (s.id != id) s])"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

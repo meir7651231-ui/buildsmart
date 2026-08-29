@@ -1,0 +1,42 @@
+{
+  "matched": 7,
+  "total": 7,
+  "summary": "7/7",
+  "entries": [
+    {
+      "id": "lipskey_products_screen.empty_title",
+      "ok": true,
+      "atom": "LipskeyProductsList"
+    },
+    {
+      "id": "lipskey_products_screen.empty_hint",
+      "ok": true,
+      "atom": "LipskeyProductsList"
+    },
+    {
+      "id": "lipskey_products_screen.price_by_supplier_grid",
+      "ok": true,
+      "atom": "LipskeyProductGridCard"
+    },
+    {
+      "id": "lipskey_products_screen.to_cart",
+      "ok": true,
+      "atom": "LipskeyProductGridCard"
+    },
+    {
+      "id": "lipskey_products_screen.price_by_supplier_row",
+      "ok": true,
+      "atom": "_ProductRow"
+    },
+    {
+      "id": "lipskey_products_screen.sku_copied",
+      "ok": true,
+      "atom": "_ProductRow"
+    },
+    {
+      "id": "lipskey_products_screen.size_label",
+      "ok": true,
+      "atom": "_ProductRow"
+    }
+  ]
+}

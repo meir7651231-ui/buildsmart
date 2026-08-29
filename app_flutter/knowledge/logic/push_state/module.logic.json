@@ -1,0 +1,1437 @@
+{
+  "module": "push_state",
+  "source": "lib/state/push_state.dart",
+  "atomCount": 25,
+  "atoms": [
+    {
+      "fn": "pushChannelIdFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(PushMessage message) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kChatPushChannelId"
+          },
+          {
+            "kind": "const",
+            "name": "kDefaultPushChannelId"
+          },
+          {
+            "kind": "const",
+            "name": "kOrdersPushChannelId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "PushController._handleForeground"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch message.data['type']"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(PushMessage message)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "pushToastText",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(PushMessage message) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "PushController._handleForeground"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "title = message.title?.trim() ?? ''"
+          },
+          {
+            "kind": "compute",
+            "detail": "body = message.body?.trim() ?? ''"
+          },
+          {
+            "kind": "precond",
+            "detail": "if title.isEmpty && body.isEmpty → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if title.isEmpty → return body"
+          },
+          {
+            "kind": "precond",
+            "detail": "if body.isEmpty → return title"
+          },
+          {
+            "kind": "return",
+            "detail": "'$title · $body'"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(PushMessage message)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if title.isEmpty && body.isEmpty → return null",
+          "if title.isEmpty → return body",
+          "if body.isEmpty → return title"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "title.isEmpty && body.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway._messaging",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> fm.FirebaseMessaging",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_injected"
+          },
+          {
+            "kind": "global",
+            "name": "fm"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_injected ?? fm.FirebaseMessaging.instance"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "fm.FirebaseMessaging",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway._toPushMessage",
+      "kind": "method",
+      "object": {
+        "signature": "(fm.RemoteMessage message) -> PushMessage",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "of"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirebaseMessagingGateway.initialMessage"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "PushMessage(title: message.notification?.title, body: message.notification?.body, data: M…"
+          }
+        ]
+      },
+      "floor": [
+        "Map",
+        "PushMessage"
+      ],
+      "contract": {
+        "input": "(fm.RemoteMessage message)",
+        "output": "PushMessage",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway.requestPermission",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "fm"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "settings = await _messaging.requestPermission()"
+          },
+          {
+            "kind": "return",
+            "detail": "settings.authorizationStatus == fm.AuthorizationStatus.authorized || settings.authorizati…"
+          }
+        ]
+      },
+      "floor": [
+        "requestPermission"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway.getToken",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<String?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_vapidPublicKey"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_messaging.getToken(vapidKey: _vapidPublicKey)"
+          }
+        ]
+      },
+      "floor": [
+        "getToken"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<String?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway.deleteToken",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_messaging.deleteToken()"
+          }
+        ]
+      },
+      "floor": [
+        "deleteToken"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway.onTokenRefresh",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Stream<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_messaging.onTokenRefresh"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Stream<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway.onForegroundMessage",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Stream<PushMessage>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "fm"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "fm.FirebaseMessaging.onMessage.map(_toPushMessage)"
+          }
+        ]
+      },
+      "floor": [
+        "map"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Stream<PushMessage>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway.initialMessage",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<PushMessage?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "of",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_toPushMessage",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "message = await _messaging.getInitialMessage()"
+          },
+          {
+            "kind": "return",
+            "detail": "message == null ? null : _toPushMessage(message)"
+          }
+        ]
+      },
+      "floor": [
+        "getInitialMessage"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<PushMessage?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseMessagingGateway.onMessageOpenedApp",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Stream<PushMessage>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "fm"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "fm.FirebaseMessaging.onMessageOpenedApp.map(_toPushMessage)"
+          }
+        ]
+      },
+      "floor": [
+        "map"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Stream<PushMessage>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FlutterLocalNotificationsGateway._android",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> AndroidFlutterLocalNotificationsPlugin?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_plugin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()"
+          }
+        ]
+      },
+      "floor": [
+        "resolvePlatformSpecificImplementation"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "AndroidFlutterLocalNotificationsPlugin?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "FlutterLocalNotificationsGateway.ensureInitialised",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPushChannels"
+          },
+          {
+            "kind": "field",
+            "name": "_plugin"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_initialised"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _initialised → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "initSettings = InitializationSettings(android: AndroidInitializationSettings('ic_notification'))"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _plugin.initialize(initSettings)"
+          },
+          {
+            "kind": "compute",
+            "detail": "android = _android"
+          },
+          {
+            "kind": "branch",
+            "detail": "if android != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_initialised = true"
+          }
+        ]
+      },
+      "floor": [
+        "AndroidInitializationSettings",
+        "AndroidNotificationChannel",
+        "InitializationSettings",
+        "createNotificationChannel",
+        "initialize"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if _initialised → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FlutterLocalNotificationsGateway.requestAndroid13Permission",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "android = _android"
+          },
+          {
+            "kind": "precond",
+            "detail": "if android == null → return true"
+          },
+          {
+            "kind": "compute",
+            "detail": "granted = await android.requestNotificationsPermission()"
+          },
+          {
+            "kind": "return",
+            "detail": "granted ?? true"
+          }
+        ]
+      },
+      "floor": [
+        "requestNotificationsPermission"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "pure",
+        "precond": [
+          "if android == null → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FlutterLocalNotificationsGateway.show",
+      "kind": "method",
+      "object": {
+        "signature": "(PushMessage message, {required String channelId}) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPushChannels"
+          },
+          {
+            "kind": "field",
+            "name": "_plugin"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "channel = kPushChannels.firstWhere((c) => c.id == channelId, orElse: () => kPushChannels.first)"
+          },
+          {
+            "kind": "compute",
+            "detail": "details = NotificationDetails(android: AndroidNotificationDetails(channel.id, channel.name, channel…"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = DateTime.now().millisecondsSinceEpoch.remainder(100000)"
+          },
+          {
+            "kind": "effect",
+            "detail": "await _plugin.show(id, message.title, message.body, details)"
+          }
+        ]
+      },
+      "floor": [
+        "AndroidNotificationDetails",
+        "NotificationDetails",
+        "firstWhere",
+        "now",
+        "remainder",
+        "show"
+      ],
+      "contract": {
+        "input": "(PushMessage message, {required String channelId})",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController.settled",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_chain"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_chain"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController._enqueue",
+      "kind": "method",
+      "object": {
+        "signature": "(Future<void> Function() task) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_disposed"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_chain"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "PushController._handleForeground",
+          "PushController._handleTokenRefresh",
+          "PushController.onAuthChanged"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _disposed → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_chain = _chain.then((_) async {try {await task();} on Object catch (e) {debugPrint('Push…"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "task",
+        "then"
+      ],
+      "contract": {
+        "input": "(Future<void> Function() task)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if _disposed → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController.onAuthChanged",
+      "kind": "method",
+      "object": {
+        "signature": "(AuthSnapshot snapshot) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFcmTokenField",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_disposed"
+          },
+          {
+            "kind": "field",
+            "name": "_gateway",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_local",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_users",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_chain",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_enqueue",
+            "module": true
+          },
+          {
+            "name": "_unregister",
+            "module": true
+          },
+          {
+            "name": "_register",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _disposed → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "uid = snapshot.user?.uid"
+          },
+          {
+            "kind": "precond",
+            "detail": "if uid == _uid → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "previous = _uid"
+          },
+          {
+            "kind": "effect",
+            "detail": "_uid = uid"
+          },
+          {
+            "kind": "branch",
+            "detail": "if previous != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if uid != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(AuthSnapshot snapshot)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if _disposed → return (void)",
+          "if uid == _uid → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController._register",
+      "kind": "method",
+      "object": {
+        "signature": "(String uid) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFcmTokenField"
+          },
+          {
+            "kind": "field",
+            "name": "_gateway"
+          },
+          {
+            "kind": "field",
+            "name": "_local"
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          },
+          {
+            "kind": "field",
+            "name": "_users"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "PushController.onAuthChanged"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "g = _gateway"
+          },
+          {
+            "kind": "compute",
+            "detail": "users = _users"
+          },
+          {
+            "kind": "precond",
+            "detail": "if g == null || users == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _uid != uid → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "local = _local"
+          },
+          {
+            "kind": "branch",
+            "detail": "if local != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "granted = await g.requestPermission()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !granted"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _uid != uid → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if local != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _uid != uid → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "token = await g.getToken()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if token == null || token.isEmpty"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _uid != uid → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "await users.set(uid, <String, dynamic>{kFcmTokenField : token})"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "ensureInitialised",
+        "getToken",
+        "requestAndroid13Permission",
+        "requestPermission",
+        "set"
+      ],
+      "contract": {
+        "input": "(String uid)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [
+          "if g == null || users == null → return (void)",
+          "if _uid != uid → return (void)",
+          "if _uid != uid → return (void)",
+          "if _uid != uid → return (void)",
+          "if _uid != uid → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController._unregister",
+      "kind": "method",
+      "object": {
+        "signature": "(String uid) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFcmTokenField"
+          },
+          {
+            "kind": "field",
+            "name": "_gateway"
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          },
+          {
+            "kind": "field",
+            "name": "_users"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "PushController.onAuthChanged"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _uid == uid → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "users = _users"
+          },
+          {
+            "kind": "branch",
+            "detail": "if users != null"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "deleteToken",
+        "set"
+      ],
+      "contract": {
+        "input": "(String uid)",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [
+          "if _uid == uid → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController._handleTokenRefresh",
+      "kind": "method",
+      "object": {
+        "signature": "(String token) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFcmTokenField"
+          },
+          {
+            "kind": "field",
+            "name": "_disposed",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_uid"
+          },
+          {
+            "kind": "field",
+            "name": "_users"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_chain",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_enqueue",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if token.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_enqueue(() async {final uid = _uid; final users = _users; if (uid == null || users == nu…"
+          }
+        ]
+      },
+      "floor": [
+        "set"
+      ],
+      "contract": {
+        "input": "(String token)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if token.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController._handleForeground",
+      "kind": "method",
+      "object": {
+        "signature": "(PushMessage message) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kChatPushChannelId",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kDefaultPushChannelId",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kOrdersPushChannelId",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_disposed",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_local"
+          },
+          {
+            "kind": "field",
+            "name": "_onForeground"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_chain",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "pushToastText",
+            "module": true
+          },
+          {
+            "name": "_enqueue",
+            "module": true
+          },
+          {
+            "name": "pushChannelIdFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "debugPrint",
+        "hook",
+        "show",
+        "showGlobalToast"
+      ],
+      "contract": {
+        "input": "(PushMessage message)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController._handleOpened",
+      "kind": "method",
+      "object": {
+        "signature": "(PushMessage message) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_onOpened"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "PushController._deliverInitialMessage"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "debugPrint",
+        "hook"
+      ],
+      "contract": {
+        "input": "(PushMessage message)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController._deliverInitialMessage",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_disposed"
+          },
+          {
+            "kind": "field",
+            "name": "_gateway"
+          },
+          {
+            "kind": "field",
+            "name": "_onOpened",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_handleOpened",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "g = _gateway"
+          },
+          {
+            "kind": "precond",
+            "detail": "if g == null → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "initial = await g.initialMessage()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if initial != null && !_disposed"
+          }
+        ]
+      },
+      "floor": [
+        "initialMessage"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [
+          "if g == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "PushController.dispose",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_disposed"
+          },
+          {
+            "kind": "field",
+            "name": "_foregroundSub"
+          },
+          {
+            "kind": "field",
+            "name": "_openedSub"
+          },
+          {
+            "kind": "field",
+            "name": "_refreshSub"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_disposed = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_foregroundSub?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_foregroundSub = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_openedSub?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_openedSub = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_refreshSub?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_refreshSub = null"
+          }
+        ]
+      },
+      "floor": [
+        "cancel"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

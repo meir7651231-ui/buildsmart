@@ -1,0 +1,10 @@
+# Conformance + regression manifest — TEMPLATE. Copy, fill, and pass to the gate:
+#   central-verify.sh <app-dir> --assert this-file
+# Paths are relative to <app-dir>. Each line is a BYTE assertion (delegated to grep-verify.sh):
+#   <relpath>:::<regex>     the file MUST contain <regex>     (conformance: a required verbatim string)
+#   <relpath>:::!<regex>    the file must NOT contain <regex>  (regression: a banned/buggy string)
+# Lines starting with # and blank lines are ignored. An EMPTY (all-comment) manifest FAILS — no silent pass.
+#
+# Example (uncomment + adapt to your project's invariants):
+# lib/data/menu_trees.dart:::הסל שלי
+# lib/screens/foo_screen.dart:::!oldBuggyString

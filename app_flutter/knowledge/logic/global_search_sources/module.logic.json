@@ -1,0 +1,701 @@
+{
+  "module": "global_search_sources",
+  "source": "lib/features/global_search/global_search_sources.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "fn": "_bestScore",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String query, Iterable<String> texts) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "screenSource"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "best = 0.0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in texts"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = scoreMatch(query, t)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s > best"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "scoreMatch"
+      ],
+      "contract": {
+        "input": "(String query, Iterable<String> texts)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "screenSource",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String query, int max) -> List<SearchResult>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_bestScore",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "hits = <SearchResult>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final KbDestination d in matchDestinations(query, max: max)"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = _bestScore(query, <String>[d.label, ...d.keywords])"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s < 2 → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "hits.add(SearchResult(kind: SearchResultKind.screen, title: d.label, score: s, run: d.run…"
+          },
+          {
+            "kind": "return",
+            "detail": "hits"
+          }
+        ]
+      },
+      "floor": [
+        "SearchResult",
+        "add",
+        "matchDestinations"
+      ],
+      "contract": {
+        "input": "(String query, int max)",
+        "output": "List<SearchResult>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "productSource",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String query, int max) -> List<SearchResult>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "hits = <SearchResult>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kDivePool"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = scoreMatch(query, p.nameHe)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s <= 0 → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "hits.add(SearchResult(kind: SearchResultKind.product, title: p.nameHe, subtitle: p.catego…"
+          },
+          {
+            "kind": "effect",
+            "detail": "hits.sort((a, b) => b.score.compareTo(a.score))"
+          },
+          {
+            "kind": "return",
+            "detail": "hits.length <= max ? hits : hits.sublist(0, max)"
+          }
+        ]
+      },
+      "floor": [
+        "SearchResult",
+        "add",
+        "compareTo",
+        "scoreMatch",
+        "showLipskeyProductSheet",
+        "sort",
+        "sublist",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String query, int max)",
+        "output": "List<SearchResult>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "chatSourceFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> SearchSource",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "mainTabProvider"
+          },
+          {
+            "kind": "global",
+            "name": "updatesChatOpenProvider"
+          },
+          {
+            "kind": "global",
+            "name": "updatesSubTabProvider"
+          },
+          {
+            "kind": "global",
+            "name": "visibleThreadsProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildEntitySearchIndex",
+          "buildGlobalSearchIndex"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(query, max) {final hits = <SearchResult>[]; for (final t in ref.read(visibleThreadsProvi…"
+          }
+        ]
+      },
+      "floor": [
+        "SearchResult",
+        "add",
+        "compareTo",
+        "read",
+        "scoreMatch",
+        "sort",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "SearchSource",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "orderSourceFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> SearchSource",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "mainTabProvider"
+          },
+          {
+            "kind": "global",
+            "name": "storeOrderOpenProvider"
+          },
+          {
+            "kind": "global",
+            "name": "storeOrdersProvider"
+          },
+          {
+            "kind": "global",
+            "name": "storeSectionProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildEntitySearchIndex",
+          "buildGlobalSearchIndex"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(query, max) {final hits = <SearchResult>[]; for (final o in ref.read(storeOrdersProvider…"
+          }
+        ]
+      },
+      "floor": [
+        "SearchResult",
+        "add",
+        "compareTo",
+        "read",
+        "scoreMatch",
+        "sort",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "SearchSource",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "notifSourceFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> SearchSource",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "activeNotifViewsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "mainTabProvider"
+          },
+          {
+            "kind": "global",
+            "name": "notifSectionProvider"
+          },
+          {
+            "kind": "global",
+            "name": "updatesSubTabProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildEntitySearchIndex",
+          "buildGlobalSearchIndex"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(query, max) {final hits = <SearchResult>[]; for (final n in ref.read(activeNotifViewsPro…"
+          }
+        ]
+      },
+      "floor": [
+        "SearchResult",
+        "add",
+        "compareTo",
+        "read",
+        "scoreMatch",
+        "sort",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "SearchSource",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "taskSourceFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> SearchSource",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "tasksProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildEntitySearchIndex",
+          "buildGlobalSearchIndex"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(query, max) {final hits = <SearchResult>[]; for (final t in ref.read(tasksProvider)) {fi…"
+          }
+        ]
+      },
+      "floor": [
+        "SearchResult",
+        "add",
+        "compareTo",
+        "read",
+        "scoreMatch",
+        "showTaskDetailSheet",
+        "sort",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "SearchSource",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "customerSourceFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> SearchSource",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "managerCustomersProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildEntitySearchIndex",
+          "buildGlobalSearchIndex"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(query, max) {final hits = <SearchResult>[]; for (final c in ref.read(managerCustomersPro…"
+          }
+        ]
+      },
+      "floor": [
+        "SearchResult",
+        "add",
+        "compareTo",
+        "read",
+        "scoreMatch",
+        "showCustomerDetailSheet",
+        "sort",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "SearchSource",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildGlobalSearchIndex",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> GlobalSearchIndex",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "activeNotifViewsProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mainTabProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "managerCustomersProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "notifSectionProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "storeOrderOpenProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "storeOrdersProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "storeSectionProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "tasksProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "updatesChatOpenProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "updatesSubTabProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "visibleThreadsProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "chatSourceFor",
+            "module": true
+          },
+          {
+            "name": "orderSourceFor",
+            "module": true
+          },
+          {
+            "name": "notifSourceFor",
+            "module": true
+          },
+          {
+            "name": "taskSourceFor",
+            "module": true
+          },
+          {
+            "name": "customerSourceFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "GlobalSearchIndex(<SearchSource>[screenSource, productSource, chatSourceFor(ref), orderSo…"
+          }
+        ]
+      },
+      "floor": [
+        "GlobalSearchIndex"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "GlobalSearchIndex",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildEntitySearchIndex",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> GlobalSearchIndex",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "activeNotifViewsProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mainTabProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "managerCustomersProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "notifSectionProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "storeOrderOpenProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "storeOrdersProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "storeSectionProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "tasksProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "updatesChatOpenProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "updatesSubTabProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "visibleThreadsProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "chatSourceFor",
+            "module": true
+          },
+          {
+            "name": "orderSourceFor",
+            "module": true
+          },
+          {
+            "name": "notifSourceFor",
+            "module": true
+          },
+          {
+            "name": "taskSourceFor",
+            "module": true
+          },
+          {
+            "name": "customerSourceFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "GlobalSearchIndex(<SearchSource>[screenSource, chatSourceFor(ref), orderSourceFor(ref), n…"
+          }
+        ]
+      },
+      "floor": [
+        "GlobalSearchIndex"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "GlobalSearchIndex",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "matched": 3,
+  "total": 3,
+  "summary": "3/3",
+  "entries": [
+    {
+      "id": "worker.today.title",
+      "ok": true,
+      "atom": "WorkerTodayStrip"
+    },
+    {
+      "id": "worker.today.empty",
+      "ok": true,
+      "atom": "WorkerTodayStrip"
+    },
+    {
+      "id": "worker.today.alldone",
+      "ok": true,
+      "atom": "WorkerTodayStrip"
+    }
+  ]
+}

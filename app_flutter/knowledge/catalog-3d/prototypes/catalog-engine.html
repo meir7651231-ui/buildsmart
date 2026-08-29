@@ -1,0 +1,206 @@
+<title>מנוע קטלוג→3D — פרמטרי</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{--bg:#e9edf1;--panel:#fff;--ink:#152029;--soft:#5a6b7b;--line:#d2dae2;--accent:#5a9e4b;--steel:#3f6591;
+    --grid:rgba(63,101,145,.09);--sky-top:#eef3ef;--sky-bot:#d9e3dc;
+    --fh:"Rubik","Heebo","Segoe UI",system-ui,"Arial Hebrew",sans-serif;
+    --fb:"Assistant","Heebo","Segoe UI",system-ui,sans-serif;--fd:ui-monospace,"JetBrains Mono",Consolas,monospace;}
+  @media (prefers-color-scheme:dark){:root{--bg:#0d141c;--panel:#151f2a;--ink:#e6edf3;--soft:#93a5b5;--line:#26333f;
+    --accent:#6cbf58;--steel:#6f97c4;--grid:rgba(111,151,196,.11);--sky-top:#111d18;--sky-bot:#0a1119;}}
+  :root[data-theme="light"]{--bg:#e9edf1;--panel:#fff;--ink:#152029;--soft:#5a6b7b;--line:#d2dae2;--accent:#5a9e4b;--grid:rgba(63,101,145,.09);--sky-top:#eef3ef;--sky-bot:#d9e3dc;}
+  :root[data-theme="dark"]{--bg:#0d141c;--panel:#151f2a;--ink:#e6edf3;--soft:#93a5b5;--line:#26333f;--accent:#6cbf58;--grid:rgba(111,151,196,.11);--sky-top:#111d18;--sky-bot:#0a1119;}
+  *{box-sizing:border-box}html{direction:rtl}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--fb);
+    display:flex;flex-direction:column;align-items:center;padding:clamp(14px,4vw,34px) 14px 34px;gap:14px;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:26px 26px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:640px;display:flex;flex-direction:column;gap:13px}
+  .eyebrow{font-family:var(--fd);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--accent);border-radius:2px}
+  h1{font-family:var(--fh);font-weight:800;font-size:clamp(19px,4.6vw,24px);margin:0;letter-spacing:-.01em}
+  .sub{color:var(--soft);font-size:13px;margin:2px 0 0}
+  select{width:100%;font-family:var(--fb);font-size:14px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink)}
+  .stage{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 20px 55px -26px rgba(0,0,0,.5);
+    background:linear-gradient(180deg,var(--sky-top),var(--sky-bot))}
+  canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}
+  .pipe{position:absolute;inset-block-start:10px;inset-inline-start:12px;font-family:var(--fd);font-size:10px;color:var(--soft);
+    background:color-mix(in srgb,var(--panel) 75%,transparent);border:1px solid var(--line);border-radius:8px;padding:5px 9px;max-width:80%;line-height:1.5}
+  .pipe b{color:var(--accent)}
+  .ctrl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .ctrl button{font-family:var(--fb);font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:7px 12px}
+  .ctrl button:hover{border-color:var(--accent)}
+  .card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:12px 15px;font-size:12.5px;line-height:1.6}
+  .card b{color:var(--accent)}.card code{font-family:var(--fd);font-size:11px;color:var(--steel)}
+  .card ol{margin:6px 0 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:3px}
+  .dims{font-family:var(--fd);font-size:11px;color:var(--soft);margin-top:6px}
+  footer{max-width:640px;font-size:11px;color:var(--soft);text-align:center;line-height:1.6}
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:3px}
+</style>
+
+<div class="wrap">
+  <div>
+    <span class="eyebrow">מנוע · קטלוג → 3D פרמטרי</span>
+    <h1>בוחרים מוצר — המנוע מייצר את ה־3D</h1>
+    <p class="sub">אותו מנוע לכל האביזרים: קטגוריה→תבנית, מידות→פרמטרים, צבע→חומר.</p>
+  </div>
+
+  <select id="pick" aria-label="בחירת מוצר"></select>
+
+  <div class="stage">
+    <canvas id="c" aria-label="אביזר תלת־ממדי מחולל"></canvas>
+    <div class="pipe" id="pipe"></div>
+  </div>
+
+  <div class="ctrl">
+    <button id="spin">⏸︎ עצור סיבוב</button>
+    <button id="reset">איפוס מבט</button>
+  </div>
+
+  <div class="card">
+    <b>המנוע ב־3 שלבים</b> (כל מוצר עובר בהם):
+    <ol>
+      <li><code>קטגוריה → תבנית</code> — מתאם→hexAdapter · מצמד→coupler · מעבר→reducer · ברך→elbow · מסעף→tee.</li>
+      <li><code>מידות → פרמטרים</code> — A/B/D/E/F/G/R משורת הקטלוג מזינות את התבנית (revolve/hexRod/sphere).</li>
+      <li><code>צבע/חומר → חומר PBR</code> — PPR→ירוק · תבריג→פליז.</li>
+    </ol>
+    <div class="dims" id="dims"></div>
+  </div>
+  <footer>הוכחת־מנוע: 5 תבניות פרמטריות + ספריית פרימיטיבים (revolve · hexRod · sphere) מכסות משפחות שלמות בקטלוג — 1,948 SKU בלי מודל ידני. אותו קוד, נתונים שונים.</footer>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById('c');const gl=cv.getContext('webgl',{antialias:true,alpha:false});
+const M={mul:(a,b)=>{const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;},
+ id:()=>{const m=new Float32Array(16);m[0]=m[5]=m[10]=m[15]=1;return m;},t:(x,y,z)=>{const m=M.id();m[12]=x;m[13]=y;m[14]=z;return m;},
+ rotZ:a=>{const m=M.id(),c=Math.cos(a),s=Math.sin(a);m[0]=c;m[1]=s;m[4]=-s;m[5]=c;return m;},
+ rotY:a=>{const m=M.id(),c=Math.cos(a),s=Math.sin(a);m[0]=c;m[2]=-s;m[8]=s;m[10]=c;return m;},
+ persp:(f,as,n,fa)=>{const t=1/Math.tan(f/2),m=new Float32Array(16);m[0]=t/as;m[5]=t;m[10]=(fa+n)/(n-fa);m[11]=-1;m[14]=2*fa*n/(n-fa);return m;},
+ look:(e,c,u)=>{let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]],zl=Math.hypot(...z);z=z.map(v=>v/zl);
+   let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]],xl=Math.hypot(...x)||1;x=x.map(v=>v/xl);
+   let y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+   return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]);}};
+function nrm(m){const a=m[0],b=m[1],c=m[2],d=m[4],e=m[5],f=m[6],g=m[8],h=m[9],i=m[10];const A=e*i-f*h,B=f*g-d*i,C=d*h-e*g;let det=a*A+b*B+c*C;det=det?1/det:0;
+  const v=[A*det,(c*h-b*i)*det,(b*f-c*e)*det,B*det,(a*i-c*g)*det,(c*d-a*f)*det,C*det,(b*g-a*h)*det,(a*e-b*d)*det];return new Float32Array([v[0],v[3],v[6],v[1],v[4],v[7],v[2],v[5],v[8]]);}
+/* ---- primitive library ---- */
+function revolve(prof,seg){const P=[],N=[],I=[];for(let i=0;i<prof.length;i++){const p0=prof[i],p1=prof[(i+1)%prof.length];
+  const dx=p1[0]-p0[0],dr=p1[1]-p0[1];let nx=-dr,nr=dx;const nl=Math.hypot(nx,nr)||1;nx/=nl;nr/=nl;
+  for(let s=0;s<seg;s++){const a0=s/seg*2*Math.PI,a1=(s+1)/seg*2*Math.PI,c0=Math.cos(a0),s0=Math.sin(a0),c1=Math.cos(a1),s1=Math.sin(a1),b=P.length/3;
+   P.push(p0[0],p0[1]*c0,p0[1]*s0);N.push(nx,nr*c0,nr*s0);P.push(p1[0],p1[1]*c0,p1[1]*s0);N.push(nx,nr*c0,nr*s0);
+   P.push(p0[0],p0[1]*c1,p0[1]*s1);N.push(nx,nr*c1,nr*s1);P.push(p1[0],p1[1]*c1,p1[1]*s1);N.push(nx,nr*c1,nr*s1);
+   I.push(b,b+1,b+2,b+2,b+1,b+3);}}return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+function hexRod(sides,r,len,cx){const P=[],N=[],I=[],h=len/2;
+  for(let i=0;i<sides;i++){const a0=i/sides*2*Math.PI,a1=(i+1)/sides*2*Math.PI,am=(a0+a1)/2,nc=Math.cos(am),ns=Math.sin(am),b=P.length/3;
+   P.push(cx-h,r*Math.cos(a0),r*Math.sin(a0));N.push(0,nc,ns);P.push(cx+h,r*Math.cos(a0),r*Math.sin(a0));N.push(0,nc,ns);
+   P.push(cx-h,r*Math.cos(a1),r*Math.sin(a1));N.push(0,nc,ns);P.push(cx+h,r*Math.cos(a1),r*Math.sin(a1));N.push(0,nc,ns);I.push(b,b+1,b+2,b+2,b+1,b+3);}
+  const cL=P.length/3;P.push(cx-h,0,0);N.push(-1,0,0);const cR=P.length/3;P.push(cx+h,0,0);N.push(1,0,0);
+  const rl=[],rr=[];for(let i=0;i<=sides;i++){const a=i/sides*2*Math.PI,c=Math.cos(a),s=Math.sin(a);
+   rl.push(P.length/3);P.push(cx-h,r*c,r*s);N.push(-1,0,0);rr.push(P.length/3);P.push(cx+h,r*c,r*s);N.push(1,0,0);}
+  for(let i=0;i<sides;i++){I.push(cL,rl[i+1],rl[i]);I.push(cR,rr[i],rr[i+1]);}return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+function sphere(r,la,lo){const P=[],N=[],I=[];for(let i=0;i<=la;i++){const th=i/la*Math.PI;for(let j=0;j<=lo;j++){const ph=j/lo*2*Math.PI;
+  const x=r*Math.sin(th)*Math.cos(ph),y=r*Math.cos(th),z=r*Math.sin(th)*Math.sin(ph);P.push(x,y,z);N.push(x/r,y/r,z/r);}}
+  for(let i=0;i<la;i++)for(let j=0;j<lo;j++){const a=i*(lo+1)+j,b=a+lo+1;I.push(a,b,a+1,a+1,b,b+1);}
+  return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+/* socket-arm profile: x0..x1, outer Ro, bore, socket recess (rs,depth) at the open (x0) end */
+function armProf(x0,x1,Ro,bore,rs,ds){return [[x0,Ro],[x1,Ro],[x1,bore],[x0+ds,bore],[x0+ds,rs],[x0,rs]];}
+function couplerProf(L,Ro,bore,rs,ds){const h=L/2;return [[-h,Ro],[h,Ro],[h,rs],[h-ds,rs],[h-ds,bore],[-h+ds,bore],[-h+ds,rs],[-h,rs]];}
+function reducerProf(L,RoL,RoR,boreL,boreR,ds){const h=L/2;return [[-h,RoL],[h,RoR],[h,boreR],[h-ds,boreR],[h-ds,boreL*.8],[-h+ds,boreL],[-h+ds, (RoL+boreL)/2],[-h,(RoL+boreL)/2]];}
+
+/* ---- MATERIAL RESOLVER ---- */
+const MAT={green:{c:[.30,.60,.37],metal:0,rough:.42},brass:{c:[.83,.63,.34],metal:1,rough:.3}};
+
+/* ---- TEMPLATES (dims → draws[]) ---- */
+const S=1/15;
+function T_adapter(d){const A=+d.A||50,B=+d.B||39,E=+d.E||21,R=+d.R||22,G=+d.G||15,bore=(+d.D2||15)/2;
+  const socketLen=20,hexLen=12,thLen=18; // mm
+  const x0=-A/2*S;
+  const sock=armProf(x0,x0+socketLen*S, (B*0.72)/2*S, bore*S, (E/2)*S, socketLen*0.7*S);
+  const th=[]; const tx0=(x0+socketLen*S+hexLen*S), tx1=tx0+thLen*S, base=(R/2)*S,amp=1.6*S,th_n=48;
+  th.push([tx0,base]); for(let k=0;k<=th_n;k++){const x=tx0+(k/th_n)*(tx1-tx0);th.push([x,base+amp*(0.5+0.5*Math.sin(k/th_n*Math.PI*2*10))]);} th.push([tx1,bore*S],[tx0,bore*S]);
+  return [{g:revolve(sock,56),model:M.id(),mat:MAT.green},
+          {g:hexRod(6,(B/2)*S,hexLen*S,(x0+socketLen*S+hexLen/2*S)),model:M.id(),mat:MAT.brass},
+          {g:revolve(th,56),model:M.id(),mat:MAT.brass}];}
+function T_coupler(d){const L=+d.L||45,D=+d.D||40,bore=(+d.d||26)/2;const Ro=D/2;
+  return [{g:revolve(couplerProf(L*S,Ro*S,bore*S,(Ro*0.82)*S,L*0.32*S),64),model:M.id(),mat:MAT.green}];}
+function T_reducer(d){const L=+d.L||50,D1=+d.D1||40,D2=+d.D2||32;
+  return [{g:revolve(reducerProf(L*S,D1/2*S,D2/2*S,(D1*0.4)*S,(D2*0.4)*S,L*0.28*S),64),model:M.id(),mat:MAT.green}];}
+function T_elbow(d){const D=+d.D||32,L=+d.L||46;const Ro=D/2*S,bore=D*0.4*S,rs=Ro*0.82,arm=L*0.7*S,ds=arm*0.55;
+  const armMesh=revolve(armProf(-arm,0.05*S,Ro,bore,rs,ds),56);
+  return [{g:armMesh,model:M.id(),mat:MAT.green},
+          {g:armMesh,model:M.rotZ(Math.PI/2),mat:MAT.green},
+          {g:sphere(Ro*1.02,20,28),model:M.id(),mat:MAT.green}];}
+function T_tee(d){const D=+d.D||32,L=+d.L||50;const Ro=D/2*S,bore=D*0.4*S,rs=Ro*0.82,arm=L*0.7*S,ds=arm*0.55;
+  const armMesh=revolve(armProf(-arm,0.05*S,Ro,bore,rs,ds),56);
+  return [{g:armMesh,model:M.id(),mat:MAT.green},
+          {g:armMesh,model:M.rotZ(Math.PI),mat:MAT.green},
+          {g:armMesh,model:M.rotZ(-Math.PI/2),mat:MAT.green},
+          {g:sphere(Ro*1.02,20,28),model:M.id(),mat:MAT.green}];}
+const TEMPLATES={adapter:T_adapter,coupler:T_coupler,reducer:T_reducer,elbow:T_elbow,tee:T_tee};
+
+/* ---- CATALOG ROWS (real SKUs from polyroll_catalog.dart) ---- */
+const CATALOG=[
+ {sku:'6702000200',name:'מתאם PPR רקורד משושה תבריג חיצוני 20×½"',cat:'מתאמים PPR',tmpl:'adapter',dims:{A:50,B:39,E:21,F:28,G:15,R:22,D1:19.5,D2:15}},
+ {sku:'6602000320',name:'מצמד PPR 32',cat:'מצמדים PPR',tmpl:'coupler',dims:{L:45,D:44,d:32}},
+ {sku:'6603000403',name:'מעבר PPR 40×32',cat:'מעברים PPR',tmpl:'reducer',dims:{L:50,D1:44,D2:36}},
+ {sku:'6601000320',name:'ברך PPR 90° 32',cat:'ברכיים PPR',tmpl:'elbow',dims:{D:44,L:52}},
+ {sku:'6604000320',name:'מסעף PPR (טי) 32',cat:'מסעפים PPR',tmpl:'tee',dims:{D:44,L:56}},
+];
+
+/* ---- GL ---- */
+function mkProg(vs,fs){const p=gl.createProgram();const a=gl.createShader(gl.VERTEX_SHADER);gl.shaderSource(a,vs);gl.compileShader(a);gl.attachShader(p,a);
+  const b=gl.createShader(gl.FRAGMENT_SHADER);gl.shaderSource(b,fs);gl.compileShader(b);gl.attachShader(p,b);gl.linkProgram(p);return p;}
+const prog=mkProg(
+ `attribute vec3 aPos,aNormal;uniform mat4 uProj,uView,uModel;uniform mat3 uNormal;varying vec3 vN,vW;
+  void main(){vec4 w=uModel*vec4(aPos,1.);vW=w.xyz;vN=normalize(uNormal*aNormal);gl_Position=uProj*uView*w;}`,
+ `precision highp float;varying vec3 vN,vW;uniform vec3 uColor,uLight,uEye;uniform float uMetal,uRough;
+  vec3 env(vec3 d){float t=clamp(d.y*.5+.5,0.,1.);return mix(vec3(.36,.4,.46),vec3(.96,.98,1.),t)+vec3(.4)*pow(max(d.y,0.),3.);}
+  void main(){vec3 N=normalize(vN),V=normalize(uEye-vW),L=normalize(uLight);if(dot(N,V)<0.)N=-N;
+   float NdotL=max(dot(N,L),0.),NdotV=max(dot(N,V),1e-3);vec3 F0=mix(vec3(.04),uColor,uMetal);vec3 F=F0+(1.-F0)*pow(1.-NdotV,5.);
+   vec3 H=normalize(L+V);float sh=mix(14.,300.,1.-uRough);float spec=pow(max(dot(N,H),0.),sh)*(sh+8.)/25.;
+   vec3 ec=env(reflect(-V,N));vec3 amb=uColor*mix(vec3(.2,.23,.27),vec3(.55,.58,.63),N.y*.5+.5);
+   vec3 diff=uColor*(1.-uMetal)*NdotL;vec3 col=amb*.7+diff*.85+F*spec*1.4+ec*F*mix(.12,1.,uMetal)*mix(.4,1.,uMetal);
+   col=pow(col,vec3(.86));gl_FragColor=vec4(col,1.);}`);
+const A={pos:gl.getAttribLocation(prog,'aPos'),nor:gl.getAttribLocation(prog,'aNormal'),proj:gl.getUniformLocation(prog,'uProj'),
+ view:gl.getUniformLocation(prog,'uView'),model:gl.getUniformLocation(prog,'uModel'),normal:gl.getUniformLocation(prog,'uNormal'),
+ color:gl.getUniformLocation(prog,'uColor'),light:gl.getUniformLocation(prog,'uLight'),eye:gl.getUniformLocation(prog,'uEye'),metal:gl.getUniformLocation(prog,'uMetal'),rough:gl.getUniformLocation(prog,'uRough')};
+gl.enable(gl.DEPTH_TEST);gl.useProgram(prog);
+function Mesh(g){const pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,g.P,gl.STATIC_DRAW);
+ const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,g.N,gl.STATIC_DRAW);
+ const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,g.I,gl.STATIC_DRAW);return {pb,nb,ib,n:g.I.length};}
+let draws=[];
+function buildFrom(row){
+  const parts=TEMPLATES[row.tmpl](row.dims);
+  draws=parts.map(p=>({mesh:Mesh(p.g),model:p.model,mat:p.mat}));
+  document.getElementById('pipe').innerHTML=`<b>${row.cat}</b> → תבנית <b>${row.tmpl}()</b><br>מק"ט ${row.sku}`;
+  document.getElementById('dims').textContent='מידות: '+Object.entries(row.dims).map(([k,v])=>`${k}=${v}`).join(' · ');
+}
+/* camera */
+let yaw=0.85,pitch=0.28,dist=5.2,spin=true;
+if(matchMedia('(prefers-reduced-motion:reduce)').matches)spin=false;
+const eye=()=>[dist*Math.cos(pitch)*Math.sin(yaw),dist*Math.sin(pitch),dist*Math.cos(pitch)*Math.cos(yaw)];
+let W,H,lastW=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);const w=cv.clientWidth||320,h=Math.round(w*0.82);cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';W=cv.width;H=cv.height;gl.viewport(0,0,W,H);}
+function hx(h){h=(h||'#d9e3dc').replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];}
+function bind(m){gl.bindBuffer(gl.ARRAY_BUFFER,m.pb);gl.enableVertexAttribArray(A.pos);gl.vertexAttribPointer(A.pos,3,gl.FLOAT,false,0,0);
+ gl.bindBuffer(gl.ARRAY_BUFFER,m.nb);gl.enableVertexAttribArray(A.nor);gl.vertexAttribPointer(A.nor,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,m.ib);}
+function frame(){if(spin)yaw+=0.007;if(cv.clientWidth!==lastW){lastW=cv.clientWidth;resize();}
+  const bg=hx(getComputedStyle(document.documentElement).getPropertyValue('--sky-bot').trim());
+  gl.clearColor(bg[0],bg[1],bg[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const proj=M.persp(0.8,W/H,0.1,100),e=eye(),view=M.look(e,[0,0,0],[0,1,0]);
+  gl.uniformMatrix4fv(A.proj,false,proj);gl.uniformMatrix4fv(A.view,false,view);gl.uniform3fv(A.light,[0.5,0.85,0.6]);gl.uniform3fv(A.eye,e);
+  for(const d of draws){bind(d.mesh);gl.uniformMatrix4fv(A.model,false,d.model);gl.uniformMatrix3fv(A.normal,false,nrm(d.model));
+    gl.uniform3fv(A.color,d.mat.c);gl.uniform1f(A.metal,d.mat.metal);gl.uniform1f(A.rough,d.mat.rough);gl.drawElements(gl.TRIANGLES,d.mesh.n,gl.UNSIGNED_SHORT,0);}
+  requestAnimationFrame(frame);}
+let drag=false,px=0,py=0;
+cv.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!drag)return;yaw+=(e.clientX-px)*.008;pitch=Math.max(-1.3,Math.min(1.3,pitch+(e.clientY-py)*.008));px=e.clientX;py=e.clientY;});
+addEventListener('pointerup',()=>drag=false);
+cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(3,Math.min(10,dist+e.deltaY*.008));},{passive:false});
+document.getElementById('spin').onclick=e=>{spin=!spin;e.target.textContent=spin?'⏸︎ עצור סיבוב':'▶︎ סובב';};
+document.getElementById('reset').onclick=()=>{yaw=0.85;pitch=0.28;dist=5.2;};
+const sel=document.getElementById('pick');
+CATALOG.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`${r.name}  ·  ${r.sku}`;sel.appendChild(o);});
+sel.onchange=()=>buildFrom(CATALOG[+sel.value]);
+resize();buildFrom(CATALOG[0]);requestAnimationFrame(frame);
+</script>

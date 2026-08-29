@@ -1,0 +1,82 @@
+{
+  "matched": 15,
+  "total": 15,
+  "summary": "15/15",
+  "entries": [
+    {
+      "id": "worker.section.title",
+      "ok": true,
+      "atom": "WorkerAppScreen"
+    },
+    {
+      "id": "worker.action.exit",
+      "ok": true,
+      "atom": "WorkerAppScreen"
+    },
+    {
+      "id": "worker.section.journal",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.action.fullMonth",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker_app_screen.t01",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker_app_screen.t02",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker_app_screen.t03",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.action.checkEquipment",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.action.employerStock",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.action.addTask",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.action.gantt",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.action.defects",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.section.proposeTitle",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.propose.subtitle",
+      "ok": true,
+      "atom": "_TasksTab"
+    },
+    {
+      "id": "worker.action.submit",
+      "ok": true,
+      "atom": "_TasksTab"
+    }
+  ]
+}

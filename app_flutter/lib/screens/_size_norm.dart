@@ -87,14 +87,19 @@ const Map<String, String> kInchPretty = {
   '5/8"': '⅝"',  '7/8"': '⅞"',
 };
 
-/// Inch label → millimetres (for sorting only — display stays verbatim).
+/// Inch label → millimetres (for sorting only — display stays verbatim). Covers
+/// the full eighth-inch sequence 1"–4" so compound whole+fraction bores
+/// (2⅜", 1⅜", 3½"…) tokenise instead of dropping to NO size token (swarm R4 —
+/// e.g. SKU 610708 'פקק שטוח 2⅜"' was invisible on the size axis). mm = inches ×
+/// 25.4; entries that never appear in the catalog are harmless dead keys.
 const Map<String, double> _kInchMm = {
   '⅛"': 3.175, '¼"': 6.35, '⅜"': 9.525,
   '½"': 12.7, '⅝"': 15.875, '¾"': 19.05, '⅞"': 22.225,
-  '1"': 25.4,
-  '1¼"': 31.75, '1½"': 38.1,
-  '2"': 50.8, '2½"': 63.5,
-  '3"': 76.2, '4"': 101.6, '6"': 152.4,
+  '1"': 25.4, '1⅛"': 28.575, '1¼"': 31.75, '1⅜"': 34.925, '1½"': 38.1,
+  '1⅝"': 41.275, '1¾"': 44.45, '1⅞"': 47.625,
+  '2"': 50.8, '2¼"': 57.15, '2⅜"': 60.325, '2½"': 63.5, '2¾"': 69.85,
+  '3"': 76.2, '3¼"': 82.55, '3½"': 88.9, '3¾"': 95.25,
+  '4"': 101.6, '6"': 152.4,
 };
 
 /// Size tokens (NO angles — angle has its own regex/axis).
@@ -211,10 +216,16 @@ List<SizeToken> tokensFromDims(Map<String, dynamic> dims) {
   final out = <SizeToken>[];
   final dnRaw = (dims['DN'] ?? dims['dn'] ?? dims['mm'])?.toString();
   if (dnRaw != null && dnRaw.trim().isNotEmpty) {
-    final n = double.tryParse(dnRaw.trim());
-    if (n != null) {
-      out.add(SizeToken(label: 'DN${n.toInt()}',
-          family: SizeFamily.dnDiameter, mm: n,),);
+    // A slash-pair like '110/50' is a reducer's two bores (swarm R4) — emit a DN
+    // token for EACH part so the product is findable by either, instead of
+    // dropping entirely (double.tryParse('110/50') is null). A plain '110' splits
+    // to a single part → one token, byte-identical to before.
+    for (final part in dnRaw.trim().split('/')) {
+      final n = double.tryParse(part.trim());
+      if (n != null) {
+        out.add(SizeToken(label: 'DN${n.toInt()}',
+            family: SizeFamily.dnDiameter, mm: n,),);
+      }
     }
   }
   final cm = double.tryParse(dims['L (cm)']?.toString() ?? '');
@@ -240,13 +251,20 @@ void sortSizeTokens(List<SizeToken> toks) {
 }
 
 /// Length-only family rank: prefer cm (most product-like, compact), then
-/// meters, then mm. Used by [dedupLengthByMm] to collapse equivalent length
+/// meters. Used by [dedupLengthByMm] to collapse equivalent length
 /// representations (e.g. `15 ס"מ` and `0.15 מ׳` are the same physical value
 /// and should not both be chips).
+///
+/// `mm` is deliberately EXCLUDED: an `mm` token is almost always a DIAMETER
+/// (a `250 מ"מ` shower head) or a cross-dim OD (`16×20`, tokenized as `mm`),
+/// not a length. Collapsing by raw mm-value wrongly merged `250 מ"מ` with
+/// `25 ס"מ` and `16×20` with `16×16` (same first dim) into one chip — and
+/// because the per-product filter (`_productHasChip`) matches by exact label,
+/// every product carrying the collapsed-away label became unreachable by the
+/// surviving chip. Keeping mm out means each mm token stays its own chip.
 const Map<SizeFamily, int> _kLengthFamilyRank = {
   SizeFamily.cm: 0,
   SizeFamily.meters: 1,
-  SizeFamily.mm: 2,
 };
 
 /// Collapse equivalent length tokens (same `mm`, length families) to a single
@@ -326,3 +344,21 @@ List<String> letterSizeTokens(String name) {
 /// (e.g. `40×60` → `60×40`). Plain Hebrew words keep the ambient direction.
 TextDirection? chipLabelDirection(String label) =>
     label.contains(RegExp(r'\d')) ? TextDirection.ltr : null;
+
+/// Wall-thickness values from cross-dim tokens (`20×2.8` → `2.8`). PPR &
+/// multilayer pipes ship the SAME outer diameter at different walls (PN
+/// pressure ratings — e.g. OD 40 comes in 3.7 and 5.5), so wall is a real
+/// second filter axis, not derivable from OD. Returns distinct walls,
+/// numeric-ascending. Empty when the name carries no cross-dim.
+final RegExp _kCrossWallRe = RegExp(r'\d+(?:\.\d+)?×(\d+(?:\.\d+)?)');
+
+List<String> wallTokens(String name) {
+  final out = <String>{};
+  for (final m in _kCrossWallRe.allMatches(name)) {
+    out.add(m.group(1)!);
+  }
+  final list = out.toList()
+    ..sort((a, b) => (double.tryParse(a) ?? double.infinity)
+        .compareTo(double.tryParse(b) ?? double.infinity));
+  return list;
+}

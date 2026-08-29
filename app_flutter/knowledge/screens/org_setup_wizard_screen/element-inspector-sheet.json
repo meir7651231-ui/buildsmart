@@ -1,0 +1,73 @@
+{
+  "name": "_ElementInspectorSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "אפס לברירת-מחדל"
+      },
+      {
+        "kind": "text",
+        "text": "החל וסגור (חי)"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "אפס לברירת-מחדל",
+      "החל וסגור (חי)"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "resolvedNodeProvider(_d.id)"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "configStoreProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "studioOwnerEmailProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "criticalIdsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "previewEmoji = _hasEmoji && _emoji.text.isNotEmpty ? … : …",
+        "effect": "text: '${_emoji.text} ' | ''"
+      }
+    ]
+  },
+  "floor": [
+    "applyCfgTextStyle",
+    "applyOps",
+    "publish",
+    "resolvedNodeProvider",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": false,
+    "props": [
+      "descriptor"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

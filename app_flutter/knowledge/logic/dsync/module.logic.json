@@ -1,0 +1,448 @@
+{
+  "module": "dsync",
+  "source": "lib/test_harness/tests/dsync.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "testDsync",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TestResult>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_validPersonaIds",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kBrands",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogCats",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogProducts",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogTree",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kLipskeyCatalog",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPersonas",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kProfileEmptyCatalog",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kSmartTreeCats",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "unknownBrandRefs.add",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_coreChecks",
+            "module": true
+          },
+          {
+            "name": "_brandsAndTreeChecks",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "[_coreChecks(), _brandsAndTreeChecks()]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<TestResult>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_coreChecks",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> TestResult",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_validPersonaIds"
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogCats"
+          },
+          {
+            "kind": "const",
+            "name": "kPersonas"
+          },
+          {
+            "kind": "const",
+            "name": "kProfileEmptyCatalog"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartTreeCats"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "testDsync"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "checks = <TestCheck>[]"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('kPersonas מכיל 5 דמויות', kPersonas.length == 5, expected: '5', got: '${kPersonas.le…"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kPersonas"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('persona id חוקי: ${p.id}', _validPersonaIds.contains(p.id), expected: _validPersonaI…"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('kCatalogCats אינו ריק', kCatalogCats.isNotEmpty, got: '${kCatalogCats.length}')"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final cat in kCatalogCats"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('קטגוריה ${cat.id} עם title', cat.title.isNotEmpty, got: cat.title)"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('קטגוריה ${cat.id} עם emoji', cat.emoji.isNotEmpty, got: cat.emoji)"
+          },
+          {
+            "kind": "effect",
+            "detail": "add(kProfileEmptyCatalog ? 'kSmartProducts ריק (קונכייה נקייה)' : 'kSmartProducts אינו רי…"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('kSmartTreeCats אינו ריק', kSmartTreeCats.isNotEmpty, got: '${kSmartTreeCats.length}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "treeCats = kSmartTreeCats.toSet()"
+          },
+          {
+            "kind": "compute",
+            "detail": "orphans = kSmartProducts.where((p) => !treeCats.contains(p.cat))"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('כל מוצר חכם משתייך לקטגוריה ידועה', orphans.isEmpty, expected: '0 יתומים', got: '${o…"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final cat in kSmartTreeCats"
+          },
+          {
+            "kind": "compute",
+            "detail": "list = smartProductsForCat(cat)"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('smartProductsForCat(\"$cat\") מחזיר ≥1', list.isNotEmpty, got: '${list.length}')"
+          },
+          {
+            "kind": "return",
+            "detail": "TestResult(id: 'dsync:core', category: TestCategory.dsync, label: 'סנכרון נתונים-תצוגה (א…"
+          }
+        ]
+      },
+      "floor": [
+        "TestCheck",
+        "TestResult",
+        "add",
+        "contains",
+        "join",
+        "smartProductsForCat",
+        "toSet",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TestResult",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_brandsAndTreeChecks",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> TestResult",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBrands"
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogProducts"
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          },
+          {
+            "kind": "const",
+            "name": "kLipskeyCatalog"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "unknownBrandRefs.add"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "testDsync"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "checks = <TestCheck>[]"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('kBrands מכיל ≥1 מותגים', kBrands.isNotEmpty, got: '${kBrands.length}')"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final b in kBrands"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('מותג ${b.id}: id לא ריק', b.id.isNotEmpty, got: b.id)"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('מותג ${b.id}: name לא ריק', b.name.isNotEmpty, got: b.name)"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('מותג ${b.id}: emoji לא ריק', b.emoji.isNotEmpty, got: b.emoji)"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('מותג ${b.id}: color != 0', b.color != 0, got: '0x${b.color.toRadixString(16)}')"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final b in kBrands"
+          },
+          {
+            "kind": "compute",
+            "detail": "found = brandById(b.id)"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('brandById(\"${b.id}\") מחזיר מותג', found != null, got: found?.id ?? 'null')"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('kCatalogTree מכיל ≥1 קטגוריות ראשיות', kCatalogTree.isNotEmpty, got: '${kCatalogTree…"
+          },
+          {
+            "kind": "compute",
+            "detail": "leaves = allLeaves()"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('allLeaves() מחזיר ≥1 עלים', leaves.isNotEmpty, got: '${leaves.length}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "leavesNoBrands = leaves.where((l) => l.brandIds.isEmpty).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('כל עלה בעץ הקטלוג מכיל ≥1 brandId', leavesNoBrands.isEmpty, expected: '0 עלים בלי מו…"
+          },
+          {
+            "kind": "compute",
+            "detail": "brandIdSet = kBrands.map((b) => b.id).toSet()"
+          },
+          {
+            "kind": "init",
+            "detail": "unknownBrandRefs = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final l in leaves"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final bid in l.brandIds"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('כל brandId בעץ הקטלוג קיים ב-kBrands', unknownBrandRefs.isEmpty, expected: '0 הפניות…"
+          },
+          {
+            "kind": "init",
+            "detail": "allIds = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final n in kCatalogTree"
+          },
+          {
+            "kind": "effect",
+            "detail": "collectIds(n)"
+          },
+          {
+            "kind": "compute",
+            "detail": "missingIds = allIds.where((id) => findCatalogNode(id) == null).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('findCatalogNode מוצא כל node בעץ', missingIds.isEmpty, expected: '0 nodes חסרים', go…"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('kLipskeyCatalog מכיל ≥1 מוצרים', kLipskeyCatalog.isNotEmpty, got: '${kLipskeyCatalog…"
+          },
+          {
+            "kind": "compute",
+            "detail": "badLipskey = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kLipskeyCatalog"
+          },
+          {
+            "kind": "branch",
+            "detail": "if p.sku.isEmpty || p.nameHe.isEmpty || p.categoryHe.isEmpty"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('כל מוצר ליפסקי עם sku+nameHe+categoryHe', badLipskey == 0, expected: '0 פגומים', got…"
+          },
+          {
+            "kind": "compute",
+            "detail": "lipskeyCategoryNames = kCatalogProducts.map((p) => p.categoryHe).toSet()"
+          },
+          {
+            "kind": "compute",
+            "detail": "leavesWithLipskey = leaves.where((l) => l.lipskeyCategory != null).toList()"
+          },
+          {
+            "kind": "compute",
+            "detail": "unmatchedLeaves = leavesWithLipskey.where((l) => !lipskeyCategoryNames.contains(l.lipskeyCategory)).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "add('כל lipskeyCategory בעלים מצביע לקטגוריה קיימת', unmatchedLeaves.isEmpty, expected: '…"
+          },
+          {
+            "kind": "return",
+            "detail": "TestResult(id: 'dsync:brands-tree', category: TestCategory.dsync, label: 'מותגים, עץ קטלו…"
+          }
+        ]
+      },
+      "floor": [
+        "TestCheck",
+        "TestResult",
+        "add",
+        "allLeaves",
+        "brandById",
+        "collectIds",
+        "contains",
+        "findCatalogNode",
+        "join",
+        "map",
+        "take",
+        "toList",
+        "toRadixString",
+        "toSet",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TestResult",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

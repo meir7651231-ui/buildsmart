@@ -1,0 +1,37 @@
+{
+  "matched": 6,
+  "total": 6,
+  "summary": "6/6",
+  "entries": [
+    {
+      "id": "courier.attend.title",
+      "ok": true,
+      "atom": "CourierAttendanceScreen"
+    },
+    {
+      "id": "courier.attend.today",
+      "ok": true,
+      "atom": "_ClockCard"
+    },
+    {
+      "id": "courier.attend.prev",
+      "ok": true,
+      "atom": "_MonthCard"
+    },
+    {
+      "id": "courier.attend.next",
+      "ok": true,
+      "atom": "_MonthCard"
+    },
+    {
+      "id": "courier.attend.empty",
+      "ok": true,
+      "atom": "_MonthCard"
+    },
+    {
+      "id": "courier.attend.month_total",
+      "ok": true,
+      "atom": "_MonthCard"
+    }
+  ]
+}

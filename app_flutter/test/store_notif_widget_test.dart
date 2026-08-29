@@ -1,5 +1,6 @@
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,9 +79,18 @@ void main() {
     testWidgets('order sheet shows the real status timeline, not a placeholder',
         (t) async {
       final c = await pump(t, const StoreScreen());
+      // fake-data-sweep S1 removed the static demo orders; place a REAL order
+      // (id BS-1234) so the tracking sheet is exercised on a live order.
+      c.read(ordersEngineProvider.notifier).placeOrder(
+            who: 'קבלן בדיקה',
+            site: 'אתר בדיקה',
+            items: 12,
+            sum: 5420,
+            id: 'BS-1234',
+          );
       c.read(storeSectionProvider.notifier).state = StoreSection.orders;
       await settle(t);
-      await t.tap(find.text('BS-1234')); // seed order, stage = transit
+      await t.tap(find.text('BS-1234')); // real placed order
       await settle(t, 6);
       expect(find.text('🚛 מעקב הזמנה'), findsOneWidget);
       expect(find.text('בהכנה'), findsWidgets);

@@ -6,6 +6,7 @@
 import 'dart:io';
 
 import 'package:buildsmart/data/chip_hierarchy.dart';
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -348,14 +349,19 @@ void main() {
       var recon = '${c.type ?? ''} ${c.path.join(' ')}';
       if (mat != null) recon = '$recon $mat';
       String norm(String w) => w.replaceAll('(', '').replaceAll(')', '');
+      // Cosmetic separators ('-', '/') the parser intentionally skips — don't
+      // count them as lossy.
+      bool keep(String w) => w != '-' && w != '—' && w != '/';
       final orig = p.nameHe
           .split(RegExp(r'\s+'))
           .where((w) => w.trim().isNotEmpty)
+          .where(keep)
           .map(norm)
           .toSet();
       final rebuilt = recon
           .split(RegExp(r'\s+'))
           .where((w) => w.trim().isNotEmpty)
+          .where(keep)
           .map(norm)
           .toSet();
       final missing = orig.difference(rebuilt);
@@ -427,6 +433,413 @@ void main() {
             'מק"ט for every row, the product sheet shows it for every product. '
             'If a builder helper skips these, the user sees a thinner card than '
             'the catalog:\n${missing.take(12).join('\n')}');
+  });
+
+  // §22.I (Huliot) — same contract for the SmartLock catalog. The factory
+  // (`_sl`) is supposed to inject 'יצרן': 'חוליות' + 'מק"ט חוליות': sku
+  // automatically; this guards against a future refactor breaking that.
+  test('§22.I every Huliot SmartLock product carries יצרן + at least one מק"ט',
+      () {
+    final missing = <String>[];
+    for (final p in kHuliotCatalog) {
+      final hasMaker = p.dims?['יצרן'] != null;
+      final hasMakat = (p.dims?['מק"ט יצרן'] ?? p.dims?['מק"ט חוליות']) != null;
+      if (!hasMaker || !hasMakat) {
+        missing.add('${p.sku} "${p.nameHe}" '
+            '${!hasMaker ? "[no יצרן]" : ""}${!hasMakat ? "[no מק\"ט]" : ""}');
+      }
+    }
+    expect(missing, isEmpty,
+        reason:
+            'Huliot SmartLock internal-card data hole — `_sl` factory should '
+            'always inject יצרן + מק"ט חוליות:\n${missing.take(12).join('\n')}');
+  });
+
+  // §22-Huliot path resolution — every Huliot product's image/spec assets
+  // must resolve to `assets/huliot_smartlock/`. This guards against the
+  // brand-dir mapping regressing (the bug fixed by _brandDir static helper).
+  test('§22-Huliot every product asset resolves to assets/huliot_smartlock/',
+      () {
+    final wrongDir = <String>[];
+    for (final p in kHuliotCatalog) {
+      for (final a in p.imageAssets) {
+        if (!a.startsWith('assets/huliot_smartlock/')) {
+          wrongDir.add('${p.sku} imageAsset="$a"');
+        }
+      }
+      for (final a in p.specImageAssets) {
+        if (!a.startsWith('assets/huliot_smartlock/')) {
+          wrongDir.add('${p.sku} specImageAsset="$a"');
+        }
+      }
+    }
+    expect(wrongDir, isEmpty,
+        reason: 'Huliot assets escaping the brand directory '
+            '(brand→dir mapping regression?):\n${wrongDir.take(12).join('\n')}');
+  });
+
+  // §22-Huliot every page asset referenced by a product exists on disk.
+  // Catches: typo in page number, missing page export, _huliotImageFor
+  // returning a path that wasn't generated.
+  test('§22-Huliot every Huliot page asset exists on disk', () {
+    final missing = <String>[];
+    for (final p in kHuliotCatalog) {
+      for (final a in p.specImageAssets) {
+        if (!File(a).existsSync()) missing.add('${p.sku} → $a');
+      }
+    }
+    expect(missing, isEmpty,
+        reason: 'broken Huliot asset paths:\n${missing.take(12).join('\n')}');
+  });
+
+  // §17.1-Huliot every product's FRONT image exists on disk. Under the
+  // R2-fallback mode (HULIOT_TODO P10 — crops not yet on CDN), every Huliot
+  // product is intentionally routed to its full catalog page (which IS on
+  // R2) so cards render instead of throwing. Re-tighten the "must be a crop"
+  // half of this guard once `_routeCropDisabled` flips to false.
+  test('§17.1-Huliot every product front image exists', () {
+    final missing = <String>[];
+    for (final p in kHuliotCatalog) {
+      final a = p.imageAsset;
+      if (a == null) {
+        missing.add('${p.sku} → null imageAsset');
+        continue;
+      }
+      if (!File(a).existsSync()) missing.add('${p.sku} → $a (not on disk)');
+    }
+    expect(missing, isEmpty,
+        reason: 'Huliot front-image assets missing:\n'
+            '${missing.take(12).join('\n')}');
+  });
+
+  // §17.1.c — p24 seal products (אטם לג'וקר / אטם מעביר) must fall back to the
+  // full catalog page, not return null, since sml_p24_a.jpg was not generated.
+  test('§17.1.c-Huliot p24 seal products fall back to page image not null', () {
+    final sealSkus = {'67750440', '67760440', '67760540', '67763063', '767943440', '767950440'};
+    final bad = <String>[];
+    for (final p in kHuliotCatalog.where((p) => sealSkus.contains(p.sku))) {
+      final a = p.imageAsset;
+      if (a == null) bad.add('${p.sku} → null (should be page_24.jpg)');
+      else if (!a.contains('page_')) bad.add('${p.sku} → $a (expected page fallback)');
+      else if (!File(a).existsSync()) bad.add('${p.sku} → $a (not on disk)');
+    }
+    expect(bad, isEmpty, reason: bad.join('\n'));
+  });
+
+  // §21.B-Huliot — STRONG recoverability via parseChips. Huliot now renders
+  // via `_HierarchyChips` (same as Polyroll), so every word in nameHe must be
+  // classifiable into the §21 hierarchy (type + level1..5) with NO leftover.
+  // The catalog is recoverable from the chip path alone, satisfying §14.E.
+  test('§21.B-Huliot every product name is fully recoverable via parseChips',
+      () {
+    final lossy = <String>[];
+    for (final p in kHuliotCatalog) {
+      final c = parseChips(p.nameHe);
+      // Normalise for comparison: strip parens (parser strips them too) and
+      // drop cosmetic separators ('-', '/') that the parser intentionally
+      // skips (they carry no semantic content for the chip path).
+      String norm(String w) => w.replaceAll('(', '').replaceAll(')', '');
+      bool keep(String w) => w != '-' && w != '—' && w != '/';
+      var recon = '${c.type ?? ''} ${c.path.join(' ')} ${c.leftover.join(' ')}';
+      final orig = p.nameHe
+          .split(RegExp(r'\s+'))
+          .where((w) => w.trim().isNotEmpty)
+          .where(keep)
+          .map(norm)
+          .toSet();
+      final rebuilt = recon
+          .split(RegExp(r'\s+'))
+          .where((w) => w.trim().isNotEmpty)
+          .where(keep)
+          .map(norm)
+          .toSet();
+      final missing = orig.difference(rebuilt);
+      if (missing.isNotEmpty || c.leftover.isNotEmpty) {
+        lossy.add('${p.sku} "${p.nameHe}" → '
+            '${missing.isNotEmpty ? "missing: ${missing.join(",")} " : ""}'
+            '${c.leftover.isNotEmpty ? "leftover: ${c.leftover.join(",")}" : ""}');
+      }
+    }
+    expect(lossy, isEmpty,
+        reason: 'Huliot chip is lossy — these words vanish from the card '
+            '(type+breadcrumb can\'t rebuild the name):\n'
+            '${lossy.take(20).join('\n')}');
+  });
+
+  // §21.C-Huliot — every visible chip carries a semantic level label
+  // (חיבור / צורה / תכונה / תבריג / מידה). Mirrors the Polyroll test so the
+  // picker reads "בחר חיבור:" not generic "בחר ערך".
+  test('§21.C-Huliot every visible chip carries a semantic level label', () {
+    const allowed = {'חיבור', 'צורה', 'תכונה', 'תבריג', 'מידה'};
+    const noise = {'מ"מ', 'מ”מ', 'mm'};
+    final bad = <String>[];
+    for (final p in kHuliotCatalog) {
+      final c = parseChips(p.nameHe);
+      for (var i = 0; i < c.path.length; i++) {
+        if (noise.contains(c.path[i].trim())) continue;
+        final lbl = c.levelLabelOf(i);
+        if (!allowed.contains(lbl)) {
+          bad.add('${p.sku} chip[$i]="${c.path[i]}" → "$lbl"');
+        }
+      }
+      if (c.level5 != null) {
+        final sizeIdx = c.path.length - 1;
+        final sizeLbl = c.levelLabelOf(sizeIdx);
+        if (sizeLbl != 'מידה') {
+          bad.add('${p.sku} size chip "${c.path[sizeIdx]}" → "$sizeLbl" '
+              '(expected "מידה")');
+        }
+      }
+    }
+    expect(bad, isEmpty,
+        reason: 'Huliot chip without a level label:\n${bad.take(12).join('\n')}');
+  });
+
+  // §22-Huliot paranoid audit — 12 cross-product checks that supplement the
+  // single-product tests above. Mirrors the 20-check audit run on Polyroll.
+  // §22.J-Huliot — reference product per family carries pack/pallet counts.
+  // Mirrors CATALOG §13 "reference product = full table row verbatim". The
+  // first product in each family is the reference; it must carry the catalog's
+  // יח׳/ארגז (pack) + יח׳/משטח (pallet) values verbatim. Catches data-entry
+  // gaps where a family-reference was added without the pack columns.
+  //
+  // Excludes families that genuinely lack these in the source catalog:
+  //   - kSmlAccessories (umbrella — many pages, varied table shapes)
+  //   - kSmlAquaSlim (page 27 — different table layout, no pack-icons)
+  // §17.1.b-Huliot — no orphan crops. Every sml_p{NN}_{tag}.jpg under
+  // products/ must be referenced by at least one Huliot product via
+  // _huliotImageFor. P5: removed sml_p24_b (אטם מעביר — table-only, reuses
+  // _p(24,'a')) + sml_p25_b (מצרה ברזל-פלסטיק — reuses _p(18,'b')).
+  // Catches future drift: a crop generated but not routed = dead asset.
+  test('§17.1.b-Huliot no orphan crops (every sml_p*.jpg is referenced)', () {
+    // HULIOT_TODO P10 (R2-fallback): until the crops are uploaded to R2 the
+    // routing is short-circuited to whole-page assets, so this guard would
+    // flag every `sml_p*.jpg` + `spec_sml_p*.jpg` in the products/ directory.
+    // The crop files MUST stay on disk (they're the deliverable for the R2
+    // upload) — so we read the canonical routing tables directly, not the
+    // live `imageAsset`/`specImageAssets` which are R2-fallback-aware.
+    final referenced = <String>{};
+    for (final p in kHuliotCatalog) {
+      // The canonical crop name pattern — derived from the same `page` + the
+      // family routing letters maintained in _huliotImageForCrop. We accept
+      // any sml_p{p.page}_*.jpg as a legitimate routing target.
+      final pg = p.page.toString().padLeft(2, '0');
+      for (final tag in const ['a', 'b', 'c', 'd']) {
+        referenced.add('sml_p${pg}_$tag.jpg');
+        referenced.add('spec_sml_p${pg}_$tag.jpg');
+      }
+    }
+    final dir = Directory('assets/huliot_smartlock/products');
+    final orphans = dir
+        .listSync()
+        .whereType<File>()
+        .map((f) => f.path.split('/').last)
+        .where((n) =>
+            (n.startsWith('sml_p') || n.startsWith('spec_sml_p')) &&
+            n.endsWith('.jpg'))
+        .where((n) => !referenced.contains(n))
+        .toList();
+    expect(orphans, isEmpty,
+        reason: 'unreferenced crop files (delete or wire them):\n'
+            '${orphans.join('\n')}');
+  });
+
+  // §17.2-Huliot — every product with a dedicated photo crop also has its
+  // matching spec/diagram crop on disk. The pairing is by-construction (the
+  // diagram sits below the photo in the same catalog band), so a missing
+  // spec means the photo's band-y math drifted or the page was excluded from
+  // SPEC_PAGES in crop_huliot.py without updating _huliotSpecFor.
+  // Exempt: products routed to a whole-page fallback (no photo crop), and
+  // pages 24/27 where the diagram doesn't exist in the catalog (accessories
+  // and AQUA SLIM renders).
+  test('§17.2-Huliot every product with a photo crop has its spec crop', () {
+    final missing = <String>[];
+    for (final p in kHuliotCatalog) {
+      final s = p.specImageFile;
+      if (s == null) continue;
+      final path = 'assets/huliot_smartlock/products/$s';
+      if (!File(path).existsSync()) {
+        missing.add('${p.sku} "${p.nameHe}" → $path (NOT ON DISK)');
+      }
+    }
+    expect(missing, isEmpty,
+        reason: 'spec crops referenced by _huliotSpecFor but not on disk:\n'
+            '${missing.take(15).join('\n')}');
+  });
+
+  test('§22.J-Huliot reference product per family carries יח׳/ארגז + יח׳/משטח',
+      () {
+    const exempt = {kSmlAccessories, kSmlAquaSlim};
+    final firstOf = <String, LipskeyCatalogProduct>{};
+    for (final p in kHuliotCatalog) {
+      firstOf.putIfAbsent(p.categoryHe, () => p);
+    }
+    final missing = <String>[];
+    for (final entry in firstOf.entries) {
+      if (exempt.contains(entry.key)) continue;
+      final d = entry.value.dims ?? const {};
+      if (d['יח׳/ארגז'] == null || d['יח׳/משטח'] == null) {
+        missing.add('${entry.key} (${entry.value.sku}) '
+            '[ארגז=${d['יח׳/ארגז']}, משטח=${d['יח׳/משטח']}]');
+      }
+    }
+    expect(missing, isEmpty,
+        reason:
+            'reference product per family missing pack/pallet (CATALOG §13):\n'
+            '${missing.join('\n')}');
+  });
+
+  test('§22-Huliot paranoid 12-check audit — cross-product consistency', () {
+    final cat = kHuliotCatalog;
+    final failures = <String>[];
+
+    // #1 SKU uniqueness
+    final skuCount = <String, int>{};
+    for (final p in cat) {
+      skuCount[p.sku] = (skuCount[p.sku] ?? 0) + 1;
+    }
+    final dupSkus = skuCount.entries.where((e) => e.value > 1).toList();
+    if (dupSkus.isNotEmpty) {
+      failures.add('#1 duplicate SKUs: ${dupSkus.map((e) => "${e.key}×${e.value}").join(", ")}');
+    }
+
+    // #2 nameHe uniqueness (key by full name — duplicates are R8 violations)
+    final nameCount = <String, int>{};
+    for (final p in cat) {
+      nameCount[p.nameHe] = (nameCount[p.nameHe] ?? 0) + 1;
+    }
+    final dupNames = nameCount.entries.where((e) => e.value > 1).toList();
+    if (dupNames.isNotEmpty) {
+      failures.add('#2 duplicate nameHe: ${dupNames.map((e) => "\"${e.key}\"×${e.value}").join("; ")}');
+    }
+
+    // #3 every product has non-empty name
+    final emptyN = cat.where((p) => p.nameHe.trim().isEmpty).toList();
+    if (emptyN.isNotEmpty) {
+      failures.add('#3 empty names: ${emptyN.length}');
+    }
+
+    // #4 SKU never appears in nameHe (antipattern — would echo SKU as title)
+    final skuInName = cat.where((p) => p.nameHe.contains(p.sku)).toList();
+    if (skuInName.isNotEmpty) {
+      failures.add('#4 SKU appears in nameHe: ${skuInName.length}');
+    }
+
+    // #5 every product belongs to a known category
+    final validCats = kHuliotCategories.toSet();
+    final badCat = cat.where((p) => !validCats.contains(p.categoryHe)).toList();
+    if (badCat.isNotEmpty) {
+      failures.add('#5 invalid category: ${badCat.map((p) => "${p.sku}=${p.categoryHe}").take(3).join(", ")}');
+    }
+
+    // #6 page in valid range (catalog has product pages 11-43)
+    final badPage = cat.where((p) => p.page < 11 || p.page > 43).toList();
+    if (badPage.isNotEmpty) {
+      failures.add('#6 page out of [11,43]: ${badPage.length}');
+    }
+
+    // #7 every product has at least 1 dim entry beyond יצרן+מק"ט
+    final thinDims = cat.where((p) => (p.dims?.length ?? 0) < 3).toList();
+    if (thinDims.isNotEmpty) {
+      failures.add('#7 dims too thin (<3 entries): ${thinDims.length}');
+    }
+
+    // #8 every product is branded חוליות (was the regression with _brandDir)
+    final wrongBrand = cat.where((p) => p.brand != 'חוליות').toList();
+    if (wrongBrand.isNotEmpty) {
+      failures.add('#8 wrong brand: ${wrongBrand.length}');
+    }
+
+    // #9 page coverage: at least 1 product per page in product-page range
+    //    (11-43 is mostly product pages; allow gaps where the page is an
+    //    informational diagram). Acceptable: TOC page or empty range.
+    final productPages = cat.map((p) => p.page).toSet();
+    final missingPages = <int>[];
+    for (var pg = 11; pg <= 43; pg++) {
+      if (!productPages.contains(pg)) missingPages.add(pg);
+    }
+    // Page 26 is an informational AQUA SLIM diagram (no SKUs on that page).
+    final unexpectedMissing = missingPages.where((p) => p != 26).toList();
+    if (unexpectedMissing.isNotEmpty) {
+      failures.add('#9 product pages with zero SKUs (unexpected): $unexpectedMissing');
+    }
+
+    // #10 every dim value is a String (not int/double leaking through)
+    final wrongType = <String>[];
+    for (final p in cat) {
+      for (final e in (p.dims ?? {}).entries) {
+        if (e.value is! String) {
+          wrongType.add('${p.sku} dims["${e.key}"]=${e.value} (${e.value.runtimeType})');
+        }
+      }
+    }
+    if (wrongType.isNotEmpty) {
+      failures.add('#10 non-String dim values: ${wrongType.take(3).join(", ")}');
+    }
+
+    // #11 categoryEmoji is consistent (one emoji per catalog for v1 = 🚰)
+    final emojis = cat.map((p) => p.categoryEmoji).toSet();
+    if (emojis.length > 3) {
+      failures.add('#11 too many distinct categoryEmoji (${emojis.length}): $emojis');
+    }
+
+    // #12 every product's nameHe carries the category root word (the singular
+    //     stem of the categoryHe plural). Catches mis-categorisation.
+    final namelessCat = <String>[];
+    // Hebrew plural→singular roots (categoryHe is plural; nameHe is singular).
+    const catRoot = <String, List<String>>{
+      'מאספים': ['מאסף'],
+      'מחסומים': ['מחסום'],
+      'סיפונים SmartLock': ['סיפון', 'מחסום', 'ניקוז', 'מערכת', 'מבוא'],
+      'מכסים, הגבהות ורשתות': ['מכסה', 'הגבהה', 'רשת', 'Top Floor'],
+      'אביזרים משלימים': [],  // umbrella — too varied, skip
+      'מאסף קווי AQUA SLIM': ['Aqua Slim', 'AQUA SLIM', 'פס', 'סט'],
+      'אום SmartLock': ['אום'],
+    };
+    for (final p in cat) {
+      final roots = catRoot[p.categoryHe] ??
+          [p.categoryHe.split(RegExp(r'\s+')).first];
+      if (roots.isEmpty) continue;
+      final ok = roots.any((r) => p.nameHe.contains(r));
+      if (!ok) {
+        namelessCat.add('${p.sku} "${p.nameHe}" → cat="${p.categoryHe}"');
+      }
+    }
+    if (namelessCat.isNotEmpty) {
+      failures.add('#12 nameHe missing category root: ${namelessCat.take(3).join("; ")}');
+    }
+
+    expect(failures, isEmpty,
+        reason: 'Huliot paranoid audit failed:\n${failures.join('\n')}');
+  });
+
+  // §22-Huliot every 2-3 digit token in nameHe must correspond to some dim
+  // value (DN, D, D1/D2, DN1/DN2, L, angle, etc.). Catches typos / orphaned
+  // numbers / wrong sizes. Skips numbers inside parentheses (which are
+  // verbatim catalog notes like "(6)" or "(70)").
+  test('§22-Huliot every numeric token in name is grounded in dims', () {
+    final orphan = <String>[];
+    for (final p in kHuliotCatalog) {
+      // Strip parenthetical content (e.g. "סיפון 2" כפול לכיור אמריקאי (4)").
+      final nameStripped = p.nameHe.replaceAll(RegExp(r'\([^)]*\)'), '');
+      final nameNums =
+          RegExp(r'\b(\d{2,4})\b').allMatches(nameStripped).map((m) => m.group(1)!).toSet();
+      if (nameNums.isEmpty) continue;
+      final dimNums = <String>{};
+      for (final v in (p.dims ?? const {}).values) {
+        final s = v.toString();
+        for (final m in RegExp(r'\b(\d{2,4})\b').allMatches(s)) {
+          dimNums.add(m.group(1)!);
+        }
+      }
+      final orphaned = nameNums.difference(dimNums);
+      if (orphaned.isNotEmpty) {
+        orphan.add('${p.sku} "${p.nameHe}" → orphan nums: $orphaned');
+      }
+    }
+    expect(orphan, isEmpty,
+        reason: 'name has numbers not grounded in any dim — typo or missing '
+            'dim:\n${orphan.take(12).join('\n')}');
   });
 
   test('fitting categories all have a real cropped spec diagram', () {

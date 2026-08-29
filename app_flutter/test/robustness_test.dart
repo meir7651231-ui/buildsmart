@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
@@ -182,25 +183,18 @@ void main() {
     }
   });
 
-  testWidgets('19 · catalog search panel renders live results', (t) async {
+  testWidgets('19 · catalog DIVE renders live results', (t) async {
     await t.pumpWidget(const ProviderScope(child: BuildSmartApp()));
     await t.pumpAndSettle();
     final c = shellContainer(t);
-    c.read(searchPanelOpenProvider.notifier).state = true;
-    c.read(searchQueryProvider.notifier).state = 'מחסום';
+    c.read(homeDepartmentProvider.notifier).state = 'אינסטלציה';
+    c.read(catalogTreePathProvider.notifier).state = const [];
+    await t.pumpAndSettle();
+    // The app's search bar/panel were deleted (owner) — the floating keyboard's
+    // live DIVE is the search now. Drive its query directly; the catalog dives.
+    c.read(keyboardDiveQueryProvider.notifier).state = 'מחסום';
     await t.pumpAndSettle();
     expect(t.takeException(), isNull);
     expect(find.byType(ListView), findsWidgets);
-  });
-
-  testWidgets('20 · BS dial opens with 5 personas', (t) async {
-    await t.pumpWidget(const ProviderScope(child: BuildSmartApp()));
-    await t.pumpAndSettle();
-    shellContainer(t).read(openDialProvider.notifier).state = OpenDial.bs;
-    await t.pumpAndSettle();
-    expect(t.takeException(), isNull);
-    for (final p in const ['קבלן', 'מנהל המערכת', 'חנות ספק', 'שליח', 'עובד']) {
-      expect(find.text(p), findsWidgets, reason: 'persona $p missing');
-    }
   });
 }

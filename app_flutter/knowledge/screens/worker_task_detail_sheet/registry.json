@@ -1,0 +1,27 @@
+{
+  "matched": 4,
+  "total": 4,
+  "summary": "4/4",
+  "entries": [
+    {
+      "id": "worker_task_detail_sheet.t09",
+      "ok": true,
+      "atom": "WorkerTaskDetailSheet"
+    },
+    {
+      "id": "worker_task_detail_sheet.t06",
+      "ok": true,
+      "atom": "WorkerTaskDetailSheet"
+    },
+    {
+      "id": "worker_task_detail_sheet.t07",
+      "ok": true,
+      "atom": "WorkerTaskDetailSheet"
+    },
+    {
+      "id": "worker_task_detail_sheet.t08",
+      "ok": true,
+      "atom": "WorkerTaskDetailSheet"
+    }
+  ]
+}

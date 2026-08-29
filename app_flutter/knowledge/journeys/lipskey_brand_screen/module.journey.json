@@ -1,0 +1,49 @@
+{
+  "module": "lipskey_brand_screen",
+  "source": "../../../app_flutter/lib/screens/lipskey_brand_screen.dart",
+  "nodeCount": 5,
+  "edgeCount": 2,
+  "nodes": [
+    {
+      "screen": "LipskeyBrandScreen",
+      "line": 27,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_BrandHeader",
+      "line": 112
+    },
+    {
+      "screen": "_SectionCard",
+      "line": 160
+    },
+    {
+      "screen": "LipskeySectionScreen",
+      "line": 232,
+      "routeAddressable": true,
+      "routeParams": "{required LipskeySection section}"
+    },
+    {
+      "screen": "_CategoryCard",
+      "line": 320
+    }
+  ],
+  "edges": [
+    {
+      "from": "LipskeyBrandScreen",
+      "to": "LipskeySectionScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 90,
+      "params": "section: section"
+    },
+    {
+      "from": "LipskeySectionScreen",
+      "to": "LipskeyProductsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 294,
+      "params": "category: entry.name,\n                                  products: products,"
+    }
+  ]
+}

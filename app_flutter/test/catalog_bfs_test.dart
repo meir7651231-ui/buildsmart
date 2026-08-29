@@ -29,11 +29,10 @@ void main() {
       expect(path!.length, lessThanOrEqualTo(3));
     });
 
-    // 3. ניקוז: סיפון DN32 → מחסום גלוי DN32
-    test('סיפון DN32 → מחסום גלוי DN32', () {
+    // 3. ניקוז: סיפון ↮ מחסום גלוי — שני מלכודות בטור = double-trap, אסור (B4)
+    test('סיפון DN32 ↮ מחסום גלוי DN32 (double-trap — אין נתיב)', () {
       final path = findShortestPath(_p('77771012'), _p('217861'), maxDepth: 3, tempC: 20);
-      expect(path, isNotNull, reason: 'לא נמצא נתיב');
-      expect(path!.length, lessThanOrEqualTo(3));
+      expect(path, isNull, reason: 'שני מכשירי-קצה (מלכודות) בטור — אסור');
     });
 
     // 4. ניקוז: תעלת ניקוז DN50 → צינור אפור DN50

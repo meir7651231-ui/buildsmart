@@ -1,0 +1,62 @@
+{
+  "matched": 11,
+  "total": 11,
+  "summary": "11/11",
+  "entries": [
+    {
+      "id": "worker_profile_screen.appbar_title",
+      "ok": true,
+      "atom": "WorkerProfileScreen"
+    },
+    {
+      "id": "worker_profile_screen.demo",
+      "ok": true,
+      "atom": "_IdentityCard"
+    },
+    {
+      "id": "worker.profile.tasks_title",
+      "ok": true,
+      "atom": "_StatsCard"
+    },
+    {
+      "id": "worker.profile.settings_title",
+      "ok": true,
+      "atom": "_ActionsCard"
+    },
+    {
+      "id": "worker.profile.role_switch_title",
+      "ok": true,
+      "atom": "_ActionsCard"
+    },
+    {
+      "id": "worker.profile.role_switch_hint",
+      "ok": true,
+      "atom": "_ActionsCard"
+    },
+    {
+      "id": "worker.profile.logout_title",
+      "ok": true,
+      "atom": "_ActionsCard"
+    },
+    {
+      "id": "worker_profile_screen.role_switch_dialog_title",
+      "ok": true,
+      "atom": "_ActionsCard"
+    },
+    {
+      "id": "worker_profile_screen.role_switch_dialog_body",
+      "ok": true,
+      "atom": "_ActionsCard"
+    },
+    {
+      "id": "worker_profile_screen.cancel",
+      "ok": true,
+      "atom": "_ActionsCard"
+    },
+    {
+      "id": "worker_profile_screen.confirm",
+      "ok": true,
+      "atom": "_ActionsCard"
+    }
+  ]
+}

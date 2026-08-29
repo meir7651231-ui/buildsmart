@@ -1,0 +1,980 @@
+{
+  "module": "card_signals",
+  "source": "lib/features/card_keyboard/card_signals.dart",
+  "atomCount": 26,
+  "atoms": [
+    {
+      "fn": "sourcesFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? subtype) -> List<SignalSource>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFinderFacets"
+          },
+          {
+            "kind": "const",
+            "name": "kHardSignals"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<SignalSource>[...kHardSignals, if (subtype != null && kFinderFacets.containsKey(subtype)…"
+          }
+        ]
+      },
+      "floor": [
+        "CuratedFacetSignal",
+        "containsKey"
+      ],
+      "contract": {
+        "input": "(String? subtype)",
+        "output": "List<SignalSource>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SizeSignal.axisId",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'size'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SizeSignal.axisName",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'גודל'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SizeSignal.chipsFor",
+      "kind": "method",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "tokens = [...sizeTokensIn(pool)]..sort((a, b) {final c = a.mm.compareTo(b.mm); return c != 0 ? c :…"
+          },
+          {
+            "kind": "return",
+            "detail": "<SignalChip>[for (final t in tokens) SignalChip(axisId: axisId, value: t.label, displayLa…"
+          }
+        ]
+      },
+      "floor": [
+        "SignalChip",
+        "compareTo",
+        "sizeTokensIn",
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SizeSignal.matches",
+      "kind": "method",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, SignalChip chip) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "productHasChip(p, chip.value)"
+          }
+        ]
+      },
+      "floor": [
+        "productHasChip"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, SignalChip chip)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AngleSignal.axisId",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'angle'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AngleSignal.axisName",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'זווית'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AngleSignal.chipsFor",
+      "kind": "method",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<SignalChip>[for (final t in angleTokensIn(pool)) SignalChip(axisId: axisId, value: t.lab…"
+          }
+        ]
+      },
+      "floor": [
+        "SignalChip",
+        "angleTokensIn"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AngleSignal.matches",
+      "kind": "method",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, SignalChip chip) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "productHasChip(p, chip.value)"
+          }
+        ]
+      },
+      "floor": [
+        "productHasChip"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, SignalChip chip)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ColorSignal.axisId",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'color'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ColorSignal.axisName",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'צבע'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ColorSignal.chipsFor",
+      "kind": "method",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<SignalChip>[for (final c in colorOptions(pool)) SignalChip(axisId: axisId, value: c, dis…"
+          }
+        ]
+      },
+      "floor": [
+        "SignalChip",
+        "colorOptions"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ColorSignal.matches",
+      "kind": "method",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, SignalChip chip) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "p.color == chip.value"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, SignalChip chip)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WordSignal.axisId",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'word'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WordSignal.axisName",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'דגם'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WordSignal.chipsFor",
+      "kind": "method",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "canonical = [...pool]..sort((a, b) => a.sku.compareTo(b.sku))"
+          },
+          {
+            "kind": "return",
+            "detail": "<SignalChip>[for (final w in wordOptions(canonical)) SignalChip(axisId: axisId, value: w,…"
+          }
+        ]
+      },
+      "floor": [
+        "SignalChip",
+        "compareTo",
+        "sort",
+        "wordOptions"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WordSignal.matches",
+      "kind": "method",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, SignalChip chip) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "productHasChip(p, chip.value)"
+          }
+        ]
+      },
+      "floor": [
+        "productHasChip"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, SignalChip chip)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialSignal.axisId",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'material'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialSignal.axisName",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'חומר'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialSignal.seededFraction",
+      "kind": "method",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "MaterialSignal.chipsFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if pool.isEmpty → return 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "seeded = pool.where((p) => materialOfEnriched(p) != null).length"
+          },
+          {
+            "kind": "return",
+            "detail": "seeded / pool.length"
+          }
+        ]
+      },
+      "floor": [
+        "materialOfEnriched",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [
+          "if pool.isEmpty → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialSignal.chipsFor",
+      "kind": "method",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMaterialCoverageGate"
+          },
+          {
+            "kind": "const",
+            "name": "kMaterialIsGatedCoAxis"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "seededFraction",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "materials = materialsInPoolEnriched(pool)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if kMaterialIsGatedCoAxis && (materials.length < 2 || seededFraction(pool) < kMaterialCovera… → return const <SignalChip>[]"
+          },
+          {
+            "kind": "return",
+            "detail": "<SignalChip>[for (final m in materials) SignalChip(axisId: axisId, value: m, displayLabel…"
+          }
+        ]
+      },
+      "floor": [
+        "SignalChip",
+        "materialsInPoolEnriched"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [
+          "if kMaterialIsGatedCoAxis && (materials.length < 2 || seededFraction(pool) < kMaterialCovera… → return const <SignalChip>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialSignal.matches",
+      "kind": "method",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, SignalChip chip) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "m = materialOfEnriched(p)"
+          },
+          {
+            "kind": "return",
+            "detail": "m == chip.value || m == null"
+          }
+        ]
+      },
+      "floor": [
+        "materialOfEnriched"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, SignalChip chip)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CuratedFacetSignal.axisId",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'facet'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CuratedFacetSignal.axisName",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'אפשרות'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CuratedFacetSignal.chipsFor",
+      "kind": "method",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> pool) -> List<SignalChip>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFinderFacets"
+          },
+          {
+            "kind": "field",
+            "name": "subtype"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "curated = subtype == null ? null : kFinderFacets[subtype]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if curated == null → return const <SignalChip>[]"
+          },
+          {
+            "kind": "return",
+            "detail": "<SignalChip>[for (final k in curated) if (pool.any((p) => p.nameHe.contains(k))) SignalCh…"
+          }
+        ]
+      },
+      "floor": [
+        "SignalChip",
+        "any",
+        "contains"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> pool)",
+        "output": "List<SignalChip>",
+        "purity": "pure",
+        "precond": [
+          "if curated == null → return const <SignalChip>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CuratedFacetSignal.matches",
+      "kind": "method",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, SignalChip chip) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "p.nameHe.contains(chip.value)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, SignalChip chip)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

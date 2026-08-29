@@ -1,0 +1,40 @@
+{
+  "module": "finder_front",
+  "source": "../../../app_flutter/lib/state/finder_front.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "catalogLeadsWithFinder",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CatalogLocation loc) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (loc) {CatalogHome() => true, CatalogSmartTree(: final smartCat) => smartCat == nu…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(CatalogLocation loc)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

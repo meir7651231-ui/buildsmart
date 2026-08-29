@@ -1,0 +1,462 @@
+{
+  "module": "supplier_data",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/supplier_data.dart",
+  "entityCount": 9,
+  "entities": [
+    {
+      "entity": "OrderStage",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "newOrder",
+            "type": "OrderStage",
+            "required": false
+          },
+          {
+            "name": "preparing",
+            "type": "OrderStage",
+            "required": false
+          },
+          {
+            "name": "ready",
+            "type": "OrderStage",
+            "required": false
+          },
+          {
+            "name": "pickup",
+            "type": "OrderStage",
+            "required": false
+          },
+          {
+            "name": "transit",
+            "type": "OrderStage",
+            "required": false
+          },
+          {
+            "name": "delivered",
+            "type": "OrderStage",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 6 values: newOrder · preparing · ready · pickup · transit · delivered"
+        ]
+      }
+    },
+    {
+      "entity": "OrderLine",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "qty",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "qty"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SysOrder",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "who",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "site",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "sum",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "stage",
+            "type": "OrderStage",
+            "required": true
+          },
+          {
+            "name": "haul",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "lines",
+            "type": "List<OrderLine>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "customerPhone",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "stage",
+            "ref": "OrderStage",
+            "kind": "embed"
+          },
+          {
+            "field": "lines",
+            "ref": "OrderLine",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "who",
+          "site",
+          "items",
+          "sum",
+          "stage",
+          "haul",
+          "lines"
+        ],
+        "defaults": {
+          "customerPhone": "''"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "StoreInfo",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "area",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "eta",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "on",
+            "type": "bool",
+            "required": false,
+            "default": "true"
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "area",
+          "eta"
+        ],
+        "defaults": {
+          "on": "true"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "HaulType",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "ic",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "extra",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "ic",
+          "extra"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FleetVehicle",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "cap",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "driver",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "cap",
+          "status",
+          "driver"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "DistZone",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "eta",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "fee",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "eta",
+          "fee"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "BulkTier",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "min",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "min",
+          "discount"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SupplierRating",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "score",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "orders",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "onTime",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "score",
+          "orders",
+          "onTime"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

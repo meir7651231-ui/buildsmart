@@ -1,0 +1,429 @@
+# BuildSmart conformance + regression assertions (paths relative to app_flutter/).
+# Run via: central-verify.sh /path/to/app_flutter --assert orchestrator/manifests/buildsmart.conformance.txt
+#
+# Conformance — core verbatim Hebrew strings that MUST stay present (the project's central invariant):
+# ('הסל שלי' moved menu_trees → store_screen in the dial-dedup, v6.16+: the cart now lives in the
+#  Store (store_screen.dart:135/194), not the dial. Verified present; rule re-pointed, invariant kept.)
+lib/screens/store_screen.dart:::הסל שלי
+lib/data/personas.dart:::מנהל המערכת
+#
+# Regression — the express-fee bug must never come back (was ₪80, corrected to ₪120 in v6.16):
+lib/screens/manager_dashboard_screen.dart:::₪120
+lib/screens/manager_dashboard_screen.dart:::!₪80
+#
+# Regression — 5-lens audit fleet: the store/courier projection must keep falling back to the engine's
+# own lines so a contractor order's items aren't dropped (H1); the price formatter must keep correct
+# multi-group thousands separators, never the old single-separator form (M1, broke at >=1,000,000):
+lib/state/sys_orders.dart:::o.lines.map
+lib/screens/store_screen.dart:::!~/ 1000}
+#
+# Regression — H3: the order-detail sheet must keep reconciling its line column to the grand total
+# (subtotal + VAT/delivery shown), so the items visibly add up — never a bare total over mismatched lines:
+lib/screens/store_screen.dart:::lineSubtotal
+#
+# Regression — fake-data-sweep BATCH-1 (2026-07-20): killed fakes must never return:
+#  S4 — the Lipskey supplier tile shows the LIVE count via a lib/data const (gate-114 safe: screens must not read kLipskeyCatalog), never the old literal "66 מוצרים":
+lib/screens/suppliers_screen.dart:::kLipskeyProductCount
+lib/screens/suppliers_screen.dart:::!66 מוצרים
+lib/data/lipskey_catalog.dart:::kLipskeyProductCount
+#  H3 — the share-code button actually writes to the clipboard (no false "הועתק" without a copy):
+lib/screens/rewards_hub_screen.dart:::Clipboard.setData
+#  F1-F4 — finance demo values FX-gated (the server-note ids landed; gate keys off the backend flag):
+lib/screens/finance_hub_sheets.dart:::roi_server_note
+lib/screens/finance_hub_sheets.dart:::index_server_note
+#
+# Regression — fake-data-sweep STORE slice (2026-07-20): killed fakes must never return:
+#  S1 — the 5 static demo orders (BS-1234…) that polluted the "open orders" counter are gone:
+lib/screens/store_screen.dart:::!_kContractorDemoOrders
+#  S3 — the "ההזמנות שלי" tile derives from real orders (not the old const '#1234' / badge 1):
+lib/screens/store_screen.dart:::ordersPreview
+#
+# Regression — fake-data-sweep H1 (2026-07-20 · owner "2א"=remove): the fake 38% progress bar must never return:
+lib/screens/smart_home_screen.dart:::!value: 0.38
+#
+# Regression — fake-data-sweep M2 (2026-07-20 · owner "1א"): customer credit is real-or-"לא רשומה", never the name-hash:
+#  the fabrication call-site (mgrCustomerList stamping contractorCredit onto every customer) must never return:
+lib/logic/manager_dashboard.dart:::!creditLimit: contractorCredit
+#  the honest "not registered" render must stay on the customer card:
+lib/screens/manager_dashboard_screen.dart:::אשראי: לא רשומה
+#
+# Regression — fake-data-sweep REWARDS (2026-07-20): fabricated leaderboard rivals / badges / shared invite code must stay demo-labeled:
+lib/screens/rewards_hub_screen.dart:::דירוג חי מהשרת
+#
+# Regression — fake-data-sweep COURIER+SUPPLIER (2026-07-20): demo fleet/ratings gated; the honest server-pending rows must stay (no fake, no blank in the review build):
+lib/screens/persona_portal.dart:::דירוגי ספקים חיים יתווספו
+lib/screens/persona_portal.dart:::ניהול צי חי יתחבר
+#
+# Regression — fake-data-sweep FINANCE-APPROVAL (2026-07-20): the approval queue is wired to the repo (real on server, not the AP-201/202 demo seed); the misleading "demo shown" note is gone:
+lib/data/repositories/finance_repository.dart:::approvals()
+lib/state/finance_hub_state.dart:::_repo?.decide
+lib/screens/finance_hub_sheets.dart:::!כאן מוצגים נתוני דמו
+#
+# Regression — fake-data-sweep SITE-HUB (2026-07-20): the 4 demo-seed site sections (tree/deps/photos/archive) stay demo-labeled:
+lib/screens/site_hub_screen.dart:::class _SiteServerNote
+#
+# Regression — STAGE-2 slice A (2026-07-24 · iron-rules 1+3): resilience hardening must never regress:
+#  one corrupt persisted order is skipped (never resets the engine to seed):
+lib/state/orders_engine.dart:::skipped corrupt persisted order
+#  a corrupt catalog cache degrades to re-sync/bundled (never a decode crash):
+lib/data/repositories/catalog_sync.dart:::corrupt cache (re-syncing)
+#  productImage has a silent default errorBuilder (no FlutterError noise on failed loads):
+lib/data/product_images.dart:::_productImageErrorFallback
+#  share-log persistence is guarded (storage failure never an unhandled async error):
+lib/state/share_log.dart:::ShareLog: persist failed
+#
+# Regression — STAGE-2 slice B (2026-07-24 · iron-rule 4): the capped listens stay capped:
+#  chatMessages — the one unbounded-growth listen — newest-500 by ts:
+lib/data/repositories/chat_firebase.dart:::descending: true).limit(500)
+#  the source adapter keeps the optional bound seam:
+lib/data/repositories/firestore_cached_repo.dart:::_bound
+#
+# Regression — STAGE-2 slice C (2026-07-24 · iron-rule 2): tenant isolation load-bearers (paths ../ = repo root):
+#  the two previously-catch-all-denied collections keep their explicit rules blocks:
+../firestore.rules:::match /material_requests/
+../firestore.rules:::match /financeBudget/
+#  users self-writes can never mint privilege (the freeze list, orgId included):
+../firestore.rules:::'storeUid', 'orgId', 'status'
+#  the customers client stamps + scopes by ownerId (the orders-A3 precedent):
+lib/data/repositories/customers_firebase.dart:::_ownerUid
+lib/data/repositories/customers_local.dart:::_customersScopeFor
+#
+# Regression — STAGE-3.1-lite (2026-07-24): the SKU bridge + search default follow the ACTIVE catalog source (v2-aware), never re-pinned to the v1 list:
+lib/data/related_info.dart:::resolvedCatalogProducts
+lib/data/related_info.dart:::!kCatalogProducts
+lib/data/fuzzy_search.dart:::resolvedCatalogProducts
+lib/data/fuzzy_search.dart:::!kCatalogProducts
+#
+# Regression — STAGE-3.4 (2026-07-24): APP_PROFILE exists with demo default; the two company-VALUE defines ride the profile:
+lib/state/app_profile.dart:::defaultValue: 'demo'
+lib/data/repositories/backend.dart:::defaultValue: kProfileCatalogBaseUrl
+lib/data/product_images.dart:::defaultValue: kProfileImageBaseUrl
+#
+# Regression — STAGE-3.2 (2026-07-24): company identity routes through AppBrand (one file per company):
+lib/config/app_brand.dart:::: 'BuildSmart';
+lib/main.dart:::title: AppBrand.name
+lib/data/related_info.dart:::AppBrand.shareDomain
+#
+# Regression — STAGE-3.3 St1+St2 (2026-07-24): org membership plumbing (inert until an admin assigns):
+#  the admin-only callable exists and is exported (../ = repo root):
+../functions/src/setOrg.ts:::export const setOrg
+../functions/src/index.ts:::from "./setOrg"
+#  the client parses + exposes the claim (null default — zero-regression):
+lib/state/auth_state.dart:::orgIdFromClaims
+lib/state/auth_state.dart:::currentOrgIdProvider
+#
+# Regression — STAGE-3.3 St3 (2026-07-25): org stamps are CREATE-only + round-trip-preserved (never a toDoc session-stamp on orders):
+lib/state/orders_engine.dart:::if (orgId.isNotEmpty) 'orgId'
+lib/data/repositories/orders_firebase.dart:::if (o.orgId.isNotEmpty) 'orgId'
+lib/data/repositories/stock_firebase.dart:::if (_orgId.isNotEmpty) 'orgId'
+#
+# Regression — STAGE-3.3 St4+St5 (2026-07-25): the org scope layer + rules branches (flag OFF = byte-identical):
+lib/data/repositories/backend.dart:::kOrgScopedQueries
+../firestore.rules:::function sameOrg()
+../firestore.rules:::orgId', '') != ''
+#
+# Regression — DIRECTIVE-clean-finish (2026-07-25): finance-4 demo honesty + the two-links machinery:
+lib/screens/finance_hub_sheets.dart:::נתוני המדד מהשרת — כאן נתוני דמו
+lib/state/app_profile.dart:::_bs || _clean || _c2
+lib/config/app_brand.dart:::'BuildMax'
+../.github/workflows/clean-two-links.yml:::profile: company2
+#
+# Regression — CLEAN EMPTY-SHELL (2026-07-25 · owner: "לא — הקטלוג גם צריך להיות נקי"): clean ships the
+# engine with ZERO content (no catalog, no demo records); company2 keeps a catalog (the own-catalog
+# proof) but zero records; demo/buildsmart stay byte-identical. The two derived gates + the ONE-point
+# catalog gate (clean branch FIRST so CATALOG_SOURCE=v2 can never leak past the shell):
+lib/state/app_profile.dart:::kProfileEmptyCatalog = _clean;
+lib/state/app_profile.dart:::kProfileEmptySeeds = _clean || _c2;
+lib/data/catalog_source.dart:::kProfileEmptyCatalog
+#  fixture pools ride the catalog gate (word-finder/dives · plain-dive · compat · smart-tree):
+lib/features/word_finder/dive_pool.dart:::kProfileEmptyCatalog
+lib/features/ring_dive/plain_dive.dart:::kProfileEmptyCatalog
+lib/data/lipskey_hotwater.dart:::kProfileEmptyCatalog
+lib/data/smart_tree.dart:::kProfileEmptyCatalog
+#  the suppliers screen keeps the honest clean empty-state (never a bare background):
+lib/screens/suppliers_screen.dart:::אין ספקים עדיין
+#  record-seed families ride the seeds gate (orders+customers · tasks · rewards · site · projects ·
+#  chat · notifications · finance rows · store projects):
+lib/logic/manager_dashboard.dart:::kProfileEmptySeeds
+lib/data/persona_data.dart:::kProfileEmptySeeds
+lib/state/rewards_state.dart:::kProfileEmptySeeds
+lib/data/phaseb_seeds.dart:::kProfileEmptySeeds
+lib/data/projects.dart:::kProfileEmptySeeds
+lib/data/chat_seeds.dart:::kProfileEmptySeeds
+lib/screens/notifications_screen.dart:::kProfileEmptySeeds
+lib/screens/finance_hub_sheets.dart:::kProfileEmptySeeds
+lib/screens/store_screen.dart:::kProfileEmptySeeds
+#
+# Regression — COMPANY-CATALOG IMPORT (2026-07-25 · owner "כן"): the pour-in half of the empty shell —
+# template download + CSV upload feed the ONE-point seam; Phase B swaps the loader, never the sink:
+#  the overlay's one write point + the hydrate-before-runApp bootstrap:
+lib/data/catalog_source.dart:::setCompanyCatalog
+lib/state/company_catalog_store.dart:::bs.company-catalog.v1
+lib/main.dart:::hydrateCompanyCatalog
+#  the pure domain: atomic commit gate + the honest per-row Hebrew errors:
+lib/data/company_catalog_import.dart:::canCommit
+lib/data/company_catalog_import.dart:::מק"ט כפול
+#  the UI: the sheet + both clean-only mounts + the platform seams:
+lib/screens/company_catalog_import_sheet.dart:::טעינת קטלוג החברה
+lib/screens/catalog_screen.dart:::_CompanyCatalogImportCard
+lib/screens/suppliers_screen.dart:::טעינת קטלוג החברה
+lib/services/file_transfer.dart:::downloadTextFileProvider
+#
+# Regression — CLEAN-100 (2026-07-25 · owner "תוצאה 100 לא 99" · E2E-driven catches): derived rows + brand honesty:
+#  the overlay-activity getter + the pure derived-categories module:
+lib/data/catalog_source.dart:::companyCatalogActive
+lib/data/company_categories.dart:::companyCategorySections
+#  the rows seam serves the company taxonomy; a derived row is a PRODUCT leaf (never "בקרוב"):
+lib/screens/catalog_screen.dart:::companyCategorySections(resolvedCatalogProducts)
+lib/screens/catalog_screen.dart:::lipskeyCategory: cat.title
+#  the welcome hero + terms ride AppBrand (E2E catch: the hero said 'BuildSmart' on a clean build):
+lib/screens/welcome_screen.dart:::AppBrand.name
+lib/screens/welcome_screen.dart:::!'BuildSmart',
+#  the shell's onboarding never promises BuildSmart's thousands-of-products:
+lib/screens/onboarding_screen.dart:::kProfileEmptyCatalog
+#
+# Regression — TEMPLATE-V2 (2026-07-26 · owner "אני רוצה 100 אחוז"): the FULL product card from one file:
+#  open spec columns + image columns + the image codec keys:
+lib/data/company_catalog_import.dart:::תמונות נוספות
+lib/data/company_catalog_import.dart:::כל עמודה נוספת שתוסיפו תופיע ככרטיס-מפרט
+#  URL passthrough in the model + the network resolver (a company's images arrive as links):
+lib/data/lipskey_catalog.dart:::_isUrl
+lib/data/product_images.dart:::startsWith('http
+#  the sheet: no bogus page-0 row; the two scan pools ride the company overlay:
+lib/screens/lipskey_product_sheet.dart:::if (p.page > 0)
+lib/screens/lipskey_product_sheet.dart:::_scanPool
+#  suggestion/word-tap vocabulary is the company's when a catalog is imported:
+lib/screens/lipskey_products_screen.dart:::_wordHits
+#  the barcode alias resolves in BOTH resolvers (identity preserved):
+lib/data/task_skus_local.dart:::ברקוד
+lib/data/related_info.dart:::ברקוד
+#
+# Regression — SLICE-B CONNECTIONS POUR-IN (2026-07-26 · owner: "זה נטו מנוע"): the verified layer is DATA:
+#  the bridge exists with the inch-mark rule + call-site-only registration (the 890-pin):
+lib/data/company_spec_bridge.dart:::kCompanySpecSkus
+lib/data/company_spec_bridge.dart:::putIfAbsent
+#  the two registration call sites (hydrate + post-commit) — and ONLY they:
+lib/state/company_catalog_store.dart:::registerCompanySpecs
+lib/screens/company_catalog_import_sheet.dart:::registerCompanySpecs
+#  the chain tool rides the company universe (data-layer getter; demo = the same const object):
+lib/data/lipskey_hotwater.dart:::chainUniverse
+lib/logic/install_engine.dart:::chainUniverse
+lib/logic/install_engine.dart:::!kCompatCatalog
+lib/screens/install_studio_screen.dart:::chainUniverse
+lib/logic/pressure_drop.dart:::chainUniverse
+#  raw fitting fallback is overlay-gated; the verified-only auto-BOM gate stays:
+lib/logic/install_engine.dart:::_fittingTypes
+#  honest provenance wording (verified stays verbatim):
+lib/screens/lipskey_product_sheet.dart:::לפי נתוני היבוא
+lib/screens/spec_copilot_screen.dart:::לפי נתוני היבוא
+#
+# Regression — RAW SHELL (2026-07-26 · owner: "זה עדיין לא נקי זה לא גולמי"): clean = engine chrome only:
+lib/state/app_profile.dart:::kProfileRawShell = _clean;
+#  the three home hides + the profession auto-skip + the honest tagline:
+lib/screens/smart_home_screen.dart:::kProfileRawShell
+lib/screens/onboarding_screen.dart:::kProfileRawShell ? const OnboardingScreen()
+lib/screens/welcome_screen.dart:::קטלוג, חיפוש חכם, סל והזמנות
+#  departments: honest-empty before an import, COMPANY-derived after (dims['מחלקה']):
+lib/data/company_categories.dart:::companyDepartments
+lib/screens/departments_screen.dart:::אין מחלקות עדיין
+#  keyboard: no phantom const departments; derived destinations share ONE definition:
+lib/screens/keyboard_destinations.dart:::companyDeptDestinations
+lib/screens/keyboard_dept_deriver.dart:::companyDeptDestinations
+#  search index: content rows raw-dropped, order-preserving segments (383 = 366+17):
+lib/data/search_index.dart:::_kEngineRowsHead
+#
+# Regression — COMPLETION ROUND (2026-07-26 · owner "למה לא הכל?"): every file-feedable engine closes:
+lib/data/company_categories.dart:::companyComplementsFor
+lib/screens/lipskey_product_sheet.dart:::מוצרים משלימים
+lib/features/word_finder/dive_pool.dart:::companyCatalogActive
+lib/features/ring_dive/plain_dive.dart:::companyCatalogActive
+lib/screens/install_studio_screen.dart:::_pickerCats
+lib/screens/ai_hub_screen.dart:::_rawHiddenToolIds
+lib/screens/store_screen.dart:::kProfileRawShell
+lib/data/search_index.dart:::_kContentProjectRows
+#
+# Regression — GIANT-SYSTEM V1 (2026-07-26 · PLAN-giant-system-master Phase 1): the runtime-config layer:
+lib/config/org_config.dart:::bool.fromEnvironment('ORG_CONFIG')
+lib/config/org_config.dart:::kCoreModules
+lib/config/org_config.dart:::bs.org-config.v1
+lib/state/org_config_store.dart:::kOrgConfigKey
+lib/state/org_config_store.dart:::corrupt cache (ignored
+lib/main.dart:::hydrateOrgConfig
+test/app_profile_flags_test.dart:::'ORG_CONFIG'
+#
+# Regression — GIANT-SYSTEM V2 wave-1 (2026-07-26): runtime module gates are LIVE on 9 surfaces:
+lib/state/org_gates.dart:::ref.watch(orgConfigProvider)
+lib/screens/role_picker_sheet.dart:::modOn(ref
+lib/screens/home_shell.dart:::modOn(ref, 'chat')
+lib/screens/home_shell.dart:::modOn(ref, 'ai')
+lib/screens/updates_screen.dart:::modOn(ref, 'chat')
+lib/screens/store_screen.dart:::modOn(ref, 'finance')
+lib/screens/store_screen.dart:::featOn(ref, 'orders', 'services')
+lib/screens/smart_home_screen.dart:::modOn(ref, 'site')
+lib/screens/profile_screen.dart:::modOn(ref, 'rewards')
+#
+# Regression — GIANT-SYSTEM V2 wave-2 (2026-07-26): the keyboard obeys the config; push degrades honestly:
+lib/screens/keyboard_destinations.dart:::kbDestAllowed
+lib/screens/keyboard_destinations.dart:::gate: 'chat'
+lib/screens/floating_card_keyboard.dart:::cfg: orgCfg
+lib/screens/keyboard_store_deriver.dart:::servicesOn
+lib/screens/keyboard_updates_deriver.dart:::chatOn
+lib/screens/updates_screen.dart:::שיחות אינן פעילות בחברה זו
+lib/screens/store_dashboard_screen.dart:::modOn(ref, 'chat')
+lib/screens/worker_app_screen.dart:::modOn(ref, 'chat')
+lib/screens/manager_dashboard_screen.dart:::kIntelLive && intelTabOn
+lib/screens/home_shell.dart:::kGlobalSearch && modOn(ref, 'search')
+lib/screens/catalog_screen.dart:::modOn(ref, 'dive')
+#
+# Regression — GIANT-SYSTEM V3 wave-1 (2026-07-26): org terms — nav/brand/CfgText rebrand, Studio wins:
+lib/state/org_gates.dart:::String orgTerm(WidgetRef ref, String key, String fallback) =>
+lib/state/org_gates.dart:::termOf(ref.watch(orgConfigProvider), key, fallback);
+lib/state/org_gates.dart:::String orgTermNow(WidgetRef ref, String key, String fallback) =>
+lib/state/org_gates.dart:::termOf(ref.read(orgConfigProvider), key, fallback);
+lib/widgets/studio/cfg_text.dart:::final org = ref.watch(orgConfigProvider);
+lib/widgets/studio/cfg_text.dart:::final txt = n.text ?? termOf(org, id, fallback);
+lib/config/org_config.dart:::V3 term-key registry
+lib/screens/home_shell.dart:::orgTerm(ref, 'nav.catalog', 'מחלקות')
+lib/screens/profile_screen.dart:::orgTerm(ref, 'brand.club', AppBrand.club)
+lib/main.dart:::orgTerm(ref, 'brand.name', AppBrand.name)
+lib/screens/worker_report_drilldowns.dart:::orgTermNow(ref, 'brand.club', AppBrand.club)
+#
+# Regression — GIANT-SYSTEM V4 (2026-07-26): vertical packs — full-replace apply, identity preserved:
+lib/config/vertical_packs.dart:::class VerticalPack
+lib/config/vertical_packs.dart:::const List<VerticalPack> kVerticalPacks = [
+lib/config/vertical_packs.dart:::id: 'building_supplier',
+lib/config/vertical_packs.dart:::modules: pack.modules,
+lib/config/vertical_packs.dart:::terms: pack.terms,
+lib/config/vertical_packs.dart:::orgName: cfg.orgName,
+lib/config/vertical_packs.dart:::features: cfg.features,
+#
+# Regression — GIANT-SYSTEM V5 (2026-07-26): the setup wizard — composed save, locked manager, honest arming:
+lib/config/org_modules.dart:::const List<OrgModuleInfo> kOrgModules = [
+lib/config/org_modules.dart:::const Set<String> kWizardLockedModules = {'manager'};
+lib/screens/org_setup_wizard_screen.dart:::class OrgSetupWizardScreen
+lib/screens/org_setup_wizard_screen.dart:::ref.read(orgConfigProvider.notifier).state = _draft;
+lib/screens/org_setup_wizard_screen.dart:::final ok = await persistOrgConfig(_draft);
+lib/screens/org_setup_wizard_screen.dart:::applyVerticalPack(_draft,
+lib/screens/org_setup_wizard_screen.dart:::מצב לא-חמוש
+lib/screens/org_setup_wizard_screen.dart:::קובץ לא-תקין — שום דבר לא יובא
+lib/screens/manager_dashboard_screen.dart:::if (kOrgConfigFlag)
+lib/screens/manager_dashboard_screen.dart:::OrgSetupWizardScreen.route()
+#
+# Regression — GIANT-SYSTEM V6 (2026-07-26): the baked company lane + the plumbing channel:
+lib/config/org_config.dart:::const String kOrgCompanyJson = String.fromEnvironment('ORG_CONFIG_JSON');
+lib/state/org_config_store.dart:::String? companyJson,
+lib/state/org_config_store.dart:::companyJson: companyJson,
+lib/state/org_config_store.dart:::ownerJson: rawValid ? raw : null,
+lib/main.dart:::companyJson: kOrgCompanyJson.isEmpty ? null : kOrgCompanyJson,
+.github/workflows/clean-two-links.yml:::channel: plumbing
+.github/workflows/clean-two-links.yml:::dart-define=ORG_CONFIG=true
+test/app_profile_flags_test.dart:::'ORG_CONFIG_JSON',
+#
+# Regression — GIANT Phase-2 wave-1a (2026-07-26): attention engine — opt-in gate, ranked fan-in:
+lib/config/org_config.dart:::bool featureEnabled(OrgConfig c, String module, String feature) {
+lib/config/org_config.dart:::return c.features['$module.$feature'] == true;
+lib/state/org_gates.dart:::bool featEnabled(WidgetRef ref, String module, String feature) =>
+lib/logic/attention_engine.dart:::List<AttentionItem> attentionItems(AttentionInput inp, {required OrgConfig cfg}) {
+lib/logic/attention_engine.dart:::...out.where((a) => a.sev == AttentionSev.crit),
+lib/state/attention_source.dart:::final attentionItemsProvider = Provider<List<AttentionItem>>((ref) {
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'attention')) const _AttentionCard(),
+#
+# Regression — GIANT Phase-2 wave-1b (2026-07-26): the workflow kernel (nameable 5-stage machine, pure):
+lib/logic/workflow_engine.dart:::enum WfStage { intake, prep, ready, dispatch, done }
+lib/logic/workflow_engine.dart:::WfAdvancePlan? planWfAdvance(OrgConfig cfg, String name, WfCase a) {
+lib/logic/workflow_engine.dart:::if (!a.dispatchPushed) {
+lib/logic/workflow_engine.dart:::String wfNormName(String s) => _normSearch(s).replaceAll(RegExp(r'\s'), '');
+lib/logic/workflow_engine.dart:::String wfStageLabel(OrgConfig cfg, WfStage s) =>
+#
+# Regression — GIANT Phase-2 wave-2a (2026-07-26): CRM shared core — ח"פ check-digit fix, phone/text normalize, fuzzy:
+lib/logic/input_validators.dart:::return sum % 10 == 0;
+lib/logic/input_validators.dart:::String normalizePhone(String input) {
+lib/logic/text_normalize.dart:::String normSearch(String t) {
+lib/logic/text_normalize.dart:::String normName(String s) => normSearch(s).replaceAll(RegExp(r'\s'), '');
+lib/logic/fuzzy_match.dart:::int damerauLevenshtein(String a, String b) {
+lib/logic/fuzzy_match.dart:::int fuzzyTolerance(int len) => (len ~/ 3) + 1;
+lib/logic/workflow_engine.dart:::import 'package:buildsmart/logic/text_normalize.dart' show normName;
+#
+# Regression — GIANT Phase-2 wave-2b (2026-07-26): saved customer entity — dedup-on-input, gated augmentation:
+lib/state/customers_store.dart:::class SavedCustomer {
+lib/state/customers_store.dart:::List<SavedCustomer> upsertCustomer(
+lib/state/customers_store.dart:::final idx = list.indexWhere((c) => c.id == incoming.id || c.dedupKey == key);
+lib/state/customers_store.dart:::SavedCustomer? customerForName(List<SavedCustomer> list, String displayName) {
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'customers'))
+lib/screens/manager_dashboard_screen.dart:::class _SavedCustomerSection extends ConsumerWidget {
+#
+# Regression — GIANT Phase-2 wave-2c (2026-07-26): fuzzy customer search — gated, composes with the status chips:
+lib/logic/fuzzy_match.dart:::bool fuzzyNameMatch(String query, String candidate) {
+lib/screens/manager_dashboard_screen.dart:::final searchOn = featEnabled(ref, 'search', 'fuzzy');
+lib/screens/manager_dashboard_screen.dart:::if (q.isEmpty || fuzzyNameMatch(q, v.customer.name)) v,
+lib/screens/manager_dashboard_screen.dart:::if (searchOn) ...[
+#
+# Regression — GIANT Phase-2 wave-2d (2026-07-26): RFM customer scoring — pure kernel + gated tier badge:
+lib/logic/customer_score.dart:::CustomerScore scoreCustomer(RfmInput input) {
+lib/logic/customer_score.dart:::final atRisk = hasR && r == 0 && (f + m) >= 3;
+lib/logic/customer_score.dart:::final maxPoints = hasR ? 6 : 4;
+lib/state/customer_score_source.dart:::final customerScoreProvider = Provider.family<CustomerScore, String>((ref, name) {
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'scoring')) ...[
+lib/screens/manager_dashboard_screen.dart:::class _RfmPill extends ConsumerWidget {
+#
+# Regression — GIANT Phase-2 wave-3a (2026-07-26): data-quality warnings lane on the catalog import (gated):
+lib/logic/data_quality.dart:::QualityReport auditRows(List<QualityRow> rows) {
+lib/logic/data_quality.dart:::kind: 'dup-name',
+lib/logic/data_quality.dart:::kind: 'near-key',
+lib/screens/company_catalog_import_sheet.dart:::if (featEnabled(ref, 'catalog', 'validation')) {
+lib/screens/company_catalog_import_sheet.dart:::if (_quality != null && _quality!.flagged > 0) ...[
+#
+# Regression — GIANT Phase-2 wave-3b (2026-07-26): shared CSV kernel extracted from the catalog parser (byte-identical, pinned suite proves it):
+lib/data/csv_kernel.dart:::List<CsvRecord> parseCsvRecords(String text, String sep) {
+lib/data/csv_kernel.dart:::List<CsvRecord> tokenizeCsvAutodetect(String text, Set<String> knownHeaders) {
+lib/data/company_catalog_import.dart:::final records = tokenizeCsvAutodetect(text, _kKnownHeaders);
+#
+# Regression — GIANT Phase-2 wave-3c (2026-07-26): pure customer bulk-import parser on the shared CSV kernel:
+lib/data/customer_import.dart:::CustomerImportReport parseCustomerCsv(String raw) {
+lib/data/customer_import.dart:::bool get canCommit => errors.isEmpty && valid.isNotEmpty;
+lib/data/customer_import.dart:::id: 'imp:${_dedupKey(name, phone)}',
+lib/data/customer_import.dart:::'שורה $n — לקוח כפול: $name'
+#
+# Regression — GIANT Phase-2 wave-3d (2026-07-26): customer CSV import UI — gated trigger + sheet + bulk importAll:
+lib/screens/customer_import_sheet.dart:::void showCustomerImportSheet(BuildContext context) {
+lib/screens/customer_import_sheet.dart:::ref.read(savedCustomersProvider.notifier).importAll(report.valid);
+lib/state/customers_store.dart:::void importAll(List<SavedCustomer> incoming) {
+lib/screens/manager_dashboard_screen.dart:::⬆️ ייבוא לקוחות מ-CSV
+#
+# Regression — GIANT Phase-2 wave-3e (2026-07-26): invoice/receipt document on the printable_docs rail (gated):
+lib/logic/invoice.dart:::int invoiceVatOf(int grossTotal) =>
+lib/logic/invoice.dart:::grossTotal - (grossTotal / (1 + kVatRate)).round();
+lib/logic/invoice.dart:::String invoiceTitle(Order order, {required bool receipt}) =>
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'orders', 'invoicing')) ...[
+lib/screens/manager_dashboard_screen.dart:::label: const Text('🧾 הפק חשבונית'),
+#
+# Regression — GIANT Phase-2 wave-4b (2026-07-27): delivery-note document on the printable-docs rail (goods, no money), gated:
+lib/logic/delivery_note.dart:::List<({String label, String value})> buildDeliveryNoteRows(Order order) {
+lib/logic/delivery_note.dart:::String deliveryNoteTitle(Order order) => 'תעודת משלוח — ${order.id}';
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'orders', 'deliveryNote')) ...[
+lib/screens/manager_dashboard_screen.dart:::label: const Text('📦 תעודת משלוח'),
+#
+# Regression — GIANT Phase-2 wave-4a (2026-07-27): optional ח״פ column on the customer importer (validBusinessId gets a real import row) + businessId on SavedCustomer:
+lib/state/customers_store.dart:::final String businessId; // ח"פ / עוסק מורשה — optional
+lib/data/customer_import.dart:::if (businessId.isNotEmpty && !validBusinessId(businessId)) {
+lib/data/customer_import.dart:::_CustCol('businessId', 'ח.פ', {
+#
+# Regression — GIANT Phase-2 wave-4c (2026-07-27): receipt (קבלה) button on the order-detail sheet — same billing rail, receipt:true, under orders.invoicing:
+lib/screens/manager_dashboard_screen.dart:::final title = invoiceTitle(invoiceOrder, receipt: true);
+lib/screens/manager_dashboard_screen.dart:::label: const Text('💵 הפק קבלה'),
+#
+# Regression — SWARM run-1 (2026-07-27): Studio registry → OrgConfig per-element show/hide toggles in the wizard (default-ON byte-identical, one central CfgText gate, kImmutable-locked):
+lib/config/org_config.dart:::bool elementShown(OrgConfig c, String id) => c.features['element.$id'] != false;
+lib/state/org_gates.dart:::bool elementVisible(WidgetRef ref, String id) {
+lib/widgets/studio/cfg_text.dart:::if (!elementVisible(ref, id)) return const SizedBox.shrink();
+lib/screens/org_setup_wizard_screen.dart:::key: Key('elem-toggle-${d.id}'),
+lib/screens/org_setup_wizard_screen.dart:::void _setElementHidden(String id, {required bool hidden}) {
+lib/config/screen_labels_he.dart:::String screenLabelHe(String
+#
+# Regression — SWARM run-2 phase-A (2026-07-27): composite element-hide (CfgVisible org gate; whole button/card removed, not empty chrome):
+lib/widgets/studio/cfg_visible.dart:::if (!elementVisible(ref, id)) return const SizedBox.shrink();
+lib/screens/manager_dashboard_screen.dart:::if (!elementVisible(ref, cfgId)) return const SizedBox.shrink();
+lib/screens/store_screen.dart:::return CfgVisible(
+#
+# Regression — wizard-is-studio slice-0 (2026-07-27): arm WYSIWYG edit + full navigation on the STUDIO+clean preview channel only (owner-gate relaxation → edit any board; live tree-shakes out):
+lib/state/studio/edit_mode.dart:::if (kStudioFlag && kProfileRawShell) return true;

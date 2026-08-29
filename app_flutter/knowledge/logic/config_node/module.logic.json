@@ -1,0 +1,924 @@
+{
+  "module": "config_node",
+  "source": "lib/state/studio/config_node.dart",
+  "atomCount": 17,
+  "atoms": [
+    {
+      "fn": "_enumByName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<T> values, Object? raw) -> T?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! String → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final v in values"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v.name == raw → return v"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<T> values, Object? raw)",
+        "output": "T?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! String → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! String · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_clampScale",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> double?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "v = (raw is num) ? raw.toDouble() : null"
+          },
+          {
+            "kind": "return",
+            "detail": "v == null ? null : v.clamp(0.8, 1.6).toDouble()"
+          }
+        ]
+      },
+      "floor": [
+        "clamp",
+        "toDouble"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "double?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_strKeyed",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is Map → return raw.map((k, v) => MapEntry(k.toString(), v))"
+          },
+          {
+            "kind": "return",
+            "detail": "const <String, dynamic>{}"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "map",
+        "toString"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [
+          "if raw is Map → return raw.map((k, v) => MapEntry(k.toString(), v))"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgStyle.isEmpty",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "bgToken"
+          },
+          {
+            "kind": "field",
+            "name": "colorToken"
+          },
+          {
+            "kind": "field",
+            "name": "fontScale"
+          },
+          {
+            "kind": "field",
+            "name": "pad"
+          },
+          {
+            "kind": "field",
+            "name": "sizeToken"
+          },
+          {
+            "kind": "field",
+            "name": "weightToken"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "colorToken == null && bgToken == null && fontScale == null && weightToken == null && size…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgStyle.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? colorToken, String? bgToken, double? fontScale, String? weightToken, String? sizeToken, EdgeKey? pad}) -> CfgStyle",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgStyle(colorToken: colorToken ?? this.colorToken, bgToken: bgToken ?? this.bgToken, fon…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgStyle"
+      ],
+      "contract": {
+        "input": "({String? colorToken, String? bgToken, double? fontScale, String? weightToken, String? sizeToken, EdgeKey? pad})",
+        "output": "CfgStyle",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgStyle.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "bgToken"
+          },
+          {
+            "kind": "field",
+            "name": "colorToken"
+          },
+          {
+            "kind": "field",
+            "name": "fontScale"
+          },
+          {
+            "kind": "field",
+            "name": "pad"
+          },
+          {
+            "kind": "field",
+            "name": "sizeToken"
+          },
+          {
+            "kind": "field",
+            "name": "weightToken"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "j = <String, dynamic>{}"
+          },
+          {
+            "kind": "branch",
+            "detail": "if colorToken != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if bgToken != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if fontScale != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if weightToken != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if sizeToken != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if pad != null"
+          },
+          {
+            "kind": "return",
+            "detail": "j"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgStyle.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "bgToken"
+          },
+          {
+            "kind": "field",
+            "name": "colorToken"
+          },
+          {
+            "kind": "field",
+            "name": "fontScale"
+          },
+          {
+            "kind": "field",
+            "name": "pad"
+          },
+          {
+            "kind": "field",
+            "name": "sizeToken"
+          },
+          {
+            "kind": "field",
+            "name": "weightToken"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "identical(this, other) || other is CfgStyle && other.colorToken == colorToken && other.bg…"
+          }
+        ]
+      },
+      "floor": [
+        "identical"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgStyle.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "bgToken"
+          },
+          {
+            "kind": "field",
+            "name": "colorToken"
+          },
+          {
+            "kind": "field",
+            "name": "fontScale"
+          },
+          {
+            "kind": "field",
+            "name": "pad"
+          },
+          {
+            "kind": "field",
+            "name": "sizeToken"
+          },
+          {
+            "kind": "field",
+            "name": "weightToken"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(colorToken, bgToken, fontScale, weightToken, sizeToken, pad)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgAction.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? kind, Map<String, dynamic>? args}) -> CfgAction",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgAction(kind: kind ?? this.kind, args: args ?? this.args)"
+          }
+        ]
+      },
+      "floor": [
+        "CfgAction"
+      ],
+      "contract": {
+        "input": "({String? kind, Map<String, dynamic>? args})",
+        "output": "CfgAction",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgAction.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "args"
+          },
+          {
+            "kind": "field",
+            "name": "kind"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<String, dynamic>{'kind' : kind, if (args.isNotEmpty) 'args' : args}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgAction.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "args"
+          },
+          {
+            "kind": "field",
+            "name": "kind"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "identical(this, other) || other is CfgAction && other.kind == kind && mapEquals(other.arg…"
+          }
+        ]
+      },
+      "floor": [
+        "identical",
+        "mapEquals"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgAction.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "args"
+          },
+          {
+            "kind": "field",
+            "name": "kind"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(kind, Object.hashAllUnordered(args.keys))"
+          }
+        ]
+      },
+      "floor": [
+        "hash",
+        "hashAllUnordered"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgNode.isEmpty",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          },
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "extra"
+          },
+          {
+            "kind": "field",
+            "name": "hidden"
+          },
+          {
+            "kind": "field",
+            "name": "order"
+          },
+          {
+            "kind": "field",
+            "name": "style"
+          },
+          {
+            "kind": "field",
+            "name": "text"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "text == null && emoji == null && hidden == null && order == null && (style == null || sty…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgNode.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? text, String? emoji, bool? hidden, int? order, CfgStyle? style, CfgAction? action, Map<String, dynamic>? extra}) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgNode(text: text ?? this.text, emoji: emoji ?? this.emoji, hidden: hidden ?? this.hidde…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "({String? text, String? emoji, bool? hidden, int? order, CfgStyle? style, CfgAction? action, Map<String, dynamic>? extra})",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgNode.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          },
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "extra"
+          },
+          {
+            "kind": "field",
+            "name": "hidden"
+          },
+          {
+            "kind": "field",
+            "name": "order"
+          },
+          {
+            "kind": "field",
+            "name": "style"
+          },
+          {
+            "kind": "field",
+            "name": "text"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "j = <String, dynamic>{...extra}"
+          },
+          {
+            "kind": "branch",
+            "detail": "if text != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if emoji != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if hidden != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if order != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if style != null && !style!.isEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if action != null"
+          },
+          {
+            "kind": "return",
+            "detail": "j"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgNode.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          },
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "extra"
+          },
+          {
+            "kind": "field",
+            "name": "hidden"
+          },
+          {
+            "kind": "field",
+            "name": "order"
+          },
+          {
+            "kind": "field",
+            "name": "style"
+          },
+          {
+            "kind": "field",
+            "name": "text"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "identical(this, other) || other is CfgNode && other.text == text && other.emoji == emoji …"
+          }
+        ]
+      },
+      "floor": [
+        "identical",
+        "mapEquals"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CfgNode.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          },
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "extra"
+          },
+          {
+            "kind": "field",
+            "name": "hidden"
+          },
+          {
+            "kind": "field",
+            "name": "order"
+          },
+          {
+            "kind": "field",
+            "name": "style"
+          },
+          {
+            "kind": "field",
+            "name": "text"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(text, emoji, hidden, order, style, action, Object.hashAllUnordered(extra.keys…"
+          }
+        ]
+      },
+      "floor": [
+        "hash",
+        "hashAllUnordered"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

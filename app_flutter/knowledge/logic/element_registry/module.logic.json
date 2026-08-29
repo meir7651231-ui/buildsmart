@@ -1,0 +1,49 @@
+{
+  "module": "element_registry",
+  "source": "lib/state/studio/element_registry.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "findDescriptor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Iterable<ElementDescriptor> all, String id) -> ElementDescriptor?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final d in all"
+          },
+          {
+            "kind": "branch",
+            "detail": "if d.id == id → return d"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Iterable<ElementDescriptor> all, String id)",
+        "output": "ElementDescriptor?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    }
+  ]
+}

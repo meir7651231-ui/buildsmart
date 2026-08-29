@@ -1,0 +1,258 @@
+{
+  "module": "presence_repository",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/presence_repository.dart",
+  "entityCount": 4,
+  "entities": [
+    {
+      "entity": "PresenceSummary",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "count",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "byRole",
+            "type": "Map<String, int>",
+            "required": false,
+            "collection": true,
+            "default": "const {}"
+          },
+          {
+            "name": "sample",
+            "type": "List<String>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "updatedAtMs",
+            "type": "int",
+            "required": false,
+            "default": "0"
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "count"
+        ],
+        "defaults": {
+          "byRole": "const {}",
+          "sample": "const []",
+          "updatedAtMs": "0"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "PresenceFreshness",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "fresh",
+            "type": "PresenceFreshness",
+            "required": false
+          },
+          {
+            "name": "stale",
+            "type": "PresenceFreshness",
+            "required": false
+          },
+          {
+            "name": "unknown",
+            "type": "PresenceFreshness",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 3 values: fresh · stale · unknown"
+        ]
+      }
+    },
+    {
+      "entity": "PresenceStatus",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "freshness",
+            "type": "PresenceFreshness",
+            "required": true
+          },
+          {
+            "name": "count",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "age",
+            "type": "Duration",
+            "required": true
+          },
+          {
+            "name": "isFresh",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "secondsAgo",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "freshness",
+            "ref": "PresenceFreshness",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "freshness",
+          "count",
+          "age"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirebasePresenceRepository",
+      "kind": "mutable",
+      "object": {
+        "fields": [
+          {
+            "name": "uid",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "roleOf",
+            "type": "String Function()",
+            "required": true
+          },
+          {
+            "name": "_sink",
+            "type": "PresenceSink?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_summarySource",
+            "type": "PresenceSummarySource?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_minIntervalMs",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "_now",
+            "type": "int Function()",
+            "required": true
+          },
+          {
+            "name": "_lastWriteMs",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_offline",
+            "type": "bool",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "uid",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "roleOf",
+            "ref": "String Function()",
+            "kind": "embed"
+          },
+          {
+            "field": "_sink",
+            "ref": "PresenceSink",
+            "kind": "embed"
+          },
+          {
+            "field": "_summarySource",
+            "ref": "PresenceSummarySource",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "_epochNow",
+          "heartbeat",
+          "goOffline",
+          "resume",
+          "summary",
+          "_writeHeartbeat"
+        ]
+      },
+      "contract": {
+        "required": [
+          "uid",
+          "roleOf",
+          "_minIntervalMs",
+          "_now"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

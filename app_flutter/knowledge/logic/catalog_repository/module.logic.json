@@ -1,0 +1,45 @@
+{
+  "module": "catalog_repository",
+  "source": "lib/data/repositories/catalog_repository.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "CatalogRepository.categoryTree",
+      "kind": "method",
+      "object": {
+        "signature": "({String tradeId = 'plumbing'}) -> List<CatalogNode>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "tradeId == 'plumbing' ? kCatalogTree : const <CatalogNode>[]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "({String tradeId = 'plumbing'})",
+        "output": "List<CatalogNode>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

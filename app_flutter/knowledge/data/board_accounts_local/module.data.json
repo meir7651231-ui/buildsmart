@@ -1,0 +1,72 @@
+{
+  "module": "board_accounts_local",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/board_accounts_local.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "BoardAccount",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "role",
+            "type": "BoardRole",
+            "required": true
+          },
+          {
+            "name": "username",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "code",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "displayName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "employerId",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "role",
+            "ref": "BoardRole",
+            "kind": "enum"
+          },
+          {
+            "field": "employerId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "role",
+          "username",
+          "code",
+          "displayName"
+        ],
+        "defaults": {
+          "employerId": "''"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

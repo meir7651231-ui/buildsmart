@@ -1,7 +1,9 @@
 import 'package:buildsmart/test_harness/regression_state.dart';
 import 'package:buildsmart/test_harness/runner.dart';
 import 'package:buildsmart/test_harness/types.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,11 +23,12 @@ class RegressionPanelScreen extends ConsumerWidget {
     final results = ref.watch(filteredResultsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
-        foregroundColor: const Color(0xFF1A1A1A),
-        title: const Text(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: BsTokens.inkLight,
+        title: CfgText(
+          'regression_panel_screen.t01',
           '🔬 מרכז בדיקות רגרסיה',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
@@ -34,7 +37,8 @@ class RegressionPanelScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
+          CfgText(
+            'regression_panel_screen.t02',
             'בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring',
             style: TextStyle(color: Color(0xFF888888), fontSize: 13),
           ),
@@ -81,8 +85,8 @@ class _RunButton extends StatelessWidget {
         onPressed: running ? null : () => runRegression(ref),
         child: Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: bsOnAccent(context),
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
@@ -103,12 +107,12 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: ok
-              ? const Color(0xFF22C55E).withAlpha(120)
-              : const Color(0xFFEF4444).withAlpha(120),
+              ? BsTokens.success.withAlpha(120)
+              : BsTokens.danger.withAlpha(120),
         ),
       ),
       child: Column(
@@ -119,7 +123,7 @@ class _SummaryCard extends StatelessWidget {
                 ? '✅ כל הבדיקות עברו (${summary.passed}/${summary.total})'
                 : '❌ נמצאו ${summary.failed} כשלים',
             style: TextStyle(
-              color: ok ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+              color: ok ? BsTokens.success : BsTokens.danger,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -189,7 +193,9 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
+      color: active
+          ? BsTokens.brand
+          : Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -199,7 +205,7 @@ class _Pill extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: active ? Colors.white : const Color(0xFFAAAAAA),
+              color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
               fontSize: 12,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -222,12 +228,12 @@ class _ResultCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: ok
-              ? const Color(0xFF22C55E).withAlpha(60)
-              : const Color(0xFFEF4444).withAlpha(120),
+              ? BsTokens.success.withAlpha(60)
+              : BsTokens.danger.withAlpha(120),
         ),
       ),
       child: Theme(
@@ -247,8 +253,8 @@ class _ResultCard extends StatelessWidget {
                 ok ? '✓' : '✗',
                 style: TextStyle(
                   color: ok
-                      ? const Color(0xFF22C55E)
-                      : const Color(0xFFEF4444),
+                      ? BsTokens.success
+                      : BsTokens.danger,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -258,7 +264,7 @@ class _ResultCard extends StatelessWidget {
                 child: Text(
                   result.label,
                   style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -269,7 +275,7 @@ class _ResultCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -285,8 +291,8 @@ class _ResultCard extends StatelessWidget {
                 '${total - failed}/$total',
                 style: TextStyle(
                   color: ok
-                      ? const Color(0xFF22C55E)
-                      : const Color(0xFFEF4444),
+                      ? BsTokens.success
+                      : BsTokens.danger,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -317,8 +323,8 @@ class _CheckRow extends StatelessWidget {
             check.pass ? '✓' : '✗',
             style: TextStyle(
               color: check.pass
-                  ? const Color(0xFF22C55E)
-                  : const Color(0xFFEF4444),
+                  ? BsTokens.success
+                  : BsTokens.danger,
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),
@@ -331,7 +337,7 @@ class _CheckRow extends StatelessWidget {
                 Text(
                   check.name,
                   style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 12,
                   ),
                 ),
@@ -347,7 +353,7 @@ class _CheckRow extends StatelessWidget {
                   Text(
                     'ציפיתי: ${check.expected} · קיבלתי: ${check.got ?? "—"}',
                     style: const TextStyle(
-                      color: Color(0xFFEF4444),
+                      color: BsTokens.danger,
                       fontSize: 11,
                     ),
                   ),

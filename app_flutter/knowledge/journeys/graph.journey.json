@@ -1,0 +1,5220 @@
+{
+  "nodeCount": 905,
+  "edgeCount": 200,
+  "nodes": [
+    {
+      "screen": "SizeToken",
+      "line": 23
+    },
+    {
+      "screen": "AdapterExplainScreen",
+      "line": 78,
+      "routeAddressable": true,
+      "routeParams": "{\n    required String productName,\n    required String sku,\n  }"
+    },
+    {
+      "screen": "_AdapterExplainState",
+      "line": 101
+    },
+    {
+      "screen": "AssistantTurn",
+      "line": 45
+    },
+    {
+      "screen": "AiAssistantScreen",
+      "line": 56,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_AiAssistantState",
+      "line": 66
+    },
+    {
+      "screen": "AiFinderScreen",
+      "line": 88,
+      "routeAddressable": true,
+      "routeParams": "{String? initialQuery}"
+    },
+    {
+      "screen": "_AiFinderState",
+      "line": 106
+    },
+    {
+      "screen": "AIHubScreen",
+      "line": 61,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_AIFeatureScreen",
+      "line": 312,
+      "routeAddressable": true,
+      "routeParams": "String id"
+    },
+    {
+      "screen": "_PredictStock",
+      "line": 362
+    },
+    {
+      "screen": "_ThreeWay",
+      "line": 444
+    },
+    {
+      "screen": "_ThreeCol",
+      "line": 513
+    },
+    {
+      "screen": "_Weather",
+      "line": 549
+    },
+    {
+      "screen": "_Wear",
+      "line": 590
+    },
+    {
+      "screen": "_Analytics",
+      "line": 645
+    },
+    {
+      "screen": "AiMdHead",
+      "line": 741
+    },
+    {
+      "screen": "AiFinTile",
+      "line": 778
+    },
+    {
+      "screen": "AiCard",
+      "line": 836
+    },
+    {
+      "screen": "AiCardTop",
+      "line": 859
+    },
+    {
+      "screen": "AiCardSub",
+      "line": 907
+    },
+    {
+      "screen": "AiBar",
+      "line": 919
+    },
+    {
+      "screen": "AiCardBtn",
+      "line": 941
+    },
+    {
+      "screen": "AiPrimary",
+      "line": 966
+    },
+    {
+      "screen": "AiServerNote",
+      "line": 996
+    },
+    {
+      "screen": "AltExplainScreen",
+      "line": 51,
+      "routeAddressable": true,
+      "routeParams": "{\n    required String product,\n    required String recName,\n    required int recPrice,\n    required String altName,\n    required int altPrice,\n  }"
+    },
+    {
+      "screen": "_AltExplainState",
+      "line": 90
+    },
+    {
+      "screen": "AuditScreen",
+      "line": 17
+    },
+    {
+      "screen": "_ScenarioResult",
+      "line": 24
+    },
+    {
+      "screen": "_AuditScreenState",
+      "line": 46
+    },
+    {
+      "screen": "BarcodeScanner",
+      "line": 10
+    },
+    {
+      "screen": "_BarcodeScannerState",
+      "line": 17
+    },
+    {
+      "screen": "BudgetCat",
+      "line": 35
+    },
+    {
+      "screen": "BudgetState",
+      "line": 46
+    },
+    {
+      "screen": "BudgetNotifier",
+      "line": 69
+    },
+    {
+      "screen": "BudgetScreen",
+      "line": 214,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_Tappable",
+      "line": 606
+    },
+    {
+      "screen": "_NumBox",
+      "line": 618
+    },
+    {
+      "screen": "_CategoryRow",
+      "line": 660
+    },
+    {
+      "screen": "_SiteRow",
+      "line": 702
+    },
+    {
+      "screen": "_Field",
+      "line": 739
+    },
+    {
+      "screen": "BusinessSummaryScreen",
+      "line": 39,
+      "routeAddressable": true,
+      "routeParams": "{required List<String> insightLines}"
+    },
+    {
+      "screen": "_BusinessSummaryState",
+      "line": 55
+    },
+    {
+      "screen": "CameraScreen",
+      "line": 57
+    },
+    {
+      "screen": "_CameraScreenState",
+      "line": 64
+    },
+    {
+      "screen": "_ShutterButton",
+      "line": 469
+    },
+    {
+      "screen": "_GalleryThumb",
+      "line": 527
+    },
+    {
+      "screen": "_GalleryAllBtn",
+      "line": 571
+    },
+    {
+      "screen": "_BarcodeReticle",
+      "line": 613
+    },
+    {
+      "screen": "_ModeFrame",
+      "line": 628
+    },
+    {
+      "screen": "CatalogScreen",
+      "line": 646
+    },
+    {
+      "screen": "_CatalogScreenState",
+      "line": 653
+    },
+    {
+      "screen": "_ManageListsSheet",
+      "line": 802
+    },
+    {
+      "screen": "_ManageListsSheetState",
+      "line": 809
+    },
+    {
+      "screen": "_ItemPickerSheet",
+      "line": 1177
+    },
+    {
+      "screen": "_ItemPickerSheetState",
+      "line": 1186
+    },
+    {
+      "screen": "_DiveResultsView",
+      "line": 1441
+    },
+    {
+      "screen": "GlobalSearchResultsView",
+      "line": 1509
+    },
+    {
+      "screen": "_GlobalDiveTile",
+      "line": 1572
+    },
+    {
+      "screen": "_DiveEntryTile",
+      "line": 1648
+    },
+    {
+      "screen": "_CatalogBody",
+      "line": 1707
+    },
+    {
+      "screen": "_SectionHeader",
+      "line": 1807
+    },
+    {
+      "screen": "_FilteredCatalogList",
+      "line": 1845
+    },
+    {
+      "screen": "_EmptySection",
+      "line": 1878
+    },
+    {
+      "screen": "_CatalogList",
+      "line": 2064
+    },
+    {
+      "screen": "_CatalogRow",
+      "line": 2124
+    },
+    {
+      "screen": "_CardCatalogData",
+      "line": 2308
+    },
+    {
+      "screen": "_TreeDrill",
+      "line": 2338
+    },
+    {
+      "screen": "_FacetRow",
+      "line": 2534
+    },
+    {
+      "screen": "_CountBadge",
+      "line": 2614
+    },
+    {
+      "screen": "_ProductsHeader",
+      "line": 2645
+    },
+    {
+      "screen": "_TreeComingSoon",
+      "line": 2749
+    },
+    {
+      "screen": "_TreeDrillBar",
+      "line": 2832
+    },
+    {
+      "screen": "_TreeDrillBarState",
+      "line": 2850
+    },
+    {
+      "screen": "_TreeCatRow",
+      "line": 3034
+    },
+    {
+      "screen": "_SmartTreeSection",
+      "line": 3139
+    },
+    {
+      "screen": "_SmartTreeCatList",
+      "line": 3153
+    },
+    {
+      "screen": "_SmartTreeProductList",
+      "line": 3272
+    },
+    {
+      "screen": "_SmartTreeProductListState",
+      "line": 3294
+    },
+    {
+      "screen": "_SheetSection",
+      "line": 3572
+    },
+    {
+      "screen": "_ChipWrap",
+      "line": 3643
+    },
+    {
+      "screen": "_SavedVersionChip",
+      "line": 3692
+    },
+    {
+      "screen": "_SmartProductSheet",
+      "line": 3766
+    },
+    {
+      "screen": "_SmartProductSheetState",
+      "line": 3776
+    },
+    {
+      "screen": "_ExplodeChips",
+      "line": 5946
+    },
+    {
+      "screen": "_ExplodeChipsState",
+      "line": 5954
+    },
+    {
+      "screen": "_DiagramFlow",
+      "line": 6036
+    },
+    {
+      "screen": "_DiagramFlowState",
+      "line": 6050
+    },
+    {
+      "screen": "_StageCard",
+      "line": 6179
+    },
+    {
+      "screen": "_AccRow",
+      "line": 6242
+    },
+    {
+      "screen": "_MiniQtyBtn",
+      "line": 6473
+    },
+    {
+      "screen": "_FavoritesSection",
+      "line": 6645
+    },
+    {
+      "screen": "_FavProductRow",
+      "line": 6693
+    },
+    {
+      "screen": "_RecentSearchesSection",
+      "line": 6732
+    },
+    {
+      "screen": "_VariantsSection",
+      "line": 6844
+    },
+    {
+      "screen": "_KindChip",
+      "line": 6983
+    },
+    {
+      "screen": "_SizeSortAxisRow",
+      "line": 7032
+    },
+    {
+      "screen": "_AxisChip",
+      "line": 7059
+    },
+    {
+      "screen": "_ActiveSizeFacetRow",
+      "line": 7083
+    },
+    {
+      "screen": "_MaterialDiameterBrowser",
+      "line": 7108
+    },
+    {
+      "screen": "_SubGroupBrowser",
+      "line": 7219
+    },
+    {
+      "screen": "_SizeFacetRow",
+      "line": 7362
+    },
+    {
+      "screen": "_FacetChip",
+      "line": 7396
+    },
+    {
+      "screen": "_ValueChip",
+      "line": 7428
+    },
+    {
+      "screen": "_FamilyRow",
+      "line": 7467
+    },
+    {
+      "screen": "_VariantFamilyView",
+      "line": 7506
+    },
+    {
+      "screen": "_CompanyCatalogImportCard",
+      "line": 7560
+    },
+    {
+      "screen": "CatalogSettingsScreen",
+      "line": 23,
+      "routeAddressable": true,
+      "routeParams": "{bool showProfileRow = true}"
+    },
+    {
+      "screen": "_ProfileRow",
+      "line": 146
+    },
+    {
+      "screen": "_ThemeSection",
+      "line": 177
+    },
+    {
+      "screen": "_NotificationsSection",
+      "line": 287
+    },
+    {
+      "screen": "_RegionSection",
+      "line": 343
+    },
+    {
+      "screen": "_SearchSection",
+      "line": 376
+    },
+    {
+      "screen": "_PricesSection",
+      "line": 432
+    },
+    {
+      "screen": "_UnitsSection",
+      "line": 491
+    },
+    {
+      "screen": "_SuppliersSection",
+      "line": 557
+    },
+    {
+      "screen": "_AiSection",
+      "line": 613
+    },
+    {
+      "screen": "_AccessibilitySection",
+      "line": 633
+    },
+    {
+      "screen": "_InfoSection",
+      "line": 687
+    },
+    {
+      "screen": "_SectionTile",
+      "line": 729
+    },
+    {
+      "screen": "_SwitchRow",
+      "line": 807
+    },
+    {
+      "screen": "_RadioGroupRow",
+      "line": 830
+    },
+    {
+      "screen": "_RadioOption",
+      "line": 911
+    },
+    {
+      "screen": "_PlaceholderRow",
+      "line": 927
+    },
+    {
+      "screen": "_NumberRow",
+      "line": 946
+    },
+    {
+      "screen": "_ActionRow",
+      "line": 999
+    },
+    {
+      "screen": "ChatSettingsScreen",
+      "line": 15,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_QuickReplyBanner",
+      "line": 112
+    },
+    {
+      "screen": "_PresenceSection",
+      "line": 245
+    },
+    {
+      "screen": "_ChatNotifSection",
+      "line": 309
+    },
+    {
+      "screen": "_MediaSection",
+      "line": 353
+    },
+    {
+      "screen": "_ChatPrivacySection",
+      "line": 407
+    },
+    {
+      "screen": "_BackupSection",
+      "line": 491
+    },
+    {
+      "screen": "_LangSection",
+      "line": 533
+    },
+    {
+      "screen": "_BusinessSection",
+      "line": 573
+    },
+    {
+      "screen": "_BotSection",
+      "line": 654
+    },
+    {
+      "screen": "_ArchiveSection",
+      "line": 699
+    },
+    {
+      "screen": "_Inert",
+      "line": 859
+    },
+    {
+      "screen": "_TimeRow",
+      "line": 958
+    },
+    {
+      "screen": "_InlineTextRow",
+      "line": 1006
+    },
+    {
+      "screen": "_InlineTextRowState",
+      "line": 1023
+    },
+    {
+      "screen": "_AudienceChip",
+      "line": 54
+    },
+    {
+      "screen": "_ChatArchivedNotifier",
+      "line": 394
+    },
+    {
+      "screen": "_ChatMutedNotifier",
+      "line": 444
+    },
+    {
+      "screen": "_ChatLastReadNotifier",
+      "line": 525
+    },
+    {
+      "screen": "_ChatHistoryClearedNotifier",
+      "line": 607
+    },
+    {
+      "screen": "ChatsScreen",
+      "line": 703
+    },
+    {
+      "screen": "_ChatsScreenState",
+      "line": 730
+    },
+    {
+      "screen": "_SearchBar",
+      "line": 896
+    },
+    {
+      "screen": "_SearchBarState",
+      "line": 903
+    },
+    {
+      "screen": "_FilterChipsRow",
+      "line": 980
+    },
+    {
+      "screen": "_Pill",
+      "line": 1059
+    },
+    {
+      "screen": "_ThreadList",
+      "line": 1092
+    },
+    {
+      "screen": "_DismissibleThread",
+      "line": 1186
+    },
+    {
+      "screen": "_ThreadRow",
+      "line": 1235
+    },
+    {
+      "screen": "_ChatPage",
+      "line": 1497
+    },
+    {
+      "screen": "_ChatPageState",
+      "line": 1506
+    },
+    {
+      "screen": "_Bubble",
+      "line": 1984
+    },
+    {
+      "screen": "_DeliveryStatus",
+      "line": 2080
+    },
+    {
+      "screen": "_TypingBubble",
+      "line": 2138
+    },
+    {
+      "screen": "_DateChip",
+      "line": 2180
+    },
+    {
+      "screen": "_PrivacyNotice",
+      "line": 2216
+    },
+    {
+      "screen": "_InputBar",
+      "line": 2461
+    },
+    {
+      "screen": "_CircleFab",
+      "line": 2587
+    },
+    {
+      "screen": "ChatsArchiveScreen",
+      "line": 2627,
+      "routeAddressable": true,
+      "routeParams": "{BsRole persona = BsRole.contractor}"
+    },
+    {
+      "screen": "_ArchivedRow",
+      "line": 2723
+    },
+    {
+      "screen": "ComingSoonScreen",
+      "line": 11,
+      "routeAddressable": true,
+      "routeParams": "String profession"
+    },
+    {
+      "screen": "_CompanyCatalogImportSheet",
+      "line": 45
+    },
+    {
+      "screen": "_CompanyCatalogImportSheetState",
+      "line": 53
+    },
+    {
+      "screen": "_ConsentDialog",
+      "line": 91
+    },
+    {
+      "screen": "_ContractorAttendanceSheet",
+      "line": 44
+    },
+    {
+      "screen": "_PresentRow",
+      "line": 195
+    },
+    {
+      "screen": "_TodayRow",
+      "line": 256
+    },
+    {
+      "screen": "_LocationPill",
+      "line": 316
+    },
+    {
+      "screen": "_ContractorHrSheet",
+      "line": 45
+    },
+    {
+      "screen": "_ContractorHrSheetState",
+      "line": 52
+    },
+    {
+      "screen": "_VacationRow",
+      "line": 602
+    },
+    {
+      "screen": "_StatusChip",
+      "line": 685
+    },
+    {
+      "screen": "_DecideButton",
+      "line": 713
+    },
+    {
+      "screen": "_TrainingRow",
+      "line": 764
+    },
+    {
+      "screen": "_TrainingStatusChip",
+      "line": 842
+    },
+    {
+      "screen": "_CertRow",
+      "line": 876
+    },
+    {
+      "screen": "_ContractorMaterialRequestsSheet",
+      "line": 64
+    },
+    {
+      "screen": "_RequestCard",
+      "line": 158
+    },
+    {
+      "screen": "_ActionButton",
+      "line": 285
+    },
+    {
+      "screen": "_SheetHandle",
+      "line": 72
+    },
+    {
+      "screen": "CheaperAlt",
+      "line": 106
+    },
+    {
+      "screen": "_CheaperAlternativesSheet",
+      "line": 157
+    },
+    {
+      "screen": "_CheaperAlternativesSheetState",
+      "line": 165
+    },
+    {
+      "screen": "StoreCompareRow",
+      "line": 389
+    },
+    {
+      "screen": "_StorePriceComparisonSheet",
+      "line": 428
+    },
+    {
+      "screen": "_StoreChip",
+      "line": 519
+    },
+    {
+      "screen": "_ScanPlanSheet",
+      "line": 573
+    },
+    {
+      "screen": "_ScanPlanSheetState",
+      "line": 582
+    },
+    {
+      "screen": "CourierAttendanceScreen",
+      "line": 29,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_CourierAttendanceScreenState",
+      "line": 40
+    },
+    {
+      "screen": "_ClockCard",
+      "line": 235
+    },
+    {
+      "screen": "_TodayStat",
+      "line": 358
+    },
+    {
+      "screen": "_MonthCard",
+      "line": 406
+    },
+    {
+      "screen": "_TableRow",
+      "line": 563
+    },
+    {
+      "screen": "_SendReportButton",
+      "line": 606
+    },
+    {
+      "screen": "CourierCertsScreen",
+      "line": 31,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_PresetChip",
+      "line": 471
+    },
+    {
+      "screen": "_CertsCard",
+      "line": 522
+    },
+    {
+      "screen": "CourierDashboardScreen",
+      "line": 94,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_CourierDashboardScreenState",
+      "line": 107
+    },
+    {
+      "screen": "_VehicleButton",
+      "line": 857
+    },
+    {
+      "screen": "_CourierJobCard",
+      "line": 945
+    },
+    {
+      "screen": "_Tracker",
+      "line": 1184
+    },
+    {
+      "screen": "_FlatCard",
+      "line": 1228
+    },
+    {
+      "screen": "_CourierNotifsBell",
+      "line": 1297
+    },
+    {
+      "screen": "_CourierNotifsSheet",
+      "line": 1360
+    },
+    {
+      "screen": "_CourierNotifRow",
+      "line": 1532
+    },
+    {
+      "screen": "_Stat",
+      "line": 1612
+    },
+    {
+      "screen": "CourierDeliveryDetailSheet",
+      "line": 66
+    },
+    {
+      "screen": "CourierFormsScreen",
+      "line": 35,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_CourierFormsScreenState",
+      "line": 45
+    },
+    {
+      "screen": "_FormCard",
+      "line": 684
+    },
+    {
+      "screen": "_PillButton",
+      "line": 725
+    },
+    {
+      "screen": "_DateField",
+      "line": 781
+    },
+    {
+      "screen": "CourierPortalTab",
+      "line": 40
+    },
+    {
+      "screen": "_DestinationCard",
+      "line": 453
+    },
+    {
+      "screen": "CourierProfileScreen",
+      "line": 53,
+      "routeAddressable": true
+    },
+    {
+      "screen": "CourierProfileBody",
+      "line": 98
+    },
+    {
+      "screen": "_CourierIdentityCard",
+      "line": 368
+    },
+    {
+      "screen": "_CourierAvatar",
+      "line": 501
+    },
+    {
+      "screen": "_CourierPersonalAreaCard",
+      "line": 550
+    },
+    {
+      "screen": "_EditCourierProfileSheet",
+      "line": 704
+    },
+    {
+      "screen": "_EditCourierProfileSheetState",
+      "line": 714
+    },
+    {
+      "screen": "_RoleSwitchCodeDialog",
+      "line": 1014
+    },
+    {
+      "screen": "_RoleSwitchCodeDialogState",
+      "line": 1021,
+      "returnsValue": true
+    },
+    {
+      "screen": "_PStat",
+      "line": 1104
+    },
+    {
+      "screen": "CourierClockEntry",
+      "line": 84
+    },
+    {
+      "screen": "CourierReportsTab",
+      "line": 166
+    },
+    {
+      "screen": "_DeliveredCard",
+      "line": 691
+    },
+    {
+      "screen": "_DeliveredCardState",
+      "line": 710
+    },
+    {
+      "screen": "_RStat",
+      "line": 887
+    },
+    {
+      "screen": "_RCard",
+      "line": 933
+    },
+    {
+      "screen": "_KvRow",
+      "line": 974
+    },
+    {
+      "screen": "_WeekBars",
+      "line": 1012
+    },
+    {
+      "screen": "CourierSettingsScreen",
+      "line": 37,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_CourierNotifSection",
+      "line": 94
+    },
+    {
+      "screen": "_CourierRegionSection",
+      "line": 194
+    },
+    {
+      "screen": "_CourierAccessibilitySection",
+      "line": 234
+    },
+    {
+      "screen": "_CourierInfoSection",
+      "line": 299
+    },
+    {
+      "screen": "CreditExplainScreen",
+      "line": 69,
+      "routeAddressable": true,
+      "routeParams": "{\n    required String name,\n    required int creditLimit,\n    required int used,\n    required int balance,\n    required int pct,\n  }"
+    },
+    {
+      "screen": "_CreditExplainState",
+      "line": 106
+    },
+    {
+      "screen": "_CustomerImportSheet",
+      "line": 37
+    },
+    {
+      "screen": "_CustomerImportSheetState",
+      "line": 45
+    },
+    {
+      "screen": "DailyReportScreen",
+      "line": 44,
+      "routeAddressable": true,
+      "routeParams": "{\n    required String title,\n    required List<String> reportLines,\n  }"
+    },
+    {
+      "screen": "_DailyReportState",
+      "line": 67
+    },
+    {
+      "screen": "_DefectsSheet",
+      "line": 58
+    },
+    {
+      "screen": "_DefectsSheetState",
+      "line": 65
+    },
+    {
+      "screen": "_DefectRow",
+      "line": 286
+    },
+    {
+      "screen": "_AddDefectForm",
+      "line": 376
+    },
+    {
+      "screen": "_SeverityChip",
+      "line": 496
+    },
+    {
+      "screen": "DepartmentsScreen",
+      "line": 97
+    },
+    {
+      "screen": "_DeptTile",
+      "line": 264
+    },
+    {
+      "screen": "_CompanyDeptTile",
+      "line": 345
+    },
+    {
+      "screen": "_DeptScopeBar",
+      "line": 394
+    },
+    {
+      "screen": "_DeptCatGroups",
+      "line": 510
+    },
+    {
+      "screen": "_CatGroupRow",
+      "line": 570
+    },
+    {
+      "screen": "DescribeToCartScreen",
+      "line": 77,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_DescribeToCartState",
+      "line": 87
+    },
+    {
+      "screen": "DocsReadinessGate",
+      "line": 32
+    },
+    {
+      "screen": "_SectionCard",
+      "line": 257
+    },
+    {
+      "screen": "_GateButton",
+      "line": 342
+    },
+    {
+      "screen": "_RecheckButton",
+      "line": 386
+    },
+    {
+      "screen": "_FinHead",
+      "line": 135
+    },
+    {
+      "screen": "_FinRow",
+      "line": 175
+    },
+    {
+      "screen": "_FinRows",
+      "line": 208
+    },
+    {
+      "screen": "_FinCallout",
+      "line": 234
+    },
+    {
+      "screen": "_CaPrimary",
+      "line": 309
+    },
+    {
+      "screen": "_FinTile",
+      "line": 339
+    },
+    {
+      "screen": "_FinanceHubGrid",
+      "line": 360
+    },
+    {
+      "screen": "_FinTileButton",
+      "line": 402
+    },
+    {
+      "screen": "_PayOpt",
+      "line": 575
+    },
+    {
+      "screen": "_SubRow",
+      "line": 687
+    },
+    {
+      "screen": "_ApprovalCard",
+      "line": 815
+    },
+    {
+      "screen": "_CaEmpty",
+      "line": 930
+    },
+    {
+      "screen": "_ThrRow",
+      "line": 1025
+    },
+    {
+      "screen": "_PenaltyInput",
+      "line": 1238
+    },
+    {
+      "screen": "_PenaltyInputState",
+      "line": 1246
+    },
+    {
+      "screen": "_PenaltyCard",
+      "line": 1302
+    },
+    {
+      "screen": "_FinReportView",
+      "line": 1406
+    },
+    {
+      "screen": "_ReportH2",
+      "line": 1535
+    },
+    {
+      "screen": "_ReportTable",
+      "line": 1552
+    },
+    {
+      "screen": "_FxCalc",
+      "line": 1657
+    },
+    {
+      "screen": "_FxCalcState",
+      "line": 1663
+    },
+    {
+      "screen": "FinderGroup",
+      "line": 32
+    },
+    {
+      "screen": "FinderSub",
+      "line": 160
+    },
+    {
+      "screen": "FinderScreen",
+      "line": 268
+    },
+    {
+      "screen": "_FinderScreenState",
+      "line": 274
+    },
+    {
+      "screen": "_ChipScroll",
+      "line": 781
+    },
+    {
+      "screen": "_ChipScrollState",
+      "line": 788
+    },
+    {
+      "screen": "FloatingCardKeyboard",
+      "line": 165
+    },
+    {
+      "screen": "_FloatingCardKeyboardState",
+      "line": 193
+    },
+    {
+      "screen": "_PredRow",
+      "line": 1674
+    },
+    {
+      "screen": "HomeContentReorder",
+      "line": 18,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_Body",
+      "line": 70
+    },
+    {
+      "screen": "_BodyState",
+      "line": 77
+    },
+    {
+      "screen": "_SectionSlot",
+      "line": 177
+    },
+    {
+      "screen": "HomeShell",
+      "line": 80,
+      "bypassSurface": "tabs"
+    },
+    {
+      "screen": "_GlobalSearchOverlay",
+      "line": 271
+    },
+    {
+      "screen": "_HelpModeOverlay",
+      "line": 289
+    },
+    {
+      "screen": "CartFab",
+      "line": 374,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_CartChatBubble",
+      "line": 484
+    },
+    {
+      "screen": "_HomeAppBar",
+      "line": 650
+    },
+    {
+      "screen": "_BottomNav",
+      "line": 895
+    },
+    {
+      "screen": "_BadgedIcon",
+      "line": 958
+    },
+    {
+      "screen": "_CatalogMenuButton",
+      "line": 1001
+    },
+    {
+      "screen": "_ChatsMenuButton",
+      "line": 1061
+    },
+    {
+      "screen": "_NotificationsMenuButton",
+      "line": 1170
+    },
+    {
+      "screen": "_StoreMenuButton",
+      "line": 1239,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_MenuRow",
+      "line": 1301
+    },
+    {
+      "screen": "_NewChatSheet",
+      "line": 1368
+    },
+    {
+      "screen": "_ProfileCard",
+      "line": 1561
+    },
+    {
+      "screen": "_RoleStatusChip",
+      "line": 1720
+    },
+    {
+      "screen": "_PulsingStatus",
+      "line": 1819
+    },
+    {
+      "screen": "_PulsingStatusState",
+      "line": 1827
+    },
+    {
+      "screen": "_SheetClose",
+      "line": 63
+    },
+    {
+      "screen": "_ActiveTradeConfig",
+      "line": 107
+    },
+    {
+      "screen": "_PickerCategory",
+      "line": 250
+    },
+    {
+      "screen": "InstallStudioHooks",
+      "line": 388
+    },
+    {
+      "screen": "InstallStudioScreen",
+      "line": 438
+    },
+    {
+      "screen": "_InstallStudioScreenState",
+      "line": 444
+    },
+    {
+      "screen": "_NodeRow",
+      "line": 1687
+    },
+    {
+      "screen": "_PipeLink",
+      "line": 1797
+    },
+    {
+      "screen": "_PipePainter",
+      "line": 1835
+    },
+    {
+      "screen": "_BlueprintPainter",
+      "line": 1866
+    },
+    {
+      "screen": "_BomSheet",
+      "line": 1897
+    },
+    {
+      "screen": "_BomSheetState",
+      "line": 1917
+    },
+    {
+      "screen": "_ProductPicker",
+      "line": 3513
+    },
+    {
+      "screen": "_ProductPickerState",
+      "line": 3521
+    },
+    {
+      "screen": "_TutorialOverlay",
+      "line": 3850
+    },
+    {
+      "screen": "IntelTab",
+      "line": 39
+    },
+    {
+      "screen": "_IntelIntro",
+      "line": 90
+    },
+    {
+      "screen": "_FunnelCard",
+      "line": 136
+    },
+    {
+      "screen": "_SegmentsCard",
+      "line": 225
+    },
+    {
+      "screen": "_RetentionCard",
+      "line": 305
+    },
+    {
+      "screen": "_PresenceCard",
+      "line": 378
+    },
+    {
+      "screen": "_IntelCard",
+      "line": 450
+    },
+    {
+      "screen": "_IntelStat",
+      "line": 505
+    },
+    {
+      "screen": "_IntelBar",
+      "line": 566
+    },
+    {
+      "screen": "_IntelPill",
+      "line": 596
+    },
+    {
+      "screen": "_LiveDot",
+      "line": 626
+    },
+    {
+      "screen": "_EmptyLine",
+      "line": 643
+    },
+    {
+      "screen": "KbDestination",
+      "line": 119
+    },
+    {
+      "screen": "KbToolNode",
+      "line": 139
+    },
+    {
+      "screen": "KbPredRow",
+      "line": 94
+    },
+    {
+      "screen": "KbUpdatesContext",
+      "line": 161
+    },
+    {
+      "screen": "LegalScreen",
+      "line": 22,
+      "routeAddressable": true,
+      "routeParams": "{LegalTab initialTab = LegalTab.terms}"
+    },
+    {
+      "screen": "_LegalScreenState",
+      "line": 37
+    },
+    {
+      "screen": "_PlaceholderNotice",
+      "line": 135
+    },
+    {
+      "screen": "_SegmentedToggle",
+      "line": 171
+    },
+    {
+      "screen": "LensSelectorRow",
+      "line": 21
+    },
+    {
+      "screen": "_LensChip",
+      "line": 70
+    },
+    {
+      "screen": "LipskeyBrandScreen",
+      "line": 27,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_BrandHeader",
+      "line": 112
+    },
+    {
+      "screen": "LipskeySectionScreen",
+      "line": 232,
+      "routeAddressable": true,
+      "routeParams": "{required LipskeySection section}"
+    },
+    {
+      "screen": "_CategoryCard",
+      "line": 320
+    },
+    {
+      "screen": "LipskeyProductSheet",
+      "line": 134
+    },
+    {
+      "screen": "_LipskeyProductSheetState",
+      "line": 162
+    },
+    {
+      "screen": "_QtyStepper",
+      "line": 1300
+    },
+    {
+      "screen": "_UnitToggle",
+      "line": 1344
+    },
+    {
+      "screen": "_RelatedCard",
+      "line": 1399
+    },
+    {
+      "screen": "_HeroImage",
+      "line": 1453
+    },
+    {
+      "screen": "_HeroImageState",
+      "line": 1466
+    },
+    {
+      "screen": "_ProductSide",
+      "line": 1542
+    },
+    {
+      "screen": "_ProductSideState",
+      "line": 1556
+    },
+    {
+      "screen": "_ZoomHint",
+      "line": 1717
+    },
+    {
+      "screen": "_SpecSide",
+      "line": 1743
+    },
+    {
+      "screen": "_SpecSideState",
+      "line": 1757
+    },
+    {
+      "screen": "_StageRow",
+      "line": 1877
+    },
+    {
+      "screen": "_SectionTitle",
+      "line": 1973
+    },
+    {
+      "screen": "_Divider",
+      "line": 2013
+    },
+    {
+      "screen": "_QuickInfoStrips",
+      "line": 2051
+    },
+    {
+      "screen": "_QuickInfoStripsState",
+      "line": 2119
+    },
+    {
+      "screen": "_StripDef",
+      "line": 2328
+    },
+    {
+      "screen": "_StripRow",
+      "line": 2348
+    },
+    {
+      "screen": "_StripRowState",
+      "line": 2362
+    },
+    {
+      "screen": "_StripPanel",
+      "line": 2441
+    },
+    {
+      "screen": "_EmptyHint",
+      "line": 3092
+    },
+    {
+      "screen": "_InteractiveChips",
+      "line": 3110
+    },
+    {
+      "screen": "_ChipPickerRow",
+      "line": 3460
+    },
+    {
+      "screen": "_PickerOption",
+      "line": 3499
+    },
+    {
+      "screen": "LipskeyProductsScreen",
+      "line": 30,
+      "routeAddressable": true,
+      "routeParams": "{\n    required String category,\n    required List<LipskeyCatalogProduct> products,\n  }"
+    },
+    {
+      "screen": "LipskeyProductsList",
+      "line": 113
+    },
+    {
+      "screen": "_LipskeyProductsListState",
+      "line": 123
+    },
+    {
+      "screen": "_LensGroupHeader",
+      "line": 307
+    },
+    {
+      "screen": "LipskeyProductCard",
+      "line": 356
+    },
+    {
+      "screen": "LipskeyProductGridCard",
+      "line": 388
+    },
+    {
+      "screen": "_StepBtn",
+      "line": 606
+    },
+    {
+      "screen": "_ProductRow",
+      "line": 703
+    },
+    {
+      "screen": "_ProductRowState",
+      "line": 733
+    },
+    {
+      "screen": "_NameWords",
+      "line": 1995
+    },
+    {
+      "screen": "_HierarchyChips",
+      "line": 2252
+    },
+    {
+      "screen": "_HierarchyChipPill",
+      "line": 2355
+    },
+    {
+      "screen": "_AttrChip",
+      "line": 2397
+    },
+    {
+      "screen": "LoginSheet",
+      "line": 110
+    },
+    {
+      "screen": "_LoginSheetState",
+      "line": 117
+    },
+    {
+      "screen": "ManagerCopilotScreen",
+      "line": 30,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_ManagerCopilotState",
+      "line": 40
+    },
+    {
+      "screen": "_Welcome",
+      "line": 187
+    },
+    {
+      "screen": "_Typing",
+      "line": 271
+    },
+    {
+      "screen": "ManagerDashboardScreen",
+      "line": 125,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_LivePill",
+      "line": 348
+    },
+    {
+      "screen": "_Dot",
+      "line": 399
+    },
+    {
+      "screen": "_ManagerToggle",
+      "line": 422
+    },
+    {
+      "screen": "_DashboardTab",
+      "line": 542
+    },
+    {
+      "screen": "_CopilotHero",
+      "line": 609
+    },
+    {
+      "screen": "_StudioHero",
+      "line": 680
+    },
+    {
+      "screen": "_AttentionCard",
+      "line": 788
+    },
+    {
+      "screen": "_AttentionRow",
+      "line": 823
+    },
+    {
+      "screen": "_MetricGrid",
+      "line": 881
+    },
+    {
+      "screen": "_MetricTile",
+      "line": 947
+    },
+    {
+      "screen": "_OrderPipeline",
+      "line": 1038
+    },
+    {
+      "screen": "_PipelineRow",
+      "line": 1110
+    },
+    {
+      "screen": "_OrdersTab",
+      "line": 1226
+    },
+    {
+      "screen": "_OrdersTabState",
+      "line": 1233
+    },
+    {
+      "screen": "_OrderSummary",
+      "line": 1374
+    },
+    {
+      "screen": "_OrderStageChips",
+      "line": 1431
+    },
+    {
+      "screen": "_OrderRow",
+      "line": 1499
+    },
+    {
+      "screen": "_StagePill",
+      "line": 1619
+    },
+    {
+      "screen": "_MiniTracker",
+      "line": 1648
+    },
+    {
+      "screen": "_AdvanceButton",
+      "line": 1676
+    },
+    {
+      "screen": "_OrderDetailSheet",
+      "line": 1722
+    },
+    {
+      "screen": "_SheetAdvanceButton",
+      "line": 1993
+    },
+    {
+      "screen": "_CustomerView",
+      "line": 2101
+    },
+    {
+      "screen": "_CustomersTab",
+      "line": 2274
+    },
+    {
+      "screen": "_CustomersTabState",
+      "line": 2281
+    },
+    {
+      "screen": "_CustomerSummary",
+      "line": 2468
+    },
+    {
+      "screen": "_CustomerStatusChips",
+      "line": 2527
+    },
+    {
+      "screen": "_RfmPill",
+      "line": 2619
+    },
+    {
+      "screen": "_CustomerCard",
+      "line": 2652
+    },
+    {
+      "screen": "_CreditBar",
+      "line": 2782
+    },
+    {
+      "screen": "_CustomerDetailSheet",
+      "line": 2814
+    },
+    {
+      "screen": "_CustomerChatButton",
+      "line": 3101
+    },
+    {
+      "screen": "_CustomerChatButtonState",
+      "line": 3118
+    },
+    {
+      "screen": "_ApprovalBadge",
+      "line": 3243
+    },
+    {
+      "screen": "_PendingApprovalPanel",
+      "line": 3294
+    },
+    {
+      "screen": "_PendingApprovalPanelState",
+      "line": 3302
+    },
+    {
+      "screen": "_PendingRow",
+      "line": 3449
+    },
+    {
+      "screen": "JourneyTimeline",
+      "line": 3544
+    },
+    {
+      "screen": "_SavedCustomerSection",
+      "line": 3630
+    },
+    {
+      "screen": "_SavedCustomerEditor",
+      "line": 3737
+    },
+    {
+      "screen": "_SavedCustomerEditorState",
+      "line": 3748
+    },
+    {
+      "screen": "_JourneyRow",
+      "line": 3840
+    },
+    {
+      "screen": "_JourneyEmpty",
+      "line": 3927
+    },
+    {
+      "screen": "_ManageTab",
+      "line": 3968
+    },
+    {
+      "screen": "_ManageTabState",
+      "line": 3975
+    },
+    {
+      "screen": "_ManageIntro",
+      "line": 4335
+    },
+    {
+      "screen": "_ManageSection",
+      "line": 4368
+    },
+    {
+      "screen": "_ApprovalsBody",
+      "line": 4539
+    },
+    {
+      "screen": "_ApprovalRow",
+      "line": 4584
+    },
+    {
+      "screen": "_ApprovalButton",
+      "line": 4696
+    },
+    {
+      "screen": "_VacationsBody",
+      "line": 4747
+    },
+    {
+      "screen": "_VacationRequestRow",
+      "line": 4819
+    },
+    {
+      "screen": "_ManageRow",
+      "line": 4926
+    },
+    {
+      "screen": "_ManageHint",
+      "line": 4966
+    },
+    {
+      "screen": "_CategoriesBody",
+      "line": 4991
+    },
+    {
+      "screen": "_AppSettingsBody",
+      "line": 5022
+    },
+    {
+      "screen": "_ProductTreeBody",
+      "line": 5061
+    },
+    {
+      "screen": "_BrandsBody",
+      "line": 5099
+    },
+    {
+      "screen": "_RegressionBody",
+      "line": 5171
+    },
+    {
+      "screen": "_NewAccountApprovalsBody",
+      "line": 5244
+    },
+    {
+      "screen": "_RoleAssignBody",
+      "line": 5317
+    },
+    {
+      "screen": "_ManagerTab",
+      "line": 5381
+    },
+    {
+      "screen": "ManagerProfileScreen",
+      "line": 27,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_ManagerProfileBody",
+      "line": 62
+    },
+    {
+      "screen": "RoleOption",
+      "line": 54
+    },
+    {
+      "screen": "ManagerRoleAssignSheet",
+      "line": 96
+    },
+    {
+      "screen": "_ManagerRoleAssignSheetState",
+      "line": 104
+    },
+    {
+      "screen": "_NoBackendBanner",
+      "line": 337
+    },
+    {
+      "screen": "_RoleChip",
+      "line": 369
+    },
+    {
+      "screen": "_AssignButton",
+      "line": 423
+    },
+    {
+      "screen": "_Dest",
+      "line": 25
+    },
+    {
+      "screen": "_ManagerScreensSheet",
+      "line": 55
+    },
+    {
+      "screen": "_ImpersonationFrame",
+      "line": 153
+    },
+    {
+      "screen": "NotifSettingsScreen",
+      "line": 17,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_SnoozeBanner",
+      "line": 122
+    },
+    {
+      "screen": "_SnoozeSheet",
+      "line": 209,
+      "returnsValue": true
+    },
+    {
+      "screen": "_ChannelsSection",
+      "line": 273
+    },
+    {
+      "screen": "_TypesSection",
+      "line": 330
+    },
+    {
+      "screen": "_QuietHoursSection",
+      "line": 416
+    },
+    {
+      "screen": "_SoundSection",
+      "line": 496
+    },
+    {
+      "screen": "_ImportanceSection",
+      "line": 544
+    },
+    {
+      "screen": "_PersonaSection",
+      "line": 579
+    },
+    {
+      "screen": "_SummariesSection",
+      "line": 645
+    },
+    {
+      "screen": "_LockScreenSection",
+      "line": 748
+    },
+    {
+      "screen": "_QuickActionsSection",
+      "line": 795
+    },
+    {
+      "screen": "PersistedIdSet",
+      "line": 22
+    },
+    {
+      "screen": "_ShowMore",
+      "line": 129
+    },
+    {
+      "screen": "NotificationsScreen",
+      "line": 477
+    },
+    {
+      "screen": "_NotificationsScreenState",
+      "line": 484
+    },
+    {
+      "screen": "_Header",
+      "line": 541
+    },
+    {
+      "screen": "_NotifList",
+      "line": 637
+    },
+    {
+      "screen": "_DateHeader",
+      "line": 828
+    },
+    {
+      "screen": "_ShowMoreRow",
+      "line": 850
+    },
+    {
+      "screen": "_DismissibleRow",
+      "line": 878
+    },
+    {
+      "screen": "_NotifRow",
+      "line": 923,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "OnboardingSlide",
+      "line": 21
+    },
+    {
+      "screen": "OnboardingGate",
+      "line": 65
+    },
+    {
+      "screen": "_OpeningFlow",
+      "line": 122,
+      "bypassSurface": "startup"
+    },
+    {
+      "screen": "OnboardingScreen",
+      "line": 169
+    },
+    {
+      "screen": "_OnboardingScreenState",
+      "line": 179
+    },
+    {
+      "screen": "_SlideView",
+      "line": 324
+    },
+    {
+      "screen": "OrderNotifSheet",
+      "line": 11
+    },
+    {
+      "screen": "OrgSetupWizardScreen",
+      "line": 122,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_OrgSetupWizardState",
+      "line": 132
+    },
+    {
+      "screen": "_ElementInspectorSheet",
+      "line": 1050
+    },
+    {
+      "screen": "_ElementInspectorSheetState",
+      "line": 1060
+    },
+    {
+      "screen": "_WizardFindReplaceScreen",
+      "line": 1290
+    },
+    {
+      "screen": "_WizardHistoryScreen",
+      "line": 1336
+    },
+    {
+      "screen": "_SectionManagerList",
+      "line": 1362
+    },
+    {
+      "screen": "_RenameDialog",
+      "line": 1483
+    },
+    {
+      "screen": "_RenameDialogState",
+      "line": 1492
+    },
+    {
+      "screen": "_ScreenManagerScreen",
+      "line": 1532
+    },
+    {
+      "screen": "_ScreenSectionEditor",
+      "line": 1569
+    },
+    {
+      "screen": "_ScreenKeyboardEditor",
+      "line": 1631
+    },
+    {
+      "screen": "PairedExplainScreen",
+      "line": 46,
+      "routeAddressable": true,
+      "routeParams": "{\n    required String product,\n    required List<String> types,\n  }"
+    },
+    {
+      "screen": "_PairedExplainState",
+      "line": 68
+    },
+    {
+      "screen": "PersonaPickingSheet",
+      "line": 57
+    },
+    {
+      "screen": "ContractorMissingDecisionSheet",
+      "line": 597
+    },
+    {
+      "screen": "_DecisionLine",
+      "line": 789
+    },
+    {
+      "screen": "_PickLine",
+      "line": 900
+    },
+    {
+      "screen": "_SplitControl",
+      "line": 1089
+    },
+    {
+      "screen": "_Banner",
+      "line": 1153
+    },
+    {
+      "screen": "_Grip",
+      "line": 1186
+    },
+    {
+      "screen": "PersonaPodSheet",
+      "line": 69
+    },
+    {
+      "screen": "PortalTileData",
+      "line": 43
+    },
+    {
+      "screen": "PortalTileButton",
+      "line": 73
+    },
+    {
+      "screen": "_PortalSheet",
+      "line": 205
+    },
+    {
+      "screen": "_ChatEntryRow",
+      "line": 355
+    },
+    {
+      "screen": "TradeOption",
+      "line": 16
+    },
+    {
+      "screen": "ProfessionScreen",
+      "line": 37
+    },
+    {
+      "screen": "_TradeCard",
+      "line": 131
+    },
+    {
+      "screen": "ProfileScreen",
+      "line": 36,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_ProfileScreenState",
+      "line": 48
+    },
+    {
+      "screen": "_HeaderCard",
+      "line": 376
+    },
+    {
+      "screen": "_SectionLabel",
+      "line": 460
+    },
+    {
+      "screen": "_FieldLabel",
+      "line": 478
+    },
+    {
+      "screen": "_LinkRow",
+      "line": 568
+    },
+    {
+      "screen": "ProjectsScreen",
+      "line": 38,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_SiteCard",
+      "line": 218
+    },
+    {
+      "screen": "_LinkBtn",
+      "line": 344
+    },
+    {
+      "screen": "_StatusSheet",
+      "line": 371
+    },
+    {
+      "screen": "_EditSheet",
+      "line": 545
+    },
+    {
+      "screen": "_EditSheetState",
+      "line": 552
+    },
+    {
+      "screen": "QuotePolishScreen",
+      "line": 41,
+      "routeAddressable": true,
+      "routeParams": "{\n    required String rawQuote,\n    required String productName,\n  }"
+    },
+    {
+      "screen": "_QuotePolishState",
+      "line": 64
+    },
+    {
+      "screen": "RegressionPanelScreen",
+      "line": 10,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_RunButton",
+      "line": 64
+    },
+    {
+      "screen": "_SummaryCard",
+      "line": 99
+    },
+    {
+      "screen": "_FilterRow",
+      "line": 148
+    },
+    {
+      "screen": "_ResultCard",
+      "line": 217
+    },
+    {
+      "screen": "_CheckRow",
+      "line": 309
+    },
+    {
+      "screen": "RejectReasonScreen",
+      "line": 50,
+      "routeAddressable": true,
+      "routeParams": "{required String role, required String name}"
+    },
+    {
+      "screen": "_RejectReasonState",
+      "line": 65
+    },
+    {
+      "screen": "RewardsHubScreen",
+      "line": 27,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_RewardsFeatureScreen",
+      "line": 103,
+      "routeAddressable": true,
+      "routeParams": "String id"
+    },
+    {
+      "screen": "_Challenges",
+      "line": 143
+    },
+    {
+      "screen": "_Leaderboard",
+      "line": 192
+    },
+    {
+      "screen": "_Green",
+      "line": 233
+    },
+    {
+      "screen": "_Coupons",
+      "line": 262
+    },
+    {
+      "screen": "_Referral",
+      "line": 315
+    },
+    {
+      "screen": "_Vip",
+      "line": 375
+    },
+    {
+      "screen": "_Redeem",
+      "line": 403
+    },
+    {
+      "screen": "_MdHead",
+      "line": 492
+    },
+    {
+      "screen": "_CoinBanner",
+      "line": 521
+    },
+    {
+      "screen": "_CaCard",
+      "line": 616
+    },
+    {
+      "screen": "_CaTop",
+      "line": 639
+    },
+    {
+      "screen": "_CaSub",
+      "line": 694
+    },
+    {
+      "screen": "_Bar",
+      "line": 706
+    },
+    {
+      "screen": "_CardBtn",
+      "line": 725
+    },
+    {
+      "screen": "_Primary",
+      "line": 750
+    },
+    {
+      "screen": "_LbRow",
+      "line": 776
+    },
+    {
+      "screen": "_BadgeRow",
+      "line": 832
+    },
+    {
+      "screen": "_VipCard",
+      "line": 877
+    },
+    {
+      "screen": "_Callout",
+      "line": 919
+    },
+    {
+      "screen": "_ServerNote",
+      "line": 979
+    },
+    {
+      "screen": "_Empty",
+      "line": 998
+    },
+    {
+      "screen": "_RolePickerCard",
+      "line": 78
+    },
+    {
+      "screen": "_RoleRow",
+      "line": 134
+    },
+    {
+      "screen": "_BoardGateRoute",
+      "line": 263
+    },
+    {
+      "screen": "_RoleRequestSheet",
+      "line": 42
+    },
+    {
+      "screen": "_RoleRequestSheetState",
+      "line": 49
+    },
+    {
+      "screen": "_RequestingAs",
+      "line": 145
+    },
+    {
+      "screen": "_RoleRequestRow",
+      "line": 202
+    },
+    {
+      "screen": "RoleRequestsInboxScreen",
+      "line": 25,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_RoleRequestsInboxScreenState",
+      "line": 37
+    },
+    {
+      "screen": "_SiteScaffold",
+      "line": 118
+    },
+    {
+      "screen": "_CaSubTitle",
+      "line": 280
+    },
+    {
+      "screen": "_SiteServerNote",
+      "line": 322
+    },
+    {
+      "screen": "_CaPill",
+      "line": 344
+    },
+    {
+      "screen": "_CardTop",
+      "line": 371
+    },
+    {
+      "screen": "_CardDone",
+      "line": 432
+    },
+    {
+      "screen": "_SiteHubGrid",
+      "line": 506
+    },
+    {
+      "screen": "_HubTile",
+      "line": 554
+    },
+    {
+      "screen": "_SiteLocations",
+      "line": 614
+    },
+    {
+      "screen": "_SiteDiary",
+      "line": 746
+    },
+    {
+      "screen": "_SiteSafety",
+      "line": 845
+    },
+    {
+      "screen": "_SiteSafetyState",
+      "line": 851
+    },
+    {
+      "screen": "_SiteDeps",
+      "line": 974
+    },
+    {
+      "screen": "_SitePhotos",
+      "line": 1050
+    },
+    {
+      "screen": "_SitePhotosState",
+      "line": 1056
+    },
+    {
+      "screen": "_SiteInspect",
+      "line": 1170
+    },
+    {
+      "screen": "_SiteArchive",
+      "line": 1263
+    },
+    {
+      "screen": "_Metrics",
+      "line": 67
+    },
+    {
+      "screen": "SmartHomeBody",
+      "line": 116
+    },
+    {
+      "screen": "_Pad",
+      "line": 171
+    },
+    {
+      "screen": "_MiniTile",
+      "line": 199
+    },
+    {
+      "screen": "_Departments",
+      "line": 271
+    },
+    {
+      "screen": "_SmartTreeRow",
+      "line": 333
+    },
+    {
+      "screen": "_SmartTreeCard",
+      "line": 362
+    },
+    {
+      "screen": "_WorkPath",
+      "line": 471
+    },
+    {
+      "screen": "_QuickTools",
+      "line": 534
+    },
+    {
+      "screen": "_InstallStudioHero",
+      "line": 621
+    },
+    {
+      "screen": "_SuperFinderOpen",
+      "line": 676
+    },
+    {
+      "screen": "_SuperFinderHero",
+      "line": 716
+    },
+    {
+      "screen": "_Favorites",
+      "line": 768
+    },
+    {
+      "screen": "_RecentOrders",
+      "line": 826
+    },
+    {
+      "screen": "_OrderCard",
+      "line": 864
+    },
+    {
+      "screen": "_EmptyCard",
+      "line": 935
+    },
+    {
+      "screen": "SmartProjectScreen",
+      "line": 26,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_SmartProjectScreenState",
+      "line": 36
+    },
+    {
+      "screen": "_Hero",
+      "line": 249
+    },
+    {
+      "screen": "_ProjectDone",
+      "line": 301
+    },
+    {
+      "screen": "SpecCopilotScreen",
+      "line": 66,
+      "routeAddressable": true,
+      "routeParams": "LipskeyCatalogProduct product"
+    },
+    {
+      "screen": "_SpecCopilotState",
+      "line": 80
+    },
+    {
+      "screen": "StockNotifier",
+      "line": 31
+    },
+    {
+      "screen": "StockScreen",
+      "line": 140,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_StockTab",
+      "line": 262
+    },
+    {
+      "screen": "_StockRow",
+      "line": 295
+    },
+    {
+      "screen": "StoreDashboardScreen",
+      "line": 103,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_StoreDashboardScreenState",
+      "line": 116
+    },
+    {
+      "screen": "_InvItem",
+      "line": 1054
+    },
+    {
+      "screen": "_AddProductSheet",
+      "line": 1096
+    },
+    {
+      "screen": "_AddProductSheetState",
+      "line": 1103
+    },
+    {
+      "screen": "SupplierProfile",
+      "line": 1325
+    },
+    {
+      "screen": "SupplierSettingsNotifier",
+      "line": 1385
+    },
+    {
+      "screen": "SupplierSettingsScreen",
+      "line": 1447,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_SupplierSettingsScreenState",
+      "line": 1458
+    },
+    {
+      "screen": "_ProfileField",
+      "line": 1809
+    },
+    {
+      "screen": "_ProfileFieldState",
+      "line": 1840
+    },
+    {
+      "screen": "_LogoPreview",
+      "line": 1906
+    },
+    {
+      "screen": "_StoreNotifsBell",
+      "line": 1955
+    },
+    {
+      "screen": "_StoreNotifsSheet",
+      "line": 2012
+    },
+    {
+      "screen": "_StoreNotifRow",
+      "line": 2170
+    },
+    {
+      "screen": "_ActionCard",
+      "line": 2259
+    },
+    {
+      "screen": "_BigButton",
+      "line": 2406
+    },
+    {
+      "screen": "_Chip",
+      "line": 2436
+    },
+    {
+      "screen": "_StoreOrderCard",
+      "line": 2486
+    },
+    {
+      "screen": "_DocumentsSheetBody",
+      "line": 40
+    },
+    {
+      "screen": "_MonthRow",
+      "line": 146
+    },
+    {
+      "screen": "StoreProfileScreen",
+      "line": 54,
+      "routeAddressable": true
+    },
+    {
+      "screen": "StoreProfileBody",
+      "line": 98
+    },
+    {
+      "screen": "_StoreIdentityCard",
+      "line": 207
+    },
+    {
+      "screen": "_StoreLogoAvatar",
+      "line": 342
+    },
+    {
+      "screen": "_StoreStatsCard",
+      "line": 396
+    },
+    {
+      "screen": "_SStat",
+      "line": 505
+    },
+    {
+      "screen": "_StorePersonalAreaCard",
+      "line": 550
+    },
+    {
+      "screen": "_EditStoreProfileSheet",
+      "line": 655
+    },
+    {
+      "screen": "_EditStoreProfileSheetState",
+      "line": 665
+    },
+    {
+      "screen": "StoreCertsScreen",
+      "line": 953,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_StoreCertsCard",
+      "line": 1378
+    },
+    {
+      "screen": "_StoreCertRow",
+      "line": 1469
+    },
+    {
+      "screen": "StoreFavoritesNotifier",
+      "line": 104
+    },
+    {
+      "screen": "StoreProjectsNotifier",
+      "line": 387
+    },
+    {
+      "screen": "StoreScreen",
+      "line": 493
+    },
+    {
+      "screen": "_StoreScreenState",
+      "line": 500
+    },
+    {
+      "screen": "_SummaryRow",
+      "line": 594
+    },
+    {
+      "screen": "_SummaryChip",
+      "line": 644
+    },
+    {
+      "screen": "_SectionChipsRow",
+      "line": 672,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_QuickActionsRow",
+      "line": 773
+    },
+    {
+      "screen": "_QuickAction",
+      "line": 855
+    },
+    {
+      "screen": "_FavoritesSheet",
+      "line": 922,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_MoadimSheet",
+      "line": 958
+    },
+    {
+      "screen": "_TizmonSheet",
+      "line": 973
+    },
+    {
+      "screen": "_SichaSheet",
+      "line": 988
+    },
+    {
+      "screen": "_SheetScaffold",
+      "line": 1039
+    },
+    {
+      "screen": "_SheetTile",
+      "line": 1088
+    },
+    {
+      "screen": "_StoreList",
+      "line": 1114
+    },
+    {
+      "screen": "_StoreListState",
+      "line": 1121,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_AllList",
+      "line": 1153,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_GridHubCard",
+      "line": 1300
+    },
+    {
+      "screen": "_DismissibleStoreRow",
+      "line": 1415
+    },
+    {
+      "screen": "_StoreRow",
+      "line": 1460
+    },
+    {
+      "screen": "_EmptyState",
+      "line": 1576
+    },
+    {
+      "screen": "_CartView",
+      "line": 1617
+    },
+    {
+      "screen": "_CartViewState",
+      "line": 1624
+    },
+    {
+      "screen": "_ProjectSelector",
+      "line": 1783
+    },
+    {
+      "screen": "_ProjectChip",
+      "line": 1905
+    },
+    {
+      "screen": "_SmartCartRow",
+      "line": 1941
+    },
+    {
+      "screen": "_SmartQtyStepper",
+      "line": 2068
+    },
+    {
+      "screen": "_SupplierHeader",
+      "line": 2131
+    },
+    {
+      "screen": "_CartItemRow",
+      "line": 2163
+    },
+    {
+      "screen": "_DeliverySelector",
+      "line": 2437
+    },
+    {
+      "screen": "_DeliveryCard",
+      "line": 2474
+    },
+    {
+      "screen": "_NotesField",
+      "line": 2528
+    },
+    {
+      "screen": "_SummaryLine",
+      "line": 2620
+    },
+    {
+      "screen": "_PaymentSelector",
+      "line": 2650
+    },
+    {
+      "screen": "_PaymentChip",
+      "line": 2703
+    },
+    {
+      "screen": "_CheckoutButton",
+      "line": 2747
+    },
+    {
+      "screen": "_CheckoutButtonState",
+      "line": 2756
+    },
+    {
+      "screen": "_CheckoutSheet",
+      "line": 2872
+    },
+    {
+      "screen": "_CheckoutSheetState",
+      "line": 2880
+    },
+    {
+      "screen": "_CartActionsRow",
+      "line": 3192
+    },
+    {
+      "screen": "_ServicesGrid",
+      "line": 3542
+    },
+    {
+      "screen": "_ServiceSheet",
+      "line": 3652
+    },
+    {
+      "screen": "_OrdersList",
+      "line": 3830
+    },
+    {
+      "screen": "_OrdersHidden",
+      "line": 3894
+    },
+    {
+      "screen": "_OrderSheet",
+      "line": 4059
+    },
+    {
+      "screen": "_OrderTimeline",
+      "line": 4324
+    },
+    {
+      "screen": "StoreSettingsScreen",
+      "line": 20,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_ShippingSection",
+      "line": 125
+    },
+    {
+      "screen": "_PaymentSection",
+      "line": 197
+    },
+    {
+      "screen": "_InvoicesSection",
+      "line": 255
+    },
+    {
+      "screen": "_CartSection",
+      "line": 382
+    },
+    {
+      "screen": "_DisplaySection",
+      "line": 503
+    },
+    {
+      "screen": "_LogisticsSection",
+      "line": 572
+    },
+    {
+      "screen": "_PrivacySection",
+      "line": 628
+    },
+    {
+      "screen": "_NumberRowState",
+      "line": 1007
+    },
+    {
+      "screen": "FindReplacePane",
+      "line": 20
+    },
+    {
+      "screen": "_FindReplacePaneState",
+      "line": 27
+    },
+    {
+      "screen": "_Hit",
+      "line": 211
+    },
+    {
+      "screen": "_Placeholder",
+      "line": 218
+    },
+    {
+      "screen": "_WideWarning",
+      "line": 236
+    },
+    {
+      "screen": "HistoryPane",
+      "line": 18
+    },
+    {
+      "screen": "InspectorPane",
+      "line": 22
+    },
+    {
+      "screen": "_InspectorPaneState",
+      "line": 29
+    },
+    {
+      "screen": "ThemePane",
+      "line": 23
+    },
+    {
+      "screen": "_Label",
+      "line": 107
+    },
+    {
+      "screen": "_Swatch",
+      "line": 126
+    },
+    {
+      "screen": "_ContrastWarning",
+      "line": 165
+    },
+    {
+      "screen": "_Preview",
+      "line": 207
+    },
+    {
+      "screen": "TreePane",
+      "line": 17
+    },
+    {
+      "screen": "_TreePaneState",
+      "line": 24
+    },
+    {
+      "screen": "_Row",
+      "line": 151
+    },
+    {
+      "screen": "_ScreenRow",
+      "line": 153
+    },
+    {
+      "screen": "_AreaRow",
+      "line": 158
+    },
+    {
+      "screen": "_ElemRow",
+      "line": 163
+    },
+    {
+      "screen": "StudioEntryCard",
+      "line": 20
+    },
+    {
+      "screen": "StudioScreen",
+      "line": 60,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_StudioScreenState",
+      "line": 38
+    },
+    {
+      "screen": "StudioTopBar",
+      "line": 31
+    },
+    {
+      "screen": "_DraftBadge",
+      "line": 88
+    },
+    {
+      "screen": "_PublishSheet",
+      "line": 179
+    },
+    {
+      "screen": "_PublishSheetState",
+      "line": 188
+    },
+    {
+      "screen": "StudioComponentBuilder",
+      "line": 83
+    },
+    {
+      "screen": "_StudioComponentBuilderState",
+      "line": 91
+    },
+    {
+      "screen": "StudioRulesScreen",
+      "line": 41
+    },
+    {
+      "screen": "_StudioRulesScreenState",
+      "line": 48
+    },
+    {
+      "screen": "_StudioTabs",
+      "line": 155
+    },
+    {
+      "screen": "_CoEditorPane",
+      "line": 252
+    },
+    {
+      "screen": "_CoEditorPaneState",
+      "line": 261
+    },
+    {
+      "screen": "SupplierOnboardingScreen",
+      "line": 37,
+      "routeAddressable": true,
+      "routeParams": "String storeId"
+    },
+    {
+      "screen": "_SupplierOnboardingState",
+      "line": 52
+    },
+    {
+      "screen": "SuppliersScreen",
+      "line": 14,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_SupplierTile",
+      "line": 99
+    },
+    {
+      "screen": "_TasksGanttSheet",
+      "line": 48
+    },
+    {
+      "screen": "_GanttBarRow",
+      "line": 228
+    },
+    {
+      "screen": "_UnscheduledRow",
+      "line": 348
+    },
+    {
+      "screen": "TasksScreen",
+      "line": 64,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_TasksScreenState",
+      "line": 74
+    },
+    {
+      "screen": "_WorkerPick",
+      "line": 409
+    },
+    {
+      "screen": "_Intro",
+      "line": 450
+    },
+    {
+      "screen": "_LogButton",
+      "line": 463
+    },
+    {
+      "screen": "_NewTaskButton",
+      "line": 498
+    },
+    {
+      "screen": "_ProposalCard",
+      "line": 607
+    },
+    {
+      "screen": "_DoneAll",
+      "line": 683
+    },
+    {
+      "screen": "_Group",
+      "line": 701
+    },
+    {
+      "screen": "_Card",
+      "line": 737
+    },
+    {
+      "screen": "_TaskSheet",
+      "line": 833
+    },
+    {
+      "screen": "_TaskSheetState",
+      "line": 841
+    },
+    {
+      "screen": "_SecH",
+      "line": 1073
+    },
+    {
+      "screen": "_PrimaryBtn",
+      "line": 1087
+    },
+    {
+      "screen": "_WorkLogSheet",
+      "line": 1112
+    },
+    {
+      "screen": "_TaskAuthorSheet",
+      "line": 1221
+    },
+    {
+      "screen": "_TaskAuthorSheetState",
+      "line": 1234
+    },
+    {
+      "screen": "AccessoryRuleEditorScreen",
+      "line": 58,
+      "routeAddressable": true,
+      "routeParams": "String tradeId"
+    },
+    {
+      "screen": "_AccessoryRuleEditorState",
+      "line": 72
+    },
+    {
+      "screen": "_EmptyAccessories",
+      "line": 386
+    },
+    {
+      "screen": "_AccessoryTile",
+      "line": 425
+    },
+    {
+      "screen": "_MustChip",
+      "line": 535
+    },
+    {
+      "screen": "_PriceChip",
+      "line": 562
+    },
+    {
+      "screen": "AttributeSchemaEditorScreen",
+      "line": 65,
+      "routeAddressable": true,
+      "routeParams": "String tradeId"
+    },
+    {
+      "screen": "_AttributeSchemaEditorState",
+      "line": 79
+    },
+    {
+      "screen": "_AttributeTile",
+      "line": 401
+    },
+    {
+      "screen": "_WarnChip",
+      "line": 532
+    },
+    {
+      "screen": "_MatchChip",
+      "line": 559
+    },
+    {
+      "screen": "CategoryTreeEditorScreen",
+      "line": 59,
+      "routeAddressable": true,
+      "routeParams": "String tradeId"
+    },
+    {
+      "screen": "_CategoryTreeEditorState",
+      "line": 73
+    },
+    {
+      "screen": "_EmptyCategories",
+      "line": 326
+    },
+    {
+      "screen": "_CategoryTile",
+      "line": 365
+    },
+    {
+      "screen": "_RenameCategoryDialog",
+      "line": 449
+    },
+    {
+      "screen": "_RenameCategoryDialogState",
+      "line": 458,
+      "returnsValue": true
+    },
+    {
+      "screen": "ConnectionRuleStudioScreen",
+      "line": 63,
+      "routeAddressable": true,
+      "routeParams": "String tradeId"
+    },
+    {
+      "screen": "_ConnectionRuleStudioState",
+      "line": 77
+    },
+    {
+      "screen": "_EmptyConnectors",
+      "line": 422
+    },
+    {
+      "screen": "_ConnectorTile",
+      "line": 460
+    },
+    {
+      "screen": "_Matrix",
+      "line": 533
+    },
+    {
+      "screen": "_MatrixCell",
+      "line": 588
+    },
+    {
+      "screen": "_MethodLabelDialog",
+      "line": 640
+    },
+    {
+      "screen": "_MethodLabelDialogState",
+      "line": 647,
+      "returnsValue": true
+    },
+    {
+      "screen": "_RuleInspectDialog",
+      "line": 716,
+      "returnsValue": true
+    },
+    {
+      "screen": "ProductAuthoringScreen",
+      "line": 68,
+      "routeAddressable": true,
+      "routeParams": "String tradeId"
+    },
+    {
+      "screen": "_ProductAuthoringState",
+      "line": 82
+    },
+    {
+      "screen": "_EmptyProducts",
+      "line": 623
+    },
+    {
+      "screen": "_ProductTile",
+      "line": 662
+    },
+    {
+      "screen": "TradeBuilderHomeScreen",
+      "line": 48,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_WizardHeader",
+      "line": 131
+    },
+    {
+      "screen": "_EmptyTrades",
+      "line": 196
+    },
+    {
+      "screen": "_TradeTile",
+      "line": 235
+    },
+    {
+      "screen": "_AddTradeButton",
+      "line": 368
+    },
+    {
+      "screen": "TradeDefineStepScreen",
+      "line": 49,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_TradeDefineStepState",
+      "line": 61
+    },
+    {
+      "screen": "_ColorSwatch",
+      "line": 229
+    },
+    {
+      "screen": "_SaveDraftButton",
+      "line": 274
+    },
+    {
+      "screen": "TradePublishSheet",
+      "line": 60,
+      "routeAddressable": true,
+      "routeParams": "String tradeId"
+    },
+    {
+      "screen": "UpdatesScreen",
+      "line": 19
+    },
+    {
+      "screen": "_UpdatesToggle",
+      "line": 70
+    },
+    {
+      "screen": "WebcamCaptureScreen",
+      "line": 52
+    },
+    {
+      "screen": "_WebcamCaptureScreenState",
+      "line": 59
+    },
+    {
+      "screen": "WelcomeScreen",
+      "line": 33
+    },
+    {
+      "screen": "_WelcomeScreenState",
+      "line": 49
+    },
+    {
+      "screen": "WorkerAppScreen",
+      "line": 68,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_WorkerAppScreenState",
+      "line": 80
+    },
+    {
+      "screen": "_TasksTab",
+      "line": 325
+    },
+    {
+      "screen": "_TasksTabState",
+      "line": 344
+    },
+    {
+      "screen": "_WeekStripCard",
+      "line": 653
+    },
+    {
+      "screen": "_DayChip",
+      "line": 793
+    },
+    {
+      "screen": "_DayAttendanceCard",
+      "line": 884
+    },
+    {
+      "screen": "_DayStat",
+      "line": 1099
+    },
+    {
+      "screen": "_WorkerNav",
+      "line": 1145
+    },
+    {
+      "screen": "_Section",
+      "line": 1397
+    },
+    {
+      "screen": "_TaskCard",
+      "line": 1498
+    },
+    {
+      "screen": "_EquipmentButton",
+      "line": 1623
+    },
+    {
+      "screen": "_EmployerStockButton",
+      "line": 1680
+    },
+    {
+      "screen": "_ProposeTaskButton",
+      "line": 1737
+    },
+    {
+      "screen": "_GanttButton",
+      "line": 1795
+    },
+    {
+      "screen": "_DefectsButton",
+      "line": 1854
+    },
+    {
+      "screen": "_ProposeTaskSheet",
+      "line": 1914
+    },
+    {
+      "screen": "_ProposeTaskSheetState",
+      "line": 1933
+    },
+    {
+      "screen": "_ProposeSecH",
+      "line": 2075
+    },
+    {
+      "screen": "_ProposePrimaryBtn",
+      "line": 2097
+    },
+    {
+      "screen": "_SubmitButton",
+      "line": 2142
+    },
+    {
+      "screen": "WorkerAttendanceScreen",
+      "line": 37,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_WorkerAttendanceScreenState",
+      "line": 48
+    },
+    {
+      "screen": "DayWorkItem",
+      "line": 254
+    },
+    {
+      "screen": "_CalendarCard",
+      "line": 505
+    },
+    {
+      "screen": "_DayCell",
+      "line": 688
+    },
+    {
+      "screen": "_DayDetailSheet",
+      "line": 774
+    },
+    {
+      "screen": "_LocationButton",
+      "line": 894
+    },
+    {
+      "screen": "_WorkLine",
+      "line": 953
+    },
+    {
+      "screen": "_EmployerStockSheet",
+      "line": 42
+    },
+    {
+      "screen": "_EmployerStockSheetState",
+      "line": 50
+    },
+    {
+      "screen": "_RequestComposer",
+      "line": 335
+    },
+    {
+      "screen": "_MyRequestRow",
+      "line": 469
+    },
+    {
+      "screen": "_EquipmentChecklistSheet",
+      "line": 144
+    },
+    {
+      "screen": "_EquipmentChecklistSheetState",
+      "line": 154
+    },
+    {
+      "screen": "_EquipmentRow",
+      "line": 375
+    },
+    {
+      "screen": "_AvailabilityChip",
+      "line": 487
+    },
+    {
+      "screen": "WorkerFormsScreen",
+      "line": 41,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_WorkerFormsScreenState",
+      "line": 51
+    },
+    {
+      "screen": "WorkerNotifsBell",
+      "line": 30
+    },
+    {
+      "screen": "_WorkerNotifsSheet",
+      "line": 103
+    },
+    {
+      "screen": "_PayslipsSheetBody",
+      "line": 33
+    },
+    {
+      "screen": "WorkerProfileScreen",
+      "line": 76,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_IdentityCard",
+      "line": 176
+    },
+    {
+      "screen": "_StatsCard",
+      "line": 368
+    },
+    {
+      "screen": "_RowStatus",
+      "line": 480
+    },
+    {
+      "screen": "_PersonalAreaCard",
+      "line": 502
+    },
+    {
+      "screen": "_PersonalAreaRow",
+      "line": 678
+    },
+    {
+      "screen": "_ActionsCard",
+      "line": 761
+    },
+    {
+      "screen": "_ProfileAvatar",
+      "line": 962
+    },
+    {
+      "screen": "_EditProfileSheet",
+      "line": 1022
+    },
+    {
+      "screen": "_EditProfileSheetState",
+      "line": 1031
+    },
+    {
+      "screen": "_SpecialtyDerivedRow",
+      "line": 1401
+    },
+    {
+      "screen": "_GroupHeader",
+      "line": 626
+    },
+    {
+      "screen": "_KvLine",
+      "line": 649
+    },
+    {
+      "screen": "_MiniStatusPill",
+      "line": 691
+    },
+    {
+      "screen": "TaskClockEntry",
+      "line": 76
+    },
+    {
+      "screen": "TaskRejectionLog",
+      "line": 145
+    },
+    {
+      "screen": "WorkerReportsTab",
+      "line": 244
+    },
+    {
+      "screen": "_KpiBox",
+      "line": 774
+    },
+    {
+      "screen": "_BarColumn",
+      "line": 1003
+    },
+    {
+      "screen": "_HistoryRow",
+      "line": 1078
+    },
+    {
+      "screen": "_StatusPill",
+      "line": 1236
+    },
+    {
+      "screen": "_ProofThumb",
+      "line": 1273
+    },
+    {
+      "screen": "_ThumbPlaceholder",
+      "line": 1315
+    },
+    {
+      "screen": "WorkerSafetyScreen",
+      "line": 28,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_TrainingsCard",
+      "line": 755
+    },
+    {
+      "screen": "_TrainingAction",
+      "line": 989
+    },
+    {
+      "screen": "WorkerSettingsScreen",
+      "line": 26,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_LangOption",
+      "line": 153
+    },
+    {
+      "screen": "_SectionCardState",
+      "line": 344
+    },
+    {
+      "screen": "WorkerTaskBoardScreen",
+      "line": 32,
+      "routeAddressable": true
+    },
+    {
+      "screen": "_StatusGroup",
+      "line": 138
+    },
+    {
+      "screen": "_StatusGroupState",
+      "line": 148
+    },
+    {
+      "screen": "_TaskRow",
+      "line": 266
+    },
+    {
+      "screen": "WorkerTaskDetailSheet",
+      "line": 214
+    },
+    {
+      "screen": "_WorkerTaskDetailSheetState",
+      "line": 226
+    },
+    {
+      "screen": "_KitRow",
+      "line": 734
+    },
+    {
+      "screen": "WorkerTodayStrip",
+      "line": 23
+    }
+  ],
+  "edges": [
+    {
+      "from": "AIHubScreen",
+      "to": "DescribeToCartScreen",
+      "trigger": "_runTile",
+      "kind": "push",
+      "line": 195
+    },
+    {
+      "from": "AIHubScreen",
+      "to": "AiAssistantScreen",
+      "trigger": "_runTile",
+      "kind": "push",
+      "line": 197
+    },
+    {
+      "from": "AIHubScreen",
+      "to": "DescribeToCartScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 281
+    },
+    {
+      "from": "AIHubScreen",
+      "to": "AiAssistantScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 283
+    },
+    {
+      "from": "_Analytics",
+      "to": "BusinessSummaryScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 675,
+      "params": "insightLines: [\n                        for (final it in insights"
+    },
+    {
+      "from": "AIHubScreen",
+      "to": "HomeShell#tab0",
+      "trigger": "_runBarcode",
+      "kind": "provider-swap",
+      "line": 141,
+      "params": "0"
+    },
+    {
+      "from": "AIHubScreen",
+      "to": "HomeShell#tab0",
+      "trigger": "_runVoice",
+      "kind": "provider-swap",
+      "line": 154,
+      "params": "0"
+    },
+    {
+      "from": "barcode_scanner",
+      "to": "BarcodeScanner",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 156
+    },
+    {
+      "from": "camera_sheet",
+      "to": "CameraScreen",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 25
+    },
+    {
+      "from": "_DiveEntryTile",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 1688,
+      "params": "initialTab: entry.title == 'תנאי שימוש'\n                  ? LegalTab.terms\n                  : LegalTab.privacy,"
+    },
+    {
+      "from": "_SmartProductSheetState",
+      "to": "QuotePolishScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 4637,
+      "params": "rawQuote: quoteTextFor(\n                                                p, _selectedBrand"
+    },
+    {
+      "from": "_SmartProductSheetState",
+      "to": "AdapterExplainScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 4774,
+      "params": "productName: prod.nameHe,\n                                              sku: prod.sku"
+    },
+    {
+      "from": "catalog_screen",
+      "to": "HomeShell#tab0",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 2095,
+      "params": "0"
+    },
+    {
+      "from": "_ProfileRow",
+      "to": "ProfileScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 169
+    },
+    {
+      "from": "_ThemeSection",
+      "to": "HomeContentReorder",
+      "trigger": "build",
+      "kind": "push",
+      "line": 278
+    },
+    {
+      "from": "_InfoSection",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 707,
+      "params": "initialTab: LegalTab.terms"
+    },
+    {
+      "from": "_InfoSection",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 720,
+      "params": "initialTab: LegalTab.privacy"
+    },
+    {
+      "from": "_ConsentDialog",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 157,
+      "params": "initialTab: LegalTab.privacy"
+    },
+    {
+      "from": "_CheaperAlternativesSheetState",
+      "to": "AltExplainScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 346,
+      "params": "product: a.product,\n                                    recName: a.recName,\n                                    recPrice: a.recPrice,\n                                    altName: a.altName,\n                                    altPrice: a.altPrice,"
+    },
+    {
+      "from": "_CourierDashboardScreenState",
+      "to": "CourierProfileScreen",
+      "trigger": "_appBar",
+      "kind": "push",
+      "line": 408
+    },
+    {
+      "from": "_CourierDashboardScreenState",
+      "to": "CourierSettingsScreen",
+      "trigger": "_appBar",
+      "kind": "push",
+      "line": 421
+    },
+    {
+      "from": "CourierPortalTab",
+      "to": "ChatsScreen",
+      "trigger": "_open",
+      "kind": "raw-push",
+      "line": 112
+    },
+    {
+      "from": "CourierProfileBody",
+      "to": "CourierSettingsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 275
+    },
+    {
+      "from": "_CourierPersonalAreaCard",
+      "to": "CourierAttendanceScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 597
+    },
+    {
+      "from": "_CourierPersonalAreaCard",
+      "to": "CourierFormsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 622
+    },
+    {
+      "from": "_CourierPersonalAreaCard",
+      "to": "CourierCertsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 649
+    },
+    {
+      "from": "CourierReportsTab",
+      "to": "DailyReportScreen",
+      "trigger": "_openAiCourierReport",
+      "kind": "push",
+      "line": 588,
+      "params": "title: 'דוח-יום — שליח ${s.displayName}',\n      reportLines: [\n        '✅ נמסרו היום (נמדד"
+    },
+    {
+      "from": "_CourierInfoSection",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 325,
+      "params": "initialTab: LegalTab.terms"
+    },
+    {
+      "from": "_CourierInfoSection",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 345,
+      "params": "initialTab: LegalTab.privacy"
+    },
+    {
+      "from": "DocsReadinessGate",
+      "to": "WorkerFormsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 147
+    },
+    {
+      "from": "DocsReadinessGate",
+      "to": "WorkerSafetyScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 153
+    },
+    {
+      "from": "DocsReadinessGate",
+      "to": "CourierCertsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 159
+    },
+    {
+      "from": "DocsReadinessGate",
+      "to": "WorkerFormsScreen",
+      "trigger": "_buildTools",
+      "kind": "push",
+      "line": 212
+    },
+    {
+      "from": "DocsReadinessGate",
+      "to": "WorkerSafetyScreen",
+      "trigger": "_buildTools",
+      "kind": "push",
+      "line": 218
+    },
+    {
+      "from": "DocsReadinessGate",
+      "to": "CourierCertsScreen",
+      "trigger": "_buildTools",
+      "kind": "push",
+      "line": 232
+    },
+    {
+      "from": "_CatalogMenuButton",
+      "to": "AIHubScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1052
+    },
+    {
+      "from": "_CatalogMenuButton",
+      "to": "CatalogSettingsScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1054
+    },
+    {
+      "from": "_ChatsMenuButton",
+      "to": "ChatsArchiveScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1134
+    },
+    {
+      "from": "_NotificationsMenuButton",
+      "to": "NotifSettingsScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1232
+    },
+    {
+      "from": "_StoreMenuButton",
+      "to": "StoreSettingsScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1294
+    },
+    {
+      "from": "_ProfileCard",
+      "to": "ProfileScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 1680
+    },
+    {
+      "from": "_RoleStatusChip",
+      "to": "WelcomeScreen",
+      "trigger": "_onTap",
+      "kind": "raw-push",
+      "line": 1802
+    },
+    {
+      "from": "HomeShell",
+      "to": "HomeShell#tabi",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 243,
+      "params": "i"
+    },
+    {
+      "from": "CartFab",
+      "to": "Store/cart",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 409,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "CartFab",
+      "to": "HomeShell#tab3",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 410,
+      "params": "3"
+    },
+    {
+      "from": "_StoreMenuButton",
+      "to": "Store/cart",
+      "trigger": "_onSelected",
+      "kind": "provider-swap",
+      "line": 1288,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "_StoreMenuButton",
+      "to": "Store/orders",
+      "trigger": "_onSelected",
+      "kind": "provider-swap",
+      "line": 1290,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "_StoreMenuButton",
+      "to": "Store/services",
+      "trigger": "_onSelected",
+      "kind": "provider-swap",
+      "line": 1292,
+      "params": "StoreSection.services"
+    },
+    {
+      "from": "install_studio_screen",
+      "to": "AuditScreen",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 434
+    },
+    {
+      "from": "_InstallStudioScreenState",
+      "to": "AuditScreen",
+      "trigger": "_dock",
+      "kind": "raw-push",
+      "line": 1073
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "ProfileScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 447
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "CatalogSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 472
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "AIHubScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 487
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "StockScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 502
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "ChatsArchiveScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 549
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "NotifSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 563
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "HomeContentReorder",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 579
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "RewardsHubScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 597
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "BudgetScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 643
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "LegalScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 744
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "LegalScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 757,
+      "params": "initialTab: LegalTab.privacy"
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "InstallStudioScreen",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 537
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "AuditScreen",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 675
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "HomeShell#tab0",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 152,
+      "params": "0"
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "HomeShell#tab3",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 159,
+      "params": "3"
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "Store/section",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 160,
+      "params": "section"
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "HomeShell#tab2",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 166,
+      "params": "2"
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "HomeShell#tab1",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 189,
+      "params": "1"
+    },
+    {
+      "from": "keyboard_destinations",
+      "to": "HomeShell#tab2",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 316,
+      "params": "2"
+    },
+    {
+      "from": "keyboard_tool_actions",
+      "to": "InstallStudioScreen",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 77
+    },
+    {
+      "from": "keyboard_tool_actions",
+      "to": "BarcodeScanner",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 85
+    },
+    {
+      "from": "keyboard_tool_actions",
+      "to": "HomeShell#tab1",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 53,
+      "params": "1"
+    },
+    {
+      "from": "keyboard_tool_actions",
+      "to": "HomeShell#tab3",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 93,
+      "params": "3"
+    },
+    {
+      "from": "keyboard_tool_actions",
+      "to": "Store/orders",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 94,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "keyboard_tool_actions",
+      "to": "HomeShell#tab0",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 129,
+      "params": "0"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "StockScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 254,
+      "dormant": true,
+      "gate": "!featureOn(ref.read(orgConfigProvider), 'site', 'stock')"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "AIHubScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 358
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CatalogSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 365
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "NotifSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 442
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "ChatsArchiveScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 959
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "NotifSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 985
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "StoreSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1010
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "AIHubScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1021
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CatalogSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1027
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "StoreSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1061
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "NotifSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1089
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "StoreSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1095
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CatalogSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1112
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "WorkerAttendanceScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1177
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "WorkerFormsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1183
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "WorkerSafetyScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1189
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "ManagerCopilotScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1204
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "ManagerProfileScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1229
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CatalogSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1235,
+      "params": "showProfileRow: false"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "NotifSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1246
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "LegalScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1252
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "LegalScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1258,
+      "params": "initialTab: LegalTab.privacy"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CatalogSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1268,
+      "params": "showProfileRow: false"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CourierProfileScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1289
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CourierSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1295
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CourierAttendanceScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1305
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CourierFormsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1311
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "CourierCertsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1317
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "LegalScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1332
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "LegalScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1338,
+      "params": "initialTab: LegalTab.privacy"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "StoreProfileScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1348
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "SupplierSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1354
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "StoreCertsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1364
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "SupplierSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1375
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "BudgetScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1385
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "TasksScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1391
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "SmartProjectScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1397
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "LipskeyBrandScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1409
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "RewardsHubScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1419
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "WorkerTaskBoardScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1439
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "WorkerSettingsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 1455
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "ChatsScreen",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 1219
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab3",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 282,
+      "params": "3"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "Store/orders",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 283,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab0",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 311,
+      "params": "0"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab3",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 594,
+      "params": "3"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "Store/orders",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 595,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab0",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 736,
+      "params": "0"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab0",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 751,
+      "params": "0"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab0",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 768,
+      "params": "0"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab2",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 825,
+      "params": "2"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab0",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 866,
+      "params": "0"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "Store/cart",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 997,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "HomeShell#tab3",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 1125,
+      "params": "3"
+    },
+    {
+      "from": "keyboard_tool_tree",
+      "to": "Store/orders",
+      "trigger": "(top)",
+      "kind": "provider-swap",
+      "line": 1126,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "LipskeyBrandScreen",
+      "to": "LipskeySectionScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 90,
+      "params": "section: section"
+    },
+    {
+      "from": "LipskeySectionScreen",
+      "to": "LipskeyProductsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 294,
+      "params": "category: entry.name,\n                                  products: products,"
+    },
+    {
+      "from": "_LipskeyProductSheetState",
+      "to": "SpecCopilotScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 1250,
+      "params": "p"
+    },
+    {
+      "from": "_LipskeyProductSheetState",
+      "to": "PairedExplainScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 1275,
+      "params": "product: p.nameHe, types: pairedTypes"
+    },
+    {
+      "from": "ManagerDashboardScreen",
+      "to": "ManagerProfileScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 265
+    },
+    {
+      "from": "ManagerDashboardScreen",
+      "to": "CatalogSettingsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 283,
+      "params": "showProfileRow: false"
+    },
+    {
+      "from": "_CopilotHero",
+      "to": "ManagerCopilotScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 621
+    },
+    {
+      "from": "_StudioHero",
+      "to": "StudioScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 700
+    },
+    {
+      "from": "_CustomerDetailSheet",
+      "to": "CreditExplainScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 2990,
+      "params": "name: c.name,\n                            creditLimit: creditLimit,\n                            used: liveTotalSpend,\n                            balance: balance,\n                            pct: livePct,"
+    },
+    {
+      "from": "_ManageTabState",
+      "to": "RegressionPanelScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 4229
+    },
+    {
+      "from": "_ManageTabState",
+      "to": "RoleRequestsInboxScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 4280
+    },
+    {
+      "from": "_ManageTabState",
+      "to": "TradeBuilderHomeScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 4302
+    },
+    {
+      "from": "_ManageTabState",
+      "to": "OrgSetupWizardScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 4324
+    },
+    {
+      "from": "ManagerDashboardScreen",
+      "to": "ChatsScreen",
+      "trigger": "build",
+      "kind": "raw-push",
+      "line": 243
+    },
+    {
+      "from": "_ManagerProfileBody",
+      "to": "CatalogSettingsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 222,
+      "params": "showProfileRow: false"
+    },
+    {
+      "from": "_ManagerScreensSheet",
+      "to": "SupplierOnboardingScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 140,
+      "params": "'ahim_cohen'"
+    },
+    {
+      "from": "_OpeningFlow",
+      "to": "startup#step - 1",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 146,
+      "params": "step - 1"
+    },
+    {
+      "from": "_OnboardingScreenState",
+      "to": "startup#0",
+      "trigger": "_finish",
+      "kind": "provider-swap",
+      "line": 202,
+      "params": "0"
+    },
+    {
+      "from": "_ChatEntryRow",
+      "to": "ChatsScreen",
+      "trigger": "build",
+      "kind": "raw-push",
+      "line": 378
+    },
+    {
+      "from": "ProfessionScreen",
+      "to": "ComingSoonScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 46,
+      "params": "name"
+    },
+    {
+      "from": "ProfessionScreen",
+      "to": "startup#2",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 50,
+      "params": "2"
+    },
+    {
+      "from": "ProfessionScreen",
+      "to": "startup#0",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 73,
+      "params": "0"
+    },
+    {
+      "from": "_ProfileScreenState",
+      "to": "RewardsHubScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 324
+    },
+    {
+      "from": "_ProfileScreenState",
+      "to": "RoleRequestsInboxScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 358
+    },
+    {
+      "from": "projects_screen",
+      "to": "ProjectsScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 36
+    },
+    {
+      "from": "ProjectsScreen",
+      "to": "BudgetScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 97
+    },
+    {
+      "from": "ProjectsScreen",
+      "to": "TasksScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 102
+    },
+    {
+      "from": "ProjectsScreen",
+      "to": "SmartProjectScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 108
+    },
+    {
+      "from": "_RequestCard",
+      "to": "RejectReasonScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 280,
+      "params": "role: role, name: name ?? ''"
+    },
+    {
+      "from": "_SiteDiary",
+      "to": "DailyReportScreen",
+      "trigger": "_openSiteSummary",
+      "kind": "push",
+      "line": 818,
+      "params": "title: 'סיכום אתר',\n      reportLines: siteSummaryReportLines(\n        ref.read(siteDiaryProvider"
+    },
+    {
+      "from": "_QuickTools",
+      "to": "StockScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 558
+    },
+    {
+      "from": "_InstallStudioHero",
+      "to": "InstallStudioScreen",
+      "trigger": "build",
+      "kind": "raw-push",
+      "line": 631
+    },
+    {
+      "from": "_Departments",
+      "to": "HomeShell#tab1",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 315,
+      "params": "1"
+    },
+    {
+      "from": "_Departments",
+      "to": "HomeShell#tab1",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 322,
+      "params": "1"
+    },
+    {
+      "from": "_SuperFinderHero",
+      "to": "HomeShell#tab0",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 726,
+      "params": "0"
+    },
+    {
+      "from": "smart_project_screen",
+      "to": "SmartProjectScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 24
+    },
+    {
+      "from": "_StoreDashboardScreenState",
+      "to": "StoreProfileScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 260
+    },
+    {
+      "from": "_StoreDashboardScreenState",
+      "to": "SupplierSettingsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 277
+    },
+    {
+      "from": "StoreProfileBody",
+      "to": "SupplierSettingsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 161
+    },
+    {
+      "from": "_StorePersonalAreaCard",
+      "to": "StoreCertsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 608
+    },
+    {
+      "from": "_SectionChipsRow",
+      "to": "Store/s",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 680,
+      "params": "s"
+    },
+    {
+      "from": "_FavoritesSheet",
+      "to": "Store/cart",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 944,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "_FavoritesSheet",
+      "to": "Store/orders",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 947,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "_AllList",
+      "to": "Store/cart",
+      "trigger": "_tapFor",
+      "kind": "provider-swap",
+      "line": 1166,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "_AllList",
+      "to": "Store/orders",
+      "trigger": "_tapFor",
+      "kind": "provider-swap",
+      "line": 1170,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "StudioEntryCard",
+      "to": "StudioScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 41,
+      "params": "ref"
+    },
+    {
+      "from": "SuppliersScreen",
+      "to": "LipskeyBrandScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 89
+    },
+    {
+      "from": "tasks_screen",
+      "to": "TasksScreen",
+      "trigger": "(top)",
+      "kind": "push",
+      "line": 49
+    },
+    {
+      "from": "_CategoryTreeEditorState",
+      "to": "AttributeSchemaEditorScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 224,
+      "params": "widget.tradeId"
+    },
+    {
+      "from": "_CategoryTreeEditorState",
+      "to": "ProductAuthoringScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 236,
+      "params": "widget.tradeId"
+    },
+    {
+      "from": "_ProductAuthoringState",
+      "to": "AccessoryRuleEditorScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 336,
+      "params": "widget.tradeId"
+    },
+    {
+      "from": "_ProductAuthoringState",
+      "to": "ConnectionRuleStudioScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 348,
+      "params": "widget.tradeId"
+    },
+    {
+      "from": "TradeBuilderHomeScreen",
+      "to": "TradeDefineStepScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 117
+    },
+    {
+      "from": "_TradeTile",
+      "to": "CategoryTreeEditorScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 255,
+      "params": "trade.id"
+    },
+    {
+      "from": "_TradeTile",
+      "to": "TradePublishSheet",
+      "trigger": "build",
+      "kind": "push",
+      "line": 315,
+      "params": "trade.id"
+    },
+    {
+      "from": "webcam_capture_sheet",
+      "to": "WebcamCaptureScreen",
+      "trigger": "(top)",
+      "kind": "raw-push",
+      "line": 39
+    },
+    {
+      "from": "_WelcomeScreenState",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 1032,
+      "params": "initialTab: LegalTab.terms"
+    },
+    {
+      "from": "_WelcomeScreenState",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 1060,
+      "params": "initialTab: LegalTab.privacy"
+    },
+    {
+      "from": "_WelcomeScreenState",
+      "to": "startup#1",
+      "trigger": "_advance",
+      "kind": "provider-swap",
+      "line": 104,
+      "params": "1"
+    },
+    {
+      "from": "_WorkerAppScreenState",
+      "to": "WorkerTaskBoardScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 187
+    },
+    {
+      "from": "_WorkerAppScreenState",
+      "to": "WorkerSettingsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 225
+    },
+    {
+      "from": "_TasksTabState",
+      "to": "WorkerAttendanceScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 428
+    },
+    {
+      "from": "_PersonalAreaCard",
+      "to": "WorkerAttendanceScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 617
+    },
+    {
+      "from": "_PersonalAreaCard",
+      "to": "WorkerFormsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 632
+    },
+    {
+      "from": "_PersonalAreaCard",
+      "to": "WorkerSafetyScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 647
+    },
+    {
+      "from": "_ActionsCard",
+      "to": "WorkerSettingsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 805
+    },
+    {
+      "from": "WorkerReportsTab",
+      "to": "DailyReportScreen",
+      "trigger": "_openAiDailyReport",
+      "kind": "push",
+      "line": 755,
+      "params": "title: 'דוח-יום — ${workerShortName(worker"
+    },
+    {
+      "from": "_NotifRow",
+      "to": "NotifSettingsScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 106
+    },
+    {
+      "from": "_InfoSection",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 299,
+      "params": "initialTab: LegalTab.terms"
+    },
+    {
+      "from": "_InfoSection",
+      "to": "LegalScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 310,
+      "params": "initialTab: LegalTab.privacy"
+    }
+  ]
+}

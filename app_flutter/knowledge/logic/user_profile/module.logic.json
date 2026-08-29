@@ -1,0 +1,730 @@
+{
+  "module": "user_profile",
+  "source": "lib/state/user_profile.dart",
+  "atomCount": 11,
+  "atoms": [
+    {
+      "fn": "registrationValid",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String name, String contact) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "UserProfileNotifier.update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "name.trim().isNotEmpty && contact.trim().isNotEmpty"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(String name, String contact)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfile.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? name, String? contact, String? profession, String? address, String? businessId, bool? registered}) -> UserProfile",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "UserProfile(name: name ?? this.name, contact: contact ?? this.contact, profession: profes…"
+          }
+        ]
+      },
+      "floor": [
+        "UserProfile"
+      ],
+      "contract": {
+        "input": "({String? name, String? contact, String? profession, String? address, String? businessId, bool? registered})",
+        "output": "UserProfile",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfile.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "address"
+          },
+          {
+            "kind": "field",
+            "name": "businessId"
+          },
+          {
+            "kind": "field",
+            "name": "contact"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "profession"
+          },
+          {
+            "kind": "field",
+            "name": "registered"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'name' : name, 'contact' : contact, 'profession' : profession, 'address' : address, 'bus…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfileNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kUserProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(kUserProfileKey)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _userTouched → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if raw == null → return (void)",
+          "if _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfileNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kUserProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "UserProfileNotifier.continueAsDemo",
+          "UserProfileNotifier.register",
+          "UserProfileNotifier.setProfession",
+          "UserProfileNotifier.update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setString(kUserProfileKey, jsonEncode(state.toJson()))"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfileNotifier.register",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String name, required String contact}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kUserProfileKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(name: name.trim(), contact: contact.trim(), registered: true)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "trim"
+      ],
+      "contract": {
+        "input": "({required String name, required String contact})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfileNotifier.continueAsDemo",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kUserProfileKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(registered: false)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfileNotifier.setProfession",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String profession) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kUserProfileKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(profession: profession)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String profession)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfileNotifier.reset",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kUserProfileKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = const UserProfile()"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(SharedPreferences.getInstance().then((p) => p.remove(kUserProfileKey)))"
+          }
+        ]
+      },
+      "floor": [
+        "UserProfile",
+        "getInstance",
+        "remove",
+        "then",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfileNotifier.update",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({String? name, String? contact, String? profession, String? address, String? businessId}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kUserProfileKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "currentUidProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "usersProfileWriterProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "registrationValid",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          },
+          {
+            "name": "_mirrorToServer",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = (name ?? state.name).trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = (contact ?? state.contact).trim()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(name: n, contact: c, profession: (profession ?? state.profession).…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_mirrorToServer()"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "trim"
+      ],
+      "contract": {
+        "input": "({String? name, String? contact, String? profession, String? address, String? businessId})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "UserProfileNotifier._mirrorToServer",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          },
+          {
+            "kind": "global",
+            "name": "currentUidProvider"
+          },
+          {
+            "kind": "global",
+            "name": "useFirebaseBackend"
+          },
+          {
+            "kind": "global",
+            "name": "usersProfileWriterProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "UserProfileNotifier.update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ref = _ref"
+          },
+          {
+            "kind": "precond",
+            "detail": "if ref == null || !useFirebaseBackend → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "uid = ref.read(currentUidProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "writer = ref.read(usersProfileWriterProvider)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if uid == null || writer == null → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "p = state"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(writer.set(uid, {if (p.name.isNotEmpty) 'displayName' : p.name, if (validIsrael…"
+          }
+        ]
+      },
+      "floor": [
+        "catchError",
+        "read",
+        "set",
+        "unawaited",
+        "validEmail",
+        "validIsraeliMobile"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if ref == null || !useFirebaseBackend → return (void)",
+          "if uid == null || writer == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

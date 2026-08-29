@@ -1,0 +1,76 @@
+# BuildSmart critical-flow tests that MUST exist (paths relative to app_flutter/).
+# Run via: central-verify.sh /path/to/app_flutter --required-tests orchestrator/manifests/buildsmart.required-tests.txt
+# Since central-verify requires the whole suite to be green, "present here" ⇒ "this flow ran and passed".
+test/orders_engine_test.dart
+test/courier_stage_advance_engine_test.dart
+test/store_stage_advance_engine_test.dart
+test/acceptance_stage_test.dart
+# manager order-flow: bs_dial_manager_orders_test was removed with the BS-dial; the
+# live manager order tab + god-advance is now covered by the dashboard screen test.
+test/manager_dashboard_screen_test.dart
+test/worker_tasks_persistence_test.dart
+# stage-2 resilience contract (DIRECTIVE-buildsmart-clean §2) — iron-rules 1+2+3+4, each in its own suite:
+test/stage2_data_tolerance_test.dart
+test/stage2_safety_net_test.dart
+test/stage2_scale_test.dart
+test/stage2_tenant_isolation_test.dart
+# stage-3 engine↔data separation — list/bridge/search single-source invariant:
+test/stage3_catalog_source_consistency_test.dart
+# stage-3.4 — the APP_PROFILE contract (demo≡today · matrix · mirror-consistency · closed-set sweep):
+test/app_profile_flags_test.dart
+# clean empty-shell — the content gates (matrix · live pins in both worlds · consumer registry):
+test/stage_clean_empty_test.dart
+# company-catalog import — template/parser/codec/seam/store (two-world hydration proof):
+test/company_catalog_import_test.dart
+# clean-100 — derived category rows over the imported catalog (pure + widget tiers):
+test/company_categories_test.dart
+test/company_catalog_rows_test.dart
+# template v2 — barcode alias resolves with object identity (own isolate — memo order):
+test/barcode_alias_test.dart
+# slice-B — the connections brain pours in (bridge parsing · registration discipline · engine payoff):
+test/company_spec_bridge_test.dart
+# completion round — pools overlay identity · AI-hub raw pins · complements order:
+test/company_pools_overlay_test.dart
+# giant-system Phase 1 / V1 — the runtime OrgConfig layer (pure + store tiers):
+test/org_config_test.dart
+test/org_config_store_test.dart
+# giant-system V2 wave-1 — the toggle matrix (every combo wired · live-swap wizard contract):
+test/org_toggle_matrix_test.dart
+# giant-system V3 wave-1 — org terms (nav/brand/CfgText rebrand · Studio-wins coexistence · live swap):
+test/org_terms_test.dart
+# giant-system V4 — vertical packs (closed-set registry · full-replace apply · reversibility):
+test/vertical_packs_test.dart
+# giant-system V5 — the setup wizard (composed save · self-lockout guard · honest no-op import):
+test/org_setup_wizard_test.dart
+# giant Phase-2 wave-1a — the attention engine (pure fan-in ranker + opt-in gated cockpit mount):
+test/attention_engine_test.dart
+test/attention_gate_test.dart
+# giant Phase-2 wave-1b — the workflow kernel (nameable 5-stage machine · 2-press dispatch · dedup · handled-today):
+test/workflow_engine_test.dart
+# giant Phase-2 wave-2a — CRM shared core (ח"פ check-digit · phone/Hebrew normalize · Damerau fuzzy primitive):
+test/crm_core_test.dart
+# giant Phase-2 wave-2b — the saved customer entity (dedup-on-input · by-name join · gated detail-sheet augmentation):
+test/customers_store_test.dart
+test/customers_gate_test.dart
+# giant Phase-2 wave-2c — fuzzy customer search (gated search.fuzzy · Damerau name match · composes with chips):
+test/customers_search_test.dart
+# giant Phase-2 wave-2d — RFM customer scoring (pure kernel · recency from Order.createdAt · gated tier badge):
+test/customer_score_test.dart
+test/customer_score_gate_test.dart
+# giant Phase-2 wave-3a — data-quality warnings lane (pure auditRows + gated non-blocking report on catalog import):
+test/data_quality_test.dart
+test/data_quality_gate_test.dart
+# giant Phase-2 wave-3b — shared CSV kernel (tokenizer + header helpers extracted from the catalog parser):
+test/csv_kernel_test.dart
+# giant Phase-2 wave-3c — pure customer bulk-import parser (name required · phone/email validated · deterministic dedup-key ids · atomic gate):
+test/customer_import_test.dart
+# giant Phase-2 wave-3d — customer import UI (gated tab trigger · sheet upload→commit→quality · bulk importAll):
+test/customer_import_gate_test.dart
+# giant Phase-2 wave-3e — invoice/receipt document (pure VAT-reconciling kernel + gated button on the order-detail sheet):
+test/invoice_test.dart
+test/invoice_gate_test.dart
+# giant Phase-2 wave-4b — delivery-note document (goods/no-money) on the printable-docs rail, gated orders.deliveryNote:
+test/delivery_note_test.dart
+test/delivery_note_gate_test.dart
+# SWARM run-1 — screen→Hebrew map for the wizard element accordion:
+test/screen_labels_he_test.dart

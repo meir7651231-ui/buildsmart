@@ -1,0 +1,47 @@
+{
+  "matched": 8,
+  "total": 8,
+  "summary": "8/8",
+  "entries": [
+    {
+      "id": "worker_settings_screen.settings_title",
+      "ok": true,
+      "atom": "WorkerSettingsScreen"
+    },
+    {
+      "id": "worker_settings_screen.notifications",
+      "ok": true,
+      "atom": "_NotifRow"
+    },
+    {
+      "id": "worker_settings_screen.coming_soon",
+      "ok": true,
+      "atom": "_RegionSection"
+    },
+    {
+      "id": "worker_settings_screen.text_size",
+      "ok": true,
+      "atom": "_AccessibilitySection"
+    },
+    {
+      "id": "worker_settings_screen.high_contrast",
+      "ok": true,
+      "atom": "_AccessibilitySection"
+    },
+    {
+      "id": "worker_settings_screen.reduced_motion",
+      "ok": true,
+      "atom": "_AccessibilitySection"
+    },
+    {
+      "id": "worker_settings_screen.terms",
+      "ok": true,
+      "atom": "_InfoSection"
+    },
+    {
+      "id": "worker_settings_screen.privacy",
+      "ok": true,
+      "atom": "_InfoSection"
+    }
+  ]
+}

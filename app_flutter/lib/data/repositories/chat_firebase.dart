@@ -1,0 +1,743 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// FirebaseChatRepository — the S4.1–S4.3 Firestore-backed implementation of
+// [ChatRepository], built on the offline-first cache base ([FirestoreCachedRepo]).
+// It drops in BEHIND the shared cross-persona chat engine
+// (`state/sys_chat.dart`): the engine binds to it (`bindRemote`) and mirrors its
+// caches, so every screen keeps reading `chatEngineProvider` unchanged — zero
+// UI diffs, the engine's public API untouched.
+//
+// WHY THIS REPO IS *COMPOSED* (two backing repos, not one — the `site_firebase`
+// S3.S precedent): the schema splits chat across TWO collections,
+//   • `chatThreads/{id}`  {participants:[uid], names, lastMsg, ts}   (S4.1)
+//   • `chatMessages/{id}` {threadId, fromUid, fromRole, text, ts}    (S4.2)
+// so messages can stream per-thread without re-reading every thread doc. Each
+// gets its own `FirestoreCachedRepo`; [threads] re-assembles the engine's
+// `ChatThread` shape (head + its ts-ordered messages) from the two caches, and
+// this composer re-fires `notifyListeners` whenever EITHER cache changes — the
+// single subscription point the engine listens on.
+//
+// HOW THE BRIDGE IS HELD (identical to the orders pilot):
+//   • reads ([threads]) are SYNCHRONOUS, served from the two in-memory caches
+//     each base maintains from its Firestore `snapshots()` listener;
+//   • [send] (S4.3) updates the caches OPTIMISTICALLY (instant for the UI) and
+//     fires the matching Firestore writes in the background — the message doc
+//     PLUS the thread head's `lastMsg`/`ts` denormalisation. A write failure is
+//     logged, never thrown.
+//
+// SEND SEMANTICS ARE A VERBATIM PORT of `ChatEngineNotifier.send`
+// (`state/sys_chat.dart`) so chat behaves byte-for-byte like the local path:
+//   • trim; no-op on empty text / unknown thread;
+//   • message id `m-<microsecondsSinceEpoch>-<role>`;
+//   • the BOT thread auto-replies (next `kBotAutoReplies` in rotation, by the
+//     thread's current bot-message count, stamped +1ms) — real threads do NOT
+//     auto-reply, the other persona answers live (that is S4's whole point).
+//
+// ⚠️ UID JOIN DEFERRED TO S1 (documented per the SSOT): until the auth fleet
+// lands real `auth.uid`s there are no user ids to write, so the existing
+// `BsRole`-based identity is mapped VERBATIM —
+//   • `chatThreads.participants` carries the role NAMES (`'contractor'`,
+//     `'store'`, …) instead of uids;
+//   • `chatMessages.fromRole` is written, `fromUid` is OMITTED.
+// After S1, this file is the single point that swaps to uid participants
+// (`fromDoc`/`toDoc` below + the S5.2/S5.3 rules `participants` checks);
+// `fromDoc` already tolerates unknown participant entries (a future uid next to
+// a role name is ignored, not fatal) so mixed docs keep decoding.
+//
+// SEED CONTRACT (offline-first, fresh-backend-safe), per composed repo:
+//   • both caches are BORN from the verbatim [kChatThreads] seed (heads +
+//     flattened messages) so chat is non-empty before snapshot 1;
+//   • a FIRST snapshot that arrives EMPTY (fresh Firestore) → `pushCacheToRemote`
+//     seeds that collection from the local seed (first-empty pushes seeds up);
+//   • `resetToSeed` → `replaceAll(seed)` on both.
+//
+// Comment density/voice mirrors `orders_firebase.dart` — the S2.3 template.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import 'dart:async';
+
+import 'package:buildsmart/data/chat_seeds.dart';
+import 'package:buildsmart/data/repositories/chat_repository.dart';
+import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/state/sys_chat.dart';
+import 'package:flutter/foundation.dart';
+
+// ─── seed projections (the verbatim kChatThreads, split per collection) ──────
+
+/// The seed thread HEADS — [kChatThreads] minus their messages, with the
+/// denormalised `lastMsg`/`ts` taken from each thread's last seed message.
+List<_ChatThreadHead> _threadHeadSeed() => [
+      for (final t in kChatThreads)
+        _ChatThreadHead(
+          id: t.id,
+          participants: t.participants,
+          participantUids: t.participantUids,
+          name: t.name,
+          avatar: t.avatar,
+          isBot: t.isBot,
+          lastMsg: t.messages.isEmpty ? '' : t.messages.last.text,
+          lastTs: t.messages.isEmpty ? null : t.messages.last.ts,
+        ),
+    ];
+
+/// The seed MESSAGES — every [kChatThreads] message, flattened (each already
+/// carries its `threadId`; `sortBy` restores the ts order after any snapshot).
+List<ChatMessage> _chatMessageSeed() =>
+    [for (final t in kChatThreads) ...t.messages];
+
+/// Seed-order index for thread heads: Firestore returns documents in doc-id
+/// (alphabetical) order, but the UI expects the verbatim seed order — exactly
+/// why the orders pilot re-sorts. Unknown ids (post-S1 server-created threads)
+/// sort after the seeds, by id, for a stable order across snapshots.
+final Map<String, int> _seedThreadOrder = {
+  for (var i = 0; i < kChatThreads.length; i++) kChatThreads[i].id: i,
+};
+
+// ─── thread heads · collection `chatThreads` ─────────────────────────────────
+
+/// One `chatThreads/{id}` document — a [ChatThread] minus its messages (those
+/// live in `chatMessages`), plus the schema's denormalised `lastMsg`/`ts` (what
+/// the live conversation LIST renders without loading messages — S4.1).
+@immutable
+class _ChatThreadHead {
+  const _ChatThreadHead({
+    required this.id,
+    required this.participants,
+    required this.name,
+    required this.avatar,
+    required this.isBot,
+    required this.lastMsg,
+    required this.lastTs,
+    this.participantUids = const [],
+  });
+
+  final String id;
+  final List<BsRole> participants;
+
+  /// A9 — uid members (auth-truth the rules scope on); `[]` on every seed /
+  /// legacy / role-based thread (zero regression). See [ChatThread.participantUids].
+  final List<String> participantUids;
+  final String name;
+  final String avatar;
+  final bool isBot;
+  final String lastMsg;
+  final DateTime? lastTs;
+
+  _ChatThreadHead copyWith({
+    String? lastMsg,
+    DateTime? lastTs,
+    List<String>? participantUids,
+  }) =>
+      _ChatThreadHead(
+        id: id,
+        participants: participants,
+        participantUids: participantUids ?? this.participantUids,
+        name: name,
+        avatar: avatar,
+        isBot: isBot,
+        lastMsg: lastMsg ?? this.lastMsg,
+        lastTs: lastTs ?? this.lastTs,
+      );
+}
+
+/// The Firestore-backed thread-head cache (collection `chatThreads`).
+class _ChatThreadsRepo extends FirestoreCachedRepo<_ChatThreadHead> {
+  _ChatThreadsRepo({RemoteCollectionSource? source})
+      : super(source ?? FirestoreCollectionSource('chatThreads'));
+
+  /// The cache is born with the verbatim seed heads so the conversation list is
+  /// non-empty before the first snapshot — identical genesis to the engine.
+  @override
+  List<_ChatThreadHead> get seed => _threadHeadSeed();
+
+  /// doc-id = the thread id (e.g. `th-contractor-store`).
+  @override
+  String idOf(_ChatThreadHead value) => value.id;
+
+  /// `_ChatThreadHead` → Firestore doc, per the schema
+  /// `{participants:[uid], names, lastMsg, ts}`. ⚠️ Pre-S1: `participants`
+  /// carries the ROLE NAMES verbatim (no real uids exist yet — see the header);
+  /// `names` carries the display name the list renders. `avatar`/`isBot` are
+  /// client extras carried so a fresh backend reseeds the full thread (the
+  /// pilot's loss-free round-trip rule). The id is the doc-id, not a field.
+  @override
+  Map<String, dynamic> toDoc(_ChatThreadHead t) => {
+        'participants': [for (final r in t.participants) r.name],
+        // A9 — the uid members, written ONLY when populated so a seed/role-based
+        // thread's doc stays byte-identical to today (forward-ready; the rules
+        // scope on this field). Display/isolation keep using `participants`.
+        if (t.participantUids.isNotEmpty) 'participantUids': t.participantUids,
+        'names': t.name,
+        'avatar': t.avatar,
+        'isBot': t.isBot,
+        'lastMsg': t.lastMsg,
+        if (t.lastTs != null) 'ts': t.lastTs!.toIso8601String(),
+      };
+
+  /// Firestore doc → `_ChatThreadHead`. Inverse of [toDoc]: the doc-id becomes
+  /// `id`; `participants` role-name strings resolve to [BsRole] — an entry that
+  /// resolves to NO role (e.g. a real uid once S1 starts writing them) is
+  /// skipped rather than fatal, so mixed pre/post-S1 docs keep decoding; a doc
+  /// with NO resolvable role AND no `participantUids` THROWS (structurally bad
+  /// for the pre-S1 world) and the base skips it per-doc — but a uid-thread
+  /// (#8/3a: empty roles, non-empty `participantUids`) is a VALID decode, not a
+  /// throw. `lastMsg`/`ts` are display denormalisations —
+  /// tolerated when missing (messages stream from their own collection anyway).
+  @override
+  _ChatThreadHead fromDoc(RemoteDoc doc) {
+    final j = doc.data;
+    final raw = j['participants'];
+    if (raw is! List) throw const FormatException('chatThreads: no participants');
+    final participants = <BsRole>[
+      for (final e in raw)
+        ...BsRole.values.where((r) => r.name == e), // unknown entry → skipped
+    ];
+    // A9 — uid members: a string list post-migration, absent on every legacy/
+    // seed doc → [] (zero regression). Tolerant of non-string entries.
+    final uidsRaw = j['participantUids'];
+    final participantUids = <String>[
+      if (uidsRaw is List)
+        for (final e in uidsRaw)
+          if (e is String) e,
+    ];
+    // #8/3a (per-user chat) — a uid-thread (per-user DM) carries EMPTY role
+    // participants but a NON-EMPTY participantUids; TOLERATE it so it survives
+    // the round-trip and shows live (else fromDoc would throw and the base would
+    // silently drop every uid-thread). Only a doc with NEITHER a resolvable role
+    // NOR any uid is structurally bad (the pre-uid world) → THROW; the base then
+    // skips it per-doc (never blanks the chat).
+    if (participants.isEmpty && participantUids.isEmpty) {
+      throw const FormatException('chatThreads: no resolvable participants');
+    }
+    return _ChatThreadHead(
+      id: doc.id,
+      participants: participants,
+      participantUids: participantUids,
+      name: (j['names'] as String?) ?? (j['name'] as String?) ?? doc.id,
+      avatar: (j['avatar'] as String?) ?? '💬',
+      isBot: j['isBot'] == true,
+      lastMsg: (j['lastMsg'] as String?) ?? '',
+      lastTs: j['ts'] == null ? null : DateTime.tryParse('${j['ts']}'),
+    );
+  }
+
+  /// Restore the verbatim seed order (Firestore returns doc-id/alphabetical
+  /// order; the engine's contract is "order preserved from the seed" — the UI
+  /// owns any newest-activity re-ordering). Non-seed threads sort after, by id.
+  @override
+  List<_ChatThreadHead> sortBy(List<_ChatThreadHead> items) {
+    return List<_ChatThreadHead>.of(items)
+      ..sort((a, b) {
+        final ai = _seedThreadOrder[a.id];
+        final bi = _seedThreadOrder[b.id];
+        if (ai != null && bi != null) return ai.compareTo(bi);
+        if (ai != null) return -1; // seed threads before server-created ones
+        if (bi != null) return 1;
+        return a.id.compareTo(b.id);
+      });
+  }
+
+  /// Fresh backend (first snapshot empty) → seed the remote from the local
+  /// seed the cache was born with (the five legacy threads appear server-side).
+  @override
+  void onFirstSnapshotEmpty() => pushCacheToRemote();
+}
+
+// ─── messages · collection `chatMessages` ────────────────────────────────────
+
+/// The Firestore-backed message cache (collection `chatMessages`). The model is
+/// the engine's own [ChatMessage] — untouched, so the drop-in is preserved
+/// exactly as the pilot keeps `Order` untouched.
+class _ChatMessagesRepo extends FirestoreCachedRepo<ChatMessage> {
+  // #chat-live-messages — the DEFAULT source below is the WHOLE-collection
+  // listen (newest 500 by `ts`). It is used ONLY on the fallback/test path: the
+  // `chatMessages` READ rule is per-doc (`auth.uid in threadParticipants(
+  // resource.data.threadId)` via a get() on the parent thread), and "rules are
+  // not filters" means a whole-collection listen by a non-manager is DENIED as a
+  // whole (silently blanking live messages). So PRODUCTION injects a
+  // [_PerThreadChatMessagesSource] instead ([chatRepositoryProvider]) — one
+  // threadId-PINNED sub-listen per participating thread, the only query shape the
+  // deployed rule can prove. This default stays for the tests' single-fake path
+  // (isScoped:false) and any Firebase-free/flag-off construction (byte-identical
+  // to before). Per-thread cursor pagination is the documented later initiative.
+  _ChatMessagesRepo({RemoteCollectionSource? source})
+      : super(source ??
+            FirestoreCollectionSource(
+              'chatMessages',
+              bound: (q) => q.orderBy('ts', descending: true).limit(500),
+            ));
+
+  /// Born with every seed message (flattened across threads) so each seeded
+  /// conversation is non-empty before the first snapshot.
+  @override
+  List<ChatMessage> get seed => _chatMessageSeed();
+
+  /// doc-id = the message id (`m-<micros>-<role>` / `seed-<thread>-<minute>`).
+  @override
+  String idOf(ChatMessage value) => value.id;
+
+  /// `ChatMessage` → Firestore doc, per the schema
+  /// `{threadId, fromUid, fromRole, text, ts}`. A8 (launch uid-migration) —
+  /// `fromUid` is now WRITTEN when the sender was signed-in (stamped at the send
+  /// path from `currentUidProvider`); it is OMITTED when empty (signed-out / the
+  /// seed / every legacy doc) so those round-trip byte-identical (zero
+  /// regression — the A3 `contractorUid` guard). `fromRole` is ALWAYS written
+  /// and still drives the mine/theirs UI; the eventual uid-scoping of
+  /// messages/thread `participants` activates later via the firestore rules
+  /// (forward-ready). The id is the doc-id, not a field.
+  /// `ChatMessage` → Firestore doc. #chat-delivery-status — the `status` field is
+  /// SENDER-LOCAL and must NOT be written to the server (a server doc carries no
+  /// status; its delivered-ness is implied purely by coming back through
+  /// [fromDoc]). `toJson` may emit `status` (the local prefs shape), so it is
+  /// stripped here — the produced map is identical to the pre-status schema
+  /// `{threadId, fromRole, text, ts, fromUid?}`.
+  @override
+  Map<String, dynamic> toDoc(ChatMessage m) => {
+        'threadId': m.threadId,
+        'fromRole': m.fromRole.name,
+        'text': m.text,
+        'ts': m.ts.toIso8601String(),
+        if (m.fromUid.isNotEmpty) 'fromUid': m.fromUid,
+      };
+
+  /// Firestore doc → `ChatMessage`, through the engine's own tolerant decoder
+  /// (`ChatMessage.tryFromJson`) with the doc-id as `id` — one mapping, two
+  /// worlds. A structurally-bad doc (missing field / unknown role) decodes to
+  /// null → THROW, and the base skips it per-doc (never blanks the chat).
+  /// A8 — `fromUid` is read tolerantly by the decoder (present on a post-A8 doc,
+  /// '' on every legacy/seed doc — the zero-regression default).
+  ///
+  /// #chat-delivery-status — THE HONEST INVARIANT lives here: a message decoded
+  /// from a SERVER snapshot really reached the server, so it is stamped
+  /// [MsgStatus.delivered] (✓✓). This is the ONLY place `delivered` is set, so a
+  /// message that never round-tripped through the server can NEVER show ✓✓. The
+  /// server doc carries no status (the decoder defaults it to `sent`); the
+  /// upgrade is applied AFTER preserving the existing null/throw behaviour.
+  @override
+  ChatMessage fromDoc(RemoteDoc doc) {
+    final m = ChatMessage.tryFromJson({...doc.data, 'id': doc.id});
+    if (m == null) throw const FormatException('chatMessages: bad doc');
+    return m.copyWith(status: MsgStatus.delivered);
+  }
+
+  /// `orderBy(ts)` (S4.2) re-established client-side: Firestore returns doc-id
+  /// order, the conversation renders chronologically. Tie-broken by id (the bot
+  /// auto-reply is stamped +1ms after the user line, so the pair stays ordered).
+  @override
+  List<ChatMessage> sortBy(List<ChatMessage> items) {
+    return List<ChatMessage>.of(items)
+      ..sort((a, b) {
+        final c = a.ts.compareTo(b.ts);
+        if (c != 0) return c;
+        return a.id.compareTo(b.id);
+      });
+  }
+
+  /// Fresh backend → push the seed messages up (first-empty seeds the remote).
+  @override
+  void onFirstSnapshotEmpty() => pushCacheToRemote();
+}
+
+// ─── messages · RULE-COMPLIANT per-thread listen (#chat-live-messages) ───────
+
+/// The `chatMessages` [RemoteCollectionSource] that the deployed Security Rules
+/// actually ALLOW to read.
+///
+/// The rule is `read: auth.uid in threadParticipants(resource.data.threadId)` —
+/// a PER-DOCUMENT check via a `get()` on the parent `chatThreads` doc. Because
+/// "rules are NOT filters", Firestore can only prove that rule for a query that
+/// PINS `threadId` to a single value (`where('threadId', isEqualTo: X)`), so the
+/// former WHOLE-collection `chatMessages` listen was DENIED as a whole and the
+/// base's guarded stream swallowed the error → no message ever arrived on either
+/// side (the live-chat break this fixes).
+///
+/// So this source MULTIPLEXES: it opens ONE threadId-pinned sub-listen per
+/// PARTICIPATING thread and MERGES their docs into the single stream the
+/// [_ChatMessagesRepo] cache consumes. The repo feeds it the current thread-id
+/// set ([setThreadIds]) from its SCOPED `chatThreads` cache (already = the user's
+/// own threads), so every sub-query is one the rule can prove. Writes
+/// ([set]/[delete]) go by doc-id through an UNSCOPED [_writer] (a scope only
+/// affects `snapshots()`, never `doc(id).set(...)`), so the send path is
+/// unchanged and a message still lands in the one `chatMessages` collection.
+class _PerThreadChatMessagesSource implements RemoteCollectionSource {
+  _PerThreadChatMessagesSource({
+    required RemoteCollectionSource Function(String threadId) sourceFor,
+    required RemoteCollectionSource writer,
+  })  : _sourceFor = sourceFor,
+        _writer = writer;
+
+  /// Builds a threadId-scoped read source (`where('threadId', isEqualTo: id)` +
+  /// the orderBy/limit bound) for one thread.
+  final RemoteCollectionSource Function(String threadId) _sourceFor;
+
+  /// The UNSCOPED collection used only for by-doc-id writes (create-a-message).
+  final RemoteCollectionSource _writer;
+
+  final StreamController<List<RemoteDoc>> _out =
+      StreamController<List<RemoteDoc>>.broadcast();
+  final Map<String, StreamSubscription<List<RemoteDoc>>> _subs = {};
+  final Map<String, List<RemoteDoc>> _latest = {};
+  bool _closed = false;
+
+  /// Reconcile the live per-thread listens to exactly [threadIds]: open a
+  /// threadId-pinned sub-listen for each NEW id, cancel the ones that vanished,
+  /// and (only when the set actually CHANGED — never on a mere message echo, so
+  /// the composer can never feed itself an infinite loop) re-emit the merged
+  /// snapshot. Idempotent: an unchanged id keeps its existing listen.
+  void setThreadIds(Iterable<String> threadIds) {
+    if (_closed) return;
+    final want = threadIds.toSet();
+    var changed = false;
+    for (final id in want) {
+      if (_subs.containsKey(id)) continue;
+      changed = true;
+      _subs[id] = _sourceFor(id).snapshots().listen(
+        (docs) {
+          _latest[id] = docs;
+          _emit();
+        },
+        // A single thread's denial/offline must NOT kill the other threads' live
+        // messages (or throw into the UI) — drop just this slice, exactly as the
+        // base's guarded whole-collection listen used to swallow its error.
+        onError: (Object e, StackTrace st) {
+          debugPrint('chatMessages[$id]: listen error (ignored): $e');
+        },
+      );
+    }
+    for (final id in _subs.keys.toList()) {
+      if (want.contains(id)) continue;
+      changed = true;
+      unawaited(_subs.remove(id)?.cancel());
+      _latest.remove(id);
+    }
+    if (changed) _emit();
+  }
+
+  void _emit() {
+    if (_closed || _out.isClosed) return;
+    _out.add(<RemoteDoc>[for (final slice in _latest.values) ...slice]);
+  }
+
+  @override
+  Stream<List<RemoteDoc>> snapshots() => _out.stream;
+
+  @override
+  Future<void> set(String id, Map<String, dynamic> data) =>
+      _writer.set(id, data);
+
+  @override
+  Future<void> delete(String id) => _writer.delete(id);
+
+  /// Each sub-listen IS threadId-scoped, so a first-EMPTY merged snapshot means
+  /// "this user's threads genuinely hold no messages" → the base blanks the demo
+  /// seed to honest-empty (never shows another persona's seed as the user's own),
+  /// exactly like the scoped `chatThreads` listen does for thread heads.
+  @override
+  bool get isScoped => true;
+
+  /// Cancel every per-thread sub-listen and close the merged stream (called from
+  /// [FirebaseChatRepository.dispose]).
+  void dispose() {
+    _closed = true;
+    for (final s in _subs.values) {
+      unawaited(s.cancel());
+    }
+    _subs.clear();
+    _latest.clear();
+    unawaited(_out.close());
+  }
+}
+
+// ─── the composed repository ─────────────────────────────────────────────────
+
+/// The Firestore-backed chat store: TWO composed caches (`chatThreads` +
+/// `chatMessages`) behind the one [ChatRepository] surface the engine binds to.
+class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
+  /// Constructs the repo over the `chatThreads` + `chatMessages` collections.
+  /// The real Firestore instance is resolved LAZILY by
+  /// [FirestoreCollectionSource] (never here), so construction does not require
+  /// Firebase to be initialised.
+  ///
+  /// The MESSAGES backing is chosen in this precedence:
+  ///   • [messagesSource] — an explicit single source (the tests' single-fake
+  ///     path); used verbatim, per-thread multiplexing OFF (byte-identical);
+  ///   • else [messagesSourceFor] — a threadId → scoped-source FACTORY
+  ///     (#chat-live-messages, the production uid-scoped path): the repo wraps it
+  ///     in a [_PerThreadChatMessagesSource] that opens one `where('threadId')`
+  ///     listen per participating thread (the only query the rules can prove) and
+  ///     writes by doc-id through [messagesWriter] (defaulting to the unscoped
+  ///     `chatMessages` collection);
+  ///   • else — the base whole-collection listen (Firebase-free / flag-off
+  ///     fallback), byte-identical to before.
+  FirebaseChatRepository({
+    RemoteCollectionSource? threadsSource,
+    RemoteCollectionSource? messagesSource,
+    RemoteCollectionSource Function(String threadId)? messagesSourceFor,
+    RemoteCollectionSource? messagesWriter,
+  }) : this._(
+          threadsSource: threadsSource,
+          messagesSource: messagesSource,
+          perThreadMessages:
+              (messagesSource == null && messagesSourceFor != null)
+                  ? _PerThreadChatMessagesSource(
+                      sourceFor: messagesSourceFor,
+                      writer: messagesWriter ??
+                          FirestoreCollectionSource('chatMessages'),
+                    )
+                  : null,
+        );
+
+  FirebaseChatRepository._({
+    required RemoteCollectionSource? threadsSource,
+    required RemoteCollectionSource? messagesSource,
+    required _PerThreadChatMessagesSource? perThreadMessages,
+  })  : _perThreadMessages = perThreadMessages,
+        _threads = _ChatThreadsRepo(source: threadsSource),
+        _messages =
+            _ChatMessagesRepo(source: messagesSource ?? perThreadMessages) {
+    // EITHER cache changing (a thread head, a message — optimistic or snapshot)
+    // re-fires this composer: the single subscription the engine listens on.
+    _threads.addListener(_forward);
+    _messages.addListener(_forward);
+  }
+
+  final _ChatThreadsRepo _threads;
+  final _ChatMessagesRepo _messages;
+
+  /// #chat-live-messages — the per-thread messages source (production uid-scoped
+  /// path) or null (the single-`messagesSource` tests + the whole-collection
+  /// fallback). When non-null the repo feeds it the participating thread-id set
+  /// on every threads-cache change ([_syncMessageThreadIds]).
+  final _PerThreadChatMessagesSource? _perThreadMessages;
+
+  void _forward() {
+    // #chat-live-messages — a thread head arriving/leaving may change WHICH
+    // threads need a message listen; reconcile before notifying. Idempotent +
+    // no-emit-when-unchanged, so a mere message echo can never loop.
+    _syncMessageThreadIds();
+    notifyListeners();
+  }
+
+  /// #chat-live-messages — reconcile the per-thread message listens to the
+  /// threads the user PARTICIPATES in: a uid-thread carries a non-empty
+  /// `participantUids` (a seed/legacy role thread carries none and its messages
+  /// rule can't be proven, so it is skipped — matching what the rules allow). A
+  /// no-op unless the per-thread source is active (production uid-scoped path).
+  void _syncMessageThreadIds() {
+    final src = _perThreadMessages;
+    if (src == null) return;
+    src.setThreadIds([
+      for (final h in _threads.cached())
+        if (h.participantUids.isNotEmpty) h.id,
+    ]);
+  }
+
+  /// Subscribe both live document streams (S4.1 threads + S4.2 messages).
+  /// Errors are guarded by the base; [dispose] cancels both. The per-thread
+  /// messages source is then seeded with the current thread-id set so its
+  /// sub-listens open immediately (a later threads snapshot re-syncs via
+  /// [_forward]).
+  void attach() {
+    _threads.attach();
+    _messages.attach();
+    _syncMessageThreadIds();
+  }
+
+  // ── reads (SYNCHRONOUS — assembled from the two caches) ─────────────────────
+
+  /// Re-assemble the engine's `ChatThread` shape: each head (seed-ordered) with
+  /// its messages grouped out of the ts-ordered message cache — so the grouped
+  /// lists are already chronological. A head with no messages yet renders empty
+  /// (never dropped).
+  @override
+  List<ChatThread> threads() {
+    final byThread = <String, List<ChatMessage>>{};
+    for (final m in _messages.cached()) {
+      (byThread[m.threadId] ??= <ChatMessage>[]).add(m);
+    }
+    return [
+      for (final h in _threads.cached())
+        ChatThread(
+          id: h.id,
+          participants: h.participants,
+          participantUids: h.participantUids,
+          name: h.name,
+          avatar: h.avatar,
+          isBot: h.isBot,
+          messages: byThread[h.id] ?? const [],
+        ),
+    ];
+  }
+
+  // ── writes (optimistic caches + background Firestore) ───────────────────────
+
+  /// Message factory — the engine's verbatim id scheme. A8: [fromUid] stamps
+  /// the sender's `auth.uid` on the user line (omitted from the doc when ''),
+  /// matching the engine's `_mk`.
+  ChatMessage _mk(String threadId, BsRole fromRole, String text, DateTime ts,
+          {String fromUid = ''}) =>
+      ChatMessage(
+        id: 'm-${ts.microsecondsSinceEpoch}-${fromRole.name}',
+        threadId: threadId,
+        fromRole: fromRole,
+        text: text,
+        ts: ts,
+        fromUid: fromUid,
+      );
+
+  /// S4.3 — verbatim port of `ChatEngineNotifier.send` via upsert: the message
+  /// lands in the `chatMessages` cache optimistically (visible synchronously to
+  /// BOTH participants — they read the same shared store) and the thread head's
+  /// `lastMsg`/`ts` denormalisation is upserted alongside; both Firestore
+  /// writes fire in the background (guarded — a failure is logged, never
+  /// thrown). The BOT thread appends its deterministic auto-reply (rotation by
+  /// the thread's current bot-message count, +1ms); real threads do NOT
+  /// auto-reply — the other persona answers live.
+  @override
+  void send(String threadId, BsRole fromRole, String text,
+      {String fromUid = ''}) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
+    final heads = _threads.cached();
+    final idx = heads.indexWhere((h) => h.id == threadId);
+    if (idx < 0) return;
+    final head = heads[idx];
+    final now = DateTime.now();
+    // A8: the user line carries the sender uid; the bot auto-reply (appended
+    // below) does NOT — it is the system, not a signed-in user.
+    // #chat-delivery-status — the USER's optimistic line starts `pending` 🕐
+    // (the Firebase write is in flight); the write outcome flips it (see the
+    // onWrite callback below). The BOT auto-reply stays the default `sent` ✓
+    // (it is local, infallible — there is no server write to confirm it).
+    final userMsg =
+        _mk(threadId, fromRole, trimmed, now, fromUid: fromUid)
+            .copyWith(status: MsgStatus.pending);
+    if (head.isBot && fromRole != BsRole.bot) {
+      final replyIdx = _messages
+          .cached()
+          .where((m) => m.threadId == threadId && m.fromRole == BsRole.bot)
+          .length;
+      final botMsg = _mk(
+        threadId,
+        BsRole.bot,
+        kBotAutoReplies[replyIdx % kBotAutoReplies.length],
+        now.add(const Duration(milliseconds: 1)),
+      );
+      _upsertUserMessage(userMsg);
+      _messages.upsert(botMsg, prepend: false); // sortBy keeps it chronological
+      _threads.upsert(head.copyWith(lastMsg: botMsg.text, lastTs: botMsg.ts));
+      return;
+    }
+    _upsertUserMessage(userMsg);
+    _threads.upsert(
+      head.copyWith(lastMsg: userMsg.text, lastTs: userMsg.ts),
+    );
+  }
+
+  /// #chat-delivery-status — upsert the USER's line `pending`, observing the
+  /// real background write outcome: on success patch it to `sent` ✓ (it is in
+  /// the outbox, NOT yet server-confirmed — ✓✓ only arrives later via the
+  /// snapshot `fromDoc`); on a swallowed failure patch it to `failed` ❌ (the UI
+  /// offers "נסה שוב"). `upsertLocalOnly` patches the cache with NO extra remote
+  /// write (the original upsert already fired the `set`); a later snapshot
+  /// reconciles and `fromDoc` then upgrades the echoed message to `delivered`.
+  void _upsertUserMessage(ChatMessage userMsg) {
+    _messages.upsert(
+      userMsg,
+      prepend: false,
+      onWrite: (ok) {
+        _messages.upsertLocalOnly(
+          userMsg.copyWith(status: ok ? MsgStatus.sent : MsgStatus.failed),
+        );
+      },
+    );
+  }
+
+  /// #8/3a (per-user chat) — CREATE-OR-GET the per-user DM thread for
+  /// [participantUids]. Deterministic id ([dmThreadId]) → the same people always
+  /// map to ONE thread (dedup with no lookup). If a head with that id is already
+  /// cached this is a NO-OP that returns the id (create-or-GET — an existing
+  /// thread is never overwritten). Otherwise a fresh head — empty role
+  /// [_ChatThreadHead.participants], the sorted uid set as
+  /// [_ChatThreadHead.participantUids], name/avatar, ts=now — is upserted: the
+  /// optimistic cache upsert notifies the engine back synchronously (mirrored in
+  /// the same call, like [send]'s head denorm) and fires a guarded background
+  /// create write (`toDoc` persists participantUids when non-empty, so the rules
+  /// can scope on it). At least TWO distinct uids are required to create; the
+  /// (always-computed) id is returned regardless.
+  @override
+  String createOrGetThread(List<String> participantUids,
+      {String name = '', String avatar = '💬'}) {
+    final uids = dmThreadUids(participantUids);
+    final id = dmThreadId(participantUids);
+    if (uids.length < 2) return id;
+    final heads = _threads.cached();
+    if (heads.any((h) => h.id == id)) return id; // create-or-GET → never overwrite
+    _threads.upsert(
+      _ChatThreadHead(
+        id: id,
+        participants: const [],
+        participantUids: uids,
+        name: name,
+        avatar: avatar,
+        isBot: false,
+        lastMsg: '',
+        lastTs: DateTime.now(),
+      ),
+    );
+    return id;
+  }
+
+  /// Reset both collections to the verbatim seed — whole-cache optimistic
+  /// replace that also re-writes the seed to the remote (the orders
+  /// `resetToSeed` semantics, applied per composed repo).
+  @override
+  void resetToSeed() {
+    _threads.replaceAll(_threadHeadSeed());
+    _messages.replaceAll(_chatMessageSeed());
+  }
+
+  /// A14 — stamp [threadId]'s head with [uids] (the resolved union of its roles'
+  /// real uids; see `ChatEngineNotifier.ensureParticipantUids`). Optimistic
+  /// head upsert → the doc's `toDoc` persists `participantUids` (it already
+  /// writes the field when non-empty, so the round-trip is loss-free and the
+  /// rules can scope on it); a no-op on an unknown thread. The upsert's notify
+  /// mirrors the new head back into the engine state. Background write guarded.
+  @override
+  void setParticipantUids(String threadId, List<String> uids) {
+    final heads = _threads.cached();
+    final idx = heads.indexWhere((h) => h.id == threadId);
+    if (idx < 0) return;
+    _threads.upsert(heads[idx].copyWith(participantUids: uids));
+  }
+
+  /// #chat-delivery-status — RE-FIRE a failed message's write. Finds the message
+  /// by [msgId] in [threadId], flips it back to `pending` 🕐, and re-`upsert`s it
+  /// with the SAME write-outcome callback (`pending → sent` on success,
+  /// `→ failed` again on a repeat failure) — exactly the [send] user-line path,
+  /// reused. No-op on an unknown id (already reconciled / never existed). The id
+  /// is stable (`m-<micros>-<role>`), so the re-write targets the same doc.
+  @override
+  void retry(String threadId, String msgId) {
+    final existing = _messages
+        .cached()
+        .where((m) => m.id == msgId && m.threadId == threadId);
+    if (existing.isEmpty) return;
+    _upsertUserMessage(existing.first.copyWith(status: MsgStatus.pending));
+  }
+
+  // ── lifecycle ────────────────────────────────────────────────────────────────
+
+  @override
+  void dispose() {
+    _threads
+      ..removeListener(_forward)
+      ..dispose();
+    _messages
+      ..removeListener(_forward)
+      ..dispose();
+    // #chat-live-messages — cancel every per-thread sub-listen + close the
+    // merged stream (no-op on the single-source / fallback path).
+    _perThreadMessages?.dispose();
+    super.dispose();
+  }
+}

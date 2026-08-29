@@ -1,0 +1,78 @@
+{
+  "module": "db_usage_monitor",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/db_usage_monitor.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "DbUsageMonitor",
+      "kind": "mutable",
+      "object": {
+        "fields": [
+          {
+            "name": "reads",
+            "type": "int",
+            "required": false
+          },
+          {
+            "name": "writes",
+            "type": "int",
+            "required": false
+          },
+          {
+            "name": "errors",
+            "type": "int",
+            "required": false
+          },
+          {
+            "name": "_latencySumMs",
+            "type": "int",
+            "required": false
+          },
+          {
+            "name": "_latencyCount",
+            "type": "int",
+            "required": false
+          },
+          {
+            "name": "avgLatencyMs",
+            "type": "double",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "errorRate",
+            "type": "double",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "readsThisSession",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "onRead",
+          "onWrite",
+          "onError",
+          "onLatency",
+          "snapshot",
+          "reset"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "module": "catalog_sync",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/catalog_sync.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "CatalogSyncGate",
+      "kind": "mutable",
+      "object": {
+        "fields": [
+          {
+            "name": "bundledFallback",
+            "type": "List<LipskeyCatalogProduct> Function()?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "kv",
+            "type": "CatalogKvStore",
+            "required": true
+          },
+          {
+            "name": "readServerVersion",
+            "type": "Future<String> Function()",
+            "required": true
+          },
+          {
+            "name": "fetchAll",
+            "type": "Future<List<LipskeyCatalogProduct>> Function()",
+            "required": true
+          },
+          {
+            "name": "toDoc",
+            "type": "Map<String, dynamic> Function(LipskeyCatalogProduct)",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "fromDoc",
+            "type": "LipskeyCatalogProduct Function(RemoteDoc)",
+            "required": true
+          },
+          {
+            "name": "fetchAllCalls",
+            "type": "int",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "bundledFallback",
+            "ref": "List<LipskeyCatalogProduct> Function()",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "kv",
+            "ref": "CatalogKvStore",
+            "kind": "embed"
+          },
+          {
+            "field": "readServerVersion",
+            "ref": "Future<String> Function()",
+            "kind": "embed"
+          },
+          {
+            "field": "fetchAll",
+            "ref": "Future<List<LipskeyCatalogProduct>> Function()",
+            "kind": "embed"
+          },
+          {
+            "field": "toDoc",
+            "ref": "Map<String, dynamic> Function(LipskeyCatalogProduct)",
+            "kind": "embed"
+          },
+          {
+            "field": "fromDoc",
+            "ref": "LipskeyCatalogProduct Function(RemoteDoc)",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "open",
+          "_encode",
+          "_decode"
+        ]
+      },
+      "contract": {
+        "required": [
+          "kv",
+          "readServerVersion",
+          "fetchAll",
+          "toDoc",
+          "fromDoc"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

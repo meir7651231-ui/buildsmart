@@ -1,0 +1,102 @@
+{
+  "name": "DocsReadinessGate",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🔒 מסמכים חסרים",
+        "registryId": "docs_readiness_gate.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "docs_readiness_gate.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ יציאה",
+        "registryId": "docs_readiness_gate.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🔒"
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔒 מסמכים חסרים — לא ניתן להתחיל עבודה",
+        "registryId": "docs_readiness_gate.t03",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [
+      "🔒"
+    ],
+    "summary": "registry 4 · mapped 4/4 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "WorkerFormsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "WorkerSafetyScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "CourierCertsScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(WorkerFormsScreen.route())",
+        "effect": "navigate → WorkerFormsScreen"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(WorkerSafetyScreen.route())",
+        "effect": "navigate → WorkerSafetyScreen"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(CourierCertsScreen.route())",
+        "effect": "navigate → CourierCertsScreen"
+      }
+    ]
+  },
+  "floor": [
+    "courierDocsReadyProvider",
+    "workerDocsReadyProvider"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": false,
+    "props": [
+      "role",
+      "readiness"
+    ],
+    "untangle": [
+      "KbScreen = shared component → separate atom"
+    ]
+  }
+}

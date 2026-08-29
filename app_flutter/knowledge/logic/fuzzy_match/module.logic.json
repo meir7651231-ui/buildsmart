@@ -1,0 +1,392 @@
+{
+  "module": "fuzzy_match",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/fuzzy_match.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "damerauLevenshtein",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String a, String b) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "filled"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_min3",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "fuzzyMatch",
+          "fuzzyScore"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if a == b → return 0"
+          },
+          {
+            "kind": "precond",
+            "detail": "if a.isEmpty → return b.length"
+          },
+          {
+            "kind": "precond",
+            "detail": "if b.isEmpty → return a.length"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = a.length"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = b.length"
+          },
+          {
+            "kind": "init",
+            "detail": "prev2 = List<int>.filled(m + 1, 0)"
+          },
+          {
+            "kind": "init",
+            "detail": "prev = List<int>.generate(m + 1, (j) => j)"
+          },
+          {
+            "kind": "init",
+            "detail": "cur = List<int>.filled(m + 1, 0)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 1; i <= n; i++"
+          },
+          {
+            "kind": "effect",
+            "detail": "cur[0] = i"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var j = 1; j <= m; j++"
+          },
+          {
+            "kind": "compute",
+            "detail": "tmp = prev2"
+          },
+          {
+            "kind": "effect",
+            "detail": "prev2 = prev"
+          },
+          {
+            "kind": "effect",
+            "detail": "prev = cur"
+          },
+          {
+            "kind": "effect",
+            "detail": "cur = tmp"
+          },
+          {
+            "kind": "return",
+            "detail": "prev[m]"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "codeUnitAt"
+      ],
+      "contract": {
+        "input": "(String a, String b)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if a == b → return 0",
+          "if a.isEmpty → return b.length",
+          "if b.isEmpty → return a.length"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "fuzzyTolerance",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int len) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "fuzzyMatch",
+          "fuzzyScore"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "(len ~/ 3) + 1"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int len)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "fuzzyMatch",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String query, String candidate) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "filled",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "damerauLevenshtein",
+            "module": true
+          },
+          {
+            "name": "fuzzyTolerance",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "fuzzyNameMatch"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "q = normSearch(query)"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = normSearch(candidate)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if q.isEmpty || c.isEmpty → return false"
+          },
+          {
+            "kind": "precond",
+            "detail": "if c.contains(q) → return true"
+          },
+          {
+            "kind": "return",
+            "detail": "damerauLevenshtein(q, c) <= fuzzyTolerance(q.length)"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "normSearch"
+      ],
+      "contract": {
+        "input": "(String query, String candidate)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if q.isEmpty || c.isEmpty → return false",
+          "if c.contains(q) → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "fuzzyNameMatch",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String query, String candidate) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "fuzzyMatch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if fuzzyMatch(query, candidate) → return true"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final word in candidate.split(RegExp(r'\\s+'))"
+          },
+          {
+            "kind": "branch",
+            "detail": "if word.isNotEmpty && fuzzyMatch(query, word) → return true"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "split"
+      ],
+      "contract": {
+        "input": "(String query, String candidate)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if fuzzyMatch(query, candidate) → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "fuzzyScore",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String query, String candidate) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "filled",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "damerauLevenshtein",
+            "module": true
+          },
+          {
+            "name": "fuzzyTolerance",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "q = normSearch(query)"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = normSearch(candidate)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if q.isEmpty || c.isEmpty → return -1"
+          },
+          {
+            "kind": "precond",
+            "detail": "if c.contains(q) → return 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "d = damerauLevenshtein(q, c)"
+          },
+          {
+            "kind": "return",
+            "detail": "d <= fuzzyTolerance(q.length) ? d : -1"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "normSearch"
+      ],
+      "contract": {
+        "input": "(String query, String candidate)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if q.isEmpty || c.isEmpty → return -1",
+          "if c.contains(q) → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_min3",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int a, int b, int c) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "damerauLevenshtein"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "a < b ? (a < c ? a : c) : (b < c ? b : c)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int a, int b, int c)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

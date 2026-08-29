@@ -1,34 +1,86 @@
+import 'package:buildsmart/theme/tokens.dart';
 import 'dart:math';
+import 'package:buildsmart/data/product_images.dart';
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive, lipskeyScanPool, resolvedCatalogProducts;
+import 'package:buildsmart/data/company_categories.dart'
+    show companyComplementsFor;
+import 'package:buildsmart/data/company_spec_bridge.dart'
+    show kCompanySpecSkus;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/screens/spec_copilot_screen.dart'
+    show SpecCopilotScreen;
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
+import 'package:buildsmart/screens/paired_explain_screen.dart'
+    show PairedExplainScreen;
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart'
+    show kCardKeyboardFlag, kUnifiedFinderFlag;
+import 'package:buildsmart/features/card_keyboard/card_picks.dart'
+    show CardPick, cardPicksProvider;
+import 'package:buildsmart/features/card_keyboard/hop_graph.dart'
+    show EdgeKind, HopGraph;
+import 'package:buildsmart/features/card_keyboard/hop_stack.dart';
+import 'package:buildsmart/features/card_keyboard/line_plan.dart'
+    show planLineFromPicks;
+import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
+    show divePoolBySku;
 import 'package:buildsmart/logic/install_kit.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/widgets/store_comparison_line.dart'
+    show StoreComparisonLine, kStoreComparisonUi;
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Opens a SmartProduct-style bottom sheet for a Lipskey product.
 /// [categoryProducts] = all products in the same Lipskey category (for brand variants).
+/// Re-entrancy guard for [showLipskeyProductSheet]: two taps landing in the SAME
+/// frame (before the modal route finishes pushing and its barrier covers the
+/// trigger) would each fire and stack two identical product sheets. Set true on
+/// open, cleared on the NEXT frame (not on dismiss) — that is enough to swallow
+/// the same-frame duplicate, and a frame-scoped reset never persists (a
+/// dismiss-scoped flag could leak across widget tests or block a legitimate
+/// re-open). Central here ⇒ all ~15 call sites are covered by this one guard.
+bool _lipskeyProductSheetOpen = false;
+
 void showLipskeyProductSheet(
   BuildContext context,
   LipskeyCatalogProduct product,
-  List<LipskeyCatalogProduct> categoryProducts,
-) {
+  List<LipskeyCatalogProduct> categoryProducts, {
+  bool forceLive = false,
+  List<LipskeyCatalogProduct> hopSeedForTest = const <LipskeyCatalogProduct>[],
+}) {
+  if (_lipskeyProductSheetOpen) return;
+  _lipskeyProductSheetOpen = true;
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (_) => LipskeyProductSheet(
       product: product,
-      categoryProducts: categoryProducts,
+      // Never hand the sheet an empty sibling list: its variant pager indexes
+      // the list and throws "Invalid argument(s): 0" on length 0 (blanking the
+      // whole card). Fall back to the product itself so it always renders.
+      categoryProducts:
+          categoryProducts.isEmpty ? [product] : categoryProducts,
+      forceLive: forceLive,
+      hopSeedForTest: hopSeedForTest,
     ),
   );
+  WidgetsBinding.instance
+      .addPostFrameCallback((_) => _lipskeyProductSheetOpen = false);
 }
 
 /// Fullscreen pinch/zoom viewer for a product image or spec page.
@@ -44,7 +96,7 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
             minScale: 0.8,
             maxScale: 5,
             child: Center(
-              child: Image.asset(asset,
+              child: productImage(asset,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => Text(emoji,
                       style: const TextStyle(fontSize: 96))),
@@ -57,13 +109,17 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
           child: Material(
             color: Colors.black12,
             shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () => Navigator.pop(context),
-              child: const SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: Icon(Icons.close, color: Colors.white)),
+            child: Semantics(
+              button: true,
+              label: 'סגור',
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () => Navigator.pop(context),
+                child: const SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Icon(Icons.close, color: Colors.white)),
+              ),
             ),
           ),
         ),
@@ -71,7 +127,8 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
           bottom: 36,
           left: 0,
           right: 0,
-          child: Text('צבוט להגדלה · הקש לסגירה',
+          child: CfgText('lipskey_product_sheet.zoom_hint_fullscreen',
+              'צבוט להגדלה · הקש לסגירה',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.black38, fontSize: 12)),
         ),
@@ -80,15 +137,33 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
   );
 }
 
+/// Candidate pool for the compat/finder scans in this sheet. Company overlay
+/// (import feature): an imported product must suggest parts from ITS OWN
+/// catalog — never BuildSmart's — so scan [resolvedCatalogProducts] when the
+/// overlay is live. Without an overlay (demo/buildsmart) this stays the
+/// Lipskey subset the rankings were tuned on — results byte-identical.
+List<LipskeyCatalogProduct> get _scanPool => lipskeyScanPool;
+
 class LipskeyProductSheet extends ConsumerStatefulWidget {
   const LipskeyProductSheet({
     super.key,
     required this.product,
     required this.categoryProducts,
+    this.forceLive = false,
+    this.hopSeedForTest = const <LipskeyCatalogProduct>[],
   });
 
   final LipskeyCatalogProduct product;
   final List<LipskeyCatalogProduct> categoryProducts;
+
+  /// P8.74 — test seam: force the flag-ON hop UI without the feature flag (parallels
+  /// CardKeyboardScreen.forceLiveForTest). Production stays flag-gated → OFF.
+  final bool forceLive;
+
+  /// P8.75 — test seam: pre-seed the hop back-stack so a test can exercise the back
+  /// control deterministically. Production opens with an empty stack.
+  @visibleForTesting
+  final List<LipskeyCatalogProduct> hopSeedForTest;
 
   @override
   ConsumerState<LipskeyProductSheet> createState() =>
@@ -99,7 +174,9 @@ enum _Unit { single, pack, pallet }
 
 class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   late int _selectedIdx;
-  LipskeyCatalogProduct? _chipOverride;
+  // P8.75: the product back-stack (replaces a single override) — a 'back' returns to
+  // the PREVIOUS hopped product, not all the way to the opening variant.
+  final HopStack<LipskeyCatalogProduct> _hops = HopStack<LipskeyCatalogProduct>();
   String? _openPickerKey; // 'type' | 'subtype' | 'model' | 'color'
   int? _activeStage;
   late Map<int, bool> _accSelected;
@@ -156,9 +233,6 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     return atomic;
   }
 
-  /// Readable size tokens for the section subtitle.
-  List<String> _sizeTokens(String name) => _connectionSizes(name);
-
   /// Material of a product, inferred from name/category (צעד 62).
   static String _material(LipskeyCatalogProduct p) {
     final n = p.nameHe + p.categoryHe;
@@ -178,7 +252,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     final method = p.connectionMethod;
     final seen = <String>{p.sku};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kLipskeyCatalog) {
+    for (final q in _scanPool) {
       if (q.categoryHe == p.categoryHe) continue; // cross-category only
       if (!seen.add(q.sku)) continue;
       if (!_sizeSet(q.nameHe).contains(size)) continue;
@@ -227,7 +301,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     // צעד 68: prepend confirmed manual pairings the size match missed.
     final overrideSkus = kLipskeyCompatPairOverride[p.sku] ?? const [];
     if (overrideSkus.isNotEmpty) {
-      final extra = kLipskeyCatalog
+      final extra = _scanPool
           .where((q) => overrideSkus.contains(q.sku))
           .toList();
       if (extra.isNotEmpty) {
@@ -307,7 +381,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
           accessories: accs,
         ));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('נוסף לסל ✓'),
+      content: CfgText('lipskey_product_sheet.added_to_cart', 'נוסף לסל ✓'),
       duration: Duration(seconds: 1),
       behavior: SnackBarBehavior.floating,
     ));
@@ -320,34 +394,333 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   List<LipskeyCatStage> get _stages =>
       lipskeyStagesFor(_current.sku, _current.categoryHe);
   LipskeyCatalogProduct get _current =>
-      _chipOverride ?? widget.categoryProducts[_selectedIdx];
+      _hops.current ?? widget.categoryProducts[_selectedIdx];
+
+  /// P8.74 — the hop UI (back control + related rail) is live when the feature flag
+  /// is on, or forced in a test. OFF in production today → byte-identical.
+  ///
+  /// Swarm-review (high): read ONCE at first access (late final), NOT ref.watch — so a late
+  /// async featureFlags load can never swap the engine mid-dive — and honour BOTH unified-
+  /// finder flags exactly like CardKeyboardScreen._live. Flag-OFF both are false → identical.
+  late final bool _live = widget.forceLive ||
+      ref.read(featureFlagsProvider).contains(kCardKeyboardFlag) ||
+      ref.read(featureFlagsProvider).contains(kUnifiedFinderFlag);
+
+  /// P8.75 — pop one hop (return to the previous product).
+  void _hopBack() => setState(_hops.back);
+
+  /// P8.77 — the flag-gated 'related' rail: the hop-graph neighbours of the current
+  /// product as tappable chips (most meaningful first — variant > kit > compat >
+  /// category > hub), each tap an in-place hop. Bounded so the rail stays scannable;
+  /// never empty for an in-graph product (the hub guarantees >=1 neighbour).
+  Widget _hopRail(LipskeyCatalogProduct p) {
+    final g = HopGraph.build();
+    final neighbours = g
+        .rankedNeighborsOf(p.sku)
+        .where((s) {
+          // De-dup (swarm-review): the compat/kit neighbours are the '🔌 מה מתחבר לזה'
+          // rail; keep THIS '🔗 קשור' rail to the OTHER relations (variant/category/hub)
+          // so no product appears in both rows.
+          final kinds = g.kindsBetween(p.sku, s);
+          return !(kinds.contains(EdgeKind.compat) ||
+              kinds.contains(EdgeKind.kit));
+        })
+        .map((s) => divePoolBySku[s])
+        .whereType<LipskeyCatalogProduct>()
+        .take(10)
+        .toList();
+    if (neighbours.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      key: const Key('hopRail'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CfgText('lipskey_product_sheet.related_rail_title', '🔗 קשור',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final n in neighbours)
+                ActionChip(
+                  key: Key('hopRailChip_${n.sku}'),
+                  label: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 160),
+                    child: Text(n.nameHe,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12)),
+                  ),
+                  onPressed: () => _switchByChip(n),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// P9.89 — the 'what connects to this' rail: the current product's hop-graph
+  /// neighbours reached by a compat or kit edge (the same canonical graph as the related
+  /// rail, filtered to physical-connection edges) as tappable in-place hops. Flag-gated.
+  Widget _hopConnectRail(LipskeyCatalogProduct p) {
+    final g = HopGraph.build();
+    final connects = g
+        .rankedNeighborsOf(p.sku)
+        .where((s) {
+          final kinds = g.kindsBetween(p.sku, s);
+          return kinds.contains(EdgeKind.compat) ||
+              kinds.contains(EdgeKind.kit);
+        })
+        .map((s) => divePoolBySku[s])
+        .whereType<LipskeyCatalogProduct>()
+        .take(8)
+        .toList();
+    if (connects.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      key: const Key('hopConnectRail'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CfgText('lipskey_product_sheet.connects_rail_title',
+              '🔌 מה מתחבר לזה',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final n in connects)
+                ActionChip(
+                  key: Key('hopConnectChip_${n.sku}'),
+                  label: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 160),
+                    child: Text(n.nameHe,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12)),
+                  ),
+                  onPressed: () => _switchByChip(n),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// P10.98 — the line controls: 'add to line' records the current product as a pick;
+  /// 'complete line (N)' appears once >=2 are picked and opens the BOM. Flag-gated.
+  Widget _lineControls(LipskeyCatalogProduct p) {
+    final picks = ref.watch(cardPicksProvider);
+    return Padding(
+      key: const Key('lineControls'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ActionChip(
+            key: const Key('addToLineChip'),
+            avatar: const Icon(Icons.add, size: 16),
+            label: const CfgText('lipskey_product_sheet.add_to_line', 'הוסף לקו'),
+            onPressed: () => _addCurrentToLine(p),
+          ),
+          if (picks.length >= 2)
+            ActionChip(
+              key: const Key('completeLineChip'),
+              avatar: const Icon(Icons.checklist, size: 16),
+              label: Text('השלם קו (${picks.length})'),
+              onPressed: () => _showLineBom(picks),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _addCurrentToLine(LipskeyCatalogProduct p) {
+    ref.read(cardPicksProvider.notifier).addPick(
+          CardPick(sku: p.sku, label: p.nameHe),
+        );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: CfgText('lipskey_product_sheet.added_to_line', 'נוסף לקו ✓'),
+      duration: Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  void _showLineBom(List<CardPick> picks) {
+    final plan = planLineFromPicks(picks);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (modalCtx) => Directionality(
+        key: const Key('lineBomSheet'),
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CfgText('lipskey_product_sheet.line_bom_title',
+                    '📋 רשימת חומרים — קו',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (plan.items.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: CfgText(
+                                'lipskey_product_sheet.line_bom_empty',
+                                'לא נמצאו פריטים לפתרון — בחר מוצרים אחרים לקו',
+                                style: TextStyle(
+                                    fontSize: 13, color: Color(0xFF888888))),
+                          ),
+                        for (final item in plan.items)
+                          Text('• ${item.nameHe}  ×${plan.qtyOf(item.sku)}',
+                              style: const TextStyle(fontSize: 13)),
+                        if (plan.gaps.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                                '⚠️ ${plan.gaps.length} פערים — דורש השלמה',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Color(0xFF888888))),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    key: const Key('addLineToCartButton'),
+                    // Swarm-review: an empty plan must NOT 'add 0 to cart' and silently
+                    // wipe the picks — disable the button so a fully-unresolvable line is a
+                    // visible no-op, not a fake success toast.
+                    onPressed: plan.items.isEmpty
+                        ? null
+                        : () {
+                            _addLineToCart(plan.items);
+                            Navigator.of(modalCtx).pop();
+                          },
+                    child: Text(
+                        plan.items.isEmpty ? 'אין פריטים לסל' : 'הוסף הכל לסל'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _addLineToCart(List<LipskeyCatalogProduct> items) {
+    final notifier = ref.read(smartCartProvider.notifier);
+    for (final part in items) {
+      notifier.add(SmartCartLine(
+        productKey: 'lip:${part.sku}',
+        productName: part.nameHe,
+        productEmoji: part.typeEmoji,
+        brandName: part.brand,
+        brandPrice: 0,
+        productQty: 1,
+        accessories: const [],
+      ));
+    }
+    ref.read(cardPicksProvider.notifier).clear();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('נוספו ${items.length} פריטי-קו לסל ✓'),
+      duration: const Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  /// P8.78 — the hop path breadcrumb: every product in the path as a tappable crumb
+  /// (home → … → current). Tapping a crumb jumps back to it (popTo); tapping home
+  /// clears to the opening variant. Built only when live and the path is non-empty.
+  Widget _hopBreadcrumb() {
+    final crumbs = _hops.path;
+    return Padding(
+      key: const Key('hopBreadcrumb'),
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 2,
+        runSpacing: 2,
+        children: [
+          InkWell(
+            key: const Key('hopCrumb_home'),
+            onTap: () => setState(_hops.clear),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Icon(Icons.home_outlined, size: 14),
+            ),
+          ),
+          for (var i = 0; i < crumbs.length; i++) ...[
+            const Icon(Icons.chevron_left, size: 14),
+            InkWell(
+              key: Key('hopCrumb_$i'),
+              onTap: () => setState(() {
+                _hops.popTo(i);
+              }),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 90),
+                child: Text(
+                  crumbs[i].nameHe,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: i == crumbs.length - 1
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _selectedIdx =
         widget.categoryProducts.indexOf(widget.product).clamp(0, widget.categoryProducts.length - 1);
+    for (final seed in widget.hopSeedForTest) {
+      _hops.push(seed);
+    }
     _accSelected = {
       for (var i = 0; i < (_accs.length); i++) i: false,
     };
   }
 
-  void _selectVariant(int i) {
-    setState(() {
-      _selectedIdx = i;
-      _chipOverride = null;
-      _openPickerKey = null;
-      _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
-      _activeStage = null;
-    });
-  }
-
   void _switchByChip(LipskeyCatalogProduct q) {
     setState(() {
-      _chipOverride = q;
+      _hops.push(q);
       _openPickerKey = null;
       _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
       _activeStage = null;
+      // Reset the unit selector to the new variant's default: pack/pallet
+      // quantities (qtyPack/qtyPallet) are per-product, so a leftover 'ארגז'
+      // from the previous variant misrepresents the freshly-selected one.
+      _unit = _Unit.single;
     });
   }
 
@@ -372,9 +745,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
         maxChildSize: 0.95,
         expand: false,
         builder: (_, scrollCtrl) => Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF5F6FA),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -395,15 +768,23 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 0, 2),
                   child: Material(
-                    color: const Color(0xFFF5F5F5),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: const CircleBorder(),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => Navigator.pop(context),
-                      child: const SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: Icon(Icons.close, color: Color(0xFF1A1A1A), size: 22),
+                    child: Semantics(
+                      button: true,
+                      label: 'סגור',
+                      child: Tooltip(
+                        message: 'סגור',
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => Navigator.pop(context),
+                          child: const SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Icon(Icons.close,
+                                color: BsTokens.inkLight, size: 22),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -446,7 +827,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                       ClipboardData(text: p.sku));
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('מק"ט הועתק'),
+                                      content: CfgText(
+                                          'lipskey_product_sheet.sku_copied',
+                                          'מק"ט הועתק'),
                                       duration: Duration(seconds: 1),
                                       behavior: SnackBarBehavior.floating,
                                     ),
@@ -463,7 +846,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                           const SizedBox(height: 6),
                           Text((p.dims?['שם מלא'] as String?) ?? p.nameHe,
                               style: const TextStyle(
-                                  color: Color(0xFF1A1A1A),
+                                  color: BsTokens.inkLight,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
                                   height: 1.3)),
@@ -475,7 +858,69 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic)),
                           ],
+                          // ── C3.4 · multi-store comparison ──────────────────
+                          // OWNER-LOCKED: the ONLY sheet surface that shows a
+                          // price. Gated on a const (default false) ⇒ dead code,
+                          // tree-shaken ⇒ the sheet is byte-identical with the
+                          // flag OFF. Turned on at go-live with useServerCatalog.
+                          if (kStoreComparisonUi)
+                            StoreComparisonLine(sku: p.sku),
+                          // Two HONEST chips instead of one conflated "ציון
+                          // נתונים": cardReadinessScore is gated on the verified
+                          // CONNECTION spec, so it really measures install/
+                          // connection readiness — a non-connecting auxiliary
+                          // (clamp/seat/grate) is correctly low. The separate
+                          // dataCompletenessScore (spec-free) vindicates a part
+                          // whose LISTING is complete even when it never plumbs.
+                          const SizedBox(height: 6),
+                          Builder(builder: (_) {
+                            final s = cardReadinessScore(p);
+                            final c = scoreBandColors(s.score);
+                            final d = dataCompletenessScore(p);
+                            final dc = scoreBandColors(d.score);
+                            Widget chip(
+                                    ScoreBandColors col, String text) =>
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: col.bg,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: col.border),
+                                  ),
+                                  child: Text(text,
+                                      style: TextStyle(
+                                          color: col.fg,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700)),
+                                );
+                            return Wrap(spacing: 6, runSpacing: 6, children: [
+                              chip(dc,
+                                  '📋 שלמות נתונים ${d.score}% · ${d.label}'),
+                              chip(c,
+                                  '🔧 מוכנות התקנה ${s.score} · ${s.label}'),
+                            ]);
+                          }),
                           const SizedBox(height: 8),
+                          if (_live && _hops.canGoBack) _hopBreadcrumb(),
+                          if (_live && _hops.canGoBack)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: ActionChip(
+                                  key: const Key('hopBackChip'),
+                                  avatar: const Icon(Icons.undo, size: 16),
+                                  label: const CfgText(
+                                      'lipskey_product_sheet.hop_back',
+                                      'חזרה למוצר הקודם'),
+                                  onPressed: _hopBack,
+                                ),
+                              ),
+                            ),
+                          if (_live) _hopRail(p),
+                          if (_live) _hopConnectRail(p),
+                          if (_live) _lineControls(p),
                           _InteractiveChips(
                             product: p,
                             openPickerKey: _openPickerKey,
@@ -488,7 +933,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                           if (widget.categoryProducts.length > 1)
                             const Padding(
                               padding: EdgeInsets.only(top: 6),
-                              child: Text(
+                              child: CfgText(
+                                  'lipskey_product_sheet.chip_hint',
                                   '💡 צ׳יפ כתום ▾ — הקש להחלפת גודל/צבע/דגם',
                                   style: TextStyle(
                                       color: Color(0xFF888888), fontSize: 11)),
@@ -562,9 +1008,18 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             if (p.dims != null)
                               for (final e in p.dims!.entries)
                                 if (e.value != null && e.key != 'שם מלא')
-                                  _SpecRow('📐', e.key, '${e.value}'),
-                            _SpecRow('📄', 'עמוד בקטלוג',
-                                'עמוד ${p.page}'),
+                                  _SpecRow(
+                                      '📐',
+                                      e.key,
+                                      formatDimValue(
+                                          e.key,
+                                          '${e.value}',
+                                          ref.watch(catalogSettingsProvider))),
+                            // Imported products carry page 0 — no bogus
+                            // 'עמוד 0' row (BuildSmart pages are all >= 1).
+                            if (p.page > 0)
+                              _SpecRow('📄', 'עמוד בקטלוג',
+                                  'עמוד ${p.page}'),
                           ],
                         ),
                       ),
@@ -615,9 +1070,11 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text('ערכת התקנה מומלצת',
+                                      const CfgText(
+                                          'lipskey_product_sheet.recommended_kit',
+                                          'ערכת התקנה מומלצת',
                                           style: TextStyle(
-                                              color: Color(0xFF1A1A1A),
+                                              color: BsTokens.inkLight,
                                               fontSize: 13,
                                               fontWeight: FontWeight.w700)),
                                       Text(
@@ -636,7 +1093,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                         horizontal: 14, vertical: 8),
                                   ),
                                   onPressed: () => _addKitToCart(kit),
-                                  child: const Text('+ ערכה',
+                                  child: const CfgText(
+                                      'lipskey_product_sheet.add_kit',
+                                      '+ ערכה',
                                       style: TextStyle(
                                           fontWeight: FontWeight.w800,
                                           fontSize: 13)),
@@ -702,7 +1161,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                               onTap: () => showLipskeyProductSheet(
                                 context,
                                 g.parts[i],
-                                kLipskeyCatalog
+                                _scanPool
                                     .where((x) =>
                                         x.categoryHe == g.parts[i].categoryHe)
                                     .toList(),
@@ -724,9 +1183,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
               // Pinned purchase bar — qty/unit/add-to-cart always reachable.
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF5F6FA),
-                  border: Border(top: BorderSide(color: Color(0x14000000))),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  border: const Border(top: BorderSide(color: Color(0x14000000))),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -763,7 +1222,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('אביזרים נבחרים:',
+                            const CfgText(
+                                'lipskey_product_sheet.selected_accessories',
+                                'אביזרים נבחרים:',
                                 style: TextStyle(
                                     color: Colors.black38, fontSize: 13)),
                             Text('+ ₪$_accTotal',
@@ -779,7 +1240,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       width: double.infinity,
                       child: FilledButton.icon(
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF7A18),
+                          backgroundColor: BsTokens.brand,
                           foregroundColor: const Color(0xFF1A1200),
                           padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
@@ -787,11 +1248,60 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         ),
                         onPressed: _addToCart,
                         icon: const Icon(Icons.shopping_cart, size: 19),
-                        label: const Text('הוסף לסל',
+                        label: const CfgText(
+                            'lipskey_product_sheet.add_to_cart_btn',
+                            'הוסף לסל',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                       ),
                     ),
+                    // #ai-spec-copilot — "is this OK for my conditions?" (verified
+                    // temp verdict in Dart + Claude phrasing). Only when the product
+                    // carries a verified spec (the verdict's source of truth).
+                    if (kVerifiedSpecs.containsKey(p.sku)) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.of(context)
+                              .push(SpecCopilotScreen.route(p)),
+                          icon: const Text('🌡️', style: TextStyle(fontSize: 15)),
+                          label: const CfgText(
+                              'lipskey_product_sheet.spec_copilot_cta',
+                              'מתאים לתנאים שלי?',
+                              style: TextStyle(fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                    ],
+                    // #ai-paired-explain — "what else does this install need?"
+                    // Grounded on the real frequentlyPairedTypesFor(p) engine;
+                    // gateway null (demo) → not in the tree → byte-identical.
+                    Builder(builder: (context) {
+                      final pairedTypes = frequentlyPairedTypesFor(p);
+                      if (pairedTypes.isEmpty) return const SizedBox.shrink();
+                      return Consumer(builder: (context, ref, _) {
+                        if (ref.watch(claudeGatewayProvider) == null) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () => Navigator.of(context).push(
+                                  PairedExplainScreen.route(
+                                      product: p.nameHe, types: pairedTypes)),
+                              icon: const Text('🧩',
+                                  style: TextStyle(fontSize: 15)),
+                              label: const CfgText(
+                                  'lipskey_product_sheet.paired_explain_cta',
+                                  'מה עוד צריך להתקנה?',
+                                  style: TextStyle(fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                        );
+                      });
+                    }),
                   ],
                 ),
               ),
@@ -819,12 +1329,12 @@ class _QtyStepper extends StatelessWidget {
               child: Center(
                   child: Text(s,
                       style: const TextStyle(
-                          color: Color(0xFF1A1A1A), fontSize: 20)))),
+                          color: BsTokens.inkLight, fontSize: 20)))),
         );
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        border: Border.all(color: const Color(0xFFFF7A18)),
+        color: Theme.of(context).colorScheme.surface,
+        border: Border.all(color: BsTokens.brand),
         borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.antiAlias,
@@ -837,7 +1347,7 @@ class _QtyStepper extends StatelessWidget {
               child: Center(
                   child: Text('$qty',
                       style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 17,
                           fontWeight: FontWeight.w800)))),
           b('+', () => onChanged(qty + 1)),
@@ -869,7 +1379,7 @@ class _UnitToggle extends StatelessWidget {
           onTap: enabled ? () => onChanged(u) : null,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 11),
-            color: sel ? const Color(0xFFFF7A18) : Colors.transparent,
+            color: sel ? BsTokens.brand : Colors.transparent,
             alignment: Alignment.center,
             child: Text(label,
                 style: TextStyle(
@@ -916,7 +1426,7 @@ class _RelatedCard extends StatelessWidget {
         width: 112,
         padding: const EdgeInsets.all(9),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: Theme.of(context).colorScheme.surface,
           border: Border.all(color: const Color(0xFFEEEEEE)),
           borderRadius: BorderRadius.circular(13),
         ),
@@ -926,7 +1436,7 @@ class _RelatedCard extends StatelessWidget {
             SizedBox(
               height: 56,
               child: product.imageAsset != null
-                  ? Image.asset(product.imageAsset!,
+                  ? productImage(product.imageAsset!,
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => Center(
                           child: Text(product.typeEmoji,
@@ -941,7 +1451,7 @@ class _RelatedCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Color(0xFF1A1A1A), fontSize: 11, height: 1.25)),
+                      color: BsTokens.inkLight, fontSize: 11, height: 1.25)),
             ),
             const SizedBox(height: 3),
             Text('#${product.sku}',
@@ -957,7 +1467,7 @@ class _RelatedCard extends StatelessWidget {
 }
 
 // ── Hero flip card ────────────────────────────────────────────────────────────
-class _HeroImage extends StatefulWidget {
+class _HeroImage extends ConsumerStatefulWidget {
   const _HeroImage({
     required this.product,
     required this.screenH,
@@ -967,10 +1477,10 @@ class _HeroImage extends StatefulWidget {
   final double screenH;
 
   @override
-  State<_HeroImage> createState() => _HeroImageState();
+  ConsumerState<_HeroImage> createState() => _HeroImageState();
 }
 
-class _HeroImageState extends State<_HeroImage>
+class _HeroImageState extends ConsumerState<_HeroImage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _anim;
@@ -991,7 +1501,12 @@ class _HeroImageState extends State<_HeroImage>
   }
 
   void _flip() {
-    if (_showSpec) {
+    // A11Y: if reducedMotion is on, jump directly to the target face with no
+    // rotation animation — the AnimatedBuilder still rebuilds but angle is 0/π.
+    final reduced = ref.read(catalogSettingsProvider).reducedMotion;
+    if (reduced) {
+      _ctrl.value = _showSpec ? 0.0 : 1.0;
+    } else if (_showSpec) {
       _ctrl.reverse();
     } else {
       _ctrl.forward();
@@ -1073,7 +1588,7 @@ class _ProductSideState extends State<_ProductSide> {
     return GestureDetector(
       onTap: widget.onZoom, // tap image → fullscreen zoom
       child: Container(
-        color: const Color(0xFFF5F6FA),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -1089,7 +1604,7 @@ class _ProductSideState extends State<_ProductSide> {
                 ),
               ),
             ),
-            Image.asset(
+            productImage(
               hasImg ? imgs[i] : product.specImageAsset,
               fit: hasImg ? BoxFit.contain : BoxFit.cover,
               errorBuilder: (_, __, ___) => Center(
@@ -1100,23 +1615,41 @@ class _ProductSideState extends State<_ProductSide> {
             // multi-image pager (1/N) — only when there's more than one photo.
             if (imgs.length > 1)
               Positioned(
-                top: 10,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () =>
-                      setState(() => _i = (i + 1) % imgs.length),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xCC1A1200),
-                      borderRadius: BorderRadius.circular(20),
+                top: 0,
+                left: 0,
+                child: Semantics(
+                  button: true,
+                  label: 'התמונה הבאה',
+                  child: Tooltip(
+                    message: 'התמונה הבאה',
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () =>
+                          setState(() => _i = (i + 1) % imgs.length),
+                      // ≥48dp tap target around the small pager chip (a11y);
+                      // Positioned 10→0 keeps the centred chip in place.
+                      child: ConstrainedBox(
+                        constraints:
+                            const BoxConstraints(minWidth: 48, minHeight: 48),
+                        child: Center(
+                          widthFactor: 1,
+                          heightFactor: 1,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xCC1A1200),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text('${i + 1}/${imgs.length}',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800)),
+                          ),
+                        ),
+                      ),
                     ),
-                    child: Text('${i + 1}/${imgs.length}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
@@ -1142,7 +1675,8 @@ class _ProductSideState extends State<_ProductSide> {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.white, width: 1.5),
                   ),
-                  child: const Text('PPR-CT',
+                  child: const CfgText('lipskey_product_sheet.ppr_ct_badge',
+                      'PPR-CT',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -1152,29 +1686,40 @@ class _ProductSideState extends State<_ProductSide> {
               ),
             // "פרטים / מפרט" button — flips to the spec page
             Positioned(
-              bottom: 10,
+              bottom: 0,
               left: 10,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: widget.onFlip,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF7A18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.description_outlined,
-                          color: Color(0xFF1A1200), size: 14),
-                      SizedBox(width: 5),
-                      Text('פרטים / מפרט',
-                          style: TextStyle(
-                              color: Color(0xFF1A1200),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800)),
-                    ],
+                // ≥48dp tap target (a11y); bottom 10→0 keeps the centred chip
+                // in (roughly) the same visual spot.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Center(
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: BsTokens.brand,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.description_outlined,
+                              color: Color(0xFF1A1200), size: 14),
+                          SizedBox(width: 5),
+                          CfgText('lipskey_product_sheet.details_spec',
+                              'פרטים / מפרט',
+                              style: TextStyle(
+                                  color: Color(0xFF1A1200),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1201,7 +1746,8 @@ class _ZoomHint extends StatelessWidget {
           children: [
             Icon(Icons.zoom_in, color: Colors.black54, size: 14),
             SizedBox(width: 4),
-            Text('הגדלה',
+            CfgText('lipskey_product_sheet.zoom',
+                'הגדלה',
                 style: TextStyle(
                     color: Colors.black54,
                     fontSize: 10,
@@ -1242,11 +1788,11 @@ class _SpecSideState extends State<_SpecSide> {
     return GestureDetector(
       onTap: widget.onZoom, // tap spec → fullscreen zoom
       child: Container(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
+            productImage(
               specs[i],
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => Center(
@@ -1257,22 +1803,41 @@ class _SpecSideState extends State<_SpecSide> {
             // multi-spec pager (1/N) — only when there's more than one image.
             if (specs.length > 1)
               Positioned(
-                top: 10,
-                left: 10,
-                child: GestureDetector(
-                  onTap: () => setState(() => _i = (i + 1) % specs.length),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xCC1A1200),
-                      borderRadius: BorderRadius.circular(20),
+                top: 0,
+                left: 0,
+                child: Semantics(
+                  button: true,
+                  label: 'המפרט הבא',
+                  child: Tooltip(
+                    message: 'המפרט הבא',
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () =>
+                          setState(() => _i = (i + 1) % specs.length),
+                      // ≥48dp tap target around the small pager chip (a11y);
+                      // Positioned 10→0 keeps the centred chip in place.
+                      child: ConstrainedBox(
+                        constraints:
+                            const BoxConstraints(minWidth: 48, minHeight: 48),
+                        child: Center(
+                          widthFactor: 1,
+                          heightFactor: 1,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xCC1A1200),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text('${i + 1}/${specs.length}',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800)),
+                          ),
+                        ),
+                      ),
                     ),
-                    child: Text('${i + 1}/${specs.length}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
@@ -1280,226 +1845,45 @@ class _SpecSideState extends State<_SpecSide> {
             const Positioned(top: 10, right: 10, child: _ZoomHint()),
             // back-to-product button
             Positioned(
-              bottom: 10,
+              bottom: 0,
               left: 10,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: widget.onFlip,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF7A18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.image_outlined,
-                          color: Color(0xFF1A1200), size: 14),
-                      SizedBox(width: 5),
-                      Text('חזרה למוצר',
-                          style: TextStyle(
-                              color: Color(0xFF1A1200),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800)),
-                    ],
+                // ≥48dp tap target (a11y); bottom 10→0 keeps the centred chip
+                // in (roughly) the same visual spot.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Center(
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: BsTokens.brand,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.image_outlined,
+                              color: Color(0xFF1A1200), size: 14),
+                          SizedBox(width: 5),
+                          CfgText('lipskey_product_sheet.back_to_product',
+                              'חזרה למוצר',
+                              style: TextStyle(
+                                  color: Color(0xFF1A1200),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Variant selector ──────────────────────────────────────────────────────────
-class _VariantSelector extends StatelessWidget {
-  const _VariantSelector({
-    required this.products,
-    required this.selectedIdx,
-    required this.onSelect,
-  });
-
-  final List<LipskeyCatalogProduct> products;
-  final int selectedIdx;
-  final void Function(int) onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 96,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemBuilder: (_, i) {
-          final p = products[i];
-          final selected = i == selectedIdx;
-          return GestureDetector(
-            onTap: () => onSelect(i),
-            child: Container(
-              width: 80,
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFF3D5A80).withOpacity(0.3)
-                    : const Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: selected
-                      ? const Color(0xFF64FFDA)
-                      : const Color(0xFF3D5A80).withOpacity(0.3),
-                  width: selected ? 1.5 : 0.8,
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: Image.asset(
-                        p.imageAsset ?? p.specImageAsset,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Text(
-                            p.typeEmoji,
-                            style: const TextStyle(fontSize: 24),
-                            textAlign: TextAlign.center)),
-                  ),
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('#${p.sku}',
-                        style: TextStyle(
-                            color: selected
-                                ? const Color(0xFF64FFDA)
-                                : const Color(0xFF888888),
-                            fontSize: 9,
-                            fontFamily: 'monospace'),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ── Accessory row ─────────────────────────────────────────────────────────────
-class _AccRow extends StatelessWidget {
-  const _AccRow({
-    required this.acc,
-    required this.selected,
-    required this.onToggle,
-  });
-
-  final LipskeyCatAcc acc;
-  final bool selected;
-  final void Function(bool) onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
-      child: GestureDetector(
-        onTap: () => onToggle(!selected),
-        child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: selected
-                ? const Color(0xFF3D5A80).withOpacity(0.2)
-                : const Color(0xFFFFFFFF),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: selected
-                  ? const Color(0xFF64FFDA).withOpacity(0.5)
-                  : const Color(0xFFEEEEEE),
-              width: 0.8,
-            ),
-          ),
-          child: Row(
-            children: [
-              Text(acc.emoji,
-                  style: const TextStyle(fontSize: 18)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(acc.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: Color(0xFF1A1A1A),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600)),
-                        ),
-                        const SizedBox(width: 6),
-                        if (acc.must)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 5, vertical: 1),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF6B35)
-                                  .withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                  color: const Color(0xFFFF6B35),
-                                  width: 0.6),
-                            ),
-                            child: const Text('חובה',
-                                style: TextStyle(
-                                    color: Color(0xFFFF6B35),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w600)),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(acc.why,
-                        style: const TextStyle(
-                            color: Color(0xFF888888), fontSize: 11)),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (acc.price != null)
-                    Text('₪${acc.price}',
-                        style: const TextStyle(
-                            color: Color(0xFF64FFDA),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700))
-                  else
-                    const Text('—',
-                        style: TextStyle(
-                            color: Color(0xFF888888), fontSize: 13)),
-                  const SizedBox(height: 4),
-                  Icon(
-                    selected
-                        ? Icons.check_circle
-                        : Icons.add_circle_outline,
-                    color: selected
-                        ? const Color(0xFF64FFDA)
-                        : Colors.black12,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -1532,14 +1916,14 @@ class _StageRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: isActive
                 ? (stage.isFinal
-                    ? const Color(0xFF22C55E).withOpacity(0.12)
+                    ? BsTokens.success.withOpacity(0.12)
                     : const Color(0xFF3D5A80).withOpacity(0.2))
                 : const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isActive
                   ? (stage.isFinal
-                      ? const Color(0xFF22C55E).withOpacity(0.6)
+                      ? BsTokens.success.withOpacity(0.6)
                       : const Color(0xFF64FFDA).withOpacity(0.5))
                   : const Color(0xFFEEEEEE),
               width: 0.8,
@@ -1552,7 +1936,7 @@ class _StageRow extends StatelessWidget {
                 height: 28,
                 decoration: BoxDecoration(
                   color: stage.isFinal
-                      ? const Color(0xFF22C55E).withOpacity(0.2)
+                      ? BsTokens.success.withOpacity(0.2)
                       : const Color(0xFF3D5A80).withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
@@ -1560,7 +1944,7 @@ class _StageRow extends StatelessWidget {
                 child: Text('${index + 1}',
                     style: TextStyle(
                         color: stage.isFinal
-                            ? const Color(0xFF22C55E)
+                            ? BsTokens.success
                             : const Color(0xFF64FFDA),
                         fontSize: 12,
                         fontWeight: FontWeight.w700)),
@@ -1575,7 +1959,7 @@ class _StageRow extends StatelessWidget {
                   children: [
                     Text(stage.label,
                         style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 13,
                             fontWeight: FontWeight.w600)),
                     if (isActive && stage.desc.isNotEmpty) ...[
@@ -1624,7 +2008,7 @@ class _SectionTitle extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 14,
                       fontWeight: FontWeight.w700)),
             ),
@@ -1654,16 +2038,24 @@ class _Divider extends StatelessWidget {
 Widget _SpecRow(String emoji, String label, String value) => Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(emoji, style: const TextStyle(fontSize: 15)),
           const SizedBox(width: 8),
-          Text(label,
-              style: const TextStyle(
-                  color: Colors.black38, fontSize: 13)),
-          const Spacer(),
-          Text(value,
-              style: const TextStyle(
-                  color: Color(0xFF1A1A1A), fontSize: 13)),
+          Flexible(
+            child: Text(label,
+                style: const TextStyle(
+                    color: Colors.black38, fontSize: 13)),
+          ),
+          const SizedBox(width: 12),
+          // Wrap long values (e.g. dims מידות / תיאור) instead of overflowing
+          // the Row — short values still right-align identically to before.
+          Expanded(
+            child: Text(value,
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                    color: BsTokens.inkLight, fontSize: 13)),
+          ),
         ],
       ),
     );
@@ -1673,7 +2065,7 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
 /// payload INTO the card when the user taps it (no navigation, no snackbars,
 /// no scrolling) — the data is rendered right below the row. Only one strip
 /// is open at a time; tapping the open strip closes it.
-class _QuickInfoStrips extends StatefulWidget {
+class _QuickInfoStrips extends ConsumerStatefulWidget {
   const _QuickInfoStrips({
     required this.product,
     required this.onPickProduct,
@@ -1687,10 +2079,10 @@ class _QuickInfoStrips extends StatefulWidget {
   final void Function(LipskeyCatalogProduct) onPickProduct;
 
   @override
-  State<_QuickInfoStrips> createState() => _QuickInfoStripsState();
+  ConsumerState<_QuickInfoStrips> createState() => _QuickInfoStripsState();
 }
 
-enum _StripKind { finder, compat, kit, variants, compliance, spec, price, info, hygiene }
+enum _StripKind { finder, compat, complements, kit, variants, compliance, spec, price, info, hygiene }
 
 /// Socket-fusion welding plan per nominal diameter (catalog p.9):
 /// (insertion depth mm, heating sec, cooling min). Plate temp 260°C.
@@ -1706,6 +2098,14 @@ const _kPprWeldPlan = <String, (double, int, int)>{
   '110': (37.0, 75, 8),
   '125': (40.0, 90, 8),
 };
+
+/// Weld-plan lookup key for a PPR pipe: its nominal/outer diameter as a bare
+/// string ('20','25',…). Polyroll PPR pipes carry it under 'קוטר חיצוני'
+/// (supply + faser) or 'dn נומינלי' (faser p.708). W1 fix: the lookup read only
+/// 'dn נומינלי', so the weld plan vanished for every pipe keyed on 'קוטר חיצוני'.
+/// Pinned by test/ppr_weld_dn_test.dart.
+String? pprWeldDn(Map<String, dynamic>? dims) =>
+    (dims?['dn נומינלי'] ?? dims?['קוטר חיצוני'])?.toString();
 
 /// One-line summary of a unified install-kit (smart-tree + auto-derived
 /// tools): "3 חובה · 2 אופציה · 4 כלים", omitting any zero segment.
@@ -1733,8 +2133,48 @@ String _formatSpecValue(
   return parts.join(' · ');
 }
 
-class _QuickInfoStripsState extends State<_QuickInfoStrips> {
+class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
   _StripKind? _open;
+
+  // Per-product memo of the engine-derived strip facts. Each of these is an
+  // O(catalog)-scale sweep (compatibleProductsCount ≈ O(855); installKitFor +
+  // variantSiblingsCountFor touch the whole catalog), so recomputing them on
+  // every build() — including each settings change watched in the price strip —
+  // was pure waste. They depend ONLY on the product, so we cache them keyed on
+  // sku and recompute only when the parent swaps to a different product. Byte-
+  // identical to calling the helpers inline (same pure inputs → same outputs).
+  String? _factsSku;
+  late ({String emoji, String label})? _finder;
+  late int _compat;
+  late ({int must, int optional, int tools})? _kit;
+  late int _famCount;
+  late List<({String label, String reason})> _compliance;
+  late ({
+    String material,
+    String? pressureRating,
+    double maxTempC,
+    String waterSystem,
+    String endsSummary,
+    double? minBoreMm,
+  })? _spec;
+  late List<LipskeyCatalogProduct> _companyComplements;
+
+  /// Recompute the cached per-product facts when [p] differs from the cached
+  /// product (or on first build). Same single source as the inline calls.
+  void _ensureFacts(LipskeyCatalogProduct p) {
+    if (_factsSku == p.sku) return;
+    _factsSku = p.sku;
+    _finder = finderGroupFor(p);
+    _compat = compatibleProductsCount(p);
+    _kit = installKitFor(p);
+    _famCount = variantSiblingsCountFor(p);
+    _compliance = complianceTriggersFor(p);
+    _spec = engineeringSpecFor(p);
+    // Company template column 'מוצרים משלימים' resolved against the live
+    // universe — const [] on demo (no product carries the column), so the
+    // demo strips render byte-identical.
+    _companyComplements = companyComplementsFor(p, resolvedCatalogProducts);
+  }
 
   @override
   void didUpdateWidget(covariant _QuickInfoStrips oldWidget) {
@@ -1752,10 +2192,11 @@ class _QuickInfoStripsState extends State<_QuickInfoStrips> {
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
-    final finder = finderGroupFor(p);
-    final compat = compatibleProductsCount(p);
-    final kit = installKitFor(p);
-    final famCount = variantSiblingsCountFor(p);
+    _ensureFacts(p);
+    final finder = _finder;
+    final compat = _compat;
+    final kit = _kit;
+    final famCount = _famCount;
 
     final rows = <_StripDef>[
       if (finder != null)
@@ -1777,6 +2218,17 @@ class _QuickInfoStripsState extends State<_QuickInfoStrips> {
           value: '$compat מוצרים',
           tint: const Color(0xFF7FD0FF),
         ),
+      // The company's OWN declared complements (template column 'מוצרים
+      // משלימים') — only on an active company catalog whose skus resolved;
+      // on demo companyCatalogActive is false, so the rows are unchanged.
+      if (companyCatalogActive && _companyComplements.isNotEmpty)
+        _StripDef(
+          kind: _StripKind.complements,
+          emoji: '🧩',
+          label: 'מוצרים משלימים',
+          value: '${_companyComplements.length} מוצרים',
+          tint: const Color(0xFFEC4899),
+        ),
       if (kit != null)
         _StripDef(
           kind: _StripKind.kit,
@@ -1794,29 +2246,37 @@ class _QuickInfoStripsState extends State<_QuickInfoStrips> {
           tint: const Color(0xFFC9A7FF),
         ),
       // ── New strips: compliance · engineering spec · price ─────────
-      if (complianceTriggersFor(p).isNotEmpty)
+      if (_compliance.isNotEmpty)
         _StripDef(
           kind: _StripKind.compliance,
           emoji: '🛡',
           label: 'תקינות',
-          value: '${complianceTriggersFor(p).length} דרישות',
-          tint: const Color(0xFFEF4444),
+          value: '${_compliance.length} דרישות',
+          tint: BsTokens.danger,
         ),
-      if (engineeringSpecFor(p) != null)
+      if (_spec != null)
         _StripDef(
           kind: _StripKind.spec,
           emoji: '📊',
           label: 'מפרט הנדסי',
-          value: _formatSpecValue(engineeringSpecFor(p)!),
+          value: _formatSpecValue(_spec!),
           tint: const Color(0xFF8B5CF6),
         ),
       if (priceFor(p) != null)
         _StripDef(
           kind: _StripKind.price,
           emoji: '💰',
+          // Estimated price honours the catalog price settings: VAT-inclusive
+          // (×1.17) when "כולל מע\"מ" is on + the chosen currency symbol, and a
+          // "ליחידה" suffix when "הצגת מחיר ליחידה" is on (the catalog ballpark
+          // is a per-unit figure).
           label: 'מחיר משוער',
-          value: '~₪${priceFor(p)}',
-          tint: const Color(0xFF22C55E),
+          value: () {
+            final s = ref.watch(catalogSettingsProvider);
+            final base = formatCatalogPrice(priceFor(p)!, s, prefix: '~');
+            return s.showUnitPrice ? '$base ליחידה' : base;
+          }(),
+          tint: BsTokens.success,
         ),
       if (p.brand == 'פולירול')
         _StripDef(
@@ -1834,12 +2294,20 @@ class _QuickInfoStripsState extends State<_QuickInfoStrips> {
           value: 'בור חלק · ללא אבנית',
           tint: const Color(0xFF06B6D4),
         ),
+      if (p.brand == 'חוליות')
+        _StripDef(
+          kind: _StripKind.info,
+          emoji: 'ℹ️',
+          label: 'מידע כללי',
+          value: 'SmartLock™ · דלוחין PP · 32-63 מ"מ',
+          tint: const Color(0xFF14764A),
+        ),
     ];
     if (rows.isEmpty) return const SizedBox.shrink();
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEEEEEE)),
       ),
@@ -1958,7 +2426,7 @@ class _StripRowState extends State<_StripRow> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1976,6 +2444,12 @@ class _StripRowState extends State<_StripRow> {
     );
   }
 }
+
+/// True when [sku]'s spec was bridged from a company import (kCompanySpecSkus)
+/// rather than hand-verified — spec-derived panels then get a 'לפי נתוני היבוא'
+/// header so imported data never reads as verified. The set is empty until a
+/// company import runs, so the demo renders byte-identical.
+bool _isCompanySpec(String sku) => kCompanySpecSkus.contains(sku);
 
 /// The data payload that opens beneath a strip when it's tapped. Each kind
 /// pulls its content from the matching helper (related_info.dart / smart-tree
@@ -2003,11 +2477,12 @@ class _StripPanel extends StatelessWidget {
       child: switch (kind) {
         _StripKind.finder => _buildFinder(),
         _StripKind.compat => _buildCompat(),
+        _StripKind.complements => _buildComplements(),
         _StripKind.kit => _buildKit(),
         _StripKind.variants => _buildVariants(),
         _StripKind.compliance => _buildCompliance(),
         _StripKind.spec => _buildSpec(),
-        _StripKind.price => _buildPrice(),
+        _StripKind.price => _buildPrice(context),
         _StripKind.info => _buildInfo(),
         _StripKind.hygiene => _buildHygiene(),
       },
@@ -2023,7 +2498,7 @@ class _StripPanel extends StatelessWidget {
     // We re-use the existing _kFinderGroups indirectly: a product belongs to
     // the same finder group when its layman label matches. So pull every
     // product whose finderGroupFor() has the same label.
-    final peers = kLipskeyCatalog
+    final peers = _scanPool
         .where((q) =>
             q.sku != product.sku && finderGroupFor(q)?.label == f.label)
         .take(20)
@@ -2044,8 +2519,25 @@ class _StripPanel extends StatelessWidget {
     if (hits.isEmpty) {
       return const _EmptyHint('לא נמצאו מוצרים שמשלימים את הקצוות');
     }
-    return _miniCarousel(hits,
+    final carousel = _miniCarousel(hits,
         labelFor: (q) => connectionExplainHe(product, q));
+    // Import-bridged spec → title the section honestly; a hand-verified spec
+    // renders exactly as before (kCompanySpecSkus is empty without an import).
+    if (!_isCompanySpec(product.sku)) return carousel;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [_infoHead('לפי נתוני היבוא'), carousel],
+    );
+  }
+
+  // ── מוצרים משלימים: the company's OWN declared complements — the template
+  // column 'מוצרים משלימים' (|-separated skus) resolved against the live
+  // universe. The strip only exists when the list is non-empty, so the hint
+  // is a stale-panel guard only.
+  Widget _buildComplements() {
+    final hits = companyComplementsFor(product, resolvedCatalogProducts);
+    if (hits.isEmpty) return const _EmptyHint('אין מוצרים משלימים');
+    return _miniCarousel(hits);
   }
 
   // ── ערכת התקנה: smart-tree accessories + auto-derived install tools ─────
@@ -2059,7 +2551,7 @@ class _StripPanel extends StatelessWidget {
     final sp = smartProductForSku(product.sku);
     final tools = recommendedKitForProduct(product);
     final isPpr = product.brand == 'פולירול';
-    final dn = product.dims?['dn נומינלי']?.toString();
+    final dn = pprWeldDn(product.dims);
     final weld = isPpr ? _kPprWeldPlan[dn] : null;
     if ((sp == null || sp.acc.isEmpty) && tools.isEmpty && !isPpr) {
       return const _EmptyHint('אין רשימת ערכת התקנה');
@@ -2074,7 +2566,8 @@ class _StripPanel extends StatelessWidget {
         if (must.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
-            child: Text('חובה (עץ חכם)',
+            child: CfgText('lipskey_product_sheet.must_smart_tree',
+                'חובה (עץ חכם)',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                     color: Color(0xFFCC6614),
@@ -2086,7 +2579,8 @@ class _StripPanel extends StatelessWidget {
         if (opt.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 8, 4, 4),
-            child: Text('אופציונלי (עץ חכם)',
+            child: CfgText('lipskey_product_sheet.optional_smart_tree',
+                'אופציונלי (עץ חכם)',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                     color: Color(0xFF888888),
@@ -2098,7 +2592,8 @@ class _StripPanel extends StatelessWidget {
         if (tools.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 8, 4, 4),
-            child: Text('כלים ואיטומים (אוטומטי)',
+            child: CfgText('lipskey_product_sheet.tools_auto',
+                'כלים ואיטומים (אוטומטי)',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                     color: Color(0xFF7FD0FF),
@@ -2125,7 +2620,7 @@ class _StripPanel extends StatelessWidget {
     final tagColor = switch (k.kind) {
       KitKind.tool => const Color(0xFF7FD0FF),
       KitKind.sealant => const Color(0xFF3DD9B0),
-      KitKind.safety => const Color(0xFFEF4444),
+      KitKind.safety => BsTokens.danger,
     };
     final tagLabel = switch (k.kind) {
       KitKind.tool => 'כלי',
@@ -2156,7 +2651,7 @@ class _StripPanel extends StatelessWidget {
               children: [
                 Text(k.label,
                     style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 12,
                         fontWeight: FontWeight.w600)),
                 Text(k.reason,
@@ -2182,7 +2677,7 @@ class _StripPanel extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w600)),
           ),
@@ -2194,7 +2689,7 @@ class _StripPanel extends StatelessWidget {
                 color: const Color(0xFFFF6B35).withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Text('חובה',
+              child: const CfgText('lipskey_product_sheet.must_badge', 'חובה',
                   style: TextStyle(
                       color: Color(0xFFCC4A14),
                       fontSize: 9,
@@ -2232,12 +2727,13 @@ class _StripPanel extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 5, vertical: 1),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444).withValues(alpha: 0.18),
+                    color: BsTokens.danger.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text('חובה',
+                  child: const CfgText(
+                      'lipskey_product_sheet.must_badge_compliance', 'חובה',
                       style: TextStyle(
-                          color: Color(0xFFEF4444),
+                          color: BsTokens.danger,
                           fontSize: 9,
                           fontWeight: FontWeight.w800)),
                 ),
@@ -2248,7 +2744,7 @@ class _StripPanel extends StatelessWidget {
                     children: [
                       Text(t.label,
                           style: const TextStyle(
-                              color: Color(0xFF1A1A1A),
+                              color: BsTokens.inkLight,
                               fontSize: 12,
                               fontWeight: FontWeight.w700)),
                       Text(t.reason,
@@ -2284,7 +2780,7 @@ class _StripPanel extends StatelessWidget {
                 child: Text(value,
                     textAlign: TextAlign.left,
                     style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         fontFamily: 'monospace')),
@@ -2295,6 +2791,8 @@ class _StripPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Import-bridged spec → header says so; hand-verified: unchanged.
+        if (_isCompanySpec(product.sku)) _infoHead('לפי נתוני היבוא'),
         row('חומר', s.material),
         if (s.pressureRating != null) row('דירוג לחץ', s.pressureRating!),
         if ((product.dims?['לחץ עבודה (50 שנה)'] as String?)?.isNotEmpty ?? false)
@@ -2315,7 +2813,7 @@ class _StripPanel extends StatelessWidget {
         child: Text('• $t',
             textAlign: TextAlign.right,
             style: const TextStyle(
-                color: Color(0xFF1A1A1A), fontSize: 11.5, height: 1.35)),
+                color: BsTokens.inkLight, fontSize: 11.5, height: 1.35)),
       );
 
   Widget _infoHead(String t) => Padding(
@@ -2328,17 +2826,19 @@ class _StripPanel extends StatelessWidget {
 
   // ── מידע כללי: מבנה רב-שכבתי + חומר גלם + יתרונות (מהקטלוג, עמ' 77) ───────
   Widget _buildInfo() {
+    if (product.brand == 'חוליות') return _buildInfoHuliot();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.asset('assets/polyroll/products/ppr_green_system.jpg',
+          child: productImage('assets/polyroll/products/ppr_green_system.jpg',
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => const SizedBox.shrink()),
         ),
         const SizedBox(height: 2),
-        const Text('צנרת PPR לאספקת מים חמים וקרים',
+        const CfgText('lipskey_product_sheet.ppr_caption',
+            'צנרת PPR לאספקת מים חמים וקרים',
             textAlign: TextAlign.center,
             style: TextStyle(color: Color(0xFF888888), fontSize: 10.5)),
         _infoHead('חומר גלם'),
@@ -2353,6 +2853,79 @@ class _StripPanel extends StatelessWidget {
         _infoBullet('רמת אקוסטיקה גבוהה'),
         _infoBullet('צנרת קלה ונוחה לעבודה, מגוון אביזרים רחב'),
         _infoBullet('מחברי הברגה מפליז DZR לסביבה קורוזיבית'),
+      ],
+    );
+  }
+
+  // ── מידע כללי — חוליות SmartLock (מהקטלוג, עמ' 5-6 verbatim) ─────────────
+  Widget _buildInfoHuliot() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const CfgText(
+            'lipskey_product_sheet.smartlock_caption',
+            'SMART LOCK — מערכת דלוחין, צנרת ואביזרים מפוליפרופילן בקטרים 32-63 מ"מ בצבע שחור',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF888888), fontSize: 10.5)),
+        _infoHead('חומר גלם'),
+        _infoBullet('צינור רב שכבתי PPML-MD-S16'),
+        _infoBullet('שכבה חיצונית: פוליפרופילן שחור — מעכבת קרני UV'),
+        _infoBullet(
+            'שכבה אמצעית: פוליפרופילן עם תרכובת מינרלית PPMD — בידוד אקוסטי'),
+        _infoBullet(
+            'שכבה פנימית: פוליפרופילן לבן — מאפשרת ניטור ובקרה חזותיים'),
+        _infoBullet('אביזרים: PPMD PP'),
+        _infoBullet('שיטת חיבור: נעילת שיניים - ראטצ\'ט'),
+        _infoBullet('אטם מערכת: אטם לחץ אלסטומרי TPE'),
+        _infoHead('יתרונות'),
+        _infoBullet('התקנה מהירה ופשוטה, אטם אינטגרלי באביזר'),
+        _infoBullet('אטם עמיד לאורך זמן'),
+        _infoBullet('חוזק טבעתי גבוה'),
+        _infoBullet('עמידות כימית גבוהה'),
+        _infoBullet('קשיחות ויציבות גבוהים'),
+        _infoBullet('עמידות בפני פגיעות מכניות'),
+        _infoBullet('מודול אלסטיות ואימפקט גבוה'),
+        _infoBullet('פנים צינור חלק מאפשר זרימה נקיה'),
+        _infoBullet('תוצאות צילום חדות במיוחד'),
+        _infoBullet('מיוצר בישראל · בעל תו תקן ישראלי'),
+        _infoBullet('קיימות (אורך חיים) ל-100 שנה'),
+        _infoBullet('שימוש בצינורות חלקים'),
+        _infoBullet(
+            'אין צורך בהכנת פאזה לצינור (נדרש לנקות גראדים) · אין צורך בשימוש בחומרי סיכה'),
+        _infoBullet('צנרת אקוסטית להפחתת רעש'),
+        _infoBullet('צנרת עמידה בעומסי כבידה ללא היווצרות בטן'),
+        _infoBullet('עמידות בתנאי מזג אויר קשים'),
+        _infoHead('תקינות'),
+        _infoBullet('ת"י 958-1 — היתר 737 (צנרת PP לסילוק שפכים חמים)'),
+        _infoBullet('ת"י 71253-1 — היתר 114782 (מחסום ריחות מפלסטיק לרצפה)'),
+        _infoBullet('ת"י 71253-2 (מאסף מפלסטיק לרצפה ברצפה)'),
+        _infoBullet(
+            'ת"י 5694 — היתר 114783 (אביזרי ניקוז לאמבט, מחסומים גלויה וסיפונים)'),
+        _infoBullet('ת"י 14020 — היתר 70304 (תו ירוק למוצרי PP)'),
+        _infoBullet('תקן בינלאומי EN-1451 · DIN 8078 · ISO 180'),
+        _infoHead('התקנה כללית (עמ\' 8)'),
+        _infoBullet('1. הכנס את הצינור* או האביזר עד למעצור (*ללא גראדים)'),
+        _infoBullet('2. הדק את האום עד לנעילת השיניים'),
+        _infoHead('התקנת מתאם זווית - ג\'וקר'),
+        _infoBullet(
+            '1. הכנס את גוף הג\'וקר לאביזר הנדרש, ללא הידוק חיבור הסמארטלוק'),
+        _infoBullet('2. השחל את האום והאטם הכדורי על הצינור'),
+        _infoBullet(
+            '3. קבע את הזווית הרצויה במחבר הג\'וקר והדק את אום הג\'וקר'),
+        _infoBullet('4. הדק את אביזר הסמארט לוק'),
+        _infoHead('התקנת פקק במחסום/מאסף (עמ\' 9)'),
+        _infoBullet(
+            'הכנס את הפקק שהמילה UP נמצאת בחלקו העליון וידית האחיזה נמצאת במצב אנכי'),
+        _infoBullet('הדק את האום עד נעילת השיניים'),
+        _infoHead('התקנה ידנית של האום'),
+        _infoBullet(
+            '⚠️ האביזרים מגיעים כשהאומים מורכבים עליהם ומוכנים להתקנה. במצב שבו האום מופרד מהאביזר יכול להתקיים רק על ידי פתיחה מכוונת'),
+        _infoBullet(
+            'כוון את החץ הירוק שעל האום מול השן הגדולה באביזר ← הברג את האום עד לשמיעת הקליק (מעבר מעל השן הגדולה)'),
+        _infoHead('חיטוי וניקוי'),
+        _infoBullet(
+            'תכונות הניקיון נובעות משכבה פנימית פוליפרופילן לבן חלקה ⇒ ללא הצטברות זרימה חופשית'),
+        _infoBullet('לא נדרש חיטוי שוטף — שטיפה במים בלבד ברוב המקרים'),
       ],
     );
   }
@@ -2379,29 +2952,44 @@ class _StripPanel extends StatelessWidget {
   }
 
   // ── מחיר: category-level ballpark with disclaimer ───────────────────────
-  Widget _buildPrice() {
-    final price = priceFor(product);
-    if (price == null) {
+  Widget _buildPrice(BuildContext context) {
+    final base = priceFor(product);
+    if (base == null) {
       return const _EmptyHint('אין הערכת מחיר לקטגוריה זו');
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-          child: Row(
-            children: [
-              const Text('~₪',
-                  style: TextStyle(
-                      color: Color(0xFF22C55E),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900)),
-              Text('$price',
-                  style: const TextStyle(
-                      color: Color(0xFF22C55E),
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900)),
-              const Spacer(),
+    // Honour the price settings: VAT-inclusive amount (×1.17) when on + the
+    // chosen currency symbol. (No FX conversion — local display symbol only.)
+    // _StripPanel is a StatelessWidget, so read settings via an inline Consumer.
+    return Consumer(builder: (context, ref, _) {
+      final s = ref.watch(catalogSettingsProvider);
+      final price = priceWithVat(base, showVat: s.showVat);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            child: Row(
+              children: [
+                Text('~${currencySymbol(s.currency)}',
+                    style: TextStyle(
+                        color: bsSuccess(context),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900)),
+                Text('$price',
+                    style: TextStyle(
+                        color: bsSuccess(context),
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900)),
+                if (s.showUnitPrice) ...[
+                  const SizedBox(width: 6),
+                  CfgText('lipskey_product_sheet.per_unit',
+                      'ליחידה',
+                      style: TextStyle(
+                          color: bsSuccess(context).withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700)),
+                ],
+                const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 2),
@@ -2409,7 +2997,8 @@ class _StripPanel extends StatelessWidget {
                   color: const Color(0xFFFBBF24).withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Text('הערכה',
+                child: const CfgText('lipskey_product_sheet.estimate_badge',
+                    'הערכה',
                     style: TextStyle(
                         color: Color(0xFFCC9114),
                         fontSize: 9,
@@ -2418,15 +3007,17 @@ class _StripPanel extends StatelessWidget {
             ],
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-              'הערכה לפי קטגוריה — מחיר אמיתי תלוי בספק, מותג ומידה ספציפית.',
-              style: TextStyle(
-                  color: Color(0xFF888888), fontSize: 10, height: 1.4)),
-        ),
-      ],
-    );
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4),
+            child: CfgText(
+                'lipskey_product_sheet.price_note',
+                'הערכה לפי קטגוריה — מחיר אמיתי תלוי בספק, מותג ומידה ספציפית.',
+                style: TextStyle(
+                    color: Color(0xFF888888), fontSize: 10, height: 1.4)),
+          ),
+        ],
+      );
+    });
   }
 
   /// Horizontal product strip. When [labelFor] is supplied and returns a
@@ -2442,7 +3033,7 @@ class _StripPanel extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
         itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (_, i) {
+        itemBuilder: (context, i) {
           final q = items[i];
           final label = labelFor?.call(q) ?? '';
           return GestureDetector(
@@ -2451,7 +3042,7 @@ class _StripPanel extends StatelessWidget {
               width: 100,
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 border: Border.all(color: const Color(0xFFEEEEEE)),
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -2461,7 +3052,7 @@ class _StripPanel extends StatelessWidget {
                   SizedBox(
                     height: 44,
                     child: q.imageAsset != null
-                        ? Image.asset(q.imageAsset!,
+                        ? productImage(q.imageAsset!,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Center(
                                 child: Text(q.typeEmoji,
@@ -2476,7 +3067,7 @@ class _StripPanel extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 10,
                             height: 1.2)),
                   ),
@@ -2558,7 +3149,8 @@ class _InteractiveChips extends StatelessWidget {
     final frame = _colorFrame(p);
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final v = q.colorVariant;
       if (v == null || v.isEmpty) continue;
@@ -2583,7 +3175,7 @@ class _InteractiveChips extends StatelessWidget {
         .join(' ');
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final v = variantValue(q, kind);
       if (v.isEmpty) continue;
@@ -2635,7 +3227,7 @@ class _InteractiveChips extends StatelessWidget {
     final compound = _resolveCompoundType(p);
     if (compound.isEmpty) return [];
     final byCompound = <String, LipskeyCatalogProduct>{compound: p};
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final qc = _resolveCompoundType(q);
       if (qc.isEmpty || byCompound.containsKey(qc)) continue;
@@ -2654,7 +3246,7 @@ class _InteractiveChips extends StatelessWidget {
   static List<LipskeyCatalogProduct> _variantsModel(LipskeyCatalogProduct p) {
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final m = q.brandModel;
       if (m == null || m.isEmpty) continue;
@@ -2682,7 +3274,7 @@ class _InteractiveChips extends StatelessWidget {
         .join(' ');
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final v = variantValue(q, kind);
       if (v.isEmpty) continue;
@@ -2713,7 +3305,7 @@ class _InteractiveChips extends StatelessWidget {
         final myVal = p.colorVariant;
         if (myVal == null || myVal.isEmpty) return false;
         final frame = _colorFrame(p);
-        return kCatalogProducts.any((q) {
+        return resolvedCatalogProducts.any((q) {
           final qv = q.colorVariant;
           return q.categoryHe == p.categoryHe &&
               q.sku != p.sku &&

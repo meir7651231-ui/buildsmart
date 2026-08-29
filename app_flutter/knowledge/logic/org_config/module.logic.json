@@ -1,0 +1,601 @@
+{
+  "module": "org_config",
+  "source": "lib/config/org_config.dart",
+  "atomCount": 12,
+  "atoms": [
+    {
+      "fn": "decodeOrgConfig",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw) -> OrgConfig?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_stringField",
+            "module": true
+          },
+          {
+            "name": "_jsonMapField",
+            "module": true
+          },
+          {
+            "name": "_boolMapField",
+            "module": true
+          },
+          {
+            "name": "_stringMapField",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "resolveOrgConfig"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "root = "
+          },
+          {
+            "kind": "precond",
+            "detail": "if root is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "version = root['v']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if version is! num || version != 1 → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "OrgConfig(slug: _stringField(root['slug']), orgName: _stringField(root['orgName']), theme…"
+          }
+        ]
+      },
+      "floor": [
+        "OrgConfig",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "(String raw)",
+        "output": "OrgConfig?",
+        "purity": "pure",
+        "precond": [
+          "if root is! Map → return null",
+          "if version is! num || version != 1 → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "root is! Map · version is! num || version != 1 · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "encodeOrgConfig",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig c) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "jsonEncode(<String, dynamic>{'v' : 1, if (c.slug.isNotEmpty) 'slug' : c.slug, if (c.orgNa…"
+          }
+        ]
+      },
+      "floor": [
+        "jsonEncode"
+      ],
+      "contract": {
+        "input": "(OrgConfig c)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "resolveOrgConfig",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({String? ownerJson, String? companyJson}) -> OrgConfig",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDefaultOrgConfig"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "decodeOrgConfig",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if ownerJson != null"
+          },
+          {
+            "kind": "branch",
+            "detail": "if companyJson != null"
+          },
+          {
+            "kind": "return",
+            "detail": "kDefaultOrgConfig"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "({String? ownerJson, String? companyJson})",
+        "output": "OrgConfig",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "moduleOn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig c, String module) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCoreModules"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "featureEnabled",
+          "featureOn"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if kCoreModules.contains(module) → return true"
+          },
+          {
+            "kind": "return",
+            "detail": "c.modules[module] != false"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(OrgConfig c, String module)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if kCoreModules.contains(module) → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "featureOn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig c, String module, String feature) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCoreModules",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "moduleOn",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !moduleOn(c, module) → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "c.features['$module.$feature'] != false"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(OrgConfig c, String module, String feature)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if !moduleOn(c, module) → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "featureEnabled",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig c, String module, String feature) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCoreModules",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "moduleOn",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !moduleOn(c, module) → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "c.features['$module.$feature'] == true"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(OrgConfig c, String module, String feature)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if !moduleOn(c, module) → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "elementShown",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig c, String id) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "c.features['element.$id'] != false"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(OrgConfig c, String id)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "termOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig c, String key, String fallback) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "term = c.terms[key]"
+          },
+          {
+            "kind": "return",
+            "detail": "term == null || term.isEmpty ? fallback : term"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(OrgConfig c, String key, String fallback)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_stringField",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? v) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "decodeOrgConfig"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "v is String ? v : ''"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? v)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_jsonMapField",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? v) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "decodeOrgConfig"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if v is! Map → return const {}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, dynamic>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in v.entries"
+          },
+          {
+            "kind": "compute",
+            "detail": "k = e.key"
+          },
+          {
+            "kind": "branch",
+            "detail": "if k is String"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? v)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [
+          "if v is! Map → return const {}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_boolMapField",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? v) -> Map<String, bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "decodeOrgConfig"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if v is! Map → return const {}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, bool>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in v.entries"
+          },
+          {
+            "kind": "compute",
+            "detail": "k = e.key"
+          },
+          {
+            "kind": "compute",
+            "detail": "val = e.value"
+          },
+          {
+            "kind": "branch",
+            "detail": "if k is String && val is bool"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? v)",
+        "output": "Map<String, bool>",
+        "purity": "pure",
+        "precond": [
+          "if v is! Map → return const {}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_stringMapField",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? v) -> Map<String, String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "decodeOrgConfig"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if v is! Map → return const {}"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in v.entries"
+          },
+          {
+            "kind": "compute",
+            "detail": "k = e.key"
+          },
+          {
+            "kind": "compute",
+            "detail": "val = e.value"
+          },
+          {
+            "kind": "branch",
+            "detail": "if k is String && val is String"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? v)",
+        "output": "Map<String, String>",
+        "purity": "pure",
+        "precond": [
+          "if v is! Map → return const {}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

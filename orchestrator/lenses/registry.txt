@@ -1,0 +1,13 @@
+# Canonical audit lenses — the orthogonal viewpoints a full audit sweep must cover.
+# lens-coverage.sh checks that the lenses a fleet returned cover the REQUIRED subset (this file, or a
+# task-specific subset of it). One lens id per line; blank lines and #-comments are ignored.
+cross-role
+money-numeric
+edge-crash
+state-leakage
+navigation
+performance
+accessibility-rtl
+async-race
+data-seed
+text-parity

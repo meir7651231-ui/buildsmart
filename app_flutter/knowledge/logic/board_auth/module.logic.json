@@ -1,0 +1,934 @@
+{
+  "module": "board_auth",
+  "source": "lib/state/board_auth.dart",
+  "atomCount": 14,
+  "atoms": [
+    {
+      "fn": "boardRoleByName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String name) -> BoardRole?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "boardSessionFromAuthSnapshot"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final role in BoardRole.values"
+          },
+          {
+            "kind": "branch",
+            "detail": "if role.name == name → return role"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String name)",
+        "output": "BoardRole?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "boardSessionFromAuthSnapshot",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AuthSnapshot snap) -> BoardSession?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardDemoNames"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "boardRoleByName",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "BoardAuthNotifier._bindFirebase"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "user = snap.user"
+          },
+          {
+            "kind": "precond",
+            "detail": "if user == null → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final r in snap.roles"
+          },
+          {
+            "kind": "compute",
+            "detail": "role = boardRoleByName(r)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if role == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "name = user.displayName"
+          },
+          {
+            "kind": "return",
+            "detail": "BoardSession(role: role, username: user.uid, displayName: (name != null && name.isNotEmpt…"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "BoardSession"
+      ],
+      "contract": {
+        "input": "(AuthSnapshot snap)",
+        "output": "BoardSession?",
+        "purity": "pure",
+        "precond": [
+          "if user == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "user == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardSession.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "demo"
+          },
+          {
+            "kind": "field",
+            "name": "displayName"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "role"
+          },
+          {
+            "kind": "field",
+            "name": "uid"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'role' : role.name, 'username' : username, 'displayName' : displayName, 'demo' : demo, i…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier._bindFirebase",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardDemoNames",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "authStateProvider"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "boardSessionFromAuthSnapshot",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_ref.listen<AuthSnapshot>(authStateProvider, (_, next) {if (!mounted) return; state = boa…"
+          }
+        ]
+      },
+      "floor": [
+        "listen"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAuthKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAuthKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "BoardAuthNotifier.enterDemo",
+          "BoardAuthNotifier.login",
+          "BoardAuthNotifier.loginManagerViaGoogle",
+          "BoardAuthNotifier.logout"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = state"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s == null"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setString(kBoardAuthKey, jsonEncode(s.toJson()))"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "remove",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier.login",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(BoardRole role, String username, String code) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAccounts"
+          },
+          {
+            "kind": "const",
+            "name": "kBoardAuthKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.remove",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "u = username.trim().toLowerCase()"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = code.replaceAll(RegExp(r'[\\s-]'), '')"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final a in kBoardAccounts"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a.role == role && a.username == u && a.code == c"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [
+        "BoardSession",
+        "RegExp",
+        "replaceAll",
+        "toLowerCase",
+        "trim"
+      ],
+      "contract": {
+        "input": "(BoardRole role, String username, String code)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier.enterDemo",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(BoardRole role) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAuthKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kBoardDemoNames"
+          },
+          {
+            "kind": "const",
+            "name": "kDemoContractorId"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.remove",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = BoardSession(role: role, username: 'demo', displayName: kBoardDemoNames[role]!, d…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "BoardSession"
+      ],
+      "contract": {
+        "input": "(BoardRole role)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier.loginManagerViaGoogle",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String uid, required String displayName}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAuthKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.remove",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = BoardSession(role: BoardRole.manager, username: uid, displayName: displayName, ui…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "BoardSession"
+      ],
+      "contract": {
+        "input": "({required String uid, required String displayName})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier.isImpersonating",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_impersonationReturn"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_impersonationReturn != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier.impersonate",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(BoardRole role) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAccounts",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_impersonationReturn"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_seedFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "current = state"
+          },
+          {
+            "kind": "precond",
+            "detail": "if current == null || current.role != BoardRole.manager → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "seed = _seedFor(role)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if seed == null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_impersonationReturn = current"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = BoardSession(role: seed.role, username: seed.username, displayName: seed.displayN…"
+          }
+        ]
+      },
+      "floor": [
+        "BoardSession"
+      ],
+      "contract": {
+        "input": "(BoardRole role)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if current == null || current.role != BoardRole.manager → return (void)",
+          "if seed == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier.returnFromImpersonation",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_impersonationReturn"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "saved = _impersonationReturn"
+          },
+          {
+            "kind": "precond",
+            "detail": "if saved == null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_impersonationReturn = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = saved"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if saved == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier._seedFor",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(BoardRole role) -> BoardAccount?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAccounts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "BoardAuthNotifier.impersonate"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final a in kBoardAccounts"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a.role == role → return a"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(BoardRole role)",
+        "output": "BoardAccount?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "BoardAuthNotifier.logout",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBoardAuthKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_impersonationReturn"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.remove",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _impersonationReturn != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

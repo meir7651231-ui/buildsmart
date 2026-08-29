@@ -1,0 +1,465 @@
+{
+  "module": "funnels",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/intel/funnels.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "computeFunnel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<IntelEvent> events, {List<String> flow = kIntelFunnelFlow}) -> FunnelReport",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPercentScale"
+          },
+          {
+            "kind": "global",
+            "name": "filled"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "analyzeIntel"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "flowSet = flow.toSet()"
+          },
+          {
+            "kind": "init",
+            "detail": "bySession = <String, Set<String>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in events"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !flowSet.contains(e.name) → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "(bySession[e.sessionId ?? ''] ??= <String>{}).add(e.name)"
+          },
+          {
+            "kind": "init",
+            "detail": "reached = List<int>.filled(flow.length, 0)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final stages in bySession.values"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < flow.length; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "base = flow.isEmpty ? 0 : reached[0]"
+          },
+          {
+            "kind": "init",
+            "detail": "stages = <FunnelStage>[for (var i = 0; i < flow.length; i++) FunnelStage(name: flow[i], reached: r…"
+          },
+          {
+            "kind": "compute",
+            "detail": "biggest = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if base > 0"
+          },
+          {
+            "kind": "return",
+            "detail": "FunnelReport(stages: stages, biggestDropOff: biggest)"
+          }
+        ]
+      },
+      "floor": [
+        "FunnelDropOff",
+        "FunnelReport",
+        "FunnelStage",
+        "List",
+        "add",
+        "contains",
+        "toSet"
+      ],
+      "contract": {
+        "input": "(List<IntelEvent> events, {List<String> flow = kIntelFunnelFlow})",
+        "output": "FunnelReport",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "detectCheckoutAbandon",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<IntelEvent> events, {required DateTime now, Duration idleEnd = kIdleEnd}) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "analyzeIntel"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "bySession = <String, List<IntelEvent>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in events"
+          },
+          {
+            "kind": "effect",
+            "detail": "(bySession[e.sessionId ?? ''] ??= <IntelEvent>[]).add(e)"
+          },
+          {
+            "kind": "init",
+            "detail": "flagged = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final entry in bySession.entries"
+          },
+          {
+            "kind": "compute",
+            "detail": "evs = entry.value"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasStart = evs.any((e) => e.name == IntelEvents.checkoutStart)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !hasStart → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "converted = evs.any((e) => e.name == IntelEvents.orderPlaced)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if converted → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "last = evs.map((e) => e.at).reduce((a, b) => a.isAfter(b) ? a : b)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if now.difference(last) >= idleEnd"
+          },
+          {
+            "kind": "effect",
+            "detail": "flagged.sort()"
+          },
+          {
+            "kind": "return",
+            "detail": "flagged"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "any",
+        "difference",
+        "isAfter",
+        "map",
+        "reduce",
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<IntelEvent> events, {required DateTime now, Duration idleEnd = kIdleEnd})",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "detectRepeatedNoResult",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<IntelEvent> events, {int threshold = kRepeatNoResult}) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "analyzeIntel"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "counts = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in events"
+          },
+          {
+            "kind": "branch",
+            "detail": "if e.name != IntelEvents.searchNoResult → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "k = e.sessionId ?? ''"
+          },
+          {
+            "kind": "effect",
+            "detail": "counts[k] = (counts[k] ?? 0) + 1"
+          },
+          {
+            "kind": "init",
+            "detail": "flagged = <String>[for (final entry in counts.entries) if (entry.value >= threshold) entry.key]..so…"
+          },
+          {
+            "kind": "return",
+            "detail": "flagged"
+          }
+        ]
+      },
+      "floor": [
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<IntelEvent> events, {int threshold = kRepeatNoResult})",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "detectDeadEndLoop",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<IntelEvent> events, {int threshold = kBackLoop}) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_maxOscillation",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "analyzeIntel"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "bySession = <String, List<IntelEvent>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in events"
+          },
+          {
+            "kind": "branch",
+            "detail": "if e.name != IntelEvents.screenView → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "(bySession[e.sessionId ?? ''] ??= <IntelEvent>[]).add(e)"
+          },
+          {
+            "kind": "init",
+            "detail": "flagged = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final entry in bySession.entries"
+          },
+          {
+            "kind": "init",
+            "detail": "indexed = <(int, IntelEvent)>[for (var i = 0; i < entry.value.length; i++) (i, entry.value[i])]..so…"
+          },
+          {
+            "kind": "init",
+            "detail": "path = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in indexed"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _maxOscillation(path) >= threshold"
+          },
+          {
+            "kind": "effect",
+            "detail": "flagged.sort()"
+          },
+          {
+            "kind": "return",
+            "detail": "flagged"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "compareTo",
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<IntelEvent> events, {int threshold = kBackLoop})",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_maxOscillation",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> path) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "detectDeadEndLoop"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "best = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "run = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 2; i < path.length; i++"
+          },
+          {
+            "kind": "branch",
+            "detail": "if path[i] == path[i - 2] && path[i] != path[i - 1]"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<String> path)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "analyzeIntel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<IntelEvent> events, {required DateTime now}) -> IntelInsights",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPercentScale",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "filled",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "computeFunnel",
+            "module": true
+          },
+          {
+            "name": "detectCheckoutAbandon",
+            "module": true
+          },
+          {
+            "name": "detectRepeatedNoResult",
+            "module": true
+          },
+          {
+            "name": "detectDeadEndLoop",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "IntelInsights(funnel: computeFunnel(events), abandonedCheckouts: detectCheckoutAbandon(ev…"
+          }
+        ]
+      },
+      "floor": [
+        "IntelInsights"
+      ],
+      "contract": {
+        "input": "(List<IntelEvent> events, {required DateTime now})",
+        "output": "IntelInsights",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

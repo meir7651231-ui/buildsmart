@@ -1,21 +1,43 @@
+import 'package:buildsmart/theme/tokens.dart';
 // BuildSmart Studio — a cinematic installation designer built on install_engine.
 // Dark "blueprint command-center": glowing product nodes wired by animated
 // energy pipes, colour-coded by plumbing system, with a one-tap auto-assemble
 // that fills every connector into an orderable bill of materials.
 import 'dart:math' as math;
+import 'package:buildsmart/data/product_images.dart';
 
+import 'package:buildsmart/config/app_brand.dart';
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart'
+    show catalogRepositoryProvider;
+import 'package:buildsmart/domain/connection_resolver.dart'
+    show ConnectionResolver;
+import 'package:buildsmart/domain/connection_schema.dart'
+    show ProductConnectorSpec, SystemDef;
+import 'package:buildsmart/domain/trade_physics_config.dart'
+    show TradePhysicsConfig;
+import 'package:buildsmart/domain/trade_schema.dart' show AccessoryRule;
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/logic/pressure_drop.dart';
 import 'package:buildsmart/logic/price_estimate.dart';
 import 'package:buildsmart/screens/audit_screen.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
+import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/saved_projects.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/trades_store.dart'
+    show TradesDoc, resolvedActiveTradeIdProvider, tradesStoreProvider;
 import 'package:buildsmart/widgets/chain_diagram.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,12 +50,12 @@ const _void0 = Color(0xFFFAFAFA); // app background
 const _void1 = Color(0xFFFFFFFF); // dialogs / sheets
 const _panel = Color(0xFFFFFFFF); // cards / tiles
 const _grid = Color(0x0F1A1A1A); // very faint neutral blueprint grid
-const _ink = Color(0xFF1A1A1A); // primary text
+const _ink = BsTokens.inkLight; // primary text
 const _mute = Color(0xFF888888); // secondary text
 const _supply = Color(0xFF0284C7); // blue — water supply
 const _drain = Color(0xFFD97706); // amber — drainage
 const _fixture = Color(0xFF7C3AED); // violet — fixtures (the bridge)
-const _accent = Color(0xFFFF7A18); // brand orange — primary action
+const _accent = BsTokens.brand; // brand orange — primary action
 const _ok = Color(0xFF16A34A); // green — success / "all good"
 
 // Close (X) for the studio bottom-sheets — matches the app's product-sheet
@@ -46,15 +68,22 @@ class _SheetClose extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 0, 2),
           child: Material(
-            color: const Color(0xFFF5F5F5),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () => Navigator.pop(context),
-              child: const SizedBox(
-                width: 36,
-                height: 36,
-                child: Icon(Icons.close, color: _ink, size: 22),
+            child: Semantics(
+              button: true,
+              label: 'סגור',
+              child: Tooltip(
+                message: 'סגור',
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => Navigator.pop(context),
+                  child: const SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Icon(Icons.close, color: _ink, size: 22),
+                  ),
+                ),
               ),
             ),
           ),
@@ -62,7 +91,138 @@ class _SheetClose extends StatelessWidget {
       );
 }
 
-Color _systemColor(LipskeyCatalogProduct p) {
+// ── s49b · the gated trade-config seams ───────────────────────────────────────
+// Every seam in this screen funnels through ONE guard: [_authoredConfigOf].
+// R1-2 KEYSTONE: when the plumbing-resolved active trade is in effect (today:
+// ALWAYS — a single published trade exists) the guard returns null BEFORE any
+// authored slice is touched, and every seam runs its legacy branch verbatim.
+// Only a published non-plumbing trade gets a config; plumbing's hand-written
+// physics/consts below are permanent and never read authored data.
+
+/// The resolved active trade's authored slices, bundled once per build:
+/// systems (+ colors), the per-sku [ProductConnectorSpec] map, the mustHave
+/// [AccessoryRule]s, the s41 [TradeResolution] (REUSED — no parallel seam) and
+/// the optional [TradePhysicsConfig] (v1: always null — no authoring UI yet,
+/// so the flow-physics panels hide for authored trades).
+class _ActiveTradeConfig {
+  _ActiveTradeConfig._({
+    required this.tradeId,
+    required this.systems,
+    required this.mustHaveAccessories,
+    required this.tradeResolution,
+    required Map<String, ProductConnectorSpec> specBySku,
+    required Map<String, String?> systemIdByTypeId,
+    required Map<String, SystemDef> systemById,
+    this.physics,
+  })  : _specBySku = specBySku,
+        _systemIdByTypeId = systemIdByTypeId,
+        _systemById = systemById;
+
+  factory _ActiveTradeConfig.fromDoc(String tradeId, TradesDoc doc) {
+    final systems = [
+      for (final s in doc.systems)
+        if (s.tradeId == tradeId) s,
+    ];
+    final connectorTypes = [
+      for (final t in doc.connectorTypes)
+        if (t.tradeId == tradeId) t,
+    ];
+    final specBySku = {
+      for (final s in doc.productSpecs)
+        if (s.tradeId == tradeId) s.productSku: s,
+    };
+    return _ActiveTradeConfig._(
+      tradeId: tradeId,
+      systems: systems,
+      mustHaveAccessories: [
+        for (final a in doc.accessories)
+          if (a.tradeId == tradeId && a.mustHave) a,
+      ],
+      tradeResolution: TradeResolution(
+        tradeId: tradeId,
+        resolver: ConnectionResolver(
+          rules: [
+            for (final r in doc.compatRules)
+              if (r.tradeId == tradeId) r,
+          ],
+          connectorTypes: connectorTypes,
+          systems: systems,
+          completionRules: [
+            for (final r in doc.completionRules)
+              if (r.tradeId == tradeId) r,
+          ],
+        ),
+        specOf: (sku) => specBySku[sku],
+      ),
+      specBySku: specBySku,
+      systemIdByTypeId: {
+        for (final t in connectorTypes) t.id: t.systemId,
+      },
+      systemById: {
+        for (final s in systems) s.id: s,
+      },
+      // physics stays null in v1 (no authoring UI for flow-physics yet) —
+      // the slope seam hides the ת"י-1205 panel for authored trades.
+    );
+  }
+
+  final String tradeId;
+  final List<SystemDef> systems;
+  final List<AccessoryRule> mustHaveAccessories;
+  final TradeResolution tradeResolution;
+  final TradePhysicsConfig? physics;
+  final Map<String, ProductConnectorSpec> _specBySku;
+  final Map<String, String?> _systemIdByTypeId;
+  final Map<String, SystemDef> _systemById;
+
+  /// The spec envelope's `maxTempC` for [sku], or null (no spec / no key —
+  /// the product is temp-suitable, matching the legacy null→suitable rule).
+  /// (Per-sku spec access goes through [tradeResolution]'s own `specOf`.)
+  num? maxTempCOf(String sku) => _specBySku[sku]?.envelope['maxTempC'];
+
+  /// [SystemDef.color] of the single authored system the sku's spec ends
+  /// belong to; the legacy multi-system convention ([_fixture], the bridge)
+  /// when they span more than one; null when the sku has no spec or no
+  /// system-carrying end — the caller falls through to the legacy consts.
+  Color? systemColorOf(String sku) {
+    final spec = _specBySku[sku];
+    if (spec == null) return null;
+    String? seen;
+    for (final end in spec.ends) {
+      final sysId = _systemIdByTypeId[end.connectorTypeId];
+      if (sysId == null) continue;
+      if (seen == null) {
+        seen = sysId;
+      } else if (seen != sysId) {
+        return _fixture;
+      }
+    }
+    if (seen == null) return null;
+    final def = _systemById[seen];
+    return def == null ? null : Color(def.color);
+  }
+}
+
+/// s49b — THE guard (R1-2): null whenever the RESOLVED active trade is
+/// 'plumbing' (today: always — count==1), returned BEFORE any authored slice
+/// is read, so every seam short-circuits to its legacy branch verbatim.
+/// `ref.read` (not watch) on purpose — this screen's existing in-build
+/// provider-read idiom; nothing live switches the active trade mid-frame yet
+/// (the s43 switcher renders only when >1 published trades exist).
+_ActiveTradeConfig? _authoredConfigOf(WidgetRef ref) {
+  final tradeId = ref.read(resolvedActiveTradeIdProvider);
+  if (tradeId == 'plumbing') return null;
+  return _ActiveTradeConfig.fromDoc(tradeId, ref.read(tradesStoreProvider));
+}
+
+Color _systemColor(LipskeyCatalogProduct p, [_ActiveTradeConfig? cfg]) {
+  // s49b seam: authored trade reads config (SystemDef.color via the product's
+  // spec ends); plumbing = legacy verbatim (R1-2 — cfg is null there, and
+  // every call-site that passes no cfg stays byte-identical).
+  if (cfg != null && cfg.systems.isNotEmpty) {
+    final authored = cfg.systemColorOf(p.sku);
+    if (authored != null) return authored;
+  }
   final s = productSystems(p);
   if (s.length > 1) return _fixture;
   return s.contains(WaterSystem.drainage) ? _drain : _supply;
@@ -112,6 +272,30 @@ const _kCats = [
   _PickerCategory('🔀', 'מחלק (כמה ברזים)', {'מחלקים'}),
   _PickerCategory('🔧', 'חיבורים', null), // null = catch-all
 ];
+
+/// The picker categories actually rendered. Raw shell ([kProfileRawShell]):
+/// the const plumbing [_kCats] never renders — with an imported company
+/// catalog active ([companyCatalogActive]) the chips derive from the LIVE
+/// [chainUniverse]'s distinct `categoryHe` values (FIRST-APPEARANCE order,
+/// the company_categories idiom; emoji from the first product of the
+/// category, template default '📦'), capped at the const grid's own count so
+/// the non-scrollable 2-col grid keeps today's visual budget; before an
+/// import there are no categories to offer — honest empty, never the const
+/// plumbing chips. Demo/buildsmart: [_kCats] verbatim.
+List<_PickerCategory> _pickerCats() {
+  if (!kProfileRawShell) return _kCats;
+  if (!companyCatalogActive) return const <_PickerCategory>[];
+  final out = <_PickerCategory>[];
+  final seen = <String>{};
+  for (final p in chainUniverse) {
+    final cat = p.categoryHe;
+    if (cat.isEmpty || !seen.add(cat)) continue;
+    out.add(_PickerCategory(
+        p.categoryEmoji.isEmpty ? '📦' : p.categoryEmoji, cat, {cat}));
+    if (out.length >= _kCats.length) break;
+  }
+  return out;
+}
 
 bool _inCategory(_PickerCategory cat, LipskeyCatalogProduct p) {
   if (cat.cats == null) {
@@ -199,6 +383,58 @@ String _productHint(LipskeyCatalogProduct p) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+/// Action hooks the mounted [InstallStudioScreen] publishes so the floating
+/// keyboard's own tools can drive it against the live chain/temp providers.
+class InstallStudioHooks {
+  const InstallStudioHooks({
+    required this.createList,
+    required this.addPart,
+    required this.openProjects,
+  });
+  final VoidCallback createList;
+  final VoidCallback addPart;
+  final VoidCallback openProjects;
+}
+
+/// Set by [InstallStudioScreen] while mounted (a post-frame publish); read by
+/// [kbInstallStudioNodes]. A plain hook registry so the keyboard tools reach the
+/// studio's own dock buttons without the screen exposing its State. Null (no-op)
+/// while the screen is not mounted.
+final installStudioActionsProvider =
+    StateProvider<InstallStudioHooks?>((_) => null);
+
+/// The studio's OWN keyboard tools (live-mirror): the same actions as its
+/// on-screen dock — build the shopping list, add a part, open saved projects —
+/// plus a jump to the audit. So the floating keyboard MIRRORS this screen
+/// instead of falling back to the catalog tools. Actions route through
+/// [installStudioActionsProvider]; a null registry no-ops.
+List<KbToolNode> kbInstallStudioNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.bolt,
+        label: 'רשימת קנייה',
+        action: (ref, context) =>
+            ref.read(installStudioActionsProvider)?.createList(),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.add,
+        label: 'הוסף חלק',
+        action: (ref, context) =>
+            ref.read(installStudioActionsProvider)?.addPart(),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.folder_open_outlined,
+        label: 'פרויקטים',
+        action: (ref, context) =>
+            ref.read(installStudioActionsProvider)?.openProjects(),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.science_outlined,
+        label: 'אודיט',
+        action: (ref, context) => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const AuditScreen())),
+      ),
+    ];
+
 class InstallStudioScreen extends ConsumerStatefulWidget {
   const InstallStudioScreen({super.key});
   @override
@@ -207,18 +443,49 @@ class InstallStudioScreen extends ConsumerStatefulWidget {
 
 class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _flow =
-      AnimationController(vsync: this, duration: const Duration(seconds: 3))
-        ..repeat();
+  late final AnimationController _flow;
 
   bool _loop = false;
   bool _showTutorial = false;
   final TextEditingController _describeCtrl = TextEditingController();
 
+  /// This screen's own keyboard tools (live-mirror), built ONCE so the stable
+  /// list identity keeps KbScreen from re-pushing on every rebuild.
+  late final List<KbToolNode> _kbTools = kbInstallStudioNodes();
+
   @override
   void initState() {
     super.initState();
+    _flow = AnimationController(
+        vsync: this, duration: const Duration(seconds: 3));
+    // A11Y: only animate the blueprint grid when reducedMotion is off.
+    if (!ref.read(catalogSettingsProvider).reducedMotion) {
+      _flow.repeat();
+    }
     _checkFirstVisit();
+    // Publish this screen's dock actions so the floating keyboard's tools drive
+    // it (list / add / projects) against the live chain/temp providers. Post-
+    // frame (a provider write during the parent build is illegal); each hook is
+    // mounted-guarded so a late tap after unmount is a no-op.
+    if (kKbGlobal) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(installStudioActionsProvider.notifier).state =
+            InstallStudioHooks(
+          createList: () {
+            if (mounted) {
+              _assemble(ref.read(chainProvider), ref.read(lineMaxTempProvider));
+            }
+          },
+          addPart: () {
+            if (mounted) _openPicker(ref.read(lineMaxTempProvider));
+          },
+          openProjects: () {
+            if (mounted) _openProjects();
+          },
+        );
+      });
+    }
   }
 
   Future<void> _checkFirstVisit() async {
@@ -253,7 +520,9 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     if (words.isEmpty) return null;
     LipskeyCatalogProduct? best;
     var bestScore = 0;
-    for (final p in kCompatCatalog) {
+    // chainUniverse = the imported company catalog when one is active, else
+    // kCompatCatalog (same object) — so תכנון חיבור serves the company universe.
+    for (final p in chainUniverse) {
       if (!productSuitableForTemp(p, temp)) continue;
       final name = p.nameHe.toLowerCase();
       final cat = p.categoryHe.toLowerCase();
@@ -316,7 +585,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   Widget build(BuildContext context) {
     final chain = ref.watch(chainProvider);
     final temp = ref.watch(lineMaxTempProvider);
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: _void0,
@@ -334,13 +603,20 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
               children: [
                 AnimatedBuilder(
                   animation: _flow,
-                  builder: (_, __) => CustomPaint(
-                    painter: _BlueprintPainter(_flow.value),
-                    child: Column(children: [
-                      _header(chain, temp),
-                      Expanded(child: _canvas(chain, temp)),
-                      _dock(chain, temp),
-                    ]),
+                  // Build the screen content ONCE and reuse it across frames —
+                  // previously the whole Column (header/canvas/dock) rebuilt on
+                  // every animation tick (60fps). RepaintBoundary isolates the
+                  // blueprint repaint so it doesn't dirty the rest of the tree.
+                  child: Column(children: [
+                    _header(chain, temp),
+                    Expanded(child: _canvas(chain, temp)),
+                    _dock(chain, temp),
+                  ]),
+                  builder: (_, child) => RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _BlueprintPainter(_flow.value),
+                      child: child,
+                    ),
                   ),
                 ),
                 if (_showTutorial)
@@ -353,6 +629,10 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         ),
       ),
     );
+    // LIVE-MIRROR: under KB_GLOBAL this screen shows ITS OWN keyboard tools
+    // (list / add / projects / audit), not the catalog fallback. Flag-off →
+    // pass-through, byte-identical.
+    return kKbGlobal ? KbScreen(tools: _kbTools, child: body) : body;
   }
 
   // ── header: title + live system legend ──────────────────────────────────────
@@ -361,11 +641,27 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       padding: const EdgeInsets.fromLTRB(14, 12, 18, 6),
       child: Row(children: [
         if (Navigator.canPop(context))
-          GestureDetector(
-            onTap: () => Navigator.maybePop(context),
-            child: const Padding(
-              padding: EdgeInsets.only(left: 8),
-              child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+          Semantics(
+            button: true,
+            label: 'חזור',
+            child: Tooltip(
+              message: 'חזור',
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.maybePop(context),
+                // ≥48dp tap target around the small arrow (a11y), without
+                // enlarging the visible glyph.
+                child: const Padding(
+                  padding: EdgeInsetsDirectional.only(end: 8),
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         Container(
@@ -399,7 +695,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     final Color borderColor;
     final String label;
     if (temp >= 80) {
-      borderColor = const Color(0xFFEF4444); // red
+      borderColor = BsTokens.danger; // red
       label = 'חם מאוד';
     } else if (temp >= 60) {
       borderColor = const Color(0xFFF97316); // orange
@@ -436,11 +732,16 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     final opts = [
       (20, '❄️ קר', 'ברז, כיור, שירותים, גינה', _supply),
       (60, '🔥 חם', 'דוד שמש, דוד חשמלי, מחמם מיידי', const Color(0xFFF97316)),
-      (80, '🌡️ חם מאוד', 'מערכת ישנה או מסחרית, 80° ומעלה', const Color(0xFFEF4444)),
+      (80, '🌡️ חם מאוד', 'מערכת ישנה או מסחרית, 80° ומעלה', BsTokens.danger),
     ];
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
+      // This sheet holds a typed description (_describeCtrl) + a temp pick. It is
+      // an INLINE sheet (not a StatefulWidget) built off parent state, so instead
+      // of a fragile PopScope retrofit here we block the main accidental-loss
+      // vector — the drag-dismiss. A deliberate scrim-tap still closes it.
+      enableDrag: false,
       builder: (_) => Directionality(
         textDirection: TextDirection.rtl,
         child: Container(
@@ -510,20 +811,35 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   // ── the flow canvas — nodes wired by animated pipes ─────────────────────────
   Widget _canvas(List<LipskeyCatalogProduct> chain, int temp) {
     if (chain.isEmpty) return _emptyState(temp);
+    // s49b seam: authored trade reads config; plumbing = legacy verbatim (R1-2).
+    final s49bCfg = _authoredConfigOf(ref);
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       itemCount: chain.length,
       itemBuilder: (_, i) {
         final p = chain[i];
         final last = i == chain.length - 1;
-        final connectsToNext =
-            last ? true : canConnect(p, chain[i + 1]);
+        // s49b seam: authored trade resolves the joint via the s41
+        // connectionMethodLabel(trade:) delegation (non-empty label = mates);
+        // plumbing = legacy verbatim (R1-2) — its call stays positional-only.
+        final bool connectsToNext;
+        if (s49bCfg != null) {
+          connectsToNext = last ||
+              connectionMethodLabel(p, chain[i + 1],
+                      trade: s49bCfg.tradeResolution)
+                  .isNotEmpty;
+        } else {
+          connectsToNext =
+              last ? true : canConnect(p, chain[i + 1]);
+        }
         return _NodeRow(
           product: p,
           index: i,
           isLast: last,
           flow: _flow.value,
-          nextColor: last ? null : _systemColor(chain[i + 1]),
+          systemColorOverride:
+              s49bCfg == null ? null : _systemColor(p, s49bCfg),
+          nextColor: last ? null : _systemColor(chain[i + 1], s49bCfg),
           connectsToNext: connectsToNext,
           onRemove: () {
             final c = [...chain]..removeAt(i);
@@ -769,25 +1085,34 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => setState(() => _loop = !_loop),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: _loop ? _fixture.withOpacity(0.2) : _void1,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                        color: _loop ? _fixture : _mute.withOpacity(0.3)),
+                // ≥48dp tap target around the small chip (a11y), without
+                // enlarging the visible chip.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Center(
+                    widthFactor: 1,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: _loop ? _fixture.withOpacity(0.2) : _void1,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                            color: _loop ? _fixture : _mute.withOpacity(0.3)),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(Icons.loop,
+                            color: _loop ? _fixture : _mute, size: 14),
+                        const SizedBox(width: 4),
+                        Text('מחזור מים חמים',
+                            style: TextStyle(
+                                color: _loop ? _fixture : _mute,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700)),
+                      ]),
+                    ),
                   ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.loop,
-                        color: _loop ? _fixture : _mute, size: 14),
-                    const SizedBox(width: 4),
-                    Text('מחזור מים חמים',
-                        style: TextStyle(
-                            color: _loop ? _fixture : _mute,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700)),
-                  ]),
                 ),
               ),
             ),
@@ -821,7 +1146,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       );
 
   Widget _legendDot(Color c, String label) => Padding(
-        padding: const EdgeInsets.only(left: 14),
+        padding: const EdgeInsetsDirectional.only(end: 14),
         child: Row(children: [
           Container(
             width: 8, height: 8,
@@ -927,10 +1252,12 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     if (isTree) {
       final trunk = fixedChain.sublist(0, mi + 1);
       final branchTargets = fixedChain.sublist(mi + 1);
-      branches = branchTargets.length;
+      // Count only REAL branch targets (a target equal to the manifold itself
+      // isn't a branch) — matches the engine's routing so the banner is accurate.
+      branches = branchTargets.where((t) => t.sku != fixedChain[mi].sku).length;
       outlets = manifoldOutlets(fixedChain[mi]);
       plan = buildTreeInstallation(trunk, branchTargets,
-          tempC: temp, accessories: acc, autoCompliance: true);
+          tempC: temp, accessories: acc, autoCompliance: true, loop: _loop);
     } else {
       plan = buildInstallation([...fixedChain],
           tempC: temp, accessories: acc, loop: _loop, autoCompliance: true);
@@ -980,11 +1307,11 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           title: Row(children: [
             const Icon(Icons.warning_amber_rounded,
-                color: Color(0xFFEF4444), size: 22),
+                color: BsTokens.danger, size: 22),
             const SizedBox(width: 8),
             Text('$criticalCount בעיות בטיחות בקו',
                 style: const TextStyle(
-                    color: Color(0xFFEF4444),
+                    color: BsTokens.danger,
                     fontSize: 16,
                     fontWeight: FontWeight.w900)),
           ]),
@@ -1032,7 +1359,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF4444),
+                  backgroundColor: BsTokens.danger,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10))),
@@ -1105,6 +1432,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         ),
       ),
     );
+    ctrl.dispose();
     if (name == null || name.isEmpty) return;
     await ref.read(savedProjectsProvider.notifier).save(
           name: name,
@@ -1209,22 +1537,33 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                                         value: 'delete',
                                         child: Text('מחק',
                                             style: TextStyle(
-                                                color: Color(0xFFEF4444)))),
+                                                color: BsTokens.danger))),
                                   ],
                                   onSelected: (v) async {
                                     if (v == 'delete') {
+                                      final ok = await confirmDestructive(
+                                        ctx,
+                                        title: 'מחיקת פרויקט?',
+                                        message:
+                                            'הפרויקט "${p.name}" יימחק לצמיתות.',
+                                        confirmLabel: 'מחק',
+                                      );
+                                      if (!ok || !ctx.mounted) return;
                                       await ref
                                           .read(savedProjectsProvider.notifier)
                                           .remove(p.id);
                                     } else if (v == 'rename') {
                                       Navigator.pop(ctx);
-                                      _renameProject(p);
+                                      WidgetsBinding.instance.addPostFrameCallback(
+                                          (_) => _renameProject(p));
                                     }
                                   },
                                 ),
                                 onTap: () {
-                                  _loadProject(p);
+                                  // Close the saved-list sheet FIRST, then load +
+                                  // auto-build (so the BOM sheet isn't popped).
                                   Navigator.pop(ctx);
+                                  _loadProject(p);
                                 },
                               );
                             },
@@ -1242,7 +1581,11 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   void _loadProject(SavedProject p) {
     final found = <LipskeyCatalogProduct>[];
     for (final sku in p.anchorSkus) {
-      final hits = kLipskeyCatalog.where((q) => q.sku == sku);
+      // Resolve against the UNIFIED chainUniverse (Lipskey + hot-water) — the
+      // same superset the anchor pickers add from. Resolving against
+      // kLipskeyCatalog alone silently DROPPED saved hot-water (HW-*) anchors,
+      // which the auto-BOM `found.length >= 2` gate then turned into a no-BOM.
+      final hits = chainUniverse.where((q) => q.sku == sku);
       if (hits.isNotEmpty) found.add(hits.first);
     }
     if (found.isEmpty) {
@@ -1253,6 +1596,14 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     ref.read(lineMaxTempProvider.notifier).state = p.tempC;
     ref.read(lineAccessoriesProvider.notifier).state = p.accessories;
     showToast(context, '📂 נפתח: ${p.name}');
+    // #autobom — one-tap auto-BOM: a saved job carries its anchors + temp +
+    // accessories, so immediately build the full bill of materials and open it
+    // (reusing the exact _assemble path), instead of requiring a separate manual
+    // "assemble" tap. Needs ≥2 anchors to form a real line; a single-anchor job
+    // just stays on the canvas.
+    if (found.length >= 2) {
+      _assemble(found, p.tempC);
+    }
   }
 
   void _renameProject(SavedProject p) async {
@@ -1299,6 +1650,8 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         ),
       ),
     );
+    ctrl.dispose();
+    if (!mounted) return;
     if (name != null && name.isNotEmpty) {
       await ref.read(savedProjectsProvider.notifier).rename(p.id, name);
     }
@@ -1307,9 +1660,21 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   String _formatDate(DateTime d) {
     final now = DateTime.now();
     final diff = now.difference(d);
-    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דקות';
-    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
-    if (diff.inDays < 7) return 'לפני ${diff.inDays} ימים';
+    // Future timestamp (device clock rolled back after the save) or <1 min →
+    // "עכשיו", never "לפני -3 דקות". Singular Hebrew forms for 1 (דקה/שעה/אתמול).
+    if (diff.isNegative || diff.inMinutes < 1) return 'עכשיו';
+    if (diff.inMinutes < 60) {
+      final m = diff.inMinutes;
+      return m == 1 ? 'לפני דקה' : 'לפני $m דקות';
+    }
+    if (diff.inHours < 24) {
+      final h = diff.inHours;
+      return h == 1 ? 'לפני שעה' : 'לפני $h שעות';
+    }
+    if (diff.inDays < 7) {
+      final n = diff.inDays;
+      return n == 1 ? 'אתמול' : 'לפני $n ימים';
+    }
     return '${d.day}/${d.month}/${d.year}';
   }
 
@@ -1333,6 +1698,7 @@ class _NodeRow extends StatelessWidget {
     required this.nextColor,
     required this.connectsToNext,
     required this.onRemove,
+    this.systemColorOverride,
   });
   final LipskeyCatalogProduct product;
   final int index;
@@ -1342,9 +1708,13 @@ class _NodeRow extends StatelessWidget {
   final bool connectsToNext; // false → broken joint (red)
   final VoidCallback onRemove;
 
+  /// s49b seam: the authored trade's SystemDef color for THIS node; null
+  /// (always, under plumbing — R1-2) keeps the legacy inference verbatim.
+  final Color? systemColorOverride;
+
   @override
   Widget build(BuildContext context) {
-    final c = _systemColor(product);
+    final c = systemColorOverride ?? _systemColor(product);
     return Column(children: [
       Container(
         padding: const EdgeInsets.all(14),
@@ -1396,9 +1766,25 @@ class _NodeRow extends StatelessWidget {
                   style: const TextStyle(color: _mute, fontSize: 11)),
             ]),
           ),
-          GestureDetector(
-            onTap: onRemove,
-            child: const Icon(Icons.close, color: _mute, size: 18),
+          Semantics(
+            button: true,
+            label: 'הסר מוצר',
+            child: Tooltip(
+              message: 'הסר מוצר',
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onRemove,
+                // ≥48dp tap target around the small ✕ (a11y), without
+                // enlarging the visible glyph.
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: Icon(Icons.close, color: _mute, size: 18),
+                  ),
+                ),
+              ),
+            ),
           ),
         ]),
       ),
@@ -1425,7 +1811,7 @@ class _PipeLink extends StatelessWidget {
   final bool broken;
   @override
   Widget build(BuildContext context) {
-    final c = broken ? const Color(0xFFEF4444) : _accent;
+    final c = broken ? BsTokens.danger : _accent;
     return SizedBox(
       height: 30,
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -1541,6 +1927,11 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   // Vertical rise from inlet to outlet (m). Used by the pressure-drop math
   // to account for static head ρgh — every metre of climb costs ≈ 0.1 bar.
   double _verticalRise = 0.0;
+  // Drainage geometry (P3.9): horizontal run + vertical drop feed
+  // checkDrainageSlope — ת"י 1205 wants ≥ 2% fall so waste doesn't pool.
+  // Defaults 3 m run / 0.06 m drop = exactly 2% (the minimum).
+  double _drainRun = 3.0;
+  double _drainDrop = 0.06;
 
   String _zoneDisplayLabel(String key) => _zoneAliases[key] ?? key;
 
@@ -1593,7 +1984,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
           ],
         ),
       ),
-    );
+    ).whenComplete(() => ctrl.dispose());
   }
   double _metersOf(String sku) => _meters[sku] ?? 2.0;
 
@@ -1651,19 +2042,28 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             if (isSwap || isAdd) ...[
               const SizedBox(width: 8),
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => _applySuggestion(s),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    borderRadius: BorderRadius.circular(6),
+                // ≥48dp tap target around the small button (a11y).
+                child: ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(minWidth: 48, minHeight: 48),
+                  child: Center(
+                    widthFactor: 1,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: accentColor,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(isSwap ? 'החלף' : 'הוסף',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800)),
+                    ),
                   ),
-                  child: Text(isSwap ? 'החלף' : 'הוסף',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800)),
                 ),
               ),
             ],
@@ -1695,7 +2095,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
           context, '✅ "${wider.nameHe}" הוחלף — לחץ "צור רשימת קנייה" לבנייה מחדש');
     } else if (s.actionKind == SuggestionKind.add &&
         s.addProductSku != null) {
-      final hits = kLipskeyCatalog.where((p) => p.sku == s.addProductSku);
+      // UNIFIED catalog (incl. hot-water) — a recommended HW-* accessory was
+      // falsely reported "not in the catalog" when resolved against Lipskey only.
+      final hits = chainUniverse.where((p) => p.sku == s.addProductSku);
       if (hits.isEmpty) {
         showToast(context, 'המוצר המומלץ אינו זמין במאגר');
         return;
@@ -1713,12 +2115,26 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     final anchorSkus = widget.anchorSkus;
     final branches = widget.branches;
     final outlets = widget.outlets;
+    // Supply lines get the pressure-drop check (static head); drainage lines get
+    // the ת"י-1205 slope check instead — different physics per system (P3.9).
+    final isSupply = lineIsSupply(plan.items);
     final ok = plan.isComplete;
     final overCapacity = branches > 0 && outlets > 0 && branches > outlets;
-    final checklist = lineComplianceChecklist(
-        plan.items,
-        ref.read(lineMaxTempProvider),
-        ref.read(lineAccessoriesProvider));
+    // s49b seam: authored trade reads config — its checklist IS its authored
+    // CompletionRule violations via the s41 trade: delegation; plumbing =
+    // legacy verbatim (R1-2) — the else call stays positional-only.
+    final s49bCfg = _authoredConfigOf(ref);
+    final checklist = s49bCfg != null
+        ? lineComplianceChecklist(
+            plan.items,
+            ref.read(lineMaxTempProvider),
+            ref.read(lineAccessoriesProvider),
+            trade: s49bCfg.tradeResolution,
+          )
+        : lineComplianceChecklist(
+            plan.items,
+            ref.read(lineMaxTempProvider),
+            ref.read(lineAccessoriesProvider));
     final checkPassed = checklist.where((c) => c.satisfied).length;
     final checkCritical = checklist.where((c) => !c.satisfied && c.severity == CheckSeverity.critical).length;
     return Directionality(
@@ -1772,13 +2188,13 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                               decoration: BoxDecoration(
                                 color: checkCritical == 0
                                     ? _accent.withOpacity(0.18)
-                                    : const Color(0xFFEF4444).withOpacity(0.18),
+                                    : BsTokens.danger.withOpacity(0.18),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 '$checkPassed/${checklist.length} ✓',
                                 style: TextStyle(
-                                  color: checkCritical == 0 ? _ok : const Color(0xFFEF4444),
+                                  color: checkCritical == 0 ? _ok : BsTokens.danger,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w900,
                                 ),
@@ -1788,14 +2204,16 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                               const SizedBox(width: 6),
                               Text('$checkCritical קריטי פתוח',
                                   style: const TextStyle(
-                                      color: Color(0xFFEF4444),
+                                      color: BsTokens.danger,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700)),
                             ],
                           ]),
                         ),
                       if (overCapacity)
-                        Text('⚠️ $branches ענפים על מחלק $outlets-יציאות',
+                        Text(
+                            '⚠️ $branches ענפים על מחלק $outlets-יציאות — '
+                            '${branches - outlets} לא חוברו (חסר במחלק)',
                             style: const TextStyle(
                                 color: _drain,
                                 fontSize: 11,
@@ -1836,7 +2254,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                         for (final c in widget.autoFixes)
                           Padding(
                             padding:
-                                const EdgeInsets.only(top: 2, right: 22),
+                                const EdgeInsetsDirectional.only(top: 2, start: 22),
                             child: Text(c,
                                 style: const TextStyle(
                                     color: _ink, fontSize: 11, height: 1.4)),
@@ -1899,7 +2317,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _accent.withOpacity(0.4)),
                     ),
@@ -2019,8 +2437,10 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     ]),
                   );
                 }),
-                // ── Vertical-rise input (feeds the pressure-drop math) ─
-                Padding(
+                // ── Vertical-rise input — supply lines only (feeds the
+                //    pressure-drop math; drainage uses the slope block below) ─
+                if (isSupply)
+                  Padding(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
                   child: Row(children: [
                     const Icon(Icons.arrow_upward, color: _mute, size: 14),
@@ -2067,12 +2487,24 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                 // can still sit on a hot line. Flag it so they swap to a
                 // heat-resistant material instead of shipping a line that melts.
                 Builder(builder: (_) {
+                  // s49b seam: authored trade reads the spec envelope's
+                  // maxTempC; plumbing = legacy verbatim below (R1-2).
+                  final s49bTempCfg = s49bCfg;
+                  if (s49bTempCfg != null) {
+                    final temp = ref.read(lineMaxTempProvider);
+                    final unfit = plan.items.where((p) {
+                      final maxT = s49bTempCfg.maxTempCOf(p.sku);
+                      return maxT != null && temp > maxT;
+                    }).toList();
+                    if (unfit.isEmpty) return const SizedBox.shrink();
+                    return _authoredTempUnfitBanner(temp, unfit, s49bTempCfg);
+                  }
                   final temp = ref.read(lineMaxTempProvider);
                   final unfit = plan.items
                       .where((p) => !productSuitableForTemp(p, temp))
                       .toList();
                   if (unfit.isEmpty) return const SizedBox.shrink();
-                  const warn = Color(0xFFEF4444);
+                  const warn = BsTokens.danger;
                   return Container(
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
@@ -2122,8 +2554,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     ),
                   );
                 }),
-                // ── Pressure-drop estimate ─────────────────────────────
-                Builder(builder: (_) {
+                // ── Pressure-drop estimate — supply lines only ─────────
+                if (isSupply)
+                  Builder(builder: (_) {
                   final pd = estimatePressureDrop(
                     plan.items,
                     pipeLengthMeters:
@@ -2189,15 +2622,148 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     ),
                   );
                 }),
+                // ── Drainage slope check — drainage lines only (ת"י 1205, P3.9).
+                //    Replaces the supply pressure block: gravity lines have no
+                //    pressure, they need a ≥2% fall so waste doesn't pool. ─────
+                if (!isSupply)
+                  Builder(builder: (_) {
+                    // s49b seam: an authored trade with no flow-physics
+                    // (physics?.minSlopePercent == null — always in v1) hides
+                    // the ת"י-1205 panel; plumbing = legacy verbatim (R1-2 —
+                    // its hand-written 2% constants below are permanent).
+                    if (s49bCfg != null &&
+                        s49bCfg.physics?.minSlopePercent == null) {
+                      return const SizedBox.shrink();
+                    }
+                    final res = checkDrainageSlope(
+                      horizontalRunMeters: _drainRun,
+                      verticalDropMeters: _drainDrop,
+                    );
+                    final slope = res?.slopePercent ?? 0;
+                    final slopeOk = res?.ok ?? false;
+                    final color = slopeOk
+                        ? const Color(0xFF15803D)
+                        : const Color(0xFFF59E0B);
+                    return Container(
+                      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: slopeOk
+                            ? const Color(0xFFE8F5E9)
+                            : const Color(0xFFFFF8E1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: color.withOpacity(0.5)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            Icon(slopeOk
+                                ? Icons.trending_down
+                                : Icons.warning_amber,
+                                color: color, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'שיפוע ניקוז: ${slope.toStringAsFixed(1)}%',
+                                style: TextStyle(
+                                    color: color,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                            const Text('מינ׳ 2% · ת"י 1205',
+                                style: TextStyle(
+                                    color: _mute,
+                                    fontSize: 10,
+                                    fontFamily: 'monospace')),
+                          ]),
+                          const SizedBox(height: 8),
+                          Row(children: [
+                            const Icon(Icons.straighten,
+                                color: _mute, size: 14),
+                            const SizedBox(width: 6),
+                            const Text('אורך אופקי:',
+                                style: TextStyle(color: _mute, fontSize: 11)),
+                            Expanded(
+                              child: Slider(
+                                value: _drainRun.clamp(0.5, 20),
+                                min: 0.5,
+                                max: 20,
+                                divisions: 39,
+                                activeColor: _drain,
+                                onChanged: (v) =>
+                                    setState(() => _drainRun = v),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 52,
+                              child: Text('${_drainRun.toStringAsFixed(1)} מ׳',
+                                  textAlign: TextAlign.end,
+                                  style: const TextStyle(
+                                      color: _ink,
+                                      fontSize: 11,
+                                      fontFamily: 'monospace',
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                          ]),
+                          Row(children: [
+                            const Icon(Icons.height, color: _mute, size: 14),
+                            const SizedBox(width: 6),
+                            const Text('מפל אנכי:',
+                                style: TextStyle(color: _mute, fontSize: 11)),
+                            Expanded(
+                              child: Slider(
+                                value: (_drainDrop * 100).clamp(0, 100),
+                                min: 0,
+                                max: 100,
+                                divisions: 100,
+                                activeColor: _drain,
+                                onChanged: (v) =>
+                                    setState(() => _drainDrop = v / 100),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 52,
+                              child: Text(
+                                  '${(_drainDrop * 100).toStringAsFixed(0)} ס״מ',
+                                  textAlign: TextAlign.end,
+                                  style: const TextStyle(
+                                      color: _ink,
+                                      fontSize: 11,
+                                      fontFamily: 'monospace',
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                          ]),
+                          if (res != null) ...[
+                            const SizedBox(height: 4),
+                            Text(res.message,
+                                style: TextStyle(
+                                    color: slopeOk
+                                        ? const Color(0xFF15803D)
+                                        : const Color(0xFFB45309),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ],
+                      ),
+                    );
+                  }),
                 // ── Installation kit (tools & sealants for this chain) ──
                 Builder(builder: (_) {
+                  // s49b seam: authored trade derives its kit from its
+                  // mustHave AccessoryRules; plumbing = legacy verbatim (R1-2).
+                  final s49bKitCfg = s49bCfg;
+                  if (s49bKitCfg != null) {
+                    return _authoredKitSection(s49bKitCfg);
+                  }
                   final kit = recommendedKitFor(plan.items);
                   if (kit.isEmpty) return const SizedBox.shrink();
                   return Container(
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _mute.withOpacity(0.35)),
                     ),
@@ -2233,7 +2799,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                                       KitKind.sealant =>
                                         _accent.withOpacity(0.18),
                                       KitKind.safety =>
-                                        const Color(0xFFEF4444).withOpacity(0.18),
+                                        BsTokens.danger.withOpacity(0.18),
                                     },
                                     borderRadius: BorderRadius.circular(4),
                                   ),
@@ -2248,7 +2814,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                                         KitKind.tool => _supply,
                                         KitKind.sealant => _accent,
                                         KitKind.safety =>
-                                          const Color(0xFFEF4444),
+                                          BsTokens.danger,
                                       },
                                       fontSize: 9,
                                       fontWeight: FontWeight.w800,
@@ -2280,6 +2846,30 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   );
                 }),
                 ..._buildBomRows(plan, anchorSkus),
+                // #guarantee — "אין נסיעה שנייה": a branded green seal at the buy
+                // moment, shown ONLY when the line is physically complete (no
+                // gaps) AND no critical safety check is open. The signal is the
+                // already-computed `ok`(=plan.isComplete) + `checkCritical`; this
+                // is the positive counterpart to the "חסרים חיבורים" warning below.
+                if (ok && checkCritical == 0)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 12, 18, 6),
+                    child: Row(
+                      children: const [
+                        Text('🛡️', style: TextStyle(fontSize: 16)),
+                        SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'אחריות: הסל משלים את העבודה — אין נסיעה שנייה',
+                            style: TextStyle(
+                                color: _ok,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (plan.gaps.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.fromLTRB(18, 12, 18, 4),
@@ -2319,7 +2909,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                       _severityBadge('קריטי',
                           checklist.where((c) =>
                               !c.satisfied && c.severity == CheckSeverity.critical).length,
-                          const Color(0xFFEF4444)),
+                          BsTokens.danger),
                       const SizedBox(width: 4),
                       _severityBadge('אזהרה',
                           checklist.where((c) =>
@@ -2354,7 +2944,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                                     fontWeight: FontWeight.w800)),
                             SizedBox(height: 4),
                             Text(
-                              'לחץ "📋 שלח לאינסטלטור" כדי להעתיק ולשלוח ב-WhatsApp,\nאו "הוסף לעגלה" להזמנה ישירה.',
+                              'לחץ "📋 שלח לאינסטלטור" כדי להעתיק ולשלוח ב-WhatsApp,\nאו "הוסף לסל" להזמנה ישירה.',
                               style: TextStyle(color: _mute, fontSize: 11, height: 1.4),
                             ),
                           ],
@@ -2416,7 +3006,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                             const Icon(Icons.add_shopping_cart,
                                 color: Colors.white, size: 18),
                             const SizedBox(width: 8),
-                            Text('הוסף ${plan.items.length} לעגלה',
+                            Text('הוסף ${plan.items.length} לסל',
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
@@ -2433,6 +3023,113 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     );
   }
 
+  // ── s49b authored-trade sections — NEW code, reached ONLY when the resolved
+  //    active trade is authored (never under plumbing — R1-2). No legacy line
+  //    above was moved into these; the legacy blocks stay verbatim in build. ──
+
+  /// s49b seam (d): the authored heat-rating guard — products whose
+  /// [ProductConnectorSpec] envelope carries a `maxTempC` below the line temp
+  /// (the plumbing-material advice line is deliberately absent — PEX/copper
+  /// guidance is plumbing-specific).
+  Widget _authoredTempUnfitBanner(
+      int temp, List<LipskeyCatalogProduct> unfit, _ActiveTradeConfig cfg) {
+    const warn = BsTokens.danger;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFDECEC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: warn.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.local_fire_department, color: warn, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'קו חם ($temp°C): ${unfit.length} מוצרים אינם עומדים בחום',
+                style: const TextStyle(
+                    color: warn, fontSize: 13, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          for (final p in unfit.take(6))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Text(
+                '• ${p.nameHe} — עד ${cfg.maxTempCOf(p.sku)?.toStringAsFixed(0) ?? "?"}°C',
+                style: const TextStyle(color: Color(0xFFC62828), fontSize: 11),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// s49b seam (g): the authored kit — the trade's mustHave [AccessoryRule]s
+  /// (emoji · name · why). No rules → nothing renders (matches the legacy
+  /// empty-kit behavior).
+  Widget _authoredKitSection(_ActiveTradeConfig cfg) {
+    final rules = cfg.mustHaveAccessories;
+    if (rules.isEmpty) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _mute.withOpacity(0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.build_circle_outlined, color: _supply, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'אביזרי חובה לקו: ${rules.length} פריטים',
+              style: const TextStyle(
+                  color: _supply, fontSize: 13, fontWeight: FontWeight.w800),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          for (final r in rules)
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(r.emoji, style: const TextStyle(fontSize: 14)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(r.nameHe,
+                            style: const TextStyle(
+                                color: _ink,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600)),
+                        Text(r.whyHe,
+                            style: const TextStyle(
+                                color: _mute, fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   // Adds every BOM line to the cart with its quantity (pipes by ceil(metres)).
   void _addToCart(BuildContext context, WidgetRef ref) {
     final cart = ref.read(smartCartProvider.notifier);
@@ -2444,18 +3141,18 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
         productName: p.nameHe,
         productEmoji: p.typeEmoji,
         brandName: p.categoryHe,
-        brandPrice: 0,
+        brandPrice: estimatePrice([p]).totalILS,
         productQty: qty,
         accessories: const [],
       ));
     }
     Navigator.pop(context);
-    showToast(context, 'נוסף לעגלה: ${widget.plan.items.length} פריטים');
+    showToast(context, 'נוסף לסל: ${widget.plan.items.length} פריטים');
   }
 
   void _copyBom(BuildContext context, InstallationPlan plan) {
     final buf = StringBuffer();
-    buf.writeln('רשימת קנייה — BuildSmart 🔧');
+    buf.writeln('רשימת קנייה — ${AppBrand.name} 🔧');
     buf.writeln('──────────────────────────');
 
     // ── BOM grouped by zone or flat list ──────────────────────────────────
@@ -2532,10 +3229,20 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     }
 
     // ── Compliance summary ────────────────────────────────────────────────
-    final checks = lineComplianceChecklist(
-        plan.items,
-        ref.read(lineMaxTempProvider),
-        ref.read(lineAccessoriesProvider));
+    // s49b seam: authored trade reads config (the s41 trade: delegation);
+    // plumbing = legacy verbatim (R1-2) — the else call stays positional-only.
+    final s49bCfg = _authoredConfigOf(ref);
+    final checks = s49bCfg != null
+        ? lineComplianceChecklist(
+            plan.items,
+            ref.read(lineMaxTempProvider),
+            ref.read(lineAccessoriesProvider),
+            trade: s49bCfg.tradeResolution,
+          )
+        : lineComplianceChecklist(
+            plan.items,
+            ref.read(lineMaxTempProvider),
+            ref.read(lineAccessoriesProvider));
     final missing = checks
         .where((c) => !c.satisfied && c.severity == CheckSeverity.critical)
         .toList();
@@ -2549,7 +3256,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
 
     buf.writeln('');
     buf.writeln('━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    buf.writeln('נוצר ע"י BuildSmart');
+    buf.writeln('נוצר ע"י ${AppBrand.name}');
 
     Clipboard.setData(ClipboardData(text: buf.toString()));
     showToast(context, '📋 הועתק — שתף ב-WhatsApp עם האינסטלטור שלך');
@@ -2659,7 +3366,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     } else {
       switch (ch.severity) {
         case CheckSeverity.critical:
-          iconColor = const Color(0xFFEF4444);
+          iconColor = BsTokens.danger;
           icon = Icons.cancel;
         case CheckSeverity.warning:
           iconColor = _drain;
@@ -2669,8 +3376,12 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
           icon = Icons.info_outline;
       }
     }
-    final displayLabel = _simpleLabel(ch.label);
-    final displayWhy = _simpleWhy(ch.why);
+    // s49b seam: an authored check's text is its CompletionRule.whyHe VERBATIM
+    // — the plumbing jargon-mappers must not rewrite it; plumbing = legacy
+    // verbatim (R1-2).
+    final s49bAuthored = _authoredConfigOf(ref) != null;
+    final displayLabel = s49bAuthored ? ch.label : _simpleLabel(ch.label);
+    final displayWhy = s49bAuthored ? ch.why : _simpleWhy(ch.why);
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -2709,7 +3420,8 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   }
 
   Widget _bomRow(LipskeyCatalogProduct p, int n, bool anchor, int qty) {
-    final c = _systemColor(p);
+    // s49b seam: authored trade reads config; plumbing = legacy verbatim (R1-2).
+    final c = _systemColor(p, _authoredConfigOf(ref));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
       child: Row(children: [
@@ -2775,13 +3487,29 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     );
   }
 
-  Widget _stepBtn(IconData ic, VoidCallback onTap) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 24, height: 24,
-          decoration: BoxDecoration(
-              color: _void1, borderRadius: BorderRadius.circular(8)),
-          child: Icon(ic, color: _ink, size: 15),
+  Widget _stepBtn(IconData ic, VoidCallback onTap) => Semantics(
+        button: true,
+        label: ic == Icons.add ? 'הוסף' : 'הפחת',
+        child: Tooltip(
+          message: ic == Icons.add ? 'הוסף' : 'הפחת',
+          child: GestureDetector(
+            onTap: onTap,
+            // 48dp min tap area; opaque so the full box (not just the 24×24
+            // chip) is tappable. The chip stays the visual via Center.
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Center(
+                child: Container(
+                  width: 24, height: 24,
+                  decoration: BoxDecoration(
+                      color: _void1, borderRadius: BorderRadius.circular(8)),
+                  child: Icon(ic, color: _ink, size: 15),
+                ),
+              ),
+            ),
+          ),
         ),
       );
 }
@@ -2800,8 +3528,29 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
   late _PickerCategory? _cat = widget.initialCat;
 
   List<LipskeyCatalogProduct> _filtered() {
+    // s49b seam: an authored trade's picker serves ITS products — the same
+    // repo read + s35 adapter + sku-sort the s50 catalog path uses (single
+    // source, zero drift); temp-suitability comes from the spec envelope's
+    // maxTempC (null → suitable, the legacy rule); the plumbing category
+    // filter (_cat) is skipped — _kCats is plumbing-shaped and the grid is
+    // bypassed for authored trades. Plumbing = legacy verbatim (R1-2).
+    final s49bCfg = _authoredConfigOf(ref);
+    if (s49bCfg != null) {
+      final q = _q.trim();
+      return ref
+          .read(catalogRepositoryProvider)
+          .allProducts(tradeId: s49bCfg.tradeId)
+          .where((p) {
+        final maxT = s49bCfg.maxTempCOf(p.sku);
+        if (maxT != null && widget.lineTemp > maxT) return false;
+        if (q.isEmpty) return true;
+        return p.nameHe.contains(q) ||
+            p.categoryHe.contains(q) ||
+            p.sku.contains(q);
+      }).take(120).toList();
+    }
     final q = _q.trim();
-    return kCompatCatalog.where((p) {
+    return chainUniverse.where((p) {
       if (!productSuitableForTemp(p, widget.lineTemp)) return false;
       if (_cat != null && !_inCategory(_cat!, p)) return false;
       if (q.isEmpty) return true;
@@ -2813,7 +3562,11 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final showGrid = _q.trim().isEmpty && _cat == null;
+    // s49b seam: an authored trade skips the plumbing category grid (_kCats
+    // is plumbing-shaped) and goes straight to its product list; plumbing =
+    // legacy verbatim (R1-2 — the legacy expression is the && tail).
+    final s49bAuthored = _authoredConfigOf(ref) != null;
+    final showGrid = !s49bAuthored && _q.trim().isEmpty && _cat == null;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -2841,26 +3594,34 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               child: Row(children: [
                 if (_cat != null) ...[
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => setState(() { _cat = null; _q = ''; }),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 9),
-                      margin: const EdgeInsets.only(left: 8),
-                      decoration: BoxDecoration(
-                        color: _panel,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _supply.withOpacity(0.4)),
+                    // ≥48dp tap target around the small chip (a11y).
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 48),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 9),
+                          margin: const EdgeInsetsDirectional.only(end: 8),
+                          decoration: BoxDecoration(
+                            color: _panel,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _supply.withOpacity(0.4)),
+                          ),
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            Text(_cat!.emoji, style: const TextStyle(fontSize: 16)),
+                            const SizedBox(width: 4),
+                            Text(_cat!.label,
+                                style: const TextStyle(
+                                    color: _supply, fontSize: 12,
+                                    fontWeight: FontWeight.w700)),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.close, color: _mute, size: 14),
+                          ]),
+                        ),
                       ),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Text(_cat!.emoji, style: const TextStyle(fontSize: 16)),
-                        const SizedBox(width: 4),
-                        Text(_cat!.label,
-                            style: const TextStyle(
-                                color: _supply, fontSize: 12,
-                                fontWeight: FontWeight.w700)),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.close, color: _mute, size: 14),
-                      ]),
                     ),
                   ),
                 ],
@@ -2902,6 +3663,10 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
 
   // 2×3 grid of category buttons
   Widget _categoryGrid() {
+    // Raw shell: derived company chips (honest-empty before an import) — the
+    // const plumbing [_kCats] renders only on demo/buildsmart (byte-identical
+    // there: _pickerCats() returns the same const list).
+    final cats = _pickerCats();
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       child: Column(
@@ -2922,10 +3687,10 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                 mainAxisSpacing: 10,
                 childAspectRatio: 2.4,
               ),
-              itemCount: _kCats.length,
+              itemCount: cats.length,
               itemBuilder: (_, i) {
-                final cat = _kCats[i];
-                final count = kCompatCatalog
+                final cat = cats[i];
+                final count = chainUniverse
                     .where((p) =>
                         productSuitableForTemp(p, widget.lineTemp) &&
                         _inCategory(cat, p))
@@ -2987,13 +3752,15 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
             style: TextStyle(color: _mute, fontSize: 14)),
       );
     }
+    // s49b seam: authored trade reads config; plumbing = legacy verbatim (R1-2).
+    final s49bCfg = _authoredConfigOf(ref);
     final chain = ref.watch(chainProvider);
     return ListView.builder(
       controller: ctrl,
       itemCount: items.length,
       itemBuilder: (_, i) {
         final p = items[i];
-        final c = _systemColor(p);
+        final c = _systemColor(p, s49bCfg);
         final inChain = chain.any((cp) => cp.sku == p.sku);
         return InkWell(
           onTap: () {
@@ -3007,7 +3774,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: p.imageAsset != null
-                    ? Image.asset(
+                    ? productImage(
                         p.imageAsset!,
                         width: 56, height: 56,
                         fit: BoxFit.cover,
@@ -3126,7 +3893,7 @@ class _TutorialOverlay extends StatelessWidget {
               _step('2️⃣', 'הוסף 2 נקודות לפחות',
                   'כניסה + יציאה — המערכת ממלאת חיבורים אוטומטית'),
               _step('3️⃣', 'קבל רשימת קנייה',
-                  'שלח לאינסטלטור ב-WhatsApp, או הוסף ישירות לעגלה'),
+                  'שלח לאינסטלטור ב-WhatsApp, או הוסף ישירות לסל'),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
@@ -3146,9 +3913,16 @@ class _TutorialOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: onDismiss,
-                child: const Text('דלג',
-                    style: TextStyle(color: _mute, fontSize: 12)),
+                // ≥48dp tap target around the small text (a11y).
+                child: const SizedBox(
+                  height: 48,
+                  child: Center(
+                    child: Text('דלג',
+                        style: TextStyle(color: _mute, fontSize: 12)),
+                  ),
+                ),
               ),
             ],
           ),

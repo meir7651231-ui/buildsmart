@@ -1,0 +1,47 @@
+{
+  "name": "_ProposalCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "tasks_screen.proposal_reject",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "❌ דחה",
+        "registryId": "tasks_screen.proposal_reject",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "id",
+      "name",
+      "detail",
+      "workerLabel",
+      "days",
+      "onApprove",
+      "onReject"
+    ],
+    "untangle": []
+  }
+}

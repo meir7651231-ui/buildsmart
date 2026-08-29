@@ -1,0 +1,142 @@
+{
+  "module": "grid_adjacency",
+  "source": "../../../app_flutter/lib/features/fittings/engine/grid_adjacency.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "snapToGrid",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Vec3 dir, {double tol = 1e-6}) -> GridStep?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "gridPortsOf",
+          "portsFace"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final s in GridStep.values"
+          },
+          {
+            "kind": "branch",
+            "detail": "if (dir.x - s.dx).abs() < tol && (dir.y - s.dy).abs() < tol && (dir.z - s.dz).abs() < tol → return s"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "abs"
+      ],
+      "contract": {
+        "input": "(Vec3 dir, {double tol = 1e-6})",
+        "output": "GridStep?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "portsFace",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Vec3 a, Vec3 b) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "snapToGrid",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "sa = snapToGrid(a)"
+          },
+          {
+            "kind": "compute",
+            "detail": "sb = snapToGrid(b)"
+          },
+          {
+            "kind": "return",
+            "detail": "sa != null && sb != null && sa.opposite == sb"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Vec3 a, Vec3 b)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "gridPortsOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RunElement el) -> List<GridStep>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "snapToGrid",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final p in directedPortsOf(el)) snapToGrid(p.dir)].whereType<GridStep>().toList()"
+          }
+        ]
+      },
+      "floor": [
+        "directedPortsOf",
+        "toList",
+        "whereType"
+      ],
+      "contract": {
+        "input": "(RunElement el)",
+        "output": "List<GridStep>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

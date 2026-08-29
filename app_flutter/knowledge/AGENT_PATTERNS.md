@@ -90,3 +90,25 @@ Overloaded response, fall back to serial, then to supervisor-direct
 - [ ] After the batch returns, run `flutter analyze` (0 errors) + full suite,
       and **confirm the test count rose** (catches the silent `*_tests.dart`
       skip).
+
+## Hook-bug reporting loop (תהליך רשמי — לקח #64/#68)
+
+When any agent hits a **pre-commit hook false-positive or bug**:
+
+1. **Agent reports** — in the execution report, section "hook bugs found":
+   - Gate number + exact failure message
+   - Why it's a false-positive (not a real violation)
+   - Suggested fix (one sentence)
+
+2. **פרוטוקוליסט acts** — within the same session:
+   - Creates `.allow_protocol_edit` with reason
+   - Fixes the gate (or exempts it), syncs `.git/hooks/pre-commit`
+   - Documents as lesson in `CARRY_FORWARD.md`
+   - Commits + pushes
+
+3. **SLA:** hook bug reported → fixed → in-branch within 24 hours.
+   Do not work around a false-positive with `--no-verify` or `BUILDSMART_EMERGENCY_DISABLE`.
+   If blocked, add to `knowledge/stuck_log.md` and escalate to user.
+
+**Precedents:** Gate 102/42 exemption (לקח #64, בנצי 2026-06-01) ·
+fail-fast reorder (לקח #68, בנצי 2026-06-02).

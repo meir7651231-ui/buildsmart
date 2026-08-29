@@ -1,0 +1,217 @@
+{
+  "//": [
+    "BuildSmart — Firestore composite indexes (launch Phase G · G1).",
+    "Project `buildsmart-b0b78`. Deploy:",
+    "  firebase deploy --only firestore:indexes --project buildsmart-b0b78",
+    "(firebase.json now points firestore.indexes -> this file).",
+    "",
+    "WHY composite indexes: a query that filters on one field AND orders by",
+    "another (or filters on two) needs a composite index — Firestore's automatic",
+    "single-field indexes do not cover those. See firestore.rules header 'RULES",
+    "ARE NOT FILTERS': a non-manager must SCOPE its listen, and those scoped",
+    "queries are exactly the ones indexed here.",
+    "",
+    "Each index below, in order, and its uid-migration state (verified vs repo):",
+    "  1. orders (contractorUid ASC, ts DESC) — LANDED (uid-A3, commit 24b5bc2).",
+    "     The contractor scoped listen where('contractorUid'==uid).orderBy('ts'",
+    "     desc) — newest-first own orders. ACTIVE NOW (contractorUid is written).",
+    "  2. orders (storeUid ASC, ts DESC) — ACTIVE. storeUid IS written (A4 claim;",
+    "     orders_firebase toDoc line 86). Serves the store scoped listen's OWN leg",
+    "     where('storeUid'==uid).orderBy('ts' desc). MUST be storeUid (not storeId)",
+    "     to match the written field + _ordersScopeFor's store branch — a storeId",
+    "     index would never serve the storeUid query (failed-precondition).",
+    "  3. orders (courierUid ASC, ts DESC) — ACTIVE (same as storeUid; toDoc 87).",
+    "  4. customers (ownerId ASC, used DESC) — FORWARD-READY. ownerId not yet",
+    "     written; keeps the spend-desc order mgrCustomerList uses for the owner",
+    "     scoped list once ownerId lands.",
+    "  5. chatThreads (participantUids ARRAY_CONTAINS, ts DESC) — ACTIVE (A14). The",
+    "     field is `participantUids` (REAL uids — the auth-truth the rules scope on",
+    "     and the now-scoped chat listen filters by), NOT `participants` (display",
+    "     ROLE NAMES). A14 stamps participantUids ⊇ [senderUid] on every touched",
+    "     thread, so this index serves the uid-scoped listen: where('participantUids',",
+    "     arrayContains: uid).orderBy('ts' desc) (S4.1). MUST be participantUids (not",
+    "     participants) to match the written field + the query — a `participants`",
+    "     index would never serve the participantUids query (failed-precondition).",
+    "  6. chatMessages (threadId ASC, ts ASC) — ACTIVE NOW. threadId IS written",
+    "     today; the per-thread stream where('threadId'==id).orderBy('ts') (S4.2)",
+    "     renders the conversation chronologically (ascending).",
+    "  7. roleRequests (requestedRole ASC, status ASC) — #6. Serves the approver",
+    "     list: where('requestedRole'==r).where('status'=='pending') — a contractor",
+    "     sees worker requests, a store sees courier, a manager sees store+",
+    "     contractor (an in-list query over the same index). Approve/deny is the",
+    "     reviewRoleRequest callable; the client sorts the small pending set in-mem.",
+    "",
+    "  ── Pillar 5 (Scale/Data/Backend · knowledge/studio-plan/05-scale-data-backend.md",
+    "  §1.5 · Step 52) — 8 NEW composite indexes below (entries 8-15). ALL forward-",
+    "  ready / greenfield: the four collection families (studioConfig*, catalogProducts*,",
+    "  analyticsEvents/presence/analyticsDaily) are written by NO client yet — they stay",
+    "  dormant behind default-OFF flags (USE_FIREBASE_BACKEND / STUDIO_LIVE /",
+    "  CATALOG_SERVER_SEARCH / CATALOG_BASE_URL, backend.dart). Flags OFF => build is",
+    "  byte-identical; these indexes cost nothing until the Phase-1 seed (Step 61).",
+    "  8. catalogProducts (tradeId ASC, nameHe ASC) — trade-scoped catalog list, paged:",
+    "     where('tradeId'==t).orderBy('nameHe').startAfterDocument(cursor).limit(40)",
+    "     (browse-by-trade; §1.6 cursor pagination — NEVER offset, which bills skipped",
+    "     docs).",
+    "  9. catalogProducts (categoryHe ASC, nameHe ASC) — category browse, paged:",
+    "     where('categoryHe'==c).orderBy('nameHe'). Same cursor pattern as #8.",
+    " 10. catalogProducts (active ASC, updatedAt DESC) — incremental delta-sync (§7) +",
+    "     owner 'recently edited': where('active'==true).orderBy('updatedAt' desc).",
+    "     updatedAt is an ISO-8601 STRING (sorts lexicographically == chrono, like ts).",
+    "     Step-52 addition-a.",
+    " 11. catalogProducts (nameTokens ARRAY_CONTAINS, nameHe ASC) — at-scale token",
+    "     search (§2): where('nameTokens', arrayContains: rarestToken).orderBy('nameHe')",
+    "     .limit(40), then fuzzySearchProducts re-ranks the small candidate page client-",
+    "     side. Shape MIRRORS chatThreads #5 (arrayConfig CONTAINS + a trailing order",
+    "     field) — MUST be nameTokens+nameHe to serve the query, else failed-precondition.",
+    "     nameTokens are derived server-side from nameHe ONLY (R1-7 — parity with the",
+    "     live fuzzy_search.dart, which matches nameHe only; token freq via",
+    "     catalogTokenFreq/{token} picks the rarest token).",
+    " 12. analyticsEvents (day ASC, name ASC) — owner daily drill-down:",
+    "     where('day'=='2026-06-23').orderBy('name'). Append-only, owner-read-only",
+    "     (rules §5); doc-id is auto so writes scatter (no date-partition hotspot).",
+    " 13. analyticsEvents (uid ASC, at DESC) — per-user support trail:",
+    "     where('uid'==u).orderBy('at' desc). at is an ISO-8601 STRING.",
+    " 14. presence (online ASC, lastSeen DESC) — 'who is online now':",
+    "     where('online'==true).orderBy('lastSeen' desc). Read SERVER-SIDE by the",
+    "     presenceSummary rollup fn (R1-3 — the owner reads one rolled-up",
+    "     presenceSummary/current doc, NOT a live listener over every presence doc) and",
+    "     by the owner's explicit paged drill-down. One self-owned doc/user; TTL sweep",
+    "     flips stale online->false (§3.4).",
+    " 15. customers (searchTokens ARRAY_CONTAINS, used DESC) — OPTIONAL customer search",
+    "     at scale (§1.4): where('searchTokens', arrayContains: tok).orderBy('used'",
+    "     desc). searchTokens not written yet (forward-ready; same array shape as",
+    "     #11/#5).",
+    "  studioConfig* need NO composite index — fixed doc-id get/listen only",
+    "  (studioConfig/published + studioConfig/draft, the ~200B publish pointer; the",
+    "  tree is a sharded immutable blob read by version, never queried — §1.1, §1.5).",
+    "  Step-52 addition-b.",
+    "",
+    "NOTE: `ts` is written as an ISO-8601 STRING (orders_firebase toDoc:",
+    "createdAt.toIso8601String()); ISO-8601 sorts lexicographically == chrono, so",
+    "a string-field DESC/ASC index orders correctly. fieldOverrides is left empty",
+    "— every collection keeps its automatic single-field indexes."
+  ],
+  "indexes": [
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contractorUid", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "storeUid", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "courierUid", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "customers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "used", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "chatThreads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "participantUids", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "chatMessages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "threadId", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "roleRequests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "requestedRole", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalogProducts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "tradeId", "order": "ASCENDING" },
+        { "fieldPath": "nameHe", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalogProducts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "categoryHe", "order": "ASCENDING" },
+        { "fieldPath": "nameHe", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalogProducts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalogProducts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "nameTokens", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "nameHe", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "analyticsEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "day", "order": "ASCENDING" },
+        { "fieldPath": "name", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "analyticsEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "uid", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "presence",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "online", "order": "ASCENDING" },
+        { "fieldPath": "lastSeen", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "customers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "searchTokens", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "used", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

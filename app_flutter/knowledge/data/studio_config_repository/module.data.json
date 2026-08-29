@@ -1,0 +1,89 @@
+{
+  "module": "studio_config_repository",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/studio_config_repository.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "StudioConfigPointer",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "channel",
+            "type": "String",
+            "required": false,
+            "default": "kStudioConfigChannel"
+          },
+          {
+            "name": "version",
+            "type": "int",
+            "required": false,
+            "default": "0"
+          },
+          {
+            "name": "schema",
+            "type": "int",
+            "required": false,
+            "default": "kSchemaVersion"
+          },
+          {
+            "name": "ref",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "checksum",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          },
+          {
+            "name": "tree",
+            "type": "ConfigLayer",
+            "required": false,
+            "default": "ConfigLayer.empty"
+          },
+          {
+            "name": "isBundled",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "tree",
+            "ref": "ConfigLayer",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {
+          "channel": "kStudioConfigChannel",
+          "version": "0",
+          "schema": "kSchemaVersion",
+          "ref": "''",
+          "checksum": "''",
+          "tree": "ConfigLayer.empty"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

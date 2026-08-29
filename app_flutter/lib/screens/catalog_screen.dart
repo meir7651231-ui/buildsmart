@@ -1,25 +1,75 @@
 import 'package:flutter/services.dart';
+import 'package:buildsmart/data/product_images.dart';
+import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 
+import 'package:buildsmart/atoms/atom_flag.dart';
+import 'package:buildsmart/atoms/atom_home_screen.dart';
 import 'package:buildsmart/data/catalog.dart';
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive, lipskeyScanPool, resolvedCatalogProducts;
+import 'package:buildsmart/data/company_categories.dart'
+    show companyCategorySections, companyCategorySummaries;
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/fuzzy_search.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart'
+    show catalogRepositoryProvider;
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
 import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
+import 'package:buildsmart/data/task_skus_local.dart' show productBySku;
 import 'package:buildsmart/data/variant_families.dart';
+// OWNER-REVIEW · kWordFinder seam — flag-gated in-app entry to WordFinderHome.
+// Additive only: when kWordFinderFlag is OFF the section pill never renders and
+// the _CatalogBody routing branch is unreachable, so catalog behaviour is
+// byte-identical for normal users.
+import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
+import 'package:buildsmart/features/ring_dive/catalog_wheel_screen.dart';
+import 'package:buildsmart/features/ring_dive/plain_dive_screen.dart';
+import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
+import 'package:buildsmart/features/ring_dive/ring_dive_screen.dart';
+import 'package:buildsmart/features/word_finder/word_finder_home.dart';
+// GLOBAL SEARCH seam — the dive window ([_DiveResultsView]) becomes the ONE
+// unified search surface: with kGlobalSearch ON it also lists the live entity
+// domains (orders/tasks/customers/chats/notifications) via the global index.
+// Flag OFF (const) ⇒ the whole branch tree-shakes ⇒ the window is byte-identical.
+import 'package:buildsmart/features/global_search/global_search.dart'
+    show SearchResult, SearchResultKind, kGlobalSearch;
+import 'package:buildsmart/features/global_search/global_search_sources.dart'
+    show buildGlobalSearchIndex;
+import 'package:buildsmart/features/global_search/hebrew_morph.dart'
+    show hebrewSearchVariants;
+import 'package:buildsmart/features/global_search/plumber_slang.dart'
+    show slangVariants;
+import 'package:buildsmart/features/global_search/prediction_ranking.dart'
+    show
+        nameAffinity,
+        productProminence,
+        matesBoost,
+        contextCompatibleSkus,
+        jobBoost;
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
-import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/logic/system_division.dart';
+import 'package:buildsmart/screens/adapter_explain_screen.dart'
+    show AdapterExplainScreen;
+import 'package:buildsmart/screens/company_catalog_import_sheet.dart'
+    show showCompanyCatalogImportSheet;
+import 'package:buildsmart/screens/quote_polish_screen.dart'
+    show QuotePolishScreen;
+import 'package:buildsmart/screens/smart_home_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
 import 'package:buildsmart/screens/finder_screen.dart';
-import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/brand_history.dart';
@@ -34,33 +84,36 @@ import 'package:buildsmart/state/display_temp.dart';
 import 'package:buildsmart/state/cart_safety.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
+import 'package:buildsmart/state/intel/intel_bus.dart';
+import 'package:buildsmart/state/intel/intel_events.dart';
+import 'package:buildsmart/state/keyboard_job_context.dart';
+import 'package:buildsmart/state/org_gates.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
 import 'package:buildsmart/state/saved_configs.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/stage_progress.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_field.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart' show CfgText;
+import 'package:buildsmart/widgets/studio/cfg_visible.dart' show CfgVisible;
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Opens the Install Studio as an immersive full-screen route (above the shell).
-void _openStudio(BuildContext context) {
-  Navigator.of(context, rootNavigator: true).push(
-    MaterialPageRoute(builder: (_) => const InstallStudioScreen()),
-  );
-}
-
-/// Active section label — 'הכל' is always first and fixed.
-/// Default landing is the בית (finder home) — the least-technical path to a
-/// product (group → sub → add, 2–3 taps), so the app opens straight on it.
+/// Active section label — 'בית' is always first and fixed (the smart home).
+/// Default landing is 'בית' — the new smart-home tiles (#32). The legacy 'הכל'
+/// overview was deleted; the finder is reachable via the 'מאתר' chip.
 final catalogSectionProvider = StateProvider<String>((_) => 'בית');
 
-/// Ordered list of user section labels (הכל is NOT stored here).
+/// Ordered list of user section labels ('בית' is the fixed first pill, NOT here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['בית', 'תכנון חיבור', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
+  (_) => ['מאתר', 'תכנון חיבור', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -71,9 +124,6 @@ final catalogListItemsProvider =
 // hiddenCatalogSectionsProvider (persisted) lives in
 // state/hidden_catalog_sections.dart — sections the user hid stay in the list
 // but are filtered out of the chip row, restorable from "ניהול רשימות".
-
-/// True while the search panel is open (search bar focused / has input).
-final searchPanelOpenProvider = StateProvider<bool>((_) => false);
 
 /// Current search query text.
 final searchQueryProvider = StateProvider<String>((_) => '');
@@ -101,6 +151,36 @@ const Map<String, List<String>> kSearchSynonyms = {
 String _normForSearch(String s) =>
     s.toLowerCase().replaceAll('״', '"').replaceAll('׳', "'");
 
+/// Whitespace splitter — hoisted to a top-level `final` so it is compiled ONCE,
+/// not re-compiled per product per keystroke (it ran inside the O(catalog) match
+/// + relevance loops). Pure perf; identical behaviour.
+final RegExp _wsSplit = RegExp(r'\s+');
+
+/// The seven one-letter Hebrew clitic prefixes (the מש״ה־וכל״ב set) that attach
+/// to the front of a word — הברז, באמבטיה, לדוד. A query token may sit one of
+/// these past a word start, so "דוד" still finds "הדוד".
+const String _kHebrewPrefixes = 'משהוכלב';
+
+/// Word-boundary-aware token match — the replacement for a raw `hay.contains`.
+/// [token] hits [hay] when it is the prefix of some whitespace-delimited word in
+/// [hay], or of that word past a single Hebrew clitic prefix. This keeps the
+/// prefix/plural hits a forgiving search needs ("ברז"→"ברזים", "דוד"→"הדוד")
+/// while dropping the mid-word substring false-positives a plain `contains`
+/// produced — so "דוד" no longer drags in "בידוד". Numeric/size tokens (1/2")
+/// keep working: they are whole space-delimited words, matched by the prefix arm.
+bool _tokenHitHe(String hay, String token) {
+  if (token.isEmpty) return false;
+  for (final w in hay.split(_wsSplit)) {
+    if (w.startsWith(token)) return true;
+    if (w.length > token.length &&
+        _kHebrewPrefixes.contains(w[0]) &&
+        w.substring(1).startsWith(token)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /// Forgiving product match for the search bar: a non-technical user types plain
 /// words ("ברז מטבח", "ניקוז", "שירותים") and the app does the finding — without
 /// them knowing the catalogue's term. Matches across name + category + SKU +
@@ -111,15 +191,26 @@ bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
     {bool requireAll = true}) {
   final q = _normForSearch(rawQuery.trim());
   if (q.isEmpty) return false;
-  final hay =
-      _normForSearch('${p.nameHe} ${p.categoryHe} ${p.sku} ${p.color ?? ''}');
-  if (hay.contains(q)) return true; // fast path: exact phrase or SKU
-  final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+  // SKU is matched separately and ONLY for queries long enough to be a real
+  // SKU fragment (≥5 chars — catalogue SKUs are 5–10 digits). Short numeric
+  // size queries like "20" / "200" / "3000" must never substring-match an
+  // unrelated SKU (e.g. "200" inside SKU 120011) — that buried real size hits
+  // under SKU-coincidence noise. Word queries don't touch the SKU at all.
+  if (q.length >= 5 && _normForSearch(p.sku).contains(q)) return true;
+  // BILINGUAL ([kGlobalSearch] const-false ⇒ the English tail folds out ⇒ the
+  // haystack string is byte-identical). Every product carries nameEn/categoryEn
+  // but the search ignored them; folding them in lets an English query ("elbow",
+  // "ball valve", "tee") find the Hebrew product it names.
+  final hay = _normForSearch(kGlobalSearch
+      ? '${p.nameHe} ${p.categoryHe} ${p.color ?? ''} ${p.nameEn} ${p.categoryEn}'
+      : '${p.nameHe} ${p.categoryHe} ${p.color ?? ''}');
+  final tokens = q.split(_wsSplit).where((t) => t.isNotEmpty).toList();
   if (tokens.isEmpty) return false;
   bool hit(String t) {
-    if (hay.contains(t)) return true;
+    if (_tokenHitHe(hay, t)) return true;
     final alts = kSearchSynonyms[t];
-    return alts != null && alts.any((a) => hay.contains(_normForSearch(a)));
+    return alts != null &&
+        alts.any((a) => _tokenHitHe(hay, _normForSearch(a)));
   }
 
   return requireAll ? tokens.every(hit) : tokens.any(hit);
@@ -135,15 +226,28 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   final name = _normForSearch(p.nameHe);
   final cat = _normForSearch(p.categoryHe);
   final color = _normForSearch(p.color ?? '');
+  // BILINGUAL scoring ([kGlobalSearch] const-false ⇒ '' ⇒ every English arm below
+  // folds out, byte-identical). An English hit scores just under its Hebrew twin,
+  // so a real Hebrew match still leads.
+  final nameEn = kGlobalSearch ? _normForSearch(p.nameEn) : '';
+  final catEn = kGlobalSearch ? _normForSearch(p.categoryEn) : '';
   var score = 0;
-  if (name.contains(q)) score += 100; // whole query in the name
-  for (final t in q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty)) {
+  if (name.contains(q)) {
+    score += 100; // whole query in the name
+  } else if (kGlobalSearch && nameEn.contains(q)) {
+    score += 90; // whole query in the English name
+  }
+  for (final t in q.split(_wsSplit).where((t) => t.isNotEmpty)) {
     if (name.contains(t)) {
       score += 20;
     } else if (cat.contains(t)) {
       score += 8;
     } else if (color.contains(t)) {
       score += 6;
+    } else if (kGlobalSearch && nameEn.contains(t)) {
+      score += 18;
+    } else if (kGlobalSearch && catEn.contains(t)) {
+      score += 7;
     } else {
       final alts = kSearchSynonyms[t];
       if (alts != null) {
@@ -158,12 +262,47 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   return score;
 }
 
-/// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
-final searchScopeProvider = StateProvider<String>((_) => 'הכל');
+/// As-you-type word completion (Benzi #6): completes the word currently being
+/// typed from the vocabulary of words that appear in catalog **product names**
+/// (system-scoped), most-frequent first, capped at [limit]. Returns the whole
+/// query with its last word completed (the already-typed words are kept), so
+/// tapping a chip fills the search box with a real product term. Pure → tested.
+List<String> searchSuggestions(String query,
+    {WaterSystem? system, int limit = 6}) {
+  // The word being typed = the last whitespace-delimited token; keep the rest.
+  final lastSpace = query.lastIndexOf(RegExp(r'\s'));
+  final committed = lastSpace < 0 ? '' : query.substring(0, lastSpace + 1);
+  final frag = query.substring(lastSpace + 1);
+  final fragN = _normForSearch(frag);
+  if (fragN.length < 2) return const [];
+  // Frequency of product-name words the fragment is a prefix of.
+  // Company build — the vocabulary is the company's; else the const catalog.
+  final freq = <String, int>{}; // original word → count
+  for (final p in filterBySystem(lipskeyScanPool, system)) {
+    for (final w in p.nameHe.split(RegExp(r'\s+'))) {
+      final wN = _normForSearch(w);
+      if (wN.length < 2 || wN == fragN || !wN.startsWith(fragN)) continue;
+      freq[w] = (freq[w] ?? 0) + 1;
+    }
+  }
+  // Most-frequent first, then א-ת; de-dupe by normalized form.
+  final words = freq.keys.toList()
+    ..sort((a, b) {
+      final c = freq[b]!.compareTo(freq[a]!);
+      return c != 0 ? c : a.compareTo(b);
+    });
+  final seen = <String>{};
+  final out = <String>[];
+  for (final w in words) {
+    if (!seen.add(_normForSearch(w))) continue;
+    out.add('$committed$w');
+    if (out.length >= limit) break;
+  }
+  return out;
+}
 
-/// When true, the search-panel results show only products that have an image
-/// (the ⚙️ פילטרים tool · "עם תמונה").
-final searchImageOnlyProvider = StateProvider<bool>((_) => false);
+// catalogSystemFilterProvider lives in logic/system_division.dart (shared with
+// the finder so neither screen back-imports the other).
 
 // recentSearchesProvider lives in state/recent_searches.dart (persisted).
 
@@ -181,10 +320,13 @@ void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
   final key = line.productKey;
   if (key.startsWith('lip:')) {
     final sku = key.substring(4);
-    final i = kLipskeyCatalog.indexWhere((p) => p.sku == sku);
+    // Unified catalog: a cart line keyed 'lip:<sku>' may be a Huliot/PPR product
+    // (they share the lip: prefix), so resolve + sibling-list over resolvedCatalogProducts.
+    // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+    final i = resolvedCatalogProducts.indexWhere((p) => p.sku == sku);
     if (i >= 0) {
-      final product = kLipskeyCatalog[i];
-      final siblings = kLipskeyCatalog
+      final product = resolvedCatalogProducts[i];
+      final siblings = resolvedCatalogProducts
           .where((p) => p.categoryHe == product.categoryHe)
           .toList();
       showLipskeyProductSheet(context, product, siblings);
@@ -204,9 +346,10 @@ void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
 ({String name, String attrs}) cartLineDisplay(SmartCartLine line) {
   if (line.productKey.startsWith('lip:')) {
     final sku = line.productKey.substring(4);
-    final i = kLipskeyCatalog.indexWhere((p) => p.sku == sku);
+    // Unified: cart-line display must resolve Huliot/PPR 'lip:'-keyed lines too.
+    final i = resolvedCatalogProducts.indexWhere((p) => p.sku == sku);
     if (i >= 0) {
-      final p = kLipskeyCatalog[i];
+      final p = resolvedCatalogProducts[i];
       final type = p.productType;
       String name;
       if (type != null) {
@@ -247,18 +390,116 @@ final catalogTreeQueryProvider = StateProvider<String>((_) => '');
 /// Selected facet labels (in order) while drilling inside a faceted leaf.
 final catalogFacetProvider = StateProvider<List<String>>((_) => const []);
 
-/// Sort order for the products listed beneath the drill rows.
-enum ProductSort { byOrder, nameAZ, nameZA, sku }
+// [ProductSort], [catalogProductSortLabel] and [catalogProductSortProvider]
+// now live in state/catalog_settings.dart (the live sort is seeded from the
+// persisted מיון ברירת מחדל user default).
 
-String _productSortLabel(ProductSort s) => switch (s) {
-      ProductSort.byOrder => 'ברירת מחדל',
-      ProductSort.nameAZ => 'שם א-ת',
-      ProductSort.nameZA => 'שם ת-א',
-      ProductSort.sku => 'מק"ט',
-    };
+/// The keyboard's live DIVE query — set by the floating card-keyboard on every
+/// keystroke (catalog tab). Drives [diveResultsProvider]; the catalog body then
+/// shows those products NATIVELY — the app DIVES, with NO search panel/chrome.
+final keyboardDiveQueryProvider = StateProvider<String>((_) => '');
 
-final catalogProductSortProvider =
-    StateProvider<ProductSort>((_) => ProductSort.byOrder);
+/// The products the live DIVE shows: the matcher proven most reliable in the
+/// engine probe ([catalogProductMatchesQuery] — the SAME one the search uses),
+/// driven by the keyboard's query. AND-tokens → OR → fuzzy; system-filtered +
+/// sorted; capped at 40. Empty until the query reaches 2 chars.
+final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
+  final query = ref.watch(keyboardDiveQueryProvider).trim();
+  if (query.length < 2) return const [];
+  final sort = ref.watch(catalogProductSortProvider);
+  final systemFilter = ref.watch(catalogSystemFilterProvider);
+  var matched = resolvedCatalogProducts
+      .where((p) => catalogProductMatchesQuery(p, query))
+      .toList();
+  // Query RESCUE ([kGlobalSearch] const-false-FIRST ⇒ the whole block folds out
+  // when off, byte-identical). Fires ONLY when the literal query found nothing, so
+  // it can never bury or reorder a working search. Two rescues, UNIONED so every
+  // real synonym surfaces together:
+  //   • Hebrew morphology — a plural query ("ברזים") → its singular ("ברז").
+  //   • Plumber slang — a trade / loan word ("אלבו", "valve") → the catalog's real
+  //     word(s) ("ברך"/"זווית", "ברז"). Verified against the catalog (אין המצאות).
+  if (kGlobalSearch && matched.isEmpty) {
+    final variants = <String>[
+      ...hebrewSearchVariants(query),
+      ...slangVariants(query),
+    ];
+    if (variants.isNotEmpty) {
+      final seen = <String>{};
+      final union = <LipskeyCatalogProduct>[];
+      for (final p in resolvedCatalogProducts) {
+        for (final v in variants) {
+          if (catalogProductMatchesQuery(p, v)) {
+            if (seen.add(p.sku)) union.add(p);
+            break;
+          }
+        }
+      }
+      matched = union;
+    }
+  }
+  if (matched.isEmpty) {
+    matched = resolvedCatalogProducts
+        .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
+        .toList();
+  }
+  if (matched.isEmpty) matched = fuzzySearchProducts(query, limit: 40);
+  final filtered = filterBySystem(matched, systemFilter);
+  final ordered = sort == ProductSort.byOrder
+      ? (kGlobalSearch
+          // PREDICTION ([kGlobalSearch], const ⇒ folds out when off): keep
+          // [searchRelevance] PRIMARY, but break its ties by prediction signal —
+          // [nameAffinity] (a product whose name IS/starts-with the query beats a
+          // variant that merely embeds it — the baseline's biggest leak),
+          // [productProminence] (showcased / verified / curated), and — the signal
+          // ORTHOGONAL to the letters — [matesBoost]: a candidate that physically
+          // CONNECTS to what's already staged on the line (the smart cart + the
+          // freshest recently-viewed). Context-seeded harness lift: 39%→66% of the
+          // FITTING product reaching top-4. Off ⇒ the plain relevance sort below is
+          // byte-identical (this whole branch, [matesBoost] + the context read
+          // included, tree-shakes out).
+          ? (() {
+              final ctx = <LipskeyCatalogProduct>[];
+              for (final line in ref.watch(smartCartProvider)) {
+                final k = line.productKey;
+                final p =
+                    productBySku(k.startsWith('lip:') ? k.substring(4) : k);
+                if (p != null) ctx.add(p);
+              }
+              for (final sku in ref.watch(recentlyViewedProvider).take(5)) {
+                final p = productBySku(sku);
+                if (p != null) ctx.add(p);
+              }
+              // JOB (keystroke-zero): the OPEN job's own kit steers even the first
+              // pick on an empty cart — its SKUs win a [jobBoost], and they also
+              // enter the mate-context so what CONNECTS to them is boosted too.
+              final jobSkus = <String>{};
+              for (final sku in ref.watch(keyboardJobSkusProvider)) {
+                final p = productBySku(sku);
+                if (p != null) {
+                  ctx.add(p);
+                  jobSkus.add(p.sku);
+                }
+              }
+              final mates = contextCompatibleSkus(ctx);
+              return [...filtered]..sort((a, b) {
+                final byRel = searchRelevance(b, query)
+                    .compareTo(searchRelevance(a, query));
+                if (byRel != 0) return byRel;
+                return (nameAffinity(b, query) +
+                        productProminence(b) +
+                        matesBoost(b, mates) +
+                        jobBoost(b, jobSkus))
+                    .compareTo(nameAffinity(a, query) +
+                        productProminence(a) +
+                        matesBoost(a, mates) +
+                        jobBoost(a, jobSkus));
+              });
+            })()
+          : ([...filtered]..sort((a, b) =>
+              searchRelevance(b, query).compareTo(searchRelevance(a, query)))))
+      : sortCatalogProducts(filtered, sort);
+  return ordered.take(40).toList();
+});
 
 /// Pure: keep only products that have an image when [imageOnly] is set.
 List<LipskeyCatalogProduct> filterByImage(
@@ -267,7 +508,18 @@ List<LipskeyCatalogProduct> filterByImage(
   return list.where((p) => p.imageAsset != null).toList();
 }
 
-List<LipskeyCatalogProduct> _sortProducts(
+// productDivisionSystems · filterBySystem · nodeHasSystem moved to
+// logic/system_division.dart (shared with the finder; see the import above).
+
+/// Synthetic root whose children are the top catalog categories — a live
+/// department opens this so its system-filtered category tree shows.
+const CatalogNode kDepartmentTreeRoot = CatalogNode(
+    id: 'dept-root', title: 'מחלקות', emoji: '🏬', children: kCatalogTree);
+
+/// Apply a [ProductSort] to a product list (pure — returns a new list, leaves
+/// the source order for [ProductSort.byOrder]). This is the single ordering the
+/// catalog list + the persisted מיון ברירת מחדל default both flow through.
+List<LipskeyCatalogProduct> sortCatalogProducts(
     List<LipskeyCatalogProduct> list, ProductSort s) {
   if (s == ProductSort.byOrder) return list;
   final out = [...list];
@@ -320,7 +572,7 @@ List<LipskeyCatalogProduct> _subtreeProducts(CatalogNode node) {
 
   walk(node);
   if (cats.isEmpty) return const [];
-  return kCatalogProducts.where((p) => cats.contains(p.categoryHe)).toList();
+  return resolvedCatalogProducts.where((p) => cats.contains(p.categoryHe)).toList();
 }
 
 /// Apply the first [sel].length facet groups to [base].
@@ -391,24 +643,6 @@ String _facetDesc(List<LipskeyCatalogProduct> matching) {
   return matching.map((p) => p.nameHe).take(2).join(' · ');
 }
 
-// Simulated metadata — preview text, timestamp, unread badge count.
-// Ordered to match kCatalogCats (same index).
-const _kMeta = [
-  (preview: 'ברז מיקסר + אמבטיה · 12 פריטים חדשים', time: 'עכשיו', badge: 12),
-  (preview: 'אסלה תלויה חדשה · 4 פריטים',            time: 'אתמול', badge: 4),
-  (preview: 'ערכת מקלחת חדשה × 3',                    time: 'אתמול', badge: 0),
-  (preview: 'דוד שמש 150L – מבצע',                    time: '21.5',  badge: 2),
-  (preview: 'כיור גרניט 2 אגנים',                      time: '21.5',  badge: 0),
-  (preview: 'צינור PVC 110mm – מלאי מוגבל',           time: '20.5',  badge: 0),
-  (preview: '3 ספקים עדכנו מחירים',                   time: '20.5',  badge: 3),
-  (preview: 'חיבורים לחץ ½″ · מחיר עודכן',           time: '19.5',  badge: 0),
-  (preview: 'לבנה בטון 25×25×15 – מבצע שבוע',        time: '19.5',  badge: 0),
-  (preview: 'צבע לבן 15L · 2 מותגים',                 time: '18.5',  badge: 0),
-  (preview: 'ערכת כלים מקצועית 120 חלקים',            time: '18.5',  badge: 0),
-  (preview: 'מערכת השקיה · טפטפות + מחברים',          time: '17.5',  badge: 0),
-  (preview: 'צנרת PPR · 12 תת-קטגוריות',              time: 'חדש',   badge: 50),
-];
-
 class CatalogScreen extends ConsumerStatefulWidget {
   const CatalogScreen({super.key});
 
@@ -470,10 +704,6 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       }
     }
 
-    // Force header visible whenever search panel opens.
-    ref.listen<bool>(searchPanelOpenProvider, (_, open) {
-      if (open) _setHeaderVisible(true);
-    });
     // AppBar search icon tapped → restore header + scroll to top.
     ref.listen<bool>(tabHeaderHiddenProvider, (_, hidden) {
       if (!hidden && !_headerVisible) {
@@ -486,197 +716,79 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       }
     });
 
-    final searchOpen = ref.watch(searchPanelOpenProvider);
-    final showFull = _headerVisible || searchOpen;
+    // Studio Pillar-3 · step 93 — catalog SEARCH intel (additive · read-only ·
+    // demo byte-identical). A single CHANGE-listener on the live-dive query is
+    // the faithful "search committed" seam — the app has NO discrete submit (the
+    // floating keyboard writes this provider per commit). `ref.listen` fires ONLY
+    // on a query change, never per rebuild, so each event lands once per query
+    // (§4). It NEVER carries the raw text — only q_len + a stable, non-reversible
+    // q_hash (§4/§7). search_no_result rides the SAME committed-query path (not a
+    // build(), which would re-fire): it emits when the query yields no products
+    // AND no index entries — the _DiveResultsView empty state.
+    ref.listen<String>(keyboardDiveQueryProvider, (_, next) {
+      final q = next.trim();
+      if (q.length < 2) return;
+      final bus = ref.read(intelBusProvider);
+      final props = <String, String>{
+        'q_len': '${q.length}',
+        'q_hash': '${q.hashCode}',
+      };
+      bus.track(IntelEvents.searchSubmit, props: props);
+      final noResults = ref.read(diveResultsProvider).isEmpty &&
+          kVisibleSearchIndex.where((e) => e.matches(q)).isEmpty;
+      if (noResults) bus.track(IntelEvents.searchNoResult, props: props);
+    });
+
+    // Live DIVE (owner): when the floating keyboard has a query, the catalog
+    // body shows the NATIVE narrowed product list — the app dives in place.
+    // BUT a wheel-finder section (מאתר-על / מאתר פשוט) is its OWN finder and holds
+    // ephemeral in-progress dive state, so a stray 2-char keystroke must NOT swap it
+    // out for the text-dive (which would unmount the wheel and discard the dive).
+    final diveSection = ref.watch(catalogSectionProvider);
+    final wheelFinder = (kAxisDive && diveSection == 'מאתר-על') ||
+        (kPlainDive && diveSection == 'מאתר פשוט');
+    final diveActive = !wheelFinder &&
+        ref.watch(keyboardDiveQueryProvider).trim().length >= 2;
 
     return Column(
       children: [
-        ClipRect(
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeInOut,
-            alignment: Alignment.topCenter,
-            child: showFull
-                ? const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [_SearchBar()],
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ),
-        if (searchOpen)
-          const Expanded(child: _SearchPanel())
-        else ...[
-          ClipRect(
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: showFull
-                  ? const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [_SectionChipsRow()],
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ),
+        // CLEAN-ONLY ([kProfileEmptyCatalog], const-false on demo/buildsmart —
+        // the entry folds out, byte-identical): the company-catalog import
+        // card, pinned above the catalog body. Opens the template/upload sheet.
+        if (kProfileEmptyCatalog) const _CompanyCatalogImportCard(),
+        // OWNER: the app's search BAR + panel are deleted — the floating keyboard
+        // IS the search now (its 🔍 חיפוש tool starts a fresh typed search, and the
+        // live dive narrows the catalog underneath). No separate search chrome.
+        if (diveActive)
+          const Expanded(child: _DiveResultsView())
+        else
+          // OWNER: the section-pill row is deleted — its lists + all their options
+          // now live in the keyboard (tab-0 chips + the 'רשימות' manager chip). The
+          // catalog body fills the space directly.
           Expanded(
             child: NotificationListener<ScrollNotification>(
               onNotification: _handleScrollNotification,
               child: _CatalogBody(scrollCtrl: _scrollCtrl),
             ),
           ),
-        ],
       ],
     );
   }
 }
 
-// Horizontal pill tabs — הכל + dynamic user sections + [+] button.
-// Short-tap activates the section.
-// Long-press on a non-הכל chip shows ניהול/מחיקה popup.
-// Plus button opens the management sheet.
-class _SectionChipsRow extends ConsumerWidget {
-  const _SectionChipsRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final active   = ref.watch(catalogSectionProvider);
-    final sections = ref.watch(catalogSectionsListProvider);
-    final hidden   = ref.watch(hiddenCatalogSectionsProvider);
-
-    void activate(String label) =>
-        ref.read(catalogSectionProvider.notifier).state = label;
-
-    void deleteSection(String label) {
-      final list = List<String>.from(ref.read(catalogSectionsListProvider))
-        ..remove(label);
-      ref.read(catalogSectionsListProvider.notifier).state = list;
-      if (active == label) activate('הכל');
-    }
-
-    void hideSection(String label) {
-      ref.read(hiddenCatalogSectionsProvider.notifier).hide(label);
-      if (active == label) activate('הכל');
-    }
-
-    Future<void> showLongPressMenu(BuildContext ctx, String label) async {
-      final w = MediaQuery.of(ctx).size.width;
-      final top = MediaQuery.of(ctx).padding.top;
-      final choice = await showMenu<String>(
-        context: ctx,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        position: RelativeRect.fromLTRB(w * 0.1, top + 140, w * 0.1, 0),
-        items: [
-          const PopupMenuItem<String>(
-            value: 'manage',
-            child: Row(
-              children: [
-                Icon(Icons.list, color: Colors.black54, size: 20),
-                SizedBox(width: 12),
-                Text(
-                  'ניהול רשימות',
-                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'rename',
-            child: Row(
-              children: [
-                Icon(
-                  Icons.drive_file_rename_outline,
-                  color: Colors.black54,
-                  size: 20,
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'שינוי שם',
-                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'hide',
-            child: Row(
-              children: [
-                Icon(Icons.visibility_off_outlined,
-                    color: Colors.black54, size: 20),
-                SizedBox(width: 12),
-                Text(
-                  'הסתרת רשימה',
-                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
-                SizedBox(width: 12),
-                Text(
-                  'מחיקת רשומה',
-                  style: TextStyle(color: Colors.redAccent, fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-      if (!ctx.mounted) return;
-      if (choice == 'manage') _openManageSheet(ctx, ref);
-      if (choice == 'rename') {
-        final list = ref.read(catalogSectionsListProvider);
-        final idx = list.indexOf(label);
-        if (idx != -1) _showRenameDialog(ctx, ref, idx, label);
-      }
-      if (choice == 'hide') hideSection(label);
-      if (choice == 'delete') deleteSection(label);
-    }
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // הכל — fixed, no long-press menu
-            _SectionPill(
-              label: 'הכל',
-              active: active == 'הכל',
-              onTap: () => activate('הכל'),
-            ),
-            for (final s in sections.where((s) => !hidden.contains(s))) ...[
-              const SizedBox(width: 8),
-              _SectionPill(
-                label: s,
-                active: active == s,
-                onTap: () => activate(s),
-                onLongPress: () => showLongPressMenu(context, s),
-              ),
-            ],
-            const SizedBox(width: 8),
-            _AddPill(onTap: () => _openManageSheet(context, ref)),
-          ],
-        ),
-      ),
-    );
-  }
-}
+/// OWNER: public entry so the KEYBOARD's 'רשימות' chip opens the full list manager
+/// (create / edit-contents / rename / hide / delete / reorder) — the same sheet the
+/// deleted section-pill row's ➕ opened. All list options now live behind a keyboard
+/// chip, not a persistent screen row.
+void openManageLists(BuildContext context, WidgetRef ref) =>
+    _openManageSheet(context, ref);
 
 void _openManageSheet(BuildContext context, WidgetRef ref) {
   final container = ProviderScope.containerOf(context);
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -699,7 +811,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
     ref.read(hiddenCatalogSectionsProvider.notifier).toggle(s);
     if (ref.read(hiddenCatalogSectionsProvider).contains(s) &&
         ref.read(catalogSectionProvider) == s) {
-      ref.read(catalogSectionProvider.notifier).state = 'הכל';
+      ref.read(catalogSectionProvider.notifier).state = 'בית';
     }
   }
 
@@ -733,18 +845,20 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
+                  tooltip: 'אישור',
                   icon: const Icon(Icons.check, color: Color(0xFF888888)),
                   onPressed: () => Navigator.pop(context),
                 ),
-                const Text(
+                const CfgText('catalog_screen.t01', 
                   'ניהול רשימות',
                   style: TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 IconButton(
+                  tooltip: 'סגירה',
                   icon: const Icon(Icons.close, color: Color(0xFF888888)),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -770,7 +884,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                 final isHidden = hidden.contains(s);
                 return ListTile(
                   key: ValueKey(s),
-                  tileColor: const Color(0xFFFFFFFF),
+                  tileColor: Theme.of(context).colorScheme.surface,
                   // Leading: icon matching section (dimmed when hidden)
                   leading: Icon(
                     _sectionIcon(s),
@@ -782,7 +896,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                     style: TextStyle(
                       color: isHidden
                           ? const Color(0xFFAAAAAA)
-                          : const Color(0xFF1A1A1A),
+                          : BsTokens.inkLight,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -812,7 +926,22 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                         ),
                         onPressed: () => _toggleHidden(s),
                       ),
+                      // OWNER: rename now lives in the manager too (all options
+                      // reachable via the keyboard's 'רשימות' chip) — it was
+                      // previously ONLY on the deleted row's long-press menu.
                       IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'שנה שם',
+                        icon: const Icon(
+                          Icons.drive_file_rename_outline,
+                          color: Color(0xFF888888),
+                          size: 20,
+                        ),
+                        onPressed: () => _showRenameDialog(context, ref, i, s),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'ערוך',
                         icon: const Icon(
                           Icons.edit_outlined,
                           color: Color(0xFF888888),
@@ -821,12 +950,20 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                         onPressed: () => _showItemPickerSheet(context, ref, s),
                       ),
                       IconButton(
+                        tooltip: 'מחק',
                         icon: const Icon(
                           Icons.delete_outline,
                           color: Color(0xFF888888),
                           size: 20,
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          final ok = await confirmDestructive(
+                            context,
+                            title: 'מחיקת רשימה?',
+                            message: 'הרשימה "$s" תימחק לצמיתות.',
+                            confirmLabel: 'מחק',
+                          );
+                          if (!ok || !context.mounted) return;
                           final list =
                               List<String>.from(
                                 ref.read(catalogSectionsListProvider),
@@ -835,7 +972,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                               list;
                           if (ref.read(catalogSectionProvider) == s) {
                             ref.read(catalogSectionProvider.notifier).state =
-                                'הכל';
+                                'בית';
                           }
                         },
                       ),
@@ -863,7 +1000,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                 children: [
                   Icon(Icons.add, color: BsTokens.brand, size: 22),
                   SizedBox(width: 10),
-                  Text(
+                  CfgText('catalog_screen.t02', 
                     'יצירת רשימה מותאמת אישית',
                     style: TextStyle(
                       color: BsTokens.brand,
@@ -886,15 +1023,18 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
     showDialog<void>(
       context: ctx,
       builder: (dCtx) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text(
+        backgroundColor: Theme.of(dCtx).colorScheme.surface,
+        title: const CfgText('catalog_screen.t03',
           'רשימה חדשה',
-          style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
+          style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
         ),
-        content: TextField(
+        // APP-KEYBOARD-ONLY — inside a DIALOG, which is precisely why the field
+        // docks its keyboard in the ROOT overlay: a dialog has no bottom bar to
+        // host one. Flag OFF ⇒ the same plain autofocused TextField as before.
+        content: BsKeyboardField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFF1A1A1A)),
+          style: const TextStyle(color: BsTokens.inkLight),
           decoration: const InputDecoration(
             hintText: 'שם הרשימה',
             hintStyle: TextStyle(color: Color(0xFF888888)),
@@ -907,14 +1047,16 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
           ),
         ),
         actions: [
-          TextButton(
+          // composite-hide: org hiding this id drops the whole cancel button, not orphaned chrome
+          CfgVisible('catalog_screen.t04', child: TextButton(
             onPressed: () => Navigator.pop(dCtx),
-            child: const Text(
+            child: const CfgText('catalog_screen.t04',
               'ביטול',
               style: TextStyle(color: Color(0xFF888888)),
             ),
-          ),
-          TextButton(
+          )),
+          // composite-hide: org hiding this id drops the whole add button, not orphaned chrome
+          CfgVisible('catalog_screen.t05', child: TextButton(
             onPressed: () {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
@@ -925,14 +1067,14 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               }
               Navigator.pop(dCtx);
             },
-            child: const Text(
+            child: const CfgText('catalog_screen.t05',
               'הוספה',
               style: TextStyle(color: BsTokens.brand),
             ),
-          ),
+          )),
         ],
       ),
-    );
+    ).whenComplete(() => controller.dispose());
   }
 
 }
@@ -947,15 +1089,16 @@ void _showRenameDialog(
   showDialog<void>(
     context: ctx,
     builder: (dCtx) => AlertDialog(
-      backgroundColor: Colors.white,
-      title: const Text(
+      backgroundColor: Theme.of(dCtx).colorScheme.surface,
+      title: const CfgText('catalog_screen.t06',
         'שינוי שם הרשימה',
-        style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
+        style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
       ),
-      content: TextField(
+      // APP-KEYBOARD-ONLY — rename dialog (root-overlay keyboard, as above).
+      content: BsKeyboardField(
         controller: controller,
         autofocus: true,
-        style: const TextStyle(color: Color(0xFF1A1A1A)),
+        style: const TextStyle(color: BsTokens.inkLight),
         decoration: const InputDecoration(
           hintText: 'שם הרשימה',
           hintStyle: TextStyle(color: Color(0xFF888888)),
@@ -968,14 +1111,16 @@ void _showRenameDialog(
         ),
       ),
       actions: [
-        TextButton(
+        // composite-hide: org hiding this id drops the whole cancel button, not orphaned chrome
+        CfgVisible('catalog_screen.t07', child: TextButton(
           onPressed: () => Navigator.pop(dCtx),
-          child: const Text(
+          child: const CfgText('catalog_screen.t07',
             'ביטול',
             style: TextStyle(color: Color(0xFF888888)),
           ),
-        ),
-        TextButton(
+        )),
+        // composite-hide: org hiding this id drops the whole save button, not orphaned chrome
+        CfgVisible('catalog_screen.t08', child: TextButton(
           onPressed: () {
             final name = controller.text.trim();
             if (name.isNotEmpty && name != current) {
@@ -999,14 +1144,14 @@ void _showRenameDialog(
             }
             Navigator.pop(dCtx);
           },
-          child: const Text(
+          child: const CfgText('catalog_screen.t08',
             'שמירה',
             style: TextStyle(color: BsTokens.brand),
           ),
-        ),
+        )),
       ],
     ),
-  );
+  ).whenComplete(() => controller.dispose());
 }
 
 void _showItemPickerSheet(
@@ -1018,7 +1163,7 @@ void _showItemPickerSheet(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -1042,6 +1187,8 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
   late String _label;
   late Set<String> _selected;
 
+  late final Set<String> _initial;
+
   @override
   void initState() {
     super.initState();
@@ -1049,6 +1196,23 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
     _selected = Set<String>.from(
       ref.read(catalogListItemsProvider)[_label] ?? <String>{},
     );
+    _initial = Set<String>.from(_selected);
+  }
+
+  // Unsaved when the checked set diverges from what was loaded — a back-swipe /
+  // drag-dismiss then CONFIRMS before discarding (PopScope in build).
+  bool get _dirty =>
+      _selected.length != _initial.length || !_selected.containsAll(_initial);
+
+  Future<void> _onPop(bool didPop, Object? result) async {
+    if (didPop) return;
+    final discard = await confirmDestructive(
+      context,
+      title: 'לבטל את השינויים?',
+      message: 'הבחירות שסימנת לא יישמרו.',
+      confirmLabel: 'בטל שינויים',
+    );
+    if (discard && mounted) Navigator.pop(context);
   }
 
   void _save() {
@@ -1065,15 +1229,16 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
     final newName = await showDialog<String>(
       context: context,
       builder: (dCtx) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text(
+        backgroundColor: Theme.of(dCtx).colorScheme.surface,
+        title: const CfgText('catalog_screen.t09',
           'שינוי שם הרשימה',
-          style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
+          style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
         ),
-        content: TextField(
+        // APP-KEYBOARD-ONLY — second rename dialog (root-overlay keyboard).
+        content: BsKeyboardField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFF1A1A1A)),
+          style: const TextStyle(color: BsTokens.inkLight),
           decoration: const InputDecoration(
             hintText: 'שם הרשימה',
             hintStyle: TextStyle(color: Color(0xFF888888)),
@@ -1086,23 +1251,26 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
           ),
         ),
         actions: [
-          TextButton(
+          // composite-hide: org hiding this id drops the whole cancel button, not orphaned chrome
+          CfgVisible('catalog_screen.t10', child: TextButton(
             onPressed: () => Navigator.pop(dCtx),
-            child: const Text(
+            child: const CfgText('catalog_screen.t10',
               'ביטול',
               style: TextStyle(color: Color(0xFF888888)),
             ),
-          ),
-          TextButton(
+          )),
+          // composite-hide: org hiding this id drops the whole save button, not orphaned chrome
+          CfgVisible('catalog_screen.t11', child: TextButton(
             onPressed: () => Navigator.pop(dCtx, controller.text.trim()),
-            child: const Text(
+            child: const CfgText('catalog_screen.t11',
               'שמירה',
               style: TextStyle(color: BsTokens.brand),
             ),
-          ),
+          )),
         ],
       ),
     );
+    controller.dispose();
     if (newName == null || newName.isEmpty || newName == _label) return;
 
     final list = List<String>.from(ref.read(catalogSectionsListProvider));
@@ -1125,7 +1293,10 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
+    return PopScope(
+      canPop: !_dirty,
+      onPopInvokedWithResult: _onPop,
+      child: DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.7,
       minChildSize: 0.4,
@@ -1147,9 +1318,10 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
+                // composite-hide: org hiding this id drops the whole save button, not orphaned chrome
+                CfgVisible('catalog_screen.t12', child: TextButton(
                   onPressed: _save,
-                  child: const Text(
+                  child: const CfgText('catalog_screen.t12',
                     'שמירה',
                     style: TextStyle(
                       color: BsTokens.brand,
@@ -1157,33 +1329,40 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
+                )),
                 InkWell(
                   onTap: _rename,
                   borderRadius: BorderRadius.circular(6),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _label,
-                          style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                          ),
+                  // ≥48dp tap target (a11y) — the header row is already
+                  // 48dp tall (IconButton), so no visual change.
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.drive_file_rename_outline,
-                          color: Color(0xFF888888),
-                          size: 16,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _label,
+                              style: const TextStyle(
+                                color: BsTokens.inkLight,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.drive_file_rename_outline,
+                              color: Color(0xFF888888),
+                              size: 16,
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -1198,7 +1377,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(
+              child: CfgText('catalog_screen.t13', 
                 'בחר אילו פריטים יופיעו ברשימה',
                 style: TextStyle(color: Color(0xFF888888), fontSize: 13),
               ),
@@ -1206,11 +1385,23 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
           ),
           const Divider(color: Color(0xFFF5F5F5), height: 1),
           Expanded(
-            child: ListView.builder(
-              controller: scrollCtrl,
-              itemCount: kCatalogCats.length,
-              itemBuilder: (_, i) {
-                final cat = kCatalogCats[i];
+            child: Builder(builder: (_) {
+              // T6.3: the ▦ קטלוג categories via the catalog repository
+              // (returns the same const `kCatalogCats`). `ref.watch` — this is
+              // inside the sheet's build tree.
+              // B4: only offer categories that lead to content, so a curated
+              // list can never route into the `_TreeComingSoon` "בקרוב"
+              // placeholder (owner policy: no content-less surface in release).
+              final cats = ref
+                  .watch(catalogRepositoryProvider)
+                  .catalogCategories()
+                  .where((c) => categoryHasContent(c.title))
+                  .toList();
+              return ListView.builder(
+                controller: scrollCtrl,
+                itemCount: cats.length,
+                itemBuilder: (_, i) {
+                  final cat = cats[i];
                 final checked = _selected.contains(cat.title);
                 return CheckboxListTile(
                   value: checked,
@@ -1224,7 +1415,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                   controlAffinity: ListTileControlAffinity.leading,
                   activeColor: BsTokens.brand,
                   checkColor: Colors.white,
-                  tileColor: const Color(0xFFFFFFFF),
+                  tileColor: Theme.of(context).colorScheme.surface,
                   title: Row(
                     children: [
                       Text(
@@ -1236,7 +1427,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                         child: Text(
                           cat.title,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1245,11 +1436,13 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                     ],
                   ),
                 );
-              },
-            ),
+                },
+              );
+            }),
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
         ],
+      ),
       ),
     );
   }
@@ -1265,739 +1458,267 @@ IconData _sectionIcon(String label) => switch (label) {
       _                 => Icons.list_alt_outlined,
     };
 
-class _SectionPill extends StatelessWidget {
-  const _SectionPill({
-    required this.label,
-    required this.active,
-    required this.onTap,
-    this.onLongPress,
-  });
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: active ? BsTokens.brand : Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: active
-            ? BorderSide.none
-            : const BorderSide(color: Color(0xFFC8C8CE), width: 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: active ? Colors.white : const Color(0xFF6E6E73),
-              fontSize: 13,
-              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AddPill extends StatelessWidget {
-  const _AddPill({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFC8C8CE), width: 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Icon(Icons.add, color: Color(0xFF6E6E73), size: 18),
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchBar extends ConsumerStatefulWidget {
-  const _SearchBar();
-
-  @override
-  ConsumerState<_SearchBar> createState() => _SearchBarState();
-}
-
-class _SearchBarState extends ConsumerState<_SearchBar> {
-  late final TextEditingController _controller;
-  late final FocusNode _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: ref.read(searchQueryProvider));
-    _focusNode = FocusNode()..addListener(_onFocusChange);
-  }
-
-  @override
-  void dispose() {
-    _focusNode
-      ..removeListener(_onFocusChange)
-      ..dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onFocusChange() {
-    if (_focusNode.hasFocus) {
-      ref.read(searchPanelOpenProvider.notifier).state = true;
-    }
-  }
-
-  void _closePanel() {
-    _focusNode.unfocus();
-    ref.read(searchPanelOpenProvider.notifier).state = false;
-  }
-
-  void _submit(String value) {
-    final q = value.trim();
-    if (q.isEmpty) return;
-    // Honour the "שמור היסטוריית חיפוש" setting.
-    if (!ref.read(catalogSettingsProvider).searchHistoryEnabled) return;
-    ref.read(recentSearchesProvider.notifier).add(q);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Keep external query state in sync (e.g. when a recent-search is tapped).
-    ref.listen<String>(searchQueryProvider, (_, next) {
-      if (next != _controller.text) {
-        _controller.text = next;
-        _controller.selection =
-            TextSelection.collapsed(offset: next.length);
-      }
-    });
-
-    final open     = ref.watch(searchPanelOpenProvider);
-    final hasText  = ref.watch(searchQueryProvider).isNotEmpty;
-    final scope    = ref.watch(searchScopeProvider);
-    final hasScope = scope != 'הכל';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFE7E7EA),
-          borderRadius: BorderRadius.circular(24),
-          border: open
-              ? Border.all(color: BsTokens.brand, width: 1.5)
-              : null,
-        ),
-        child: Row(
-          children: [
-            // Leading: back arrow when panel open, search icon otherwise.
-            if (open)
-              IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Color(0xFF888888),
-                  size: 20,
-                ),
-                onPressed: _closePanel,
-              )
-            else
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Icon(Icons.search, color: Color(0xFF888888), size: 20),
-              ),
-
-            // Scope token chip — shown when a non-הכל scope is active.
-            if (hasScope) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: BsTokens.brand,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      scope,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: () =>
-                          ref.read(searchScopeProvider.notifier).state = 'הכל',
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 6),
-            ],
-
-            // Text input — expands to fill remaining width.
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                textInputAction: TextInputAction.search,
-                onChanged: (v) =>
-                    ref.read(searchQueryProvider.notifier).state = v,
-                onSubmitted: _submit,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: hasScope
-                      ? 'חפש $scope...'
-                      : 'חיפוש מוצרים, קטגוריות, מסכים...',
-                  hintStyle: const TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 14,
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-
-            // Clear button — shown when there is text.
-            if (hasText)
-              IconButton(
-                icon: const Icon(
-                  Icons.close,
-                  color: Color(0xFF888888),
-                  size: 18,
-                ),
-                onPressed: () {
-                  _controller.clear();
-                  ref.read(searchQueryProvider.notifier).state = '';
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchPanel extends ConsumerWidget {
-  const _SearchPanel();
+/// The live DIVE view (owner): the catalog body when the floating keyboard has
+/// a query — the engine-narrowed products in the NATIVE product list. The app
+/// dives in place; no search panel, no search chrome.
+class _DiveResultsView extends ConsumerWidget {
+  const _DiveResultsView();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final query    = ref.watch(searchQueryProvider);
-    final scope    = ref.watch(searchScopeProvider);
-    final showResults = query.isNotEmpty || scope != 'הכל';
-    return Material(
-      color: BsTokens.cardLight,
-      child: Column(
-        children: [
-          const _SearchToolsRow(),
-          const _SearchScopeRow(),
-          const Divider(height: 1, color: Color(0xFFF5F5F5)),
-          Expanded(
-            child: showResults
-                ? const _SearchResultsList()
-                : const _RecentSearchesList(),
-          ),
-        ],
-      ),
-    );
-  }
-}
+    // GLOBAL SEARCH ([kGlobalSearch], const ⇒ folds out when off): the catalog's
+    // OWN inline dive stands down under the flag — [HomeShell] overlays the ONE
+    // unified panel ([GlobalSearchResultsView]) over EVERY tab instead (owner:
+    // option A — the list replaces the screen content in place, everywhere), so
+    // the results render exactly once. Off ⇒ the legacy body below is byte-identical.
+    if (kGlobalSearch) return const SizedBox.shrink();
 
-class _SearchToolsRow extends ConsumerWidget {
-  const _SearchToolsRow();
+    final products = ref.watch(diveResultsProvider);
+    // OWNER (A slice 3 — unify "so it searches those too"): the ONE keyboard search
+    // finds CATEGORIES + SCREENS as well, not just products — exactly what the old
+    // search bar did via [kVisibleSearchIndex]. The non-product index matches lead
+    // (capped, compact), then the engine-narrowed products fill the rest.
+    final query = ref.watch(keyboardDiveQueryProvider).trim();
+    final entries = query.isEmpty
+        ? const <SearchEntry>[]
+        : kVisibleSearchIndex.where((e) => e.matches(query)).take(4).toList();
 
-  static const _sheetShape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-  );
-
-  // ↕️ מיון — pick a sort for the live product results.
-  void _openSortSheet(BuildContext context, WidgetRef ref) {
-    final current = ref.read(catalogProductSortProvider);
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: _sheetShape,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const _SheetTitle('מיון מוצרים'),
-            for (final s in ProductSort.values)
-              ListTile(
-                leading: Icon(
-                  s == current ? Icons.check : Icons.swap_vert,
-                  color:
-                      s == current ? BsTokens.brand : const Color(0xFF888888),
-                ),
-                title: Text(_productSortLabel(s),
-                    style: const TextStyle(color: Color(0xFF1A1A1A))),
-                onTap: () {
-                  ref.read(catalogProductSortProvider.notifier).state = s;
-                  Navigator.pop(context);
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ⚙️ פילטרים — filter the live product results.
-  void _openFilterSheet(BuildContext context, WidgetRef ref) {
-    final imageOnly = ref.read(searchImageOnlyProvider);
-    Widget opt(String label, bool value) => ListTile(
-          leading: Icon(
-            value == imageOnly ? Icons.check : Icons.radio_button_unchecked,
-            color:
-                value == imageOnly ? BsTokens.brand : const Color(0xFF888888),
-          ),
-          title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
-          onTap: () {
-            ref.read(searchImageOnlyProvider.notifier).state = value;
-            Navigator.pop(context);
-          },
-        );
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: _sheetShape,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const _SheetTitle('סינון תוצאות'),
-            opt('הכל', false),
-            opt('עם תמונה בלבד', true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _SearchToolButton(
-            emoji: '🎤',
-            label: 'קולי',
-            onTap: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              final ok = await VoiceService.instance.listen(
-                onFinal: (t) {
-                  if (t.isNotEmpty) {
-                    messenger.showSnackBar(SnackBar(content: Text(t)));
-                  }
-                },
-              );
-              if (!ok) {
-                messenger.showSnackBar(
-                  const SnackBar(content: Text('הדפדפן לא תומך בחיפוש קולי')),
-                );
-              }
-            },
-          ),
-          _SearchToolButton(
-            emoji: '📷',
-            label: 'ברקוד',
-            onTap: () => openBarcodeScanner(context),
-          ),
-          _SearchToolButton(
-            emoji: '⚙️',
-            label: 'פילטרים',
-            onTap: () => _openFilterSheet(context, ref),
-          ),
-          _SearchToolButton(
-            emoji: '↕️',
-            label: 'מיון',
-            onTap: () => _openSortSheet(context, ref),
-          ),
-          _SearchToolButton(
-            emoji: '▦',
-            label: 'קטלוג',
-            onTap: () {
-              ref.read(searchPanelOpenProvider.notifier).state = false;
-              ref.read(catalogSectionProvider.notifier).state = 'קטגוריות';
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Small right-aligned title row for the search tool bottom-sheets.
-class _SheetTitle extends StatelessWidget {
-  const _SheetTitle(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: Text(text,
-              style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700)),
-        ),
-      );
-}
-
-class _SearchToolButton extends StatelessWidget {
-  const _SearchToolButton({
-    required this.emoji,
-    required this.label,
-    required this.onTap,
-  });
-
-  final String emoji;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(emoji, style: const TextStyle(fontSize: 20)),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.black54, fontSize: 11),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchScopeRow extends ConsumerWidget {
-  const _SearchScopeRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final scope = ref.watch(searchScopeProvider);
-    const scopes = ['הכל', 'מוצרים', 'קטגוריות', 'מסכים'];
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (final s in scopes) ...[
-              _SectionPill(
-                label: s,
-                active: scope == s,
-                onTap: () =>
-                    ref.read(searchScopeProvider.notifier).state = s,
-              ),
-              const SizedBox(width: 8),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RecentSearchesList extends ConsumerWidget {
-  const _RecentSearchesList();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(recentSearchesProvider);
-    if (items.isEmpty) {
+    if (products.isEmpty && entries.isEmpty) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 32),
-          child: Text(
-            'התחל להקליד כדי לחפש מוצרים, קטגוריות ומסכים.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+          padding: EdgeInsets.all(BsTokens.space4),
+          child: CfgText('catalog_screen.t14', 
+            'אין תוצאות תואמות',
+            style: TextStyle(color: BsTokens.mutedLight),
           ),
         ),
       );
     }
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'חיפושים אחרונים',
-                style: TextStyle(
-                  color: Color(0xFF888888),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              TextButton(
-                onPressed: () =>
-                    ref.read(recentSearchesProvider.notifier).clear(),
-                child: const Text(
-                  'נקה',
-                  style: TextStyle(color: BsTokens.brand, fontSize: 13),
-                ),
-              ),
-            ],
+      children: <Widget>[
+        for (final e in entries) _DiveEntryTile(entry: e),
+        if (entries.isNotEmpty)
+          const Divider(height: 1, color: Color(0xFFF5F5F5)),
+        Expanded(
+          child: products.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(BsTokens.space4),
+                    child: CfgText('catalog_screen.t15', 
+                      'אין מוצרים תואמים',
+                      style: TextStyle(color: BsTokens.mutedLight),
+                    ),
+                  ),
+                )
+              : LipskeyProductsList(products: products),
+        ),
+      ],
+    );
+  }
+
+}
+
+/// GLOBAL SEARCH ([kGlobalSearch]) — the ONE unified results panel. Owner: option
+/// A — when you type, this list REPLACES the screen content IN PLACE, on EVERY
+/// tab (not just the catalog). `HomeShell` overlays it over whatever tab is active
+/// whenever the keyboard has a query; the catalog's own inline dive stands down
+/// under the flag so the results render exactly once. Beyond the [kVisibleSearchIndex]
+/// entries (screens / categories / settings) + the rich [LipskeyProductsList], it
+/// lists the live ENTITY domains the search could never show before — orders ·
+/// tasks · customers · chats · notifications — via [buildGlobalSearchIndex], each
+/// tile running its OWN open/navigate closure. Products stay the rich list (not
+/// flattened to tiles), so this ONLY ADDS the five entity domains. Public because
+/// `HomeShell` mounts it.
+class GlobalSearchResultsView extends ConsumerWidget {
+  const GlobalSearchResultsView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final products = ref.watch(diveResultsProvider);
+    final query = ref.watch(keyboardDiveQueryProvider).trim();
+    final entries = query.isEmpty
+        ? const <SearchEntry>[]
+        : kVisibleSearchIndex.where((e) => e.matches(query)).take(4).toList();
+    // The five ENTITY domains the search can't already show (products → the rich
+    // list below; screens / categories / settings → the index entries above).
+    final extras = query.length >= 2
+        ? buildGlobalSearchIndex(ref)
+            .search(query)
+            .where((r) =>
+                r.kind != SearchResultKind.product &&
+                r.kind != SearchResultKind.screen &&
+                r.kind != SearchResultKind.setting)
+            .take(6)
+            .toList()
+        : const <SearchResult>[];
+
+    if (products.isEmpty && entries.isEmpty && extras.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(BsTokens.space4),
+          child: CfgText('catalog_screen.t16', 
+            'אין תוצאות תואמות',
+            style: TextStyle(color: BsTokens.mutedLight),
           ),
         ),
+      );
+    }
+    return Column(
+      children: <Widget>[
+        for (final e in entries) _DiveEntryTile(entry: e),
+        for (final r in extras) _GlobalDiveTile(result: r),
+        if (entries.isNotEmpty || extras.isNotEmpty)
+          const Divider(height: 1, color: Color(0xFFF5F5F5)),
         Expanded(
-          child: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (_, i) {
-              final q = items[i];
-              return ListTile(
-                dense: true,
-                leading: const Icon(
-                  Icons.history,
-                  color: Color(0xFF888888),
-                  size: 20,
-                ),
-                title: Text(
-                  q,
-                  style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
-                ),
-                trailing: IconButton(
-                  icon: const Icon(
-                    Icons.north_west,
-                    color: Color(0xFF888888),
-                    size: 18,
+          child: products.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(BsTokens.space4),
+                    child: CfgText('catalog_screen.t17', 
+                      'אין מוצרים תואמים',
+                      style: TextStyle(color: BsTokens.mutedLight),
+                    ),
                   ),
-                  onPressed: () =>
-                      ref.read(searchQueryProvider.notifier).state = q,
-                ),
-                onTap: () =>
-                    ref.read(searchQueryProvider.notifier).state = q,
-              );
-            },
-          ),
+                )
+              : LipskeyProductsList(products: products),
         ),
       ],
     );
   }
 }
 
-class _SearchResultsList extends ConsumerWidget {
-  const _SearchResultsList();
+/// A single ENTITY search hit (order / task / customer / chat / notification)
+/// inside the unified dive window ([kGlobalSearch]). Mirrors [_DiveEntryTile]'s
+/// look — emoji + title + optional subtitle + a Hebrew type badge — and on tap
+/// runs the result's OWN open/navigate closure (open the order/task/customer
+/// sheet · jump to the chat/notification section), keeping the overlay floating.
+class _GlobalDiveTile extends ConsumerWidget {
+  const _GlobalDiveTile({required this.result});
+
+  final SearchResult result;
+
+  static const Map<SearchResultKind, String> _emoji =
+      <SearchResultKind, String>{
+    SearchResultKind.order: '🧾',
+    SearchResultKind.task: '✅',
+    SearchResultKind.customer: '👤',
+    SearchResultKind.chat: '💬',
+    SearchResultKind.notification: '🔔',
+  };
+  static const Map<SearchResultKind, String> _label =
+      <SearchResultKind, String>{
+    SearchResultKind.order: 'הזמנה',
+    SearchResultKind.task: 'משימה',
+    SearchResultKind.customer: 'לקוח',
+    SearchResultKind.chat: 'שיחה',
+    SearchResultKind.notification: 'התראה',
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final query = ref.watch(searchQueryProvider);
-    final scope = ref.watch(searchScopeProvider);
-
-    final filtered = kSearchIndex.where((e) {
-      // When query is empty, skip text matching — show all items in scope.
-      if (query.isNotEmpty && !e.matches(query)) return false;
-      return switch (scope) {
-        'מוצרים'   => e.type == SearchType.category,
-        'קטגוריות' => e.type == SearchType.setting || e.type == SearchType.menu,
-        'מסכים'    => e.type == SearchType.screen ||
-            e.type == SearchType.persona ||
-            e.type == SearchType.action,
-        _ => true,
-      };
-    }).toList();
-
-    // Live product matches from the real catalog (name or SKU), shown in
-    // "הכל" / "מוצרים" scopes once the user has typed something.
-    final showProducts = query.trim().length >= 2 &&
-        (scope == 'הכל' || scope == 'מוצרים');
-    // Apply the ⚙️ image filter and ↕️ sort (from the search-panel tools)
-    // before capping to 40 results.
-    final imageOnly = ref.watch(searchImageOnlyProvider);
-    final sort = ref.watch(catalogProductSortProvider);
-    // AND-match first; if a reasonable query finds nothing (e.g. a stray word
-    // the catalogue doesn't use), fall back to matching ANY word so the user
-    // never hits a dead end. Final fallback: `fuzzySearchProducts` (closes
-    // step 62 — the helper is now wired into the UI search path) — used only
-    // when both AND and OR fail so it never disturbs the happy path.
-    List<LipskeyCatalogProduct> matchProducts() {
-      final and = kLipskeyCatalog
-          .where((p) => catalogProductMatchesQuery(p, query))
-          .toList();
-      if (and.isNotEmpty) return and;
-      final or = kLipskeyCatalog
-          .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
-          .toList();
-      if (or.isNotEmpty) return or;
-      // Last-chance forgiving search (each word as a substring of nameHe,
-      // ranked by proximity). Empty if even fuzzy can't find it.
-      return fuzzySearchProducts(query, limit: 40);
-    }
-
-    // Default order ranks by relevance (best match first); an explicit
-    // ↕️ sort (name/SKU) overrides it.
-    List<LipskeyCatalogProduct> orderProducts(List<LipskeyCatalogProduct> ps) {
-      if (sort != ProductSort.byOrder) return _sortProducts(ps, sort);
-      return [...ps]..sort(
-          (a, b) => searchRelevance(b, query).compareTo(searchRelevance(a, query)));
-    }
-
-    final products = showProducts
-        ? orderProducts(filterByImage(matchProducts(), imageOnly)).take(40).toList()
-        : const <LipskeyCatalogProduct>[];
-
-    if (filtered.isEmpty && products.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Text(
-            query.isNotEmpty
-                ? 'לא נמצאו תוצאות עבור "$query"'
-                : 'אין תוצאות ב$scope',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFF888888), fontSize: 14),
+    return ListTile(
+      dense: true,
+      leading: Text(
+        _emoji[result.kind] ?? '🔎',
+        style: const TextStyle(fontSize: 20),
+      ),
+      title: Text(
+        result.title,
+        style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: result.subtitle.isNotEmpty
+          ? Text(
+              result.subtitle,
+              style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          _label[result.kind] ?? '',
+          style: const TextStyle(
+            color: Color(0xFF888888),
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
           ),
         ),
-      );
-    }
+      ),
+      onTap: () {
+        // END the in-place search before running: an entity result may navigate to
+        // a tab/section this panel would otherwise keep COVERING. Clearing the dive
+        // query drops the panel (see [GlobalSearchResultsView]); the result then
+        // opens its sheet over / navigates to the now-revealed destination.
+        ref.read(keyboardDiveQueryProvider.notifier).state = '';
+        result.run(ref, context);
+      },
+    );
+  }
+}
 
-    return ListView.builder(
-      itemCount: filtered.length + products.length,
-      itemBuilder: (_, i) {
-        // Product results come after the index entries.
-        if (i >= filtered.length) {
-          final p = products[i - filtered.length];
-          return ListTile(
-            leading: Container(
-              width: 44,
-              height: 44,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
-                shape: BoxShape.circle,
-              ),
-              clipBehavior: Clip.antiAlias,
-              alignment: Alignment.center,
-              child: p.imageAsset != null
-                  ? Image.asset(p.imageAsset!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Text(p.categoryEmoji,
-                          style: const TextStyle(fontSize: 20)))
-                  : Text(p.categoryEmoji, style: const TextStyle(fontSize: 20)),
+/// A single non-product search hit (category / screen / setting) inside the live
+/// DIVE (owner A slice 3). Mirrors the old search list's entry tile: a legal leaf
+/// navigates to its screen; every other entry NARROWS the dive to its title (the
+/// dive's [keyboardDiveQueryProvider], the analogue of the old search bar setting
+/// [searchQueryProvider]).
+class _DiveEntryTile extends ConsumerWidget {
+  const _DiveEntryTile({required this.entry});
+
+  final SearchEntry entry;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      dense: true,
+      leading: Text(entry.emoji, style: const TextStyle(fontSize: 20)),
+      title: Text(
+        entry.title,
+        style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+      ),
+      subtitle: entry.breadcrumb.isNotEmpty
+          ? Text(
+              entry.breadcrumb,
+              style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          entry.typeLabel,
+          style: const TextStyle(
+            color: Color(0xFF888888),
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      onTap: () {
+        if (entry.title == 'תנאי שימוש' || entry.title == 'מדיניות פרטיות') {
+          Navigator.of(context).push(
+            LegalScreen.route(
+              initialTab: entry.title == 'תנאי שימוש'
+                  ? LegalTab.terms
+                  : LegalTab.privacy,
             ),
-            title: Text(p.nameHe,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
-                maxLines: 2, overflow: TextOverflow.ellipsis),
-            subtitle: Text('${p.categoryHe} · #${p.sku}',
-                style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
-                maxLines: 1, overflow: TextOverflow.ellipsis),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1c1409),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text('מוצר',
-                  style: TextStyle(
-                      color: Color(0xFFFF7A18), fontSize: 10,
-                      fontWeight: FontWeight.w600)),
-            ),
-            onTap: () {
-              final cat = kLipskeyCatalog
-                  .where((x) => x.categoryHe == p.categoryHe)
-                  .toList();
-              showLipskeyProductSheet(context, p, cat);
-            },
           );
+          return;
         }
-        final entry = filtered[i];
-        return ListTile(
-          leading: Container(
-            width: 44,
-            height: 44,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF5F5F5),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(entry.emoji, style: const TextStyle(fontSize: 20)),
-          ),
-          title: Text(
-            entry.title,
-            style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
-          ),
-          subtitle: entry.breadcrumb.isNotEmpty
-              ? Text(
-                  entry.breadcrumb,
-                  style: const TextStyle(
-                    color: Color(0xFF666666),
-                    fontSize: 11,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                )
-              : null,
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              entry.typeLabel,
-              style: const TextStyle(
-                color: Color(0xFF888888),
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          onTap: () {
-            ref.read(searchQueryProvider.notifier).state = entry.title;
-            if (!ref.read(catalogSettingsProvider).searchHistoryEnabled) return;
-            ref.read(recentSearchesProvider.notifier).add(entry.title);
-          },
-        );
+        // Narrow the LIVE dive to this hit (the dive-query analogue of the old
+        // search bar's searchQueryProvider = entry.title).
+        ref.read(keyboardDiveQueryProvider.notifier).state = entry.title;
       },
     );
   }
@@ -2013,8 +1734,76 @@ class _CatalogBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
-    if (active == 'הכל') return _AllOverview(scrollCtrl: scrollCtrl);
-    if (active == 'בית') return const FinderScreen();
+    if (active == 'בית') return SmartHomeBody(scrollCtrl: scrollCtrl);
+    // Giant-system V2 — `search` module off ⇒ skip the finder branch, so 'מאתר'
+    // falls through to the section-absent tail below (header + 📋 empty state),
+    // never a crash (absent=on ⇒ the all-on default keeps this byte-identical).
+    if (active == 'מאתר' && modOn(ref, 'search')) {
+      // The finder ('מאתר') is the contractor-home atom-engine target. Behind
+      // kAtomEngine (default off → FinderScreen renders, no code change) it is
+      // assembled by the atom engine from atom-engine/manifests/
+      // contractor-home.json; AtomHomeScreen is pixel-identical to FinderScreen
+      // (atom_home_parity_test). See atom-engine/ENGINE-SPEC.md.
+      return kAtomEngine ? const AtomHomeScreen() : const FinderScreen();
+    }
+    // OWNER-REVIEW · kWordFinder seam — routes the flag-gated 'מאתר חכם' pill to
+    // the two-mode word-finder host. Unreachable when kWordFinderFlag is off
+    // (the pill that sets this active section never renders), so this branch is
+    // inert by default. WordFinderHome also self-gates on the same flag.
+    // kRingDive demo: when the RingDive flag is on (the demo deploy adds
+    // --dart-define=ENABLE_RING_DIVE=true), the smart-finder pill opens the
+    // rotary RingDive surface instead; a normal build (flag off) is
+    // byte-identical (this section is only reachable via the kWordFinder pill
+    // and falls back to WordFinderHome). RingDiveScreen self-gates too.
+    // OWNER · PlainDive ([kPlainDive], const-false ⇒ this branch folds out ⇒
+    // byte-identical). A SEPARATE layman finder that runs ALONGSIDE 'מאתר חכם' —
+    // reached by its OWN 'מאתר פשוט' chip, never replacing the pro dial. The 4-ring
+    // dictionary drill narrows in everyday words down to the exact product.
+    // OWNER · the AXIS-DIVE super-wheel ([kAxisDive], const-false ⇒ folds out ⇒
+    // byte-identical). Its OWN 'מאתר-על' chip: the first wheel picks WHICH of the
+    // ~15 axes to start from, then any axis in any order down to the product.
+    // Giant-system V2 — the three dive branches also AND the `dive` module gate
+    // (const flags stay FIRST, so a false const still folds the branch out; off
+    // at runtime ⇒ fall through to the section-absent tail, never a crash).
+    if (kAxisDive && active == 'מאתר-על' && modOn(ref, 'dive')) {
+      return const Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(child: CatalogWheelScreen()),
+      );
+    }
+    if (kPlainDive && active == 'מאתר פשוט' && modOn(ref, 'dive')) {
+      return const Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(child: PlainDiveScreen()),
+      );
+    }
+    if (active == 'מאתר חכם' && modOn(ref, 'dive')) {
+      // kRingDive demo → the rotary RingDive dial; otherwise the two-mode
+      // word-finder host. Flag off (default) → WordFinderHome (byte-identical).
+      if (ref.watch(featureFlagsProvider).contains(kRingDiveFlag)) {
+        return const Directionality(
+          textDirection: TextDirection.rtl,
+          child: SafeArea(child: RingDiveScreen()),
+        );
+      }
+      return const WordFinderHome();
+    }
+    // OWNER-REVIEW · kCardKeyboard seam (#38 A/B) — routes the flag-gated
+    // 'מקלדת חכמה' pill to the unified card-keyboard. Unreachable when the flag is
+    // off (the pill that sets this active never renders); CardKeyboardScreen also
+    // self-gates. It has no Scaffold/Directionality of its own, so wrap it RTL +
+    // scrollable (swarm R10).
+    if (active == 'מקלדת חכמה') {
+      return const Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+            child: CardKeyboardScreen(),
+          ),
+        ),
+      );
+    }
     if (active == 'עץ חכם') return const _SmartTreeSection();
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();
@@ -2046,7 +1835,7 @@ class _SectionHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      color: const Color(0xFFFFFFFF),
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
       child: Row(
         children: [
@@ -2054,7 +1843,7 @@ class _SectionHeader extends ConsumerWidget {
             child: Text(
               label,
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -2084,9 +1873,14 @@ class _FilteredCatalogList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Preserve original ordering by collecting original indices that match.
+    // B4: also skip any (possibly previously-saved) content-less title so a
+    // curated list never renders a tile that drills into the `_TreeComingSoon`
+    // "בקרוב" placeholder. Display-only filter — the saved selection is kept.
     final indices = <int>[
       for (var i = 0; i < kCatalogCats.length; i++)
-        if (selected.contains(kCatalogCats[i].title)) i,
+        if (selected.contains(kCatalogCats[i].title) &&
+            categoryHasContent(kCatalogCats[i].title))
+          i,
     ];
     return ListView.separated(
       key: const Key('catalog-list'),
@@ -2098,7 +1892,7 @@ class _FilteredCatalogList extends StatelessWidget {
       ),
       itemBuilder: (_, i) {
         final idx = indices[i];
-        return _CatalogRow(cat: kCatalogCats[idx], meta: _kMeta[idx]);
+        return _CatalogRow(cat: kCatalogCats[idx]);
       },
     );
   }
@@ -2121,7 +1915,7 @@ class _EmptySection extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -2129,7 +1923,7 @@ class _EmptySection extends StatelessWidget {
           const SizedBox(height: 8),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
+            child: CfgText('catalog_screen.t18', 
               'אין פריטים להצגה.\nפתחו את ניהול הרשימות והקישו ✏️ כדי לבחור פריטים.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFF888888), fontSize: 13),
@@ -2141,270 +1935,172 @@ class _EmptySection extends StatelessWidget {
   }
 }
 
-class _CatalogList extends StatelessWidget {
+/// OWNER POLICY (B4): a top category is shown only when it actually leads to
+/// content. A `kCatalogCats` title with no matching `kCatalogTree` node (or a
+/// node with an empty subtree) would drill straight into the `_TreeComingSoon`
+/// "בקרוב — הקטגוריה הזו בבנייה" placeholder; the App Store rejects visible
+/// content-less / "coming soon" surfaces, so those tiles are filtered out of
+/// the browse list. Reversible data filter (mirrors wave-1's `where(...)`) —
+/// no `kCatalogCats`/`kCatalogTree` data is deleted; re-add a tree node and the
+/// category reappears automatically.
+/// Real bundled product-photo (`assets/lipskey/categories/*.png`) for a catalog
+/// category / smart-tree node, resolved by keyword — replaces the emoji on the
+/// card avatars with a real image. Returns null when no keyword matches (the
+/// caller then keeps the emoji). Uses the same designer image-set as the finder.
+String? catPhotoAsset(String label) {
+  String? f;
+  if (label.contains('ברז')) {
+    f = 'faucets';
+  } else if (label.contains('אסל')) {
+    f = 'toilets';
+  } else if (label.contains('סיפון') ||
+      label.contains('ניקוז') ||
+      label.contains('דלוחין') ||
+      label.contains('מחסום')) {
+    f = 'drainage';
+  } else if (label.contains('SmartLock') || label.contains('חוליות')) {
+    f = 'smartlock';
+  } else if (label.contains('PPR')) {
+    f = 'ppr';
+  } else if (label.contains('מקלחת') ||
+      label.contains('אמבט') ||
+      label.contains('מזלף') ||
+      label.contains('זרוע') ||
+      label.contains('שטיפה') ||
+      label.contains('ראשי')) {
+    f = 'shower_bath';
+  } else if (label.contains('צינור') || label.contains('צנרת')) {
+    f = 'pipes';
+  } else if (label.contains('מחבר') ||
+      label.contains('חיבור') ||
+      label.contains('רקורד') ||
+      label.contains('מעבר')) {
+    f = 'connectors';
+  } else if (label.contains('חבק') || label.contains('תלי')) {
+    f = 'clamps';
+  } else if (label.contains('גינ') || label.contains('השקי')) {
+    f = 'garden';
+  }
+  return f == null ? null : 'assets/lipskey/categories/$f.png';
+}
+
+/// Card-avatar content: the real category photo when [label] maps to one, else
+/// the [emoji] at [emojiSize]. A missing/failed image falls back to the emoji.
+Widget catAvatar(String label, String emoji, double emojiSize) {
+  final asset = catPhotoAsset(label);
+  if (asset == null) {
+    return Text(emoji, style: TextStyle(fontSize: emojiSize));
+  }
+  return Padding(
+    padding: const EdgeInsets.all(6),
+    child: Image.asset(
+      asset,
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) =>
+          Text(emoji, style: TextStyle(fontSize: emojiSize)),
+    ),
+  );
+}
+
+bool categoryHasContent(String title) {
+  final node = _findCatalogTreeNodeByTitle(title);
+  return node != null && node.children.isNotEmpty;
+}
+
+/// Top categories that belong to [system] — matched to their catalog-tree
+/// node's dominant system (fixtures show in both), consistent with the tree
+/// drill. null → all. Content-less categories (B4) are always filtered out.
+List<Section> _catsForSystem(WaterSystem? system) {
+  // Company overlay (import feature): the rows ARE the imported catalog's
+  // categories — the company's own taxonomy, system-agnostic (imported data
+  // carries no WaterSystem mapping; every live filter setter writes null).
+  if (companyCatalogActive) {
+    return companyCategorySections(resolvedCatalogProducts);
+  }
+  // Empty shell, nothing imported yet: an honest blank under the import
+  // card — never the 0-count plumbing maze. (Dead branch on demo/buildsmart:
+  // the compile-time catalog there is never empty.)
+  if (resolvedCatalogProducts.isEmpty) return const [];
+  final out = <Section>[];
+  for (final c in kCatalogCats) {
+    if (!categoryHasContent(c.title)) continue;
+    if (system == null) {
+      out.add(c);
+      continue;
+    }
+    final node = _findCatalogTreeNodeByTitle(c.title);
+    if (node != null && nodeHasSystem(node, system)) out.add(c);
+  }
+  return out;
+}
+
+/// Real, department-aware summary for a top category — its in-system product
+/// count + a description built from its in-system sub-categories. Replaces the
+/// old static `_kMeta` copy so each row reflects the *active* system, not fixed
+/// marketing text identical across departments.
+({int count, String desc}) _categorySummary(String title, WaterSystem? system) {
+  final node = _findCatalogTreeNodeByTitle(title);
+  if (node == null) return (count: 0, desc: 'בקרוב');
+  final leafCats = <String>{};
+  void collect(CatalogNode n) {
+    if (n.isLeaf) {
+      final c = n.lipskeyCategory;
+      if (c != null) leafCats.add(c);
+    } else {
+      for (final ch in n.children) {
+        collect(ch);
+      }
+    }
+  }
+
+  collect(node);
+  final count = filterBySystem(
+          resolvedCatalogProducts.where((p) => leafCats.contains(p.categoryHe)).toList(),
+          system)
+      .length;
+  final subs = [
+    for (final ch in node.children)
+      if (system == null || nodeHasSystem(ch, system)) ch.title,
+  ];
+  final desc = subs.isEmpty ? '$count מוצרים' : subs.take(3).join(' · ');
+  return (count: count, desc: desc);
+}
+
+/// PERF-H3: derived provider — precomputes every category's summary once per
+/// active system, keyed by category title. `_CatalogRow` does a map lookup
+/// instead of calling `_categorySummary` (which scans the full catalog) on
+/// each build. Identical values to the previous per-row calls.
+final categorySummaryProvider =
+    Provider<Map<String, ({int count, String desc})>>((ref) {
+  final system = ref.watch(catalogSystemFilterProvider);
+  // Company overlay: summaries derive from the imported list (same shape,
+  // same '$count מוצרים' idiom) — the const-tree walk has nothing to say
+  // about a company's categories.
+  if (companyCatalogActive) {
+    return companyCategorySummaries(resolvedCatalogProducts);
+  }
+  return {
+    for (final c in kCatalogCats) c.title: _categorySummary(c.title, system),
+  };
+});
+
+class _CatalogList extends ConsumerWidget {
   const _CatalogList();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cats = _catsForSystem(ref.watch(catalogSystemFilterProvider));
     return ListView.separated(
       key: const Key('catalog-list'),
-      itemCount: kCatalogCats.length,
+      itemCount: cats.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
         color: Color(0xFFF5F5F5),
       ),
-      itemBuilder: (context, i) {
-        return _CatalogRow(
-          cat: kCatalogCats[i],
-          meta: _kMeta[i],
-        );
-      },
+      itemBuilder: (context, i) => _CatalogRow(cat: cats[i]),
     );
   }
-}
-
-// ── "הכל" overview — a preview block per section ─────────────────────────────
-class _AllOverview extends ConsumerWidget {
-  const _AllOverview({this.scrollCtrl});
-  final ScrollController? scrollCtrl;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    void go(String s) =>
-        ref.read(catalogSectionProvider.notifier).state = s;
-
-    final recents = ref.watch(recentSearchesProvider);
-    final favSkus = ref.watch(productFavoritesProvider);
-    final favProducts =
-        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).take(3).toList();
-
-    return ListView(
-      controller: scrollCtrl,
-      key: const Key('catalog-list'),
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        // קטגוריות — full list inline (no preview cap, no "הצג הכל").
-        _OverviewBlock(
-          title: 'קטגוריות',
-          count: kCatalogCats.length,
-          children: [
-            for (var i = 0; i < kCatalogCats.length; i++)
-              _CatalogRow(cat: kCatalogCats[i], meta: _kMeta[i]),
-          ],
-        ),
-        // חיפושים אחרונים
-        _OverviewBlock(
-          title: 'חיפושים אחרונים',
-          count: recents.length,
-          onShowAll: () => go('חיפושים אחרונים'),
-          children: recents.isEmpty
-              ? const [_OverviewEmpty('אין חיפושים אחרונים')]
-              : [
-                  for (final q in recents.take(3))
-                    _OverviewRow(
-                      icon: Icons.history,
-                      label: q,
-                      onTap: () {
-                        ref.read(searchQueryProvider.notifier).state = q;
-                        ref.read(searchPanelOpenProvider.notifier).state = true;
-                      },
-                    ),
-                ],
-        ),
-        // תאימות
-        _OverviewBlock(
-          title: 'תכנון חיבור',
-          count: kLipskeyCatalog.length,
-          onShowAll: () => _openStudio(context),
-          children: [
-            _OverviewRow(
-              icon: Icons.handyman,
-              label: 'תכנון חיבור — בחר מה לחבר ונכין רשימת קנייה',
-              onTap: () => _openStudio(context),
-            ),
-          ],
-        ),
-        // מועדפים
-        _OverviewBlock(
-          title: 'מועדפים',
-          count: favSkus.length,
-          onShowAll: () => go('מועדפים'),
-          children: favProducts.isEmpty
-              ? const [_OverviewEmpty('אין מועדפים עדיין')]
-              : [
-                  for (final p in favProducts)
-                    _OverviewRow(
-                      icon: Icons.favorite,
-                      label: p.nameHe,
-                      onTap: () => go('מועדפים'),
-                    ),
-                ],
-        ),
-        // עץ חכם
-        _OverviewBlock(
-          title: 'עץ חכם',
-          count: kSmartTreeCats.length,
-          onShowAll: () => go('עץ חכם'),
-          isLast: true,
-          children: [
-            for (var i = 0; i < kSmartTreeCats.length && i < 3; i++)
-              _OverviewRow(
-                icon: Icons.account_tree_outlined,
-                label:
-                    '${kSmartTreeCats[i]} · ${smartProductsForCat(kSmartTreeCats[i]).length} מוצרים',
-                onTap: () {
-                  ref.read(smartTreeCatProvider.notifier).state =
-                      kSmartTreeCats[i];
-                  go('עץ חכם');
-                },
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _OverviewBlock extends StatelessWidget {
-  const _OverviewBlock({
-    required this.title,
-    required this.children,
-    this.onShowAll,
-    this.count = 0,
-    this.isLast = false,
-  });
-  final String title;
-  final int count;
-  final VoidCallback? onShowAll;
-  final List<Widget> children;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 14, 16, 4),
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              // Title + count badge fill the space (so the title can ellipsize
-              // without stealing room from / mis-centering the "הצג הכל" link).
-              Expanded(
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    if (count > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: BsTokens.brand,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (onShowAll != null)
-                TextButton(
-                  onPressed: onShowAll,
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('הצג הכל',
-                          style: TextStyle(
-                              color: BsTokens.brand,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600)),
-                      Icon(Icons.chevron_left, color: BsTokens.brand, size: 18),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-        ...children,
-        if (!isLast)
-          const Divider(height: 1, thickness: 1, color: BsTokens.brand),
-      ],
-    );
-  }
-}
-
-class _OverviewRow extends StatelessWidget {
-  const _OverviewRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-        child: Row(
-          children: [
-            Icon(icon, color: BsTokens.brand, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
-              ),
-            ),
-            const Icon(Icons.chevron_left, color: Color(0xFFB0B0B8), size: 18),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _OverviewEmpty extends StatelessWidget {
-  const _OverviewEmpty(this.text);
-  final String text;
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
-        child: Text(text,
-            style: const TextStyle(color: Color(0xFF888888), fontSize: 13)),
-      );
 }
 
 // ── Lipskey supplier card — pinned at top of catalog list ────────────────────
@@ -2416,26 +2112,70 @@ CatalogNode? _findCatalogTreeNodeByTitle(String title) {
   return null;
 }
 
+/// Smart-nav: switch to the catalog tab and drill into [categoryTitle], so a
+/// tapped category suggestion takes the user straight to those products.
+void openCatalogCategory(WidgetRef ref, String categoryTitle) {
+  ref.read(mainTabProvider.notifier).state = 0; // catalog tab
+  // Company overlay: an imported category resolves to a synthetic product
+  // leaf (same fallback as _CatalogRow.onTap) — never the "בקרוב" placeholder.
+  final node = _findCatalogTreeNodeByTitle(categoryTitle) ??
+      (companyCatalogActive
+          ? CatalogNode(
+              id: 'company.$categoryTitle',
+              title: categoryTitle,
+              emoji: companyCategorySections(resolvedCatalogProducts)
+                  .firstWhere(
+                    (c) => c.title == categoryTitle,
+                    orElse: () => const Section(id: '', emoji: '📦', title: ''),
+                  )
+                  .emoji,
+              lipskeyCategory: categoryTitle,
+            )
+          : CatalogNode(
+              id: 'placeholder.$categoryTitle',
+              title: categoryTitle,
+              emoji: kCatalogCats
+                  .firstWhere(
+                    (c) => c.title == categoryTitle,
+                    orElse: () => const Section(id: '', emoji: '', title: ''),
+                  )
+                  .emoji,
+            ));
+  ref.read(catalogTreePathProvider.notifier).state = [node];
+}
+
 class _CatalogRow extends ConsumerWidget {
-  const _CatalogRow({required this.cat, required this.meta});
+  const _CatalogRow({required this.cat});
 
   final Section cat;
-  final ({String preview, String time, int badge}) meta;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasBadge = meta.badge > 0;
+    // PERF-H3: map lookup — summaries precomputed once by categorySummaryProvider.
+    final summary = ref.watch(categorySummaryProvider)[cat.title] ??
+        (count: 0, desc: 'בקרוב');
+    final hasBadge = summary.count > 0;
     return InkWell(
       onTap: () {
         // Categories without tree data drill into a designed "coming soon"
         // screen via a childless placeholder node, so the experience stays
-        // consistent across every main category.
+        // consistent across every main category. With a COMPANY catalog live,
+        // a derived row instead becomes a synthetic PRODUCT leaf
+        // (lipskeyCategory = the row title) — the existing drill serves it
+        // end-to-end (isProductLeaf → system base → auto-facets → list).
         final node = _findCatalogTreeNodeByTitle(cat.title) ??
-            CatalogNode(
-              id: 'placeholder.${cat.title}',
-              title: cat.title,
-              emoji: cat.emoji,
-            );
+            (companyCatalogActive
+                ? CatalogNode(
+                    id: 'company.${cat.title}',
+                    title: cat.title,
+                    emoji: cat.emoji,
+                    lipskeyCategory: cat.title,
+                  )
+                : CatalogNode(
+                    id: 'placeholder.${cat.title}',
+                    title: cat.title,
+                    emoji: cat.emoji,
+                  ));
         ref.read(catalogTreePathProvider.notifier).state = [node];
       },
       child: Padding(
@@ -2446,47 +2186,32 @@ class _CatalogRow extends ConsumerWidget {
             Container(
               width: 50,
               height: 50,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Text(cat.emoji, style: const TextStyle(fontSize: 24)),
+              child: catAvatar(cat.title, cat.emoji, 24),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          cat.title,
-                          style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        meta.time,
-                        style: TextStyle(
-                          color: hasBadge
-                              ? BsTokens.brand
-                              : const Color(0xFF888888),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    cat.title,
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          meta.preview,
+                          summary.desc,
                           style: const TextStyle(
                             color: Color(0xFF888888),
                             fontSize: 13,
@@ -2506,7 +2231,7 @@ class _CatalogRow extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${meta.badge}',
+                            '${summary.count}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -2531,11 +2256,19 @@ class _CatalogRow extends ConsumerWidget {
 // (bottom) stay fixed; only the rows scroll. A fixed drill bar replaces the
 // search bar: back-one-level + the current category as a pressed orange chip
 // with an X that cancels the whole drill.
-int _treeNodeCount(CatalogNode node) {
-  if (!node.isLeaf) return node.children.length;
+int _treeNodeCount(CatalogNode node, [WaterSystem? system]) {
+  if (!node.isLeaf) {
+    return (system == null
+            ? node.children
+            : node.children.where((c) => nodeHasSystem(c, system)))
+        .length;
+  }
   if (node.lipskeyCategory != null) {
-    return kCatalogProducts
-        .where((p) => p.categoryHe == node.lipskeyCategory)
+    return filterBySystem(
+            resolvedCatalogProducts
+                .where((p) => p.categoryHe == node.lipskeyCategory)
+                .toList(),
+            system)
         .length;
   }
   if (node.smartKey != null) {
@@ -2546,20 +2279,25 @@ int _treeNodeCount(CatalogNode node) {
 
 /// Secondary-line description — child names for a branch, or the
 /// product/model/brand summary for a leaf.
-String _treeNodeDesc(CatalogNode node) {
+String _treeNodeDesc(CatalogNode node, [WaterSystem? system]) {
   if (!node.isLeaf) {
-    return node.children.map((c) => c.title).join(' · ');
+    final kids = system == null
+        ? node.children
+        : node.children.where((c) => nodeHasSystem(c, system)).toList();
+    return kids.map((c) => c.title).join(' · ');
   }
   if (node.lipskeyCategory != null) {
     // Preview of what's inside (characterizing words / sample names) rather
     // than a bare product count.
-    final prods = kCatalogProducts
-        .where((p) => p.categoryHe == node.lipskeyCategory)
-        .toList();
+    final prods = filterBySystem(
+        resolvedCatalogProducts
+            .where((p) => p.categoryHe == node.lipskeyCategory)
+            .toList(),
+        system);
     final preview = _facetDesc(prods);
     return preview.isNotEmpty
         ? preview
-        : '${_treeNodeCount(node)} מוצרים · ליפסקי ברקן';
+        : '${_treeNodeCount(node, system)} מוצרים · ליפסקי ברקן';
   }
   if (node.smartKey != null) {
     final p = smartProductByKey(node.smartKey!);
@@ -2568,6 +2306,58 @@ String _treeNodeDesc(CatalogNode node) {
   return '${node.brandIds.length} מותגים';
 }
 
+/// PERF: a tree row needs BOTH the count and the description for the SAME
+/// (node, system); computing them separately ran the (now-memoised)
+/// `nodeHasSystem` child filter twice. This bundles them and caches the pair
+/// per `node.id|system` so `_TreeCatRow` builds it ONCE — not twice per row,
+/// not again every frame. Identical values to calling the two helpers directly.
+final Map<String, ({int count, String desc})> _treeNodeSummaryCache = {};
+({int count, String desc}) _treeNodeSummary(CatalogNode node,
+    [WaterSystem? system]) {
+  final key = '${node.id}|${system?.name ?? ''}';
+  return _treeNodeSummaryCache[key] ??= (
+    count: _treeNodeCount(node, system),
+    desc: _treeNodeDesc(node, system),
+  );
+}
+
+/// The engine-derived "נתוני קטלוג" facts a card shows for a product: each of
+/// these is an O(catalog)-scale sweep (`compatibleProductsFor` ≈ O(855);
+/// `installKitFor` + `variantSiblingsCountFor` touch the whole catalog), so the
+/// card's Builder recomputed all six on every setState (filter chip, depth
+/// toggle, …). They depend ONLY on the product, so we bundle and cache them
+/// keyed on sku — byte-identical to calling the helpers inline (same pure
+/// inputs → same outputs), just computed once per SKU.
+class _CardCatalogData {
+  _CardCatalogData(LipskeyCatalogProduct prod)
+      : spec = engineeringSpecFor(prod),
+        price = priceFor(prod),
+        compat = compatibleProductsFor(prod),
+        finder = finderGroupFor(prod),
+        kit = installKitFor(prod),
+        variants = variantSiblingsCountFor(prod),
+        readiness = cardReadinessScore(prod);
+
+  final ({
+    String material,
+    String? pressureRating,
+    double maxTempC,
+    String waterSystem,
+    String endsSummary,
+    double? minBoreMm,
+  })? spec;
+  final int? price;
+  final List<LipskeyCatalogProduct> compat;
+  final ({String emoji, String label})? finder;
+  final ({int must, int optional, int tools})? kit;
+  final int variants;
+  final ({int score, String label, int breadth, int depth}) readiness;
+}
+
+final Map<String, _CardCatalogData> _cardCatalogDataCache = {};
+_CardCatalogData _cardCatalogDataFor(LipskeyCatalogProduct prod) =>
+    _cardCatalogDataCache[prod.sku] ??= _CardCatalogData(prod);
+
 class _TreeDrill extends ConsumerWidget {
   const _TreeDrill({required this.path});
   final List<CatalogNode> path;
@@ -2575,14 +2365,18 @@ class _TreeDrill extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final current = path.last;
-    final query = ref.watch(catalogTreeQueryProvider).trim();
+    final query =
+        ref.watch(catalogTreeQueryProvider.select((q) => q.trim()));
     final facetSel = ref.watch(catalogFacetProvider);
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
+    // T6.3: catalog reads via the repository (same const data).
+    final repo = ref.watch(catalogRepositoryProvider);
 
     // A leaf that maps to a lipskey category with products drills by facets
     // (curated where defined, else auto-derived) before the product list.
     final leafCat = current.isLeaf ? current.lipskeyCategory : null;
     final isProductLeaf = leafCat != null &&
-        kCatalogProducts.any((p) => p.categoryHe == leafCat);
+        repo.allProducts().any((p) => p.categoryHe == leafCat);
 
     void resetQuery() =>
         ref.read(catalogTreeQueryProvider.notifier).state = '';
@@ -2612,14 +2406,14 @@ class _TreeDrill extends ConsumerWidget {
       if (n.isLeaf) {
         // Leaf with products → drill in-tab (facets + product list below).
         if (n.lipskeyCategory != null &&
-            kCatalogProducts.any((p) => p.categoryHe == n.lipskeyCategory)) {
+            repo.allProducts().any((p) => p.categoryHe == n.lipskeyCategory)) {
           resetQuery();
           resetFacets();
           ref.read(catalogTreePathProvider.notifier).state = [...path, n];
           return;
         }
         if (n.smartKey != null) {
-          final product = smartProductByKey(n.smartKey!);
+          final product = repo.smartProductByKey(n.smartKey!);
           if (product != null) openSmartProductSheet(context, product);
         }
         return;
@@ -2648,8 +2442,9 @@ class _TreeDrill extends ConsumerWidget {
     Widget? special;
 
     if (isProductLeaf) {
-      final base =
-          kCatalogProducts.where((p) => p.categoryHe == leafCat).toList();
+      final base = filterBySystem(
+          repo.allProducts().where((p) => p.categoryHe == leafCat).toList(),
+          systemFilter);
       final curated = kProductFacets[leafCat];
       final options = <({String label, String desc, int count})>[];
       if (curated != null) {
@@ -2696,14 +2491,17 @@ class _TreeDrill extends ConsumerWidget {
     } else if (current.children.isEmpty) {
       special = _TreeComingSoon(node: current);
     } else {
-      final rows = query.isEmpty
+      var rows = query.isEmpty
           ? current.children
           : _searchSubtree(current, query);
+      if (systemFilter != null) {
+        rows = rows.where((c) => nodeHasSystem(c, systemFilter)).toList();
+      }
       rowWidgets = [
         for (final n in rows)
-          _TreeCatRow(node: n, onTap: () => openNode(n)),
+          _TreeCatRow(node: n, system: systemFilter, onTap: () => openNode(n)),
       ];
-      products = _subtreeProducts(current);
+      products = filterBySystem(_subtreeProducts(current), systemFilter);
       if (query.isNotEmpty) {
         products =
             products.where((p) => p.nameHe.contains(query)).toList();
@@ -2719,7 +2517,7 @@ class _TreeDrill extends ConsumerWidget {
       }
     }
 
-    products = _sortProducts(products, ref.watch(catalogProductSortProvider));
+    products = sortCatalogProducts(products, ref.watch(catalogProductSortProvider));
 
     final body = special ??
         CustomScrollView(
@@ -2773,7 +2571,7 @@ class _FacetRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: BsTokens.brand, width: 1),
       ),
@@ -2793,7 +2591,7 @@ class _FacetRow extends StatelessWidget {
                       Text(
                         label,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -2878,7 +2676,7 @@ class _ProductsHeader extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
-          Text(
+          CfgText('catalog_screen.t19', 
             'מוצרים',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
@@ -2904,7 +2702,7 @@ class _ProductsHeader extends ConsumerWidget {
           ),
           const Spacer(),
           // Sort-by button on the opposite side of the header.
-          if (ref.watch(catalogSettingsProvider).quickFilterBar)
+          if (ref.watch(catalogSettingsProvider.select((s) => s.quickFilterBar)))
           PopupMenuButton<ProductSort>(
             tooltip: 'מיון לפי',
             color: Colors.white,
@@ -2929,9 +2727,9 @@ class _ProductsHeader extends ConsumerWidget {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        _productSortLabel(s),
+                        catalogProductSortLabel(s),
                         style: TextStyle(
-                          color: const Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 14,
                           fontWeight:
                               s == sort ? FontWeight.w700 : FontWeight.w400,
@@ -2952,7 +2750,7 @@ class _ProductsHeader extends ConsumerWidget {
                 children: [
                   const Icon(Icons.swap_vert, size: 16, color: BsTokens.brand),
                   const SizedBox(width: 4),
-                  Text(
+                  CfgText('catalog_screen.t20', 
                     'מיון לפי',
                     style: const TextStyle(
                       color: BsTokens.brand,
@@ -2992,37 +2790,38 @@ class _TreeComingSoon extends StatelessWidget {
                 border: Border.all(color: BsTokens.brand, width: 1.5),
               ),
               alignment: Alignment.center,
-              child: Text(node.emoji, style: const TextStyle(fontSize: 44)),
+              child: catAvatar(node.title, node.emoji, 44),
             ),
             const SizedBox(height: 20),
             Text(
               node.title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 10),
-            Container(
+            // composite-hide: org hiding this id drops the whole "בקרוב" pill, not orphaned chrome
+            CfgVisible('catalog_screen.t21', child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
                 color: BsTokens.brand,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Text(
+              child: CfgText('catalog_screen.t21',
                 'בקרוב',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: bsOnAccent(context),
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
+            )),
             const SizedBox(height: 12),
-            const Text(
+            const CfgText('catalog_screen.t22', 
               'הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFF888888), fontSize: 13),
@@ -3093,34 +2892,46 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
   Widget _crumb(({String label, VoidCallback? onTap}) crumb) {
     final active = crumb.onTap == null;
     if (active) {
-      return Container(
-        padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
-        decoration: BoxDecoration(
-          color: BsTokens.brand,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 130),
-              child: Text(
-                crumb.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+      return Semantics(
+        button: true,
+        label: 'בטל',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onCancel,
+          // ≥48dp tap target: the whole active crumb cancels; the visible
+          // pill stays small (a11y) inside the fixed-48dp bar.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                decoration: BoxDecoration(
+                  color: BsTokens.brand,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 130),
+                      child: Text(
+                        crumb.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.close, color: Colors.white, size: 16),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(width: 6),
-            GestureDetector(
-              onTap: widget.onCancel,
-              child: const Icon(Icons.close, color: Colors.white, size: 16),
-            ),
-          ],
+          ),
         ),
       );
     }
@@ -3161,7 +2972,8 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
             TextSelection.collapsed(offset: next.length);
       }
     });
-    final hasText = ref.watch(catalogTreeQueryProvider).isNotEmpty;
+    final hasText =
+        ref.watch(catalogTreeQueryProvider.select((q) => q.isNotEmpty));
 
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -3174,7 +2986,7 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back,
+            icon: const Icon(Icons.arrow_forward,
                 color: Color(0xFF555555), size: 20),
             tooltip: 'חזרה',
             onPressed: widget.onBack,
@@ -3205,12 +3017,21 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
           // Scoped search field (compact).
           SizedBox(
             width: 92,
-            child: TextField(
+            // APP-KEYBOARD-ONLY: a drop-in for the TextField that was here —
+            // with SMART_INPUT off it renders that same plain field (device
+            // keyboard unchanged); with it on the field goes readOnly and our
+            // keyboard docks itself, so the platform keyboard never covers the
+            // catalog. `textInputAction` is dropped on purpose: it only styles
+            // the OS keyboard's enter key, which is exactly what we replace —
+            // its search behaviour is `onSubmitted` below, which our keyboard's
+            // send key fires too.
+            child: BsKeyboardField(
               controller: _controller,
-              textInputAction: TextInputAction.search,
               onChanged: (v) =>
                   ref.read(catalogTreeQueryProvider.notifier).state = v,
-              style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+              onSubmitted: (v) =>
+                  ref.read(catalogTreeQueryProvider.notifier).state = v,
+              style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
               decoration: const InputDecoration(
                 hintText: 'חיפוש',
                 hintStyle: TextStyle(color: Color(0xFF888888), fontSize: 14),
@@ -3234,18 +3055,22 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
 }
 
 class _TreeCatRow extends StatelessWidget {
-  const _TreeCatRow({required this.node, required this.onTap});
+  const _TreeCatRow({required this.node, required this.onTap, this.system});
   final CatalogNode node;
   final VoidCallback onTap;
+  final WaterSystem? system;
 
   @override
   Widget build(BuildContext context) {
-    final count = _treeNodeCount(node);
-    final desc = _treeNodeDesc(node);
+    // PERF: count + desc for this (node, system) computed once and cached,
+    // instead of two passes over the children per row, every frame.
+    final summary = _treeNodeSummary(node, system);
+    final count = summary.count;
+    final desc = summary.desc;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: BsTokens.brand, width: 1),
       ),
@@ -3261,12 +3086,12 @@ class _TreeCatRow extends StatelessWidget {
                 Container(
                   width: 50,
                   height: 50,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F5F5),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child: Text(node.emoji, style: const TextStyle(fontSize: 24)),
+                  child: catAvatar(node.title, node.emoji, 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -3276,7 +3101,7 @@ class _TreeCatRow extends StatelessWidget {
                       Text(
                         node.title,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -3366,7 +3191,19 @@ class _SmartTreeCatList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cats = kSmartTreeCats;
+    // Scope the smart tree to the active water system (Benzi #1, Phase 2b):
+    // keep only categories that still have an in-system product.
+    final system = ref.watch(catalogSystemFilterProvider);
+    // T6.3: catalog reads via the repository (same const data).
+    final repo = ref.watch(catalogRepositoryProvider);
+    final cats = system == null
+        ? repo.smartTreeCats()
+        : repo
+            .smartTreeCats()
+            .where((c) =>
+                filterSmartBySystem(repo.smartProductsForCat(c), system)
+                    .isNotEmpty)
+            .toList();
     return Column(
       children: [
         Expanded(
@@ -3376,7 +3213,8 @@ class _SmartTreeCatList extends ConsumerWidget {
                 const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
             itemBuilder: (_, i) {
               final cat = cats[i];
-              final prods = smartProductsForCat(cat);
+              final prods =
+                  filterSmartBySystem(repo.smartProductsForCat(cat), system);
               final count = prods.length;
               final desc = prods.map((p) => p.name).join(' · ');
               final emoji = _catEmojis[cat] ?? '📦';
@@ -3391,8 +3229,8 @@ class _SmartTreeCatList extends ConsumerWidget {
                       Container(
                         width: 50,
                         height: 50,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF5F5F5),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -3407,7 +3245,7 @@ class _SmartTreeCatList extends ConsumerWidget {
                             Text(
                               cat,
                               style: const TextStyle(
-                                color: Color(0xFF1A1A1A),
+                                color: BsTokens.inkLight,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -3463,7 +3301,7 @@ class _SmartTreeProductList extends ConsumerStatefulWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -3498,9 +3336,13 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
 
   @override
   Widget build(BuildContext context) {
-    const green = Color(0xFF22C55E);
-    final query = ref.watch(smartTreeQueryProvider).trim();
-    final all = smartProductsForCat(widget.cat);
+    const green = BsTokens.success;
+    final query =
+        ref.watch(smartTreeQueryProvider.select((q) => q.trim()));
+    // T6.3: smart-tree products via the repository (same const data).
+    final all = filterSmartBySystem(
+        ref.watch(catalogRepositoryProvider).smartProductsForCat(widget.cat),
+        ref.watch(catalogSystemFilterProvider));
     final products = query.isEmpty
         ? all
         : all.where((p) => p.name.contains(query)).toList();
@@ -3518,52 +3360,68 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back,
+                icon: const Icon(Icons.arrow_forward,
                     color: Color(0xFF555555), size: 20),
                 tooltip: 'חזרה',
                 onPressed: _back,
               ),
               Flexible(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
-                  decoration: BoxDecoration(
-                    color: green,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('🌳 ', style: TextStyle(fontSize: 13)),
-                      Flexible(
-                        child: Text(
-                          widget.cat,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                child: Semantics(
+                  button: true,
+                  label: 'בטל',
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _back,
+                    // ≥48dp tap target: the whole category chip cancels; the
+                    // visible pill stays small (a11y) inside the 48dp bar.
+                    child: ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minWidth: 48, minHeight: 48),
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                          decoration: BoxDecoration(
+                            color: green,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('🌳 ',
+                                  style: TextStyle(fontSize: 13)),
+                              Flexible(
+                                child: Text(
+                                  widget.cat,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: bsOnAccent(context),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(Icons.close,
+                                  color: bsOnAccent(context), size: 16),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: _back,
-                        child: const Icon(Icons.close,
-                            color: Colors.white, size: 16),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: TextField(
+                // APP-KEYBOARD-ONLY — same drop-in as the tree search above.
+                child: BsKeyboardField(
                   controller: _searchCtrl,
-                  textInputAction: TextInputAction.search,
                   onChanged: (v) =>
                       ref.read(smartTreeQueryProvider.notifier).state = v,
-                  style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+                  onSubmitted: (v) =>
+                      ref.read(smartTreeQueryProvider.notifier).state = v,
+                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                   decoration: const InputDecoration(
                     hintText: 'חיפוש',
                     hintStyle: TextStyle(color: Color(0xFF888888), fontSize: 14),
@@ -3595,7 +3453,7 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: green, width: 1),
                 ),
@@ -3613,8 +3471,8 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                           Container(
                             width: 50,
                             height: 50,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF5F5F5),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
@@ -3629,7 +3487,7 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                                 Text(
                                   p.name,
                                   style: const TextStyle(
-                                    color: Color(0xFF1A1A1A),
+                                    color: BsTokens.inkLight,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -3683,10 +3541,17 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
 /// accessories + cart sync) for [product]. Used by the catalog drill-down so
 /// reaching a leaf opens the same rich sheet as the smart-tree.
 void openSmartProductSheet(BuildContext context, SmartProduct product) {
+  // Studio Pillar-3 · step 93 — product_view intel (additive · one place catches
+  // every caller · fired from a tap handler, never build → demo byte-identical).
+  // Reads the bus via the container — the established idiom (catalog_screen:622).
+  ProviderScope.containerOf(context, listen: false)
+      .read(intelBusProvider)
+      .track(IntelEvents.productView,
+          props: <String, String>{'sku': product.key});
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFFFFFFFF),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -3755,7 +3620,7 @@ class _SheetSection extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -3831,7 +3696,7 @@ class _ChipWrap extends StatelessWidget {
               child: Text(
                 o,
                 style: TextStyle(
-                  color: selected == o ? Colors.white : const Color(0xFF6E6E73),
+                  color: selected == o ? bsOnAccent(context) : const Color(0xFF6E6E73),
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -3874,15 +3739,23 @@ class _SavedVersionChip extends StatelessWidget {
               button: true,
               label: 'טען גרסה $label',
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: onLoad,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.fromLTRB(8, 3, 6, 3),
-                  child: Text(label,
-                      style: const TextStyle(
-                          color: Color(0xFF5B21B6),
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600)),
+                // ≥48dp tap target (a11y) — label text stays 10.5sp; only
+                // the hit area (and the violet pill) grows.
+                child: ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(minWidth: 48, minHeight: 48),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 3, 6, 3),
+                      child: Text(label,
+                          style: const TextStyle(
+                              color: Color(0xFF5B21B6),
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -3893,11 +3766,16 @@ class _SavedVersionChip extends StatelessWidget {
               button: true,
               label: 'מחק גרסה $label',
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: onDelete,
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(2, 3, 6, 3),
-                  child: Icon(Icons.close,
-                      size: 12, color: Color(0xFF7C3AED)),
+                // ≥48dp tap target around the small ✕ (a11y).
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: Icon(Icons.close,
+                        size: 12, color: Color(0xFF7C3AED)),
+                  ),
                 ),
               ),
             ),
@@ -3971,7 +3849,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? BsTokens.brand.withAlpha(30) : const Color(0xFFF5F5F5),
+          color: selected ? BsTokens.brand.withAlpha(30) : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected ? BsTokens.brand : const Color(0xFFE0E0E0),
@@ -3990,7 +3868,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         child: Text(
                           b.name,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -3998,14 +3876,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       ),
                       if (b.rec) ...[
                         const SizedBox(width: 8),
-                        Container(
+                        // composite-hide: org hiding this id drops the whole "מומלץ" badge, not orphaned chrome
+                        CfgVisible('catalog_screen.t23', child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: BsTokens.brand,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Text(
+                          child: const CfgText('catalog_screen.t23',
                             'מומלץ',
                             style: TextStyle(
                               color: Colors.white,
@@ -4013,7 +3892,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ),
+                        )),
                       ],
                     ],
                   ),
@@ -4029,7 +3908,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
               ),
             ),
             Text(
-              b.price != null ? '₪${b.price}' : 'לפי ספק',
+              b.price != null ? '₪${groupThousands(b.price!)}' : 'לפי ספק',
               style: TextStyle(
                 color: selected ? BsTokens.brand : const Color(0xFF888888),
                 fontSize: 16,
@@ -4087,9 +3966,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   // Roadmap step 28/22 — resolve the smart cart's lines to catalog products.
   List<LipskeyCatalogProduct> _resolveCartProducts() {
     final cart = ref.read(smartCartProvider);
+    // T6.3: catalog↔smart bridge via the repository (same const data).
+    final repo = ref.read(catalogRepositoryProvider);
     final out = <LipskeyCatalogProduct>[];
     for (final line in cart) {
-      final csp = smartProductByKey(line.productKey);
+      final csp = repo.smartProductByKey(line.productKey);
       if (csp == null) continue;
       SmartBrand? cb;
       for (final b in csp.brands) {
@@ -4098,7 +3979,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
           break;
         }
       }
-      final cprod = cb == null ? null : catalogProductForBrand(cb);
+      final cprod = cb == null ? null : repo.productForBrand(cb);
       if (cprod != null) out.add(cprod);
     }
     return out;
@@ -4112,9 +3993,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   void _showProjectBom(String project) {
     final notifier = ref.read(cardProjectsProvider.notifier);
     final items = notifier.forProject(project);
+    // T6.3: SKU→catalog lookup via the repository (same const data).
+    final repo = ref.read(catalogRepositoryProvider);
     final anchors = <LipskeyCatalogProduct>[];
     for (final it in items) {
-      final cp = catalogProductForSku(it.sku);
+      final cp = repo.productForSku(it.sku);
       if (cp != null) anchors.add(cp);
     }
     if (anchors.isEmpty) {
@@ -4158,9 +4041,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
             ),
           ),
           actions: [
-            TextButton(
+            // composite-hide: org hiding this id drops the whole close button, not orphaned chrome
+            CfgVisible('catalog_screen.t24', child: TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('סגור')),
+                child: const CfgText('catalog_screen.t24', 'סגור'))),
           ],
         ),
       ),
@@ -4202,9 +4086,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
             ),
           ),
           actions: [
-            TextButton(
+            // composite-hide: org hiding this id drops the whole close button, not orphaned chrome
+            CfgVisible('catalog_screen.t25', child: TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('סגור')),
+                child: const CfgText('catalog_screen.t25', 'סגור'))),
           ],
         ),
       ),
@@ -4244,7 +4129,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 12,
                       fontWeight: FontWeight.w600)),
             ),
@@ -4274,27 +4159,43 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   ),
                 ),
                 Positioned(
-                  top: 6,
-                  left: 12,
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: const BoxDecoration(
-                        color: BsTokens.brand,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x33000000),
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
+                  // 48dp tap box centred on the same spot as the old 36dp
+                  // circle (top 6→0, left 12→6 compensates the +12dp box).
+                  top: 0,
+                  left: 6,
+                  child: Tooltip(
+                    message: 'סגור',
+                    child: Semantics(
+                      button: true,
+                      label: 'סגור',
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => Navigator.pop(context),
+                        child: SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Center(
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: const BoxDecoration(
+                                color: BsTokens.brand,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0x33000000),
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              alignment: Alignment.center,
+                              child: const Icon(Icons.close,
+                                  color: Colors.white, size: 22),
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.close,
-                          color: Colors.white, size: 22),
                     ),
                   ),
                 ),
@@ -4309,8 +4210,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 Container(
                   width: 56,
                   height: 56,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F5F5),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -4324,7 +4225,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       Text(
                         p.name,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
@@ -4511,7 +4412,19 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           ],
                         ),
                       ),
-                      for (final i in _filteredBrandIdx) _brandCard(i),
+                      if (_filteredBrandIdx.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          child: Center(
+                            child: CfgText('catalog_screen.t26', 
+                              'אין מותג תואם לסינון שנבחר',
+                              style: TextStyle(
+                                  color: Color(0xFF64748B), fontSize: 13),
+                            ),
+                          ),
+                        )
+                      else
+                        for (final i in _filteredBrandIdx) _brandCard(i),
                     ],
                   ),
                 ),
@@ -4557,14 +4470,20 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 // 📦 נתוני קטלוג — spec / compat / price of the selected
                 // brand's real SKU (Roadmap 6/11/21), via the bridge.
                 Builder(builder: (_) {
-                  final prod = catalogProductForBrand(brand);
+                  // T6.3: brand→catalog lookup via the repository (same const).
+                  final prod =
+                      ref.read(catalogRepositoryProvider).productForBrand(brand);
                   if (prod == null) return const SizedBox.shrink();
-                  final spec = engineeringSpecFor(prod);
-                  final price = priceFor(prod);
-                  final compat = compatibleProductsFor(prod);
-                  final finder = finderGroupFor(prod);
-                  final kit = installKitFor(prod);
-                  final variants = variantSiblingsCountFor(prod);
+                  // PERF: the six engine sweeps below are pure in `prod`, so the
+                  // bundle is computed once per SKU and reused across setState
+                  // rebuilds instead of recomputed every time.
+                  final data = _cardCatalogDataFor(prod);
+                  final spec = data.spec;
+                  final price = data.price;
+                  final compat = data.compat;
+                  final finder = data.finder;
+                  final kit = data.kit;
+                  final variants = data.variants;
                   // Roadmap step 95 — expert/simple depth toggle (persisted).
                   final expert =
                       ref.watch(cardDetailModeProvider) == CardDetailMode.expert;
@@ -4575,16 +4494,20 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       children: [
                         Row(
                           children: [
-                            const Text('📦 נתוני קטלוג',
-                                style: TextStyle(
-                                    color: Color(0xFF888888),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600)),
+                            const CfgText(
+                              'catalog.detail.dataHeader',
+                              '📦 נתוני קטלוג',
+                              style: TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             const SizedBox(width: 8),
                             // Roadmap step 30 — card data readiness score
                             // (polish E — colorised by band 🟢/🟡/🔴).
                             Builder(builder: (_) {
-                              final s = cardReadinessScore(prod);
+                              final s = data.readiness;
                               final c = scoreBandColors(s.score);
                               return Container(
                                 padding: const EdgeInsets.symmetric(
@@ -4617,7 +4540,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     .read(projectModeProvider.notifier)
                                     .set(nextProjectMode(m)),
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 6),
+                                  padding: const EdgeInsetsDirectional.only(end: 6),
                                   child: Text('${l.emoji}${l.label}',
                                       style: const TextStyle(
                                           color: Color(0xFF6B7280),
@@ -4643,7 +4566,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     .read(professionModeProvider.notifier)
                                     .set(nextProfessionMode(prof)),
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 6),
+                                  padding: const EdgeInsetsDirectional.only(end: 6),
                                   child: Text('${l.emoji}${l.label}',
                                       style: const TextStyle(
                                           color: Color(0xFF6B7280),
@@ -4672,7 +4595,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                       .read(savedConfigsProvider.notifier)
                                       .toggle(p.key, brand.name),
                                   child: Padding(
-                                    padding: const EdgeInsets.only(left: 8),
+                                    padding: const EdgeInsetsDirectional.only(end: 8),
                                     child: Text(saved ? '★ נשמר' : '☆ שמור',
                                         style: TextStyle(
                                             color: saved
@@ -4686,7 +4609,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               );
                             }),
                             // Roadmap step 48 — copy a shareable price quote.
-                            Tooltip(
+                            // composite-hide: org hiding this id drops the whole "📋 הצעה" action, not orphaned chrome
+                            CfgVisible('catalog.action.proposal', child: Tooltip(
                               message:
                                   'העתק הצעת מחיר לזיכרון — מחיר + מק"ט + מותג, מוכן ל-WhatsApp',
                               child: GestureDetector(
@@ -4697,20 +4621,63 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content:
-                                            Text('הצעת המחיר הועתקה'),
+                                            CfgText('catalog_screen.t27', 'הצעת המחיר הועתקה'),
                                         duration: Duration(seconds: 2)),
                                   );
                                 },
                                 child: const Padding(
-                                  padding: EdgeInsets.only(left: 8),
-                                  child: Text('📋 הצעה',
-                                      style: TextStyle(
-                                          color: Color(0xFF0F766E),
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w700)),
+                                  padding: EdgeInsetsDirectional.only(end: 8),
+                                  child: const CfgText(
+                                    'catalog.action.proposal',
+                                    '📋 הצעה',
+                                    style: TextStyle(
+                                      color: Color(0xFF0F766E),
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            )),
+                            // #ai-quote-polish — when AI is live, turn the raw
+                            // quote into a professional customer message (every
+                            // number preserved). gateway null → not in the tree
+                            // → demo byte-identical.
+                            Builder(builder: (context) {
+                              if (ref.watch(claudeGatewayProvider) == null) {
+                                return const SizedBox.shrink();
+                              }
+                              // composite-hide: org hiding this id drops the whole "✨ נסח" action, not orphaned chrome
+                              return CfgVisible('catalog.action.draft', child: Tooltip(
+                                message:
+                                    'נסח הצעה מקצועית עם AI — מוכן לשליחה ללקוח',
+                                // a11y (swarm): expose a button role to a11y.
+                                child: Semantics(
+                                  button: true,
+                                  label: 'נסח הצעה מקצועית',
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                        QuotePolishScreen.route(
+                                            rawQuote: quoteTextFor(
+                                                p, _selectedBrand),
+                                            productName: p.name)),
+                                    child: const Padding(
+                                      padding:
+                                          EdgeInsetsDirectional.only(end: 8),
+                                      child: const CfgText(
+                                        'catalog.action.draft',
+                                        '✨ נסח',
+                                        style: TextStyle(
+                                          color: Color(0xFF6D28D9),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ));
+                            }),
                             Tooltip(
                               message: expert
                                   ? 'מצב מורחב — מציג את כל המפרט. טאפ לפישוט.'
@@ -4798,18 +4765,55 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 29 — physical-connection warning.
-                        Builder(builder: (_) {
+                        Builder(builder: (context) {
                           final warn = connectionWarningHe(prod);
                           if (warn == null) return const SizedBox.shrink();
+                          final aiOn =
+                              ref.watch(claudeGatewayProvider) != null;
                           return Padding(
                             padding: const EdgeInsets.only(top: 6),
-                            child: Text(warn,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    color: Color(0xFFB91C1C),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(warn,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Color(0xFFB91C1C),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700)),
+                                // #ai-adapter-explain — when AI is live, explain
+                                // which adapter bridges the gap (grounded on the
+                                // part's REAL verified ends). gateway null → not
+                                // in the tree → byte-identical demo.
+                                if (aiOn)
+                                  // a11y (swarm): expose a button role to a11y.
+                                  // composite-hide: org hiding this id drops the whole "🔌 איך לגשר?" action, not orphaned chrome
+                                  CfgVisible('catalog.action.howToBridge', child: Semantics(
+                                    button: true,
+                                    label: 'הסבר איזה מתאם מגשר',
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.of(context).push(
+                                          AdapterExplainScreen.route(
+                                              productName: prod.nameHe,
+                                              sku: prod.sku)),
+                                      child: const Padding(
+                                        padding: EdgeInsets.only(top: 4),
+                                        child: const CfgText(
+                                          'catalog.action.howToBridge',
+                                          '🔌 איך לגשר?',
+                                          style: TextStyle(
+                                            color: Color(0xFF1D4ED8),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )),
+                              ],
+                            ),
                           );
                         }),
                         // Roadmap step 28 — "your line so far": how this product
@@ -4817,9 +4821,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         Builder(builder: (_) {
                           final cart = ref.watch(smartCartProvider);
                           if (cart.isEmpty) return const SizedBox.shrink();
+                          // T6.3: catalog↔smart bridge via the repository.
+                          final repo = ref.read(catalogRepositoryProvider);
                           final lineProducts = <LipskeyCatalogProduct>[];
                           for (final line in cart) {
-                            final csp = smartProductByKey(line.productKey);
+                            final csp = repo.smartProductByKey(line.productKey);
                             if (csp == null) continue;
                             SmartBrand? cb;
                             for (final b in csp.brands) {
@@ -4830,7 +4836,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             }
                             final cprod = cb == null
                                 ? null
-                                : catalogProductForBrand(cb);
+                                : repo.productForBrand(cb);
                             if (cprod != null) lineProducts.add(cprod);
                           }
                           final fit = lineFitFor(prod, lineProducts);
@@ -4959,7 +4965,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               ],
                             );
                           }),
-                        if (price != null) catRow('מחיר משוער', '~₪$price'),
+                        if (price != null)
+                          catRow('מחיר משוער', '~₪${groupThousands(price)}'),
                         // Roadmap step 45 — cheaper standard-comparable brand.
                         Builder(builder: (_) {
                           final alt = cheaperAlternativeBrand(p, _selectedBrand);
@@ -4967,7 +4974,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           return Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                                '💰 חלופה זולה יותר: ${alt.name} (~₪${alt.price})',
+                                '💰 חלופה זולה יותר: ${alt.name} (~₪${groupThousands(alt.price)})',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -4985,8 +4992,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             return Padding(
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
-                                  '🧮 עלות קו משוערת: ~₪${c.total}  '
-                                  '(מוצר ₪${c.product} · אביזרים ₪${c.accessories} · עבודה ₪${c.labour})',
+                                  '🧮 עלות קו משוערת: ~₪${groupThousands(c.total)}  '
+                                  '(מוצר ₪${groupThousands(c.product)} · אביזרים ₪${groupThousands(c.accessories)} · עבודה ₪${groupThousands(c.labour)})',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -5052,7 +5059,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           }),
                           // Roadmap step 22 — "build my line" → materialized BOM.
                           const SizedBox(height: 8),
-                          Semantics(
+                          // composite-hide: org hiding this id drops the whole "🔧 בנה לי קו (BOM)" action, not orphaned chrome
+                          CfgVisible('catalog.action.buildBom', child: Semantics(
                             button: true,
                             label: 'פתח קו פריטים מומחש',
                             child: GestureDetector(
@@ -5066,14 +5074,18 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   border: Border.all(
                                       color: BsTokens.brand.withAlpha(90)),
                                 ),
-                                child: const Text('🔧 בנה לי קו (BOM)',
-                                    style: TextStyle(
-                                        color: BsTokens.brand,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700)),
+                                child: const CfgText(
+                                  'catalog.action.buildBom',
+                                  '🔧 בנה לי קו (BOM)',
+                                  style: TextStyle(
+                                    color: BsTokens.brand,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          )),
                           // Roadmap step 25 — engine-derived auto safety kit.
                           if (expert)
                             Builder(builder: (_) {
@@ -5130,7 +5142,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     // Roadmap step 46 — add line + safety to cart.
                                     Padding(
                                       padding: const EdgeInsets.only(top: 6),
-                                      child: Semantics(
+                                      // composite-hide: org hiding this id drops the whole "🛒 + בטיחות לסל" action, not orphaned chrome
+                                      child: CfgVisible('catalog_screen.t28', child: Semantics(
                                         button: true,
                                         label:
                                             'הוסף את הקו לסל כולל פריטי בטיחות',
@@ -5185,7 +5198,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                 color:
                                                     const Color(0xFFFCD34D)),
                                           ),
-                                          child: const Text(
+                                          child: const CfgText('catalog_screen.t28',
                                               '🛒 + בטיחות לסל',
                                               style: TextStyle(
                                                   color: Color(0xFFB45309),
@@ -5193,7 +5206,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                   fontWeight: FontWeight.w700)),
                                         ),
                                       ),
-                                      ),
+                                      )),
                                     ),
                                   ],
                                 ),
@@ -5203,7 +5216,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         // Roadmap steps 71/72/74 — assign to a project.
                         Builder(builder: (_) {
                           const proj = 'הפרויקט שלי';
-                          final loc = finderGroupFor(prod)?.label ?? 'כללי';
+                          final loc = data.finder?.label ?? 'כללי';
                           ProjectItem mk(String l) => ProjectItem(
                               project: proj,
                               location: l,
@@ -5223,7 +5236,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Semantics(
+                                  // composite-hide: org hiding this id drops the whole "➕ הוסף לפרויקט" action, not orphaned chrome
+                                  CfgVisible('catalog.action.addToProject', child: Semantics(
                                     button: true,
                                     label: 'הוסף את המוצר לפרויקט',
                                     child: GestureDetector(
@@ -5245,23 +5259,28 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFC7D2FE)),
                                       ),
-                                      child: const Text('➕ הוסף לפרויקט',
-                                          style: TextStyle(
-                                              color: Color(0xFF4338CA),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700)),
+                                      child: const CfgText(
+                                        'catalog.action.addToProject',
+                                        '➕ הוסף לפרויקט',
+                                        style: TextStyle(
+                                          color: Color(0xFF4338CA),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  ),
+                                  )),
                                   const SizedBox(width: 8),
-                                  GestureDetector(
+                                  // composite-hide: org hiding this id drops the whole "×3 חדרים" pill, not orphaned chrome
+                                  CfgVisible('catalog_screen.t30', child: GestureDetector(
                                     onTap: () {
                                       notifier.addToLocations(
                                           mk(loc), ['חדר 1', 'חדר 2', 'חדר 3']);
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(const SnackBar(
                                               content:
-                                                  Text('נוסף ל-3 חדרים'),
+                                                  CfgText('catalog_screen.t29', 'נוסף ל-3 חדרים'),
                                               duration: Duration(seconds: 2)));
                                     },
                                     child: Container(
@@ -5273,13 +5292,13 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFE2E8F0)),
                                       ),
-                                      child: const Text('×3 חדרים',
+                                      child: const CfgText('catalog_screen.t30', '×3 חדרים',
                                           style: TextStyle(
                                               color: Color(0xFF475569),
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700)),
                                     ),
-                                  ),
+                                  )),
                                 ],
                               ),
                               // Roadmap step 80 — ready project templates.
@@ -5289,11 +5308,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   spacing: 6,
                                   runSpacing: 6,
                                   children: [
-                                    const Text('תבניות:',
-                                        style: TextStyle(
-                                            color: Color(0xFF94A3B8),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600)),
+                                    const CfgText(
+                                      'catalog.templates.label',
+                                      'תבניות:',
+                                      style: TextStyle(
+                                        color: Color(0xFF94A3B8),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                     for (final t in projectTemplates())
                                       GestureDetector(
                                         onTap: () {
@@ -5342,7 +5365,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               if (units > 0)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 6),
-                                  child: GestureDetector(
+                                  // composite-hide: org hiding this id drops the whole "📋 BOM פרויקט מלא" action, not orphaned chrome
+                                  child: CfgVisible('catalog_screen.t31', child: GestureDetector(
                                     onTap: () => _showProjectBom(proj),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
@@ -5354,27 +5378,28 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFA5B4FC)),
                                       ),
-                                      child: const Text(
+                                      child: const CfgText('catalog_screen.t31',
                                           '📋 BOM פרויקט מלא',
                                           style: TextStyle(
                                               color: Color(0xFF3730A3),
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700)),
                                     ),
-                                  ),
+                                  )),
                                 ),
                               // Roadmap step 75 — customer quote for the project.
                               if (units > 0)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 6),
-                                  child: GestureDetector(
+                                  // composite-hide: org hiding this id drops the whole "📋 הצעת מחיר לפרויקט" action, not orphaned chrome
+                                  child: CfgVisible('catalog_screen.t33', child: GestureDetector(
                                     onTap: () {
                                       Clipboard.setData(ClipboardData(
                                           text: projectQuoteText(
                                               proj, inProj)));
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(const SnackBar(
-                                              content: Text(
+                                              content: CfgText('catalog_screen.t32', 
                                                   'הצעת מחיר לפרויקט הועתקה'),
                                               duration: Duration(seconds: 2)));
                                     },
@@ -5388,14 +5413,14 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFA7F3D0)),
                                       ),
-                                      child: const Text(
+                                      child: const CfgText('catalog_screen.t33',
                                           '📋 הצעת מחיר לפרויקט',
                                           style: TextStyle(
                                               color: Color(0xFF047857),
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700)),
                                     ),
-                                  ),
+                                  )),
                                 ),
                             ],
                           );
@@ -5408,11 +5433,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              const Text('תקינות נדרשת',
-                                  style: TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              const CfgText(
+                                'catalog.detail.requiredStandards',
+                                'תקינות נדרשת',
+                                style: TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               for (final t in triggers) ...[
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
@@ -5431,7 +5460,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                            color: Color(0xFF999999),
+                                            color: Color(0xFF595959),
                                             fontSize: 10,
                                             height: 1.25)),
                                   ),
@@ -5448,11 +5477,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 6),
-                                const Text('מה הקו צריך לחיבור',
-                                    style: TextStyle(
-                                        color: Color(0xFF888888),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600)),
+                                const CfgText(
+                                  'catalog.detail.connectionNeeds',
+                                  'מה הקו צריך לחיבור',
+                                  style: TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 for (final n in needs)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
@@ -5475,11 +5508,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 6),
-                                const Text('בדיקת קבלה (סיום התקנה)',
-                                    style: TextStyle(
-                                        color: Color(0xFF888888),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600)),
+                                const CfgText(
+                                  'catalog.detail.acceptanceCheck',
+                                  'בדיקת קבלה (סיום התקנה)',
+                                  style: TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 for (final c in checks)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
@@ -5502,11 +5539,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              const Text('תקן ישראלי רלוונטי',
-                                  style: TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              const CfgText(
+                                'catalog.detail.israeliStandard',
+                                'תקן ישראלי רלוונטי',
+                                style: TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               for (final s in stds)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
@@ -5539,11 +5580,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 6),
-                                const Text('טעויות נפוצות וטיפים',
-                                    style: TextStyle(
-                                        color: Color(0xFF888888),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600)),
+                                const CfgText(
+                                  'catalog.detail.commonMistakes',
+                                  'טעויות נפוצות וטיפים',
+                                  style: TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 for (final t in tips)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
@@ -5601,7 +5646,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 children: [
                                   Row(
                                     children: [
-                                      Semantics(
+                                      // composite-hide: org hiding this id drops the whole "💾 שמור גרסה" action, not orphaned chrome
+                                      CfgVisible('catalog.action.saveVersion', child: Semantics(
                                         button: true,
                                         label: 'שמור גרסת תצורה',
                                         child: GestureDetector(
@@ -5628,14 +5674,18 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                 color:
                                                     const Color(0xFFC4B5FD)),
                                           ),
-                                          child: const Text('💾 שמור גרסה',
-                                              style: TextStyle(
-                                                  color: Color(0xFF5B21B6),
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w700)),
+                                          child: const CfgText(
+                                            'catalog.action.saveVersion',
+                                            '💾 שמור גרסה',
+                                            style: TextStyle(
+                                              color: Color(0xFF5B21B6),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                      ),
+                                      )),
                                       const SizedBox(width: 8),
                                       if (versions.isNotEmpty)
                                         Text('${versions.length} גרסאות',
@@ -5701,11 +5751,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              const Text('מתי לבחור איזה מותג',
-                                  style: TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              const CfgText(
+                                'catalog.detail.brandGuide',
+                                'מתי לבחור איזה מותג',
+                                style: TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               for (final g in guide)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
@@ -5732,14 +5786,21 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              const Text('נצפו לאחרונה',
-                                  style: TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              const CfgText(
+                                'catalog.detail.recentlyViewed',
+                                'נצפו לאחרונה',
+                                style: TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               for (final sku in recent)
                                 Builder(builder: (_) {
-                                  final rp = catalogProductForSku(sku);
+                                  // T6.3: SKU→catalog lookup via the repository.
+                                  final rp = ref
+                                      .read(catalogRepositoryProvider)
+                                      .productForSku(sku);
                                   if (rp == null) {
                                     return const SizedBox.shrink();
                                   }
@@ -5765,7 +5826,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 if (mustItems.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.only(top: 16, bottom: 8),
-                    child: Text(
+                    child: CfgText('catalog_screen.t34', 
                       '⚡ פריטי חובה',
                       style: TextStyle(
                         color: Color(0xFF888888),
@@ -5806,7 +5867,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 if (optItems.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.only(top: 16, bottom: 8),
-                    child: Text(
+                    child: CfgText('catalog_screen.t35', 
                       '💡 פריטים אופציונליים',
                       style: TextStyle(
                         color: Color(0xFF888888),
@@ -5876,14 +5937,18 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               accessories: selectedAcc,
                             ),
                           );
+                      // Studio Pillar-3 · step 93 — add_to_cart intel (additive ·
+                      // single statement · tap handler, not build → byte-identical).
+                      ref.read(intelBusProvider).track(IntelEvents.addToCart,
+                          props: <String, String>{'sku': p.key});
                       Navigator.pop(context);
                       showToast(context,
                           '${p.name} · ${brand.name} (+${selectedAcc.length} אביזרים) נוסף לסל 🛒');
                     },
                     child: Text(
-                      'הוסף לסל · ₪$_total',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      'הוסף לסל · ₪${groupThousands(_total)}',
+                      style: TextStyle(
+                        color: bsOnAccent(context),
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -6047,7 +6112,7 @@ class _DiagramFlowState extends ConsumerState<_DiagramFlow>
       margin: const EdgeInsets.only(top: 16, bottom: 4),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6FA),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: const Color(0xFFE6E6EC)),
       ),
@@ -6120,7 +6185,7 @@ class _DiagramFlowState extends ConsumerState<_DiagramFlow>
               textAlign: TextAlign.center,
             )
           else
-            const Text(
+            const CfgText('catalog_screen.t36', 
               '💡 הקש על שלב כדי להדגיש את האביזרים שלו',
               style: TextStyle(
                 color: Color(0xFF888888),
@@ -6177,7 +6242,7 @@ class _StageCard extends StatelessWidget {
           Text(
             stage.label,
             style: TextStyle(
-              color: isActive ? const Color(0xFFF2A516) : const Color(0xFF1A1A1A),
+              color: isActive ? const Color(0xFFF2A516) : BsTokens.inkLight,
               fontSize: 9.5,
               fontWeight: FontWeight.w700,
             ),
@@ -6240,30 +6305,39 @@ class _AccRow extends StatelessWidget {
             : EdgeInsets.zero,
         child: Row(
           children: [
-            // Checkbox / lock
+            // Checkbox / lock — ≥48dp tap target around the 24dp box (a11y);
+            // the visible square stays 24dp.
             GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () => onToggle?.call(!selected),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: selected
-                      ? BsTokens.brand
-                      : const Color(0xFFEDEDED),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: selected
-                        ? BsTokens.brand
-                        : const Color(0xFFC8C8CE),
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? BsTokens.brand
+                          : const Color(0xFFEDEDED),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: selected
+                            ? BsTokens.brand
+                            : const Color(0xFFC8C8CE),
+                      ),
+                    ),
+                    child: selected
+                        ? const Icon(Icons.check,
+                            color: Colors.white, size: 13)
+                        : null,
                   ),
                 ),
-                child: selected
-                    ? const Icon(Icons.check, color: Colors.white, size: 13)
-                    : null,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 2),
             // Emoji + selected badge
             SizedBox(
               width: 36,
@@ -6274,8 +6348,8 @@ class _AccRow extends StatelessWidget {
                   Container(
                     width: 36,
                     height: 36,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF5F5F5),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -6290,7 +6364,7 @@ class _AccRow extends StatelessWidget {
                         width: 16,
                         height: 16,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF22C55E),
+                          color: BsTokens.success,
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: const Color(0xFFFFFFFF),
@@ -6320,21 +6394,30 @@ class _AccRow extends StatelessWidget {
                         child: Text(
                           acc.name,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => _showAccInfo(context, acc),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 2),
-                          child: Icon(
-                            Icons.info_outline,
-                            color: BsTokens.brand,
-                            size: 16,
+                      Semantics(
+                        button: true,
+                        label: 'מידע על האביזר',
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => _showAccInfo(context, acc),
+                          // ≥48dp tap target around the small ⓘ (a11y),
+                          // without enlarging the visible glyph.
+                          child: const SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Center(
+                              child: Icon(
+                                Icons.info_outline,
+                                color: BsTokens.brand,
+                                size: 16,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -6357,7 +6440,7 @@ class _AccRow extends StatelessWidget {
               children: [
                 Text(
                   acc.price != null
-                      ? '₪${acc.price! * qty}'
+                      ? '₪${groupThousands(acc.price! * qty)}'
                       : 'לפי ספק',
                   style: TextStyle(
                     color: selected
@@ -6388,7 +6471,7 @@ class _AccRow extends StatelessWidget {
                           '$qty',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -6417,16 +6500,26 @@ class _MiniQtyBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-        child: Icon(
-          icon,
-          size: 12,
-          color: onTap != null
-              ? Colors.black54
-              : const Color(0xFFCCCCCC),
+    return Semantics(
+      button: true,
+      label: icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        // ≥48dp tap target (a11y) — the visible +/- glyph stays 12dp; only
+        // the hit area (and the grey pill) grows.
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Center(
+            child: Icon(
+              icon,
+              size: 12,
+              color: onTap != null
+                  ? Colors.black54
+                  : const Color(0xFFCCCCCC),
+            ),
+          ),
         ),
       ),
     );
@@ -6437,7 +6530,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
   showDialog<void>(
     context: context,
     builder: (ctx) => Dialog(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(ctx).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360),
@@ -6452,8 +6545,8 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                   Container(
                     width: 56,
                     height: 56,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF5F5F5),
+                    decoration: BoxDecoration(
+                      color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -6468,7 +6561,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                         Text(
                           acc.name,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
                           ),
@@ -6500,7 +6593,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text(
+              const CfgText('catalog_screen.t37', 
                 'למה צריך:',
                 style: TextStyle(
                   color: Color(0xFF888888),
@@ -6512,7 +6605,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
               Text(
                 acc.why,
                 style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                   fontSize: 14,
                   height: 1.4,
                 ),
@@ -6527,7 +6620,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                 ),
                 child: Row(
                   children: [
-                    const Text(
+                    const CfgText('catalog_screen.t38', 
                       'מחיר ליחידה:',
                       style: TextStyle(
                         color: Color(0xFF666666),
@@ -6536,7 +6629,9 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                     ),
                     const Spacer(),
                     Text(
-                      '₪${acc.price}',
+                      acc.price != null
+                          ? '₪${groupThousands(acc.price!)}'
+                          : 'לפי ספק',
                       style: const TextStyle(
                         color: BsTokens.brand,
                         fontSize: 18,
@@ -6547,15 +6642,18 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                 ),
               ),
               const SizedBox(height: 12),
+              // A11Y-M2: AlignmentDirectional.centerStart is RTL-correct
+              // (maps to right edge in RTL layouts, left in LTR).
               Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
+                alignment: AlignmentDirectional.centerStart,
+                // composite-hide: org hiding this id drops the whole close button, not orphaned chrome
+                child: CfgVisible('catalog_screen.t39', child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text(
+                  child: const CfgText('catalog_screen.t39',
                     'סגור',
                     style: TextStyle(color: BsTokens.brand, fontSize: 14),
                   ),
-                ),
+                )),
               ),
             ],
           ),
@@ -6576,12 +6674,19 @@ class _FavoritesSection extends ConsumerWidget {
     if (favSkus.isEmpty) {
       return const _EmptySection(emoji: '⭐', label: 'מועדפים');
     }
-    final products =
-        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList();
+    // Scope favorites to the active water system (Benzi #1, option 2).
+    // T6.3: catalog read via the repository (same const data).
+    final products = filterBySystem(
+        ref
+            .watch(catalogRepositoryProvider)
+            .allProducts()
+            .where((p) => favSkus.contains(p.sku))
+            .toList(),
+        ref.watch(catalogSystemFilterProvider));
     return Column(
       children: [
         Container(
-          color: const Color(0xFF1A1A1A),
+          color: BsTokens.inkLight,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Row(
             children: [
@@ -6620,8 +6725,10 @@ class _FavProductRow extends ConsumerWidget {
       leading: product.imageAsset != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(product.imageAsset!,
+              child: productImage(product.imageAsset!,
                   width: 48, height: 48, fit: BoxFit.cover,
+                  // 48px cell → cap decode at 2× (retina) instead of full-res.
+                  cacheWidth: 96, cacheHeight: 96,
                   errorBuilder: (_, __, ___) => Text(product.typeEmoji,
                       style: const TextStyle(fontSize: 30))),
             )
@@ -6629,11 +6736,18 @@ class _FavProductRow extends ConsumerWidget {
               style: const TextStyle(fontSize: 30)),
       title: Text(product.nameHe,
           style: const TextStyle(
-              color: Color(0xFF1A1A1A), fontSize: 13, fontWeight: FontWeight.w600)),
+              color: BsTokens.inkLight, fontSize: 13, fontWeight: FontWeight.w600)),
       subtitle: Text(product.brand,
-          style: const TextStyle(color: Color(0xFF9AA3B2), fontSize: 11)),
-      onTap: () => showLipskeyProductSheet(context, product,
-          kLipskeyCatalog.where((p) => p.categoryHe == product.categoryHe).toList()),
+          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11)),
+      onTap: () => showLipskeyProductSheet(
+          context,
+          product,
+          // T6.3: catalog read via the repository (same const data).
+          ref
+              .read(catalogRepositoryProvider)
+              .allProducts()
+              .where((p) => p.categoryHe == product.categoryHe)
+              .toList()),
     );
   }
 }
@@ -6652,7 +6766,7 @@ class _RecentSearchesSection extends ConsumerWidget {
     return Column(
       children: [
         Container(
-          color: const Color(0xFF1A1A1A),
+          color: BsTokens.inkLight,
           padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -6662,13 +6776,24 @@ class _RecentSearchesSection extends ConsumerWidget {
                       color: Colors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w700)),
-              TextButton(
-                onPressed: () =>
-                    ref.read(recentSearchesProvider.notifier).clear(),
-                child: const Text('נקה הכל',
-                    style:
-                        TextStyle(color: BsTokens.brand, fontSize: 13)),
-              ),
+              // composite-hide: org hiding this id drops the whole "נקה הכל" button, not orphaned chrome
+              CfgVisible('catalog.search.clearAll', child: TextButton(
+                onPressed: () async {
+                  final ok = await confirmDestructive(
+                    context,
+                    title: 'ניקוי כל החיפושים?',
+                    message: 'כל היסטוריית החיפושים תימחק.',
+                    confirmLabel: 'נקה הכל',
+                  );
+                  if (!ok || !context.mounted) return;
+                  ref.read(recentSearchesProvider.notifier).clear();
+                },
+                child: const CfgText(
+                  'catalog.search.clearAll',
+                  'נקה הכל',
+                  style: TextStyle(color: BsTokens.brand, fontSize: 13),
+                ),
+              )),
             ],
           ),
         ),
@@ -6684,8 +6809,9 @@ class _RecentSearchesSection extends ConsumerWidget {
                     color: Color(0xFF9AA3B2), size: 20),
                 title: Text(q,
                     style: const TextStyle(
-                        color: Color(0xFF1A1A1A), fontSize: 14)),
+                        color: BsTokens.inkLight, fontSize: 14)),
                 trailing: IconButton(
+                  tooltip: 'הסר',
                   icon: const Icon(Icons.close,
                       color: Color(0xFF9AA3B2), size: 18),
                   onPressed: () =>
@@ -6866,7 +6992,7 @@ class _VariantsSection extends ConsumerWidget {
         ),
         Expanded(
           child: families.isEmpty
-              ? const Center(child: Text('אין משפחות וריאנטים'))
+              ? const Center(child: CfgText('catalog_screen.t40', 'אין משפחות וריאנטים'))
               : ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   itemCount: families.length,
@@ -6907,19 +7033,19 @@ class _KindChip extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFFF7A18) : Colors.transparent,
+          color: selected ? BsTokens.brand : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: selected ? const Color(0xFFFF7A18) : Theme.of(context).colorScheme.outline.withOpacity(0.35), width: 1.2),
+          border: Border.all(color: selected ? BsTokens.brand : Theme.of(context).colorScheme.outline.withOpacity(0.35), width: 1.2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label, style: TextStyle(color: selected ? Colors.white : Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w700, fontSize: 13)),
+            Text(label, style: TextStyle(color: selected ? bsOnAccent(context) : Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w700, fontSize: 13)),
             const SizedBox(width: 5),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(color: selected ? Colors.white.withOpacity(0.25) : const Color(0x14FF7A18), borderRadius: BorderRadius.circular(10)),
-              child: Text('$count', style: TextStyle(color: selected ? Colors.white : const Color(0xFFCC6614), fontWeight: FontWeight.w700, fontSize: 11)),
+              child: Text('$count', style: TextStyle(color: selected ? bsOnAccent(context) : const Color(0xFFCC6614), fontWeight: FontWeight.w700, fontSize: 11)),
             ),
           ],
         ),
@@ -6937,7 +7063,7 @@ class _SizeSortAxisRow extends ConsumerWidget {
     return Wrap(
       spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Padding(padding: const EdgeInsets.only(left: 2, right: 2), child: Text('מיון לפי:', style: TextStyle(color: cs.onSurface.withOpacity(0.7), fontWeight: FontWeight.w700, fontSize: 12))),
+        Padding(padding: const EdgeInsets.only(left: 2, right: 2), child: CfgText('catalog_screen.t41', 'מיון לפי:', style: TextStyle(color: cs.onSurface.withOpacity(0.7), fontWeight: FontWeight.w700, fontSize: 12))),
         for (final axis in SizeSortAxis.values)
           _AxisChip(
             label: kSizeSortLabel[axis]!,
@@ -6969,11 +7095,11 @@ class _AxisChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFF7A18) : Colors.transparent,
+          color: isSelected ? BsTokens.brand : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: isSelected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.35), width: 1.2),
+          border: Border.all(color: isSelected ? BsTokens.brand : cs.outline.withOpacity(0.35), width: 1.2),
         ),
-        child: Text(label, style: TextStyle(color: isSelected ? Colors.white : cs.onSurface, fontWeight: FontWeight.w700, fontSize: 12)),
+        child: Text(label, style: TextStyle(color: isSelected ? bsOnAccent(context) : cs.onSurface, fontWeight: FontWeight.w700, fontSize: 12)),
       ),
     );
   }
@@ -7060,41 +7186,43 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
         // Below: diameter atoms for the active material
         if (active != null && perMat[active] != null) ...[
           const SizedBox(height: 6),
-          Wrap(
-            spacing: 0,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              for (int i = 0; i < (perMat[active]!.entries.toList()
-                  ..sort((a, b) => _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)))).length; i++) ...[
-                if (i > 0)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 3),
-                    child: Text('—',
-                        style: TextStyle(
-                            color: Color(0xFF8A8A8A),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12)),
-                  ),
-                () {
-                  final sorted = perMat[active]!.entries.toList()
-                    ..sort((a, b) =>
-                        _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)));
-                  final e = sorted[i];
-                  final key = '$active|${e.key}';
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: _FacetChip(
-                      label: e.key,
-                      count: e.value,
-                      isSelected: selected.contains(key),
-                      onTap: () => toggleAtom(active, e.key),
+          () {
+            // L13-A: hoist sort once — used for both .length and item access.
+            final sorted = perMat[active]!.entries.toList()
+              ..sort((a, b) =>
+                  _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)));
+            return Wrap(
+              spacing: 0,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                for (int i = 0; i < sorted.length; i++) ...[
+                  if (i > 0)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 3),
+                      child: Text('—',
+                          style: TextStyle(
+                              color: Color(0xFF8A8A8A),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12)),
                     ),
-                  );
-                }(),
+                  () {
+                    final e = sorted[i];
+                    final key = '$active|${e.key}';
+                    return Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 4),
+                      child: _FacetChip(
+                        label: e.key,
+                        count: e.value,
+                        isSelected: selected.contains(key),
+                        onTap: () => toggleAtom(active, e.key),
+                      ),
+                    );
+                  }(),
+                ],
               ],
-            ],
-          ),
+            );
+          }(),
         ],
       ],
     );
@@ -7177,7 +7305,7 @@ class _SubGroupBrowser extends ConsumerWidget {
                         child: Text('—', style: TextStyle(color: Color(0xFF8A8A8A), fontWeight: FontWeight.w700, fontSize: 12)),
                       ),
                     Padding(
-                      padding: const EdgeInsets.only(right: 4),
+                      padding: const EdgeInsetsDirectional.only(start: 4),
                       child: _FacetChip(
                         label: group[i].$1,
                         count: group[i].$2,
@@ -7282,7 +7410,7 @@ class _SizeFacetRow extends ConsumerWidget {
           for (int i = 0; i < groups[gi].length; i++) ...[
             if (i > 0)
               const Padding(padding: EdgeInsets.symmetric(horizontal: 3), child: Text('—', style: TextStyle(color: Color(0xFF8A8A8A), fontWeight: FontWeight.w700, fontSize: 12))),
-            Padding(padding: const EdgeInsets.only(right: 4), child: _FacetChip(label: groups[gi][i].$1, count: groups[gi][i].$2, isSelected: selected.contains(groups[gi][i].$1), onTap: () => toggle(groups[gi][i].$1))),
+            Padding(padding: const EdgeInsetsDirectional.only(start: 4), child: _FacetChip(label: groups[gi][i].$1, count: groups[gi][i].$2, isSelected: selected.contains(groups[gi][i].$1), onTap: () => toggle(groups[gi][i].$1))),
           ],
         ],
       ],
@@ -7307,7 +7435,7 @@ class _FacetChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? const Color(0x22FF7A18) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.25), width: 1),
+          border: Border.all(color: isSelected ? BsTokens.brand : cs.outline.withOpacity(0.25), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -7346,7 +7474,7 @@ class _ValueChip extends ConsumerWidget {
         decoration: BoxDecoration(
           color: selected ? const Color(0x22FF7A18) : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.25), width: 1),
+          border: Border.all(color: selected ? BsTokens.brand : cs.outline.withOpacity(0.25), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -7379,14 +7507,17 @@ class _FamilyRow extends ConsumerWidget {
               child: Text('${family.count}', style: const TextStyle(color: Color(0xFFCC6614), fontWeight: FontWeight.w800, fontSize: 12)),
             ),
             const Spacer(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('${family.emoji}  ${family.frame}', style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w700, fontSize: 14)),
-                const SizedBox(height: 2),
-                Text('${family.categoryHe} · ${family.brand}', style: TextStyle(color: cs.onSurface.withOpacity(0.55), fontSize: 11)),
-              ],
+            // A11Y-H2: Flexible prevents RenderFlex overflow on long frame names.
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${family.emoji}  ${family.frame}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w700, fontSize: 14)),
+                  const SizedBox(height: 2),
+                  Text('${family.categoryHe} · ${family.brand}', style: TextStyle(color: cs.onSurface.withOpacity(0.55), fontSize: 11)),
+                ],
+              ),
             ),
             const SizedBox(width: 6),
             Icon(Icons.chevron_left, size: 18, color: cs.onSurface.withOpacity(0.4)),
@@ -7410,9 +7541,22 @@ class _VariantFamilyView extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
           child: Row(
             children: [
-              InkWell(
-                onTap: () => ref.read(variantsActiveFamilyProvider.notifier).state = null,
-                child: const Padding(padding: EdgeInsets.all(4), child: Icon(Icons.arrow_forward, size: 20)),
+              Tooltip(
+                message: 'חזרה',
+                child: Semantics(
+                  button: true,
+                  label: 'חזרה',
+                  child: InkWell(
+                    onTap: () => ref.read(variantsActiveFamilyProvider.notifier).state = null,
+                    // RTL arrow: arrow_back is semantically "go back" and mirrors
+                    // correctly in RTL (points right → back in Hebrew layout).
+                    child: const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Center(child: Icon(Icons.arrow_forward, size: 20)),
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(child: Text('${family.emoji}  ${family.frame}', textAlign: TextAlign.right, style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800, fontSize: 15))),
@@ -7429,6 +7573,61 @@ class _VariantFamilyView extends ConsumerWidget {
         ),
         Expanded(child: LipskeyProductsList(products: family.products)),
       ],
+    );
+  }
+}
+
+// ── CLEAN-ONLY · company-catalog import entry ────────────────────────────────
+// Mounted at the top of the catalog tab body ONLY under [kProfileEmptyCatalog]
+// (const-false on demo/buildsmart — the mount folds out, byte-identical).
+// A compact card (the _SupplierTile idiom) that opens the import sheet:
+// download the CSV template / upload company data.
+class _CompanyCatalogImportCard extends StatelessWidget {
+  const _CompanyCatalogImportCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => showCompanyCatalogImportSheet(context),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFFEEEEEE),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '📦 טעינת קטלוג החברה',
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    resolvedCatalogProducts.isNotEmpty
+                        ? 'נטענו ${resolvedCatalogProducts.length} מוצרים'
+                        : 'הורידו תבנית, מלאו והעלו — והאפליקציה תעבוד על הקטלוג שלכם',
+                    style: const TextStyle(color: Colors.black38, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_left, color: Colors.black38, size: 22),
+          ],
+        ),
+      ),
     );
   }
 }

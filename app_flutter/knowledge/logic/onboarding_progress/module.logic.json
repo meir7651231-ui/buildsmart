@@ -1,0 +1,234 @@
+{
+  "module": "onboarding_progress",
+  "source": "/home/user/buildsmart/app_flutter/lib/state/onboarding_progress.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "OnboardingProgressNotifier.persistKey",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_key"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OnboardingProgressNotifier.hasSeen",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String hintId) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state.contains(hintId)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String hintId)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OnboardingProgressNotifier.markSeen",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String hintId) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state.contains(hintId) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, hintId}"
+          },
+          {
+            "kind": "effect",
+            "detail": "persistToPrefs()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "persistToPrefs"
+      ],
+      "contract": {
+        "input": "(String hintId)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.contains(hintId) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OnboardingProgressNotifier.seenAll",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Iterable<String> hintIds) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final id in hintIds"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !state.contains(id) → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(Iterable<String> hintIds)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OnboardingProgressNotifier.reset",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = const {}"
+          },
+          {
+            "kind": "effect",
+            "detail": "persistToPrefs()"
+          }
+        ]
+      },
+      "floor": [
+        "persistToPrefs"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

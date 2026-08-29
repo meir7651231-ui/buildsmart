@@ -1,0 +1,130 @@
+{
+  "module": "word_extraction",
+  "source": "lib/features/word_finder/word_extraction.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "_realWordTokens",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String name) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "firstMeaningfulToken"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "name.split(RegExp(r'[\\s()\"׳/×,.+\\-]+')).where((w) => w.length >= 2 && !RegExp(r'\\d').hasM…"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "hasMatch",
+        "split",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String name)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "firstMeaningfulToken",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String nameHe, Set<String> blocklist) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_realWordTokens",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final t in _realWordTokens(nameHe)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !blocklist.contains(t) → return t"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String nameHe, Set<String> blocklist)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "canonicalizeWord",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String token, Map<String, String> synonyms) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "synonyms[token] ?? token"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String token, Map<String, String> synonyms)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

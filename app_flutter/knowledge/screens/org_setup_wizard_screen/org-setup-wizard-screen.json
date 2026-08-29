@@ -1,0 +1,182 @@
+{
+  "name": "OrgSetupWizardScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🔒 ליבה — נעול"
+      },
+      {
+        "kind": "text",
+        "text": "✎"
+      },
+      {
+        "kind": "text",
+        "text": "אין רכיבים תואמים"
+      },
+      {
+        "kind": "text",
+        "text": "כל מודול = סקציה. פתח סקציה כדי להדליק/לכבות רכיבים. חיפוש וצ׳יפים מסננים. ליבה (ניווט/כניסה) נעולה תמיד."
+      },
+      {
+        "kind": "text",
+        "text": "הכל"
+      },
+      {
+        "kind": "text",
+        "text": "🔌 אשף הקמת חברה"
+      },
+      {
+        "kind": "text",
+        "text": "מצב לא-חמוש: השינויים פעילים מיד, אך לא ייטענו אחרי סגירה (נדרש build עם ORG_CONFIG=true)."
+      },
+      {
+        "kind": "text",
+        "text": "החלת חבילה מחליפה מודולים+מונחים במלואם — שם וזהות נשמרים."
+      },
+      {
+        "kind": "text",
+        "text": "🔎"
+      },
+      {
+        "kind": "text",
+        "text": "מצא והחלף"
+      },
+      {
+        "kind": "text",
+        "text": "🕘"
+      },
+      {
+        "kind": "text",
+        "text": "גרסאות"
+      },
+      {
+        "kind": "text",
+        "text": "🖥️"
+      },
+      {
+        "kind": "text",
+        "text": "ניהול מסכים (סדר · הסתר)"
+      },
+      {
+        "kind": "text",
+        "text": "שמור והפעל"
+      },
+      {
+        "kind": "text",
+        "text": "ייצוא JSON"
+      },
+      {
+        "kind": "text",
+        "text": "ייבוא JSON"
+      },
+      {
+        "kind": "text",
+        "text": "איפוס טיוטה"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "🔒 ליבה — נעול",
+      "✎",
+      "אין רכיבים תואמים",
+      "כל מודול = סקציה. פתח סקציה כדי להדליק/לכבות רכיבים. חיפוש וצ׳יפים מסננים. ליבה (ניווט/כניסה) נעולה תמיד.",
+      "הכל",
+      "🔌 אשף הקמת חברה",
+      "מצב לא-חמוש: השינויים פעילים מיד, אך לא ייטענו אחרי סגירה (נדרש build עם ORG_CONFIG=true).",
+      "החלת חבילה מחליפה מודולים+מונחים במלואם — שם וזהות נשמרים.",
+      "🔎",
+      "מצא והחלף",
+      "🕘",
+      "גרסאות",
+      "🖥️",
+      "ניהול מסכים (סדר · הסתר)",
+      "שמור והפעל",
+      "ייצוא JSON",
+      "ייבוא JSON",
+      "איפוס טיוטה"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 18"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "orgConfigProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "orgConfigProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "downloadTextFileProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "pickTextFileProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "_WizardFindReplaceScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "_WizardHistoryScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "_ScreenManagerScreen"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "terms == null"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (terms == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "applyVerticalPack",
+    "bsOnAccent",
+    "decodeOrgConfig",
+    "elementShown",
+    "encodeOrgConfig",
+    "moduleOn",
+    "persistOrgConfig",
+    "screenLabelHe",
+    "setState",
+    "sort",
+    "termOf"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onOrgConfig(…) callback instead of direct orgConfigProvider write"
+    ]
+  }
+}

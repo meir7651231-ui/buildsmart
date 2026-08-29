@@ -1,0 +1,750 @@
+{
+  "module": "recipe_kit",
+  "source": "lib/features/word_finder/recipe_kit.dart",
+  "atomCount": 12,
+  "caches": [
+    "_bySku"
+  ],
+  "atoms": [
+    {
+      "fn": "resolveAccessory",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(SmartAcc acc) -> KitLine",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAccRankedSkus"
+          },
+          {
+            "kind": "const",
+            "name": "kDivePool"
+          },
+          {
+            "kind": "const",
+            "name": "kKitAutoMargin"
+          },
+          {
+            "kind": "const",
+            "name": "kKitAutoScore"
+          },
+          {
+            "kind": "const",
+            "name": "kKitMinScore"
+          },
+          {
+            "kind": "global",
+            "name": "_bySku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "assembleKit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "curatedSku = acc.sku"
+          },
+          {
+            "kind": "branch",
+            "detail": "if curatedSku != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "ranked = kAccRankedSkus[acc.name]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if ranked != null && ranked.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "compute",
+            "detail": "bestScore = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "runnerUp = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kDivePool"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = searchRelevance(p, acc.name)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if s > bestScore"
+          },
+          {
+            "kind": "precond",
+            "detail": "if best == null || bestScore < kKitMinScore → return KitLine(acc: acc, product: null, match: KitMatch.none, score: bestScore)"
+          },
+          {
+            "kind": "compute",
+            "detail": "decisiveMargin = (bestScore - runnerUp) >= kKitAutoMargin"
+          },
+          {
+            "kind": "precond",
+            "detail": "if bestScore >= kKitAutoScore && decisiveMargin → return KitLine(acc: acc, product: best, match: KitMatch.auto, score: bestScore)"
+          },
+          {
+            "kind": "return",
+            "detail": "KitLine(acc: acc, product: best, match: KitMatch.ambiguous, score: bestScore)"
+          }
+        ]
+      },
+      "floor": [
+        "KitLine",
+        "searchRelevance",
+        "sublist"
+      ],
+      "contract": {
+        "input": "(SmartAcc acc)",
+        "output": "KitLine",
+        "purity": "pure",
+        "precond": [
+          "if best == null || bestScore < kKitMinScore → return KitLine(acc: acc, product: null, match: KitMatch.none, score: bestScore)",
+          "if bestScore >= kKitAutoScore && decisiveMargin → return KitLine(acc: acc, product: best, match: KitMatch.auto, score: bestScore)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "assembleKit",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(SmartProduct recipe) -> List<KitLine>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kAccRankedSkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kDivePool",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kKitAutoMargin",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kKitAutoScore",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kKitMinScore",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_bySku",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "resolveAccessory",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "measureKitCoverage"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final a in recipe.acc) resolveAccessory(a)]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(SmartProduct recipe)",
+        "output": "List<KitLine>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_tally",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<KitLine> lines) -> KitCoverage",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "measureKitCoverage"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "curated = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "auto = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "swarm = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "ambiguous = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "none = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final l in lines"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch l.match"
+          },
+          {
+            "kind": "return",
+            "detail": "KitCoverage(total: lines.length, curated: curated, auto: auto, swarm: swarm, ambiguous: a…"
+          }
+        ]
+      },
+      "floor": [
+        "KitCoverage"
+      ],
+      "contract": {
+        "input": "(List<KitLine> lines)",
+        "output": "KitCoverage",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "measureKitCoverage",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> KitCoverage",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "assembleKit",
+            "module": true
+          },
+          {
+            "name": "_tally",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "curated = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "auto = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "swarm = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "ambiguous = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "none = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "total = 0"
+          },
+          {
+            "kind": "init",
+            "detail": "perRecipe = <String, KitCoverage>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final recipe in kSmartProducts"
+          },
+          {
+            "kind": "compute",
+            "detail": "lines = assembleKit(recipe)"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = _tally(lines)"
+          },
+          {
+            "kind": "effect",
+            "detail": "perRecipe[recipe.key] = c"
+          },
+          {
+            "kind": "effect",
+            "detail": "total += c.total"
+          },
+          {
+            "kind": "effect",
+            "detail": "curated += c.curated"
+          },
+          {
+            "kind": "effect",
+            "detail": "auto += c.auto"
+          },
+          {
+            "kind": "effect",
+            "detail": "swarm += c.swarm"
+          },
+          {
+            "kind": "effect",
+            "detail": "ambiguous += c.ambiguous"
+          },
+          {
+            "kind": "effect",
+            "detail": "none += c.none"
+          },
+          {
+            "kind": "return",
+            "detail": "KitCoverage(total: total, curated: curated, auto: auto, swarm: swarm, ambiguous: ambiguou…"
+          }
+        ]
+      },
+      "floor": [
+        "KitCoverage"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "KitCoverage",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitCoverage.resolved",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "auto"
+          },
+          {
+            "kind": "field",
+            "name": "curated"
+          },
+          {
+            "kind": "field",
+            "name": "swarm"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "curated + auto + swarm"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitCoverage.resolvedRatio",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "total"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "total == 0 ? 0 : resolved / total"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitCoverage._ratio",
+      "kind": "method",
+      "object": {
+        "signature": "(int n) -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "total"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "KitCoverage.ambiguousRatio",
+          "KitCoverage.autoRatio",
+          "KitCoverage.curatedRatio",
+          "KitCoverage.noneRatio",
+          "KitCoverage.swarmRatio"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "total == 0 ? 0 : n / total"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int n)",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitCoverage.curatedRatio",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "curated"
+          },
+          {
+            "kind": "field",
+            "name": "total",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_ratio",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ratio(curated)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitCoverage.autoRatio",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "auto"
+          },
+          {
+            "kind": "field",
+            "name": "total",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_ratio",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ratio(auto)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitCoverage.swarmRatio",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "swarm"
+          },
+          {
+            "kind": "field",
+            "name": "total",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_ratio",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ratio(swarm)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitCoverage.ambiguousRatio",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "ambiguous"
+          },
+          {
+            "kind": "field",
+            "name": "total",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_ratio",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ratio(ambiguous)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitCoverage.noneRatio",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> double",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "none"
+          },
+          {
+            "kind": "field",
+            "name": "total",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_ratio",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ratio(none)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "double",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

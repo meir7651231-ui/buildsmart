@@ -1,0 +1,130 @@
+{
+  "name": "_OrdersTab",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "לא נמצאו הזמנות תואמות.",
+        "registryId": "manager.orders.empty",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✓ הושלם",
+        "registryId": "manager_dashboard_screen.order_completed_badge",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📦"
+      },
+      {
+        "kind": "cfgText",
+        "text": "✓ ההזמנה הושלמה ונמסרה",
+        "registryId": "manager_dashboard_screen.order_completed_delivered",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🧾 הפק חשבונית"
+      },
+      {
+        "kind": "text",
+        "text": "💵 הפק קבלה"
+      },
+      {
+        "kind": "text",
+        "text": "📦 תעודת משלוח"
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "manager.orders.advance",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "קדם שלב ›",
+        "registryId": "manager.orders.advance",
+        "registryOk": true
+      }
+    ],
+    "registered": 5,
+    "unregistered": [
+      "📦",
+      "🧾 הפק חשבונית",
+      "💵 הפק קבלה",
+      "📦 תעודת משלוח"
+    ],
+    "summary": "registry 5 · mapped 5/5 · unregistered 4"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "ordersEngineProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "ordersEngineProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "order == null"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (order == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הדפסה זמינה בדפדפן')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "buildDeliveryNoteRows",
+    "buildInvoiceRows",
+    "buildPrintableHtml",
+    "cfgRadius",
+    "chip",
+    "deliveryNoteTitle",
+    "featEnabled",
+    "invoiceTitle",
+    "onSelect",
+    "printDocument",
+    "row",
+    "setState",
+    "stat",
+    "tile"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

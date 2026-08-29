@@ -1,0 +1,621 @@
+{
+  "module": "site_hub_state",
+  "source": "lib/state/site_hub_state.dart",
+  "atomCount": 13,
+  "atoms": [
+    {
+      "fn": "formatGeo",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double lat, double lng, {double? accuracyMeters}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "latStr = '${lat.abs().toStringAsFixed(4)}°${lat >= 0 ? 'N' : 'S'}'"
+          },
+          {
+            "kind": "compute",
+            "detail": "lngStr = '${lng.abs().toStringAsFixed(4)}°${lng >= 0 ? 'E' : 'W'}'"
+          },
+          {
+            "kind": "compute",
+            "detail": "acc = accuracyMeters == null ? '' : ' (±${accuracyMeters.round()}מ׳)'"
+          },
+          {
+            "kind": "return",
+            "detail": "'$latStr, $lngStr$acc'"
+          }
+        ]
+      },
+      "floor": [
+        "abs",
+        "round",
+        "toStringAsFixed"
+      ],
+      "contract": {
+        "input": "(double lat, double lng, {double? accuracyMeters})",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "siteSummaryReportLines",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<DiaryEntry> diary, List<SiteSnag> snags, List<SiteInspection> inspections) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "openSnags = snags.where((s) => s.status == 'פתוח').length"
+          },
+          {
+            "kind": "compute",
+            "detail": "fixedSnags = snags.where((s) => s.status == 'טופל').length"
+          },
+          {
+            "kind": "compute",
+            "detail": "plannedInsp = inspections.where((i) => i.status == 'מתוכננת').length"
+          },
+          {
+            "kind": "compute",
+            "detail": "doneInsp = inspections.where((i) => i.status == 'בוצעה').length"
+          },
+          {
+            "kind": "return",
+            "detail": "['📓 רישומי-יומן: ${diary.length}', if (diary.isNotEmpty) '📅 רישום אחרון: ${diary.first.…"
+          }
+        ]
+      },
+      "floor": [
+        "where"
+      ],
+      "contract": {
+        "input": "(List<DiaryEntry> diary, List<SiteSnag> snags, List<SiteInspection> inspections)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteSnag.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? status}) -> SiteSnag",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "loc"
+          },
+          {
+            "kind": "field",
+            "name": "severity"
+          },
+          {
+            "kind": "field",
+            "name": "what"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "SiteSnag(id: id, what: what, loc: loc, severity: severity, status: status ?? this.status)"
+          }
+        ]
+      },
+      "floor": [
+        "SiteSnag"
+      ],
+      "contract": {
+        "input": "({String? status})",
+        "output": "SiteSnag",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteSnagsNotifier.add",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String what) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "id = 'SNG-${(state.length + 1).toString().padLeft(2, '0')}'"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [SiteSnag(id: id, what: what.isEmpty ? 'ליקוי' : what, loc: 'האתר הנוכחי', severi…"
+          }
+        ]
+      },
+      "floor": [
+        "SiteSnag",
+        "padLeft",
+        "toString"
+      ],
+      "contract": {
+        "input": "(String what)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteSnagsNotifier.fix",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = [for (final s in state) s.id == id ? s.copyWith(status: 'טופל') : s]"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteInspection.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? status}) -> SiteInspection",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "due"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "what"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "SiteInspection(id: id, what: what, due: due, status: status ?? this.status)"
+          }
+        ]
+      },
+      "floor": [
+        "SiteInspection"
+      ],
+      "contract": {
+        "input": "({String? status})",
+        "output": "SiteInspection",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteInspectionsNotifier.add",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String what) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "id = 'INS-${state.length + 1}'"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [SiteInspection(id: id, what: what.isEmpty ? 'ביקורת' : what, due: 'בעוד שבוע', s…"
+          }
+        ]
+      },
+      "floor": [
+        "SiteInspection"
+      ],
+      "contract": {
+        "input": "(String what)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteInspectionsNotifier.complete",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = [for (final i in state) i.id == id ? i.copyWith(status: 'בוצעה') : i]"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AttendanceEntry.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? timeOut}) -> AttendanceEntry",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "date"
+          },
+          {
+            "kind": "field",
+            "name": "geo"
+          },
+          {
+            "kind": "field",
+            "name": "timeIn"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "AttendanceEntry(date: date, timeIn: timeIn, timeOut: timeOut ?? this.timeOut, geo: geo)"
+          }
+        ]
+      },
+      "floor": [
+        "AttendanceEntry"
+      ],
+      "contract": {
+        "input": "({String? timeOut})",
+        "output": "AttendanceEntry",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteAttendanceNotifier.open",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> AttendanceEntry?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final a in state"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a.timeOut == null → return a"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "AttendanceEntry?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteAttendanceNotifier.clockIn",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String now, {String geo = kGeoUnavailable}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = [AttendanceEntry(date: caToday(), timeIn: now, timeOut: null, geo: geo), ...state]"
+          }
+        ]
+      },
+      "floor": [
+        "AttendanceEntry",
+        "caToday"
+      ],
+      "contract": {
+        "input": "(String now, {String geo = kGeoUnavailable})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteAttendanceNotifier.clockOut",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String now) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "done = false"
+          },
+          {
+            "kind": "init",
+            "detail": "next = <AttendanceEntry>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final a in state"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !done && a.timeOut == null"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String now)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SiteDiaryNotifier.add",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String text) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDiaryWeathers"
+          },
+          {
+            "kind": "field",
+            "name": "_rng"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "state = [DiaryEntry(date: caToday(), text: text.isEmpty ? 'עבודה באתר' : text, workers: 3…"
+          }
+        ]
+      },
+      "floor": [
+        "DiaryEntry",
+        "caToday",
+        "nextInt"
+      ],
+      "contract": {
+        "input": "(String text)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

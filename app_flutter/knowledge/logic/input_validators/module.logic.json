@@ -1,0 +1,374 @@
+{
+  "module": "input_validators",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/input_validators.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "validIsraeliMobile",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String input) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "digits = input.replaceAll(RegExp(r'[\\s-]'), '')"
+          },
+          {
+            "kind": "return",
+            "detail": "RegExp(r'^05\\d{8}$').hasMatch(digits)"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "hasMatch",
+        "replaceAll"
+      ],
+      "contract": {
+        "input": "(String input)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "validEmail",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String input) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = input.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "RegExp(r'^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$').hasMatch(s)"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "hasMatch",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String input)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "validBusinessId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String input) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "digits = input.replaceAll(RegExp(r'[\\s-]'), '')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !RegExp(r'^\\d{9}$').hasMatch(digits) → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "sum = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < 9; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "product = (digits.codeUnitAt(i) - 0x30) * (i.isEven ? 1 : 2)"
+          },
+          {
+            "kind": "effect",
+            "detail": "sum += product > 9 ? product - 9 : product"
+          },
+          {
+            "kind": "return",
+            "detail": "sum % 10 == 0"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "codeUnitAt",
+        "hasMatch",
+        "replaceAll"
+      ],
+      "contract": {
+        "input": "(String input)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if !RegExp(r'^\\d{9}$').hasMatch(digits) → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "normalizePhone",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String input) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "digits = input.replaceAll(RegExp(r'\\D'), '')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if digits.isEmpty → return ''"
+          },
+          {
+            "kind": "branch",
+            "detail": "if digits.startsWith('00')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if digits.startsWith('972')"
+          },
+          {
+            "kind": "return",
+            "detail": "digits"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "replaceAll",
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String input)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if digits.isEmpty → return ''"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "validBoardCode",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String input) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "digits = input.replaceAll(RegExp(r'[\\s-]'), '')"
+          },
+          {
+            "kind": "return",
+            "detail": "RegExp(r'^\\d{4}$').hasMatch(digits)"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "hasMatch",
+        "replaceAll"
+      ],
+      "contract": {
+        "input": "(String input)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "waMeDigits",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String input) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "digits = input.replaceAll(RegExp(r'\\D'), '')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if digits.isEmpty → return ''"
+          },
+          {
+            "kind": "branch",
+            "detail": "if digits.startsWith('00')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if digits.startsWith('0')"
+          },
+          {
+            "kind": "return",
+            "detail": "digits"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "replaceAll",
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String input)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if digits.isEmpty → return ''"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "validPositiveAmount",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(num? value) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "value != null && value.isFinite && value > 0"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(num? value)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "validDateRange",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime start, DateTime end) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "end.isAfter(start)"
+          }
+        ]
+      },
+      "floor": [
+        "isAfter"
+      ],
+      "contract": {
+        "input": "(DateTime start, DateTime end)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

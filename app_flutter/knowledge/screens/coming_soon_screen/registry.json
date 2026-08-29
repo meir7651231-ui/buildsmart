@@ -1,0 +1,27 @@
+{
+  "matched": 4,
+  "total": 4,
+  "summary": "4/4",
+  "entries": [
+    {
+      "id": "coming_soon_screen.title",
+      "ok": true,
+      "atom": "ComingSoonScreen"
+    },
+    {
+      "id": "coming_soon_screen.back",
+      "ok": true,
+      "atom": "ComingSoonScreen"
+    },
+    {
+      "id": "coming_soon_screen.heading",
+      "ok": true,
+      "atom": "ComingSoonScreen"
+    },
+    {
+      "id": "coming_soon_screen.back_to_picker",
+      "ok": true,
+      "atom": "ComingSoonScreen"
+    }
+  ]
+}

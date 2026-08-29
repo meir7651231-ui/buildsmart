@@ -1,0 +1,297 @@
+{
+  "module": "huliot_smartlock_catalog",
+  "source": "lib/data/huliot_smartlock_catalog.dart",
+  "atomCount": 5,
+  "caches": [
+    "kHuliotCatalog"
+  ],
+  "atoms": [
+    {
+      "fn": "_p",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int page, String tag) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_huliotImageForCrop"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'sml_p${page.toString().padLeft(2, '0')}_$tag.jpg'"
+          }
+        ]
+      },
+      "floor": [
+        "padLeft",
+        "toString"
+      ],
+      "contract": {
+        "input": "(int page, String tag)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_huliotImageFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int page, String nameHe, String categoryHe) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_huliotImageForCrop",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_sl"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "_routeCropDisabled = false"
+          },
+          {
+            "kind": "compute",
+            "detail": "pageFallback = 'page_${page.toString().padLeft(2, '0')}.jpg'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _routeCropDisabled → return pageFallback"
+          },
+          {
+            "kind": "return",
+            "detail": "_huliotImageForCrop(page, nameHe, categoryHe) ?? pageFallback"
+          }
+        ]
+      },
+      "floor": [
+        "padLeft",
+        "toString"
+      ],
+      "contract": {
+        "input": "(int page, String nameHe, String categoryHe)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if _routeCropDisabled → return pageFallback"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_huliotImageForCrop",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int page, String nameHe, String categoryHe) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_p",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_huliotImageFor",
+          "_huliotSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch page"
+          },
+          {
+            "kind": "return",
+            "detail": "'page_${page.toString().padLeft(2, '0')}.jpg'"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "has",
+        "padLeft",
+        "toString"
+      ],
+      "contract": {
+        "input": "(int page, String nameHe, String categoryHe)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_huliotSpecFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int page, String nameHe, String categoryHe) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_huliotImageForCrop",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_sl"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "_specCropDisabled = false"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _specCropDisabled → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "img = _huliotImageForCrop(page, nameHe, categoryHe)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if img == null || img.startsWith('page_') → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if img.startsWith('sml_p27_') → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if img.startsWith('sml_p24_') → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if img == 'sml_p40_c.jpg' || img == 'sml_p41_c.jpg' → return null"
+          },
+          {
+            "kind": "init",
+            "detail": "_missingSpecs = {'sml_p11_b.jpg', 'sml_p30_d.jpg', 'sml_p32_a.jpg', 'sml_p36_b.jpg', 'sml_p38_a.jpg', 'sm…"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _missingSpecs.contains(img) → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "'spec_$img'"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "startsWith"
+      ],
+      "contract": {
+        "input": "(int page, String nameHe, String categoryHe)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if _specCropDisabled → return null",
+          "if img == null || img.startsWith('page_') → return null",
+          "if img.startsWith('sml_p27_') → return null",
+          "if img.startsWith('sml_p24_') → return null",
+          "if img == 'sml_p40_c.jpg' || img == 'sml_p41_c.jpg' → return null",
+          "if _missingSpecs.contains(img) → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "_specCropDisabled · img == null || img.startsWith('page_') · img.startsWith('sml_p27_') · img.startsWith('sml_p24_') · img == 'sml_p40_c.jpg' || img == 'sml_p41_c.jpg' · _missingSpecs.contains(img) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_sl",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String sku, String nameHe, String categoryHe, int page, {Map<String, dynamic>? dims, String? color}) -> LipskeyCatalogProduct",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kHuliotBrand"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_huliotImageFor",
+            "module": true
+          },
+          {
+            "name": "_huliotSpecFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "fullDims = <String, dynamic>{'יצרן' : 'חוליות', 'מק\"ט חוליות' : sku, if (dims != null) ...dims}"
+          },
+          {
+            "kind": "return",
+            "detail": "LipskeyCatalogProduct(sku: sku, nameHe: nameHe, nameEn: nameHe, categoryHe: categoryHe, c…"
+          }
+        ]
+      },
+      "floor": [
+        "LipskeyCatalogProduct"
+      ],
+      "contract": {
+        "input": "(String sku, String nameHe, String categoryHe, int page, {Map<String, dynamic>? dims, String? color})",
+        "output": "LipskeyCatalogProduct",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

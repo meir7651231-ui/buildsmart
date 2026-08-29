@@ -1,0 +1,100 @@
+{
+  "module": "site_firebase",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/site_firebase.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "_StageFlag",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "key",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "key"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirebaseSiteRepository",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_orders",
+            "type": "OrdersRepository",
+            "required": true
+          },
+          {
+            "name": "_tasks",
+            "type": "_TasksRepo",
+            "required": true
+          },
+          {
+            "name": "_stage",
+            "type": "_StageRepo",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_orders",
+            "ref": "OrdersRepository",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "attach",
+          "dispose",
+          "projects",
+          "projectById",
+          "activeProjectId",
+          "siteToolsTree",
+          "planTypes",
+          "safetyTips",
+          "budgetLevel",
+          "stageIsDone",
+          "stageDoneCount",
+          "toggleStage",
+          "workerTasks",
+          "pendingApprovals",
+          "_taskById",
+          "submitForReview",
+          "approve",
+          "reject"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_orders",
+          "_tasks",
+          "_stage"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "name": "FloatingCardKeyboard",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "קולי — בקרוב",
+        "registryId": "floating_card_keyboard.voice_soon",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "החלקים לעבודה"
+      }
+    ],
+    "registered": 1,
+    "unregistered": [
+      "החלקים לעבודה"
+    ],
+    "summary": "registry 1 · mapped 1/1 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "keyboardSearchModeProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "keyboardSearchModeProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "mainTabProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "keyboardDiveQueryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "updatesSubTabProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "updatesChatSearchProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "notifSearchQueryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "storeSearchQueryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "keyboardOverlayOpenProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogLocationProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "keyboardScreenToolsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showSnackBar",
+        "target": "showSnackBar"
+      },
+      {
+        "kind": "action",
+        "via": "showLipskeyProductSheet",
+        "target": "showLipskeyProductSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "mainTabProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "orgConfigProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "featureFlagsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "deptLocationProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "updatesLocationProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "visibleThreadsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeLocationProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "ordersEngineProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogLocationProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "keyboardJobSkusProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "keyboardScreenToolsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "sep = existing.isEmpty || existing.endsWith(' ') ? … : …",
+        "effect": "text: '' | ' '"
+      }
+    ]
+  },
+  "floor": [
+    "add",
+    "buildEntitySearchIndex",
+    "buildWordLexicon",
+    "cardKeyboardPredictions",
+    "catalogLeadsWithFinder",
+    "clear",
+    "crossDomainNextTokens",
+    "currentScreenTools",
+    "deriveCatalogContext",
+    "deriveDeptContext",
+    "deriveStoreContext",
+    "deriveUpdatesContext",
+    "dispose",
+    "featureOn",
+    "hideCurrentSnackBar",
+    "insertAtCaret",
+    "kbHomeNodes",
+    "kbKbdNodes",
+    "kbScreenMenuNodes",
+    "kbTabToolNodes",
+    "kbTilesFor",
+    "keyboardLayoutKey",
+    "listEquals",
+    "matchDestinations",
+    "mergeNarrowers",
+    "moduleOn",
+    "productBySku",
+    "removeListener",
+    "run",
+    "setState",
+    "tabNodes"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onKeyboardDiveQuery(…) callback instead of direct keyboardDiveQueryProvider write",
+      "onKeyboardOverlayOpen(…) callback instead of direct keyboardOverlayOpenProvider write",
+      "onKeyboardSearchMode(…) callback instead of direct keyboardSearchModeProvider write",
+      "onNotifSearchQuery(…) callback instead of direct notifSearchQueryProvider write",
+      "onStoreSearchQuery(…) callback instead of direct storeSearchQueryProvider write",
+      "onUpdatesChatSearch(…) callback instead of direct updatesChatSearchProvider write"
+    ]
+  }
+}

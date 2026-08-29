@@ -1,0 +1,78 @@
+{
+  "name": "_ChatNotifSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+        "registryId": "chat_settings_screen.t14",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — עדיין לא משפיע",
+        "registryId": "chat_settings_screen.t15",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה",
+        "registryId": "chat_settings_screen.t17",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "chatSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "chatSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '$label — בבנייה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+    ]
+  }
+}

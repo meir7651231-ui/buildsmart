@@ -1,0 +1,43 @@
+{
+  "module": "push",
+  "source": "../../../functions/src/push.ts",
+  "functionCount": 3,
+  "functions": [
+    {
+      "name": "onOrderStageChanged",
+      "trigger": "onDocumentUpdated",
+      "region": "REGION",
+      "line": 98,
+      "authGated": false,
+      "reads": [],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "onChatMessageCreated",
+      "trigger": "onDocumentCreated",
+      "region": "REGION",
+      "line": 143,
+      "authGated": false,
+      "reads": [
+        "chatThreads",
+        "users"
+      ],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "onUserActivated",
+      "trigger": "onDocumentUpdated",
+      "region": "REGION",
+      "line": 198,
+      "authGated": false,
+      "reads": [],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    }
+  ]
+}

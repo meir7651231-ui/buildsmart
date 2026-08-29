@@ -1,0 +1,137 @@
+{
+  "module": "company_catalog_import",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/company_catalog_import.dart",
+  "entityCount": 3,
+  "entities": [
+    {
+      "entity": "CompanyImportRowError",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "row",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "messageHe",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "row",
+          "messageHe"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "CompanyImportReport",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "valid",
+            "type": "List<LipskeyCatalogProduct>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "errors",
+            "type": "List<CompanyImportRowError>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "canCommit",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "valid",
+            "ref": "LipskeyCatalogProduct",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "errors",
+            "ref": "CompanyImportRowError",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "valid",
+          "errors"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "_Col",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "key",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "he",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "match",
+            "type": "Set<String>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "key",
+          "he",
+          "match"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

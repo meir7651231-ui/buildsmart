@@ -1,0 +1,305 @@
+{
+  "module": "connection_resolver",
+  "source": "/home/user/buildsmart/app_flutter/lib/domain/connection_resolver.dart",
+  "entityCount": 4,
+  "entities": [
+    {
+      "entity": "ConnectResult",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "mates",
+            "type": "bool",
+            "required": true
+          },
+          {
+            "name": "methodLabelHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "severity",
+            "type": "RuleSeverity?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "rule",
+            "type": "CompatibilityRule?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "severity",
+            "ref": "RuleSeverity",
+            "kind": "embed"
+          },
+          {
+            "field": "rule",
+            "ref": "CompatibilityRule",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "mates",
+          "methodLabelHe"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "CompletionIssue",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "rule",
+            "type": "CompletionRule",
+            "required": true
+          },
+          {
+            "name": "whyHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "severity",
+            "type": "RuleSeverity",
+            "required": true
+          },
+          {
+            "name": "offendingSkus",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "rule",
+            "ref": "CompletionRule",
+            "kind": "embed"
+          },
+          {
+            "field": "severity",
+            "ref": "RuleSeverity",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "rule",
+          "whyHe",
+          "severity",
+          "offendingSkus"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SystemCoherence",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "coherent",
+            "type": "bool",
+            "required": true
+          },
+          {
+            "name": "offendingSystem",
+            "type": "SystemDef?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "offendingSku",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "offendingSystem",
+            "ref": "SystemDef",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "coherent"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ConnectionResolver",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "rules",
+            "type": "List<CompatibilityRule>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "connectorTypes",
+            "type": "List<ConnectorType>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "systems",
+            "type": "List<SystemDef>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "completionRules",
+            "type": "List<CompletionRule>",
+            "required": false,
+            "collection": true,
+            "default": "const []"
+          },
+          {
+            "name": "_memo",
+            "type": "Map<String, ConnectResult>",
+            "required": false,
+            "collection": true
+          },
+          {
+            "name": "_systemIdByTypeId",
+            "type": "Map<String, String?>",
+            "required": false,
+            "collection": true
+          },
+          {
+            "name": "_systemById",
+            "type": "Map<String, SystemDef>",
+            "required": false,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "rules",
+            "ref": "CompatibilityRule",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "connectorTypes",
+            "ref": "ConnectorType",
+            "kind": "enum",
+            "collection": true
+          },
+          {
+            "field": "systems",
+            "ref": "SystemDef",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "completionRules",
+            "ref": "CompletionRule",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "_memo",
+            "ref": "ConnectResult",
+            "kind": "embed"
+          },
+          {
+            "field": "_systemIdByTypeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "_systemById",
+            "ref": "SystemDef",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "canConnect",
+          "_endPairMemoized",
+          "_endPair",
+          "_sizeOk",
+          "completion",
+          "systemCoherence"
+        ]
+      },
+      "contract": {
+        "required": [
+          "rules"
+        ],
+        "defaults": {
+          "connectorTypes": "const []",
+          "systems": "const []",
+          "completionRules": "const []"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

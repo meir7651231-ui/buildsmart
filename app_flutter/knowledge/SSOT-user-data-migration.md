@@ -1,0 +1,55 @@
+# SSOT — מיגרציה מקומי→שרת של חנויות-משתמש (#2)
+
+> יעד: להעביר חנויות-דאטה per-user מ-SharedPreferences ל-Firestore uid-scoped →
+> סנכרון בין-מכשירים · ניהול-שרת · מחיקה. **הכל מאחורי דגל `kUserDataServer`
+> (OFF-default) — OFF ⇒ המסלול המקומי byte-identical.** מפעילים אחרי שהכל בנוי+נבדק.
+
+## התבנית (למחזר לכל חנות)
+`users_repository.dart` (`FirestoreUsersRepository` + `usersRepositoryProvider`) + `firestore_cached_repo.dart` (`FirestoreCollectionSource`/`RemoteCollectionSource`/`RemoteDoc`). provider מחזיר repo-שרת **רק** תחת `kUserDataServer && useFirebaseBackend && uid != null && !anonymous`, אחרת ה-notifier המקומי הקיים. seam ניטרלי → טסטים Firebase-free עם fake-source.
+
+## חנויות ה-increment (צ'אט + 3 נקיות)
+| חנות | יעד-שרת | סטטוס |
+|---|---|---|
+| smart_cart (עגלה) | `carts/{uid}` (single doc `{lines,updatedAt}`) | ✅ **חי** (repo · rule · deletion-ref · test · USER_DATA_SERVER דלוק) |
+| saved_projects | `savedProjects/{uid}` (single doc `{projects:[…],updatedAt}`) | ✅ **חי** (repo · rule · deletion-ref · test) |
+| notif_settings | `notifSettings/{uid}` (single doc = toJson) | ✅ **חי** (repo · rule · deletion-ref · test; שער-25 הוסר) |
+| draft_quote (טיוטות-הצעה) | `draftQuotes/{uid}` (single doc `{quotes:[…],updatedAt}`) | ✅ **חי** (draft_quotes_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
+| comparison_set (השוואות) | `comparisonSets/{uid}` (single doc `{keys:[…],updatedAt}`) | ✅ **חי** (comparison_sets_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
+| customers_store (CRM אישי) | `savedCustomers/{uid}` (single doc `{customers:[…],updatedAt}`) | ✅ **חי** (saved_customers_repository.dart · rule · deletion-ref · test · stage2-exempt · גל-א׳) |
+| **גל-ב׳ HR (דו-צדדי · דורש board→uid+employer):** תשתית ✅ — `setEmployer` callable + `employerId` claim→session | — | ✅ **חי** |
+| worker_attendance (נוכחות-עובד) | `workerAttendance/{workerUid}` (`{days,employerId,updatedAt}`) | ✅ **חי · end-to-end (slice A צד-עובד + slice B שאילתת-מעסיק)** (repo · rule דו-צדדי · employerAttendanceProvider bounded · deletion · test · golden) |
+| worker_certs (תעודות-עובד) | `workerCerts/{workerUid}` (`{certs,employerId,updatedAt}`) | ✅ **חי · end-to-end** (repo · rule דו-צדדי · employerCertsProvider bounded · deletion · test · golden) |
+| worker_trainings (הדרכות-עובד) | `workerTrainings/{workerUid}` (`{trainings,employerId,updatedAt}`) | ✅ **חי · end-to-end** (repo · rule דו-צדדי · employerTrainingsProvider bounded · deletion · test · golden · **DEMO-SEED מדולג בשרת**) |
+| worker_forms (טפסי-עובד: 101+מחלה) | `workerForms/{uid}` (`{forms,sick,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** carts-shape · deletion · test · golden · **לא דו-צדדי** — הטופס מגיע לקבלן דרך צ'אט) |
+| worker_profile_store (פרופיל-עובד) | `workerProfiles/{uid}` (`{…profile,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** · deletion · test · golden · map→doc-יחיד לפי uid, PII של הבעלים בלבד) |
+| courier_hr (נוכחות/תעודות/טפסי-שליח) | `courier{Attendance,Certs,Forms}/{uid}` | ✅ **חי** (מיחזור מחלקות ה-worker · 3 providers role==courier · 3 כללי **self-only** · deletion · test · השליח מדווח לחנות בצ'אט → אין roster) |
+| courier_profile_store (פרופיל-שליח) | `courierProfiles/{uid}` (`{…profile,updatedAt}`) | ✅ **חי** (repo single-doc · rule **self-only** · deletion · test · golden · תאום worker_profile) |
+| store_profile_store (פרופיל-עסק + תעודות-עסק) | `storeProfiles/{uid}` + `storeCerts/{uid}` | ✅ **חי** (repo single-doc + מיחזור WorkerCerts · rule **self-only** ×2 · deletion · test · golden · legacy-seed מדולג בשרת) |
+| vacation_requests (בקשות-חופשה) **cross-party** | `vacationRequests/{requestId}` (per-doc) | ✅ **חי** (repo submit/decide · rule cross-party: create-עצמי-pending · update רק מעסיק/מנהל + keys קפואים · read מגיש/מעסיק/מנהל · deletion by-query · test · golden · mutation-verify) |
+| courier_clock (שעון-משלוחים) | `courierClock/{uid}` (`{entries,updatedAt}`) | ✅ **חי** (repo single-doc · free-function writer עם repo מושחל · rule **self-only** · deletion · test · golden · אין שינוי חזותי) |
+| tasks_engine (משימות §6) **cross-party** | `tasks/{taskId}` (`TaskItem.toJson` minus id) | ✅ **חי · cross-party מלא** (Wave T3 + increment-2): scoped-provider 3-תפקידים (worker `assignedWorkerUid` · contractor `employerId` · manager god-view) · 6-state rules הדוקים · bindRemote (bind-once + ref.listen re-bind) · write-path `_commit`→`upsert`→toDoc · חבילת-טסטים רב-צדדית (authoring/proposal/approval/gantt/scope/closure/realtime-bind). **indexes: לא נדרש** (single-field equality). **תיקון-אבטחה 2026-08-15:** הוסר match-block כפול-ורופף (Wave-T1) שביטל בשקט את הכלל ההדוק (Firestore OR על אותו path) |
+| chatThreads (מחיקה) | authorship+membership מנותקים | ✅ **הוכרע** (2026-08-13 · אישור-בעלים "א"): מחיקה מנתקת fromUid+participantUids+profile; שארית תווית-השם → רפורם-הזהות המקביל, **לא פריט עצמאי** |
+
+> **תיקון-תבנית (saved_projects):** ה-notifier שומר את **כל הרשימה** בכל שינוי (`_persist` אחרי כל save/remove/rename), ולכן היעד הוא **דוק-בודד** `savedProjects/{uid}` = `{projects:[…],updatedAt}` — תבנית-העגלה verbatim (List↔{key:[…]}), לא subcollection. פשוט יותר, אפס per-doc writes, מתאים לנפח (שמירות-עיצוב ידניות, מעטות).
+
+**~~נדחה~~ ✅ הועברו (2026-08-14 · אישור-בעלים להסרת שער 25):** `app_settings · catalog_settings · chat_settings · store_settings` (4) — יצאו מ-parity-freeze (Preact פרש, Flutter-only). כל אחד repo self-only `<coll>/{uid}` (מראה notif_settings) · rule · deleteAccount · stage2 · test · mutation-verify. השער בהוק הוסר במלואו (אישור-בעלים מפורש). dormant מאחורי kUserDataServer (דלוק→חי). **`notif_settings` הוסר מהרשימה (2026-08-13) ועלה לשרת** — Preact פרש (buildsmart-il.com = Flutter בלבד, אישור-בעלים מפורש), ואין קובץ notif ב-`app/src`, אז נעילת-ה-parity הייתה מיושנת. שאר-4 שוחררו 2026-08-14 (שער 25 בהוק הוסר, אישור-בעלים) — מיגרציית-#2 סגורה.
+**~~נדחה~~ ✅ worker_notifs — הועבר (2026-08-13, Wave T3 · 2d):** טריגר-שרת `onTaskStatusChanged` כותב `workerNotifs/{assignedWorkerUid}` (uid-keyed — פותר את board-username→uid דרך חתימת-ה-uid ב-2c); reader ממזג server(task)∪local(HR); rule self-only; dormant מאחורי kTasksServer.
+**~~נדחה~~ ✅ rewards — הועבר (2026-08-14):** overlay `{coins,claimedChallengeIds}` → `rewards/{uid}` self-only (uid במקום username בשרת — פותר את board→uid; leaderboard נשאר נגזר-מקומי). repo · rule · deleteAccount · stage2 · test · mutation-verify. dormant מאחורי kUserDataServer. **לא-דאטה:** board_accounts (Auth+claims) · board_auth session (מקומי-בכוונה).
+
+## שלבים לכל חנות
+1. **rule** `<coll>/{uid}` self-only (מראה diag/{uid}). subcollection = match נפרד (rules לא יורשים).
+2. **repo** (מראה users_repository) + provider-switch (OFF→null→מקומי).
+3. **~~migration hook~~ — בוטל.** ההעברה-החד-פעמית תוכננה לשמר דאטה-מקומית קיימת. **הבעלים אישר: אין משתמשים פעילים** (מאושר גם בהערת web-deploy.yml: *"No active users yet ⇒ safe live validation"*), אז אין דאטה-מקומית-אמיתית לשמר → הצעד הזה **מיותר ונמחק**. flip ישיר.
+4. **deletion:** single-doc → ל-`refs[]` ב-eraseUserCompletely; subcollection → `recursiveDelete(users/{uid})`.
+
+## סכמת-צ'אט (Phase 4) — הוכרע: לא-עצמאי, נסמך על רפורם-הזהות (2026-08-13 · אישור-בעלים "א")
+**מצב-המחיקה (מאומת בקוד):** `chatMessages.fromUid` נמחק (authorship), `chatThreads.participantUids` arrayRemove (membership), `users/{uid}` נמחק (profile). המהות מנותקת. השארית היחידה: `chatThreads.names` = מחרוזת-תצוגה **בודדת** (שם-הצד-השני, נשמרת ביצירה) — שהצד-השני ממילא מכיר.
+**למה לא לתקן עצמאית:** (1) **לא-עמיד** — הלקוח כותב מחדש את `names` מהמטמון בכל כתיבת-שרשור; (2) **שביר** — התאמת-שם מפספסת rename; (3) **תיקון-עמיד = שכבת-הצגת-השם בלקוח** (map פר-uid / directory-lookup) — בדיוק מה שרפורם-הזהות המקביל (uid-A · PR#48 chatMessageIsMine · participantUids/fromUid) משכתב עכשיו. כשפענוח-השם יעבור ל-uid→directory, השארית תיסגר **מעצמה** (users doc של הנמחק מחוק → השם נעלם).
+**⛔ לא לפתוח מחדש כפריט-מיגרציה עצמאי** — לא לשנות `names`→map בנפרד (יתנגש עם רפורם-הזהות ויתייתר). המשך-הטיפול שייך לרפורם-הזהות.
+> **התבנית המקורית (היסטורי, בוטלה):** ~~`names` String→map + `fromDoc` סובלני + deleteAccount scrub `names.${uid}`~~ — נזנחה לטובת directory-lookup ברפורם-הזהות.
+
+## 🟢 TASKS_SERVER הודלק (Wave T3 · הפעלה חיה · 2026-08-14)
+`--dart-define=TASKS_SERVER=true` נוסף ל-3 build-workflows (web-deploy · firebase-hosting · android-test-build), ליד `USER_DATA_SERVER`. **תנאי-סף אומתו לפני:** (1) הכללים חיים — `firebase-deploy` #124 ירוק אחרי תיקון-הסוגר ב-notifSettings (סדר-פריסה בטוח: rules לפני הדגל) · (2) `USE_FIREBASE_BACKEND=true` בבנייה החיה → הדגל מפעיל · (3) `isManager()` כבר מפעיל god-views חיים (orders/customers) → ה-manager-god-view של tasks בטוח. **מה להשגיח (rollback = מחיקת 3 ה-defines):** לוח-המנהל (god-view) · שהעובד-הרשום רואה משימות שהוקצו-לו-לפי-uid · שבורר-הקבלן טעון מה-directory. הלוח החוצה-צדדי כעת חי: קבלן→עובד→אישור דרך `tasks/{taskId}`, פעמון דרך `onTaskStatusChanged`.
+
+## 🔴 דחיפה / הדלקה חיה
+**הדגל `USER_DATA_SERVER` הודלק** (2026-08-13, דירקטיבת-הבעלים: *"אין דמו/מקומי — אמיתי וחי ודלוק לשרת, או שלא בונים"*). מנגנון: `--dart-define=USER_DATA_SERVER=true` בשלושת build-ה-workflows (`web-deploy.yml` · `firebase-hosting.yml` — הזוג המתחרה על הערוץ-החי, זהים · `android-test-build.yml`). **בדחיפה:** עגלה + פרויקטים הופכים server-backed חיים למשתמש-מחובר-אמיתי (guest-אנונימי נשאר מקומי — אין לו uid). rollback = הסרת ה-3 defines. seed-migration בוטל (אין משתמשים פעילים). דחיפה על "תדחוף".

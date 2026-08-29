@@ -1,0 +1,972 @@
+{
+  "name": "_SmartTreeProductList",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🌳 "
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_screen.t23",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מומלץ",
+        "registryId": "catalog_screen.t23",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_screen.t24",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סגור",
+        "registryId": "catalog_screen.t24",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_screen.t25",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סגור",
+        "registryId": "catalog_screen.t25",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין מותג תואם לסינון שנבחר",
+        "registryId": "catalog_screen.t26",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📦 נתוני קטלוג",
+        "registryId": "catalog.detail.dataHeader",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog.action.proposal",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הצעת המחיר הועתקה",
+        "registryId": "catalog_screen.t27",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📋 הצעה",
+        "registryId": "catalog.action.proposal",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog.action.draft",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✨ נסח",
+        "registryId": "catalog.action.draft",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog.action.howToBridge",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔌 איך לגשר?",
+        "registryId": "catalog.action.howToBridge",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog.action.buildBom",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔧 בנה לי קו (BOM)",
+        "registryId": "catalog.action.buildBom",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_screen.t28",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🛒 + בטיחות לסל",
+        "registryId": "catalog_screen.t28",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog.action.addToProject",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "➕ הוסף לפרויקט",
+        "registryId": "catalog.action.addToProject",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_screen.t30",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נוסף ל-3 חדרים",
+        "registryId": "catalog_screen.t29",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "×3 חדרים",
+        "registryId": "catalog_screen.t30",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "תבניות:",
+        "registryId": "catalog.templates.label",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_screen.t31",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📋 BOM פרויקט מלא",
+        "registryId": "catalog_screen.t31",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog_screen.t33",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הצעת מחיר לפרויקט הועתקה",
+        "registryId": "catalog_screen.t32",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📋 הצעת מחיר לפרויקט",
+        "registryId": "catalog_screen.t33",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "תקינות נדרשת",
+        "registryId": "catalog.detail.requiredStandards",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מה הקו צריך לחיבור",
+        "registryId": "catalog.detail.connectionNeeds",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בדיקת קבלה (סיום התקנה)",
+        "registryId": "catalog.detail.acceptanceCheck",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "תקן ישראלי רלוונטי",
+        "registryId": "catalog.detail.israeliStandard",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "טעויות נפוצות וטיפים",
+        "registryId": "catalog.detail.commonMistakes",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "catalog.action.saveVersion",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💾 שמור גרסה",
+        "registryId": "catalog.action.saveVersion",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מתי לבחור איזה מותג",
+        "registryId": "catalog.detail.brandGuide",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נצפו לאחרונה",
+        "registryId": "catalog.detail.recentlyViewed",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "⚡ פריטי חובה",
+        "registryId": "catalog_screen.t34",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💡 פריטים אופציונליים",
+        "registryId": "catalog_screen.t35",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💡 הקש על שלב כדי להדגיש את האביזרים שלו",
+        "registryId": "catalog_screen.t36",
+        "registryOk": true
+      }
+    ],
+    "registered": 42,
+    "unregistered": [
+      "🌳 "
+    ],
+    "summary": "registry 42 · mapped 42/42 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "smartTreeQueryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "smartTreeQueryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "smartTreeCatProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartTreeQueryProvider.select((q) => q.trim())"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogRepositoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSystemFilterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cardSelectionProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "brandHistoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cardAccStateProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cardFilterStateProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "recentlyViewedProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogRepositoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cardProjectsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "stageProgressProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "stageProgressProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "prod == null"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cardDetailModeProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "projectModeProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "set",
+        "target": "projectModeProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "professionModeProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "set",
+        "target": "professionModeProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "savedConfigsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "savedConfigsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "toggle",
+        "target": "savedConfigsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "ref.watch(claudeGatewayProvider) == null"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "QuotePolishScreen"
+      },
+      {
+        "kind": "writes",
+        "via": "toggle",
+        "target": "cardDetailModeProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "tags.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "note == null"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "warn == null"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "AdapterExplainScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "cart.isEmpty"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "displayTempProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "hw.total < 2"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "displayTempProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "d == null"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "eff == null"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "mi == null"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "alt == null"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "c == null"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "types.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "line.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "text.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "anchors.length < 2"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kit.isEmpty"
+      },
+      {
+        "kind": "writes",
+        "via": "add",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cardProjectsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "triggers.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "needs.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "checks.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "stds.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "tools.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "tips.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "fam.isEmpty"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cardVersionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cardVersionsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "guide.length < 2"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "recentlyViewedProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "recent.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "rp == null"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "intelBusProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "p.stages.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "widget.items.isEmpty"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(cardSelectionProvider.notifier).setBrand(widget.product.key, b.name)",
+        "effect": "write → cardSelectionProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(brandHistoryProvider.notifier).record(widget.product.key, b.name)",
+        "effect": "write → brandHistoryProvider"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (prod == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(projectModeProvider.notifier).set(nextProjectMode(m))",
+        "effect": "write → projectModeProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(professionModeProvider.notifier).set(nextProfessionMode(prof))",
+        "effect": "write → professionModeProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(savedConfigsProvider.notifier).toggle(p.key, brand.name)",
+        "effect": "write → savedConfigsProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: CfgText('c…",
+        "effect": "open → showSnackBar"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (ref.watch(claudeGatewayProvider) == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(QuotePolishScreen.route(rawQuote: quoteTextFor(p, …",
+        "effect": "navigate → QuotePolishScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(cardDetailModeProvider.notifier).toggle()",
+        "effect": "write → cardDetailModeProvider"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (tags.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (note == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (warn == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(AdapterExplainScreen.route(productName: prod.nameH…",
+        "effect": "navigate → AdapterExplainScreen"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (cart.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (hw.total < 2)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(displayTempProvider.notifier).state = cycleDisplayTemp(tempC)",
+        "effect": "write → displayTempProvider"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (d == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (eff == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (mi == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (alt == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (c == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (types.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (line.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (text.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (anchors.length < 2)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kit.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(smartCartProvider.notifier).add(SmartCartLine(productKey: p.key, pro…",
+        "effect": "write → smartCartProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('הקו נוסף ל…",
+        "effect": "open → showSnackBar"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('נוסף ל\"$pr…",
+        "effect": "open → showSnackBar"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('הוחלה תבני…",
+        "effect": "open → showSnackBar"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (triggers.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (needs.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (checks.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (stds.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (tools.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (tips.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (fam.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('נשמר: \"${b…",
+        "effect": "open → showSnackBar"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (guide.length < 2)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (recent.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (rp == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(smartCartProvider.notifier).add(SmartCartLine(productKey: p.key, pro…",
+        "effect": "write → smartCartProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, '${p.name} · ${brand.name} (+${selectedAcc.length} אביזרים…",
+        "effect": "toast"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (p.stages.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (widget.items.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "acceptanceChecklistFor",
+    "adapterSuggestionFor",
+    "brandDecisionGuide",
+    "brandIsMetallic",
+    "brandSuitableForHot",
+    "bsOnAccent",
+    "buildInstallation",
+    "buildSafetyAccessories",
+    "catRow",
+    "chainArrowText",
+    "cheaperAlternativeBrand",
+    "complianceTriggersFor",
+    "complianceWhyHe",
+    "connectionExplainHe",
+    "connectionNeedsHe",
+    "connectionWarningHe",
+    "cycleDisplayTemp",
+    "discoveryTagsFor",
+    "durabilityRatingFor",
+    "estimatePressureDrop",
+    "filterSmartBySystem",
+    "frequentlyPairedTypesFor",
+    "groupThousands",
+    "hotWaterSuitabilityFor",
+    "installEffortFor",
+    "installTipsFor",
+    "installToolsFor",
+    "israeliStandardsFor",
+    "labelForProfession",
+    "labelForProjectMode",
+    "lineCostEstimateFor",
+    "lineFitFor",
+    "lineReadinessFromCounts",
+    "manufacturerInfoFor",
+    "mk",
+    "nextProfessionMode",
+    "nextProjectMode",
+    "onQtyChanged",
+    "onSelect",
+    "priceFor",
+    "projectQuoteText",
+    "projectTemplates",
+    "quoteTextFor",
+    "resolveDefaultBrandIndex",
+    "safetyKitItems",
+    "scoreBandColors",
+    "setState",
+    "smartCardSummaryHe",
+    "systemSafetyNoteHe",
+    "variantSiblingsOf"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": false,
+    "props": [
+      "cat"
+    ],
+    "untangle": [
+      "onCardDetailMode(…) callback instead of direct cardDetailModeProvider write",
+      "onDisplayTemp(…) callback instead of direct displayTempProvider write",
+      "onProfessionMode(…) callback instead of direct professionModeProvider write",
+      "onProjectMode(…) callback instead of direct projectModeProvider write",
+      "onSavedConfigs(…) callback instead of direct savedConfigsProvider write",
+      "onSmartCart(…) callback instead of direct smartCartProvider write",
+      "onSmartTreeCat(…) callback instead of direct smartTreeCatProvider write",
+      "onSmartTreeQuery(…) callback instead of direct smartTreeQueryProvider write"
+    ]
+  }
+}

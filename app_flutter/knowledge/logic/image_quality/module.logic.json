@@ -1,0 +1,199 @@
+{
+  "module": "image_quality",
+  "source": "../../../app_flutter/lib/features/catalog_config/image_quality.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "fn": "_basename",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? assetPath) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "imageBrightness"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if assetPath == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "slash = assetPath.lastIndexOf('/')"
+          },
+          {
+            "kind": "return",
+            "detail": "slash < 0 ? assetPath : assetPath.substring(slash + 1)"
+          }
+        ]
+      },
+      "floor": [
+        "lastIndexOf",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String? assetPath)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if assetPath == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "assetPath == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "imageBrightness",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? assetPath) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kImageBrightness"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_basename",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "isBrightImage"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "file = _basename(assetPath)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if file == null → return -1"
+          },
+          {
+            "kind": "return",
+            "detail": "kImageBrightness[file] ?? 255"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String? assetPath)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if file == null → return -1"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "isBrightImage",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? assetPath) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDarkFloor"
+          },
+          {
+            "kind": "const",
+            "name": "kImageBrightness",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "imageBrightness",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "imageBrightness(assetPath) >= kDarkFloor"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String? assetPath)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "tileEmoji",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String categoryEmoji) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kBlackEmojis"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "categoryEmoji.isEmpty || _kBlackEmojis.contains(categoryEmoji) ? '📦' : categoryEmoji"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String categoryEmoji)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,420 @@
+{
+  "module": "contractor_seeds",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/contractor_seeds.dart",
+  "entityCount": 9,
+  "entities": [
+    {
+      "entity": "BudgetThreshold",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "pct",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "label",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "pct",
+          "label"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "StoreOffer",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "store",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "store",
+          "price"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ScanItem",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "meta",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tree",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "stores",
+            "type": "List<StoreOffer>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "stores",
+            "ref": "StoreOffer",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "meta",
+          "emoji",
+          "stores"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ScanZone",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "emoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "conf",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "List<ScanItem>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "items",
+            "ref": "ScanItem",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "emoji",
+          "name",
+          "conf",
+          "items"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "PlanType",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "key",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "label",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "icon",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "sub",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "summaryUnit",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "steps",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "zones",
+            "type": "List<ScanZone>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "zones",
+            "ref": "ScanZone",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "key",
+          "label",
+          "icon",
+          "sub",
+          "summaryUnit",
+          "steps",
+          "zones"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "BudgetCategory",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "icon",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "amount",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "icon",
+          "amount"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "DeptTile",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "icon",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "icon",
+          "name"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "BrandTier",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "brand",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "rec",
+            "type": "bool",
+            "required": false,
+            "default": "false"
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "brand",
+          "price"
+        ],
+        "defaults": {
+          "rec": "false"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ProductBrands",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "product",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "tiers",
+            "type": "List<BrandTier>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "tiers",
+            "ref": "BrandTier",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "product",
+          "tiers"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

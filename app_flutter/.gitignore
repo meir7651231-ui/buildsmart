@@ -44,7 +44,16 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android signing — NEVER commit (secrets / keystore)
+/android/key.properties
+**/*.jks
+**/*.keystore
+
 # Local golden review harness — env-sensitive, kept out of CI (see knowledge/CATALOG-CARD-PROTOCOL.md §10)
 test/failures/
 test/ref_*.png
 test/ref_card_golden_test.dart
+
+# GENERATED — version.g.dart נוצר ע"י scripts/gen_version.sh (gitignored, לא tracked).
+# חריג ל-build בלבד; asset-manifests נשארים tracked (קטלגן, לקח #72).
+lib/version.g.dart

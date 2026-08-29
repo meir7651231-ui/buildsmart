@@ -1,0 +1,62 @@
+name: Atom Tools (dev-tooling · generated suite is NON-blocking)
+
+# Separate from the swarm's Protocol Enforcement. The tool golden tests are
+# blocking (they pin the decomposer + generator). The GENERATED widget suite is
+# opt-in + continue-on-error — a failing generated test is a TRIAGE signal, never
+# a blocker for the main CI.
+on:
+  push:
+    branches:
+      - 'claude/whats-happening-LyY9G'
+      - main
+    paths:
+      - 'tools/atom/**'
+      - 'app_flutter/test/generated/**'
+      - 'app_flutter/knowledge/screens/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/atom/**'
+
+jobs:
+  tool-goldens:
+    name: tool goldens (decompose + testgen) — blocking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+      - name: decompose — analyze + golden
+        working-directory: tools/atom/decompose
+        run: |
+          dart pub get
+          dart analyze
+          dart test
+      - name: testgen — analyze + golden
+        working-directory: tools/atom/testgen
+        run: |
+          dart pub get
+          dart analyze
+          dart test
+
+  generated-triage:
+    name: generated widget suite (opt-in · triage · non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+      - name: pub get
+        working-directory: app_flutter
+        run: flutter pub get
+      # The opt-in dart-define runs the generated tests; `|| true` keeps the
+      # workflow green so the triage never blocks the swarm. Read the log for
+      # the pass/fail breakdown.
+      - name: generated suite (atomgen=true)
+        working-directory: app_flutter
+        run: flutter test test/generated/ --dart-define=atomgen=true || true

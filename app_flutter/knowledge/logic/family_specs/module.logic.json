@@ -1,0 +1,288 @@
+{
+  "module": "family_specs",
+  "source": "lib/data/family_specs.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "fn": "_huliotDn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_huliotSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = p.nameHe"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = RegExp(r'(\\d{2,4})\\s*[×xX]\\s*(\\d{2,4})').firstMatch(n)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r != null → return r.group(1)"
+          },
+          {
+            "kind": "compute",
+            "detail": "o = RegExp(r'Ø\\s*(\\d{2,4})').firstMatch(n)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o != null → return o.group(1)"
+          },
+          {
+            "kind": "compute",
+            "detail": "t = RegExp(r'(\\d{2,4})\\s*$').firstMatch(n.replaceAll('°', ''))"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t != null → return t.group(1)"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = RegExp(r'\\b(\\d{2,4})\\b').firstMatch(n)"
+          },
+          {
+            "kind": "return",
+            "detail": "m?.group(1)"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "firstMatch",
+        "group",
+        "replaceAll"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if r != null → return r.group(1)",
+          "if o != null → return o.group(1)",
+          "if t != null → return t.group(1)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_huliotSpecFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> VerifiedSpec?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHuliotNonFitting"
+          },
+          {
+            "kind": "const",
+            "name": "_kHuliotPorts"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_huliotDn",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "familySpecFor",
+          "registerFamilySpecs"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if p.brand != 'Huliot' → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _kHuliotNonFitting.contains(p.categoryHe) → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "dn = _huliotDn(p)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if dn == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "ports = _kHuliotPorts[p.categoryHe] ?? 2"
+          },
+          {
+            "kind": "return",
+            "detail": "VerifiedSpec(sku: p.sku, ends: List<ConnectorEnd>.generate(ports, (_) => ConnectorEnd(End…"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorEnd",
+        "List",
+        "VerifiedSpec",
+        "contains"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "VerifiedSpec?",
+        "purity": "pure",
+        "precond": [
+          "if p.brand != 'Huliot' → return null",
+          "if _kHuliotNonFitting.contains(p.categoryHe) → return null",
+          "if dn == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "p.brand != 'Huliot' · _kHuliotNonFitting.contains(p.categoryHe) · dn == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "familySpecFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> VerifiedSpec?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHuliotNonFitting",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kHuliotPorts",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_huliotSpecFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "polyrollSpecFor(p) ?? _huliotSpecFor(p)"
+          }
+        ]
+      },
+      "floor": [
+        "polyrollSpecFor"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "VerifiedSpec?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "registerFamilySpecs",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHuliotNonFitting",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kHuliotPorts",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kHuliotProducts"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_huliotSpecFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final p in kHuliotProducts"
+          },
+          {
+            "kind": "compute",
+            "detail": "spec = _huliotSpecFor(p)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if spec == null → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "kVerifiedSpecs.putIfAbsent(p.sku, () => spec)"
+          }
+        ]
+      },
+      "floor": [
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

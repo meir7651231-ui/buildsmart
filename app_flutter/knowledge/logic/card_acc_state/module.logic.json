@@ -1,0 +1,497 @@
+{
+  "module": "card_acc_state",
+  "source": "lib/state/card_acc_state.dart",
+  "atomCount": 9,
+  "atoms": [
+    {
+      "fn": "AccState.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({bool? selected, int? qty}) -> AccState",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "AccState(selected: selected ?? this.selected, qty: qty ?? this.qty)"
+          }
+        ]
+      },
+      "floor": [
+        "AccState"
+      ],
+      "contract": {
+        "input": "({bool? selected, int? qty})",
+        "output": "AccState",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AccState.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "qty"
+          },
+          {
+            "kind": "field",
+            "name": "selected"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'s' : selected, 'q' : qty}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardAccStateNotifier.ready",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ready"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ready"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardAccStateNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(_key)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw != null"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "map"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardAccStateNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "CardAccStateNotifier._update"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "compute",
+            "detail": "serialised = state.map((pk, inner) => MapEntry(pk, inner.map((k, v) => MapEntry(k, v.toJson()))))"
+          },
+          {
+            "kind": "effect",
+            "detail": "await prefs.setString(_key, jsonEncode(serialised))"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "getInstance",
+        "jsonEncode",
+        "map",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardAccStateNotifier.get",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String accName) -> AccState?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state[productKey]?[accName]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String productKey, String accName)",
+        "output": "AccState?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardAccStateNotifier._update",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String accName, AccState Function(AccState? prev) f) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "from"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "CardAccStateNotifier.setQty",
+          "CardAccStateNotifier.setSelected"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "outer = Map<String, Map<String, AccState>>.from(state)"
+          },
+          {
+            "kind": "init",
+            "detail": "inner = Map<String, AccState>.from(outer[productKey] ?? const {})"
+          },
+          {
+            "kind": "effect",
+            "detail": "inner[accName] = f(inner[accName])"
+          },
+          {
+            "kind": "effect",
+            "detail": "outer[productKey] = inner"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = outer"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "Map",
+        "f"
+      ],
+      "contract": {
+        "input": "(String productKey, String accName, AccState Function(AccState? prev) f)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardAccStateNotifier.setSelected",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String accName, bool selected) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "from",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_update",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_update(productKey, accName, (prev) => (prev ?? const AccState(selected: false, qty: 1)).…"
+          }
+        ]
+      },
+      "floor": [
+        "AccState",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String productKey, String accName, bool selected)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CardAccStateNotifier.setQty",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String productKey, String accName, int qty) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "from",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_update",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "branch",
+            "detail": "if qty < 1"
+          },
+          {
+            "kind": "effect",
+            "detail": "_update(productKey, accName, (prev) => (prev ?? const AccState(selected: false, qty: 1)).…"
+          }
+        ]
+      },
+      "floor": [
+        "AccState",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String productKey, String accName, int qty)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,852 @@
+{
+  "screen": "store_settings_screen",
+  "source": "store_settings_screen.dart",
+  "atomCount": 10,
+  "atoms": [
+    {
+      "name": "StoreSettingsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "הגדרות חנות",
+            "registryId": "store_settings_screen.screen_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "איפוס הגדרות?",
+            "registryId": "store_settings_screen.reset_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כל הגדרות החנות יוחזרו לברירת המחדל.",
+            "registryId": "store_settings_screen.reset_body",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "store_settings_screen.cancel",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ביטול",
+            "registryId": "store_settings_screen.cancel",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "store_settings_screen.reset_ok",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אפס",
+            "registryId": "store_settings_screen.reset_ok",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [],
+        "summary": "registry 7 · mapped 7/7 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "kbStoreSettingsNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_ShippingSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.inline_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.radio_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_PaymentSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.radio_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "store_settings_screen.placeholder_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_InvoicesSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.inline_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "validBusinessId"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_NotificationsSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_CartSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.number_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_SuppliersSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "store_settings_screen.placeholder_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.number_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.radio_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 5,
+        "unregistered": [],
+        "summary": "registry 5 · mapped 5/5 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_DisplaySection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.radio_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_LogisticsSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "store_settings_screen.placeholder_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.radio_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_PrivacySection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "store_settings_screen.section_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.switch_wip",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "store_settings_screen.number_wip",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "storeSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "storeSearchQueryProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'החיפוש נוקה')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(storeSearchQueryProvider.notifier).state = ''",
+            "effect": "write → storeSearchQueryProvider"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "confirmDestructive"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onStoreSearchQuery(…) callback instead of direct storeSearchQueryProvider write",
+          "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 11,
+    "total": 11,
+    "summary": "11/11",
+    "entries": [
+      {
+        "id": "store_settings_screen.screen_title",
+        "ok": true,
+        "atom": "StoreSettingsScreen"
+      },
+      {
+        "id": "store_settings_screen.reset_title",
+        "ok": true,
+        "atom": "StoreSettingsScreen"
+      },
+      {
+        "id": "store_settings_screen.reset_body",
+        "ok": true,
+        "atom": "StoreSettingsScreen"
+      },
+      {
+        "id": "store_settings_screen.cancel",
+        "ok": true,
+        "atom": "StoreSettingsScreen"
+      },
+      {
+        "id": "store_settings_screen.reset_ok",
+        "ok": true,
+        "atom": "StoreSettingsScreen"
+      },
+      {
+        "id": "store_settings_screen.section_wip",
+        "ok": true,
+        "atom": "_ShippingSection"
+      },
+      {
+        "id": "store_settings_screen.inline_wip",
+        "ok": true,
+        "atom": "_ShippingSection"
+      },
+      {
+        "id": "store_settings_screen.radio_wip",
+        "ok": true,
+        "atom": "_ShippingSection"
+      },
+      {
+        "id": "store_settings_screen.switch_wip",
+        "ok": true,
+        "atom": "_ShippingSection"
+      },
+      {
+        "id": "store_settings_screen.placeholder_wip",
+        "ok": true,
+        "atom": "_PaymentSection"
+      },
+      {
+        "id": "store_settings_screen.number_wip",
+        "ok": true,
+        "atom": "_CartSection"
+      }
+    ]
+  }
+}

@@ -1,0 +1,656 @@
+{
+  "module": "company_spec_bridge",
+  "source": "lib/data/company_spec_bridge.dart",
+  "atomCount": 9,
+  "caches": [
+    "_kInchValueToKey",
+    "kCompanySpecSkus"
+  ],
+  "atoms": [
+    {
+      "fn": "companySpecFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> VerifiedSpec?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kEngineMaterials",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_kBareMm",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_parseEnd",
+            "module": true
+          },
+          {
+            "name": "_normalizeMaterial",
+            "module": true
+          },
+          {
+            "name": "_pressureRating",
+            "module": true
+          },
+          {
+            "name": "_maxTempC",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "registerCompanySpecs"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "ends = <ConnectorEnd>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final key in const ['קצה 1', 'קצה 2', 'קצה 3']"
+          },
+          {
+            "kind": "compute",
+            "detail": "cell = p.dims?[key]?.toString().trim()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if cell == null || cell.isEmpty → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "end = _parseEnd(cell)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if end != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if ends.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "material = _normalizeMaterial(p.dims?['חומר']?.toString().trim() ?? '')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if material.isEmpty && ends.any((e) => e.type == EndType.hdpeCompression) → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "pressure = _pressureRating(p)"
+          },
+          {
+            "kind": "compute",
+            "detail": "maxTemp = _maxTempC(p)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if maxTemp != null → return VerifiedSpec(sku: p.sku, ends: ends, material: material, pressureRating: pressure, maxTem…"
+          },
+          {
+            "kind": "return",
+            "detail": "VerifiedSpec(sku: p.sku, ends: ends, material: material, pressureRating: pressure)"
+          }
+        ]
+      },
+      "floor": [
+        "VerifiedSpec",
+        "add",
+        "any",
+        "toString",
+        "trim"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "VerifiedSpec?",
+        "purity": "pure",
+        "precond": [
+          "if ends.isEmpty → return null",
+          "if material.isEmpty && ends.any((e) => e.type == EndType.hdpeCompression) → return null",
+          "if maxTemp != null → return VerifiedSpec(sku: p.sku, ends: ends, material: material, pressureRating: pressure, maxTem…"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "ends.isEmpty · material.isEmpty && ends.any((e) => e.type == EndType.hdpeCompression) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "registerCompanySpecs",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> products) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "kCompanySpecSkus"
+          },
+          {
+            "kind": "state",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "calls": [
+          {
+            "name": "companySpecFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final p in products"
+          },
+          {
+            "kind": "compute",
+            "detail": "spec = companySpecFor(p)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if spec == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "inserted = false"
+          },
+          {
+            "kind": "effect",
+            "detail": "kVerifiedSpecs.putIfAbsent(p.sku, () {inserted = true; return spec;})"
+          },
+          {
+            "kind": "branch",
+            "detail": "if inserted"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> products)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_parseEnd",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String text) -> ConnectorEnd?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBspInchToMm",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "_kBareMm"
+          },
+          {
+            "kind": "global",
+            "name": "_kInchValueToKey",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_canonInchSize",
+            "module": true
+          },
+          {
+            "name": "_mmSize",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "companySpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "upper = text.toUpperCase()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if text.contains('תבריג') || text.contains('הברגה')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if text.contains('פקס') || upper.contains('PEX')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if text.contains('נחושת')"
+          },
+          {
+            "kind": "init",
+            "detail": "socketWords = ['הדבקה', 'דבק', 'שקע', 'מופה', 'כניסה']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if socketWords.any(text.contains) || upper.startsWith('DN') || _kBareMm.hasMatch(text)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if text.contains('פתח ניקוז')"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorEnd",
+        "any",
+        "contains",
+        "hasMatch",
+        "replaceFirst",
+        "startsWith",
+        "toUpperCase",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String text)",
+        "output": "ConnectorEnd?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_canonInchSize",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String text) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBspInchToMm"
+          },
+          {
+            "kind": "global",
+            "name": "_kInchValueToKey"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_expandInchFractions",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_parseEnd"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = text"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final mark in const ['\"', '״', \"'\", '׳', '″', '′']"
+          },
+          {
+            "kind": "effect",
+            "detail": "t = t.replaceAll(mark, ' ')"
+          },
+          {
+            "kind": "effect",
+            "detail": "t = _expandInchFractions(t)"
+          },
+          {
+            "kind": "effect",
+            "detail": "t = t.replaceAllMapped(RegExp(r'(\\d+)\\s+\\.(\\d+)'), (m) => '${m[1]}.${m[2]}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = "
+          },
+          {
+            "kind": "compute",
+            "detail": "mixed = RegExp(r'(\\d+)[\\s-]+(\\d+)\\s*/\\s*(\\d+)').firstMatch(t)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if mixed != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if v == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = _kInchValueToKey[v]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if key == null || !kBspInchToMm.containsKey(key) → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "'$key\"'"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "containsKey",
+        "firstMatch",
+        "parse",
+        "replaceAll",
+        "replaceAllMapped",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(String text)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if v == null → return null",
+          "if key == null || !kBspInchToMm.containsKey(key) → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "v == null · key == null || !kBspInchToMm.containsKey(key) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_expandInchFractions",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String w) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_canonInchSize"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "w.replaceAll('¼', '.25').replaceAll('½', '.5').replaceAll('¾', '.75').replaceAll('⅛', '.1…"
+          }
+        ]
+      },
+      "floor": [
+        "replaceAll"
+      ],
+      "contract": {
+        "input": "(String w)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_mmSize",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String text) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_parseEnd"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "m = RegExp(r'\\d+(?:\\.\\d+)?').firstMatch(text)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if m == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "n = double.parse(m[0]!)"
+          },
+          {
+            "kind": "return",
+            "detail": "n == n.roundToDouble() ? n.toInt().toString() : m[0]!"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "firstMatch",
+        "parse",
+        "roundToDouble",
+        "toInt",
+        "toString"
+      ],
+      "contract": {
+        "input": "(String text)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if m == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "m == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_normalizeMaterial",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kEngineMaterials"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "companySpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final token in _kEngineMaterials"
+          },
+          {
+            "kind": "branch",
+            "detail": "if raw.toUpperCase() == token → return token"
+          },
+          {
+            "kind": "return",
+            "detail": "raw"
+          }
+        ]
+      },
+      "floor": [
+        "toUpperCase"
+      ],
+      "contract": {
+        "input": "(String raw)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_maxTempC",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> double?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "companySpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "raw = p.dims?['טמפ׳ מקסימלית']?.toString() ?? p.dims?[\"טמפ' מקסימלית\"]?.toString()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "cleaned = raw.replaceAll('מעלות', '').replaceAll('°', '').trim().replaceAll(RegExp(r'[Cc]$'), '').t…"
+          },
+          {
+            "kind": "return",
+            "detail": "double.tryParse(cleaned)"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "replaceAll",
+        "toString",
+        "trim",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "double?",
+        "purity": "pure",
+        "precond": [
+          "if raw == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pressureRating",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "companySpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final key in const ['לחץ', 'PN']"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = p.dims?[key]?.toString().trim()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v != null && v.isNotEmpty → return v"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "toString",
+        "trim"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    }
+  ]
+}

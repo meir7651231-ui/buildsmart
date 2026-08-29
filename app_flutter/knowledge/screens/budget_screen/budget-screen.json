@@ -1,0 +1,196 @@
+{
+  "name": "BudgetScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "תקציב הפרויקט",
+        "registryId": "budget_screen.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "פירוט הוצאות לפי קטגוריה",
+        "registryId": "budget_screen.cat_header",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "＋ הוסף",
+        "registryId": "budget_screen.add",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין קטגוריות עדיין — הקש \"＋ הוסף\" כדי להוסיף קטגוריה",
+        "registryId": "budget_screen.no_cats",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הוצאות לפי אתר",
+        "registryId": "budget_screen.site_header",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין אתרים פעילים — הוסיפו פרויקט במסך הפרויקטים",
+        "registryId": "budget_screen.no_sites",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✏️ עריכת התקציב",
+        "registryId": "budget_screen.edit_budget_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "עריכת תקציב",
+        "registryId": "budget_screen.editor_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שמירה",
+        "registryId": "budget_screen.save",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "− הסר הוצאה",
+        "registryId": "budget_screen.remove_expense",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "＋ הוסף הוצאה",
+        "registryId": "budget_screen.add_expense",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שמירה",
+        "registryId": "budget_screen.save_cat",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🗑️ מחיקת קטגוריה",
+        "registryId": "budget_screen.delete_cat",
+        "registryOk": true
+      }
+    ],
+    "registered": 13,
+    "unregistered": [],
+    "summary": "registry 13 · mapped 13/13 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "budgetProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "siteRepositoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "ordersEngineProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "budgetProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(budgetProvider.notifier).addCategory()",
+        "effect": "write → budgetProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(ctx, 'יש להזין מספרים תקינים')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(budgetProvider.notifier).setTotals(total, spent)",
+        "effect": "write → budgetProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'התקציב עודכן')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(ctx, 'יש להזין שם קטגוריה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(ctx, 'יש להזין סכום תקין')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(budgetProvider.notifier).saveCategory(i, name, amt)",
+        "effect": "write → budgetProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הקטגוריה נשמרה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(budgetProvider.notifier).deleteCategory(i)",
+        "effect": "write → budgetProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הקטגוריה נמחקה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "confirmDestructive"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

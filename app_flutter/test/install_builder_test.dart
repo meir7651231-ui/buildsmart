@@ -57,9 +57,10 @@ void main() {
       for (final p in path!) { expect(_hasAccessory([p]), isFalse); }
     });
 
-    // 7. כל מחבר-ביניים חייב VerifiedSpec
-    test('7. מחברי ביניים מאומתים — קיסר → ברז גן ½"', () {
-      final path = findShortestPath(_p('779096G'), _p('77777341'), maxDepth: 6);
+    // 7. כל מחבר-ביניים חייב VerifiedSpec (ברז-מעבר inline → קיסר קצה; קו חוקי בעל
+    //    מחברי-ביניים. היה קיסר→ברז גן = שני ברזי-קצה, שלא חוקי מ-B4.)
+    test('7. מחברי ביניים מאומתים — ברז מעבר 1" → קיסר ½"', () {
+      final path = findShortestPath(_p('77777313'), _p('779096G'), maxDepth: 6);
       expect(path, isNotNull);
       for (var i = 1; i < path!.length - 1; i++) {
         expect(kVerifiedSpecs[path[i].sku], isNotNull,
@@ -68,9 +69,9 @@ void main() {
       }
     });
 
-    // 8. קבועה רק כקצה — אסלה לא באמצע
+    // 8. קבועה רק כקצה — אסלה לא באמצע (ברז-מעבר → אסלה: קו אספקה חוקי, אסלה בקצה)
     test('8. אסלה אינה מחבר-אמצע', () {
-      final path = findShortestPath(_p('779096G'), _p('77771006'), maxDepth: 6);
+      final path = findShortestPath(_p('77777311'), _p('77771006'), maxDepth: 6);
       expect(path, isNotNull);
       for (var i = 1; i < path!.length - 1; i++) {
         expect(flowRole(path[i]), isNot(FlowRole.fixture));

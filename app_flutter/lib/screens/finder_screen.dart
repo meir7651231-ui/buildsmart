@@ -3,15 +3,21 @@
 // questions a layman can answer: מה זה (a plain-language type — not the plumber
 // taxonomy) and איזה גודל (a size read off their list). Results render through
 // the shared LipskeyProductsList so cards behave like the rest of the catalog.
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart'
+    show WaterSystem;
+import 'package:buildsmart/data/repositories/catalog_local.dart';
+import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
+import '../features/word_finder/narrow_axis.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const _ink = Color(0xFF1A1A1A);
+const _ink = BsTokens.inkLight;
 const _mute = Color(0xFF888888);
 const _surface = Color(0xFFF5F5F5);
 
@@ -74,6 +80,13 @@ const List<FinderGroup> kFinderGroups = [
     'פקקים PPR', 'אומגה PPR', 'ברזים PPR', 'צווארונים ואוגנים PPR',
     'אביזרי ריתוך חשמלי PPR', 'כלי ריתוך PPR',
   }, desc: 'מערכת צנרת PPR לאספקת מים ומיזוג — פולירול',),
+  FinderGroup('🟢', 'דלוחין SmartLock', {
+    kSmlPipes, kSmlCutters, kSmlJoker,
+    kSmlElbowOneSide, kSmlElbow, kSmlElbowReducing, kSmlElbowTelescopic,
+    kSmlTee, kSmlDoubleCoupling, kSmlReducer,
+    kSmlGutters, kSmlFloorDrains, kSmlAccessories, kSmlNuts,
+    kSmlAquaSlim, kSmlCovers, kSmlSiphons,
+  }, desc: 'מערכת דלוחין SmartLock מפוליפרופילן 32-63 מ"מ — חוליות',),
   FinderGroup('🔧', 'אחר', {}, desc: 'כל שאר המוצרים בקטלוג'), // catch-all
 ];
 
@@ -93,6 +106,7 @@ const Map<String, IconData> kFinderGroupIcons = {
   'מחברים וחיבורים': Icons.link,
   'חבקים ותלייה': Icons.hardware,
   'צנרת PPR': Icons.trip_origin,
+  'דלוחין SmartLock': Icons.water_damage,
   'אחר': Icons.category,
 };
 
@@ -114,6 +128,7 @@ const Map<String, String> kFinderGroupImage = {
   'מחברים וחיבורים': 'connectors',
   'חבקים ותלייה': 'clamps',
   'צנרת PPR': 'ppr',
+  'דלוחין SmartLock': 'smartlock',
   'אחר': 'other',
 };
 
@@ -237,148 +252,17 @@ const Map<String, List<FinderSub>> kFinderSubs = {
 final Set<String> _claimedCats = {for (final g in kFinderGroups) ...g.cats};
 
 List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
+  // T6.3: route through the catalog repository (same const `kCatalogProducts`).
   if (g.cats.isEmpty) {
-    return kCatalogProducts
+    return catalogRepo()
+        .allProducts()
         .where((p) => !_claimedCats.contains(p.categoryHe))
         .toList();
   }
-  return kCatalogProducts.where((p) => g.cats.contains(p.categoryHe)).toList();
-}
-
-/// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 ·
-/// 50 מ"מ). Catches inch/fraction, DN, cross-sizes, and Hebrew "מ"מ" (mm).
-/// (Regex lives in `_size_norm.dart` now; this comment marker stays as the
-/// reading entry-point.)
-
-/// Size labels a product carries — readable tokens from the name AND from
-/// the dims map. A pipe carries TWO orthogonal axes: a diameter (in dims)
-/// and a length (in name); the chooser needs both — they aren't substitutes.
-/// Returns a deduped set; the family tag lets the chooser keep family-
-/// coherent ordering (no inch interleaved with cm).
-List<SizeToken> _productSizeTokens(LipskeyCatalogProduct p) {
-  final out = <SizeToken>{...parseSizeTokens(p.nameHe)};
-  final d = p.dims;
-  if (d != null) out.addAll(tokensFromDims(d));
-  return out.toList();
-}
-
-/// Sorted, deduped chip list for the pool. Keeps every family the pool
-/// surfaces (mm + cm, inch + DN, …) but groups them so the row reads
-/// coherently: all mm in numeric order, THEN all cm in numeric order — never
-/// `200 · 25 · 250 · 30` interleaved. Length equivalents across cm/meters/mm
-/// collapse to one chip (e.g. `15 ס"מ` ≡ `0.15 מ׳`).
-List<SizeToken> _sizeTokensIn(List<LipskeyCatalogProduct> ps) {
-  final all = <SizeToken>{};
-  for (final p in ps) {
-    all.addAll(_productSizeTokens(p));
-  }
-  final out = dedupLengthByMm(all.toList());
-  sortSizeTokens(out);
-  return out;
-}
-
-/// Angle chips for the pool (separate axis — used only when sizes don't
-/// split). Sorted ascending.
-List<SizeToken> _angleTokensIn(List<LipskeyCatalogProduct> ps) {
-  final all = <SizeToken>{};
-  for (final p in ps) {
-    all.addAll(parseAngleTokens(p.nameHe));
-  }
-  final out = all.toList()..sort((a, b) => a.mm.compareTo(b.mm));
-  return out;
-}
-
-/// Characterizing-word chips for sub-types with no size axis (e.g. toilet seats
-/// differ by model/shape, not size). The first distinguishing word per name —
-/// same idea as the catalog's auto-facets.
-List<String> _wordOptions(List<LipskeyCatalogProduct> pool) {
-  if (pool.length <= 1) return const [];
-  List<String> toks(String name) => name
-      .split(RegExp(r'[\s()"׳/×,.+-]+'))
-      .where((w) => w.length >= 2 && !RegExp(r'\d').hasMatch(w))
+  return catalogRepo()
+      .allProducts()
+      .where((p) => g.cats.contains(p.categoryHe))
       .toList();
-  final lists = [for (final p in pool) toks(p.nameHe)];
-  final shared = lists.first.toSet();
-  for (final t in lists.skip(1)) {
-    shared.retainAll(t.toSet());
-  }
-  final counts = <String, int>{};
-  for (final t in lists) {
-    for (final w in t) {
-      if (shared.contains(w)) continue;
-      counts[w] = (counts[w] ?? 0) + 1;
-      break; // first distinguishing word wins
-    }
-  }
-  final entries = counts.entries.toList()
-    ..sort((a, b) => b.value.compareTo(a.value));
-  return [for (final e in entries.take(12)) e.key];
-}
-
-/// Curated narrow chips for sub-types that resist auto size/word detection —
-/// keyword splits a non-technical user understands (cover/grate, round/square…).
-const Map<String, List<String>> kFinderFacets = {
-  'מכסים ורשתות': ['מכסה', 'רשת', 'עגול', 'מרובע', 'ניקל', 'נחושת', 'שחור'],
-  'מחסומים גלויים': ['אמריקאי', 'נסתר', 'לכיור', 'למדיח', 'כביסה', 'מטבח'],
-  // floor drains read off plain words, not opaque "245/50" DN codes
-  'מחסומי רצפה': ['פתוח', 'סגור', 'למקלחת', 'קומקום'],
-};
-
-/// Distinct product colours in the pool (≥2) — narrows identical-name items
-/// that differ only by colour (e.g. toilet seats: לבן/פרגמון/אפור).
-List<String> _colorOptions(List<LipskeyCatalogProduct> pool) {
-  final cols = <String>{};
-  for (final p in pool) {
-    final c = p.color;
-    if (c != null && c.trim().isNotEmpty) cols.add(c);
-  }
-  return cols.length > 1 ? (cols.toList()..sort()) : const [];
-}
-
-/// "Narrow by" axis for a pool, best first: curated facets → sizes → angles
-/// (when sizes don't split) → colours → characterizing words. Returns a Hebrew
-/// axis label (for the chip-row hint) plus the chip *labels*; empty when
-/// nothing splits the pool.
-({String label, List<String> chips}) _narrowAxis(
-    List<LipskeyCatalogProduct> pool, String? subtype,) {
-  final curated = subtype == null ? null : kFinderFacets[subtype];
-  if (curated != null) {
-    final matching =
-        curated.where((k) => pool.any((p) => p.nameHe.contains(k))).toList();
-    if (matching.length > 1) return (label: 'אפשרות', chips: matching);
-  }
-  // Each axis must actually split the pool (>1 option); a lone chip can't
-  // narrow anything, so fall through to the next axis (or show no bar).
-  final sizes = _sizeTokensIn(pool);
-  if (sizes.length > 1) {
-    return (label: 'גודל', chips: sizes.map((t) => t.label).toList());
-  }
-  final angles = _angleTokensIn(pool);
-  if (angles.length > 1) {
-    return (label: 'זווית', chips: angles.map((t) => t.label).toList());
-  }
-  final colors = _colorOptions(pool);
-  if (colors.length > 1) return (label: 'צבע', chips: colors);
-  final words = _wordOptions(pool);
-  return words.length > 1
-      ? (label: 'דגם', chips: words)
-      : (label: '', chips: const <String>[]);
-}
-
-/// Returns true iff a product carries the structural token for [chipLabel] —
-/// no String.contains fallback. Lets the filter reject "25 שנים אחריות" when
-/// the chip is "25 ס"מ".
-bool _productHasChip(LipskeyCatalogProduct p, String chipLabel) {
-  for (final t in _productSizeTokens(p)) {
-    if (t.label == chipLabel) return true;
-  }
-  for (final t in parseAngleTokens(p.nameHe)) {
-    if (t.label == chipLabel) return true;
-  }
-  // curated-facet chips (kFinderFacets) are plain words; the only place a
-  // substring match is *correct* (e.g. "אמריקאי" inside a drain name).
-  if (p.nameHe.contains(chipLabel)) return true;
-  return p.color == chipLabel;
 }
 
 class FinderScreen extends ConsumerStatefulWidget {
@@ -393,12 +277,77 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
   String? _size;
   String? _angle;
   String? _letter;
+  String? _wall;
+
+  // Memo of the system-filtered group pool. `filterBySystem(_productsForGroup(g))`
+  // is a full O(catalog) scan, but it depends ONLY on the active group + system
+  // filter — NOT on the chip selections (_size/_angle/_sub/_letter/_wall) that
+  // setState on every tap. Cache it keyed on (group, systemFilter) so toggling a
+  // chip reuses the same base instead of rescanning the catalog each build.
+  FinderGroup? _baseGroup;
+  WaterSystem? _baseSystem;
+  List<LipskeyCatalogProduct>? _baseCache;
+
+  List<LipskeyCatalogProduct> _baseFor(FinderGroup g, WaterSystem? systemFilter) {
+    if (_baseCache != null &&
+        identical(_baseGroup, g) &&
+        _baseSystem == systemFilter) {
+      return _baseCache!;
+    }
+    _baseGroup = g;
+    _baseSystem = systemFilter;
+    return _baseCache = filterBySystem(_productsForGroup(g), systemFilter);
+  }
+
+  // Per-(systemFilter) tally of how many in-system products each `categoryHe`
+  // has — built ONCE per system from a single catalog pass, so `_typeList` can
+  // size all 12 group badges by summing each group's categories instead of
+  // re-scanning the whole catalog 12× (filterBySystem ∘ _productsForGroup per
+  // group). Byte-identical: filtering-then-grouping == grouping-then-filtering.
+  WaterSystem? _catCountSystem;
+  Map<String, int>? _catCountCache;
+
+  Map<String, int> _categoryCountsFor(WaterSystem? systemFilter) {
+    if (_catCountCache != null && _catCountSystem == systemFilter) {
+      return _catCountCache!;
+    }
+    final counts = <String, int>{};
+    for (final p
+        in filterBySystem(catalogRepo().allProducts(), systemFilter)) {
+      counts[p.categoryHe] = (counts[p.categoryHe] ?? 0) + 1;
+    }
+    _catCountSystem = systemFilter;
+    return _catCountCache = counts;
+  }
+
+  /// In-system product count for [g] — sums the per-category tally so it avoids
+  /// the old per-group `filterBySystem(_productsForGroup(g))` rescan. Catch-all
+  /// (`g.cats` empty) sums every category not claimed by another group, exactly
+  /// as `_productsForGroup` selects them.
+  int _groupCount(FinderGroup g, Map<String, int> catCounts) {
+    if (g.cats.isEmpty) {
+      var n = 0;
+      catCounts.forEach((cat, c) {
+        if (!_claimedCats.contains(cat)) n += c;
+      });
+      return n;
+    }
+    var n = 0;
+    for (final c in g.cats) {
+      n += catCounts[c] ?? 0;
+    }
+    return n;
+  }
 
   @override
   Widget build(BuildContext context) {
     if (_group == null) return _typeList();
 
-    final base = _productsForGroup(_group!);
+    // Scope to the active water system (Benzi #1, option 2): a department sets
+    // catalogSystemFilterProvider, so the finder's whole pool — subs, narrow
+    // chips, results — derives from the filtered base.
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
+    final base = _baseFor(_group!, systemFilter);
     final subs = _subsFor(base);
     FinderSub? sel;
     for (final s in subs) {
@@ -410,27 +359,35 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final pool = sel == null
         ? base
         : base.where((p) => sel!.cats.contains(p.categoryHe)).toList();
-    final narrow = _narrowAxis(pool, _sub);
+    final narrow = narrowAxis(pool, _sub);
     // Secondary angle row appears whenever the primary axis was סוג/גודל/דגם
     // AND the pool has >1 angles — so a user looking at a 90° elbow can flip
     // to 45° from the same screen.
     final angleChips = narrow.label == 'זווית'
         ? const <String>[]
-        : _angleTokensIn(pool).map((t) => t.label).toList();
+        : angleTokensIn(pool).map((t) => t.label).toList();
     // Secondary letter-size row (S/M/L): some collars/anchors carry a letter
     // size instead of a number. Surfaced like the angle axis, co-filterable.
     final letterChips = _letterOptions(pool);
+    // Secondary wall-thickness row (PPR/multilayer): the SAME OD ships at
+    // different walls (PN ratings), so `20×2.8` vs `40×5.5` — wall narrows
+    // beyond the גודל (OD) axis. Co-filterable.
+    final wallChips = _wallOptions(pool);
     var results = pool;
     if (_size != null) {
-      results = results.where((p) => _productHasChip(p, _size!)).toList();
+      results = results.where((p) => productHasChip(p, _size!)).toList();
     }
     if (_angle != null) {
-      results = results.where((p) => _productHasChip(p, _angle!)).toList();
+      results = results.where((p) => productHasChip(p, _angle!)).toList();
     }
     if (_letter != null) {
       results = results
           .where((p) => letterSizeTokens(p.nameHe).contains(_letter))
           .toList();
+    }
+    if (_wall != null) {
+      results =
+          results.where((p) => wallTokens(p.nameHe).contains(_wall)).toList();
     }
     // Count of cards the user will actually see (variants collapse to one).
     final shown = results.map(productListDedupeKey).toSet().length;
@@ -442,6 +399,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         if (narrow.chips.isNotEmpty) _sizeBar(narrow.label, narrow.chips),
         if (angleChips.length > 1) _angleBar(angleChips),
         if (letterChips.length > 1) _letterBar(letterChips),
+        if (wallChips.length > 1) _wallBar(wallChips),
         if (results.isNotEmpty) _countStrip(shown),
         if (results.isNotEmpty &&
             !ref.watch(finderChipTipDismissedProvider))
@@ -449,7 +407,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         Expanded(
           child: results.isEmpty
               ? const Center(
-                  child: Text('לא נמצאו מוצרים',
+                  child: CfgText('finder_screen.no_results', 'לא נמצאו מוצרים',
                       style: TextStyle(color: _mute),),)
               : LipskeyProductsList(products: results),
         ),
@@ -489,6 +447,27 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     return out;
   }
 
+  /// Secondary chip row for wall thickness (PPR PN ratings) — keyed `_wall`.
+  Widget _wallBar(List<String> chips) {
+    return _chipRow('עובי', [
+      _chip('הכל', _wall == null, () => setState(() => _wall = null)),
+      for (final c in chips)
+        _chip('$c מ"מ', _wall == c, () => setState(() => _wall = c)),
+    ]);
+  }
+
+  /// Distinct cross-dim wall thicknesses across the pool (numeric-ascending).
+  List<String> _wallOptions(List<LipskeyCatalogProduct> pool) {
+    final all = <String>{};
+    for (final p in pool) {
+      all.addAll(wallTokens(p.nameHe));
+    }
+    final out = all.toList()
+      ..sort((a, b) => (double.tryParse(a) ?? double.infinity)
+          .compareTo(double.tryParse(b) ?? double.infinity));
+    return out;
+  }
+
   // One-time hint explaining the orange chips on the product cards below
   // (their colour code has no legend of its own). Dismissible via the X.
   Widget _chipTip() {
@@ -503,13 +482,29 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         const Text('💡', style: TextStyle(fontSize: 13)),
         const SizedBox(width: 6),
         const Expanded(
-          child: Text('צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע',
+          child: CfgText('finder_screen.chip_tip', 'צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע',
               style: TextStyle(color: _ink, fontSize: 12),),
         ),
-        GestureDetector(
-          onTap: () =>
-              ref.read(finderChipTipDismissedProvider.notifier).state = true,
-          child: const Icon(Icons.close, size: 16, color: _mute),
+        Semantics(
+          button: true,
+          label: 'סגור',
+          child: Tooltip(
+            message: 'סגור',
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () =>
+                  ref.read(finderChipTipDismissedProvider.notifier).state = true,
+              // ≥48dp tap target around the small ✕ (a11y), without
+              // enlarging the visible glyph.
+              child: const SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: Icon(Icons.close, size: 16, color: _mute),
+                ),
+              ),
+            ),
+          ),
         ),
       ],),
     );
@@ -529,17 +524,28 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
 
   // ── step 1: type rows — same WhatsApp-style row as _CatalogList ──────────
   Widget _typeList() {
+    // Scope to the active water system (Benzi #1, option 2): hide groups with no
+    // products in it, and show the in-system count. The count comes from a
+    // single per-category tally (built once per system) summed per group —
+    // instead of one full catalog scan per group (was ≈12×O(catalog) per build).
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
+    final catCounts = _categoryCountsFor(systemFilter);
+    final groups = <(FinderGroup, int)>[];
+    for (final g in kFinderGroups) {
+      final n = _groupCount(g, catCounts);
+      if (n > 0) groups.add((g, n));
+    }
     return ListView.separated(
       key: const Key('catalog-list'),
-      itemCount: kFinderGroups.length,
+      itemCount: groups.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 82,
         color: _surface,
       ),
       itemBuilder: (_, i) {
-        final g = kFinderGroups[i];
-        final count = _productsForGroup(g).length;
+        final g = groups[i].$1;
+        final count = groups[i].$2;
         return InkWell(
           onTap: () => setState(() {
             _group = g;
@@ -547,6 +553,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             _size = null;
             _angle = null;
             _letter = null;
+            _wall = null;
           }),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -622,6 +629,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           if (_angle != null) {
             _angle = null;
             _letter = null;
+            _wall = null;
           } else if (_size != null) {
             _size = null;
           } else if (_sub != null) {
@@ -645,7 +653,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(crumbs.join('  ›  '),
+              child: Text(crumbs.join('  ‹  '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -699,7 +707,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       ),
       child: Row(children: [
         Padding(
-          padding: const EdgeInsets.only(right: 14, left: 2),
+          padding: const EdgeInsetsDirectional.only(start: 14, end: 2),
           child: Text(hint,
               style: const TextStyle(
                   color: _mute, fontSize: 12, fontWeight: FontWeight.w700,),),
@@ -717,6 +725,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                 _size = null;
                 _angle = null;
                 _letter = null;
+                _wall = null;
               }),),
       for (final s in subs)
         _chip(s.label, _sub == s.label,
@@ -725,6 +734,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                   _size = null;
                   _angle = null;
                   _letter = null;
+                  _wall = null;
                 }),),
     ]);
   }
@@ -740,7 +750,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
 
   Widget _chip(String label, bool active, VoidCallback onTap) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsetsDirectional.only(end: 8),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -831,7 +841,8 @@ class _ChipScrollState extends State<_ChipScroll> {
                   ),
                 ),
                 alignment: Alignment.centerLeft,
-                child: const Icon(Icons.chevron_left, size: 18, color: _mute),
+                child: const Icon(Icons.chevron_left, size: 18, color: _mute,
+                    textDirection: TextDirection.ltr),
               ),
             ),
           ),

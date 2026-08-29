@@ -1,0 +1,274 @@
+{
+  "screen": "courier_settings_screen",
+  "source": "courier_settings_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "CourierSettingsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "הגדרות שליח",
+            "registryId": "courier.settings.title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "kbCourierSettingsNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom",
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_CourierNotifSection",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "notifSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "notifSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_CourierRegionSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier_settings_screen.soon",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "courier_settings_screen.soon",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "appSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "appSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onAppSettings(…) callback instead of direct appSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_CourierAccessibilitySection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier_settings_screen.soon",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "courier_settings_screen.soon",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "catalogSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onCatalogSettings(…) callback instead of direct catalogSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_CourierInfoSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "תנאי שימוש",
+            "registryId": "courier.info.terms",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מדיניות פרטיות",
+            "registryId": "courier.info.privacy",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "LegalScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.terms))",
+            "effect": "navigate → LegalScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.privacy))",
+            "effect": "navigate → LegalScreen"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": true,
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "courier.settings.title",
+        "ok": true,
+        "atom": "CourierSettingsScreen"
+      },
+      {
+        "id": "courier_settings_screen.soon",
+        "ok": true,
+        "atom": "_CourierRegionSection"
+      },
+      {
+        "id": "courier.info.terms",
+        "ok": true,
+        "atom": "_CourierInfoSection"
+      },
+      {
+        "id": "courier.info.privacy",
+        "ok": true,
+        "atom": "_CourierInfoSection"
+      }
+    ]
+  }
+}

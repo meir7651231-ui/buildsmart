@@ -1,0 +1,659 @@
+{
+  "module": "worker_notifs",
+  "source": "lib/state/worker_notifs.dart",
+  "atomCount": 11,
+  "atoms": [
+    {
+      "fn": "boardFeedEnabled",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(NotifSettings s, BoardRole role) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !s.pushEnabled → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "switch (role) {BoardRole.worker => s.personaWorker, BoardRole.courier => s.personaCourier…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(NotifSettings s, BoardRole role)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if !s.pushEnabled → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotif.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({bool? read}) -> WorkerNotif",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "body"
+          },
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "title"
+          },
+          {
+            "kind": "field",
+            "name": "ts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "WorkerNotif(id: id, emoji: emoji, title: title, body: body, ts: ts, read: read ?? this.re…"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerNotif"
+      ],
+      "contract": {
+        "input": "({bool? read})",
+        "output": "WorkerNotif",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotif.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "body"
+          },
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "read"
+          },
+          {
+            "kind": "field",
+            "name": "title"
+          },
+          {
+            "kind": "field",
+            "name": "ts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'emoji' : emoji, 'title' : title, 'body' : body, 'ts' : ts.toIso8601String(),…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotifsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkerNotifsKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "cast",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotifsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkerNotifsKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "WorkerNotifsNotifier._set"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotifsNotifier._set",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Map<String, List<WorkerNotif>> next) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkerNotifsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "WorkerNotifsNotifier.addNotification",
+          "WorkerNotifsNotifier.clear",
+          "WorkerNotifsNotifier.markAllRead",
+          "WorkerNotifsNotifier.markRead"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = next"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Map<String, List<WorkerNotif>> next)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotifsNotifier.addNotification",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String username, required String emoji, required String title, String body = ''}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkerNotifsCap"
+          },
+          {
+            "kind": "field",
+            "name": "_seq"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_set",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "WorkerNotifsNotifier.addForWorker"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = WorkerNotif(id: '${DateTime.now().microsecondsSinceEpoch}-${_seq++}', emoji: emoji, title…"
+          },
+          {
+            "kind": "compute",
+            "detail": "cur = state[username] ?? const <WorkerNotif>[]"
+          },
+          {
+            "kind": "effect",
+            "detail": "_set({...state, username : [n, ...cur].take(kWorkerNotifsCap).toList()})"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerNotif",
+        "now",
+        "take",
+        "toList"
+      ],
+      "contract": {
+        "input": "({required String username, required String emoji, required String title, String body = ''})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotifsNotifier.addForWorker",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int worker, {required String emoji, required String title, String body = ''}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkerNotifsCap",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kWorkerUsernames"
+          },
+          {
+            "kind": "field",
+            "name": "_seq",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "addNotification",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final u in kWorkerUsernames[worker] ?? const <String>[]"
+          },
+          {
+            "kind": "effect",
+            "detail": "addNotification(username: u, emoji: emoji, title: title, body: body)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int worker, {required String emoji, required String title, String body = ''})",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotifsNotifier.markRead",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username, String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_set",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "cur = state[username]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cur == null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_set({...state, username : [for (final n in cur) if (n.id == id) n.copyWith(read: true) e…"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String username, String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if cur == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotifsNotifier.markAllRead",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_set",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "cur = state[username]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cur == null || cur.every((n) => n.read) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_set({...state, username : [for (final n in cur) n.copyWith(read: true)]})"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "every"
+      ],
+      "contract": {
+        "input": "(String username)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if cur == null || cur.every((n) => n.read) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerNotifsNotifier.clear",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_set",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if (state[username] ?? const []).isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_set({...state, username : const []})"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String username)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if (state[username] ?? const []).isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

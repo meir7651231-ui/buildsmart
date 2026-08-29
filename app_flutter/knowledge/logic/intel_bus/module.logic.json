@@ -1,0 +1,377 @@
+{
+  "module": "intel_bus",
+  "source": "lib/state/intel/intel_bus.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "NoopIntelSink.enqueue",
+      "kind": "method",
+      "object": {
+        "signature": "(IntelEvent e) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [],
+      "contract": {
+        "input": "(IntelEvent e)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelBus.track",
+      "kind": "method",
+      "object": {
+        "signature": "(String name, {Map<String, String> props = const <String, String>{}}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_minInterval",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_throttled",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "actorKeyProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelLogProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelSinkProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "sessionIdProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "telemetryProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_lastEmittedAt",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_isThrottled",
+            "module": true
+          },
+          {
+            "name": "_fanOut",
+            "module": true
+          },
+          {
+            "name": "_context",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "debugPrint"
+      ],
+      "contract": {
+        "input": "(String name, {Map<String, String> props = const <String, String>{}})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelBus.identify",
+      "kind": "method",
+      "object": {
+        "signature": "({required String anonKey, required String uid}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelLogProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "intelSinkProvider",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "telemetryProvider",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_fanOut",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "IntelEvent",
+        "debugPrint",
+        "now"
+      ],
+      "contract": {
+        "input": "({required String anonKey, required String uid})",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelBus._fanOut",
+      "kind": "method",
+      "object": {
+        "signature": "(IntelEvent event, Map<String, String> telemetryParams) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "intelLogProvider"
+          },
+          {
+            "kind": "global",
+            "name": "intelSinkProvider"
+          },
+          {
+            "kind": "global",
+            "name": "telemetryProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "IntelBus.identify",
+          "IntelBus.track"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_ref.read(intelLogProvider.notifier).record(event)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ref.read(telemetryProvider).logEvent(event.name, params: telemetryParams)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ref.read(intelSinkProvider).enqueue(event)"
+          }
+        ]
+      },
+      "floor": [
+        "enqueue",
+        "logEvent",
+        "read",
+        "record"
+      ],
+      "contract": {
+        "input": "(IntelEvent event, Map<String, String> telemetryParams)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelBus._context",
+      "kind": "method",
+      "object": {
+        "signature": "(String name, Map<String, String> props) -> IntelEvent",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "actorKeyProvider"
+          },
+          {
+            "kind": "global",
+            "name": "sessionIdProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "IntelBus.track"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "IntelEvent(name: name, at: DateTime.now(), actorKey: _ref.read(actorKeyProvider), session…"
+          }
+        ]
+      },
+      "floor": [
+        "IntelEvent",
+        "now",
+        "read"
+      ],
+      "contract": {
+        "input": "(String name, Map<String, String> props)",
+        "output": "IntelEvent",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "IntelBus._isThrottled",
+      "kind": "method",
+      "object": {
+        "signature": "(String name) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_minInterval"
+          },
+          {
+            "kind": "field",
+            "name": "_throttled"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_lastEmittedAt"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "IntelBus.track"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_throttled.contains(name) → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "now = DateTime.now()"
+          },
+          {
+            "kind": "compute",
+            "detail": "last = _lastEmittedAt[name]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if last != null && now.difference(last) < _minInterval → return true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_lastEmittedAt[name] = now"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "difference",
+        "now"
+      ],
+      "contract": {
+        "input": "(String name)",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if !_throttled.contains(name) → return false",
+          "if last != null && now.difference(last) < _minInterval → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

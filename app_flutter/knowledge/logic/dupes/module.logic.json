@@ -1,0 +1,225 @@
+{
+  "module": "dupes",
+  "source": "lib/test_harness/tests/dupes.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "testDupes",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TestResult>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kBrands"
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogCats"
+          },
+          {
+            "kind": "const",
+            "name": "kCatalogTree"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "checks = <TestCheck>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "catIds = kCatalogCats.map((c) => c.id).toList()"
+          },
+          {
+            "kind": "compute",
+            "detail": "catIdSet = catIds.toSet()"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אין כפילות ב-id של kCatalogCats', pass: catIdSet.length == ca…"
+          },
+          {
+            "kind": "init",
+            "detail": "byTitle = <String, List<String>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in kCatalogCats"
+          },
+          {
+            "kind": "effect",
+            "detail": "(byTitle[c.title] ??= []).add(c.id)"
+          },
+          {
+            "kind": "compute",
+            "detail": "titleClashes = byTitle.entries.where((e) => e.value.length > 1).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אין קטגוריות בעלות title זהה', pass: titleClashes.isEmpty, de…"
+          },
+          {
+            "kind": "compute",
+            "detail": "keys = kSmartProducts.map((p) => p.key).toList()"
+          },
+          {
+            "kind": "compute",
+            "detail": "keySet = keys.toSet()"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אין כפילות ב-key של kSmartProducts', pass: keySet.length == k…"
+          },
+          {
+            "kind": "init",
+            "detail": "byNameCat = <String, List<String>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kSmartProducts"
+          },
+          {
+            "kind": "effect",
+            "detail": "(byNameCat['${p.cat}::${p.name}'] ??= []).add(p.key)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ncClashes = byNameCat.entries.where((e) => e.value.length > 1).toList()"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אין מוצרים חכמים עם name+cat זהה', pass: ncClashes.isEmpty, d…"
+          },
+          {
+            "kind": "init",
+            "detail": "accDupes = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kSmartProducts"
+          },
+          {
+            "kind": "compute",
+            "detail": "accNames = p.acc.map((a) => a.name).toList()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if accNames.toSet().length != accNames.length"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אביזרים בתוך כל מוצר חכם — ללא כפילות שמות', pass: accDupes.i…"
+          },
+          {
+            "kind": "compute",
+            "detail": "brandIds = kBrands.map((b) => b.id).toList()"
+          },
+          {
+            "kind": "compute",
+            "detail": "brandIdSet = brandIds.toSet()"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אין כפילות ב-id של kBrands', pass: brandIdSet.length == brand…"
+          },
+          {
+            "kind": "compute",
+            "detail": "brandNames = kBrands.map((b) => b.name).toList()"
+          },
+          {
+            "kind": "compute",
+            "detail": "brandNameSet = brandNames.toSet()"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אין כפילות ב-name של kBrands', pass: brandNameSet.length == b…"
+          },
+          {
+            "kind": "init",
+            "detail": "nodeIds = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final n in kCatalogTree"
+          },
+          {
+            "kind": "effect",
+            "detail": "walkTree(n)"
+          },
+          {
+            "kind": "compute",
+            "detail": "nodeIdSet = nodeIds.toSet()"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אין כפילות ב-id של nodes בעץ הקטלוג', pass: nodeIdSet.length …"
+          },
+          {
+            "kind": "compute",
+            "detail": "leaves = allLeaves()"
+          },
+          {
+            "kind": "init",
+            "detail": "lipskeyCategories = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final l in leaves"
+          },
+          {
+            "kind": "branch",
+            "detail": "if l.lipskeyCategory != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "lipskeyCatSet = lipskeyCategories.toSet()"
+          },
+          {
+            "kind": "effect",
+            "detail": "checks.add(TestCheck(name: 'אין כפילות ב-lipskeyCategory בין עלים', pass: lipskeyCatSet.l…"
+          },
+          {
+            "kind": "return",
+            "detail": "[TestResult(id: 'dupes:core', category: TestCategory.dupes, label: 'בדיקת זהויות וכפילויו…"
+          }
+        ]
+      },
+      "floor": [
+        "TestCheck",
+        "TestResult",
+        "add",
+        "allLeaves",
+        "join",
+        "map",
+        "take",
+        "toList",
+        "toSet",
+        "walkTree",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<TestResult>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

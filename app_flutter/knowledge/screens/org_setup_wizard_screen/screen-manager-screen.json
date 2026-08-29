@@ -1,0 +1,97 @@
+{
+  "name": "_ScreenManagerScreen",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "ניהול מסכים"
+      },
+      {
+        "kind": "text",
+        "text": "אפס סדר/הסתרה"
+      },
+      {
+        "kind": "text",
+        "text": "✎"
+      },
+      {
+        "kind": "text",
+        "text": "⌨️"
+      },
+      {
+        "kind": "text",
+        "text": "מקלדת"
+      },
+      {
+        "kind": "text",
+        "text": "ערוך שם"
+      },
+      {
+        "kind": "text",
+        "text": "אפס לברירת-מחדל"
+      },
+      {
+        "kind": "text",
+        "text": "שמור"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "ניהול מסכים",
+      "אפס סדר/הסתרה",
+      "✎",
+      "⌨️",
+      "מקלדת",
+      "ערוך שם",
+      "אפס לברירת-מחדל",
+      "שמור"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 8"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "MaterialPageRoute<void>(builder: (_) …"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => _ScreenKey…",
+        "effect": "navigate → MaterialPageRoute<void>(builder: (_) …"
+      }
+    ]
+  },
+  "floor": [
+    "keyboardLayoutKey"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "ReorderableListView = shared component → separate atom"
+    ]
+  }
+}

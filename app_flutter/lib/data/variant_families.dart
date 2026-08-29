@@ -4,7 +4,8 @@
 // these families in the new "וריאנטים" section.
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 
 enum AttrKind { size, color, model, subtype }
 
@@ -84,7 +85,8 @@ List<VariantFamily> allVariantFamilies() {
     // Search the unified catalog (Lipskey + Polyroll) so PPR products get
     // variant families just like Lipskey products. Grouping by brand keeps
     // PPR families distinct from Lipskey families — no cross-pollination.
-    for (final p in kCatalogProducts) {
+    // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+    for (final p in resolvedCatalogProducts) {
       final hasKind = p.nameHe
           .split(RegExp(r'\s+'))
           .any((w) => kindOf(w) == kind);
@@ -206,6 +208,15 @@ List<String> sizeDiameterAtoms(String size) {
   }
   return out.toList();
 }
+
+/// The product's FRAME — its name with every variant token (size / color /
+/// brand-model / subtype · [kindOf]) removed. Every variant of the same product
+/// shares one frame; it is the human label of the collapsed family row (the
+/// name-half of [productCanonicalKey], mirrored here so that key stays untouched).
+String productFrame(LipskeyCatalogProduct p) => p.nameHe
+    .split(RegExp(r'\s+'))
+    .where((w) => w.isNotEmpty && kindOf(w) == null)
+    .join(' ');
 
 /// Canonical key identifying a product's "family" — every variant (size,
 /// color, brand-model, subtype) of the same product yields the same key. Two

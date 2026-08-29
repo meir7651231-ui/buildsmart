@@ -63,25 +63,27 @@ void main() {
       expect(plan.items.any((p)=>flowRole(p)==FlowRole.accessory), isFalse);
     });
 
-    // 8. כל מחבר-ביניים מאומת (יש VerifiedSpec)
-    test('8. מחברי-ביניים מאומתים — קיסר→ברז גן ½"', () {
-      final path = findShortestPath(_p('779096G'), _p('77777341'), maxDepth: 6)!;
+    // 8. כל מחבר-ביניים מאומת (ברז-מעבר 1" → קיסר ½": קו אספקה חוקי עם מחברי-ביניים.
+    //    היה קיסר→ברז גן = שני ברזי-קצה, לא חוקי מ-B4.)
+    test('8. מחברי-ביניים מאומתים — ברז מעבר 1"→קיסר ½"', () {
+      final path = findShortestPath(_p('77777313'), _p('779096G'), maxDepth: 6)!;
       for (var i=1;i<path.length-1;i++) {
         expect(kVerifiedSpecs[path[i].sku], isNotNull);
       }
     });
 
-    // 9. התקנת שירותים מלאה — BOM שלם בלי פערים
-    test('9. BOM שלם — ברז 1"→קיסר→אסלה→בור', () {
-      final plan = buildInstallation(['77777313','779096G','77771006','116113'].map(_p).toList());
+    // 9. התקנת ניקוז-אסלה מלאה — BOM שלם בלי פערים (אסלה = הקצה היחיד; קו ניקוז.
+    //    היה ברז→קיסר→אסלה→בור = ברז+אסלה שתי קבועות על קו אחד, לא חוקי מ-B4.)
+    test('9. BOM שלם — אסלה → צינור 110 → מסעף', () {
+      final plan = buildInstallation(['77771006','116113','116565'].map(_p).toList());
       expect(plan.gaps, isEmpty);
-      expect(plan.items.length, greaterThanOrEqualTo(5));
+      expect(plan.items.length, greaterThanOrEqualTo(3));
     });
 
     // 10. דטרמיניזם — אותו קלט נותן אותו פלט
     test('10. דטרמיניסטי', () {
-      final a = findShortestPath(_p('779096G'), _p('77777341'), maxDepth: 6)!;
-      final b = findShortestPath(_p('779096G'), _p('77777341'), maxDepth: 6)!;
+      final a = findShortestPath(_p('77777313'), _p('779096G'), maxDepth: 6)!;
+      final b = findShortestPath(_p('77777313'), _p('779096G'), maxDepth: 6)!;
       expect(a.map((p)=>p.sku).toList(), b.map((p)=>p.sku).toList());
     });
   });

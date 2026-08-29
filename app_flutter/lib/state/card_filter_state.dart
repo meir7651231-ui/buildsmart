@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,20 +31,39 @@ class CardFilterSelection {
 class CardFilterStateNotifier
     extends StateNotifier<Map<String, CardFilterSelection>> {
   CardFilterStateNotifier() : super(const {}) {
-    _load();
+    _ready = _load();
   }
 
   static const _key = 'bs.card-filter-state.v1';
+
+  /// @visibleForTesting — completes when the constructor's async [_load] settles,
+  /// so a test can deterministically await the first read (mirrors
+  /// ProductFavoritesNotifier.ready) instead of a flaky fixed delay.
+  @visibleForTesting
+  Future<void> get ready => _ready;
+  late final Future<void> _ready;
+
+  /// `true` once any mutating method (setType/setSize/clear) has written state.
+  /// The provider is lazy, so the constructor's async `_load()` can resolve
+  /// AFTER a synchronous user write and clobber it (mirrors UserProfileNotifier
+  /// #24). This one-shot guard makes a late `_load()` non-destructive once the
+  /// user has touched state.
+  bool _userTouched = false;
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw == null) return;
-    final m = jsonDecode(raw) as Map<String, dynamic>;
-    state = m.map((k, v) => MapEntry(
-          k,
-          CardFilterSelection.fromJson(v as Map<String, dynamic>),
-        ));
+    if (_userTouched) return;
+    try {
+      final m = jsonDecode(raw) as Map<String, dynamic>;
+      state = m.map((k, v) => MapEntry(
+            k,
+            CardFilterSelection.fromJson(v as Map<String, dynamic>),
+          ));
+    } catch (_) {
+      // corrupt/legacy payload — keep default state
+    }
   }
 
   Future<void> _persist() async {
@@ -55,16 +75,19 @@ class CardFilterStateNotifier
   CardFilterSelection? get(String productKey) => state[productKey];
 
   void setType(String productKey, String? type) {
+    _userTouched = true;
     final cur = state[productKey];
     _put(productKey, CardFilterSelection(type: type, size: cur?.size));
   }
 
   void setSize(String productKey, String? size) {
+    _userTouched = true;
     final cur = state[productKey];
     _put(productKey, CardFilterSelection(type: cur?.type, size: size));
   }
 
   void clear(String productKey) {
+    _userTouched = true;
     if (!state.containsKey(productKey)) return;
     final next = {...state}..remove(productKey);
     state = next;

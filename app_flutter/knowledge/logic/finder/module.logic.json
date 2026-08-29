@@ -1,0 +1,228 @@
+{
+  "module": "finder",
+  "source": "lib/test_harness/tests/finder.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "testFinder",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TestResult>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFinderGroups"
+          },
+          {
+            "kind": "const",
+            "name": "kFinderSubs"
+          },
+          {
+            "kind": "const",
+            "name": "kLipskeyCatalog"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "results = <TestResult>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "cats = {for (final p in kLipskeyCatalog) p.categoryHe}"
+          },
+          {
+            "kind": "compute",
+            "detail": "named = kFinderGroups.where((g) => g.cats.isNotEmpty).toList()"
+          },
+          {
+            "kind": "init",
+            "detail": "owner = <String, String>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "overlaps = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final g in named"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in g.cats"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'finder:groups', category: TestCategory.catalog, label: 'בית —…"
+          },
+          {
+            "kind": "init",
+            "detail": "orphans = <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "dupLabels = <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "notInGroup = <String>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in kFinderSubs.entries"
+          },
+          {
+            "kind": "compute",
+            "detail": "group = named.firstWhere((g) => g.label == e.key, orElse: () => const FinderGroup('', '', {}))"
+          },
+          {
+            "kind": "init",
+            "detail": "covered = {for (final s in e.value) ...s.cats}"
+          },
+          {
+            "kind": "compute",
+            "detail": "withProducts = group.cats.where(cats.contains).toSet()"
+          },
+          {
+            "kind": "effect",
+            "detail": "orphans.addAll(withProducts.difference(covered).map((c) => '${e.key}:$c'))"
+          },
+          {
+            "kind": "init",
+            "detail": "labels = [for (final s in e.value) s.label]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if labels.toSet().length != labels.length"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final s in e.value"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'finder:subs', category: TestCategory.catalog, label: 'בית — ת…"
+          },
+          {
+            "kind": "init",
+            "detail": "searchChecks = <TestCheck>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "kitchen = findBy((p) => p.categoryHe == 'ברזי מטבח')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if kitchen != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "seat = findBy((p) => p.categoryHe == 'מושבי אסלה')"
+          },
+          {
+            "kind": "compute",
+            "detail": "connector = findBy((p) => p.categoryHe == 'מסעפים וחיבורי אסלה')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if seat != null && connector != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "colored = findBy((p) => (p.color ?? '').trim().isNotEmpty)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if colored != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'finder:search', category: TestCategory.catalog, label: 'חיפוש…"
+          },
+          {
+            "kind": "init",
+            "detail": "sizeChecks = <TestCheck>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "mixed = [SizeToken(label: '200 מ\"מ', family: SizeFamily.mm, mm: 200), SizeToken(label: '25 ס\"מ', …"
+          },
+          {
+            "kind": "effect",
+            "detail": "sortSizeTokens(mixed)"
+          },
+          {
+            "kind": "effect",
+            "detail": "sizeChecks.add(TestCheck(name: 'מסנן גודל — מ\"מ קודם ס\"מ, מספרי', pass: mixed.map((t) => …"
+          },
+          {
+            "kind": "effect",
+            "detail": "sizeChecks.add(TestCheck(name: 'גודל — \"25 שנים אחריות\" אינו chip', pass: parseSizeTokens…"
+          },
+          {
+            "kind": "effect",
+            "detail": "sizeChecks.add(TestCheck(name: 'גודל — 45° אינו chip גודל (זווית)', pass: parseSizeTokens…"
+          },
+          {
+            "kind": "effect",
+            "detail": "sizeChecks.add(TestCheck(name: 'גודל — ⅜\" מתקפל ל-3/8\" (canvaskit font)', pass: parseSize…"
+          },
+          {
+            "kind": "effect",
+            "detail": "results.add(TestResult(id: 'finder:size', category: TestCategory.catalog, label: 'מסנן גו…"
+          },
+          {
+            "kind": "return",
+            "detail": "results"
+          }
+        ]
+      },
+      "floor": [
+        "FinderGroup",
+        "SizeToken",
+        "TestCheck",
+        "TestResult",
+        "add",
+        "addAll",
+        "any",
+        "catalogProductMatchesQuery",
+        "contains",
+        "containsKey",
+        "difference",
+        "every",
+        "f",
+        "findBy",
+        "firstWhere",
+        "join",
+        "map",
+        "parseAngleTokens",
+        "parseSizeTokens",
+        "searchRelevance",
+        "sortSizeTokens",
+        "take",
+        "toList",
+        "toSet",
+        "trim",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<TestResult>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

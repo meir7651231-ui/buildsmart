@@ -1,0 +1,345 @@
+{
+  "module": "worker_profile_store",
+  "source": "lib/state/worker_profile_store.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "WorkerProfile.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? name, String? phone, String? specialty, Object? photo = _sentinel, String? idNumber, String? address, String? emergencyName, String? emergencyPhone}) -> WorkerProfile",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sentinel"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "WorkerProfile(name: name ?? this.name, phone: phone ?? this.phone, specialty: specialty ?…"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerProfile"
+      ],
+      "contract": {
+        "input": "({String? name, String? phone, String? specialty, Object? photo = _sentinel, String? idNumber, String? address, String? emergencyName, String? emergencyPhone})",
+        "output": "WorkerProfile",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerProfile.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "address"
+          },
+          {
+            "kind": "field",
+            "name": "emergencyName"
+          },
+          {
+            "kind": "field",
+            "name": "emergencyPhone"
+          },
+          {
+            "kind": "field",
+            "name": "idNumber"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "phone"
+          },
+          {
+            "kind": "field",
+            "name": "photo"
+          },
+          {
+            "kind": "field",
+            "name": "specialty"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'name' : name, 'phone' : phone, 'specialty' : specialty, 'photo' : photo, 'idNumber' : i…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerProfileStore._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkerProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
+      },
+      "floor": [
+        "cast",
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "load"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerProfileStore._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkerProfileKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "WorkerProfileStore.save"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !persist → return true"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerProfile",
+        "getInstance",
+        "jsonEncode",
+        "save",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerProfileStore.save",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username, WorkerProfile profile) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkerProfileKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = {...state, username : profile}"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok && mounted"
+          },
+          {
+            "kind": "return",
+            "detail": "ok"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String username, WorkerProfile profile)",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

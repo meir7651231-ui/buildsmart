@@ -1,0 +1,226 @@
+{
+  "module": "worker_tasks_engine",
+  "source": "lib/state/worker_tasks_engine.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "_asPersonaTask",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(TaskItem t) -> PersonaTask",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "PersonaTask(id: t.id, name: t.name, worker: t.worker, status: t.status, days: t.days, ste…"
+          }
+        ]
+      },
+      "floor": [
+        "PersonaTask"
+      ],
+      "contract": {
+        "input": "(TaskItem t)",
+        "output": "PersonaTask",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTasksNotifier._engine",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> TasksNotifier",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "tasksProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ref.read(tasksProvider.notifier)"
+          }
+        ]
+      },
+      "floor": [
+        "read"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "TasksNotifier",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTasksNotifier.submitForReview",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_engine.submitForReview(id)"
+          }
+        ]
+      },
+      "floor": [
+        "submitForReview"
+      ],
+      "contract": {
+        "input": "(int id)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTasksNotifier.approve",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_engine.approve(id)"
+          }
+        ]
+      },
+      "floor": [
+        "approve"
+      ],
+      "contract": {
+        "input": "(int id)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTasksNotifier.reject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_engine.reject(id)"
+          }
+        ]
+      },
+      "floor": [
+        "reject"
+      ],
+      "contract": {
+        "input": "(int id)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerTasksNotifier.resetToSeed",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_engine.resetToSeed()"
+          }
+        ]
+      },
+      "floor": [
+        "resetToSeed"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

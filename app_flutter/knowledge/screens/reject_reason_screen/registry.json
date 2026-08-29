@@ -1,0 +1,27 @@
+{
+  "matched": 4,
+  "total": 4,
+  "summary": "4/4",
+  "entries": [
+    {
+      "id": "reject_reason_screen.copied",
+      "ok": true,
+      "atom": "RejectReasonScreen"
+    },
+    {
+      "id": "reject_reason_screen.title",
+      "ok": true,
+      "atom": "RejectReasonScreen"
+    },
+    {
+      "id": "reject_reason_screen.copy",
+      "ok": true,
+      "atom": "RejectReasonScreen"
+    },
+    {
+      "id": "reject_reason_screen.note",
+      "ok": true,
+      "atom": "RejectReasonScreen"
+    }
+  ]
+}

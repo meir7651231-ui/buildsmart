@@ -1,0 +1,71 @@
+{
+  "name": "_Departments",
+  "role": "section",
+  "section": "categories",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "מחלקות"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "מחלקות"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kProfileRawShell"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "homeDepartmentProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "mainTabProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kProfileRawShell)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(homeDepartmentProvider.notifier).state = d.name",
+        "effect": "write → homeDepartmentProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(mainTabProvider.notifier).state = 1",
+        "effect": "write → mainTabProvider"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write",
+      "onMainTab(…) callback instead of direct mainTabProvider write"
+    ]
+  }
+}

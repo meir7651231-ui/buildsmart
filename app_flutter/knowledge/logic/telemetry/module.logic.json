@@ -1,0 +1,279 @@
+{
+  "module": "telemetry",
+  "source": "lib/state/telemetry.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "NoopTelemetrySink.enabled",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NoopTelemetrySink.logEvent",
+      "kind": "method",
+      "object": {
+        "signature": "(String name, {Map<String, Object>? params}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String name, {Map<String, Object>? params})",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "NoopTelemetrySink.recordError",
+      "kind": "method",
+      "object": {
+        "signature": "(Object error, StackTrace? stack, {String? reason}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object error, StackTrace? stack, {String? reason})",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseTelemetrySink._analytics",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> FirebaseAnalytics",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_injectedAnalytics"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_injectedAnalytics ?? FirebaseAnalytics.instance"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "FirebaseAnalytics",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseTelemetrySink._crashlytics",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> FirebaseCrashlytics",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_injectedCrashlytics"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_injectedCrashlytics ?? FirebaseCrashlytics.instance"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "FirebaseCrashlytics",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseTelemetrySink.enabled",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseTelemetrySink.logEvent",
+      "kind": "method",
+      "object": {
+        "signature": "(String name, {Map<String, Object>? params}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_analytics.logEvent(name: name, parameters: params).catchError((Object e) => debugPrint('…"
+          }
+        ]
+      },
+      "floor": [
+        "catchError",
+        "debugPrint",
+        "logEvent"
+      ],
+      "contract": {
+        "input": "(String name, {Map<String, Object>? params})",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseTelemetrySink.recordError",
+      "kind": "method",
+      "object": {
+        "signature": "(Object error, StackTrace? stack, {String? reason}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_crashlytics.recordError(error, stack, reason: reason).catchError((Object e) => debugPrin…"
+          }
+        ]
+      },
+      "floor": [
+        "catchError",
+        "debugPrint",
+        "recordError"
+      ],
+      "contract": {
+        "input": "(Object error, StackTrace? stack, {String? reason})",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

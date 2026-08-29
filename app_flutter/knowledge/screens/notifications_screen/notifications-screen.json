@@ -1,0 +1,33 @@
+{
+  "name": "NotificationsScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "tabHeaderHiddenProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onTabHeaderHidden(…) callback instead of direct tabHeaderHiddenProvider write"
+    ]
+  }
+}

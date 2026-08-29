@@ -1,0 +1,264 @@
+{
+  "module": "role_requests",
+  "source": "lib/state/role_requests.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "fn": "submitRoleRequest",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String role) -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRequestableRoles"
+          },
+          {
+            "kind": "global",
+            "name": "currentUidProvider"
+          },
+          {
+            "kind": "global",
+            "name": "roleRequestWriterProvider"
+          },
+          {
+            "kind": "global",
+            "name": "userProfileProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "writer = ref.read(roleRequestWriterProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "uid = ref.read(currentUidProvider)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if writer == null || uid == null || !kRequestableRoles.contains(role) → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "p = ref.read(userProfileProvider)"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "debugPrint",
+        "delete",
+        "now",
+        "read",
+        "set",
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String role)",
+        "output": "Future<bool>",
+        "purity": "pure",
+        "precond": [
+          "if writer == null || uid == null || !kRequestableRoles.contains(role) → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "approvableRolesForClaims",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<String> claimRoles) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRequestableRoles"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if claimRoles.contains('admin') → return kRequestableRoles"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String>[]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if claimRoles.contains('contractor')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if claimRoles.contains('store')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if claimRoles.contains('manager')"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "contains"
+      ],
+      "contract": {
+        "input": "(List<String> claimRoles)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [
+          "if claimRoles.contains('admin') → return kRequestableRoles"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "roleChipStateFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required bool isRegistered, required bool isActive, required bool hasServerRole, required String? requestStatus}) -> RoleChipState",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !isRegistered → return RoleChipState.needsRegistration"
+          },
+          {
+            "kind": "precond",
+            "detail": "if isActive || hasServerRole || requestStatus == 'approved' → return RoleChipState.approved"
+          },
+          {
+            "kind": "precond",
+            "detail": "if requestStatus == 'denied' → return RoleChipState.rejected"
+          },
+          {
+            "kind": "precond",
+            "detail": "if requestStatus == 'pending' → return RoleChipState.inProcess"
+          },
+          {
+            "kind": "return",
+            "detail": "RoleChipState.needsRegistration"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "({required bool isRegistered, required bool isActive, required bool hasServerRole, required String? requestStatus})",
+        "output": "RoleChipState",
+        "purity": "pure",
+        "precond": [
+          "if !isRegistered → return RoleChipState.needsRegistration",
+          "if isActive || hasServerRole || requestStatus == 'approved' → return RoleChipState.approved",
+          "if requestStatus == 'denied' → return RoleChipState.rejected",
+          "if requestStatus == 'pending' → return RoleChipState.inProcess"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "clearAllRoleRequests",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> Future<int>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "pendingRoleRequestsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "roleRequestWriterProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "writer = ref.read(roleRequestWriterProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "docs = ref.read(pendingRoleRequestsProvider).valueOrNull ?? const []"
+          },
+          {
+            "kind": "precond",
+            "detail": "if writer == null || docs.isEmpty → return 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "deleted = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final d in docs"
+          },
+          {
+            "kind": "return",
+            "detail": "deleted"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "delete",
+        "read"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "Future<int>",
+        "purity": "pure",
+        "precond": [
+          "if writer == null || docs.isEmpty → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

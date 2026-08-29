@@ -8,6 +8,151 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v6.02 — 👔 **Manager rebuild — M5: 🛠️ ניהול tab — the 5 management tools (manager screen COMPLETE)** 🟦.
+The FINAL 🛠️ ניהול tab of `ManagerDashboardScreen` is filled with the manager's **5 management tools**
+(`lib/screens/manager_dashboard_screen.dart` — the `IndexedStack` index-3 body is now `_ManageTab`
+instead of the last "בקרוב" placeholder; **the `_TabPlaceholder` class is removed entirely — ZERO
+"בקרוב" remains in any tab, the screen is COMPLETE**). A faithful port of the legacy `renderMgrManage`
+(@index.html:16645-16890), a 5-section accordion (one open at a time, the legacy `mgrManageOpen`):
+**(1) 🗂️ קטגוריות** — the LIVE catalog category list from `managerAnalyticsProvider.catalogCategories`
+(header `קטגוריות פעילות (N)` + `<cat> · <count> מוצרים` rows + the verbatim hint, legacy SECTION 3
+@16715); **(2) ⚙️ הגדרות אפליקציה** — the verbatim config rows אקספרס=₪80 (`EXPRESS_FEE` @11961) ·
+אשראי=₪50,000 (`creditLimit` @11963) · מע״מ=18% (`VAT_RATE` @11941) + hint (SECTION 4 @16733); **(3) 🌳
+עץ המוצרים** — an inline summary of the catalog tree (the legacy prompt-edit has no backend here);
+**(4) 🏷️ מותגים ומחירים** — the brands list from `lib/data/brands.dart` (`kBrands`); **(5) 🔬 בדיקות
+רגרסיה** — routes to the existing `RegressionPanelScreen` (the old dial's target). LIGHT only — white
+`cardLight` accordion cards on `bgLight`, no dark tokens. **M5** ✅ — only the 🛠️ tab body + the route
+call changed; the engine internals, the other 3 tabs, the role picker, and the buyer/checkout flow are
+untouched. Guard `manager_dashboard_screen_test` grows by 7 (now 30); the placeholder test asserts NO
+"בקרוב" remains. All manager + engine tests stay green (screen 30 + dashboard 12 + engine 21). **The
+manager rebuild (M1→M5) is COMPLETE.**
+
+v5.99 — 👔 **Manager rebuild — M2: 📊 לוח בקרה tab — live cockpit (metrics + pipeline)** 🟦.
+The first 📊 לוח בקרה tab of `ManagerDashboardScreen` is filled with a LIGHT scrollable **cockpit over
+the LIVE shared orders engine** (`lib/screens/manager_dashboard_screen.dart` — the `IndexedStack`
+index-0 body is now `_DashboardTab`; tabs 🚚/👥/🛠️ stay "בקרוב" placeholders for M3–M5). A trimmed port
+of the legacy `renderMgrDashboard` (@index.html:12133): **(a) 5 metric tiles** (`mdMetric`
+@12160-12164) — WHITE `cardLight` cards, `brand` number + `mutedLight` verbatim label (🚚 הזמנות פתוחות
+· 📦 מוצרים בקטלוג · 🧰 אביזרים נלווים · ✅ זמינים כעת · 🏪 חנויות פעילות), every number from
+`managerAnalyticsProvider` over the engine's LIVE orders (NOT the static const) so 🚚 recounts on
+place/advance/deliver — seed 4 / 54 / 148 / 202 / 3/3; **(b) order pipeline** (`md-pipe` @12177-12198)
+— a WHITE card with a per-stage count + proportional bar across the **6** `kManagerOrderFlow` stages
+(group-by-stage over `ordersEngineProvider`), labels verbatim + נאסף for pickup (התקבלה · בהכנה · מוכן
+· נאסף · בדרך · נמסר). LIGHT only — no dark tokens; bar colours = legacy hex. **M2** ✅ — only the 📊
+tab body + provider reads changed; the engine internals, the other 3 tabs, the role picker, and the
+buyer/checkout flow are untouched. Guard `manager_dashboard_screen_test` grows to 11 (M1's six + 4 new
+M2). All existing manager + engine tests stay green (54/54 targeted). **Remaining (🟦):** M3 (👥
+customers) · M4 (🛠️ manage) · M5 (🚚 orders) tab bodies.
+
+v5.98 — 👔 **Manager rebuild — M1: `ManagerDashboardScreen` SHELL** 🟦.
+The 👔 "מנהל המערכת" persona is rebuilt from a BS-dial drill into a **full LIGHT role-app screen**
+(same shell as the 🦺 worker app). **M1 = SHELL only:** `lib/screens/manager_dashboard_screen.dart`
+→ `ManagerDashboardScreen` — `Scaffold(bgLight)` + white AppBar (`cardLight`, title "מרכז השליטה"
+`inkLight` + subtitle "מנהל המערכת" `mutedLight` + green "חי" pill), a **4-tab pill toggle**
+(selected = `brand` fill + white text; unselected = `cardLight` + `inkLight`; 📊 לוח בקרה · 🚚 הזמנות ·
+👥 לקוחות · 🛠️ ניהול — replicates `updates_screen`'s `seg()`), and an `IndexedStack` of **4
+"בקרוב" placeholders**. `route()` + `managerTabProvider` (`StateProvider<int>`,
+`lib/state/manager_dashboard_state.dart`). **Entry wired:** the role picker's manager row now
+`Navigator.push(ManagerDashboardScreen.route())` (mirrors worker→`WorkerAppScreen`) instead of the
+old `activePersonaProvider='manager'`/`OpenDial.bs` drill; other personas unchanged, the old dial code
+stays (unreachable) for later cleanup. Tab CONTENTS (M2–M5) + engine wiring are LATER waves; the
+orders engine is untouched. Guard `manager_dashboard_screen_test` (6); all existing manager tests stay
+green. **Remaining (🟦):** M2 (🚚 orders) · M3 (👥 customers) · M4 (🛠️ manage) · M5 (📊 dashboard) tab
+bodies.
+
+v5.97 — 🔗 **Shared orders engine — the keystone that makes the data live across roles** 🟦.
+The legacy `SYS_ORDERS` (the localStorage array every role read & wrote, @index.html:11965-12039,
+:16939-17035) is ported to a Riverpod state engine `lib/state/orders_engine.dart` —
+`ordersEngineProvider` (`StateNotifier<List<Order>>`). **DATA LAYER ONLY — no UI changed.** Seeded
+with the **SAME four seed orders** (from the unchanged `kManagerOrderSeed`) so **every existing
+manager number is preserved** (🚚 open=4, the 4 customers, …). `Order` = `id/who/site/items/sum/stage`
+(+ optional `createdAt`), mirroring `ManagerOrder`. Public API: `placeOrder(...)` (contractor →
+stage `new`, auto-id `BS-####`, timestamped) · `advance(orderId)` (next `kManagerOrderFlow` stage,
+no-op at `delivered` — verbatim `mgrAdvanceOrder` @17022-17032) · `setStage(orderId, stage)`
+(manager god-step to any flow stage). Persists to `SharedPreferences` key `bs.orders.v1`
+(cart/profile pattern; corrupt → seed). `managerAnalyticsProvider` + `managerCustomersProvider`
+derive the manager dashboard/customers from the engine's LIVE orders via the SAME pure folds in
+`manager_dashboard.dart` (equal to the static derivations while the engine holds the seed; the
+const seed source is retained, not deleted). The 4-tab UI + wiring the dial to the engine are LATER
+waves (`bs_dial_widget` unchanged). Guard `orders_engine_test` (21); all manager tests stay green.
+
+v5.96 — 👔 **Manager 🛠️ ניהול — final wave (M4): manager persona COMPLETE** 🟦.
+The 👔 "מנהל המערכת" BS-dial → 🛠️ ניהול section's `mm-*` leaves are now ALL wired to their
+REAL targets — the whole manager persona is **COMPLETE** with **ZERO reachable "בבנייה"** across
+all four sections (md/mo/mc/mm). Faithful port of the legacy `renderMgrManage`
+(@index.html:16645-16743): **`mm-cats`** → an inline data panel (`_ManagerManagePanel`, state
+`bsManageLeafProvider`) listing the REAL categories + product counts from
+`kManagerCatalogCategories` (the legacy SECTION 3 tally @16716) + the verbatim hint;
+**`mm-settings`** → the same panel with the three REAL config rows (express ₪80 / credit ₪50,000 /
+VAT 18%, the legacy editable globals @11941/11961/11963) + the verbatim hint; **`mm-trees`** &
+**`mm-brands`** (legacy = `prompt()`-driven server edits) → a labelled toast with the verbatim
+legacy action sub-title (@16653/16687), NOT "בבנייה"; **`mm-regression`** → UNCHANGED (still routes
+to `RegressionPanelScreen`). The data panel is R2 (dial-drill, no new screen) and mutually
+exclusive with the M1/M2/M3 panels; `kManagerManageDataLeafIds` + `kManagerManageActionLeafIds`
+partition the leaves so none falls through to the stub. Guard `bs_dial_manager_manage_test` (12).
+All data verbatim from index.html (NOT `SYSTEM_MANAGER.md`). **Manager wave (M0→M4) DONE.**
+
+v5.95 — 👔 **Manager 👥 לקוחות — real customer list** (wave 1: M3) 🟦.
+The 👔 "מנהל המערכת" BS-dial → 👥 לקוחות section's 2 `mc-*` leaves now show the REAL
+customer list inline (R2 dial-drill, no new screen) instead of "בבנייה" toasts.
+**M3** ✅ — `bsCustomerLeafProvider` + an inline `_ManagerCustomerPanel` in
+`bs_dial_widget.dart`: each `mc-*` leaf = one legacy customer status filter
+(`kManagerCustomerLeafStatus`: `mc-live`=פעיל · `mc-low`=אשראי גבוה, pill labels verbatim
+@index.html:16592); the panel filters `mgrCustomerList` (grouping SYS_ORDERS_SEED by buyer) to
+that status and lists each customer (`👷 name` / `orders הזמנות · sites אתרים` / status pill /
+`ניצול אשראי: ₪spent / ₪credit (pct%)`, mirroring the legacy `mc-card` @16593-16604) + a count.
+With the Dart `contractorCredit` ceilings all 4 seed buyers are `live` → **`mc-low` is empty**
+→ the legacy empty text "לא נמצאו קבלנים תואמים." (@16586). Metric / order / customer panels
+are mutually exclusive. `pct`/`status`/`sites` derived exactly @16554,16559-16562. Guard
+`bs_dial_manager_customers_test` (4). All data verbatim from index.html (NOT `SYSTEM_MANAGER.md`).
+**M4** ✅ (v5.96) — the manager's management (ניהול) section; manager persona COMPLETE.
+
+v5.94 — 👔 **Manager 📦 הזמנות — real per-stage orders** (wave 1: M2) 🟦.
+The 👔 "מנהל המערכת" BS-dial → 🚚 הזמנות section's 6 `mo-*` leaves now show the REAL
+orders in their order-flow stage inline (R2 dial-drill, no new screen) instead of
+"בבנייה" toasts. **M2** ✅ — `bsOrderLeafProvider` + an inline `_ManagerOrderPanel` in
+`bs_dial_widget.dart`: each `mo-*` leaf = one `kManagerOrderFlow` stage; the panel filters
+`kManagerOrderSeed` to that stage and lists each order (`📦 id` / `who · site` /
+`items פריטים · ₪sum`, mirroring the legacy `mo-card` @index.html:17001-17014) + a count.
+The 2 stages with no seed orders (pickup · delivered) render the legacy empty text
+"לא נמצאו הזמנות תואמות." (@16986). Order & metric panels are mutually exclusive.
+`kManagerOrderLeafStage`/`kManagerOrderLeafIds`/`_kOrderStageLabel` (stage names verbatim from
+`ORDER_STAGE` @12041-12048). Guard `bs_dial_manager_orders_test` (5). All data verbatim from
+index.html (NOT `SYSTEM_MANAGER.md`). **M3** ✅ (v5.95). **Remaining (🟦):** M4 — the manager's
+management section.
+
+v5.93 — 👔 **Manager 📊 dashboard — real derived numbers** (wave 1: M0+M1) 🟦.
+The 👔 "מנהל המערכת" BS-dial 📊 dashboard's 5 `md-*` leaves now show REAL numbers
+inline (R2 dial-drill, no new screen) instead of "בבנייה" toasts.
+**M0** ✅ — `logic/manager_dashboard.dart` (PURE) ports `mgrAnalytics()`
+(@index.html:12081-12126): the seed (STORES · SYS_ORDERS_SEED · TREES distribution ·
+STORE_STOCK) + the 5 `mdMetric` tiles (@12160-12164) as `ManagerAnalytics` getters
+(open-orders=4 · catalog=54 · accessories=148 · available=202 · stores=3/3). Numbers
+verified verbatim against the live index.html `TREES` loop (NOT `SYSTEM_MANAGER.md`).
+`kManagerOrderFlow` (@16943) + `contractorCredit` + `mgrCustomerList` = M2/M3 foundation.
+Guard `manager_dashboard_test` (12). **M1** ✅ — `bsMetricLeafProvider` + an inline
+`_ManagerMetricPanel` in `bs_dial_widget.dart`; guard `bs_dial_manager_test` (4).
+**M2** ✅ (v5.94) · **M3** ✅ (v5.95). **Remaining (🟦):** M4 — the manager's
+management section.
+
+v5.69 — 💧 **Division option 2 — through the finder** (Benzi #1, user-chosen).
+A live department now opens the **finder (בית)** scoped to its `WaterSystem`
+(not a forced tree): `_DeptScopeBar` shows the scope + clear; the finder hides
+empty groups + filters its pool. Division helpers extracted to
+`logic/system_division.dart` (shared catalog+finder, no back-import cycle).
+Phase 1 of 3 (finder + tree-drill + search filtered; remaining sections = Phase
+2; sysOpt removal = Phase 3). 1009/1009 green.
+
+v5.59 — 💧 **Water-system division via departments** (Benzi #1, closes 🟦).
+Home departments (v5.57) now route into the catalog **pre-filtered by `WaterSystem`**:
+אינסטלציה→drainage · ברזים וסניטריים→supply. `productDivisionSystems`
+(spec.endSystems → PPR=supply → else drainage; PPR aligns with the v5.41
+`systemOverride: supply` bridge) + `nodeHasSystem` (fixtures both-sides, else
+dominant) filter the whole category tree + counts + descriptions. Entry is the
+department grid, NOT the filter sheet (the sheet sysOpt is now redundant —
+flagged for removal in `ACTION_PLAN.md`). **Open:** tree-drill vs.
+finder-with-filtered-chips (user design question). 986/986 green.
+
 v5.41 — 🌉 **Polyroll bridge** (discovered via probe pattern). All 757 PPR
 products were silently invisible to 8 card helpers because they had no
 `VerifiedSpec`. Fixed:
@@ -55,11 +200,11 @@ v5.36 polish bump (no new step ✅, three existing steps tightened):
   mode · temp picker) in `Tooltip` widgets so long-press/hover explains "what
   this chip does", plain Hebrew.
 
-## 📌 Handoff (v5.43, ~89% ✅)
+## 📌 Handoff (v5.55, ~92% ✅)
 Saved for the next run. Pick up here:
 - **Group A — כולו ✅** (76·25·46·74·89·82·85·57 — all done, tests green)
-- **Group B remaining 🟦:** 86 (i18n scaffold) · 88 (bundle-split docs) · 90 (crash-log)
-- **Group B — closed this session ✅:** 2·7·9·15·20·24·26·29·30·48·56·65·68
+- **Group B — כולו ✅** (2·7·9·15·20·24·26·29·30·48·56·65·68·86·88·90 — all done, tests green)
+- **פאזה K (ידע) — ✅** (76/76 מסמכים עם verdict, README אינדקס 100%, 0 יתומים — ליטוש 2026-06-01)
 - **Group C (needs infra/pkg/backend/assets — needs user decision):** 13,17,18,32,36,37,39,40,
   41,43,44,49,50,53,54,55,60,69,70,79,83,84,86,88,90,91,92,93,94,96,97,98.
 - **Group D (risky / shared-subsystem / big refactor):** 1 (merge sheets — user said don't touch

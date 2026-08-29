@@ -1,0 +1,49 @@
+{
+  "name": "_ContractorMaterialRequestsSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📥 בקשות חומר",
+        "registryId": "contractor_material_requests_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "contractor_material_requests_sheet.t02",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "requestsForEmployer(kDemoContractorId)"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "materialRequestsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "requestsForEmployer"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

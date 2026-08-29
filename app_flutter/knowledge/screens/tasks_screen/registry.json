@@ -1,0 +1,67 @@
+{
+  "matched": 12,
+  "total": 12,
+  "summary": "12/12",
+  "entries": [
+    {
+      "id": "tasks_screen.title",
+      "ok": true,
+      "atom": "TasksScreen"
+    },
+    {
+      "id": "tasks_screen.exit",
+      "ok": true,
+      "atom": "TasksScreen"
+    },
+    {
+      "id": "tasks_screen.proposal_intro",
+      "ok": true,
+      "atom": "TasksScreen"
+    },
+    {
+      "id": "tasks_screen.log_btn",
+      "ok": true,
+      "atom": "_LogButton"
+    },
+    {
+      "id": "tasks_screen.new_task",
+      "ok": true,
+      "atom": "_NewTaskButton"
+    },
+    {
+      "id": "tasks_screen.approval_reject",
+      "ok": true,
+      "atom": "_ApprovalCard"
+    },
+    {
+      "id": "tasks_screen.proposal_reject",
+      "ok": true,
+      "atom": "_ProposalCard"
+    },
+    {
+      "id": "tasks_screen.edit",
+      "ok": true,
+      "atom": "_Group"
+    },
+    {
+      "id": "tasks_screen.decide_intro",
+      "ok": true,
+      "atom": "_TaskSheet"
+    },
+    {
+      "id": "tasks_screen.sheet_reject",
+      "ok": true,
+      "atom": "_TaskSheet"
+    },
+    {
+      "id": "tasks_screen.worklog_title",
+      "ok": true,
+      "atom": "_WorkLogSheet"
+    },
+    {
+      "id": "tasks_screen.worklog_sub",
+      "ok": true,
+      "atom": "_WorkLogSheet"
+    }
+  ]
+}

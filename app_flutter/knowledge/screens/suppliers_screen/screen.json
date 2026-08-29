@@ -1,0 +1,126 @@
+{
+  "screen": "suppliers_screen",
+  "source": "suppliers_screen.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "SuppliersScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "ספקים ומותגים",
+            "registryId": "suppliers_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🏪"
+          },
+          {
+            "kind": "text",
+            "text": "אין ספקים עדיין"
+          },
+          {
+            "kind": "text",
+            "text": "ספקים ומותגים יופיעו כשקטלוג החברה ייטען"
+          },
+          {
+            "kind": "text",
+            "text": "📦 טעינת קטלוג החברה"
+          }
+        ],
+        "registered": 1,
+        "unregistered": [
+          "🏪",
+          "אין ספקים עדיין",
+          "ספקים ומותגים יופיעו כשקטלוג החברה ייטען",
+          "📦 טעינת קטלוג החברה"
+        ],
+        "summary": "registry 1 · mapped 1/1 · unregistered 4"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showCompanyCatalogImportSheet",
+            "target": "showCompanyCatalogImportSheet"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "context"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showCompanyCatalogImportSheet(context)",
+            "effect": "open → showCompanyCatalogImportSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.push(context, LipskeyBrandScreen.route())",
+            "effect": "navigate → context"
+          }
+        ]
+      },
+      "floor": [
+        "kbSuppliersNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_SupplierTile",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "emoji",
+          "title",
+          "subtitle",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 1,
+    "total": 1,
+    "summary": "1/1",
+    "entries": [
+      {
+        "id": "suppliers_screen.title",
+        "ok": true,
+        "atom": "SuppliersScreen"
+      }
+    ]
+  }
+}

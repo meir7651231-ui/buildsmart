@@ -1,0 +1,42 @@
+{
+  "matched": 7,
+  "total": 7,
+  "summary": "7/7",
+  "entries": [
+    {
+      "id": "worker_forms_screen.forms_title",
+      "ok": true,
+      "atom": "WorkerFormsScreen"
+    },
+    {
+      "id": "worker_forms_screen.form101_note",
+      "ok": true,
+      "atom": "WorkerFormsScreen"
+    },
+    {
+      "id": "worker_forms_screen.employer_details",
+      "ok": true,
+      "atom": "WorkerFormsScreen"
+    },
+    {
+      "id": "worker_forms_screen.my_requests",
+      "ok": true,
+      "atom": "WorkerFormsScreen"
+    },
+    {
+      "id": "worker_forms_screen.sick_hint",
+      "ok": true,
+      "atom": "WorkerFormsScreen"
+    },
+    {
+      "id": "worker_forms_screen.no_uploads",
+      "ok": true,
+      "atom": "WorkerFormsScreen"
+    },
+    {
+      "id": "worker_forms_screen.signed",
+      "ok": true,
+      "atom": "WorkerFormsScreen"
+    }
+  ]
+}

@@ -1,0 +1,865 @@
+{
+  "module": "hop_graph",
+  "source": "lib/features/card_keyboard/hop_graph.dart",
+  "atomCount": 14,
+  "caches": [
+    "_builtHopGraph"
+  ],
+  "atoms": [
+    {
+      "fn": "crossesSystem",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String aSku, String bSku) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_addCategoryEdges",
+          "_addCompatEdges",
+          "_addKitEdges"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "a = kVerifiedSpecs[aSku]?.endSystems"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = kVerifiedSpecs[bSku]?.endSystems"
+          },
+          {
+            "kind": "precond",
+            "detail": "if a == null || b == null → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "(only(a, WaterSystem.supply) && only(b, WaterSystem.drainage)) || (only(a, WaterSystem.dr…"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "only"
+      ],
+      "contract": {
+        "input": "(String aSku, String bSku)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if a == null || b == null → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_buildPopulated",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> HopGraph",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSmartProducts",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "divePoolBySku",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_emptyAdj",
+            "module": true
+          },
+          {
+            "name": "_addCompatEdges",
+            "module": true
+          },
+          {
+            "name": "_addVariantEdges",
+            "module": true
+          },
+          {
+            "name": "_addKitEdges",
+            "module": true
+          },
+          {
+            "name": "_addCategoryEdges",
+            "module": true
+          },
+          {
+            "name": "_addHubEdges",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "adj = _emptyAdj()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_addCompatEdges(adj)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_addVariantEdges(adj)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_addKitEdges(adj)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_addCategoryEdges(adj)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_addHubEdges(adj)"
+          },
+          {
+            "kind": "return",
+            "detail": "HopGraph._(adj)"
+          }
+        ]
+      },
+      "floor": [
+        "_"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "HopGraph",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_emptyAdj",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Map<String, Map<String, Set<EdgeKind>>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "divePoolBySku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_buildPopulated"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{for (final sku in divePoolBySku.keys) sku : <String, Set<EdgeKind>>{}}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, Map<String, Set<EdgeKind>>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_addCompatEdges",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, Map<String, Set<EdgeKind>>> adj) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "divePoolBySku"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "crossesSystem",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_buildPopulated"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final entry in divePoolBySku.entries"
+          },
+          {
+            "kind": "compute",
+            "detail": "sku = entry.key"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final mate in compatibleProductsFor(entry.value)"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "compatibleProductsFor",
+        "containsKey",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(Map<String, Map<String, Set<EdgeKind>>> adj)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_addVariantEdges",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, Map<String, Set<EdgeKind>>> adj) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_buildPopulated"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final fam in allVariantFamilies()"
+          },
+          {
+            "kind": "init",
+            "detail": "skus = [for (final p in fam.products) p.sku]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final a in skus"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "allVariantFamilies",
+        "containsKey",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(Map<String, Map<String, Set<EdgeKind>>> adj)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_addKitEdges",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, Map<String, Set<EdgeKind>>> adj) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "crossesSystem",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_buildPopulated"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final recipe in kSmartProducts"
+          },
+          {
+            "kind": "init",
+            "detail": "skus = <String>[for (final line in assembleKit(recipe)) if (line.product != null && (line.match …"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final a in skus"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "assembleKit",
+        "containsKey",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(Map<String, Map<String, Set<EdgeKind>>> adj)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_addCategoryEdges",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, Map<String, Set<EdgeKind>>> adj) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "divePoolBySku"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "crossesSystem",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_buildPopulated"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "byCat = <String, List<String>>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final entry in divePoolBySku.entries"
+          },
+          {
+            "kind": "compute",
+            "detail": "cat = entry.value.categoryHe"
+          },
+          {
+            "kind": "branch",
+            "detail": "if cat.isEmpty → continue"
+          },
+          {
+            "kind": "effect",
+            "detail": "(byCat[cat] ??= <String>[]).add(entry.key)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final skus in byCat.values"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final a in skus"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(Map<String, Map<String, Set<EdgeKind>>> adj)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_addHubEdges",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, Map<String, Set<EdgeKind>>> adj) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "divePoolBySku"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_buildPopulated"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "repOf = <String, String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final sku in adj.keys"
+          },
+          {
+            "kind": "effect",
+            "detail": "repOf.putIfAbsent(groupOf(divePoolBySku[sku]!), () => sku)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final sku in adj.keys"
+          },
+          {
+            "kind": "effect",
+            "detail": "biLink(sku, repOf[groupOf(divePoolBySku[sku]!)]!)"
+          },
+          {
+            "kind": "compute",
+            "detail": "reps = repOf.values.toList()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < reps.length; i++"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var j = i + 1; j < reps.length; j++"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "biLink",
+        "groupOf",
+        "putIfAbsent",
+        "toList"
+      ],
+      "contract": {
+        "input": "(Map<String, Map<String, Set<EdgeKind>>> adj)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HopGraph.nodes",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Iterable<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_adj"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_adj.keys"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Iterable<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HopGraph.neighborsOf",
+      "kind": "method",
+      "object": {
+        "signature": "(String sku) -> Iterable<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_adj"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "HopGraph.hopsBetween",
+          "HopGraph.reachWithin"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_adj[sku]?.keys ?? const <String>[]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String sku)",
+        "output": "Iterable<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HopGraph.kindsBetween",
+      "kind": "method",
+      "object": {
+        "signature": "(String a, String b) -> Set<EdgeKind>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_adj"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_adj[a]?[b] ?? const <EdgeKind>{}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String a, String b)",
+        "output": "Set<EdgeKind>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HopGraph.rankedNeighborsOf",
+      "kind": "method",
+      "object": {
+        "signature": "(String sku) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kEdgeKindRank"
+          },
+          {
+            "kind": "field",
+            "name": "_adj"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "neighbours = _adj[sku]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if neighbours == null → return const <String>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "entries = neighbours.entries.toList()..sort((a, b) {final ra = best(a.value); final rb = best(b.val…"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final e in entries) e.key]"
+          }
+        ]
+      },
+      "floor": [
+        "best",
+        "compareTo",
+        "map",
+        "reduce",
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "(String sku)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [
+          "if neighbours == null → return const <String>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HopGraph.reachWithin",
+      "kind": "method",
+      "object": {
+        "signature": "(String src, int maxHops) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_adj",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "neighborsOf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "seen = <String>{src}"
+          },
+          {
+            "kind": "init",
+            "detail": "frontier = <String>{src}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var d = 0; d < maxHops; d++"
+          },
+          {
+            "kind": "init",
+            "detail": "next = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final s in frontier"
+          },
+          {
+            "kind": "branch",
+            "detail": "if next.isEmpty → break"
+          },
+          {
+            "kind": "effect",
+            "detail": "frontier = next"
+          },
+          {
+            "kind": "return",
+            "detail": "seen..remove(src)"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "remove"
+      ],
+      "contract": {
+        "input": "(String src, int maxHops)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "HopGraph.hopsBetween",
+      "kind": "method",
+      "object": {
+        "signature": "(String a, String b, {int maxHops = 4}) -> int?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_adj",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "neighborsOf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if a == b → return 0"
+          },
+          {
+            "kind": "init",
+            "detail": "seen = <String>{a}"
+          },
+          {
+            "kind": "init",
+            "detail": "frontier = <String>{a}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var d = 1; d <= maxHops; d++"
+          },
+          {
+            "kind": "init",
+            "detail": "next = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final s in frontier"
+          },
+          {
+            "kind": "branch",
+            "detail": "if next.isEmpty → break"
+          },
+          {
+            "kind": "effect",
+            "detail": "frontier = next"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "add"
+      ],
+      "contract": {
+        "input": "(String a, String b, {int maxHops = 4})",
+        "output": "int?",
+        "purity": "pure",
+        "precond": [
+          "if a == b → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    }
+  ]
+}

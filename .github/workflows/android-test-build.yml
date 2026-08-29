@@ -1,0 +1,168 @@
+name: Android TEST build (backend flags ON — connects to Firebase)
+
+# SEPARATE from the live android-package.yml (which stays DEMO, never passes the
+# backend flags). This is a workflow_dispatch-only build with the backend flags
+# ON, for on-device verification that the app connects to the live Firebase
+# backend after F1. The APK is downloadable from the run's artifacts.
+#
+# DEBUG-SIGNED on purpose (self-install / sideload) — NOT a Play release. The
+# live web build (deploy.yml / firebase-hosting.yml) is unaffected and stays demo.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - 'app_flutter/**'
+      - '.github/workflows/android-test-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  android-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use the committed stable test key for release signing (key.properties)
+        run: |
+          mkdir -p ~/.android
+          cp app_flutter/android/app/bs-test-debug.keystore ~/.android/debug.keystore
+          printf 'storePassword=android\nkeyPassword=android\nkeyAlias=androiddebugkey\nstoreFile=bs-test-debug.keystore\n' > app_flutter/android/key.properties
+          echo "✅ key.properties -> app/bs-test-debug.keystore (SHA-1 68:F9:...:57:68:52) so Google sign-in works"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
+      - name: Analyze (GATE — 0 errors required)
+        working-directory: app_flutter
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Build APK with backend flags ON (debug-signed, connects to server)
+        working-directory: app_flutter
+        run: |
+          # --build-number = CI run number → a UNIQUE, monotonically rising Android
+          # versionCode on every build. Without it the versionCode stays pinned at
+          # pubspec's +N, so App Distribution / Android saw every build as the SAME
+          # version "1.4.x (8)" and never offered the update (the v6.20 delivery bug).
+          #
+          # CATALOG_BASE_URL + STORE_COMPARISON_UI ARE A PAIR — never ship one alone.
+          # STORE_COMPARISON_UI puts the comparison line in the product sheet; the
+          # repository behind it is built only `if (useServerCatalog)`, and a non-empty
+          # CATALOG_BASE_URL is what turns that on. The UI flag without the URL put the
+          # app in the exact state store_comparison_line.dart calls unreachable: the
+          # widget renders, its provider throws UnimplementedError, and maybeWhen's
+          # orElse swallows it — the feature reads as ON while being silently dead, and
+          # every product-sheet open raises an exception nobody ever sees.
+          # It also left the app on the BUNDLED catalog while the site reads the server
+          # one — the same product answering differently depending on where you opened
+          # it. Keep in step with web-deploy.yml + firebase-hosting.yml (one dataset).
+          #
+          # (Comments belong HERE, above the command — a `#` inside the backslash
+          # continuation below would comment out every flag after it.)
+          flutter build apk --release \
+            --build-number=${{ github.run_number }} \
+            --dart-define=USE_FIREBASE_BACKEND=true \
+            --dart-define=UID_SCOPED_QUERIES=true \
+            --dart-define=SERVER_CALLABLES=true \
+            --dart-define=CLAUDE_AI=true \
+            --dart-define=ENABLE_WORD_FINDER=true \
+            --dart-define=KB_LIVE_MIRROR=true \
+            --dart-define=KB_GLOBAL=true \
+            --dart-define=ENABLE_RING_DIVE=true \
+            --dart-define=GLOBAL_SEARCH=true \
+            --dart-define=PLAIN_DIVE=true \
+            --dart-define=STUDIO_SHARED_SYNC=true \
+            --dart-define=AXIS_DIVE=true \
+            --dart-define=CATALOG_BASE_URL=https://buildsmart-il.com \
+            --dart-define=STORE_COMPARISON_UI=true \
+            --dart-define=INTERNAL_CARD=true \
+            --dart-define=USER_DATA_SERVER=true \
+            --dart-define=TASKS_SERVER=true \
+            --dart-define=ORG_CONFIG=true \
+            --dart-define=ORG_CONFIG_LIVE=true \
+            --dart-define=ACCESS_LOCK=true \
+            ${{ vars.STUDIO_DART_DEFINES }}
+
+      - name: Upload backend-ON APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-backend-on-apk
+          path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      # ── Firebase App Distribution — THIS (flags-ON, real backend) is the build
+      #    the tester auto-updates to: install once, then every push pings the
+      #    device. It is the ONLY build whose live features (🟢/🔴 connection ·
+      #    ✓✓/❌ delivery) actually exercise the server. Same SA→ADC pattern as
+      #    bootstrap-admin.yml; continue-on-error so a transient distribute hiccup
+      #    never fails the build (the artifact is the fallback). The SA needs the
+      #    "Firebase App Distribution Admin" role.
+      - name: Write service account credentials
+        run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+        env:
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      # The release note the tester actually reads. It used to be a string typed
+      # into this file, and it drifted: every APK sent today announced
+      # "גרסה 1.4.7 (v6.99)" and described the Studio text editor — a release from
+      # weeks earlier — while actually carrying the keyboard work, the auth doors
+      # and the approval queue. A notification that lies about its own contents is
+      # worse than none: it teaches the tester that a new build is nothing new,
+      # which is exactly why the owner believed nothing had shipped.
+      #
+      # Derived now from the SAME two files the app is versioned from —
+      # pubspec.yaml and knowledge/STATUS.md (what scripts/gen_version.sh reads
+      # for the on-screen label). A release can only ship a stale note if
+      # STATUS.md itself is stale, and updating that file IS the release step.
+      - name: Compose the release note from STATUS.md + pubspec
+        id: relnote
+        run: |
+          set -euo pipefail
+          STATUS=app_flutter/knowledge/STATUS.md
+          LABEL=$(grep -oE 'v[0-9]+\.[0-9]+' "$STATUS" | head -1)
+          APPVER=$(grep -m1 -oE '^version: [0-9]+\.[0-9]+\.[0-9]+\+[0-9]+' app_flutter/pubspec.yaml | awk '{print $2}')
+          # Headline of the newest section: "## v7.00 — <what> — <yyyy-mm-dd>"
+          HEAD_LINE=$(grep -m1 -E "^## ${LABEL} — " "$STATUS" || true)
+          WHAT=$(printf '%s' "$HEAD_LINE" | sed -E "s/^## ${LABEL} — //; s/ — [0-9]{4}-[0-9]{2}-[0-9]{2}$//")
+          if [ -z "$WHAT" ]; then
+            # Visibly broken beats quietly wrong: if the section is missing or
+            # renamed, say so rather than repeat an old story.
+            WHAT="⚠️ תיאור-השחרור לא נמצא ב-STATUS.md (חפש סעיף ## ${LABEL})"
+          fi
+          echo "note=🟢 גרסה ${APPVER} (${LABEL}) — ${WHAT} · build #${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "composed: ${APPVER} (${LABEL}) ${WHAT}"
+
+      - name: Distribute to Firebase App Distribution
+        continue-on-error: true
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+        run: |
+          echo "── deploy SA (needs 'Firebase App Distribution Admin'):"
+          grep -oE '"client_email"[^,]+' "$GOOGLE_APPLICATION_CREDENTIALS" || true
+          npm install -g firebase-tools >/dev/null 2>&1
+          firebase appdistribution:distribute \
+            app_flutter/build/app/outputs/flutter-apk/app-release.apk \
+            --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
+            --testers "meir7651231@gmail.com" \
+            --release-notes "${{ steps.relnote.outputs.note }}" \
+            --project buildsmart-b0b78

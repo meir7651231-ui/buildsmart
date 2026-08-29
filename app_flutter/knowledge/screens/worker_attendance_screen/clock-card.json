@@ -1,0 +1,44 @@
+{
+  "name": "_ClockCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "היום",
+        "registryId": "worker_attendance_screen.today",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📍 מיקום נרשם",
+        "registryId": "worker_attendance_screen.loc_recorded",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "cfgRadius",
+    "mapsQueryForDay"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "today",
+      "onClockIn",
+      "onClockOut"
+    ],
+    "untangle": []
+  }
+}

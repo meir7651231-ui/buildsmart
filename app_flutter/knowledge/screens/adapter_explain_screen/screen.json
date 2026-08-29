@@ -1,0 +1,87 @@
+{
+  "screen": "adapter_explain_screen",
+  "source": "adapter_explain_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "AdapterExplainScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🔌 איך לגשר?",
+            "registryId": "adapter_explain_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הקצוות שלו:",
+            "registryId": "adapter_explain_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "⚙️ הקצוות מנתוני-המפרט; ה-AI רק מסביר איזה סוג-מתאם מגשר.",
+            "registryId": "adapter_explain_screen.t03",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "productName",
+          "sku"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 3,
+    "total": 3,
+    "summary": "3/3",
+    "entries": [
+      {
+        "id": "adapter_explain_screen.t01",
+        "ok": true,
+        "atom": "AdapterExplainScreen"
+      },
+      {
+        "id": "adapter_explain_screen.t02",
+        "ok": true,
+        "atom": "AdapterExplainScreen"
+      },
+      {
+        "id": "adapter_explain_screen.t03",
+        "ok": true,
+        "atom": "AdapterExplainScreen"
+      }
+    ]
+  }
+}

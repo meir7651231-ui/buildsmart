@@ -1,0 +1,167 @@
+{
+  "module": "buildable_spec",
+  "source": "lib/features/fittings/plan/buildable_spec.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "connectionMethodFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConnectorEnd end) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildableSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (end.type) {EndType.hdpeCompression => 'ריתוך-שקע (סוקט-פיוז׳ן) 260°C', EndType.bs…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ConnectorEnd end)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildableSpecFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String family, int od, {int? od2, int tempC = 20, String? threadInch, bool? threadMale}) -> BuildableSpec?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kSpecFamilies"
+          },
+          {
+            "kind": "const",
+            "name": "kPprMaterial"
+          },
+          {
+            "kind": "const",
+            "name": "kPprStandards"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "connectionMethodFor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_kSpecFamilies.contains(family) → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "dims = generate(family, od, od2: od2)"
+          },
+          {
+            "kind": "compute",
+            "detail": "ends = family == 'מתאם תבריג' ? ppRThreadAdapterEnds(od, threadInch: threadInch, male: threadMal…"
+          },
+          {
+            "kind": "return",
+            "detail": "BuildableSpec(family: family, od: od, od2: od2, dims: dims, envelope: envelopeFor(family,…"
+          }
+        ]
+      },
+      "floor": [
+        "BuildableSpec",
+        "contains",
+        "envelopeFor",
+        "generate",
+        "hotLineSafetyFor",
+        "ppRThreadAdapterEnds",
+        "weldEndsFor",
+        "weldParamsFor"
+      ],
+      "contract": {
+        "input": "(String family, int od, {int? od2, int tempC = 20, String? threadInch, bool? threadMale})",
+        "output": "BuildableSpec?",
+        "purity": "pure",
+        "precond": [
+          "if !_kSpecFamilies.contains(family) → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "!_kSpecFamilies.contains(family) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "BuildableSpec.isComplete",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "dims"
+          },
+          {
+            "kind": "field",
+            "name": "ends"
+          },
+          {
+            "kind": "field",
+            "name": "envelope"
+          },
+          {
+            "kind": "field",
+            "name": "standards"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "dims.isNotEmpty && envelope != null && ends.isNotEmpty && standards.isNotEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

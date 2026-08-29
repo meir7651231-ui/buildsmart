@@ -1,0 +1,1271 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BuildSmart — Firestore Security Rules (S5 · server-connect).
+// Project `buildsmart-b0b78` · Production mode (deny-by-default) — this file is
+// the server-side RBAC that makes the client's role separation REAL.
+// SSOT: SPEC-server-connect-MICRO rows S5.1–S5.8 + SPEC-server-connect
+// §"אבטחה — מתווה-rules". Roles are Firebase Auth CUSTOM CLAIMS written ONLY by
+// the `setRole` callable (functions/src/index.ts): `role: <r>` or `roles: [r…]`
+// over contractor|manager|store|courier|worker, plus the bootstrap-only
+// `admin: true`. The `users/{uid}.role` Firestore field is a READ MIRROR — the
+// claims are the source of truth these rules read (request.auth.token).
+//
+// ⚠️ S5.7 — App Check: enforcement is a CONSOLE action, not a rules expression.
+//    Firebase console → App Check → APIs → Cloud Firestore → Enforce (after the
+//    clients ship with the App Check provider, S0.5). See rules_test/README.md.
+//
+// ⚠️ uid-MIGRATION STATE (launch Phase A/G) — these rules enforce the uid
+//    contract PER COLLECTION at its actual landed state (verified against the
+//    repo, not assumed):
+//      • orders — OWNERSHIP IS LANDED. uid-A3 (commit 24b5bc2) added
+//        `orders.contractorUid` = the placer's auth.uid (orders_engine.dart),
+//        written by orders_firebase toDoc when signed-in. THIS is the ownership
+//        key these rules use (see `ownsOrder`). `orders.contractorId` is the
+//        legacy DISPLAY NAME (who→contractorId) and is NOT a uid — it is not
+//        used for any gate. Seed/pre-A3 docs carry no contractorUid → owner-
+//        unmatched but still manager/admin-readable (backward-tolerant).
+//      • chat — FORWARD-READY (S1 uid join DEFERRED). `chatThreads.participants`
+//        still carries ROLE NAMES ('contractor', 'store', …) and
+//        `chatMessages.fromUid` is OMITTED (chat_firebase.dart header). The
+//        participants/fromUid rules below implement the POST-S1 uid contract, so
+//        current role-name writes/reads are DENIED to a non-manager by design —
+//        DO NOT assume these fields are populated yet. The single swap point is
+//        chat_firebase toDoc/fromDoc when S1 lands real uids.
+//      • customers — FORWARD-READY. `customers.ownerId` is NOT yet written
+//        (customers_firebase toDoc omits it), so an ownerId-scoped read matches
+//        nothing today; a doc with no ownerId is manager/admin-only (backward-
+//        tolerant — never hard-breaks an admin read).
+//    Run/finish the uid migration (chat participants→uids + fromUid; customers
+//    ownerId; orders storeId/courierId assignment) BEFORE relying on the
+//    forward-ready gates for those collections.
+//
+// ⚠️ RULES ARE NOT FILTERS — the app's `FirestoreCollectionSource` currently
+//    listens to WHOLE collections (`collection(...).snapshots()`, no `where`).
+//    On participant-scoped collections (orders / chatThreads / chatMessages /
+//    customers / finance*) a full-collection listen by a non-manager is DENIED
+//    as a whole. Clients must scope their queries to what the rule can prove,
+//    e.g. `chatThreads.where('participants', arrayContains: uid)` (the S4.1
+//    contract) or orders `.where('contractorId'|'storeId'|'courierId', '==',
+//    uid)`. The repos' guarded listeners log the denial and keep serving the
+//    seed cache (never thrown to the UI) — but live data requires scoped
+//    queries. Same consequence: a fresh-backend seed push
+//    (`onFirstSnapshotEmpty → pushCacheToRemote`) only succeeds from a session
+//    whose role may create those docs (manager/admin); seeding belongs to
+//    dev/emulator or an admin session, not an arbitrary first client.
+// ─────────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    /// Any authenticated caller (Firebase Auth — phone/email, S1).
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /// The bootstrap `admin: true` claim (functions/README — first admin).
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.get('admin', false) == true;
+    }
+
+    /// Role check over BOTH claim shapes the setRole callable writes:
+    /// single `role: 'store'` or multi `roles: ['store', 'courier']`.
+    function hasRole(r) {
+      return isSignedIn()
+          && (request.auth.token.get('role', '') == r
+              || (r in request.auth.token.get('roles', [])));
+    }
+
+    /// A PERSON, not merely a session.
+    ///
+    /// `isSignedIn()` is `request.auth != null`, and since the catalog cutover
+    /// every visitor is signed in anonymously before the first frame so the
+    /// catalog can be read. That makes `isSignedIn()` true for a total stranger,
+    /// which is correct for reading a catalog and wrong for everything else.
+    /// The `directory` rule already uses this predicate; commercial writes need
+    /// it just as much.
+    function isRealUser() {
+      return isSignedIn()
+          && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    /// An APPROVED person — the server-side half of "all-by-approval".
+    ///
+    /// The approval lifecycle existed only on the client until now: the amber
+    /// banner calls itself "a non-blocking notice", the typed `requirePermission`
+    /// gate has no call sites, and the checkout fence tests a device-local
+    /// SharedPreferences bool the user sets by typing their own name. No rule
+    /// read `users/{uid}.status` anywhere, so an unapproved account's order
+    /// landed on the store and courier boards exactly like an approved one.
+    ///
+    /// Costs one document read per evaluated write. That is the price of the
+    /// claim being authoritative; a claims-based mirror would be cheaper but
+    /// would go stale for exactly as long as a token lives, which is the window
+    /// an approval revocation most needs to close.
+    ///
+    /// Defaults to `pending` on a MISSING field but requires the DOC to exist —
+    /// `fromWire(null) -> active` was an early trap here, and a document that
+    /// was never created must never read as approved.
+    function isActive() {
+      return isRealUser()
+          && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+          && get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', 'pending') == 'active';
+    }
+
+    /// Manager is the app's god-role (dashboard / setStage / finance); admin
+    /// (claims bootstrap) is a superset everywhere a manager is allowed.
+    function isManager() {
+      return hasRole('manager') || isAdmin();
+    }
+
+    /// HR read-scope: the signed-in caller is the EMPLOYER of [workerUid] — the
+    /// `users/{workerUid}.employerId` mirror (server-assigned by the setEmployer
+    /// callable, self-write-frozen) equals the caller's uid. This is the ONE
+    /// proof future worker-HR read rules use to let a contractor read THEIR
+    /// workers' docs (attendance/certs/…) without exposing them to anyone else.
+    /// Referenced by no match block yet — adding it changes no existing rule.
+    function isEmployerOf(workerUid) {
+      return isSignedIn()
+          && get(/databases/$(database)/documents/users/$(workerUid))
+                .data.get('employerId', '') == request.auth.uid;
+    }
+
+    /// The app OWNER, by verified email — the authority ROOT of the Studio
+    /// publish-to-all path. Mirrors, verbatim value, functions/src/common.ts
+    /// `isOwnerEmail` (OWNER_EMAIL) and the app's kOwnerEmails
+    /// (app_flutter/lib/data/board_accounts_local.dart:98). The Google ID-token
+    /// delivers this claim already normalized (lower-cased), so the compare is a
+    /// direct literal match. Defined here beside isManager() so the rules and the
+    /// callable share ONE owner identity; the §5 studioConfig blocks (Step 65)
+    /// consume it. Adding this helper does NOT change any existing rule — it is
+    /// referenced by no match block yet.
+    function isOwnerEmail() {
+      return isSignedIn()
+          && request.auth.token.get('email', '') == 'meir7651231@gmail.com';
+    }
+
+    /// ORG membership — stage-3.3 St5. The caller's `orgId` CUSTOM CLAIM
+    /// (server-assigned — the users rule below freezes `orgId`, so it is never
+    /// self-claimed) matches the doc's stamped `orgId`. THE LOAD-BEARING GUARD
+    /// is `!= ''`: legacy docs carry no orgId (→ '') and a claimless token
+    /// yields '' too, so without it every claimless user would match every
+    /// legacy doc ('' == ''). With it, ''-docs stay on their existing gates
+    /// (backward-tolerant) and only a real org claim ever widens a read.
+    /// Consumed as an ADDITIVE `|| sameOrg()` read branch on the org-stampable
+    /// collections (orders / customers / finance*) — never a write gate.
+    function sameOrg() {
+      return isSignedIn()
+          && request.auth.token.get('orgId', '') != ''
+          && request.auth.token.get('orgId', '')
+              == resource.data.get('orgId', '');
+    }
+
+    // ── users/{uid} — S5.1 / U0 · doc-id = auth uid · {displayName, phone, email,
+    //    role, storeUid, orgId, status, createdAt, lastSeen, fcmToken} ────────────
+    // read: self or admin. write: self may maintain the own MIRROR doc
+    // (displayName, phone, email, profession/address/businessId, fcmToken S6.1,
+    // createdAt/lastSeen) but may NEVER touch the AUTHORITY fields
+    // `role`/`roles`/`storeUid`/`orgId`/`status` — those are server/callable/admin
+    // only:
+    //   • role/roles — the custom-claim is the real source; the doc only mirrors it.
+    //   • storeUid    — store-ownership binding (single-owner) — a user cannot
+    //                   self-grant ownership of a store.
+    //   • orgId       — org membership — server-assigned, not self-claimed.
+    //   • status      — approval lifecycle (U0). Registration is ALL-BY-APPROVAL:
+    //                   a self-CREATE may set status only to 'pending' (absent →
+    //                   defaults 'pending'); the flip pending→active/suspended is
+    //                   an admin/callable action, so UPDATE freezes `status`. This
+    //                   is what stops a user self-approving.
+    // BACKWARD-COMPATIBLE: no current client writes any of these five to `users`
+    // (the profile mirror writes only displayName/phone/email/profession/address/
+    // businessId), so the added blocks never break an existing write.
+    // delete: self (S1.8 in-app account deletion — Apple requirement:
+    // user.delete() + data deletion) or admin.
+    // ── directory/{uid} — the readable "who exists here" list ────────────────
+    // { role, displayName, status, updatedAt } and nothing more. It exists
+    // because chat threads isolate on `participantUids`, and filling that list
+    // means resolving the OTHER side's uids by role — a read the `users` rule
+    // below correctly denies, since `users` holds phones, e-mails and approval
+    // status. The client swallowed that denial and stamped only itself, so every
+    // thread silently became private to whoever wrote first: two contractors in
+    // one conversation, neither able to see the other.
+    //
+    // READ: any signed-in, non-anonymous account. An anonymous catalog browser
+    // is not a person anyone can message, so it has no business enumerating who
+    // is here.
+    //
+    // WRITE: server only (the Admin SDK bypasses rules). `role` is what every
+    // permission decision keys on; a client-writable directory would be a way to
+    // claim a role by declaring one. The ONE exception is a person stamping
+    // their OWN `lastSeenAt` — the presence heartbeat — which can touch nothing
+    // else, so "who is online" can never become "who says they are an admin".
+    match /directory/{uid} {
+      allow read: if isSignedIn()
+          && request.auth.token.firebase.sign_in_provider != 'anonymous';
+      allow update: if isSignedIn() && request.auth.uid == uid
+          && request.resource.data.diff(resource.data)
+              .affectedKeys().hasOnly(['lastSeenAt']);
+      allow create, delete: if false; // server-written only
+    }
+
+    match /users/{uid} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow create: if isAdmin()
+          || (isSignedIn() && request.auth.uid == uid
+              && !request.resource.data.keys()
+                  .hasAny(['role', 'roles', 'storeUid', 'orgId', 'employerId'])
+              && request.resource.data.get('status', 'pending') == 'pending');
+      allow update: if isAdmin()
+          || (isSignedIn() && request.auth.uid == uid
+              && !request.resource.data.diff(resource.data)
+                  .affectedKeys()
+                  .hasAny(['role', 'roles', 'storeUid', 'orgId', 'status', 'employerId']));
+      allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+    }
+
+    // ── chatThreads/{threadId} — S5.2 · {participants:[role], participantUids:
+    //    [uid], names, lastMsg, ts} ──────────────────────────────────────────────
+    // read/write ONLY for a uid member (`participantUids` — the auth-truth; A9.
+    // `participants` carries the display ROLES, not auth). create requires the
+    // author to put themself in the NEW doc's participantUids; update FREEZES
+    // participantUids for an EXISTING participant (a participant may refresh the
+    // lastMsg/ts denorm — the repo's full-doc upsert rewrites the same array,
+    // which passes — but may not eject the peer or recruit others; membership
+    // changes are a server/Functions concern), with ONE A14 exception: a thread
+    // whose participantUids is still EMPTY may be stamped by a signed-in user
+    // that includes THEMSELF (the uid-migration last mile — see the update rule),
+    // after which the freeze applies. Pre-migration docs (empty participantUids)
+    // match no auth.uid for read/create — forward-ready until A14 stamps them.
+    match /chatThreads/{threadId} {
+      allow read: if isSignedIn()
+          && request.auth.uid in resource.data.get('participantUids', []);
+      // DELIBERATELY `isRealUser()` AND NOT `isActive()`. Ordering requires
+      // approval; talking must not. A person whose account is still pending is
+      // precisely the person who needs to ask an admin "when?", and a rule that
+      // answered that question with permission-denied would close the only
+      // channel they have left — the app would be silent in both directions.
+      // The anonymous catalog guest is a different case: it is a browser
+      // session, not somebody anyone can hold a conversation with.
+      allow create: if isRealUser()
+          && request.auth.uid in request.resource.data.get('participantUids', []);
+      // Two shapes are allowed:
+      //  (a) an EXISTING participant refreshing the denorm (lastMsg/ts) — the
+      //      repo's full-doc upsert rewrites the SAME participantUids array, which
+      //      passes the freeze; it may NOT eject the peer or recruit others
+      //      (membership changes are a server/Functions concern).
+      //  (b) A14 uid-migration LAST MILE — a thread whose participantUids is still
+      //      EMPTY (a forward-ready seed) is otherwise LOCKED: no auth.uid is a
+      //      member, so branch (a) can never fire and the thread can never be
+      //      stamped. So a signed-in user may set the array on a previously-EMPTY
+      //      thread provided they include THEMSELF AND hold one of the thread's
+      //      `participants` ROLES. (swarm#3 authz fix: WITHOUT the role gate any
+      //      signed-in user — e.g. a worker/courier — could stamp an empty
+      //      contractor↔store thread and then READ it; the role gate scopes the
+      //      stamp to the conversation's own roles, which is exactly whom the
+      //      client's union-stamp then admits anyway, so it never blocks a real
+      //      participant.) The freeze still applies once participantUids is
+      //      non-empty — branch (b)'s `size() == 0` guard makes (b) unreachable
+      //      thereafter.
+      allow update: if isSignedIn()
+          && ((request.auth.uid in resource.data.get('participantUids', [])
+                  && request.resource.data.get('participantUids', [])
+                      == resource.data.get('participantUids', []))
+              || (resource.data.get('participantUids', []).size() == 0
+                  && request.auth.uid
+                      in request.resource.data.get('participantUids', [])
+                  && (resource.data.get('participants', [])
+                          .hasAny([request.auth.token.get('role', '')])
+                      || resource.data.get('participants', [])
+                          .hasAny(request.auth.token.get('roles', [])))));
+      allow delete: if isSignedIn()
+          && request.auth.uid in resource.data.get('participantUids', []);
+    }
+
+    /// The participantUids array of a thread — one extra doc read (billed) per
+    /// rule evaluation; the price of keeping messages in their own collection.
+    function threadParticipants(threadId) {
+      return get(/databases/$(database)/documents/chatThreads/$(threadId))
+          .data.get('participantUids', []);
+    }
+
+    // ── chatMessages/{messageId} — S5.3 · {threadId, fromUid, fromRole, text,
+    //    ts} ─────────────────────────────────────────────────────────────────────
+    // read: uid ∈ the parent thread's participants (get() lookup — queries must
+    // pin `threadId` per S4.2 `where('threadId').orderBy(ts)`). create: only as
+    // yourself (`fromUid == auth.uid` — no sender spoofing) and only into a
+    // thread you participate in. Messages are immutable: no update/delete from
+    // clients (moderation/retention is an admin/Functions concern, S8).
+    match /chatMessages/{messageId} {
+      allow read: if isSignedIn()
+          && request.auth.uid in threadParticipants(resource.data.threadId);
+      // Same split as the thread above: a pending person may still speak, an
+      // anonymous session may not. Thread membership remains the real fence.
+      allow create: if isRealUser()
+          && request.resource.data.fromUid == request.auth.uid
+          && request.auth.uid in
+              threadParticipants(request.resource.data.threadId);
+      allow update, delete: if false;
+    }
+
+    // ── customers/{customerId} — S5.4 · {name, phone, creditLimit, used,
+    //    balance, ownerId} ──────────────────────────────────────────────────────
+    // CREDIT DATA. read: manager/admin, OR the record's owner (`ownerId == uid`).
+    // write: manager only. Everyone else (store/courier/worker/foreign
+    // contractor) is blocked — the S5.8 "credit blocked" test.
+    // ⚠️ FORWARD-READY (Phase G): `ownerId` is NOT yet written by the client
+    // (customers_firebase toDoc omits it), so the owner branch matches NOTHING
+    // today — every customers doc is effectively manager/admin-only right now.
+    // The rule is shipped so the owner-scoped read lights up the moment an A-phase
+    // stamps ownerId (the orders-A3 precedent). BACKWARD-TOLERANT: a doc with no
+    // ownerId defaults to '' and never equals an auth.uid, so it stays manager/
+    // admin-only — it never hard-breaks an admin read.
+    match /customers/{customerId} {
+      allow read: if isManager()
+          || (isSignedIn()
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
+      allow write: if isManager();
+    }
+
+    // ── orders/{orderId} — S5.5 · {projectId, lines[], sum, stage,
+    //    siteAddress, contractorId(=display name), contractorUid(=auth.uid, the
+    //    LANDED ownership key, A3), storeId, courierId, ts} ─────────────────────
+
+    /// kManagerOrderFlow (lib/logic/manager_dashboard.dart) — the ONLY legal
+    /// stage vocabulary.
+    function orderStages() {
+      return ['new', 'preparing', 'ready', 'pickup', 'transit', 'delivered'];
+    }
+
+    /// A stage-only update: every other field is frozen for store/courier.
+    function onlyStageChanged() {
+      return request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['stage']);
+    }
+
+    /// One legal hop: the doc currently sits at [from] and moves to [to].
+    /// Both sides read via `.get(...,'')` so a doc/delta missing `stage` yields a
+    /// clean false (no evaluation error) instead of throwing — important now
+    /// that the store/courier claim update may carry a `{storeUid}`/`{courierUid}`
+    /// delta where the engine still re-evaluates this guard.
+    function stageMove(from, to) {
+      return resource.data.get('stage', '') == from
+          && request.resource.data.get('stage', '') == to;
+    }
+
+    /// The STORE chain — kManagerOrderFlow's store stages, new→ready:
+    /// new→preparing→ready (one hop at a time, mirroring `advance`).
+    function storeStageMove() {
+      return stageMove('new', 'preparing') || stageMove('preparing', 'ready');
+    }
+
+    /// The COURIER chain — ready/pickup→delivered:
+    /// ready→pickup→transit→delivered (one hop at a time).
+    function courierStageMove() {
+      return stageMove('ready', 'pickup')
+          || stageMove('pickup', 'transit')
+          || stageMove('transit', 'delivered');
+    }
+
+    /// Assignment binding: once an order carries a storeId/courierId, ONLY that
+    /// uid's session may work it; an empty/absent field (pre-assignment — the
+    /// current toDoc never writes them) leaves the role-gate as the only gate.
+    function unassignedOrMine(field) {
+      return resource.data.get(field, '') == ''
+          || resource.data.get(field, '') == request.auth.uid;
+    }
+
+    /// A4/A5 (claim-on-first-advance + shared pool) — the store stages an order
+    /// may sit in while still UN-CLAIMED and visible to the whole store pool
+    /// (the store chain new→preparing→ready). Mirrors `_kStorePoolStages`
+    /// (orders_local.dart) — the client pool query and this read gate must agree.
+    function storePoolStages() {
+      return ['new', 'preparing', 'ready'];
+    }
+
+    /// A4/A5 — the courier pool stages (ready/pickup/transit) — mirrors
+    /// `_kCourierPoolStages`.
+    function courierPoolStages() {
+      return ['ready', 'pickup', 'transit'];
+    }
+
+    /// A5 — is this a STORE pool order (un-claimed `storeUid` AND in a store
+    /// stage)? Every store may READ it (the shared pool); the first to advance
+    /// CLAIMS it (the update rule's no-steal then binds it).
+    function inStorePool() {
+      return resource.data.get('storeUid', '') == ''
+          && resource.data.get('stage', '') in storePoolStages();
+    }
+
+    /// A5 — the courier analogue of [inStorePool].
+    function inCourierPool() {
+      return resource.data.get('courierUid', '') == ''
+          && resource.data.get('stage', '') in courierPoolStages();
+    }
+
+    /// A4 — NO-STEAL claim guard for a uid-ownership [field] (storeUid /
+    /// courierUid): the WRITE may leave the field empty, set it to the caller's
+    /// OWN uid (the claim), or leave an already-mine value unchanged — but it may
+    /// NEVER point the field at a value the caller does not own. Combined with
+    /// the binding (only the owner/pool may update at all), this makes a steal of
+    /// another party's claimed order impossible; a manager bypasses it entirely.
+    function claimOnlySelf(field) {
+      return request.resource.data.get(field, '') == ''
+          || request.resource.data.get(field, '') == request.auth.uid;
+    }
+
+    /// A4 — the store update's changed-keys are exactly the stage hop, optionally
+    /// plus its OWN claim field — never the peer's (`courierUid`) and never any
+    /// business field. (The advance write is `set(merge:true)` of stage [+
+    /// storeUid on the claim]; merge does not delete omitted fields, so the diff
+    /// is precisely these keys.)
+    function storeStageOrClaimOnly() {
+      return request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['stage', 'storeUid']);
+    }
+
+    /// A4 — the courier analogue: only `stage` (+ its own `courierUid` claim).
+    function courierStageOrClaimOnly() {
+      return request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['stage', 'courierUid']);
+    }
+
+    /// The contractor's OWNERSHIP uid on an order. ⚠️ Phase-G correction: the
+    /// LANDED uid field is `contractorUid` (uid-A3, commit 24b5bc2 —
+    /// orders_engine.dart `Order.contractorUid` = the placer's auth.uid, written
+    /// by orders_firebase toDoc only when non-empty). `contractorId` is the
+    /// legacy DISPLAY NAME (`Order.who`), NOT a uid — keying ownership on it (as
+    /// the pre-G rule did) compares a name to a uid and DENIES a contractor their
+    /// own order. So ownership reads/keys on `contractorUid`. A legacy/seed doc
+    /// that predates A3 carries no `contractorUid` (→ '') and is therefore
+    /// owner-unmatched — manager/admin still reads it (backward-tolerant: an
+    /// un-uid'd doc never hard-breaks an admin read), and a fresh A3 order
+    /// carries the real uid so the owner matches. (`contractorId` is intentionally
+    /// NOT a read fallback: it holds a name, which can never equal an auth.uid —
+    /// accepting it would gate nothing and could leak by name-collision.)
+    function ownsOrder() {
+      return resource.data.get('contractorUid', '') == request.auth.uid;
+    }
+
+    // create: the placer of an order, always at the flow head ('new'), bound to
+    //   the author (`contractorUid == uid` — an order cannot be created in
+    //   someone else's name; the LANDED A3 uid field, see ownsOrder above).
+    //   manager/admin may also create at any legal stage (dashboard/seed/reset
+    //   tooling). NOTE: the client must stamp contractorUid (signed-in) for its
+    //   own create to pass — an empty contractorUid (signed-out / pre-A3 path)
+    //   is denied creation by design, which is the intended hardening.
+    //   ⚠️ Phase-G FIX (cross-device sync): the create gate keys on the
+    //   OWNERSHIP UID (`contractorUid == auth.uid`), NOT on `hasRole('contractor')`.
+    //   The `contractor` IDENTITY is the app's DEFAULT no-claim persona — the
+    //   `setRole` callable + manager_role_assign_sheet only ever mint the SPECIAL
+    //   roles (manager/store/courier/worker) and DELIBERATELY never assign
+    //   'contractor' (see manager_role_assign_sheet.dart's RoleOption doc). So a
+    //   real signed-in contractor carries NO role claim → `hasRole('contractor')`
+    //   was ALWAYS false → every contractor's order create was DENIED, the
+    //   guarded background `set` swallowed the permission-denied, and the order
+    //   (shown optimistically on the placing device) NEVER reached Firestore →
+    //   it never synced to the same account's other devices. Gating on the uid
+    //   the order is bound to is the correct, equally-strict ownership check (the
+    //   author still cannot forge another uid; still pinned to stage 'new').
+    // update: transition-per-role — claim-on-first-advance + shared pool (A4) —
+    //   store:   new→preparing→ready, may CLAIM `storeUid` (empty→own only,
+    //            no-steal); bound to its claim OR the un-claimed pool; the diff
+    //            is stage[+storeUid] only;
+    //   courier: ready→pickup→transit→delivered, may CLAIM `courierUid`
+    //            (analogous);
+    //   manager: the god-step (`setStage`) — any change whose stage is legal
+    //            (incl. REASSIGNING storeUid/courierUid to any uid).
+    // read: owner (contractorUid == uid) / claimant (storeUid|courierUid == uid)
+    //   / the shared POOL (un-claimed order in the role's stages — A5) or
+    //   manager/admin. Legacy storeId/courierId stay as a forward-tolerant read
+    //   fallback (never written today; an empty field never equals a uid).
+    // delete: manager only (`resetToSeed` cleanup is a manager/admin action).
+    match /orders/{orderId} {
+      allow read: if isManager()
+          || (isSignedIn()
+              && (ownsOrder()
+                  || resource.data.get('storeUid', '') == request.auth.uid
+                  || resource.data.get('courierUid', '') == request.auth.uid
+                  || resource.data.get('storeId', '') == request.auth.uid
+                  || resource.data.get('courierId', '') == request.auth.uid
+                  || (hasRole('store') && inStorePool())
+                  || (hasRole('courier') && inCourierPool())))
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg()
+          ;
+      // An order is a commercial act, so the caller must be an APPROVED PERSON —
+      // not merely a session. `isSignedIn()` alone admitted both the anonymous
+      // catalog guest and a registered-but-unapproved account, and their orders
+      // reached the store and courier boards indistinguishable from real ones.
+      // This is the server half of "all-by-approval"; the client half is the
+      // checkout gate in store_screen.dart, which now asks the same question.
+      allow create: if (isActive()
+              && request.resource.data.stage == 'new'
+              && request.resource.data.get('contractorUid', '')
+                  == request.auth.uid)
+          || (isManager() && request.resource.data.stage in orderStages());
+      allow update: if (hasRole('store')
+              && storeStageOrClaimOnly()
+              && storeStageMove()
+              && unassignedOrMine('storeUid')
+              && claimOnlySelf('storeUid')
+              && request.resource.data.get('courierUid', '')
+                  == resource.data.get('courierUid', ''))
+          || (hasRole('courier')
+              && courierStageOrClaimOnly()
+              && courierStageMove()
+              && unassignedOrMine('courierUid')
+              && claimOnlySelf('courierUid')
+              && request.resource.data.get('storeUid', '')
+                  == resource.data.get('storeUid', ''))
+          || (isManager() && request.resource.data.stage in orderStages());
+      allow delete: if isManager();
+    }
+
+    // ── S5.6 — stock / siteNodes / projects / tasks / siteStageProgress ──────
+    // The SSOT asks for project-ownership + role. The live docs do not yet
+    // carry usable ownership joins (stock/tasks ship projectId:'' / none;
+    // `projects` itself is still a const board pass-through the app never
+    // writes; siteStageProgress doc-ids are bare "<productKey>#<idx>" flags) —
+    // so the PRAGMATIC, documented enforcement here is: any signed-in user may
+    // READ, and WRITES are gated to the roles that own each flow. Tightening to
+    // per-project membership (`projects.members[]` / projectId get() joins) is
+    // the post-uid-migration hardening step, alongside S8's server-side
+    // validation.
+
+    // stock — the store persona's inventory (`move`) + manager oversight.
+    match /stock/{stockId} {
+      allow read: if isSignedIn();
+      allow write: if hasRole('store') || isManager();
+    }
+
+    // siteNodes — the site workspace structure (S3.S schema row); written by
+    // the contractor running the site, overseen by manager.
+    match /siteNodes/{nodeId} {
+      allow read: if isSignedIn();
+      allow write: if hasRole('contractor') || isManager();
+    }
+
+    // projects — {name, address, status, contractorId, members[]}. A contractor
+    // may create/maintain a project bound to themself; manager everything.
+    match /projects/{projectId} {
+      allow read: if isSignedIn();
+      allow create, update: if isManager()
+          || (hasRole('contractor')
+              && request.resource.data.get('contractorId', '')
+                  == request.auth.uid);
+      allow delete: if isManager();
+    }
+
+    // tasks/{taskId} — the CROSS-PARTY §6 board rules live BELOW (Wave T3, the
+    // tight worker/employer/manager block). This loose Wave-T1 placeholder was
+    // REMOVED (2026-08-15): two match blocks for the SAME path are OR'd by
+    // Firestore, so it silently defeated the tight block — any signed-in user
+    // could read EVERY task, and any worker/manager could write ANY task, undoing
+    // the cross-party isolation + the no-self-approval / employerId-write-once
+    // guards. The single authoritative block is `match /tasks/{taskId}` further down.
+
+    // material_requests — the worker material-request queue: worker files a
+    // request, the reviewing board advances `status`
+    // (requested→ordered→supplied/declined); both ride the same docs — the
+    // `tasks` posture above (the review side rides the manager/admin gate: the
+    // contractor identity carries no role claim, see the orders Phase-G note).
+    // stage-2 C1: this collection previously had NO block, so the final
+    // catch-all denied the repo's whole-collection listen and the client
+    // silently served its seed cache forever.
+    match /material_requests/{requestId} {
+      allow read: if isSignedIn();
+      allow write: if hasRole('worker') || isManager();
+    }
+
+    // siteStageProgress — per-product install-stage done-flags (doc existence
+    // == done), toggled from the contractor's site tools (and the worker's
+    // install flow).
+    match /siteStageProgress/{flagId} {
+      allow read: if isSignedIn();
+      allow write: if hasRole('contractor') || hasRole('worker') || isManager();
+    }
+
+    // ── finance* — S3.F wave · manager-only writes ───────────────────────────
+    // financeApprovals {what, amount, by, status} · financePenalties {days,
+    // perDay, amount, createdAt} · financePaymentTerms/active {termId}.
+    // read: manager (+ the record's owner where an ownerId field exists —
+    // future-proof; the current docs carry none, so they are manager-only).
+    // write: manager only (decide / addPenalty / setPaymentTerm are manager
+    // dashboard actions).
+
+    match /financeApprovals/{approvalId} {
+      allow read: if isManager()
+          || (isSignedIn()
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
+      allow write: if isManager();
+    }
+
+    match /financePenalties/{penaltyId} {
+      allow read: if isManager()
+          || (isSignedIn()
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
+      allow write: if isManager();
+    }
+
+    match /financePaymentTerms/{termId} {
+      allow read: if isManager()
+          || (isSignedIn()
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
+      allow write: if isManager();
+    }
+
+    // financeBudget — the manager's editable project budget, persisted as the
+    // single `financeBudget/active` doc {total, spent, cats[]} that
+    // FirebaseFinanceRepository's `setBudget` upserts and the budget reads
+    // serve. Same manager-only posture + forward-ready ownerId read branch as
+    // the finance* blocks above (the current doc carries no ownerId, so it is
+    // manager-only today). stage-2 C1: this collection previously had NO block,
+    // so the final catch-all denied the budget listen and the client silently
+    // served its seed cache forever.
+    match /financeBudget/{budgetId} {
+      allow read: if isManager()
+          || (isSignedIn()
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
+      allow write: if isManager();
+    }
+
+    // ── diag/{uid} — TEMPORARY on-device self-test (cross-device-sync probe) ──
+    // The BackendDebugBadge (FS_DIAG build) writes diag/{uid} then reads it back
+    // to prove "connected + persists" INDEPENDENT of role — the baseline the
+    // owner asked for. Self-only (doc-id == auth.uid), so no user can touch
+    // another's probe. REMOVE this rule together with the badge after go-live.
+    match /diag/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // carts/{uid} — the user's single active smart-cart (local→server migration
+    // behind kUserDataServer). Self-only, doc-id == auth.uid (mirrors diag/{uid}).
+    match /carts/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // savedProjects/{uid} — the user's saved install-studio projects (local→server
+    // migration behind kUserDataServer). Self-only, doc-id == auth.uid (mirrors carts).
+    match /savedProjects/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // notifSettings/{uid} — the user's notification-settings blob (local→server
+    // migration behind kUserDataServer; unblocked after Preact retired). Self-only.
+    match /notifSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // appSettings / catalogSettings / chatSettings / storeSettings {uid} — the four
+    // per-user settings blobs (local→server migration behind kUserDataServer, out of
+    // the שער-25 Preact-freeze once Preact retired). Self-only, doc-id == auth.uid
+    // (mirrors notifSettings/carts).
+    match /appSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /catalogSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /chatSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /storeSettings/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // rewards/{uid} — the user's PRIVATE rewards overlay { coins,
+    // claimedChallengeIds } (local→server migration behind kUserDataServer; the
+    // board-username→uid deferral resolved by keying on the uid). Self-only — the
+    // leaderboard is a DERIVED local view, so nothing cross-party lives here.
+    match /rewards/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // draftQuotes/{uid} — the user's saved quote drafts (local→server migration
+    // behind kUserDataServer). Self-only, doc-id == auth.uid (mirrors savedProjects).
+    match /draftQuotes/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // comparisonSets/{uid} — the user's side-by-side compare set (local→server
+    // migration behind kUserDataServer). Self-only, doc-id == auth.uid (mirrors draftQuotes).
+    match /comparisonSets/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // savedCustomers/{uid} — the user's personal saved-customers CRM (local→server
+    // migration behind kUserDataServer; distinct from the shared `customers` domain).
+    // Self-only, doc-id == auth.uid (mirrors comparisonSets).
+    match /savedCustomers/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // workerAttendance/{workerUid} — a worker's own attendance ledger
+    // { days, employerId, updatedAt } (local→server migration behind
+    // kUserDataServer). TWO-SIDED HR: the WORKER writes/reads their OWN doc; their
+    // EMPLOYER (the doc's employerId equals the reader) and a manager may READ it
+    // — the employer roster query (`where employerId == me`) is the next slice.
+    // WRITE is self-only AND the doc's employerId must equal the worker's real
+    // `employerId` claim (minted by setEmployer), so a worker cannot stamp a fake
+    // employer to expose their ledger to an arbitrary uid. Location (GPS) rows
+    // make the strict read-scope essential — never the permissive isSignedIn().
+    match /workerAttendance/{workerUid} {
+      allow read: if isSignedIn()
+          && (request.auth.uid == workerUid
+              || resource.data.employerId == request.auth.uid
+              || isManager());
+      allow write: if isSignedIn()
+          && request.auth.uid == workerUid
+          && request.resource.data.get('employerId', '')
+              == request.auth.token.get('employerId', '');
+    }
+
+    // workerCerts/{workerUid} — a worker's own certificate wallet
+    // { certs, employerId, updatedAt } (local→server migration behind
+    // kUserDataServer). SAME two-sided HR model as workerAttendance: the WORKER
+    // writes/reads their OWN doc (and the doc's employerId must equal their real
+    // employerId claim — no faking an employer); the EMPLOYER (doc's employerId
+    // == reader) and a manager may READ. Certificate photos are PII → strict
+    // read-scope, never the permissive isSignedIn().
+    match /workerCerts/{workerUid} {
+      allow read: if isSignedIn()
+          && (request.auth.uid == workerUid
+              || resource.data.employerId == request.auth.uid
+              || isManager());
+      allow write: if isSignedIn()
+          && request.auth.uid == workerUid
+          && request.resource.data.get('employerId', '')
+              == request.auth.token.get('employerId', '');
+    }
+
+    // workerTrainings/{workerUid} — a worker's own safety-training log
+    // { trainings, employerId, updatedAt } (local→server migration behind
+    // kUserDataServer). SAME two-sided HR model as workerCerts: the WORKER
+    // writes/reads their OWN doc (and the doc's employerId must equal their real
+    // employerId claim — no faking an employer); the EMPLOYER (doc's employerId
+    // == reader) and a manager may READ. Training certificates are PII → strict
+    // read-scope, never the permissive isSignedIn().
+    match /workerTrainings/{workerUid} {
+      allow read: if isSignedIn()
+          && (request.auth.uid == workerUid
+              || resource.data.employerId == request.auth.uid
+              || isManager());
+      allow write: if isSignedIn()
+          && request.auth.uid == workerUid
+          && request.resource.data.get('employerId', '')
+              == request.auth.token.get('employerId', '');
+    }
+
+    // workerForms/{uid} — a worker's own digital forms { forms (101), sick,
+    // updatedAt } (local→server migration behind kUserDataServer). SINGLE-DOC +
+    // SELF-ONLY (the carts/draftQuotes/savedProjects shape) — NOT two-sided:
+    // the 101 form reaches the contractor through the CHAT engine, not a roster
+    // read, so there is no employer branch. Forms carry PII (ת.ז, signature) →
+    // only the owner reads/writes their own doc.
+    match /workerForms/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // workerProfiles/{uid} — a worker's own editable board profile { name, phone,
+    // specialty, photo, idNumber, address, emergency*, updatedAt } (local→server
+    // migration behind kUserDataServer). SINGLE-DOC + SELF-ONLY (the carts shape):
+    // no persona reads another worker's profile through this store. Profile PII
+    // (ת.ז, phone, address, emergency contact) → only the owner reads/writes.
+    match /workerProfiles/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // courierAttendance/{uid} · courierCerts/{uid} · courierForms/{uid} — the
+    // COURIER's own HR ledgers (attendance / driver-cert wallet / 101+sick-notes),
+    // the courier-keyed twins of the worker* stores (local→server migration behind
+    // kUserDataServer). SELF-ONLY: the courier reports to the store through CHAT,
+    // so there is no store-roster query — only the owner reads/writes their own
+    // doc. (`employerId` still rides the attendance/cert write, forward-ready for a
+    // future store roster, but no rule branch grants a non-owner read yet.)
+    match /courierAttendance/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /courierCerts/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /courierForms/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // courierProfiles/{uid} — the courier's own editable board profile
+    // { displayName, phone, preferredHaul, photo, updatedAt } (local→server
+    // migration behind kUserDataServer). SINGLE-DOC + SELF-ONLY (the worker
+    // Profiles twin): no persona reads another courier's profile here; PII (phone)
+    // → only the owner reads/writes.
+    match /courierProfiles/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // courierClock/{uid} — the courier's own delivery-clock side-map
+    // { entries: { orderId: { pickedUpAt, deliveredAt, attempts } }, updatedAt }
+    // (local→server migration behind kUserDataServer). SELF-ONLY: a best-effort
+    // MEASUREMENT read back only in the courier's own reports tab (the store gets
+    // the monthly report via CHAT) — only the owner reads/writes their own doc.
+    match /courierClock/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // storeProfiles/{uid} · storeCerts/{uid} — the STORE's own business profile
+    // { businessName, phone, address, businessId, logo, updatedAt } and its
+    // business-certificate wallet (license/insurance), local→server migration
+    // behind kUserDataServer. SINGLE-DOC (profile) / self-doc (certs) + SELF-ONLY:
+    // only the owner reads/writes their own business data (ח.פ., certs are PII).
+    match /storeProfiles/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    match /storeCerts/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // vacationRequests/{requestId} — the CROSS-PARTY HR queue (local→server
+    // migration behind kUserDataServer). A worker/courier SUBMITS their own
+    // request; the employing contractor (doc's employerId == me) or a manager
+    // DECIDES it (status flip). Keyed by requestId (NOT uid) because a DIFFERENT
+    // party writes the decision than created the row. `username` holds the
+    // requester's uid on the server path (the notifier writes session.uid).
+    //   • create — only the requester, only a PENDING row for THEMSELF (no
+    //     pre-decided smuggling, no filing under someone else's uid).
+    //   • read   — the requester, their employer, or a manager (no one else sees
+    //     another worker's leave/PII).
+    //   • update — ONLY the employer or a manager (the decision). The requester
+    //     can NEVER update → no self-approval. `username`/`employerId` are frozen
+    //     so a decide can't re-owner the row.
+    //   • delete — never from a client (GDPR erasure is server-side, by query).
+    match /vacationRequests/{requestId} {
+      allow read: if isSignedIn()
+          && (resource.data.get('username', '') == request.auth.uid
+              || resource.data.get('employerId', '') == request.auth.uid
+              || isManager());
+      allow create: if isSignedIn()
+          && request.resource.data.get('username', '') == request.auth.uid
+          && request.resource.data.get('status', '') == 'pending';
+      allow update: if isSignedIn()
+          && (resource.data.get('employerId', '') == request.auth.uid
+              || isManager())
+          && request.resource.data.get('username', '')
+              == resource.data.get('username', '')
+          && request.resource.data.get('employerId', '')
+              == resource.data.get('employerId', '');
+      allow delete: if false;
+    }
+
+    // tasks/{taskId} — the CROSS-PARTY §6 board (Wave T3, behind kTasksServer).
+    // Keyed by the int task id (as a string). Three parties, each proven by a
+    // field on the doc: the WORKER (`assignedWorkerUid == me`), the employing
+    // CONTRACTOR (`employerId == me`), or a MANAGER (claim). Field names mirror
+    // `TaskItem.toJson`.
+    //   • read   — the assigned worker, the employer, or a manager (no worker
+    //     sees another worker's board; the role-scoped query matches this).
+    //   • create — the CONTRACTOR mints a `pending` task they employ
+    //     (employerId == me), OR a WORKER PROPOSES a `proposed` task for
+    //     THEMSELF (assignedWorkerUid == me). No pre-`done` smuggling.
+    //   • update — the WORKER on the task may only move it within
+    //     {active,rejected,review} (their submit + fixes) and can NEVER set
+    //     `done`/`proposed`/reassign → NO SELF-APPROVAL; `assignedWorkerUid`
+    //     stays self, `employerId` is write-once. The EMPLOYER/MANAGER decide
+    //     (any status: approve→done, reject→rejected, approveProposal→active,
+    //     (re)assign) with `employerId` frozen so a decide can't re-owner it.
+    //   • delete — never from a client (erasure is server-side, by query).
+    match /tasks/{taskId} {
+      function tWorker(r) {
+        return r.get('assignedWorkerUid', '') == request.auth.uid
+            && r.get('assignedWorkerUid', '') != '';
+      }
+      function tEmployer(r) {
+        return r.get('employerId', '') == request.auth.uid
+            && r.get('employerId', '') != '';
+      }
+      allow read: if isSignedIn()
+          && (tWorker(resource.data) || tEmployer(resource.data) || isManager());
+      allow create: if isSignedIn()
+          && ((request.resource.data.get('employerId', '') == request.auth.uid
+                  && request.resource.data.get('status', '') == 'pending')
+              || (request.resource.data.get('assignedWorkerUid', '')
+                      == request.auth.uid
+                  && request.resource.data.get('status', '') == 'proposed'));
+      allow update: if isSignedIn()
+          && (
+            // WORKER on the task — own runtime transitions ONLY. Cannot self-
+            // approve (status confined to active/rejected/review), cannot steal
+            // the assignment (stays self), employerId write-once (set when '').
+            (tWorker(resource.data)
+                && request.resource.data.get('assignedWorkerUid', '')
+                    == request.auth.uid
+                && request.resource.data.get('status', '')
+                    in ['active', 'rejected', 'review']
+                && (request.resource.data.get('employerId', '')
+                        == resource.data.get('employerId', '')
+                    || resource.data.get('employerId', '') == ''))
+            // EMPLOYER / MANAGER — the decisions (any status), employerId frozen
+            // so a decide can't re-owner the row.
+            || ((tEmployer(resource.data) || isManager())
+                && request.resource.data.get('employerId', '')
+                    == resource.data.get('employerId', ''))
+          );
+      allow delete: if false;
+    }
+
+    // workerNotifs/{uid} — the SERVER-GENERATED worker bell feed (Wave T3 · 2d)
+    // `{ items: [{id,emoji,title,body,ts,read}], updatedAt }`. WRITTEN BY THE
+    // onTaskStatusChanged trigger (Admin SDK, bypasses these rules) so a
+    // contractor's approve reaches the worker WITHOUT a cross-party client write.
+    // SELF-ONLY for clients: the owner READS their feed and marks-read / clears
+    // it (an update/clear of their OWN doc). No client can write ANOTHER user's
+    // feed (no cross-party notification spam); no client create is needed (the
+    // trigger seeds the doc). delete: server-side on account erasure.
+    match /workerNotifs/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
+    //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
+    // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,
+    // status starts 'pending', no reviewer fields). They read/cancel their own.
+    // The designated approver (the matrix) may READ the tier they sign off:
+    //   worker→contractor · courier→store · store/contractor→manager · admin=any.
+    // The approve/deny (status flip + the role CLAIM) is server-only via
+    // reviewRoleRequest (Admin SDK) — clients NEVER write status (update: false).
+    match /roleRequests/{uid} {
+      // The role a caller must hold to review a request for `reqRole`.
+      function approverRoleFor(reqRole) {
+        return reqRole == 'worker' ? 'contractor'
+             : reqRole == 'courier' ? 'store'
+             : (reqRole == 'store' || reqRole == 'contractor') ? 'manager'
+             : '';
+      }
+      function canReview(reqRole) {
+        return isAdmin()
+            || (approverRoleFor(reqRole) != '' && hasRole(approverRoleFor(reqRole)));
+      }
+      allow read: if isSignedIn()
+          && (request.auth.uid == uid || canReview(resource.data.requestedRole));
+      allow create: if isSignedIn()
+          && request.auth.uid == uid
+          && request.resource.data.status == 'pending'
+          && request.resource.data.requestedRole
+              in ['worker', 'courier', 'store', 'contractor']
+          && !request.resource.data.keys()
+              .hasAny(['reviewedBy', 'reviewedByRole', 'reviewedAt']);
+      // The requester may cancel their OWN pending request (delete); admin too.
+      allow delete: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // status/claim changes are server-only (reviewRoleRequest, Admin SDK);
+      // a re-request is delete + create.
+      allow update: if false;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // Pillar 5 · §5 STUDIO + AUTHORED-CATALOG blocks (Step 65) — R1-3/R1-6 canonical
+    // ─────────────────────────────────────────────────────────────────────────
+    // Server-side RBAC for the no-code Studio's four greenfield data families
+    // (knowledge/firestore-schema.md §"Pillar 5"): the publish POINTER + immutable
+    // SNAPSHOTS, the authored `catalogProducts` superset with its role-scoped PRICE
+    // sub-doc, and the append-only ANALYTICS / PRESENCE streams. Every collection
+    // gets an EXPLICIT rule (deny-by-default demands one per collection). The
+    // privileged paths run through the Admin SDK — the `publishConfig` callable +
+    // its revert/rollup/indexer triggers (functions/src/studio.ts) — which BYPASSES
+    // these rules, so the client-facing predicates below are deliberately tight:
+    // world-READ where the datum is public (the priceless catalog doc, the published
+    // pointer), owner/claim-GATED where it is not (drafts, the contractor price), and
+    // `if false` wherever ONLY the server may write (the published pointer/snapshots,
+    // the summary/rollup docs). ADDS ONLY — no existing rule above is touched; the
+    // catalog `if false` write pairs with the step-57 revert trigger, and these are
+    // the FIRST consumers of the isOwnerEmail() helper added in step 56. Flags OFF ⇒
+    // no client touches any of these ⇒ the blocks are inert/forward-ready, exactly
+    // like the customers/chat forward-ready gates above.
+    // ⚠️ App Check (S5.7) — enforce Firestore in the console for `studioConfig` /
+    //    `catalogProducts` too once the clients ship the provider; not a rules clause.
+
+    // ── studioConfig/{channel} — the publish POINTER collection (Step 56/58) ───
+    // Holds the `published` ~200B world-pointer (its `version` is the cache-bust
+    // signal EVERY client listens for, step 58) ALONGSIDE the operational
+    // `publishAllow` kill-switch flag {enabled} (studio.ts:240). READ = any signed-in
+    // client, DELIBERATELY uniform across channels: the step-58 client opens a
+    // WHOLE-collection `snapshots()` over `studioConfig` and does NOT scope the
+    // listen, and "RULES ARE NOT FILTERS" (see the file header) means a mixed
+    // per-doc gate would DENY the entire listen for a non-manager — starving the
+    // fan-out that must reach contractors/stores/couriers/workers. Neither datum is
+    // sensitive (a pointer + a boolean); the sensitive DRAFT TREES live in
+    // studioConfigSnapshots (owner/manager-gated below), NOT here. WRITE = `if false`
+    // for EVERY channel: the ONLY writer is the `publishConfig` callable (Admin SDK,
+    // step 56), backed by the `revertIllegalConfigWrite` trigger (step 57) — a forged
+    // direct client write is denied HERE and reverted THERE.
+    match /studioConfig/{channel} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ── studioConfigSnapshots/{snapshotId} (+ /shards) — immutable blobs + drafts
+    // Two shapes share this collection (studio_config_firebase.dart / studio.ts):
+    //   • a PUBLISHED snapshot `v<N>` — the IMMUTABLE frozen config tree a publish
+    //     creates. World-READ (signed-in) so any client can pull the `/shards` the
+    //     pointer names; NO client write (immutable — the callable/Admin SDK froze
+    //     it, step 57 protects it). Rollback is a pointer flip, never a mutate.
+    //   • a DRAFT `draft-<uid>` — the owner's working copy (the step-55 sink writes
+    //     ONLY here, owner-write §5). OWNER read+write (the doc-id ENCODES the owner
+    //     uid); a manager may READ any draft (draft config is manager-scoped) but
+    //     ONLY the owner writes it. Read/write is per-DOC (the sink uses a scoped
+    //     `set`; the shard pull is a scoped subcollection read) — no whole-collection
+    //     listen here, so a mixed gate is safe (unlike studioConfig above).
+    match /studioConfigSnapshots/{snapshotId} {
+      // A PUBLISHED immutable snapshot = any id NOT named `draft-…` (spec §65.6).
+      function isPublishedSnap(snap) {
+        return !snap.matches('draft-.*');
+      }
+      // The caller OWNS the draft `draft-<uid>` — its id encodes the owner's uid.
+      function ownsDraftSnap(snap) {
+        return isSignedIn() && snap == 'draft-' + request.auth.uid;
+      }
+      allow read: if isPublishedSnap(snapshotId)
+          ? isSignedIn()
+          : (isManager() || ownsDraftSnap(snapshotId));
+      // Published `v<N>` = immutable (no client write); a draft = owner-write only.
+      allow write: if !isPublishedSnap(snapshotId) && ownsDraftSnap(snapshotId);
+
+      // The sharded blob under a snapshot (studioConfigSnapshots/{id}/shards/{n}):
+      // SAME read gate as its parent; writes are Admin-SDK-only (the publish callable
+      // writes the shards it checksums), so `if false` for every client.
+      match /shards/{shardId} {
+        allow read: if isPublishedSnap(snapshotId)
+            ? isSignedIn()
+            : (isManager() || ownsDraftSnap(snapshotId));
+        allow write: if false;
+      }
+    }
+
+    // ── studioConfigApprovals/{approvalId} — DUAL-CONTROL approval (Step 56) ────
+    // A doc `draft-<publisherUid>` a SECOND manager writes {approved, approvedBy}
+    // to sign off another manager's publish; the callable counts it only when
+    // approvedBy DIFFERS from the publisher (the two-person rule, studio.ts:262).
+    // Manager/owner read+write — the approving authority, nobody else.
+    match /studioConfigApprovals/{approvalId} {
+      allow read, write: if isManager() || isOwnerEmail();
+    }
+
+    // ── _publishRate/{uid} — publish RATE-LIMIT ledger (Step 56/66) ────────────
+    // Server-internal fixed-window counter (studio.ts:175 enforceRateLimit),
+    // maintained by the Admin SDK ONLY. No client ever reads or writes it — an
+    // explicit `if false` so a client can never reset its OWN rate window.
+    match /_publishRate/{uid} {
+      allow read, write: if false;
+    }
+
+    // ── catalogProducts/{sku} (+ /pricing/{audience}) — authored superset (Step 60)
+    // The PUBLIC doc is PRICELESS (toDoc omits price, R1-6) and world-READ (signed-
+    // in — browse is a paged query, §1.6, so no mixed-gate listen issue); authoring
+    // is manager/owner. The PRICE lives ONLY in the role-scoped `pricing/{audience}`
+    // sub-doc: READ is claim-gated (`isManager() || hasRole(audience)`) so a
+    // competing store / an unauthorised customer can NEVER read the contractor price
+    // by scanning the collection (R1-6); WRITE is manager/owner (the Studio prices).
+    match /catalogProducts/{sku} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+
+      match /pricing/{audience} {
+        allow read: if isManager() || hasRole(audience);
+        allow write: if isManager() || isOwnerEmail();
+      }
+    }
+
+    // ── catalogPending/{batchId} (+ /items) — seed STAGING (Step 61, R2-9) ──────
+    // The OFF-by-default bulk-import DRAFT: rows stage here and flip to the live
+    // `catalogProducts` only on FULL success. Never a normal-client surface —
+    // manager/owner (or the emulator/admin seed session) only, reads and writes.
+    match /catalogPending/{batchId} {
+      allow read, write: if isManager() || isOwnerEmail();
+      match /items/{sku} {
+        allow read, write: if isManager() || isOwnerEmail();
+      }
+    }
+
+    // ── catalog metadata + search-support (Step 60/63) ─────────────────────────
+    // `catalogTrades`/`catalogCategories` — browse metadata: world-READ (signed-in),
+    //   manager/owner authoring. `catalogTokenFreq` — the token-frequency map the
+    //   client reads to pick the rarest `arrayContains` token (search_firebase.dart);
+    //   it is maintained by the `onCatalogProductWrite` indexer (Admin SDK), so a
+    //   client may READ but NEVER write it (governance #84 — the client never
+    //   fabricates search tokens/frequencies).
+    match /catalogTrades/{tradeId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    match /catalogCategories/{catId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    match /catalogTokenFreq/{token} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ── analyticsEvents/{eventId} — append-only event stream (Step 67) ─────────
+    // CREATE only as YOURSELF (`uid == auth.uid` — no actor spoofing); the payload
+    // may carry sensitive context, so READ is manager only. Events are IMMUTABLE —
+    // no update/delete from any client (append-only, like the audit log). The daily
+    // rollup runs Admin-SDK-side over these (bypassing rules).
+    match /analyticsEvents/{eventId} {
+      allow read: if isManager();
+      allow create: if isSignedIn()
+          && request.resource.data.get('uid', '') == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ── presence/{uid} — per-user heartbeat · self-write (Step 67, R1-3) ───────
+    // Each client writes ONLY its own `presence/<uid>` doc (heartbeat). READ is
+    // manager or self. The owner dashboard does NOT listen to this collection — it
+    // reads the server-rolled `presenceSummary/current` (below), so thousands of
+    // presence docs are never fanned out to a client (cost + "who's online" leak,
+    // R1-3).
+    match /presence/{uid} {
+      allow read: if isManager() || (isSignedIn() && request.auth.uid == uid);
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── presenceSummary/{summaryId} — server-rolled online summary (Step 66, R1-3)
+    // The single `current` doc {count, byRole, sample, updatedAt} a scheduled fn
+    // rolls up from `presence/*`. MANAGER-read (the owner dashboard reads ONE doc,
+    // not the collection); `if false` write — only the Admin-SDK rollup writes it.
+    match /presenceSummary/{summaryId} {
+      allow read: if isManager();
+      allow write: if false;
+    }
+
+    // ── analytics rollups — daily doc + distributed counters (Step 66) ─────────
+    // `analyticsDaily/{day}` — one owner-read doc/day the scheduled rollup writes.
+    // `analyticsCounters/{metric}/shards/{n}` — the distributed-counter shards the
+    // Admin SDK increments. Both are MANAGER-read, `if false` write (server-owned).
+    match /analyticsDaily/{day} {
+      allow read: if isManager();
+      allow write: if false;
+    }
+    match /analyticsCounters/{metric} {
+      allow read: if isManager();
+      allow write: if false;
+      match /shards/{shardId} {
+        allow read: if isManager();
+        allow write: if false;
+      }
+    }
+
+    // ── Studio "live for everyone" — the self-contained shared config doc ───────
+    // `studioConfigLive/current` mirrors the owner's PUBLISHED Studio config
+    // (app_flutter/lib/state/studio/config_sink_firebase.dart, gated by the
+    // STUDIO_SHARED_SYNC build flag). PUBLIC read — every client (incl. signed-out
+    // demo visitors) renders the published UI-text overrides, which are
+    // non-sensitive. WRITE is OWNER-ONLY via `isOwnerEmail()` (the un-spoofable
+    // Google email), so only the owner can publish an edit to all users. This is
+    // DISTINCT from the callable-only `studioConfig/published` pointer (Step 56):
+    // a simpler, self-contained path that needs no Cloud Function.
+    match /studioConfigLive/{docId} {
+      allow read: if true;
+      allow write: if isOwnerEmail();
+    }
+
+    // `orgConfigLive/current` mirrors the owner's PUBLISHED org config (the setup
+    // wizard → app_flutter/lib/state/org_config_sink_firebase.dart, gated by the
+    // ORG_CONFIG_LIVE build flag). SAME contract as studioConfigLive above: PUBLIC
+    // read — the org shape (which screens/modules/labels are on) is non-sensitive
+    // UI config every client (incl. the pre-auth catalog visitor) needs to render;
+    // WRITE is OWNER-ONLY via isOwnerEmail() (the un-spoofable Google email), so
+    // only the owner can publish an org config that reaches ALL users. No Cloud
+    // Function — the self-contained path, exactly like studioConfigLive.
+    match /orgConfigLive/{docId} {
+      allow read: if true;
+      allow write: if isOwnerEmail();
+    }
+
+    // `screenSectionsLive/current` mirrors the manager's PUBLISHED screen layout
+    // (the section ORDER / HIDE / rename map → app_flutter/lib/state/
+    // screen_sections_sink_firebase.dart, gated by the SCREEN_SECTIONS_LIVE build
+    // flag). SAME contract as orgConfigLive above: PUBLIC read — the layout (which
+    // sections render, in what order, under what label) is non-sensitive UI config
+    // every client needs to render; WRITE is OWNER-ONLY via isOwnerEmail() (the
+    // un-spoofable Google email), so only the owner/manager can publish a layout
+    // that reaches ALL users. No Cloud Function — self-contained, like orgConfigLive.
+    match /screenSectionsLive/{docId} {
+      allow read: if true;
+      allow write: if isOwnerEmail();
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // catalog-to-server (SPEC-catalog-to-server · C0.4 / C5.3) — the migrated data
+    // families + the multi-store INVENTORY. Every collection gets an explicit rule
+    // (deny-by-default). products/specs/recipes/stores/meta are WORLD-READ (signed-in
+    // — the catalog + the "available in N · cheapest X" comparison render for any
+    // client; browse is a paged query, no mixed-gate listen) and manager/owner-
+    // AUTHORED. `inventory` is the C5.3 core: a STORE writes ONLY its own rows. The
+    // Admin-SDK seed (scripts/seed) BYPASSES these; the flags are OFF so no client
+    // touches them yet ⇒ inert/forward-ready, like the studio blocks above.
+    // ─────────────────────────────────────────────────────────────────────────
+    match /verified_specs/{sku} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    match /recipes/{key} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    match /stores/{storeId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isManager() || isOwnerEmail();
+      // U3.2.2 — the store's OWNER may edit its OWN store doc (name/logo/contact),
+      // but may NOT reassign ownership: `ownerUid` is FROZEN on the owner path
+      // (only manager/owner transfer a store). FORWARD-READY — no store carries
+      // `ownerUid` today, so the owner branch matches nobody (dormant, backward-
+      // tolerant: it never hard-breaks a manager/seed write, which stay allowed).
+      allow update: if isManager() || isOwnerEmail()
+          || (isSignedIn()
+              && resource.data.get('ownerUid', '') == request.auth.uid
+              && request.resource.data.get('ownerUid', '')
+                  == resource.data.get('ownerUid', ''));
+    }
+    // The catalog VERSION doc the sync gate polls (C1.6) — public-read, server-write.
+    match /catalogMeta/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    // ── inventory/{storeId}_{sku} — S/price/stock · C5.3 per-store write ────────
+    // read: signed-in (the product-sheet comparison). write: manager/owner (the seed
+    // + Studio) OR the OWNING store ONLY — the row's `storeId` must equal the caller's
+    // `storeId` custom claim (minted when a store onboards), so a store can NEVER
+    // write a competitor's price/stock. FORWARD-READY: until the store `storeId` claim
+    // lands, only manager/owner writes (backward-tolerant, never hard-breaks a seed).
+    match /inventory/{invId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail()
+          || (hasRole('store')
+              && request.auth.token.get('storeId', '') != ''
+              && request.resource.data.get('storeId', '')
+                  == request.auth.token.get('storeId', ''));
+    }
+
+    // ── default — S5 deny-by-default ─────────────────────────────────────────
+    // Anything not explicitly matched above (including any future collection
+    // added without a rule) is denied for everyone. NOTE: the STATIC catalog
+    // (1,877 Lipskey products) is intentionally NOT a collection here — it is
+    // bundled/R2-CDN static JSON (SSOT §אזהרות), so no rule will ever exist for it.
+    // (This is DISTINCT from the AUTHORED `catalogProducts` superset gated above in
+    // the Step-65 block — the S3.K decision keeps them two separate data sets:
+    // see app_flutter/lib/data/repositories/authored_products_firebase.dart.)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

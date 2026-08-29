@@ -1,0 +1,73 @@
+{
+  "name": "_DayDetailSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📍 לא נרשם מיקום ביום זה",
+        "registryId": "worker_attendance_screen.no_loc_day",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סיכום עבודה יומי",
+        "registryId": "worker_attendance_screen.work_summary",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין פירוט-עבודה משויך ליום זה",
+        "registryId": "worker_attendance_screen.no_work_day",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_attendance_screen.open_nav",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מיקום הכניסה — פתח ניווט",
+        "registryId": "worker_attendance_screen.open_nav",
+        "registryOk": true
+      }
+    ],
+    "registered": 5,
+    "unregistered": [],
+    "summary": "registry 5 · mapped 5/5 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "openNavSheet",
+        "target": "openNavSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "openNavSheet(context, label: label, lat: lat, lng: lng)",
+        "effect": "open → openNavSheet"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "mapsQueryForDay"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "day",
+      "work"
+    ],
+    "untangle": []
+  }
+}

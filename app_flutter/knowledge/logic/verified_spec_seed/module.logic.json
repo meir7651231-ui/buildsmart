@@ -1,0 +1,280 @@
+{
+  "module": "verified_spec_seed",
+  "source": "lib/data/repositories/verified_spec_seed.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "c1SliceSpecs",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<VerifiedSpec>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kC1SliceSkus"
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "seedC1SliceSpecs"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<VerifiedSpec>[for (final sku in kC1SliceSkus) if (kVerifiedSpecs.containsKey(sku)) kVeri…"
+          }
+        ]
+      },
+      "floor": [
+        "containsKey"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<VerifiedSpec>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "verifiedSpecToDoc",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(VerifiedSpec s) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "seedC1SliceSpecs"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<String, dynamic>{'sku' : s.sku, 'material' : s.material, 'maxTempC' : s.maxTempC, 'ends'…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(VerifiedSpec s)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_endTypeByName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? n) -> EndType",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "verifiedSpecFromDoc"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "EndType.values.firstWhere((e) => e.name == n, orElse: () => EndType.hdpeCompression)"
+          }
+        ]
+      },
+      "floor": [
+        "firstWhere"
+      ],
+      "contract": {
+        "input": "(String? n)",
+        "output": "EndType",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_waterSystemByName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? n) -> WaterSystem?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "verifiedSpecFromDoc"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "n == null ? null : WaterSystem.values.firstWhere((w) => w.name == n, orElse: () => WaterS…"
+          }
+        ]
+      },
+      "floor": [
+        "firstWhere"
+      ],
+      "contract": {
+        "input": "(String? n)",
+        "output": "WaterSystem?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "verifiedSpecFromDoc",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RemoteDoc doc) -> VerifiedSpec",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_waterSystemByName",
+            "module": true
+          },
+          {
+            "name": "_endTypeByName",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "j = doc.data"
+          },
+          {
+            "kind": "return",
+            "detail": "VerifiedSpec(sku: (j['sku'] as String?) ?? doc.id, material: (j['material'] as String?) ?…"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectorEnd",
+        "VerifiedSpec",
+        "toDouble"
+      ],
+      "contract": {
+        "input": "(RemoteDoc doc)",
+        "output": "VerifiedSpec",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "seedC1SliceSpecs",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(VerifiedSpecSink sink) -> Future<int>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kC1SliceSkus",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "c1SliceSpecs",
+            "module": true
+          },
+          {
+            "name": "verifiedSpecToDoc",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "specs = c1SliceSpecs()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final s in specs"
+          },
+          {
+            "kind": "effect",
+            "detail": "await sink(s.sku, verifiedSpecToDoc(s))"
+          },
+          {
+            "kind": "return",
+            "detail": "specs.length"
+          }
+        ]
+      },
+      "floor": [
+        "sink"
+      ],
+      "contract": {
+        "input": "(VerifiedSpecSink sink)",
+        "output": "Future<int>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

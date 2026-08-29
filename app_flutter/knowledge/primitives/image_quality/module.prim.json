@@ -1,0 +1,49 @@
+{
+  "module": "image_quality",
+  "source": "../../../app_flutter/lib/features/catalog_config/image_quality.dart",
+  "primitiveCount": 4,
+  "primitives": [
+    {
+      "name": "_basename",
+      "line": 66,
+      "signature": "(String? assetPath) → String?",
+      "returns": "String?",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "lookup < 0",
+          "note": "a not-found lookup (index < 0) → the fallback branch"
+        }
+      ]
+    },
+    {
+      "name": "imageBrightness",
+      "line": 75,
+      "signature": "(String? assetPath) → int",
+      "returns": "int",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "return -1",
+          "note": "no match → -1 (sentinel, distinct from a real score of 0)"
+        }
+      ]
+    },
+    {
+      "name": "isBrightImage",
+      "line": 83,
+      "signature": "(String? assetPath) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": []
+    },
+    {
+      "name": "tileEmoji",
+      "line": 94,
+      "signature": "(String categoryEmoji) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": []
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "module": "order_functions",
+  "source": "../../../app_flutter/lib/data/repositories/order_functions.dart",
+  "providerCount": 0,
+  "consumerCount": 0,
+  "providers": [],
+  "consumers": [],
+  "exceptions": [
+    {
+      "name": "OrderFunctionsException",
+      "line": 94,
+      "throwSites": 2
+    }
+  ]
+}

@@ -1,0 +1,992 @@
+{
+  "module": "polyroll_catalog",
+  "source": "lib/data/polyroll_catalog.dart",
+  "atomCount": 14,
+  "caches": [
+    "_kCatalogRaw",
+    "kCatalogProducts",
+    "kPolyrollCatalog"
+  ],
+  "atoms": [
+    {
+      "fn": "_pp",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int page, String suffix) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_pprPagePhoto"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'ppr_p${page}_$suffix.jpg'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int page, String suffix)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pprPagePhoto",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int page, String nameHe) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPprPagePhoto"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pp",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_pprImageFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch page"
+          },
+          {
+            "kind": "return",
+            "detail": "_kPprPagePhoto[page]"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(int page, String nameHe)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pprImageFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String categoryHe, String nameHe, int page) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPprCategoryImage"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprPagePhoto",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprCouplers"
+          },
+          {
+            "kind": "const",
+            "name": "kPprElbows"
+          },
+          {
+            "kind": "const",
+            "name": "kPprTees"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pprPagePhoto",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_ppr"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "photo = _pprPagePhoto(page, nameHe)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if photo != null → return photo"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch categoryHe"
+          },
+          {
+            "kind": "return",
+            "detail": "_kPprCategoryImage[categoryHe]"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String categoryHe, String nameHe, int page)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if photo != null → return photo"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_p37ElbowModel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String nameHe) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_pprSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final size in const ['355', '400']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nameHe.contains(' $size') → return 'B'"
+          },
+          {
+            "kind": "return",
+            "detail": "'A'"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String nameHe)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_p54AdapterModel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String nameHe) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_pprSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final size in const ['63', '75', '90', '110']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nameHe.contains('${size}x') → return 'C'"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final size in const ['40', '50']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nameHe.contains('${size}x') → return 'B'"
+          },
+          {
+            "kind": "return",
+            "detail": "'A'"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String nameHe)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_p53AdapterModel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String nameHe) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_pprSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final size in const ['40', '50', '63', '75', '90', '110']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nameHe.contains('${size}x') → return 'B'"
+          },
+          {
+            "kind": "return",
+            "detail": "'A'"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String nameHe)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_p55AdapterModel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String nameHe) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_pprSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final size in const ['40', '50', '63', '75']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nameHe.contains('${size}x') → return 'B'"
+          },
+          {
+            "kind": "return",
+            "detail": "'A'"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String nameHe)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_p39ElbowModel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String nameHe) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_pprSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final size in const ['355', '400']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nameHe.contains(' $size') → return 'B'"
+          },
+          {
+            "kind": "return",
+            "detail": "'A'"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String nameHe)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_p58SaddleModel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String nameHe) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_pprSpecFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if nameHe.contains('x32') → return 'B'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if nameHe.contains('110-125-160x25') → return 'B'"
+          },
+          {
+            "kind": "return",
+            "detail": "'A'"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String nameHe)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if nameHe.contains('x32') → return 'B'",
+          "if nameHe.contains('110-125-160x25') → return 'B'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pprSpecFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String categoryHe, String nameHe, int page) -> List<String>?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPprAdapterHexPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprAdapterRoundPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprCollarPagePlainSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprCouplerPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprCouplerReducingPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprElbow45PageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprElbow90PageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprOmegaPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprPlugPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprSaddlePageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprTeePageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprTeeReducingPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprValveBallPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "_kPprValveConcealedPageSpec"
+          },
+          {
+            "kind": "const",
+            "name": "kPprAdapters"
+          },
+          {
+            "kind": "const",
+            "name": "kPprCollars"
+          },
+          {
+            "kind": "const",
+            "name": "kPprCouplers"
+          },
+          {
+            "kind": "const",
+            "name": "kPprElbows"
+          },
+          {
+            "kind": "const",
+            "name": "kPprElectrofusion"
+          },
+          {
+            "kind": "const",
+            "name": "kPprOmega"
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesAC"
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesFiber"
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesSupply"
+          },
+          {
+            "kind": "const",
+            "name": "kPprPlugs"
+          },
+          {
+            "kind": "const",
+            "name": "kPprSaddles"
+          },
+          {
+            "kind": "const",
+            "name": "kPprTees"
+          },
+          {
+            "kind": "const",
+            "name": "kPprTools"
+          },
+          {
+            "kind": "const",
+            "name": "kPprValves"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_p37ElbowModel",
+            "module": true
+          },
+          {
+            "name": "_p39ElbowModel",
+            "module": true
+          },
+          {
+            "name": "_p53AdapterModel",
+            "module": true
+          },
+          {
+            "name": "_p54AdapterModel",
+            "module": true
+          },
+          {
+            "name": "_p55AdapterModel",
+            "module": true
+          },
+          {
+            "name": "_p58SaddleModel",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_ppr"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch categoryHe"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "contains",
+        "containsKey",
+        "toLowerCase"
+      ],
+      "contract": {
+        "input": "(String categoryHe, String nameHe, int page)",
+        "output": "List<String>?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_ppr",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String sku, String nameHe, String nameEn, String categoryHe, String categoryEn, String emoji, int page, {Map<String, dynamic>? dims, String? imageFile, List<String>? imageFiles, String? specImageFile, String? color}) -> LipskeyCatalogProduct",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kPprAdapterHexPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprAdapterRoundPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprCategoryImage",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprCollarPagePlainSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprCouplerPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprCouplerReducingPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprElbow45PageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprElbow90PageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprOmegaPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprPlugPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprSaddlePageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprTeePageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprTeeReducingPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprValveBallPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kPprValveConcealedPageSpec",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPolyrollBrand"
+          },
+          {
+            "kind": "const",
+            "name": "kPprAdapters",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprCollars",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprCouplers",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprElbows",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprElectrofusion",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprOmega",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesAC",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesFiber",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesSupply",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprPlugs",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprSaddles",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprTees",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprTools",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprValves",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_pprImageFor",
+            "module": true
+          },
+          {
+            "name": "_pprImageFilesFor",
+            "module": true
+          },
+          {
+            "name": "_pprSpecFor",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_acPipe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "LipskeyCatalogProduct(sku: sku, nameHe: nameHe, nameEn: nameEn, categoryHe: categoryHe, c…"
+          }
+        ]
+      },
+      "floor": [
+        "LipskeyCatalogProduct"
+      ],
+      "contract": {
+        "input": "(String sku, String nameHe, String nameEn, String categoryHe, String categoryEn, String emoji, int page, {Map<String, dynamic>? dims, String? imageFile, List<String>? imageFiles, String? specImageFile, String? color})",
+        "output": "LipskeyCatalogProduct",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_pprImageFilesFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String categoryHe, String nameHe, int page) -> List<String>?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_ppr"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if page == 29 && nameHe.contains('מחבר מתוברג') → return const ['ppr_p29_a.jpg']"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(String categoryHe, String nameHe, int page)",
+        "output": "List<String>?",
+        "purity": "pure",
+        "precond": [
+          "if page == 29 && nameHe.contains('מחבר מתוברג') → return const ['ppr_p29_a.jpg']"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_acPipe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String sku, String size, String sdr, String d, String s, String di, String w, String vol, String len) -> LipskeyCatalogProduct",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPolyrollBrand",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kPprPipesAC"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_ppr",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_ppr(sku, 'צינור PPR מיזוג אוויר $size', 'PPR AC Blue Pipe $size', kPprPipesAC, 'PPR AC B…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String sku, String size, String sdr, String d, String s, String di, String w, String vol, String len)",
+        "output": "LipskeyCatalogProduct",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_withOwnerImage",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> LipskeyCatalogProduct",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFittingImageOverrides"
+          },
+          {
+            "kind": "const",
+            "name": "kHuliotImageOverrides"
+          },
+          {
+            "kind": "const",
+            "name": "kLipskiImageOverrides"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "override = kHuliotImageOverrides[p.sku] ?? kLipskiImageOverrides[p.sku] ?? kFittingImageOverrides[p.…"
+          },
+          {
+            "kind": "precond",
+            "detail": "if override == null → return p"
+          },
+          {
+            "kind": "return",
+            "detail": "LipskeyCatalogProduct(sku: p.sku, nameHe: p.nameHe, nameEn: p.nameEn, color: p.color, qty…"
+          }
+        ]
+      },
+      "floor": [
+        "LipskeyCatalogProduct"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "LipskeyCatalogProduct",
+        "purity": "pure",
+        "precond": [
+          "if override == null → return p"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

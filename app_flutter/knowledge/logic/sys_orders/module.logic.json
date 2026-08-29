@@ -1,0 +1,405 @@
+{
+  "module": "sys_orders",
+  "source": "lib/state/sys_orders.dart",
+  "atomCount": 7,
+  "caches": [
+    "_seedMeta"
+  ],
+  "atoms": [
+    {
+      "fn": "_stageFromFlow",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> OrderStage",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "SysOrdersNotifier._toSysOrder"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (s) {'new' => OrderStage.newOrder, 'preparing' => OrderStage.preparing, 'ready' =>…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String s)",
+        "output": "OrderStage",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SysOrdersNotifier._derive",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(List<Order> orders) -> List<SysOrder>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "orders.map(_toSysOrder).toList(growable: false)"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<Order> orders)",
+        "output": "List<SysOrder>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SysOrdersNotifier._toSysOrder",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Order o) -> SysOrder",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_runtimeMeta"
+          },
+          {
+            "kind": "global",
+            "name": "_seedMeta"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_stageFromFlow",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "meta = _runtimeMeta[o.id] ?? _seedMeta[o.id]"
+          },
+          {
+            "kind": "return",
+            "detail": "SysOrder(id: o.id, who: o.who, site: o.site, items: o.items, sum: o.sum, stage: _stageFro…"
+          }
+        ]
+      },
+      "floor": [
+        "OrderLine",
+        "SysOrder",
+        "map",
+        "toList"
+      ],
+      "contract": {
+        "input": "(Order o)",
+        "output": "SysOrder",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SysOrdersNotifier._orderById",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> Order?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "ordersEngineProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "SysOrdersNotifier.courierAdvance",
+          "SysOrdersNotifier.storeAdvance"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final o in _ref.read(ordersEngineProvider)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if o.id == id → return o"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "read"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "Order?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "SysOrdersNotifier.storeAdvance",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "currentUidProvider"
+          },
+          {
+            "kind": "global",
+            "name": "ordersEngineProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_orderById",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "o = _orderById(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o == null → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if o.stage == 'new' || o.stage == 'preparing' || o.stage == 'ready'"
+          }
+        ]
+      },
+      "floor": [
+        "advance",
+        "claimStore",
+        "read"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if o == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SysOrdersNotifier.courierAdvance",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "currentUidProvider"
+          },
+          {
+            "kind": "global",
+            "name": "ordersEngineProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_orderById",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "o = _orderById(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o == null → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if o.stage == 'pickup' || o.stage == 'transit'"
+          }
+        ]
+      },
+      "floor": [
+        "advance",
+        "claimCourier",
+        "read"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if o == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SysOrdersNotifier.simulateIncomingOrder",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSimCustomers"
+          },
+          {
+            "kind": "const",
+            "name": "kSimSites"
+          },
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "field",
+            "name": "_simSeq"
+          },
+          {
+            "kind": "global",
+            "name": "ordersEngineProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_runtimeMeta"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "n = _simSeq++"
+          },
+          {
+            "kind": "init",
+            "detail": "lines = [OrderLineItem(name: 'ברז לכיור', emoji: '🚰', qty: 2, price: 118), OrderLineItem(name: '…"
+          },
+          {
+            "kind": "compute",
+            "detail": "order = _ref.read(ordersEngineProvider.notifier).placeOrder(who: kSimCustomers[n % kSimCustomers.…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_runtimeMeta[order.id] = (haul: 'small', lines: lines.map((l) => OrderLine(l.name, l.qty)…"
+          },
+          {
+            "kind": "return",
+            "detail": "order.id"
+          }
+        ]
+      },
+      "floor": [
+        "OrderLine",
+        "OrderLineItem",
+        "map",
+        "placeOrder",
+        "read",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

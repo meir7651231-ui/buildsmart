@@ -1,0 +1,104 @@
+{
+  "name": "PersonaPickingSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "אין הזמנות בקטגוריה זו ✓",
+        "registryId": "persona_picking_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "persona_picking_sheet.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📄 הצג תעודת משלוח",
+        "registryId": "persona_picking_sheet.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "persona_picking_sheet.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🛵 ההזמנה מוכנה — ממתינה לאיסוף השליח",
+        "registryId": "persona_picking_sheet.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סמן כל פריט כ\"לוקט\" או \"חסר\" כדי לסיים את ההכנה",
+        "registryId": "persona_picking_sheet.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "תעודת משלוח",
+        "registryId": "persona_picking_sheet.t05",
+        "registryOk": true
+      }
+    ],
+    "registered": 7,
+    "unregistered": [],
+    "summary": "registry 7 · mapped 7/7 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "fulfillmentProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "fulfillmentProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "fMoney",
+    "haulInfo"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": false,
+    "props": [
+      "orderId"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

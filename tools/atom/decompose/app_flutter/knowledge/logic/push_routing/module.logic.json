@@ -1,0 +1,229 @@
+{
+  "module": "push_routing",
+  "source": "../../../app_flutter/lib/state/push_routing.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "threadIdFrom",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic> data) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "raw = data['threadId']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw is! String → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "id.isEmpty ? null : id"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> data)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! String → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! String · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "threadIdFromLaunchUrl",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? url) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if url == null || url.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = Uri.tryParse(url)?.queryParameters['thread']?.trim()"
+          },
+          {
+            "kind": "return",
+            "detail": "(id == null || id.isEmpty) ? null : id"
+          }
+        ]
+      },
+      "floor": [
+        "trim",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(String? url)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if url == null || url.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "url == null || url.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "requestThreadOpen",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String threadId) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "pendingPushThreadProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ref.read(pendingPushThreadProvider.notifier).state = threadId"
+          }
+        ]
+      },
+      "floor": [
+        "read"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String threadId)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "consumePendingThread",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "pendingPushThreadProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "id = ref.read(pendingPushThreadProvider)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if id != null"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [
+        "read"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "afterThisFrame",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(VoidCallback open) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "WidgetsBinding.instance.addPostFrameCallback((_) => open())"
+          }
+        ]
+      },
+      "floor": [
+        "addPostFrameCallback",
+        "open"
+      ],
+      "contract": {
+        "input": "(VoidCallback open)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

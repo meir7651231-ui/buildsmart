@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/logic/money_format.dart' show groupThousands;
+import 'package:buildsmart/data/repositories/catalog_settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +11,22 @@ const String _kStorageKey = 'bs.catalog-settings.v1';
 enum CatalogViewMode { grid, list }
 
 enum CatalogSort { relevance, priceAsc, rating, newest }
+
+/// The product-list sort the catalog actually applies (one entry per *working*
+/// ordering the catalog data can support). Lives here — not in the screen —
+/// because it is now a persisted user default ([CatalogSettings.productSortDefault])
+/// that the catalog screen seeds its live sort from. (Distinct from [CatalogSort],
+/// whose price/rating/newest options have no backing field on the product model.)
+enum ProductSort { byOrder, nameAZ, nameZA, sku }
+
+/// Verbatim Hebrew label for each [ProductSort] (shared by the settings picker
+/// and the in-catalog ↕️ מיון sheet so they can never drift).
+String catalogProductSortLabel(ProductSort s) => switch (s) {
+      ProductSort.byOrder => 'ברירת מחדל',
+      ProductSort.nameAZ => 'שם א-ת',
+      ProductSort.nameZA => 'שם ת-א',
+      ProductSort.sku => 'מק"ט',
+    };
 
 enum CatalogCurrency { ils, usd, eur }
 
@@ -39,6 +57,7 @@ class CatalogSettings {
     // Section 2 — Display
     required this.gridColumns,
     required this.imageSize,
+    required this.productSortDefault,
     // Section 3 — Prices
     required this.showUnitPrice,
     required this.priceComparison,
@@ -83,6 +102,10 @@ class CatalogSettings {
   // Section 2 — Display
   final int gridColumns;
   final CatalogImageSize imageSize;
+
+  /// Default product-list ordering the catalog applies on open (seeds the live
+  /// [catalogProductSortProvider]). One of the working [ProductSort] options.
+  final ProductSort productSortDefault;
 
   // Section 3 — Prices
   final bool showUnitPrice;
@@ -130,6 +153,7 @@ class CatalogSettings {
     searchRadius: 50,
     gridColumns: 2,
     imageSize: CatalogImageSize.medium,
+    productSortDefault: ProductSort.byOrder,
     showUnitPrice: true,
     priceComparison: true,
     syncFavorites: true,
@@ -164,6 +188,7 @@ class CatalogSettings {
     int? searchRadius,
     int? gridColumns,
     CatalogImageSize? imageSize,
+    ProductSort? productSortDefault,
     bool? showUnitPrice,
     bool? priceComparison,
     bool? syncFavorites,
@@ -197,6 +222,7 @@ class CatalogSettings {
       searchRadius: searchRadius ?? this.searchRadius,
       gridColumns: gridColumns ?? this.gridColumns,
       imageSize: imageSize ?? this.imageSize,
+      productSortDefault: productSortDefault ?? this.productSortDefault,
       showUnitPrice: showUnitPrice ?? this.showUnitPrice,
       priceComparison: priceComparison ?? this.priceComparison,
       syncFavorites: syncFavorites ?? this.syncFavorites,
@@ -232,6 +258,7 @@ class CatalogSettings {
         'searchRadius': searchRadius,
         'gridColumns': gridColumns,
         'imageSize': imageSize.name,
+        'productSortDefault': productSortDefault.name,
         'showUnitPrice': showUnitPrice,
         'priceComparison': priceComparison,
         'syncFavorites': syncFavorites,
@@ -263,7 +290,7 @@ class CatalogSettings {
       viewMode: _enum(
         j['viewMode'],
         CatalogViewMode.values,
-        CatalogViewMode.grid,
+        CatalogViewMode.list,
       ),
       sortDefault: _enum(
         j['sortDefault'],
@@ -291,6 +318,11 @@ class CatalogSettings {
         j['imageSize'],
         CatalogImageSize.values,
         CatalogImageSize.medium,
+      ),
+      productSortDefault: _enum(
+        j['productSortDefault'],
+        ProductSort.values,
+        ProductSort.byOrder,
       ),
       showUnitPrice: b('showUnitPrice'),
       priceComparison: b('priceComparison'),
@@ -336,11 +368,21 @@ T _enum<T extends Enum>(Object? raw, List<T> values, T fallback) {
 }
 
 class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
-  CatalogSettingsNotifier() : super(CatalogSettings.defaults) {
+  CatalogSettingsNotifier([this._repo]) : super(CatalogSettings.defaults) {
     unawaited(_load());
   }
 
+  /// Server store (`catalogSettings/{uid}`) when USER_DATA_SERVER is on for a real
+  /// signed-in user; null ⇒ the SharedPreferences path.
+  final CatalogSettingsRepository? _repo;
+
   Future<void> _load() async {
+    final repo = _repo;
+    if (repo != null) {
+      final s = await repo.load(repo.currentUid);
+      if (s != null) state = s;
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
@@ -351,6 +393,13 @@ class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
   }
 
   Future<void> _persist() async {
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, state);
+      } on Object catch (_) {/* best-effort */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
@@ -364,6 +413,13 @@ class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
 
   Future<void> reset() async {
     state = CatalogSettings.defaults;
+    final repo = _repo;
+    if (repo != null) {
+      try {
+        await repo.save(repo.currentUid, CatalogSettings.defaults);
+      } on Object catch (_) {/* ignore */}
+      return;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kStorageKey);
@@ -373,5 +429,120 @@ class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
 
 final catalogSettingsProvider =
     StateNotifierProvider<CatalogSettingsNotifier, CatalogSettings>(
-  (_) => CatalogSettingsNotifier(),
+  (ref) => CatalogSettingsNotifier(ref.watch(catalogSettingsRepositoryProvider)),
 );
+
+/// Live, in-session product sort for the catalog list. SEEDED (one-shot, via
+/// `ref.read`) from the persisted [CatalogSettings.productSortDefault] so the
+/// catalog opens in the user's chosen default ordering; a manual ↕️ מיון pick
+/// then overrides it for the session without being clobbered by a settings
+/// reload. (Settings load before the catalog is reachable in practice, so the
+/// read returns the persisted default.) The catalog screen + settings picker
+/// both drive this provider.
+final catalogProductSortProvider = StateProvider<ProductSort>(
+  (ref) => ref.read(catalogSettingsProvider).productSortDefault,
+);
+
+// ─── price / dimension display helpers (pure — applied by the consuming UI) ──
+//
+// These are the single source of truth for how the price & dimension settings
+// in the קטלוג › מחירים ומטבע / יחידות מידה sections actually affect rendered
+// text. The settings screen binds the controls; the catalog/product-card/sheet
+// call these so the toggle is honest (it really changes what the user sees).
+
+/// Israel statutory VAT rate (18% since 2025-01-01). [priceWithVat] multiplies
+/// by `1 + this`. SINGLE SOURCE OF TRUTH — the cart charge (`cartVat`) and the
+/// manager's displayed rate derive from this, so the browse price and the
+/// checkout charge can never disagree (was 0.17 here while the cart charged 18%).
+const double kVatRate = 0.18;
+
+/// Apply VAT to a base (pre-VAT) price when [showVat] is on. Pure rounding to
+/// the nearest shekel so the displayed integer matches what the card renders.
+/// Returns the base unchanged when [showVat] is false.
+int priceWithVat(int base, {required bool showVat}) =>
+    showVat ? (base * (1 + kVatRate)).round() : base;
+
+/// Display symbol for the chosen catalog currency. This is the *local display*
+/// symbol only — NO FX conversion is applied to the amount (live rates need an
+/// external service; faking a conversion would mislead). The selection is
+/// persisted and the symbol is shown next to the (unconverted) amount.
+String currencySymbol(CatalogCurrency c) => switch (c) {
+      CatalogCurrency.ils => '₪',
+      CatalogCurrency.usd => r'$',
+      CatalogCurrency.eur => '€',
+    };
+
+/// Format a base (pre-VAT, ILS) price for display: applies [CatalogSettings.showVat]
+/// and prefixes the chosen [CatalogSettings.currency] symbol. [prefix] is kept
+/// (e.g. '~' for an estimated price) and sits before the symbol.
+/// Example: base 100, showVat true, ils → '₪117'.
+String formatCatalogPrice(
+  int base,
+  CatalogSettings s, {
+  String prefix = '',
+}) {
+  final amount = priceWithVat(base, showVat: s.showVat);
+  // Grouped via the single-source primitive — catalog cards now match the cart
+  // ("₪4,200", not "₪4200"). Symbol stays per-currency; sign N/A (prices ≥0).
+  return '$prefix${currencySymbol(s.currency)}${groupThousands(amount)}';
+}
+
+/// mm → inch (1″ = 25.4 mm). Returns null when [raw] has no parseable number.
+double? _mmToInch(String raw) {
+  final m = RegExp(r'-?\d+(?:\.\d+)?').firstMatch(raw);
+  if (m == null) return null;
+  return double.parse(m.group(0)!) / 25.4;
+}
+
+/// Render a decimal inch value per [CatalogDecimalFormat]:
+///  • decimal  → '1.57"'   (2 dp, trailing zeros trimmed)
+///  • fraction → '1 9/16"' (nearest 1/16, mixed number)
+String _formatInch(double inch, CatalogDecimalFormat fmt) {
+  if (fmt == CatalogDecimalFormat.decimal) {
+    var t = inch.toStringAsFixed(2);
+    if (t.contains('.')) {
+      t = t.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return '$t"';
+  }
+  // Nearest 1/16″ as a mixed fraction.
+  final sixteenths = (inch * 16).round();
+  final whole = sixteenths ~/ 16;
+  var num = sixteenths % 16;
+  var den = 16;
+  while (num != 0 && num % 2 == 0) {
+    num ~/= 2;
+    den ~/= 2;
+  }
+  if (num == 0) return '$whole"';
+  if (whole == 0) return '$num/$den"';
+  return '$whole $num/$den"';
+}
+
+/// Whether a dims-table key carries a millimetre measurement we can convert to
+/// imperial (matches `mm`, `מ"מ`, diameter/length keys). Keys without a numeric
+/// mm value (materials, pressure ratings, free text) are left untouched.
+bool _isMmDimKey(String key) {
+  final k = key.toLowerCase();
+  return k == 'mm' ||
+      key.contains('מ"מ') ||
+      key.contains('מ”מ') ||
+      k.contains('mm');
+}
+
+/// Format ONE dims-table value for display, honouring the metric/imperial unit
+/// system and the decimal/fraction format. Metric is passed through verbatim
+/// (the catalog data is already metric). Imperial converts a mm value to inches
+/// in the chosen format; non-mm values (and anything unparseable) pass through.
+/// [unitHint] is the dims key (e.g. 'mm', 'אורך') used to decide convertibility.
+String formatDimValue(
+  String unitHint,
+  String value,
+  CatalogSettings s,
+) {
+  if (s.unit == CatalogUnit.metric) return value;
+  if (!_isMmDimKey(unitHint)) return value;
+  final inch = _mmToInch(value);
+  if (inch == null) return value;
+  return _formatInch(inch, s.decimalFormat);
+}

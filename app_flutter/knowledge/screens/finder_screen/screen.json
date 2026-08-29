@@ -1,0 +1,130 @@
+{
+  "screen": "finder_screen",
+  "source": "finder_screen.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "FinderScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "לא נמצאו מוצרים",
+            "registryId": "finder_screen.no_results",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "💡"
+          },
+          {
+            "kind": "cfgText",
+            "text": "צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע",
+            "registryId": "finder_screen.chip_tip",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [
+          "💡"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSystemFilterProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "finderChipTipDismissedProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "finderChipTipDismissedProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(finderChipTipDismissedProvider.notifier).state = true",
+            "effect": "write → finderChipTipDismissedProvider"
+          }
+        ]
+      },
+      "floor": [
+        "angleTokensIn",
+        "catalogRepo",
+        "chipLabelDirection",
+        "filterBySystem",
+        "identical",
+        "letterSizeTokens",
+        "narrowAxis",
+        "productHasChip",
+        "setState",
+        "sort",
+        "wallTokens"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "constructible": true,
+        "props": [],
+        "untangle": [
+          "onFinderChipTipDismissed(…) callback instead of direct finderChipTipDismissedProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_ChipScroll",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "constructible": false,
+        "props": [
+          "children"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 2,
+    "total": 2,
+    "summary": "2/2",
+    "entries": [
+      {
+        "id": "finder_screen.no_results",
+        "ok": true,
+        "atom": "FinderScreen"
+      },
+      {
+        "id": "finder_screen.chip_tip",
+        "ok": true,
+        "atom": "FinderScreen"
+      }
+    ]
+  }
+}

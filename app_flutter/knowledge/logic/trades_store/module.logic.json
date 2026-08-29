@@ -1,0 +1,1835 @@
+{
+  "module": "trades_store",
+  "source": "lib/state/trades_store.dart",
+  "atomCount": 27,
+  "atoms": [
+    {
+      "fn": "_list",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? v, T Function(Map<String, dynamic>) from) -> List<T>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "v is List ? v.whereType<Map<dynamic, dynamic>>().map((e) => from(e.cast<String, dynamic>(…"
+          }
+        ]
+      },
+      "floor": [
+        "cast",
+        "from",
+        "map",
+        "toList",
+        "whereType"
+      ],
+      "contract": {
+        "input": "(Object? v, T Function(Map<String, dynamic>) from)",
+        "output": "List<T>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_schemaVer",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? v, int fallback) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "TradesStoreNotifier.migrate"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if v is num → return v.toInt()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v is String"
+          },
+          {
+            "kind": "return",
+            "detail": "fallback"
+          }
+        ]
+      },
+      "floor": [
+        "toInt",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? v, int fallback)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if v is num → return v.toInt()"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesDoc.isEmpty",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "accessories"
+          },
+          {
+            "kind": "field",
+            "name": "attributes"
+          },
+          {
+            "kind": "field",
+            "name": "categories"
+          },
+          {
+            "kind": "field",
+            "name": "compatRules"
+          },
+          {
+            "kind": "field",
+            "name": "completionRules"
+          },
+          {
+            "kind": "field",
+            "name": "connectorTypes"
+          },
+          {
+            "kind": "field",
+            "name": "fixtures"
+          },
+          {
+            "kind": "field",
+            "name": "productSpecs"
+          },
+          {
+            "kind": "field",
+            "name": "products"
+          },
+          {
+            "kind": "field",
+            "name": "systems"
+          },
+          {
+            "kind": "field",
+            "name": "trades"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "trades.isEmpty && categories.isEmpty && attributes.isEmpty && products.isEmpty && accesso…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesDoc.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({List<Trade>? trades, List<TradeCategory>? categories, List<AttributeDef>? attributes, List<TradeProduct>? products, List<AccessoryRule>? accessories, List<SmartFixture>? fixtures, List<ConnectorType>? connectorTypes, List<SystemDef>? systems, List<ProductConnectorSpec>? productSpecs, List<CompatibilityRule>? compatRules, List<CompletionRule>? completionRules, int? schemaVersion}) -> TradesDoc",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TradesDoc(trades: trades ?? this.trades, categories: categories ?? this.categories, attri…"
+          }
+        ]
+      },
+      "floor": [
+        "TradesDoc"
+      ],
+      "contract": {
+        "input": "({List<Trade>? trades, List<TradeCategory>? categories, List<AttributeDef>? attributes, List<TradeProduct>? products, List<AccessoryRule>? accessories, List<SmartFixture>? fixtures, List<ConnectorType>? connectorTypes, List<SystemDef>? systems, List<ProductConnectorSpec>? productSpecs, List<CompatibilityRule>? compatRules, List<CompletionRule>? completionRules, int? schemaVersion})",
+        "output": "TradesDoc",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesDoc.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "accessories"
+          },
+          {
+            "kind": "field",
+            "name": "attributes"
+          },
+          {
+            "kind": "field",
+            "name": "categories"
+          },
+          {
+            "kind": "field",
+            "name": "compatRules"
+          },
+          {
+            "kind": "field",
+            "name": "completionRules"
+          },
+          {
+            "kind": "field",
+            "name": "connectorTypes"
+          },
+          {
+            "kind": "field",
+            "name": "fixtures"
+          },
+          {
+            "kind": "field",
+            "name": "productSpecs"
+          },
+          {
+            "kind": "field",
+            "name": "products"
+          },
+          {
+            "kind": "field",
+            "name": "schemaVersion"
+          },
+          {
+            "kind": "field",
+            "name": "systems"
+          },
+          {
+            "kind": "field",
+            "name": "trades"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'trades' : trades.map((e) => e.toJson()).toList(), 'categories' : categories.map((e) => …"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesDoc.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "accessories"
+          },
+          {
+            "kind": "field",
+            "name": "attributes"
+          },
+          {
+            "kind": "field",
+            "name": "categories"
+          },
+          {
+            "kind": "field",
+            "name": "compatRules"
+          },
+          {
+            "kind": "field",
+            "name": "completionRules"
+          },
+          {
+            "kind": "field",
+            "name": "connectorTypes"
+          },
+          {
+            "kind": "field",
+            "name": "fixtures"
+          },
+          {
+            "kind": "field",
+            "name": "productSpecs"
+          },
+          {
+            "kind": "field",
+            "name": "products"
+          },
+          {
+            "kind": "field",
+            "name": "schemaVersion"
+          },
+          {
+            "kind": "field",
+            "name": "systems"
+          },
+          {
+            "kind": "field",
+            "name": "trades"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is TradesDoc && listEquals(other.trades, trades) && listEquals(other.categories, ca…"
+          }
+        ]
+      },
+      "floor": [
+        "listEquals"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesDoc.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "accessories"
+          },
+          {
+            "kind": "field",
+            "name": "attributes"
+          },
+          {
+            "kind": "field",
+            "name": "categories"
+          },
+          {
+            "kind": "field",
+            "name": "compatRules"
+          },
+          {
+            "kind": "field",
+            "name": "completionRules"
+          },
+          {
+            "kind": "field",
+            "name": "connectorTypes"
+          },
+          {
+            "kind": "field",
+            "name": "fixtures"
+          },
+          {
+            "kind": "field",
+            "name": "productSpecs"
+          },
+          {
+            "kind": "field",
+            "name": "products"
+          },
+          {
+            "kind": "field",
+            "name": "schemaVersion"
+          },
+          {
+            "kind": "field",
+            "name": "systems"
+          },
+          {
+            "kind": "field",
+            "name": "trades"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(Object.hashAll(trades), Object.hashAll(categories), Object.hashAll(attributes…"
+          }
+        ]
+      },
+      "floor": [
+        "hash",
+        "hashAll"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.migrate",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Map<String, dynamic> json) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_schemaVer",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "TradesStoreNotifier._load"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "j = json"
+          },
+          {
+            "kind": "compute",
+            "detail": "from = _schemaVer(j['schemaVersion'], 0)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if from < 1"
+          },
+          {
+            "kind": "return",
+            "detail": "j"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Map<String, dynamic> json)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "migrate",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "fromJson",
+        "getInstance",
+        "getString",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "TradesStoreNotifier.clear",
+          "TradesStoreNotifier.removeAccessory",
+          "TradesStoreNotifier.removeAttribute",
+          "TradesStoreNotifier.removeCategory",
+          "TradesStoreNotifier.removeCompatRule",
+          "TradesStoreNotifier.removeConnectorType",
+          "TradesStoreNotifier.removeProduct",
+          "TradesStoreNotifier.removeTrade",
+          "TradesStoreNotifier.replaceAll",
+          "TradesStoreNotifier.upsertAccessory",
+          "TradesStoreNotifier.upsertAttribute",
+          "TradesStoreNotifier.upsertCategory",
+          "TradesStoreNotifier.upsertCompatRule",
+          "TradesStoreNotifier.upsertConnectorType",
+          "TradesStoreNotifier.upsertProduct",
+          "TradesStoreNotifier.upsertTrade"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.upsertTrade",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Trade t) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.trades.indexWhere((x) => x.id == t.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i >= 0 && state.trades[i] == t → return (void)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...state.trades]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i >= 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(trades: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(Trade t)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i >= 0 && state.trades[i] == t → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.removeTrade",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.trades.any((x) => x.id == id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(trades: state.trades.where((x) => x.id != id).toList())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.trades.any((x) => x.id == id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.upsertCategory",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(TradeCategory c) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.categories.indexWhere((x) => x.id == c.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i >= 0 && state.categories[i] == c → return (void)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...state.categories]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i >= 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(categories: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(TradeCategory c)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i >= 0 && state.categories[i] == c → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.removeCategory",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.categories.any((x) => x.id == id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(categories: state.categories.where((x) => x.id != id).toList())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.categories.any((x) => x.id == id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.upsertAttribute",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(AttributeDef a) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.attributes.indexWhere((x) => x.id == a.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i >= 0 && state.attributes[i] == a → return (void)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...state.attributes]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i >= 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(attributes: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(AttributeDef a)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i >= 0 && state.attributes[i] == a → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.removeAttribute",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.attributes.any((x) => x.id == id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(attributes: state.attributes.where((x) => x.id != id).toList())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.attributes.any((x) => x.id == id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.upsertProduct",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(TradeProduct p) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.products.indexWhere((x) => x.id == p.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i >= 0 && state.products[i] == p → return (void)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...state.products]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i >= 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(products: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(TradeProduct p)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i >= 0 && state.products[i] == p → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.removeProduct",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.products.any((x) => x.id == id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(products: state.products.where((x) => x.id != id).toList())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.products.any((x) => x.id == id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.upsertAccessory",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(AccessoryRule a) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.accessories.indexWhere((x) => x.id == a.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i >= 0 && state.accessories[i] == a → return (void)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...state.accessories]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i >= 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(accessories: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(AccessoryRule a)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i >= 0 && state.accessories[i] == a → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.removeAccessory",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.accessories.any((x) => x.id == id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(accessories: state.accessories.where((x) => x.id != id).toList())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.accessories.any((x) => x.id == id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.upsertConnectorType",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ConnectorType t) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.connectorTypes.indexWhere((x) => x.id == t.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i >= 0 && state.connectorTypes[i] == t → return (void)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...state.connectorTypes]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i >= 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(connectorTypes: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(ConnectorType t)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i >= 0 && state.connectorTypes[i] == t → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.removeConnectorType",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.connectorTypes.any((x) => x.id == id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(connectorTypes: state.connectorTypes.where((x) => x.id != id).toLi…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.connectorTypes.any((x) => x.id == id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.upsertCompatRule",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(CompatibilityRule r) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.compatRules.indexWhere((x) => x.id == r.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i >= 0 && state.compatRules[i] == r → return (void)"
+          },
+          {
+            "kind": "init",
+            "detail": "next = [...state.compatRules]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if i >= 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(compatRules: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(CompatibilityRule r)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if i >= 0 && state.compatRules[i] == r → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.removeCompatRule",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !state.compatRules.any((x) => x.id == id) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(compatRules: state.compatRules.where((x) => x.id != id).toList())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "any",
+        "copyWith",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !state.compatRules.any((x) => x.id == id) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.replaceAll",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(TradesDoc doc) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if doc == state → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = doc"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(TradesDoc doc)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if doc == state → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TradesStoreNotifier.clear",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTradesKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = TradesDoc.empty"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ActiveTradeNotifier.set",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state = id"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

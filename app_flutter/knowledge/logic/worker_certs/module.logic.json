@@ -1,0 +1,539 @@
+{
+  "module": "worker_certs",
+  "source": "lib/state/worker_certs.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "WorkerCert.statusAt",
+      "kind": "method",
+      "object": {
+        "signature": "(DateTime now) -> CertExpiryStatus",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "expiry"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "today = DateTime(now.year, now.month, now.day)"
+          },
+          {
+            "kind": "compute",
+            "detail": "exp = DateTime(expiry.year, expiry.month, expiry.day)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if exp.isBefore(today) → return CertExpiryStatus.expired"
+          },
+          {
+            "kind": "precond",
+            "detail": "if exp.difference(today).inDays <= 31 → return CertExpiryStatus.expiringSoon"
+          },
+          {
+            "kind": "return",
+            "detail": "CertExpiryStatus.valid"
+          }
+        ]
+      },
+      "floor": [
+        "DateTime",
+        "difference",
+        "isBefore"
+      ],
+      "contract": {
+        "input": "(DateTime now)",
+        "output": "CertExpiryStatus",
+        "purity": "pure",
+        "precond": [
+          "if exp.isBefore(today) → return CertExpiryStatus.expired",
+          "if exp.difference(today).inDays <= 31 → return CertExpiryStatus.expiringSoon"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerCert.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "addedTs"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "expiry"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "issuer"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "photo"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'username' : username, 'name' : name, 'issuer' : issuer, 'expiry' : expiry.to…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerCert.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> WorkerCert?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "addedTs"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "issuer"
+          },
+          {
+            "kind": "field",
+            "name": "photo"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "username = raw['username']"
+          },
+          {
+            "kind": "compute",
+            "detail": "name = raw['name']"
+          },
+          {
+            "kind": "compute",
+            "detail": "expiry = DateTime.tryParse('${raw['expiry']}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "added = DateTime.tryParse('${raw['addedTs']}')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! String || username is! String || name is! String || expiry == null || added == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "WorkerCert(id: id, username: username, name: name, issuer: raw['issuer'] is String ? raw[…"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerCert",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "WorkerCert?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if id is! String || username is! String || name is! String || expiry == null || added == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · id is! String || username is! String || name is! String || expiry == null || added == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerCertsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
+            "name": "storageKey"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(storageKey)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw == null || _userTouched → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "loadMine",
+        "tryFromJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted → return (void)",
+          "if raw == null || _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerCertsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<bool>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "repo"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          },
+          {
+            "kind": "field",
+            "name": "storageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "WorkerCertsNotifier.add",
+          "WorkerCertsNotifier.remove"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = repo"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r != null"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "saveMine",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<bool>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerCertsNotifier.add",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String username, required String name, required String issuer, required DateTime expiry, String? photo, String employerId = ''}) -> Future<WorkerCert?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_seq"
+          },
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "cert = WorkerCert(id: 'cert-${DateTime.now().microsecondsSinceEpoch}-${_seq++}', username: usern…"
+          },
+          {
+            "kind": "compute",
+            "detail": "before = state"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, cert]"
+          },
+          {
+            "kind": "compute",
+            "detail": "ok = await _persist()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !ok"
+          },
+          {
+            "kind": "return",
+            "detail": "cert"
+          }
+        ]
+      },
+      "floor": [
+        "WorkerCert",
+        "now",
+        "trim"
+      ],
+      "contract": {
+        "input": "({required String username, required String name, required String issuer, required DateTime expiry, String? photo, String employerId = ''})",
+        "output": "Future<WorkerCert?>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerCertsNotifier.remove",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "repo",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final c in state) if (c.id != id) c]"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

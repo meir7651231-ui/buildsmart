@@ -75,6 +75,14 @@ const List<Brand> kBrands = [
     tagline: 'מערכות צנרת PPR — מים ומיזוג אוויר',
     productCount: 779,
   ),
+  Brand(
+    id: 'huliot',
+    name: 'חוליות',
+    emoji: '🟢',
+    color: 0xFF14764A,
+    tagline: 'SmartLock — מערכת דלוחין PP 32-63 מ"מ',
+    productCount: 170,
+  ),
 ];
 
 Brand? brandById(String id) {

@@ -1,0 +1,71 @@
+{
+  "module": "customers_local",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/customers_local.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "LocalCustomersRepository",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "_ref",
+            "type": "Ref",
+            "required": true
+          },
+          {
+            "name": "_serverCallables",
+            "type": "bool?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_functions",
+            "type": "OrderFunctionsGateway?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_useCallable",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_ref",
+            "ref": "Ref",
+            "kind": "embed"
+          },
+          {
+            "field": "_functions",
+            "ref": "OrderFunctionsGateway",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "all",
+          "aggregate",
+          "byName",
+          "creditLimit",
+          "computeCredit",
+          "_localCredit"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_ref"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,792 @@
+{
+  "module": "material_requests_engine",
+  "source": "lib/state/material_requests_engine.dart",
+  "atomCount": 11,
+  "atoms": [
+    {
+      "fn": "MaterialRequest.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? employerId, String? workerUid, String? username, String? workerName, List<String>? items, String? note, int? createdTs, String? status}) -> MaterialRequest",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "MaterialRequest(id: id, employerId: employerId ?? this.employerId, workerUid: workerUid ?…"
+          }
+        ]
+      },
+      "floor": [
+        "MaterialRequest"
+      ],
+      "contract": {
+        "input": "({String? employerId, String? workerUid, String? username, String? workerName, List<String>? items, String? note, int? createdTs, String? status})",
+        "output": "MaterialRequest",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequest.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "createdTs"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "items"
+          },
+          {
+            "kind": "field",
+            "name": "note"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          },
+          {
+            "kind": "field",
+            "name": "workerName"
+          },
+          {
+            "kind": "field",
+            "name": "workerUid"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'employerId' : employerId, 'workerUid' : workerUid, 'username' : username, 'w…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequest.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> MaterialRequest?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMatReqRequested"
+          },
+          {
+            "kind": "const",
+            "name": "kMatReqStatuses"
+          },
+          {
+            "kind": "field",
+            "name": "note"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "employerId = raw['employerId']"
+          },
+          {
+            "kind": "compute",
+            "detail": "workerUid = raw['workerUid']"
+          },
+          {
+            "kind": "compute",
+            "detail": "workerName = raw['workerName']"
+          },
+          {
+            "kind": "compute",
+            "detail": "createdTs = raw['createdTs']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! String || employerId is! String || workerUid is! String || workerName is! String |… → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "rawItems = raw['items']"
+          },
+          {
+            "kind": "compute",
+            "detail": "items = rawItems is List ? [for (final e in rawItems) if (e is String) e] : const <String>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "status = raw['status']"
+          },
+          {
+            "kind": "return",
+            "detail": "MaterialRequest(id: id, employerId: employerId, workerUid: workerUid, username: raw['user…"
+          }
+        ]
+      },
+      "floor": [
+        "MaterialRequest",
+        "contains"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "MaterialRequest?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if id is! String || employerId is! String || workerUid is! String || workerName is! String |… → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · id is! String || employerId is! String || workerUid is! String || workerName is! String |… · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequestsNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMaterialRequestsKey"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(kMaterialRequestsKey)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw == null || _userTouched → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "tryFromJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted → return (void)",
+          "if raw == null || _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequestsNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMaterialRequestsKey"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "MaterialRequestsNotifier.setStatus",
+          "MaterialRequestsNotifier.submit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequestsNotifier.submit",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String employerId, required String workerUid, required String username, required String workerName, required List<String> items, String note = ''}) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMatReqRequested"
+          },
+          {
+            "kind": "const",
+            "name": "kMaterialRequestsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "_seq"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "remote = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if remote != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "_seq++"
+          },
+          {
+            "kind": "init",
+            "detail": "cleaned = [for (final raw in items) if (raw.trim().isNotEmpty) raw.trim()]"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = 'mat-${DateTime.now().microsecondsSinceEpoch}-$_seq'"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = MaterialRequest(id: id, employerId: employerId, workerUid: workerUid, username: username,…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, r]"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [
+        "MaterialRequest",
+        "now",
+        "submit",
+        "trim"
+      ],
+      "contract": {
+        "input": "({required String employerId, required String workerUid, required String username, required String workerName, required List<String> items, String note = ''})",
+        "output": "String",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequestsNotifier.setStatus",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, String status) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMatReqDeclined",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kMatReqStatuses"
+          },
+          {
+            "kind": "const",
+            "name": "kMatReqSupplied",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kMaterialRequestsKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_isTerminal",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !kMatReqStatuses.contains(status) → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "remote = _remote"
+          },
+          {
+            "kind": "branch",
+            "detail": "if remote != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final r in state) if (r.id == id && !_isTerminal(r.status)) r.copyWith(stat…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "copyWith",
+        "setStatus"
+      ],
+      "contract": {
+        "input": "(String id, String status)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !kMatReqStatuses.contains(status) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequestsNotifier._isTerminal",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String status) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kMatReqDeclined"
+          },
+          {
+            "kind": "const",
+            "name": "kMatReqSupplied"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "MaterialRequestsNotifier.setStatus"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "status == kMatReqSupplied || status == kMatReqDeclined"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String status)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequestsNotifier.bindRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(FirebaseMaterialRequestsRepository repo) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "of",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "field",
+            "name": "_userTouched",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_refreshFromRemote",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if identical(_remote, repo) → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_remote?.removeListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_remote = repo"
+          },
+          {
+            "kind": "effect",
+            "detail": "repo.addListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_refreshFromRemote()"
+          }
+        ]
+      },
+      "floor": [
+        "addListener",
+        "identical",
+        "removeListener"
+      ],
+      "contract": {
+        "input": "(FirebaseMaterialRequestsRepository repo)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if identical(_remote, repo) → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequestsNotifier._refreshFromRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          },
+          {
+            "kind": "global",
+            "name": "of"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "MaterialRequestsNotifier.bindRemote"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = _remote"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r == null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = List<MaterialRequest>.of(r.all())"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "all"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if r == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "MaterialRequestsNotifier.dispose",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_remote?.removeListener(_refreshFromRemote)"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "dispose",
+        "removeListener"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

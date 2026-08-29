@@ -1,0 +1,137 @@
+{
+  "module": "customer_import",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/customer_import.dart",
+  "entityCount": 3,
+  "entities": [
+    {
+      "entity": "CustomerImportRowError",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "row",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "messageHe",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "row",
+          "messageHe"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "CustomerImportReport",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "valid",
+            "type": "List<SavedCustomer>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "errors",
+            "type": "List<CustomerImportRowError>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "canCommit",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "valid",
+            "ref": "SavedCustomer",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "errors",
+            "ref": "CustomerImportRowError",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "valid",
+          "errors"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "_CustCol",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "key",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "he",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "match",
+            "type": "Set<String>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "key",
+          "he",
+          "match"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

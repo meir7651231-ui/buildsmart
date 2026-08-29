@@ -1,0 +1,2548 @@
+{
+  "module": "config_store",
+  "source": "lib/state/studio/config_store.dart",
+  "atomCount": 45,
+  "atoms": [
+    {
+      "fn": "cfgOpError",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOp op, {Set<String> criticalIds = const {}, Set<String> allowedKinds = kCfgAllowedActionKinds}) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCfgMaxTextLen"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_hasBidiControl",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ConfigStore.applyOps"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch op"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(ConfigOp op, {Set<String> criticalIds = const {}, Set<String> allowedKinds = kCfgAllowedActionKinds})",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_hasBidiControl",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "cfgOpError"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "s.runes.any((r) => r == 0x200E || r == 0x200F || (r >= 0x202A && r <= 0x202E) || (r >= 0x…"
+          }
+        ]
+      },
+      "floor": [
+        "any"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_decodeJsonMap",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "d = jsonDecode(raw)"
+          },
+          {
+            "kind": "return",
+            "detail": "d is Map ? d.map((k, v) => MapEntry(k.toString(), v)) : const {}"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "jsonDecode",
+        "map",
+        "toString"
+      ],
+      "contract": {
+        "input": "(String raw)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_withNode",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigLayer d, String id, CfgNode next, String? persona) -> ConfigLayer",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConfigStore._sanitizeCritical",
+          "ConfigStore.applyOps",
+          "ConfigStore.editDraft",
+          "ConfigStore.resetDraftNode"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if persona == null"
+          },
+          {
+            "kind": "init",
+            "detail": "p = {...d.persona}"
+          },
+          {
+            "kind": "init",
+            "detail": "inner = {...(p[persona] ?? const {})}"
+          },
+          {
+            "kind": "branch",
+            "detail": "if next.isEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if inner.isEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "d.copyWith(persona: p)"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "remove"
+      ],
+      "contract": {
+        "input": "(ConfigLayer d, String id, CfgNode next, String? persona)",
+        "output": "ConfigLayer",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_promote",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigLayer pub, ConfigLayer draft) -> ConfigLayer",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_overlayNode",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ConfigStore.publish"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "g = {...pub.global}"
+          },
+          {
+            "kind": "effect",
+            "detail": "draft.global.forEach((id, dn) {final merged = _overlayNode(g[id], dn); if (merged.isEmpty…"
+          },
+          {
+            "kind": "init",
+            "detail": "p = {for (final e in pub.persona.entries) e.key : {...e.value}}"
+          },
+          {
+            "kind": "effect",
+            "detail": "draft.persona.forEach((role, m) {final inner = {...(p[role] ?? const {})}; m.forEach((id,…"
+          },
+          {
+            "kind": "return",
+            "detail": "ConfigLayer(global: g, persona: p, structure: {...pub.structure, ...draft.structure})"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigLayer",
+        "forEach",
+        "remove"
+      ],
+      "contract": {
+        "input": "(ConfigLayer pub, ConfigLayer draft)",
+        "output": "ConfigLayer",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_overlayNode",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CfgNode? base, CfgNode over) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_promote"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if base == null → return over"
+          },
+          {
+            "kind": "return",
+            "detail": "CfgNode(text: over.text ?? base.text, emoji: over.emoji ?? base.emoji, hidden: over.hidde…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode",
+        "mergeAction",
+        "mergeStyle"
+      ],
+      "contract": {
+        "input": "(CfgNode? base, CfgNode over)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [
+          "if base == null → return over"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetText.apply",
+      "kind": "method",
+      "object": {
+        "signature": "(CfgNode n) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "text"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgNode(text: text, emoji: n.emoji, hidden: n.hidden, order: n.order, style: n.style, act…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "(CfgNode n)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetText.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "text"
+          },
+          {
+            "kind": "global",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'op' : 'setText', 'id' : id, if (text != null) 'text' : text}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetEmoji.apply",
+      "kind": "method",
+      "object": {
+        "signature": "(CfgNode n) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "emoji"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgNode(text: n.text, emoji: emoji, hidden: n.hidden, order: n.order, style: n.style, act…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "(CfgNode n)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetEmoji.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "emoji"
+          },
+          {
+            "kind": "global",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'op' : 'setEmoji', 'id' : id, if (emoji != null) 'emoji' : emoji}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetHidden.apply",
+      "kind": "method",
+      "object": {
+        "signature": "(CfgNode n) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "hidden"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgNode(text: n.text, emoji: n.emoji, hidden: hidden, order: n.order, style: n.style, act…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "(CfgNode n)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetHidden.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "hidden"
+          },
+          {
+            "kind": "global",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'op' : 'setHidden', 'id' : id, if (hidden != null) 'hidden' : hidden}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetOrder.apply",
+      "kind": "method",
+      "object": {
+        "signature": "(CfgNode n) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "order"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgNode(text: n.text, emoji: n.emoji, hidden: n.hidden, order: order, style: n.style, act…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "(CfgNode n)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetOrder.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "order"
+          },
+          {
+            "kind": "global",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'op' : 'setOrder', 'id' : id, if (order != null) 'order' : order}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetStyle.apply",
+      "kind": "method",
+      "object": {
+        "signature": "(CfgNode n) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "style"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgNode(text: n.text, emoji: n.emoji, hidden: n.hidden, order: n.order, style: style, act…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "(CfgNode n)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetStyle.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "style"
+          },
+          {
+            "kind": "global",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'op' : 'setStyle', 'id' : id, if (style != null) 'style' : style!.toJson()}"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetAction.apply",
+      "kind": "method",
+      "object": {
+        "signature": "(CfgNode n) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgNode(text: n.text, emoji: n.emoji, hidden: n.hidden, order: n.order, style: n.style, a…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "(CfgNode n)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SetAction.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          },
+          {
+            "kind": "global",
+            "name": "id"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'op' : 'setAction', 'id' : id, if (action != null) 'action' : action!.toJson()}"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigSink.watch",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Stream<ConfigDoc>?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Stream<ConfigDoc>?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "LocalPrefsSink.save",
+      "kind": "method",
+      "object": {
+        "signature": "(ConfigDoc doc) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.remove"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "remove",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "(ConfigDoc doc)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "LocalPrefsSink.load",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<ConfigDoc?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_key"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "compute",
+        "fromJson",
+        "getInstance",
+        "getString"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<ConfigDoc?>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "LocalPrefsSink.watch",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Stream<ConfigDoc>?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Stream<ConfigDoc>?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.canUndo",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_undo"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_undo.isNotEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.canRedo",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_redo"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_redo.isNotEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sink"
+          },
+          {
+            "kind": "field",
+            "name": "_undo"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "loaded = await _sink.load()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if loaded == null || !mounted || _undo.isNotEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.published.isEmpty ? loaded : loaded.copyWith(published: state.published)"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "load"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if loaded == null || !mounted || _undo.isNotEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._subscribeRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sink"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_remoteSub"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "stream = _sink.watch()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if stream == null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_remoteSub = stream.listen(_adoptRemote)"
+          }
+        ]
+      },
+      "floor": [
+        "listen",
+        "watch"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if stream == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._adoptRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ConfigDoc remote) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !mounted || state.published == remote.published → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(published: remote.published)"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(ConfigDoc remote)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted || state.published == remote.published → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.applyOps",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(List<ConfigOp> ops, {String? persona, Set<String> criticalIds = const {}}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCfgMaxTextLen",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "cfgOpError",
+            "module": true
+          },
+          {
+            "name": "_withNode",
+            "module": true
+          },
+          {
+            "name": "_nodeIn",
+            "module": true
+          },
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if ops.isEmpty → return 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "d = state.draft"
+          },
+          {
+            "kind": "compute",
+            "detail": "applied = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final op in ops"
+          },
+          {
+            "kind": "branch",
+            "detail": "if cfgOpError(op, criticalIds: criticalIds) != null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "before = d"
+          },
+          {
+            "kind": "effect",
+            "detail": "d = _withNode(d, op.id, op.apply(_nodeIn(d, op.id, persona)), persona)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if d != before"
+          },
+          {
+            "kind": "precond",
+            "detail": "if d == state.draft → return 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.add(state.draft)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(draft: d)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          },
+          {
+            "kind": "return",
+            "detail": "applied"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "apply",
+        "clear",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(List<ConfigOp> ops, {String? persona, Set<String> criticalIds = const {}})",
+        "output": "int",
+        "purity": "side-effecting",
+        "precond": [
+          "if ops.isEmpty → return 0",
+          "if d == state.draft → return 0"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.undo",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_undo"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _undo.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.add(state.draft)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(draft: _undo.removeLast())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "removeLast"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if _undo.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.redo",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_redo"
+          },
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _redo.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.add(state.draft)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(draft: _redo.removeLast())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "copyWith",
+        "removeLast"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if _redo.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.resetDraftNode",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, {String? persona}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_withNode",
+            "module": true
+          },
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "next = _withNode(state.draft, id, CfgNode.identity, persona)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if next == state.draft → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.add(state.draft)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(draft: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "clear",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(String id, {String? persona})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if next == state.draft → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.discardDraft",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state.draft.isEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.add(state.draft)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(draft: ConfigLayer.empty)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "clear",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.draft.isEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.resetAll",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({String byEmail = '', int nowMs = 0}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kHistoryCap"
+          },
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_nextVersionId",
+            "module": true
+          },
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state.published.isEmpty && state.draft.isEmpty → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "vid = _nextVersionId(nowMs)"
+          },
+          {
+            "kind": "compute",
+            "detail": "empty = ConfigLayer.empty"
+          },
+          {
+            "kind": "compute",
+            "detail": "version = ConfigVersion(id: vid, snapshot: empty, publishedAtMs: nowMs, note: 'איפוס לברירת-מחדל', …"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = ConfigDoc(published: empty, draft: ConfigLayer.empty, history: [version, ...state…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigDoc",
+        "ConfigVersion",
+        "clear",
+        "take",
+        "toList"
+      ],
+      "contract": {
+        "input": "({String byEmail = '', int nowMs = 0})",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.published.isEmpty && state.draft.isEmpty → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._nextVersionId",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int nowMs) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConfigStore.publish",
+          "ConfigStore.resetAll",
+          "ConfigStore.rollback"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "last = state.history.isEmpty ? 0 : state.history.first.id"
+          },
+          {
+            "kind": "return",
+            "detail": "nowMs > last ? nowMs : last + 1"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int nowMs)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.publish",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({String note = '', String byEmail = '', int nowMs = 0, Set<String> criticalIds = const {}}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kHistoryCap"
+          },
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_sanitizeCritical",
+            "module": true
+          },
+          {
+            "name": "_nextVersionId",
+            "module": true
+          },
+          {
+            "name": "_promote",
+            "module": true
+          },
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if state.draft.isEmpty → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "cleanDraft = _sanitizeCritical(state.draft, criticalIds)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cleanDraft.isEmpty → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "vid = _nextVersionId(nowMs)"
+          },
+          {
+            "kind": "compute",
+            "detail": "newPublished = _promote(state.published, cleanDraft)"
+          },
+          {
+            "kind": "compute",
+            "detail": "version = ConfigVersion(id: vid, snapshot: newPublished, publishedAtMs: nowMs, note: note, byEmail:…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = ConfigDoc(published: newPublished, draft: ConfigLayer.empty, history: [version, .…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigDoc",
+        "ConfigVersion",
+        "clear",
+        "take",
+        "toList"
+      ],
+      "contract": {
+        "input": "({String note = '', String byEmail = '', int nowMs = 0, Set<String> criticalIds = const {}})",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if state.draft.isEmpty → return false",
+          "if cleanDraft.isEmpty → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.criticalViolations",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(Set<String> criticalIds) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_violates",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <String>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final id in criticalIds"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _violates(state.draft.global[id])"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final layer in state.draft.persona.values"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "add"
+      ],
+      "contract": {
+        "input": "(Set<String> criticalIds)",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._violates",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(CfgNode? n) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConfigStore._sanitizeCritical",
+          "ConfigStore.criticalViolations"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "n != null && (n.hidden != null || n.action != null)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(CfgNode? n)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._sanitizeCritical",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ConfigLayer draft, Set<String> criticalIds) -> ConfigLayer",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_violates",
+            "module": true
+          },
+          {
+            "name": "_withNode",
+            "module": true
+          },
+          {
+            "name": "_stripGuard",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ConfigStore.publish"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if criticalIds.isEmpty → return draft"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = draft"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final id in criticalIds"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _violates(out.global[id])"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final persona in out.persona.keys.toList()"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "toList"
+      ],
+      "contract": {
+        "input": "(ConfigLayer draft, Set<String> criticalIds)",
+        "output": "ConfigLayer",
+        "purity": "pure",
+        "precond": [
+          "if criticalIds.isEmpty → return draft"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._stripGuard",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(CfgNode n) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConfigStore._sanitizeCritical"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "CfgNode(text: n.text, emoji: n.emoji, order: n.order, style: n.style, extra: n.extra)"
+          }
+        ]
+      },
+      "floor": [
+        "CfgNode"
+      ],
+      "contract": {
+        "input": "(CfgNode n)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.rollback",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int versionId, {String byEmail = '', int nowMs = 0}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kHistoryCap"
+          },
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_nextVersionId",
+            "module": true
+          },
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "v = state.history.where((x) => x.id == versionId).firstOrNull"
+          },
+          {
+            "kind": "precond",
+            "detail": "if v == null → return false"
+          },
+          {
+            "kind": "compute",
+            "detail": "vid = _nextVersionId(nowMs)"
+          },
+          {
+            "kind": "compute",
+            "detail": "version = ConfigVersion(id: vid, snapshot: v.snapshot, publishedAtMs: nowMs, note: 'שחזור גרסה ${v.…"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = ConfigDoc(published: v.snapshot, draft: ConfigLayer.empty, history: [version, ...…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigDoc",
+        "ConfigVersion",
+        "clear",
+        "take",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(int versionId, {String byEmail = '', int nowMs = 0})",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if v == null → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.editDraft",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String id, CfgNode Function(CfgNode) fn, {String? persona}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_nodeIn",
+            "module": true
+          },
+          {
+            "name": "_withNode",
+            "module": true
+          },
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "next = fn(_nodeIn(state.draft, id, persona))"
+          },
+          {
+            "kind": "compute",
+            "detail": "d = _withNode(state.draft, id, next, persona)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if d == state.draft → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.add(state.draft)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(draft: d)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "clear",
+        "copyWith",
+        "fn"
+      ],
+      "contract": {
+        "input": "(String id, CfgNode Function(CfgNode) fn, {String? persona})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if d == state.draft → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.setThemeDraft",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(CfgTheme theme) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sink",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "_redo"
+          },
+          {
+            "kind": "state",
+            "name": "_undo"
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_save",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "next = state.draft.copyWith(structure: {...state.draft.structure, 'theme' : theme.toJson()})"
+          },
+          {
+            "kind": "precond",
+            "detail": "if next == state.draft → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_undo.add(state.draft)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_redo.clear()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = state.copyWith(draft: next)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_save()"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "clear",
+        "copyWith",
+        "toJson"
+      ],
+      "contract": {
+        "input": "(CfgTheme theme)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if next == state.draft → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._nodeIn",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(ConfigLayer d, String id, String? persona) -> CfgNode",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConfigStore.applyOps",
+          "ConfigStore.editDraft"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "persona == null ? (d.global[id] ?? CfgNode.identity) : (d.persona[persona]?[id] ?? CfgNod…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ConfigLayer d, String id, String? persona)",
+        "output": "CfgNode",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore._save",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sink"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConfigStore.applyOps",
+          "ConfigStore.discardDraft",
+          "ConfigStore.editDraft",
+          "ConfigStore.publish",
+          "ConfigStore.redo",
+          "ConfigStore.resetAll",
+          "ConfigStore.resetDraftNode",
+          "ConfigStore.rollback",
+          "ConfigStore.setThemeDraft",
+          "ConfigStore.undo"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_sink.save(state)"
+          }
+        ]
+      },
+      "floor": [
+        "save"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConfigStore.dispose",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remoteSub"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_remoteSub?.cancel()"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.dispose()"
+          }
+        ]
+      },
+      "floor": [
+        "cancel",
+        "dispose"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

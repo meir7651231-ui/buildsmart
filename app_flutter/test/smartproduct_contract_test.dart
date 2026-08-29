@@ -2,6 +2,7 @@
 // The smart-tree card and the catalog must stay linked: every SmartBrand.sku is
 // a real catalog SKU. This is the foundation the unification (steps 1–4) builds
 // on — if a brand points at a missing SKU the merged card would 404.
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
@@ -62,6 +63,53 @@ void main() {
       }
     }
     expect(checked, greaterThan(200));
+  });
+
+  test('Huliot SmartLock drainage fixtures are wired into the smart-tree', () {
+    final huliotSkus = {for (final p in kHuliotCatalog) p.sku};
+    // The drainage cards (fixtures + piping) each carry ≥1 Huliot brand option.
+    for (final key in const [
+      'floorDrain',
+      'basinTrap',
+      'kitchenDrain',
+      'washingMachineDrain',
+      'pvcPipe',
+      'drainageElbow',
+      'drainageFittings',
+      'visibleTrap',
+      'roofCollector',
+      'floorCover',
+      'drainChannel',
+      'tools',
+      'smlSpareParts'
+    ]) {
+      final sp = kSmartProducts.firstWhere((s) => s.key == key);
+      final huliotBrands = sp.brands
+          .where((b) => b.sku != null && huliotSkus.contains(b.sku))
+          .length;
+      expect(huliotBrands, greaterThan(0),
+          reason: '$key carries no Huliot brand');
+    }
+    // Spot-check the specific reverse mappings (sku → card).
+    expect(smartProductForSku('70124599')?.key, 'floorDrain');
+    expect(smartProductForSku('61230060')?.key, 'basinTrap');
+    expect(smartProductForSku('61450060')?.key, 'kitchenDrain');
+    expect(smartProductForSku('61480100')?.key, 'washingMachineDrain');
+    expect(smartProductForSku('64032300')?.key, 'pvcPipe');
+    expect(smartProductForSku('70033960')?.key, 'drainageElbow');
+    expect(smartProductForSku('70633460')?.key, 'drainageFittings');
+    expect(smartProductForSku('62450060')?.key, 'visibleTrap');
+    expect(smartProductForSku('70140760')?.key, 'roofCollector');
+    expect(smartProductForSku('60200260')?.key, 'floorCover');
+    expect(smartProductForSku('60150331')?.key, 'drainChannel');
+    expect(smartProductForSku('79904070')?.key, 'tools');
+    expect(smartProductForSku('70703260')?.key, 'drainageFittings');
+    expect(smartProductForSku('67750440')?.key, 'smlSpareParts');
+    // Batch 5 (spare-parts card) completes coverage: ALL 170 Huliot SKUs map.
+    final mappedHuliot =
+        huliotSkus.where((s) => smartProductForSku(s) != null).length;
+    expect(mappedHuliot, greaterThanOrEqualTo(170),
+        reason: 'only $mappedHuliot Huliot SKUs mapped to a SmartProduct');
   });
 
   test('coverage report (informational)', () {

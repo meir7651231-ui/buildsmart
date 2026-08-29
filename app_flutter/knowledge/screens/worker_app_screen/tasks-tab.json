@@ -1,0 +1,325 @@
+{
+  "name": "_TasksTab",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📅 היומן שלי",
+        "registryId": "worker.section.journal",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker.action.fullMonth",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "חודש מלא ›",
+        "registryId": "worker.action.fullMonth",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_app_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✓ נרשמה נוכחות להיום",
+        "registryId": "worker_app_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "לא נרשמה נוכחות ביום זה",
+        "registryId": "worker_app_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_app_screen.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "דמו",
+        "registryId": "worker_app_screen.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker.action.checkEquipment",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🧰"
+      },
+      {
+        "kind": "cfgText",
+        "text": "בדוק ציוד נדרש",
+        "registryId": "worker.action.checkEquipment",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker.action.employerStock",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📦"
+      },
+      {
+        "kind": "cfgText",
+        "text": "מלאי הקבלן",
+        "registryId": "worker.action.employerStock",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker.action.addTask",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "➕"
+      },
+      {
+        "kind": "cfgText",
+        "text": "הוסף משימה",
+        "registryId": "worker.action.addTask",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker.action.gantt",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📊"
+      },
+      {
+        "kind": "cfgText",
+        "text": "גאנט משימות",
+        "registryId": "worker.action.gantt",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker.action.defects",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🔧"
+      },
+      {
+        "kind": "cfgText",
+        "text": "ליקויים",
+        "registryId": "worker.action.defects",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "➕ הצעת משימה לקבלן",
+        "registryId": "worker.section.proposeTitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "המשימה תישלח לקבלן לאישור",
+        "registryId": "worker.propose.subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "שם המשימה"
+      },
+      {
+        "kind": "text",
+        "text": "תיאור"
+      },
+      {
+        "kind": "text",
+        "text": "שלבי ביצוע — שלב בכל שורה"
+      },
+      {
+        "kind": "text",
+        "text": "משך משוער (ימים)"
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker.action.submit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📸 שלח לאישור",
+        "registryId": "worker.action.submit",
+        "registryOk": true
+      }
+    ],
+    "registered": 22,
+    "unregistered": [
+      "🧰",
+      "📦",
+      "➕",
+      "📊",
+      "🔧",
+      "שם המשימה",
+      "תיאור",
+      "שלבי ביצוע — שלב בכל שורה",
+      "משך משוער (ימים)"
+    ],
+    "summary": "registry 22 · mapped 22/22 · unregistered 9"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "workerAttendanceProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "WorkerAttendanceScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showEquipmentChecklistSheet",
+        "target": "showEquipmentChecklistSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showEmployerStockSheet",
+        "target": "showEmployerStockSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showTasksGanttSheet",
+        "target": "showTasksGanttSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showDefectsSheet",
+        "target": "showDefectsSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerAttendanceProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "action",
+        "via": "openNavSheet",
+        "target": "openNavSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "taskClockProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showWorkerTaskDetailSheet",
+        "target": "showWorkerTaskDetailSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showEquipmentChecklistSheet(context, ref, tasks: current)",
+        "effect": "open → showEquipmentChecklistSheet"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showEmployerStockSheet(context)",
+        "effect": "open → showEmployerStockSheet"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showTasksGanttSheet(context)",
+        "effect": "open → showTasksGanttSheet"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showDefectsSheet(context)",
+        "effect": "open → showDefectsSheet"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showWorkerTaskDetailSheet(context, taskId: task.id)",
+        "effect": "open → showWorkerTaskDetailSheet"
+      }
+    ]
+  },
+  "floor": [
+    "attendanceDateKey",
+    "bsOnAccent",
+    "buildDayStages",
+    "cfgRadius",
+    "currentGeoFix",
+    "hasDot",
+    "mapsQueryForDay",
+    "onSelect",
+    "setState",
+    "workerShortName"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "worker",
+      "username",
+      "demo",
+      "onSubmit"
+    ],
+    "untangle": []
+  }
+}

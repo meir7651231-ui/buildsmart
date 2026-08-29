@@ -1,0 +1,249 @@
+{
+  "module": "catalog_taxonomy",
+  "source": "../../../app_flutter/lib/features/catalog_config/catalog_taxonomy.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "fn": "familyGroupOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "typeKeyOf"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "groupOf(p)"
+          }
+        ]
+      },
+      "floor": [
+        "groupOf"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "typeWordOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTypeSynonyms"
+          },
+          {
+            "kind": "const",
+            "name": "kBrandPrefixBlocklist"
+          },
+          {
+            "kind": "const",
+            "name": "kCategoryFallbackWord"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "typeKeyOf"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "token = firstMeaningfulToken(p.nameHe, kBrandPrefixBlocklist)"
+          },
+          {
+            "kind": "compute",
+            "detail": "base = (token != null && token.isNotEmpty) ? token : (kCategoryFallbackWord[p.categoryHe] ?? p.c…"
+          },
+          {
+            "kind": "compute",
+            "detail": "canon = canonicalizeWord(base, _kTypeSynonyms)"
+          },
+          {
+            "kind": "return",
+            "detail": "canon.isEmpty ? p.categoryHe : canon"
+          }
+        ]
+      },
+      "floor": [
+        "canonicalizeWord",
+        "firstMeaningfulToken"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "typeKeyOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kTypeSynonyms",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kBrandPrefixBlocklist",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kCategoryFallbackWord",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "familyGroupOf",
+            "module": true
+          },
+          {
+            "name": "typeWordOf",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "typeGroupOf"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'${familyGroupOf(p)} ${typeWordOf(p)}'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "typeGroupOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p, List<LipskeyCatalogProduct> universe) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "typeKeyOf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "key = typeKeyOf(p)"
+          },
+          {
+            "kind": "return",
+            "detail": "[for (final m in universe) if (typeKeyOf(m) == key) m]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p, List<LipskeyCatalogProduct> universe)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "materialOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "m = materialOfEnriched(p)"
+          },
+          {
+            "kind": "return",
+            "detail": "m == null ? '' : canonicalMaterial(m)"
+          }
+        ]
+      },
+      "floor": [
+        "canonicalMaterial",
+        "materialOfEnriched"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

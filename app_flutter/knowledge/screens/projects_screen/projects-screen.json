@@ -1,0 +1,149 @@
+{
+  "name": "ProjectsScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🏗️ הפרויקטים שלי",
+        "registryId": "projects_screen.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "projects_screen.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ יציאה",
+        "registryId": "projects_screen.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "projects_screen.new_project",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "פרויקט חדש",
+        "registryId": "projects_screen.new_project",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🏗️"
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין פרויקטים עדיין",
+        "registryId": "projects_screen.empty_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "צרו פרויקט חדש כדי לנהל סל, תקציב ומשימות לכל אתר",
+        "registryId": "projects_screen.empty_sub",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "projects_screen.empty_cta",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "פרויקט חדש",
+        "registryId": "projects_screen.empty_cta",
+        "registryOk": true
+      }
+    ],
+    "registered": 9,
+    "unregistered": [
+      "🏗️"
+    ],
+    "summary": "registry 9 · mapped 9/9 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "projectsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "BudgetScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "TasksScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "SmartProjectScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "projectsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(BudgetScreen.route())",
+        "effect": "navigate → BudgetScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(TasksScreen.route())",
+        "effect": "navigate → TasksScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(SmartProjectScreen.route())",
+        "effect": "navigate → SmartProjectScreen"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "kbProjectsNodes"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "KbScreen = shared component → separate atom"
+    ]
+  }
+}

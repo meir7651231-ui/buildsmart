@@ -1,0 +1,37 @@
+{
+  "matched": 6,
+  "total": 6,
+  "summary": "6/6",
+  "entries": [
+    {
+      "id": "manager_copilot_screen.title",
+      "ok": true,
+      "atom": "ManagerCopilotScreen"
+    },
+    {
+      "id": "manager_copilot_screen.subtitle",
+      "ok": true,
+      "atom": "ManagerCopilotScreen"
+    },
+    {
+      "id": "manager_copilot_screen.welcome_headline",
+      "ok": true,
+      "atom": "_Welcome"
+    },
+    {
+      "id": "manager_copilot_screen.welcome_sub",
+      "ok": true,
+      "atom": "_Welcome"
+    },
+    {
+      "id": "manager_copilot_screen.morning_brief",
+      "ok": true,
+      "atom": "_Welcome"
+    },
+    {
+      "id": "manager_copilot_screen.or_ask",
+      "ok": true,
+      "atom": "_Welcome"
+    }
+  ]
+}

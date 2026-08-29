@@ -1,0 +1,193 @@
+{
+  "module": "data_quality",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/data_quality.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "fn": "auditRows",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<QualityRow> rows) -> QualityReport",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "warnings = <QualityWarning>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "firstByName = <String, int>{}"
+          },
+          {
+            "kind": "init",
+            "detail": "firstByKey = <String, int>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final r in rows"
+          },
+          {
+            "kind": "compute",
+            "detail": "nn = normName(r.name)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nn.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "nk = normName(r.key)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if nk.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "QualityReport(warnings: warnings, scanned: rows.length)"
+          }
+        ]
+      },
+      "floor": [
+        "QualityReport",
+        "QualityWarning",
+        "add",
+        "normName"
+      ],
+      "contract": {
+        "input": "(List<QualityRow> rows)",
+        "output": "QualityReport",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "QualityReport.flagged",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "warnings"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "warnings.length"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "QualityReport.clean",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "warnings"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "warnings.isEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "QualityReport.countOf",
+      "kind": "method",
+      "object": {
+        "signature": "(String kind) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "warnings"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "warnings.where((w) => w.kind == kind).length"
+          }
+        ]
+      },
+      "floor": [
+        "where"
+      ],
+      "contract": {
+        "input": "(String kind)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "_NewTaskButton",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "tasks_screen.new_task",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "＋ משימה חדשה",
+        "registryId": "tasks_screen.new_task",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "onTap"
+    ],
+    "untangle": []
+  }
+}

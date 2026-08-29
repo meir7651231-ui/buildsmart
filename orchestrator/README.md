@@ -1,0 +1,80 @@
+# Orchestrator kit — how to run "another one of me"
+
+This is the distilled behavior of an orchestrator agent that **audits → validates → fixes → verifies
+→ ships** a codebase by driving a fleet of parallel sub-agents. It is **config, not application code** —
+load it into an agent runtime and you get another orchestrator. One orchestrator is worth its whole
+fleet because it keeps the judgment; the fleet keeps the labor.
+
+## What's here
+| file | role |
+|------|------|
+| `PLAYBOOK.md` | the orchestrator's brain — the pipeline + the hard rules. **Load as the system prompt / project instructions.** |
+| `agents/auditor.md` | read-only lens-scanner sub-agent (spawn N, one disjoint lens each) |
+| `agents/validator.md` | adversarial verifier (drops false-positives before fixing) |
+| `agents/fixer.md` | disjoint-file fixer (spawn several, partitioned by file) |
+| `agents/supervisor.md` | **one per fleet** — objectively verifies the fleet + reports up (the oversight node) |
+| `FACTORY.md` | hierarchical factory architecture (Tier 0/1/2 + the up/down control loop) + the **verified** execution model (nested on the SDK, flattened in Claude Code) |
+| `scripts/wt-setup.sh` | fresh worktree per run |
+| `scripts/central-verify.sh` | **the gate** — analyze 0 + tests + build, **plus** optional `--assert` (byte-conformance) and `--required-tests` (critical-flow presence); skips are LOUD, never silent (project adapter; current: Flutter) |
+| `scripts/assert-manifest.sh` | run a manifest of byte assertions (conformance + regression) — makes "verify the bytes" an **automatic gate step**, not a manual one |
+| `scripts/required-tests.sh` | enforce that critical-flow test files **exist** (present + green suite ⇒ the flow ran and passed) |
+| `scripts/grep-verify.sh` | verify the **bytes** of a claimed fix, not the agent's prose |
+| `scripts/ff-push.sh` | fast-forward-only push with divergence refusal + retries |
+| `scripts/ckpt.sh` | durable run checkpoint — resume + **phase-order guard** (a later stage can't run before an earlier one) |
+| `scripts/registry.sh` | sub-agent registry — `assert-none-open` BLOCKs if any spawned agent was left unreaped |
+| `scripts/report-lint.sh` | lint a run-report JSON — a "CLEAN" report **may not** carry deferred work or unresolved discrepancies |
+| `scripts/lens-coverage.sh` | coverage gate — every **required** audit lens must have been returned by the fleet |
+| `scripts/diff-coverage.sh` | every **changed** source file must be in coverage; a path-prefix mismatch is a BLOCK, never a silent pass |
+| `scripts/selftest.sh` | exercises all of the above on synthetic data with expected exit codes — run before committing tooling |
+| `lenses/registry.txt` | the canonical lens set (the orthogonal viewpoints a full sweep must cover) |
+| `schemas/report.schema.json` | documents the run-report shape (report-lint.sh is the runtime enforcer) |
+| `manifests/*.txt` | conformance/regression + required-tests manifests (a template + the live BuildSmart set) fed to the gate |
+
+### Making conformance part of the gate (the recommended invocation)
+The gate only runs `analyze + test + build` by default — that does **not** enforce source-conformance (e.g.
+verbatim Hebrew/legacy strings) or guarantee critical flows stay covered. Pass the manifests so it does:
+```
+central-verify.sh <app-dir> \
+  --assert         orchestrator/manifests/buildsmart.conformance.txt \
+  --required-tests orchestrator/manifests/buildsmart.required-tests.txt
+```
+With no manifest the gate prints a **loud** "NOT enforced this run" line — absence is visible, not silent.
+Every escaped bug becomes a permanent `:::!bannedString` line in the conformance manifest (the regression
+ledger): authoring the rule stays a human judgment, but once written it is enforced forever, automatically.
+
+## Spawning a copy
+
+**A) Inside Claude Code (easiest, highest fidelity).** Each Claude Code session that loads this config
+*is* one orchestrator. Run several sessions in parallel (different modules/branches) = several
+orchestrators — exactly the "six independent agents, each worth six" shape.
+- Copy `agents/*.md` into `.claude/agents/` (they become spawnable sub-agents).
+- Reference `PLAYBOOK.md` from `CLAUDE.md` (or wrap it in a `.claude/skills/audit-fix-ship/` skill so a
+  session can kick the whole pipeline with one command).
+- The session then fans out auditor/validator/fixer agents and runs the gate itself.
+
+**B) As a standalone process (programmatic fleet).** When your agent-network needs to deploy many
+orchestrators autonomously, build on the **Claude Agent SDK** (the framework for "your own Claude
+Code"): use `PLAYBOOK.md` as the system prompt and `agents/*.md` as subagent definitions; launch N SDK
+processes = N orchestrators. Same brain, different body.
+
+## Adapting to another project/stack
+Only `scripts/central-verify.sh` is stack-specific (it currently runs `flutter analyze/test/build`).
+Swap those three blocks for your toolchain (e.g. `tsc && vitest && vite build`). Everything else —
+the playbook, the agent roles, worktree/grep/ff-push — is stack-agnostic.
+
+## The tooling-layer gates — and what they are NOT
+`ckpt` / `registry` / `report-lint` / `lens-coverage` / `diff-coverage` are **real, runnable** checks that
+turn silent gaps into visible BLOCKs (missing lens, unreaped agent, uncovered change, a "CLEAN" report that
+isn't). They are **useful tooling, not a security boundary**: this agent runs as root, so anything on-host —
+these scripts included — can be edited or skipped by the same actor that runs them. They raise the floor on
+*honest mistakes* and mis-narration; they do **not** constrain a determined or compromised orchestrator. The
+only in-runtime mechanism that does is **structural absence** (a tool that isn't in the process can't be
+used — e.g. the shell-less `fixer`). True enforcement lives **off-host** (CI holding the sole deploy
+credential). Keep the two straight; don't let a green gate be mistaken for a guarantee.
+
+Run `scripts/selftest.sh` after touching any of these — it must print `SELFTEST PASS` before you commit.
+
+## The one rule that matters most
+**Do not trust a sub-agent's prose.** Agents mis-narrate ("already done") even when they did the work —
+or claim a fix that isn't there. After the fleet returns, verify the **bytes** (`grep-verify.sh`) and
+pass the **gate** (`central-verify.sh`). Ship only on green; confirm "live" only from the deployed bytes.

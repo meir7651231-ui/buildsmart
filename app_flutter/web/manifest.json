@@ -1,11 +1,13 @@
 {
-    "name": "buildsmart",
-    "short_name": "buildsmart",
+    "name": "בנייה חכמה",
+    "short_name": "בנייה חכמה",
+    "lang": "he",
+    "dir": "rtl",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "BuildSmart — construction site procurement & task management",
+    "background_color": "#FF7A18",
+    "theme_color": "#FF7A18",
+    "description": "בנייה חכמה — רכש חומרים וניהול משימות לאתרי בנייה. פלטפורמה אחת לקבלנים, ספקים ושליחים.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

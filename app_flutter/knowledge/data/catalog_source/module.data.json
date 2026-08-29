@@ -1,0 +1,40 @@
+{
+  "module": "catalog_source",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/catalog_source.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "CatalogSource",
+      "kind": "enum",
+      "object": {
+        "fields": [
+          {
+            "name": "v1",
+            "type": "CatalogSource",
+            "required": false
+          },
+          {
+            "name": "v2",
+            "type": "CatalogSource",
+            "required": false
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": [
+          "a closed set of 2 values: v1 · v2"
+        ]
+      }
+    }
+  ]
+}

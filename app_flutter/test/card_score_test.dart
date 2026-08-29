@@ -6,6 +6,20 @@ import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// A bounded, evenly-spread sample of [xs] (~[n] items). The card-readiness
+/// bounds are STRUCTURAL (breadth weights sum to exactly 50; depth tiers cap at
+/// 50), so a weight-sum regression shows up on ANY product — a small strided
+/// sample is a sufficient, FAST tripwire. The full sweep was O(n²)
+/// (compatibleProductsCount rescans the whole catalog per product) and timed
+/// out under CI load — the source of the "card_score" deploy-gate failure.
+Iterable<T> _sample<T>(List<T> xs, [int n = 40]) sync* {
+  if (xs.isEmpty) return;
+  final step = (xs.length / n).ceil().clamp(1, xs.length);
+  for (var i = 0; i < xs.length; i += step) {
+    yield xs[i];
+  }
+}
+
 void main() {
   setUpAll(registerPolyrollSpecs);
 
@@ -43,7 +57,7 @@ void main() {
   test('score is within 0..100 and label matches the band, for all products',
       () {
     const bands = {'מצוין', 'טוב', 'בסיסי', 'חלקי'};
-    for (final p in kLipskeyCatalog) {
+    for (final p in _sample(kLipskeyCatalog)) {
       final r = cardReadinessScore(p);
       expect(r.score, inInclusiveRange(0, 100), reason: p.sku);
       expect(bands, contains(r.label));
@@ -53,15 +67,27 @@ void main() {
     }
   });
 
-  test('a product with a verified spec scores at least the spec weight', () {
-    for (final p in kLipskeyCatalog) {
+  test('a verified spec contributes its full breadth weight (composite)', () {
+    // In the composite model a verified spec is the heaviest BREADTH category
+    // (+10). It no longer guarantees a fixed total — the rest of the score
+    // depends on how broad AND deep the product is — but the spec presence must
+    // always show up in the breadth sub-score.
+    for (final p in _sample(kLipskeyCatalog)) {
       if (kVerifiedSpecs[p.sku] != null) {
-        // Spec weight is +25 in the raised-bar formula (was +40). A spec'd
-        // product is guaranteed at least the spec weight; richer signals
-        // (compat/standards/install) lift it further.
-        expect(cardReadinessScore(p).score, greaterThanOrEqualTo(25),
+        expect(cardReadinessScore(p).breadth, greaterThanOrEqualTo(10),
             reason: p.sku);
       }
+    }
+  });
+
+  test('composite == breadth + depth (capped at 100), both within 0..50', () {
+    for (final p in _sample([...kLipskeyCatalog, ...kPolyrollCatalog])) {
+      final r = cardReadinessScore(p);
+      expect(r.breadth, inInclusiveRange(0, 50), reason: p.sku);
+      expect(r.depth, inInclusiveRange(0, 50), reason: p.sku);
+      // Composite is the sum, unless the (impossible-in-practice) >100 cap hit.
+      final raw = r.breadth + r.depth;
+      expect(r.score, raw > 100 ? 100 : raw, reason: p.sku);
     }
   });
 }

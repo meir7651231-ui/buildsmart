@@ -1,0 +1,39 @@
+{
+  "module": "orders",
+  "source": "../../../functions/src/orders.ts",
+  "functionCount": 2,
+  "functions": [
+    {
+      "name": "advanceOrderStage",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 50,
+      "authGated": true,
+      "reads": [
+        "orders"
+      ],
+      "writes": [
+        "orders"
+      ],
+      "calls": [],
+      "errorCodes": [
+        "failed-precondition",
+        "invalid-argument",
+        "not-found",
+        "permission-denied",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "revertIllegalOrderStageWrite",
+      "trigger": "onDocumentUpdated",
+      "region": "REGION",
+      "line": 145,
+      "authGated": false,
+      "reads": [],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    }
+  ]
+}

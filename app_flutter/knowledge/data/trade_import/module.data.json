@@ -1,0 +1,102 @@
+{
+  "module": "trade_import",
+  "source": "/home/user/buildsmart/app_flutter/lib/domain/trade_import.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "ImportRowError",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "rowIndex",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "messageHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "rowIndex",
+          "messageHe"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ImportReport",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "valid",
+            "type": "List<TradeProduct>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "errors",
+            "type": "List<ImportRowError>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "canCommit",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "valid",
+            "ref": "TradeProduct",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "errors",
+            "ref": "ImportRowError",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "valid",
+          "errors"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

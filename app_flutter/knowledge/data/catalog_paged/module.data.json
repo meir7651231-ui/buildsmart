@@ -1,0 +1,121 @@
+{
+  "module": "catalog_paged",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/catalog_paged.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "CatalogPageCache",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "maxPages",
+            "type": "int",
+            "required": false,
+            "default": "_defaultMaxPages"
+          },
+          {
+            "name": "_pages",
+            "type": "LinkedHashMap<String, PagedResult<LipskeyCatalogProduct>>",
+            "required": false
+          },
+          {
+            "name": "length",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_pages",
+            "ref": "LinkedHashMap<String, PagedResult<LipskeyCatalogProduct>>",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "containsKey",
+          "get",
+          "put",
+          "clear"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {
+          "maxPages": "_defaultMaxPages"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "CatalogPagedBrowse",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_authored",
+            "type": "FirebaseAuthoredProductsRepository?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_cache",
+            "type": "CatalogPageCache?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_bundledPage",
+            "type": "PagedResult<LipskeyCatalogProduct>?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "isPaged",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_authored",
+            "ref": "FirebaseAuthoredProductsRepository",
+            "kind": "embed"
+          },
+          {
+            "field": "_cache",
+            "ref": "CatalogPageCache",
+            "kind": "embed"
+          },
+          {
+            "field": "_bundledPage",
+            "ref": "PagedResult<LipskeyCatalogProduct>",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "page"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "name": "_PersonaSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+        "registryId": "notif_settings_screen.t07",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "דורש חיבור שרת — לא זמין בגרסה זו",
+        "registryId": "notif_settings_screen.t08",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — עדיין לא משפיע",
+        "registryId": "notif_settings_screen.t09",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
+    ]
+  }
+}

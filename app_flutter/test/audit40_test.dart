@@ -4,6 +4,12 @@ import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Collected failures across all 40 cases — asserted at the very end so a single
+/// run surfaces EVERY problem (a cross-system supply↔drainage leak, a missing
+/// intra-system path, or a stale SKU), not just the first. Before this gate the
+/// audit was print-only: a leak printed ✗✗✗ yet the suite passed.
+final _fails = <String>[];
+
 LipskeyCatalogProduct? _f(String s) {
   try { return kCompatCatalog.firstWhere((p) => p.sku == s); } catch (_) { return null; }
 }
@@ -25,22 +31,24 @@ String _flags(List<LipskeyCatalogProduct> path) {
 
 void _run(int n, String desc, String from, String to, {bool expectPath=true, int depth=7}) {
   final a=_f(from), b=_f(to);
-  if (a==null||b==null){ print('$n. ?? SKU חסר ($from/$to)'); return; }
+  if (a==null||b==null){ print('$n. ?? SKU חסר ($from/$to)'); _fails.add('$n. SKU חסר ($from/$to)'); return; }
   final path=findShortestPath(a,b,maxDepth:depth,tempC:20);
   final got = path!=null;
   final ok = got==expectPath;
   final mark = ok?'✓':'✗✗✗';
+  if (!ok) _fails.add('$n. $desc — ציפיתי ${expectPath?"נתיב":"אין-נתיב"}, קיבלתי ${got?"נתיב":"אין-נתיב"}');
   if (!got){ print('$n. $mark $desc → אין נתיב'); return; }
   print('$n. $mark $desc → ${path.length} | trans=${_trans(path)} | '
       '${path.map((p)=>p.nameHe).join(" → ")}${_flags(path)}');
 }
 
 void main() {
-  test('AUDIT 40', () {
+  test('AUDIT 40 — pathfinding + cross-system isolation gate', () {
+    _fails.clear();
     print('\n════════ אספקה תוך-מערכתי (1-12) ════════');
     _run(1,'קיסר → פקק נחושת ½"','779096G','77778071');
     _run(2,'אל-חוזר ½" → ברז מעבר פ.פ ½"','77004401','77777201');
-    _run(3,'ברז גן ¾" → ברז כיור ½"','77777345','77777114');
+    _run(3,'ברז גן ¾" ↮ ברז כיור ½" (שני ברזי-קצה — אין נתיב)','77777345','77777114',expectPath:false);
     _run(4,'ניפל נחושת ½" → ברז מעבר פ.פ ½"','77777641','77777201');
     _run(5,'ברז מעבר 1" → קיסר ½"','77777313','779096G');
     _run(6,'ברז מעבר 2" → קיסר ½"','77777316','779096G');
@@ -54,7 +62,7 @@ void main() {
     print('\n════════ ניקוז תוך-מערכתי (13-24) ════════');
     _run(13,'ברך PVC 110 → צינור אפור 110','142289','116113');
     _run(14,'מחסום DN32 → צינור אפור DN32','217861','116180');
-    _run(15,'סיפון → מחסום גלוי','77003221','116635');
+    _run(15,'סיפון ↮ מחסום גלוי (double-trap — אין נתיב)','77003221','116635',expectPath:false);
     _run(16,'תעלת ניקוז → צינור DN50','77575327','221022');
     _run(17,'צינור PP 110 → ברך PVC 110','224169','142289');
     _run(18,'מולטי DN75 → ברך PVC 75','273216','116033');
@@ -62,7 +70,7 @@ void main() {
     _run(20,'מסעף 45 DN50 → צינור DN50','116565','221022');
     _run(21,'מחסום גלוי → צינור 110','116635','116113');
     _run(22,'ברך אסלה → צינור 110','164873','116113');
-    _run(23,'מחסום DN32 → סיפון DN32','217861','77003221');
+    _run(23,'מחסום DN32 ↮ סיפון DN32 (double-trap — אין נתיב)','217861','77003221',expectPath:false);
     _run(24,'צינור 110 → מסעף 45','116113','116565');
 
     print('\n════════ חוצה-מערכת — חייב אין נתיב (25-34) ════════');
@@ -78,11 +86,14 @@ void main() {
     _run(34,'בושינג ¾×½ → צינור 110','77777661','116113',expectPath:false);
 
     print('\n════════ קבועה כקצה + התקנות (35-40) ════════');
-    _run(35,'קיסר → אסלה (כניסה)','779096G','77771006');
+    _run(35,'קיסר ↮ אסלה (שתי קבועות נפרדות — אין נתיב)','779096G','77771006',expectPath:false);
     _run(36,'אסלה → צינור ניקוז (יציאה)','77771006','116113');
     _run(37,'ברז מעבר ½" → אסלה','77777311','77771006');
     _run(38,'אסלה → מסעף 45','77771006','116565');
-    _run(39,'ברז כיור → אסלה','77777114','77771006');
+    _run(39,'ברז כיור ↮ אסלה (שתי קבועות נפרדות — אין נתיב)','77777114','77771006',expectPath:false);
     _run(40,'אסלה(2) → צינור 110','77771010','116113');
+
+    expect(_fails, isEmpty,
+        reason: 'AUDIT 40 — ${_fails.length} כשלים:\n${_fails.join("\n")}');
   });
 }

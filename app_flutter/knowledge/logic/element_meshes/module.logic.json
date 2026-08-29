@@ -1,0 +1,300 @@
+{
+  "module": "element_meshes",
+  "source": "lib/features/fittings/geometry/element_meshes.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "fn": "elementMeshesFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String family, int od, {int? od2}) -> ElementMeshes?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStub"
+          },
+          {
+            "kind": "const",
+            "name": "_kSupported"
+          },
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_xf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !_kSupported.contains(family) → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "g = generate(family, od, od2: od2)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'מצמד'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'ברך 90°' || family == 'ברך 45°'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'מסעף (טי)'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'מתאם תבריג'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'ברז כדורי'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'מצרה'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'פקק'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'רוכב'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if family == 'צווארון'"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "ElementMeshes",
+        "ElementPart",
+        "contains",
+        "cos",
+        "generate",
+        "hexRod",
+        "revolve",
+        "sin",
+        "sphere",
+        "tube",
+        "up"
+      ],
+      "contract": {
+        "input": "(String family, int od, {int? od2})",
+        "output": "ElementMeshes?",
+        "purity": "pure",
+        "precond": [
+          "if !_kSupported.contains(family) → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "!_kSupported.contains(family) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "taperGeom",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double len, double oA, double oB) -> Mesh",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "rA = oA / 2 * 0.98"
+          },
+          {
+            "kind": "compute",
+            "detail": "rB = oB / 2 * 0.98"
+          },
+          {
+            "kind": "compute",
+            "detail": "iA = (oA - 2 * oA / 6) / 2"
+          },
+          {
+            "kind": "compute",
+            "detail": "iB = (oB - 2 * oB / 6) / 2"
+          },
+          {
+            "kind": "return",
+            "detail": "revolve([[0, rA], [len * 0.4, rA], [len * 0.6, rB], [len, rB], [len, iB], [len * 0.6, iB]…"
+          }
+        ]
+      },
+      "floor": [
+        "revolve"
+      ],
+      "contract": {
+        "input": "(double len, double oA, double oB)",
+        "output": "Mesh",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "straightPipe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(double len, double od) -> Mesh",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "tube(0, len, od / 2 * 0.98, (od - 2 * od / 6) / 2)"
+          }
+        ]
+      },
+      "floor": [
+        "tube"
+      ],
+      "contract": {
+        "input": "(double len, double od)",
+        "output": "Mesh",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_xf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Mesh m, {double rotZ = 0, double tx = 0, double ty = 0, double tz = 0}) -> Mesh",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "math"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "elementMeshesFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "c = math.cos(rotZ)"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = math.sin(rotZ)"
+          },
+          {
+            "kind": "init",
+            "detail": "p = <double>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "n = <double>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < m.vertexCount; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "x = m.positions[i * 3]"
+          },
+          {
+            "kind": "compute",
+            "detail": "y = m.positions[i * 3 + 1]"
+          },
+          {
+            "kind": "compute",
+            "detail": "z = m.positions[i * 3 + 2]"
+          },
+          {
+            "kind": "effect",
+            "detail": "p.addAll([c * x - s * y + tx, s * x + c * y + ty, z + tz])"
+          },
+          {
+            "kind": "compute",
+            "detail": "nx = m.normals[i * 3]"
+          },
+          {
+            "kind": "compute",
+            "detail": "ny = m.normals[i * 3 + 1]"
+          },
+          {
+            "kind": "compute",
+            "detail": "nz = m.normals[i * 3 + 2]"
+          },
+          {
+            "kind": "effect",
+            "detail": "n.addAll([c * nx - s * ny, s * nx + c * ny, nz])"
+          },
+          {
+            "kind": "return",
+            "detail": "Mesh(p, n, m.indices)"
+          }
+        ]
+      },
+      "floor": [
+        "Mesh",
+        "addAll",
+        "cos",
+        "sin"
+      ],
+      "contract": {
+        "input": "(Mesh m, {double rotZ = 0, double tx = 0, double ty = 0, double tz = 0})",
+        "output": "Mesh",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

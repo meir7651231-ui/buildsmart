@@ -1,0 +1,202 @@
+{
+  "name": "CourierReportsTab",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📊 דוחות",
+        "registryId": "courier.reports.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נתונים חיים ממנוע ההזמנות המשותף — ללא המצאות",
+        "registryId": "courier.reports.subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מסירות ישנות ללא ייחוס אינן נספרות",
+        "registryId": "courier_reports_tab.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין עדיין מדידות זמן — הזמן נמדד אוטומטית מרגע אישור האיסוף ועד המסירה ללקוח.",
+        "registryId": "courier_reports_tab.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "היסטוריית מסירות",
+        "registryId": "courier.reports.history_title",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📭"
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין עדיין מסירות שהושלמו",
+        "registryId": "courier.reports.empty_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "משלוח שיסומן \"נמסר ללקוח\" יופיע כאן",
+        "registryId": "courier_reports_tab.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "courier.reports.send_report",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🏪 שלח דוח-יומי לחנות",
+        "registryId": "courier.reports.send_report",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "courier_reports_tab.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "✨"
+      },
+      {
+        "kind": "cfgText",
+        "text": "נסח דוח עם AI",
+        "registryId": "courier_reports_tab.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הדוח נשלח כהודעה אמיתית לשיחת \"חנות ליפסקי\" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. מוני המסירות והערך מיוחסים לשליח המחובר בלבד, בלי המצאות.",
+        "registryId": "courier_reports_tab.t05",
+        "registryOk": true
+      }
+    ],
+    "registered": 12,
+    "unregistered": [
+      "📭",
+      "✨"
+    ],
+    "summary": "registry 12 · mapped 12/12 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "fulfillmentProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "courierClockProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "podPhotosProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "rewardsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "fulfillmentProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "courierClockProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "DailyReportScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatEngineProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerNotifsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "streakLabel = activityDays.isEmpty ? … : …",
+        "effect": "text: '—' | '${streak} ימים'"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "firstAttemptLabel = measuredDelivered.isEmpty ? … : …",
+        "effect": "text: '—' | '${(firstAttempt * 100 / measuredDelivered.length).round()}%'"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "daysBetweenDst",
+    "fMoney",
+    "orgTerm",
+    "startOfWeekSunday"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

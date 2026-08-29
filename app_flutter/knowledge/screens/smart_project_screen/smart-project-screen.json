@@ -1,0 +1,130 @@
+{
+  "name": "SmartProjectScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🏗️ פרויקט חכם",
+        "registryId": "smart_project_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "smart_project_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📅 בחר יום",
+        "registryId": "smart_project_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "smart_project_screen.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ יציאה",
+        "registryId": "smart_project_screen.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🗓️"
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין ימי עבודה בתוכנית",
+        "registryId": "smart_project_screen.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כשתוגדר תוכנית עבודה — ימי העבודה יופיעו כאן",
+        "registryId": "smart_project_screen.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בחר יום",
+        "registryId": "smart_project_screen.t06",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✓ הושלם",
+        "registryId": "smart_project_screen.t07",
+        "registryOk": true
+      }
+    ],
+    "registered": 9,
+    "unregistered": [
+      "🗓️"
+    ],
+    "summary": "registry 9 · mapped 9/9 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartProjectProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartProjectProgressProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "activeProjectProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "toggle",
+        "target": "smartProjectProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "title = active.name.isEmpty ? … : …",
+        "effect": "text: 'הפרויקט שלי — מאפס עד מסירה' | '${active.name} — מאפס עד מסירה'"
+      }
+    ]
+  },
+  "floor": [
+    "addAll",
+    "buildDayStages",
+    "cfgRadius",
+    "clear",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "constructible": true,
+    "props": [],
+    "untangle": [
+      "onSmartProject(…) callback instead of direct smartProjectProvider write"
+    ]
+  }
+}

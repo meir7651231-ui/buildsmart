@@ -1,0 +1,37 @@
+{
+  "matched": 6,
+  "total": 6,
+  "summary": "6/6",
+  "entries": [
+    {
+      "id": "home.helpmode.banner",
+      "ok": true,
+      "atom": "_HelpModeOverlay"
+    },
+    {
+      "id": "home.topbar.brand",
+      "ok": true,
+      "atom": "_HomeAppBar"
+    },
+    {
+      "id": "home.status.smarttree",
+      "ok": true,
+      "atom": "_HomeAppBar"
+    },
+    {
+      "id": "home.newchat.title",
+      "ok": true,
+      "atom": "_HomeAppBar"
+    },
+    {
+      "id": "home.newchat.subtitle",
+      "ok": true,
+      "atom": "_HomeAppBar"
+    },
+    {
+      "id": "home.newchat.empty",
+      "ok": true,
+      "atom": "_HomeAppBar"
+    }
+  ]
+}

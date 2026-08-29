@@ -1,0 +1,830 @@
+{
+  "module": "orders_firebase",
+  "source": "lib/data/repositories/orders_firebase.dart",
+  "atomCount": 17,
+  "atoms": [
+    {
+      "fn": "FirebaseOrdersRepository.seed",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<Order>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOrdersEngineSeed"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kOrdersEngineSeed"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<Order>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.idOf",
+      "kind": "method",
+      "object": {
+        "signature": "(Order value) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "value.id"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Order value)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.toDoc",
+      "kind": "method",
+      "object": {
+        "signature": "(Order o) -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'contractorId' : o.who, 'siteAddress' : o.site, 'items' : o.items, 'sum' : o.sum, 'stage…"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toIso8601String",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "(Order o)",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.fromDoc",
+      "kind": "method",
+      "object": {
+        "signature": "(RemoteDoc doc) -> Order",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "j = doc.data"
+          },
+          {
+            "kind": "compute",
+            "detail": "tsRaw = (j['ts'] ?? j['createdAt']) as String?"
+          },
+          {
+            "kind": "return",
+            "detail": "Order(id: doc.id, who: (j['contractorId'] ?? j['who']) as String, site: (j['siteAddress']…"
+          }
+        ]
+      },
+      "floor": [
+        "Order",
+        "fromJson",
+        "map",
+        "toInt",
+        "toList",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(RemoteDoc doc)",
+        "output": "Order",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.sortBy",
+      "kind": "method",
+      "object": {
+        "signature": "(List<Order> items) -> List<Order>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "of"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "return",
+            "detail": "List<Order>.of(items)..sort((a, b) {final at = a.createdAt; final bt = b.createdAt; if (a…"
+          }
+        ]
+      },
+      "floor": [
+        "List",
+        "compareTo",
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<Order> items)",
+        "output": "List<Order>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.onFirstSnapshotEmpty",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "pushCacheToRemote()"
+          }
+        ]
+      },
+      "floor": [
+        "pushCacheToRemote"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.all",
+      "kind": "method",
+      "object": {
+        "signature": "() -> List<Order>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "cached()"
+          }
+        ]
+      },
+      "floor": [
+        "cached"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<Order>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.byId",
+      "kind": "method",
+      "object": {
+        "signature": "(String id) -> Order?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirebaseOrdersRepository.advance",
+          "FirebaseOrdersRepository.applyServerStage",
+          "FirebaseOrdersRepository.claimCourier",
+          "FirebaseOrdersRepository.claimStore",
+          "FirebaseOrdersRepository.setStage"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final o in cached()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if o.id == id → return o"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "cached"
+      ],
+      "contract": {
+        "input": "(String id)",
+        "output": "Order?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.open",
+      "kind": "method",
+      "object": {
+        "signature": "() -> List<Order>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "cached().where((o) => o.isOpen).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "cached",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<Order>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository._nextId",
+      "kind": "method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "FirebaseOrdersRepository.placeOrder"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "re = RegExp(r'^BS-(\\d+)$')"
+          },
+          {
+            "kind": "compute",
+            "detail": "maxN = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final o in cached()"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = re.firstMatch(o.id)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if m != null"
+          },
+          {
+            "kind": "return",
+            "detail": "maxN > 0 ? 'BS-${maxN + 1}' : 'BS-${DateTime.now().millisecondsSinceEpoch}'"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "cached",
+        "firstMatch",
+        "group",
+        "now",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.placeOrder",
+      "kind": "method",
+      "object": {
+        "signature": "({required String who, required String site, required int items, required int sum, String? id, DateTime? createdAt, List<OrderLineItem> lines = const [], String shipTo = '', String notes = '', String contractorUid = '', String orgId = '', String customerPhone = '', String customerEmail = ''}) -> Order",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kManagerOrderFlow"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_nextId",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "order = Order(id: id ?? _nextId(), who: who, site: site, items: items, sum: sum, stage: kManagerO…"
+          },
+          {
+            "kind": "effect",
+            "detail": "upsert(order)"
+          },
+          {
+            "kind": "return",
+            "detail": "order"
+          }
+        ]
+      },
+      "floor": [
+        "Order",
+        "now",
+        "upsert"
+      ],
+      "contract": {
+        "input": "({required String who, required String site, required int items, required int sum, String? id, DateTime? createdAt, List<OrderLineItem> lines = const [], String shipTo = '', String notes = '', String contractorUid = '', String orgId = '', String customerPhone = '', String customerEmail = ''})",
+        "output": "Order",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.advance",
+      "kind": "method",
+      "object": {
+        "signature": "(String orderId) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kManagerOrderFlow"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "byId",
+            "module": true
+          },
+          {
+            "name": "setStage",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "o = byId(orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o == null → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "cur = kManagerOrderFlow.indexOf(o.stage)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cur < 0 || cur >= kManagerOrderFlow.length - 1 → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "setStage(orderId, kManagerOrderFlow[cur + 1])"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(String orderId)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if o == null → return (void)",
+          "if cur < 0 || cur >= kManagerOrderFlow.length - 1 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.setStage",
+      "kind": "method",
+      "object": {
+        "signature": "(String orderId, String stage) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kManagerOrderFlow"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "byId",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "FirebaseOrdersRepository.advance"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !kManagerOrderFlow.contains(stage) → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "o = byId(orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o.stage == stage → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "upsert(o.copyWith(stage: stage))"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "copyWith",
+        "upsert"
+      ],
+      "contract": {
+        "input": "(String orderId, String stage)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if !kManagerOrderFlow.contains(stage) → return (void)",
+          "if o == null → return (void)",
+          "if o.stage == stage → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.applyServerStage",
+      "kind": "method",
+      "object": {
+        "signature": "(String orderId, String stage) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "byId",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "o = byId(orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o.stage == stage → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "upsertLocalOnly(o.copyWith(stage: stage))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "upsertLocalOnly"
+      ],
+      "contract": {
+        "input": "(String orderId, String stage)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if o == null → return (void)",
+          "if o.stage == stage → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.claimStore",
+      "kind": "method",
+      "object": {
+        "signature": "(String orderId, String uid) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "byId",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if uid.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "o = byId(orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o.storeUid.isNotEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "upsert(o.copyWith(storeUid: uid))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "upsert"
+      ],
+      "contract": {
+        "input": "(String orderId, String uid)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if uid.isEmpty → return (void)",
+          "if o == null → return (void)",
+          "if o.storeUid.isNotEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.claimCourier",
+      "kind": "method",
+      "object": {
+        "signature": "(String orderId, String uid) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "byId",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if uid.isEmpty → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "o = byId(orderId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if o.courierUid.isNotEmpty → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "upsert(o.copyWith(courierUid: uid))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "upsert"
+      ],
+      "contract": {
+        "input": "(String orderId, String uid)",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if uid.isEmpty → return (void)",
+          "if o == null → return (void)",
+          "if o.courierUid.isNotEmpty → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "FirebaseOrdersRepository.resetToSeed",
+      "kind": "method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "replaceAll(seed)"
+          }
+        ]
+      },
+      "floor": [
+        "replaceAll"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

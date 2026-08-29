@@ -1,0 +1,32 @@
+{
+  "name": "_ActionCard",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "color",
+      "badge",
+      "title",
+      "sub",
+      "onTap"
+    ],
+    "untangle": []
+  }
+}

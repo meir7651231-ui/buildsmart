@@ -1,0 +1,28 @@
+{
+  "module": "prompt_sanitize",
+  "source": "../../../app_flutter/lib/logic/prompt_sanitize.dart",
+  "primitiveCount": 1,
+  "primitives": [
+    {
+      "name": "promptSafeText",
+      "line": 19,
+      "signature": "(String raw, {int maxLen = 600, bool collapseWhitespace = false}) → String",
+      "returns": "String",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "substring(0, maxLen)",
+          "note": "over the cap → truncated to maxLen"
+        },
+        {
+          "signal": "replaceAll(\\s+ → \" \")",
+          "note": "whitespace RUNS collapsed to a single space (conditional)"
+        },
+        {
+          "signal": ".trim()",
+          "note": "surrounding whitespace trimmed"
+        }
+      ]
+    }
+  ]
+}

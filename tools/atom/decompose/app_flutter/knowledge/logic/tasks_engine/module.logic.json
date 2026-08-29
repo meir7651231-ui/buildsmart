@@ -1,0 +1,2170 @@
+{
+  "module": "tasks_engine",
+  "source": "../../../app_flutter/lib/state/tasks_engine.dart",
+  "atomCount": 28,
+  "atoms": [
+    {
+      "fn": "_seedTasks",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<TaskItem>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonaTasks"
+          },
+          {
+            "kind": "const",
+            "name": "kTaskDetail"
+          },
+          {
+            "kind": "const",
+            "name": "kTaskSteps"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "TasksNotifier._load",
+          "TasksNotifier.resetToSeed"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final t in kPersonaTasks) TaskItem(id: t.id, name: t.name, detail: kTaskDetail[t.id…"
+          }
+        ]
+      },
+      "floor": [
+        "TaskItem"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<TaskItem>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "taskClockLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(TaskItem t) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "start = t.startedAt"
+          },
+          {
+            "kind": "precond",
+            "detail": "if start == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "d = (t.completedAt ?? DateTime.now()).difference(start)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if d.isNegative"
+          },
+          {
+            "kind": "precond",
+            "detail": "if d.inMinutes < 1 → return 'פחות מדקה'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if d.inMinutes < 60 → return '${d.inMinutes} דק׳'"
+          },
+          {
+            "kind": "branch",
+            "detail": "if d.inHours < 24"
+          },
+          {
+            "kind": "compute",
+            "detail": "h = d.inHours % 24"
+          },
+          {
+            "kind": "return",
+            "detail": "h == 0 ? '${d.inDays} ימים' : '${d.inDays} ימים $h שע׳'"
+          }
+        ]
+      },
+      "floor": [
+        "difference",
+        "now"
+      ],
+      "contract": {
+        "input": "(TaskItem t)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if start == null → return null",
+          "if d.inMinutes < 1 → return 'פחות מדקה'",
+          "if d.inMinutes < 60 → return '${d.inMinutes} דק׳'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "start == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "todayWorkLog",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<TaskItem> tasks) -> WorkLogDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWorkers"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "done = tasks.where((t) => t.status == 'done').toList()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if done.isEmpty → return const WorkLogDay(date: 'היום', items: [WorkLogItem(worker: '—', task: 'אין עדיין משימות ש…"
+          },
+          {
+            "kind": "return",
+            "detail": "WorkLogDay(date: 'היום', items: [for (final t in done) WorkLogItem(worker: kWorkers[t.wor…"
+          }
+        ]
+      },
+      "floor": [
+        "WorkLogDay",
+        "WorkLogItem",
+        "replaceAll",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<TaskItem> tasks)",
+        "output": "WorkLogDay",
+        "purity": "pure",
+        "precond": [
+          "if done.isEmpty → return const WorkLogDay(date: 'היום', items: [WorkLogItem(worker: '—', task: 'אין עדיין משימות ש…"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TaskItem.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({String? status, Object? photo = _sentinel, String? note, Object? startedAt = _sentinel, Object? completedAt = _sentinel, Set<int>? doneSteps, String? employerId, String? assignedWorkerUid, String? createdBy, Object? scheduledStart = _sentinel, String? kind, String? location, String? severity}) -> TaskItem",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_sentinel"
+          },
+          {
+            "kind": "field",
+            "name": "days"
+          },
+          {
+            "kind": "field",
+            "name": "detail"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "orderId"
+          },
+          {
+            "kind": "field",
+            "name": "steps"
+          },
+          {
+            "kind": "field",
+            "name": "worker"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "TaskItem(id: id, name: name, detail: detail, worker: worker, status: status ?? this.statu…"
+          }
+        ]
+      },
+      "floor": [
+        "TaskItem"
+      ],
+      "contract": {
+        "input": "({String? status, Object? photo = _sentinel, String? note, Object? startedAt = _sentinel, Object? completedAt = _sentinel, Set<int>? doneSteps, String? employerId, String? assignedWorkerUid, String? createdBy, Object? scheduledStart = _sentinel, String? kind, String? location, String? severity})",
+        "output": "TaskItem",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TaskItem.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "assignedWorkerUid"
+          },
+          {
+            "kind": "field",
+            "name": "completedAt"
+          },
+          {
+            "kind": "field",
+            "name": "createdBy"
+          },
+          {
+            "kind": "field",
+            "name": "days"
+          },
+          {
+            "kind": "field",
+            "name": "detail"
+          },
+          {
+            "kind": "field",
+            "name": "doneSteps"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "id"
+          },
+          {
+            "kind": "field",
+            "name": "kind"
+          },
+          {
+            "kind": "field",
+            "name": "location"
+          },
+          {
+            "kind": "field",
+            "name": "name"
+          },
+          {
+            "kind": "field",
+            "name": "note"
+          },
+          {
+            "kind": "field",
+            "name": "orderId"
+          },
+          {
+            "kind": "field",
+            "name": "photo"
+          },
+          {
+            "kind": "field",
+            "name": "scheduledStart"
+          },
+          {
+            "kind": "field",
+            "name": "severity"
+          },
+          {
+            "kind": "field",
+            "name": "startedAt"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          },
+          {
+            "kind": "field",
+            "name": "steps"
+          },
+          {
+            "kind": "field",
+            "name": "worker"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'id' : id, 'name' : name, 'detail' : detail, 'worker' : worker, 'status' : status, 'days…"
+          }
+        ]
+      },
+      "floor": [
+        "sort",
+        "toIso8601String",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TaskItem.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> TaskItem?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "assignedWorkerUid"
+          },
+          {
+            "kind": "field",
+            "name": "completedAt"
+          },
+          {
+            "kind": "field",
+            "name": "createdBy"
+          },
+          {
+            "kind": "field",
+            "name": "days"
+          },
+          {
+            "kind": "field",
+            "name": "detail"
+          },
+          {
+            "kind": "field",
+            "name": "doneSteps"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "kind"
+          },
+          {
+            "kind": "field",
+            "name": "location"
+          },
+          {
+            "kind": "field",
+            "name": "note"
+          },
+          {
+            "kind": "field",
+            "name": "orderId"
+          },
+          {
+            "kind": "field",
+            "name": "photo"
+          },
+          {
+            "kind": "field",
+            "name": "scheduledStart"
+          },
+          {
+            "kind": "field",
+            "name": "severity"
+          },
+          {
+            "kind": "field",
+            "name": "startedAt"
+          },
+          {
+            "kind": "field",
+            "name": "status"
+          },
+          {
+            "kind": "field",
+            "name": "steps"
+          },
+          {
+            "kind": "field",
+            "name": "worker"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "id = raw['id']"
+          },
+          {
+            "kind": "compute",
+            "detail": "name = raw['name']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if id is! int || name is! String → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "TaskItem(id: id, name: name, detail: raw['detail'] is String ? raw['detail'] as String : …"
+          }
+        ]
+      },
+      "floor": [
+        "TaskItem",
+        "toInt",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "TaskItem?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if id is! int || name is! String → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · id is! int || name is! String · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonaTasks"
+          },
+          {
+            "kind": "const",
+            "name": "kTaskClockSideMapKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskDetail",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskSteps",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksRuntimeKey"
+          },
+          {
+            "kind": "const",
+            "name": "kTasksScreenKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_seedTasks",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "contains",
+        "copyWith",
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "toInt",
+        "tryFromJson",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonaTasks"
+          },
+          {
+            "kind": "const",
+            "name": "kTaskClockSideMapKey"
+          },
+          {
+            "kind": "const",
+            "name": "kTasksRuntimeKey"
+          },
+          {
+            "kind": "const",
+            "name": "kTasksScreenKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          },
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "TasksNotifier.state="
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "sort",
+        "toIso8601String",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.state=",
+      "kind": "setter",
+      "object": {
+        "signature": "set (List<TaskItem> value) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonaTasks",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskClockSideMapKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksRuntimeKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksScreenKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_loaded = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "super.state = value"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<TaskItem> value)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier._byId",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id) -> TaskItem?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "TasksNotifier.approve",
+          "TasksNotifier.approveProposal",
+          "TasksNotifier.reject",
+          "TasksNotifier.rejectProposal",
+          "TasksNotifier.startWork",
+          "TasksNotifier.submitForReview",
+          "TasksNotifier.toggleStep"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = state.indexWhere((t) => t.id == id)"
+          },
+          {
+            "kind": "return",
+            "detail": "i < 0 ? null : state[i]"
+          }
+        ]
+      },
+      "floor": [
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(int id)",
+        "output": "TaskItem?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier._patch",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, TaskItem Function(TaskItem) f) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonaTasks",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskClockSideMapKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksRuntimeKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksScreenKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "TasksNotifier.approve",
+          "TasksNotifier.approveProposal",
+          "TasksNotifier.assignTask",
+          "TasksNotifier.attachPhoto",
+          "TasksNotifier.editTask",
+          "TasksNotifier.reject",
+          "TasksNotifier.rejectProposal",
+          "TasksNotifier.startWork",
+          "TasksNotifier.submitForReview",
+          "TasksNotifier.toggleStep"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "idx = state.indexWhere((t) => t.id == id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if idx < 0 → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (var i = 0; i < state.length; i++) if (i == idx) f(state[i]) else state[i]]"
+          }
+        ]
+      },
+      "floor": [
+        "f",
+        "indexWhere"
+      ],
+      "contract": {
+        "input": "(int id, TaskItem Function(TaskItem) f)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if idx < 0 → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.attachPhoto",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, [String photo = 'demo']) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_patch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_patch(id, (t) => t.copyWith(photo: photo))"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(int id, [String photo = 'demo'])",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.toggleStep",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int taskId, int stepIndex) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "from"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_byId",
+            "module": true
+          },
+          {
+            "name": "_patch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = _byId(taskId)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if stepIndex < 0 || stepIndex >= t.steps.length → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_patch(taskId, (x) {final next = Set<int>.from(x.doneSteps); if (!next.add(stepIndex)) ne…"
+          }
+        ]
+      },
+      "floor": [
+        "Set",
+        "add",
+        "copyWith",
+        "remove"
+      ],
+      "contract": {
+        "input": "(int taskId, int stepIndex)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if t == null → return (void)",
+          "if stepIndex < 0 || stepIndex >= t.steps.length → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.startWork",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, {String? workerUid, String? employerId}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_byId",
+            "module": true
+          },
+          {
+            "name": "_patch",
+            "module": true
+          },
+          {
+            "name": "_stampIdentity",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = _byId(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t.status != 'active' && t.status != 'rejected' → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t.startedAt != null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_patch(id, (x) => _stampIdentity(x.copyWith(startedAt: DateTime.now()), workerUid: worker…"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "now"
+      ],
+      "contract": {
+        "input": "(int id, {String? workerUid, String? employerId})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if t == null → return (void)",
+          "if t.status != 'active' && t.status != 'rejected' → return (void)",
+          "if t.startedAt != null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier._stampIdentity",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(TaskItem t, {String? workerUid, String? employerId}) -> TaskItem",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "TasksNotifier.startWork",
+          "TasksNotifier.submitForReview"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "uid = workerUid?.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "emp = employerId?.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if (uid == null || uid.isEmpty) && (emp == null || emp.isEmpty) → return t"
+          },
+          {
+            "kind": "return",
+            "detail": "t.copyWith(assignedWorkerUid: (uid != null && uid.isNotEmpty) ? uid : null, employerId: (…"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "trim"
+      ],
+      "contract": {
+        "input": "(TaskItem t, {String? workerUid, String? employerId})",
+        "output": "TaskItem",
+        "purity": "pure",
+        "precond": [
+          "if (uid == null || uid.isEmpty) && (emp == null || emp.isEmpty) → return t"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.submitForReview",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, {String? note, String? workerUid, String? employerId}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "workerNotifsProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_byId",
+            "module": true
+          },
+          {
+            "name": "_patch",
+            "module": true
+          },
+          {
+            "name": "_stampIdentity",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = _byId(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t == null → return (void)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t.status != 'active' && t.status != 'rejected' → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_patch(id, (x) => _stampIdentity(x.copyWith(status: 'review', photo: x.photo ?? 'demo', n…"
+          },
+          {
+            "kind": "compute",
+            "detail": "next = state.where((x) => x.worker == t.worker && x.status == 'pending').toList()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if next.isNotEmpty"
+          }
+        ]
+      },
+      "floor": [
+        "addForWorker",
+        "copyWith",
+        "now",
+        "read",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(int id, {String? note, String? workerUid, String? employerId})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if t == null → return (void)",
+          "if t.status != 'active' && t.status != 'rejected' → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.approve",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTaskApprovalCoins"
+          },
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "ordersEngineProvider"
+          },
+          {
+            "kind": "global",
+            "name": "rewardsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "workerNotifsProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_byId",
+            "module": true
+          },
+          {
+            "name": "_patch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = _byId(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t == null || t.status != 'review' → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "orderId = t.orderId"
+          },
+          {
+            "kind": "effect",
+            "detail": "_patch(id, (x) => x.copyWith(status: 'done'))"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = _ref"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r == null → return (void)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if orderId != null"
+          },
+          {
+            "kind": "effect",
+            "detail": "r.read(rewardsProvider.notifier).awardCoins(kTaskApprovalCoins)"
+          },
+          {
+            "kind": "effect",
+            "detail": "r.read(workerNotifsProvider.notifier).addForWorker(t.worker, emoji: '✅', title: 'המשימה א…"
+          }
+        ]
+      },
+      "floor": [
+        "addForWorker",
+        "advance",
+        "awardCoins",
+        "copyWith",
+        "read"
+      ],
+      "contract": {
+        "input": "(int id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if t == null || t.status != 'review' → return (void)",
+          "if r == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.reject",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, {String? reason}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTaskRejectNoteSideMapKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "workerNotifsProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_byId",
+            "module": true
+          },
+          {
+            "name": "_patch",
+            "module": true
+          },
+          {
+            "name": "_saveRejectNote",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = _byId(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t == null || t.status != 'review' → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_patch(id, (x) => x.copyWith(status: 'rejected', photo: null, completedAt: null))"
+          },
+          {
+            "kind": "compute",
+            "detail": "why = reason?.trim()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if why != null && why.isNotEmpty"
+          },
+          {
+            "kind": "compute",
+            "detail": "r = _ref"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r == null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "r.read(workerNotifsProvider.notifier).addForWorker(t.worker, emoji: '🔁', title: (why == …"
+          }
+        ]
+      },
+      "floor": [
+        "addForWorker",
+        "copyWith",
+        "read",
+        "trim"
+      ],
+      "contract": {
+        "input": "(int id, {String? reason})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if t == null || t.status != 'review' → return (void)",
+          "if r == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier._saveRejectNote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, String reason) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTaskRejectNoteSideMapKey"
+          },
+          {
+            "kind": "field",
+            "name": "persist"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "TasksNotifier.reject",
+          "TasksNotifier.rejectProposal"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !persist → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "jsonEncode",
+        "setString"
+      ],
+      "contract": {
+        "input": "(int id, String reason)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !persist → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.resetToSeed",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonaTasks",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskClockSideMapKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskDetail",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskSteps",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksRuntimeKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksScreenKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_seedTasks",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "state = _seedTasks()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.createTask",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String name, String detail = '', int days = 1, List<String> steps = const [], int worker = 0, String assignedWorkerUid = '', String employerId = '', DateTime? scheduledStart, String kind = 'task', String location = '', String severity = ''}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonaTasks",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskClockSideMapKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksRuntimeKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksScreenKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "id = state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1)"
+          },
+          {
+            "kind": "compute",
+            "detail": "emp = employerId.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "uid = assignedWorkerUid.trim()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, TaskItem(id: id, name: name, detail: detail, worker: worker, status: '…"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [
+        "TaskItem",
+        "map",
+        "reduce",
+        "trim"
+      ],
+      "contract": {
+        "input": "({required String name, String detail = '', int days = 1, List<String> steps = const [], int worker = 0, String assignedWorkerUid = '', String employerId = '', DateTime? scheduledStart, String kind = 'task', String location = '', String severity = ''})",
+        "output": "int",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.proposeTask",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "({required String name, required int worker, String detail = '', int days = 1, List<String> steps = const [], String assignedWorkerUid = '', String employerId = '', DateTime? scheduledStart, String kind = 'task', String location = '', String severity = ''}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kPersonaTasks",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTaskClockSideMapKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksRuntimeKey",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTasksScreenKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_loaded",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "id = state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1)"
+          },
+          {
+            "kind": "compute",
+            "detail": "emp = employerId.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "uid = assignedWorkerUid.trim()"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [...state, TaskItem(id: id, name: name, detail: detail, worker: worker, status: '…"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [
+        "TaskItem",
+        "map",
+        "reduce",
+        "trim"
+      ],
+      "contract": {
+        "input": "({required String name, required int worker, String detail = '', int days = 1, List<String> steps = const [], String assignedWorkerUid = '', String employerId = '', DateTime? scheduledStart, String kind = 'task', String location = '', String severity = ''})",
+        "output": "int",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.approveProposal",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "workerNotifsProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_byId",
+            "module": true
+          },
+          {
+            "name": "_patch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = _byId(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t == null || t.status != 'proposed' → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_patch(id, (x) => x.copyWith(status: 'active'))"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ref?.read(workerNotifsProvider.notifier).addForWorker(t.worker, emoji: '✅', title: 'ההצע…"
+          }
+        ]
+      },
+      "floor": [
+        "addForWorker",
+        "copyWith",
+        "read"
+      ],
+      "contract": {
+        "input": "(int id)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if t == null || t.status != 'proposed' → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.rejectProposal",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, {String? reason}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTaskRejectNoteSideMapKey",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "field",
+            "name": "persist",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "workerNotifsProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_byId",
+            "module": true
+          },
+          {
+            "name": "_patch",
+            "module": true
+          },
+          {
+            "name": "_saveRejectNote",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "t = _byId(id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if t == null || t.status != 'proposed' → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_patch(id, (x) => x.copyWith(status: 'rejected'))"
+          },
+          {
+            "kind": "compute",
+            "detail": "why = reason?.trim()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if why != null && why.isNotEmpty"
+          },
+          {
+            "kind": "effect",
+            "detail": "_ref?.read(workerNotifsProvider.notifier).addForWorker(t.worker, emoji: '🔁', title: (why…"
+          }
+        ]
+      },
+      "floor": [
+        "addForWorker",
+        "copyWith",
+        "read",
+        "trim"
+      ],
+      "contract": {
+        "input": "(int id, {String? reason})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if t == null || t.status != 'proposed' → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.editTask",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, {String? name, String? detail, int? days, List<String>? steps, DateTime? scheduledStart, String? location, String? severity}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_patch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "effect",
+            "detail": "_patch(id, (t) => TaskItem(id: t.id, name: name ?? t.name, detail: detail ?? t.detail, wo…"
+          }
+        ]
+      },
+      "floor": [
+        "TaskItem"
+      ],
+      "contract": {
+        "input": "(int id, {String? name, String? detail, int? days, List<String>? steps, DateTime? scheduledStart, String? location, String? severity})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.assignTask",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(int id, {int? worker, String? assignedWorkerUid}) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_patch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "uid = assignedWorkerUid?.trim()"
+          },
+          {
+            "kind": "effect",
+            "detail": "_patch(id, (t) => TaskItem(id: t.id, name: t.name, detail: t.detail, worker: worker ?? t.…"
+          }
+        ]
+      },
+      "floor": [
+        "TaskItem",
+        "trim"
+      ],
+      "contract": {
+        "input": "(int id, {int? worker, String? assignedWorkerUid})",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier.bindRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(dynamic repo) -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_refreshFromRemote",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _remote != null → return (void)"
+          },
+          {
+            "kind": "effect",
+            "detail": "_remote = repo"
+          },
+          {
+            "kind": "effect",
+            "detail": "_refreshFromRemote()"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(dynamic repo)",
+        "output": "void",
+        "purity": "side-effecting",
+        "precond": [
+          "if _remote != null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "TasksNotifier._refreshFromRemote",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> void",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_remote"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "TasksNotifier.bindRemote"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _remote == null → return (void)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "void",
+        "purity": "pure",
+        "precond": [
+          "if _remote == null → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

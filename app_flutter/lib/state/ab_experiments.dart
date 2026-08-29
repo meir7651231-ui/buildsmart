@@ -1,7 +1,6 @@
-import 'dart:convert';
 
+import 'package:buildsmart/state/prefs_persisted.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Built-in A/B experiment infrastructure (roadmap step 92).
 ///
@@ -9,26 +8,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Once a variant is assigned for an experiment it sticks across sessions (so
 /// the same user keeps seeing the same variant), and can be manually overridden
 /// from a debug screen via [override]. Persisted as JSON under a versioned key.
-class AbExperimentsNotifier extends StateNotifier<Map<String, String>> {
+class AbExperimentsNotifier extends StateNotifier<Map<String, String>>
+    with StringMapPrefsPersisted {
   AbExperimentsNotifier() : super(const {}) {
-    _load();
+    loadFromPrefs();
   }
+
+  // NB: no @override annotation — this class has a member named `override`
+  // (the manual A/B override), which shadows the dart:core annotation.
+  String get persistKey => _key;
 
   static const _key = 'bs.ab-experiments.v1';
 
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    if (raw != null) {
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      state = m.map((k, v) => MapEntry(k, v as String));
-    }
-  }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, jsonEncode(state));
-  }
 
   /// If [experiment] already has a variant in [state], return it.
   /// Otherwise pick one deterministically from [variants] using
@@ -46,7 +38,7 @@ class AbExperimentsNotifier extends StateNotifier<Map<String, String>> {
     final idx = experiment.hashCode.abs() % variants.length;
     final pick = variants[idx];
     state = {...state, experiment: pick};
-    _persist();
+    persistToPrefs();
     return pick;
   }
 
@@ -57,14 +49,14 @@ class AbExperimentsNotifier extends StateNotifier<Map<String, String>> {
   void override(String experiment, String variant) {
     if (state[experiment] == variant) return;
     state = {...state, experiment: variant};
-    _persist();
+    persistToPrefs();
   }
 
   /// Removes any assignment for [experiment].
   void clear(String experiment) {
     if (!state.containsKey(experiment)) return;
     state = {...state}..remove(experiment);
-    _persist();
+    persistToPrefs();
   }
 }
 

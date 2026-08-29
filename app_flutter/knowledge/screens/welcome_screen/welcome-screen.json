@@ -1,0 +1,275 @@
+{
+  "name": "WelcomeScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "כניסת מנהל המערכת",
+        "registryId": "welcome_screen.mgr_login_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "חשבון הבעלים — כניסה מאובטחת עם חשבון Google.",
+        "registryId": "welcome_screen.mgr_login_subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "welcome_screen.mgr_continue_google",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "המשך עם Google",
+        "registryId": "welcome_screen.mgr_continue_google",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "welcome_screen.mgr_needs_connection",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כניסת מנהל דורשת חיבור לאינטרנט. נסה שוב כשיש חיבור.",
+        "registryId": "welcome_screen.mgr_needs_connection",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "או כניסה עם קוד (demo)",
+        "registryId": "welcome_screen.mgr_or_code_login",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כניסה ללקוח קיים",
+        "registryId": "welcome_screen.board_existing_login_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "welcome_screen.board_demo_mode",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מצב דמו",
+        "registryId": "welcome_screen.board_demo_mode",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "welcome.hero.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "welcome.hero.tagline",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "welcome_screen.owner_google_login",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כניסה עם Google (בעלים)",
+        "registryId": "welcome_screen.owner_google_login",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "welcome_screen.existing_login_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כניסה ללקוח קיים",
+        "registryId": "welcome_screen.existing_login_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "או הירשם",
+        "registryId": "welcome.signup.divider",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "רישום ראשוני",
+        "registryId": "welcome.signup.heading",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מלא את הפרטים — סימן ✓ יופיע כשהשדות תקינים",
+        "registryId": "welcome.signup.subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בהרשמה אתה מאשר את ",
+        "registryId": "welcome_screen.terms_prefix",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "welcome_screen.terms_of_use",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "תנאי השימוש",
+        "registryId": "welcome_screen.terms_of_use",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": " ואת ",
+        "registryId": "welcome_screen.terms_and",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "welcome_screen.privacy_policy",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מדיניות הפרטיות",
+        "registryId": "welcome_screen.privacy_policy",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "welcome_screen.terms_suffix",
+        "registryOk": true
+      }
+    ],
+    "registered": 26,
+    "unregistered": [],
+    "summary": "registry 26 · mapped 26/26 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "startupStepProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "userProfileProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "authStateProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "guestBrowsingProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "welcomeSeenProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showLoginSheet",
+        "target": "showLoginSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "authGatewayProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "usersProfileWriterProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "userSystemSyncProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "promptRoleRequestProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "LegalScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.terms))",
+        "effect": "navigate → LegalScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.privacy))",
+        "effect": "navigate → LegalScreen"
+      }
+    ]
+  },
+  "floor": [
+    "confirmDestructive",
+    "hebrewAuthError",
+    "isOwnerEmail",
+    "onSubmitted",
+    "persistGuestBrowsing",
+    "persistWelcomeSeen",
+    "registrationValid",
+    "setState",
+    "unawaited",
+    "validEmail",
+    "validIsraeliMobile"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "constructible": true,
+    "props": [
+      "boardRole"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

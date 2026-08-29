@@ -1,0 +1,66 @@
+{
+  "name": "_Favorites",
+  "role": "section",
+  "section": "favorites",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "מועדפים"
+      },
+      {
+        "kind": "text",
+        "text": "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "מועדפים",
+      "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "productFavoritesProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogRepositoryProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showLipskeyProductSheet",
+        "target": "showLipskeyProductSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogRepositoryProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showLipskeyProductSheet(context, p, ref.read(catalogRepositoryProvider).allPr…",
+        "effect": "open → showLipskeyProductSheet"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": true,
+    "props": [],
+    "untangle": []
+  }
+}

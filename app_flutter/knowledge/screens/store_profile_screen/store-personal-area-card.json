@@ -1,0 +1,115 @@
+{
+  "name": "_StorePersonalAreaCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🏪"
+      },
+      {
+        "kind": "cfgText",
+        "text": "פרופיל עסק",
+        "registryId": "store_profile_screen.profile_row",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שם, טלפון, כתובת, ח.פ. ולוגו",
+        "registryId": "store_profile_screen.profile_row_sub",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🪪"
+      },
+      {
+        "kind": "cfgText",
+        "text": "תעודות עסק",
+        "registryId": "store_profile_screen.certs_row",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "רישיון עסק · ביטוח עסק",
+        "registryId": "store_profile_screen.certs_row_sub",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🧾"
+      },
+      {
+        "kind": "cfgText",
+        "text": "מסמכים",
+        "registryId": "store_profile_screen.docs_row",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "יחובר עם חיבור השרת",
+        "registryId": "store_profile_screen.docs_row_sub",
+        "registryOk": true
+      }
+    ],
+    "registered": 6,
+    "unregistered": [
+      "🏪",
+      "🪪",
+      "🧾"
+    ],
+    "summary": "registry 6 · mapped 6/6 · unregistered 3"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showStoreProfileEditSheet",
+        "target": "showStoreProfileEditSheet"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "StoreCertsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showStoreDocumentsSheet",
+        "target": "showStoreDocumentsSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showStoreProfileEditSheet(context, session: session)",
+        "effect": "open → showStoreProfileEditSheet"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(StoreCertsScreen.route())",
+        "effect": "navigate → StoreCertsScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showStoreDocumentsSheet(context)",
+        "effect": "open → showStoreDocumentsSheet"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "constructible": false,
+    "props": [
+      "session"
+    ],
+    "untangle": []
+  }
+}

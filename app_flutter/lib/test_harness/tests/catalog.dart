@@ -419,13 +419,15 @@ List<TestResult> testCatalog() {
         smartProductForSku('___none___') == null,
     got: '$linked מוצרים מקושרים ל-SmartProduct',
   ));
-  // כל SKU שמופיע ב-SmartProduct.brands קיים בקטלוג (אין קישור יתום)
+  // כל SKU שמופיע ב-SmartProduct.brands קיים בקטלוג (אין קישור יתום).
+  // נבדק מול הקטלוג המאוחד kCatalogProducts (Lipskey+Polyroll+Huliot) — לא רק
+  // kLipskeyCatalog — כי כרטיס-חכם יכול להמליץ גם על מותג PPR/חוליות (צעד 77).
   final brandSkus = {
     for (final sp in kSmartProducts)
       for (final b in sp.brands)
         if (b.sku != null) b.sku!,
   };
-  final catalogSkus = {for (final p in products) p.sku};
+  final catalogSkus = {for (final p in kCatalogProducts) p.sku};
   final orphanLinks =
       brandSkus.where((s) => !catalogSkus.contains(s)).toList();
   model.add(TestCheck(
