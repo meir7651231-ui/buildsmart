@@ -35,16 +35,16 @@ class _GenBusinessScreenState extends State<GenBusinessScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
-        appBar: AppBar(title: Text(gen_business_t15)),
+        appBar: AppBar(title: Text(gen_business_app_bar_title)),
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12),
           children: [
-          CaSubTitle(gen_business_t1),
-          SettingsInlineTextRow(label: gen_business_t2, hint: gen_business_t3, value: _t1, onChanged: (v) => setState(() => _t1 = v), labelColor: BsTokens.inkLight, inkColor: BsTokens.inkLight, cursorColor: BsTokens.brand, hintColor: BsTokens.mutedLight, fillColor: BsTokens.cardLight),
-          UnitSegmentToggle(options: const <({String label, bool enabled})>[(label: gen_business_t4, enabled: true), (label: gen_business_t5, enabled: true), (label: gen_business_t6, enabled: true)], selectedIndex: _n2, onSelect: (v) => setState(() => _n2 = v), selectedBgColor: BsTokens.cardLight, selectedFgColor: BsTokens.inkLight, enabledFgColor: BsTokens.inkLight, disabledFgColor: BsTokens.inkLight, borderColor: BsTokens.divider),
-          ChipWrap(options: const <String>[gen_business_t7, gen_business_t8, gen_business_t9], selected: _t3, onSelect: (v) => setState(() => _t3 = v)),
-          ChatSettingsSwitchRow(fallback: gen_business_t10, label: gen_business_t11, value: _v4, onChanged: (v) => setState(() => _v4 = v)),
-          ChatSettingsActionRow(label: gen_business_t12, buttonLabel: gen_business_t13, onTap: () => _toast(gen_business_t14)),
+          CaSubTitle(gen_business_header_text),
+          SettingsInlineTextRow(label: gen_business_textfield_label, hint: gen_business_textfield_hint, value: _t1, onChanged: (v) => setState(() => _t1 = v), labelColor: BsTokens.inkLight, inkColor: BsTokens.inkLight, cursorColor: BsTokens.brand, hintColor: BsTokens.mutedLight, fillColor: BsTokens.cardLight),
+          UnitSegmentToggle(options: const <({String label, bool enabled})>[(label: gen_business_radio_option, enabled: true), (label: gen_business_radio_option2, enabled: true), (label: gen_business_radio_option3, enabled: true)], selectedIndex: _n2, onSelect: (v) => setState(() => _n2 = v), selectedBgColor: BsTokens.cardLight, selectedFgColor: BsTokens.inkLight, enabledFgColor: BsTokens.inkLight, disabledFgColor: BsTokens.inkLight, borderColor: BsTokens.divider),
+          ChipWrap(options: const <String>[gen_business_chip_option, gen_business_chip_option2, gen_business_chip_option3], selected: _t3, onSelect: (v) => setState(() => _t3 = v)),
+          ChatSettingsSwitchRow(fallback: gen_business_switch_fallback, label: gen_business_switch_label, value: _v4, onChanged: (v) => setState(() => _v4 = v)),
+          ChatSettingsActionRow(label: gen_business_button_label, buttonLabel: gen_business_button_button_label, onTap: () => _toast(gen_business_button_toast)),
           ],
         ),
       ),

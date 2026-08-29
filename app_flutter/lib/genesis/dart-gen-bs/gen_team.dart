@@ -33,15 +33,15 @@ class _GenTeamScreenState extends State<GenTeamScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
-        appBar: AppBar(title: Text(gen_team_t11)),
+        appBar: AppBar(title: Text(gen_team_app_bar_title)),
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12),
           children: [
-          SettingsInlineTextRow(label: gen_team_t1, hint: gen_team_t2, value: _t1, onChanged: (v) => setState(() => _t1 = v), labelColor: BsTokens.inkLight, inkColor: BsTokens.inkLight, cursorColor: BsTokens.brand, hintColor: BsTokens.mutedLight, fillColor: BsTokens.cardLight),
-          SettingsNumberRow(label: gen_team_t3, value: _n2, onChanged: (v) => setState(() => _n2 = v), inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, cursorColor: BsTokens.brand, fillColor: BsTokens.cardLight),
-          ChatSettingsSwitchRow(fallback: gen_team_t4, label: gen_team_t5, value: _v3, onChanged: (v) => setState(() => _v3 = v)),
-          ChatSettingsSwitchRow(fallback: gen_team_t6, label: gen_team_t7, value: _v4, onChanged: (v) => setState(() => _v4 = v)),
-          ChatSettingsActionRow(label: gen_team_t8, buttonLabel: gen_team_t9, onTap: () => _toast(gen_team_t10)),
+          SettingsInlineTextRow(label: gen_team_textfield_label, hint: gen_team_textfield_hint, value: _t1, onChanged: (v) => setState(() => _t1 = v), labelColor: BsTokens.inkLight, inkColor: BsTokens.inkLight, cursorColor: BsTokens.brand, hintColor: BsTokens.mutedLight, fillColor: BsTokens.cardLight),
+          SettingsNumberRow(label: gen_team_number_label, value: _n2, onChanged: (v) => setState(() => _n2 = v), inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, cursorColor: BsTokens.brand, fillColor: BsTokens.cardLight),
+          ChatSettingsSwitchRow(fallback: gen_team_switch_fallback, label: gen_team_switch_label, value: _v3, onChanged: (v) => setState(() => _v3 = v)),
+          ChatSettingsSwitchRow(fallback: gen_team_switch_fallback2, label: gen_team_switch_label2, value: _v4, onChanged: (v) => setState(() => _v4 = v)),
+          ChatSettingsActionRow(label: gen_team_button_label, buttonLabel: gen_team_button_button_label, onTap: () => _toast(gen_team_button_toast)),
           ],
         ),
       ),

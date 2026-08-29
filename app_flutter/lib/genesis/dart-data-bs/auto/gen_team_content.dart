@@ -1,12 +1,12 @@
 // 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
-const String gen_team_t1 = 'שם העובד';
-const String gen_team_t2 = 'שם העובד';
-const String gen_team_t3 = 'ימי עבודה בשבוע';
-const String gen_team_t4 = 'קבלת התראות';
-const String gen_team_t5 = 'קבלת התראות';
-const String gen_team_t6 = 'גישה למחסן';
-const String gen_team_t7 = 'גישה למחסן';
-const String gen_team_t8 = 'הוספת עובד';
-const String gen_team_t9 = 'הוספת עובד';
-const String gen_team_t10 = 'הוספת עובד';
-const String gen_team_t11 = 'ניהול צוות';
+const String gen_team_textfield_label = 'שם העובד'; // t_3b200298
+const String gen_team_textfield_hint = 'שם העובד'; // t_3b200298
+const String gen_team_number_label = 'ימי עבודה בשבוע';
+const String gen_team_switch_fallback = 'קבלת התראות';
+const String gen_team_switch_label = 'קבלת התראות';
+const String gen_team_switch_fallback2 = 'גישה למחסן';
+const String gen_team_switch_label2 = 'גישה למחסן';
+const String gen_team_button_label = 'הוספת עובד';
+const String gen_team_button_button_label = 'הוספת עובד';
+const String gen_team_button_toast = 'הוספת עובד';
+const String gen_team_app_bar_title = 'ניהול צוות';

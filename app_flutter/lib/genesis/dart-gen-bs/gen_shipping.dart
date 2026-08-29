@@ -33,15 +33,15 @@ class _GenShippingScreenState extends State<GenShippingScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
-        appBar: AppBar(title: Text(gen_shipping_t11)),
+        appBar: AppBar(title: Text(gen_shipping_app_bar_title)),
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12),
           children: [
-          ChatSettingsSwitchRow(fallback: gen_shipping_t1, label: gen_shipping_t2, value: _v1, onChanged: (v) => setState(() => _v1 = v)),
-          SettingsInlineTextRow(label: gen_shipping_t3, hint: gen_shipping_t4, value: _t2, onChanged: (v) => setState(() => _t2 = v), labelColor: BsTokens.inkLight, inkColor: BsTokens.inkLight, cursorColor: BsTokens.brand, hintColor: BsTokens.mutedLight, fillColor: BsTokens.cardLight),
-          ChatSettingsSwitchRow(fallback: gen_shipping_t5, label: gen_shipping_t6, value: _v3, onChanged: (v) => setState(() => _v3 = v)),
-          SettingsNumberRow(label: gen_shipping_t7, value: _n4, onChanged: (v) => setState(() => _n4 = v), inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, cursorColor: BsTokens.brand, fillColor: BsTokens.cardLight),
-          ChatSettingsActionRow(label: gen_shipping_t8, buttonLabel: gen_shipping_t9, onTap: () => _toast(gen_shipping_t10)),
+          ChatSettingsSwitchRow(fallback: gen_shipping_switch_fallback, label: gen_shipping_switch_label, value: _v1, onChanged: (v) => setState(() => _v1 = v)),
+          SettingsInlineTextRow(label: gen_shipping_textfield_label, hint: gen_shipping_textfield_hint, value: _t2, onChanged: (v) => setState(() => _t2 = v), labelColor: BsTokens.inkLight, inkColor: BsTokens.inkLight, cursorColor: BsTokens.brand, hintColor: BsTokens.mutedLight, fillColor: BsTokens.cardLight),
+          ChatSettingsSwitchRow(fallback: gen_shipping_switch_fallback2, label: gen_shipping_switch_label2, value: _v3, onChanged: (v) => setState(() => _v3 = v)),
+          SettingsNumberRow(label: gen_shipping_number_label, value: _n4, onChanged: (v) => setState(() => _n4 = v), inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, cursorColor: BsTokens.brand, fillColor: BsTokens.cardLight),
+          ChatSettingsActionRow(label: gen_shipping_button_label, buttonLabel: gen_shipping_button_button_label, onTap: () => _toast(gen_shipping_button_toast)),
           ],
         ),
       ),
