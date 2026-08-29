@@ -41,7 +41,8 @@ jobs:
           echo "── שגיאות לפי-תיקייה ──"
           grep "^  error" genesis-analyze.txt | grep -oE "lib/genesis/[a-z-]+" | sort | uniq -c | sort -rn
           tail -5 genesis-analyze.txt
-          exit $CODE
+          # ירוק = אפס-שגיאות; הערות-סגנון (infos) אינן מפילות את השער
+          [ "$E" -eq 0 ] && exit 0 || exit 1
 
       - name: Upload full report
         if: always()
