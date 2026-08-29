@@ -12,6 +12,7 @@ const String gen_entry_stat_value3 = '79';
 const String gen_entry_stat_label3 = 'מסכים הורכבו מחדש מהלבנים';
 const String gen_entry_header_text2 = 'גשר הלוגיקה פועם';
 const String gen_entry_stat_label4 = 'החודש העברי כרגע לפי מנוע מאור';
+const String gen_entry_stat_label5 = 'קוד הזמנה דטרמיניסטי "genesis"';
 const String gen_entry_header_text3 = 'הצורות שהמחולל מבין';
 const String gen_entry_chip_option = 'מתג';
 const String gen_entry_chip_option2 = 'שדה';
