@@ -21,6 +21,5 @@ const String gen_entry_chip_option7 = 'כותרת';
 const String gen_entry_chip_option8 = 'כפתור';
 const String gen_entry_banner_sub = 'המסך הזה נוצר על ידי המחולל עצמו — מאטומים קיימים בלבד';
 const String gen_entry_button_label = 'צרו מסך חדש';
-const String gen_entry_button_button_label = 'צרו מסך חדש';
 const String gen_entry_button_toast = 'צרו מסך חדש';
 const String gen_entry_app_bar_title = 'המחולל';
