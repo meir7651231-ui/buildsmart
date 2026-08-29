@@ -212,7 +212,7 @@ class AccRow extends StatelessWidget {
                         onTap: qty > 1
                             ? () => onQtyChanged(qty - 1)
                             : null,
-                      , label3: label3, label4: label4),
+                       label3: label3, label4: label4),
                       SizedBox(
                         width: 22,
                         child: Text(
@@ -228,7 +228,7 @@ class AccRow extends StatelessWidget {
                       _MiniQtyBtn(
                         icon: Icons.add,
                         onTap: () => onQtyChanged(qty + 1),
-                      , label3: label3, label4: label4),
+                       label3: label3, label4: label4),
                     ],
                   ),
                 ),

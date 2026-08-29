@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/catalog_settings_placeholder_row.dart';
 import '../dart-ui-bs/auto/chat_settings_switch_row.dart';
 import '../dart-ui-bs/auto/store_settings_action_row.dart';
+import '../dart-ui-bs/auto/store_settings_section_tile.dart';
 import '../dart-ui-bs/screens__store_settings_screen/settings_number_row.dart';
 import '../dart-ui-bs/screens__store_settings_screen/settings_validated_text_row.dart';
+import '../dart-data-bs/auto/screens__store_settings_screen_content.dart';
+import '../dart-data-bs/screens__store_settings_screen_content.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -22,11 +25,12 @@ class StoreSettingsScreenTokens {
 }
 
 class StoreSettingsScreenComposed extends StatelessWidget {
-  const StoreSettingsScreenComposed({required this.onChanged, required this.onTap, required this.buttonLabel, required this.errorText, required this.fallback, required this.hint, required this.label, required this.subtitleNote, required this.underConstruction, required this.value, required this.value2, required this.value22, required this.t, super.key});
+  const StoreSettingsScreenComposed({required this.onChanged, required this.onTap, required this.buttonLabel, required this.children, required this.errorText, required this.fallback, required this.hint, required this.label, required this.subtitleNote, required this.underConstruction, required this.value, required this.value2, required this.value22, required this.t, super.key});
 
   final VoidCallback onChanged;
   final VoidCallback onTap;
   final String buttonLabel;
+  final List<Widget> children;
   final String? errorText;
   final String fallback;
   final String hint;
@@ -43,6 +47,13 @@ class StoreSettingsScreenComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
+          StoreSettingsSectionTile(
+            fallback: store_settings_section_tile_fallback,
+            emoji: storeSettingsScreenContent.emoji,
+            title: storeSettingsScreenContent.title,
+            children: children,
+            underConstruction: underConstruction,
+          ),
           SettingsValidatedTextRow(
             label: label,
             hint: hint,

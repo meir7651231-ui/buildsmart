@@ -13,7 +13,7 @@ class SichaSheet extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  static final _contacts = [
+  late final _contacts = [
     (avatar: '👷', name: name),
     (avatar: '🏪', name: name2),
     (avatar: '🛵', name: name3),

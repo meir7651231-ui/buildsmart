@@ -62,4 +62,3 @@ class SubmitButton extends StatelessWidget {
     );
   }
 }
-

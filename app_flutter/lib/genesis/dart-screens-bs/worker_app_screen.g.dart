@@ -10,6 +10,7 @@ import '../dart-ui-bs/auto/submit_button.dart';
 import '../dart-ui-bs/auto/summary_card.dart';
 import '../dart-ui-bs/auto/today_stat.dart';
 import '../dart-ui-bs/auto/worker_app_stat.dart';
+import '../dart-ui-bs/auto/worker_nav.dart';
 import '../dart-data-bs/auto/screens__worker_app_screen_content.dart';
 
 
@@ -20,10 +21,12 @@ class WorkerAppScreenTokens {
 }
 
 class WorkerAppScreenComposed extends StatelessWidget {
-  const WorkerAppScreenComposed({required this.onPressed, required this.onTap, required this.deliveryFee, required this.label, required this.label2, required this.label3, required this.label4, required this.label5, required this.subtotal, required this.text, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
+  const WorkerAppScreenComposed({required this.onPressed, required this.onTap, required this.chatOn, required this.currentIndex, required this.deliveryFee, required this.label, required this.label2, required this.label3, required this.label4, required this.label5, required this.subtotal, required this.text, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
 
   final VoidCallback onPressed;
   final VoidCallback onTap;
+  final bool chatOn;
+  final int currentIndex;
   final int deliveryFee;
   final String label;
   final String label2;
@@ -43,6 +46,14 @@ class WorkerAppScreenComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
+          WorkerNav(
+            label: worker_nav_label,
+            label2: worker_nav_label2,
+            label3: worker_nav_label3,
+            label4: worker_nav_label4,
+            currentIndex: currentIndex,
+            chatOn: chatOn,
+          ),
           SummaryCard(
             label: label,
             label2: label2,

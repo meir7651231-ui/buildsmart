@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__trade_builder_home.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
+// מקור-החיווט: screens__trade_builder__trade_builder_home.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/trade_builder/trade_builder_home.dart';
@@ -23,7 +23,6 @@ class TradeBuilderTradeBuilderHomeBoard extends ConsumerWidget {
     return TradeBuilderTradeBuilderHomeComposed(
       onTap: () {} /* TODO-לוח */,
       fallback: '' /* TODO-לוח: String */,
-      published: false /* TODO-לוח: bool */,
       t: TradeBuilderTradeBuilderHomeTokens(),
     );
   }

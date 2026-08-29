@@ -13,7 +13,7 @@ class WorkerEmployerStockSheetStockRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final warehouse = location == 'warehouse';
+    late final warehouse = location == 'warehouse';
     return Container(
       constraints: const BoxConstraints(minHeight: 48),
       margin: const EdgeInsets.only(bottom: BsTokens.space2),

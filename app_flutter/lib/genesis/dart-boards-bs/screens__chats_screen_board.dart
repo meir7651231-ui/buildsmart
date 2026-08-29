@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__chats_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
+// מקור-החיווט: screens__chats_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 11.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
@@ -32,9 +32,17 @@ class ChatsScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ChatsScreenComposed(
+      onSend: () {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,
       active: false /* TODO-לוח: bool */,
+      controller: TextEditingController() /* TODO-לוח: TextEditingController */,
+      date: '' /* TODO-לוח: String */,
+      enabled: false /* TODO-לוח: bool */,
+      hintText: '' /* TODO-לוח: String */,
+      icon: Icons.circle /* TODO-לוח: IconData */,
       label: '' /* TODO-לוח: String */,
+      semanticLabel: '' /* TODO-לוח: String */,
+      tooltip: '' /* TODO-לוח: String */,
       t: ChatsScreenTokens(),
     );
   }

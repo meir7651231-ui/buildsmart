@@ -121,4 +121,3 @@ class ConsentDialog extends StatelessWidget {
     );
   }
 }
-

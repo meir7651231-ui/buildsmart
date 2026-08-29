@@ -1,39 +1,13 @@
 // 🧽 לוטש ע"י מנוע-המטרות (data-lift v3) — דאטה/מודל/תבנית הורמו ל-props לפי מטרתם, אל תערוך ידנית.
-// מוצא: screens__notif_settings_screen:_QuickActionsSection (בנייה-חכמה main) · צרור-5 · props-שורש: title, label, label2, label3, label4, fallback, fallback2, onTap
+// מוצא: screens__notif_settings_screen:_SectionTile (בנייה-חכמה main) · צרור-4 · props-שורש: fallback
 // התוכן: new/dart-data-bs/auto/screens__notif_settings_screen_content.dart
 import 'package:flutter/material.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'bs_tokens.dart';
 import 'package:buildsmart/state/under_construction.dart';
 
-class QuickActionsSection extends StatelessWidget {
-  QuickActionsSection({required this.title, required this.label, required this.label2, required this.label3, required this.label4, required this.fallback, required this.fallback2, required this.onTap});
-  final String title;
-  final String label;
-  final String label2;
-  final String label3;
-  final String label4;
-  final String fallback;
-  final String fallback2;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return _SectionTile(
-      emoji: '⚡',
-      title: title,
-      children: [
-        _PlaceholderRow(label: label, fallback2: fallback2, onTap: onTap),
-        _PlaceholderRow(label: label2, fallback2: fallback2, onTap: onTap),
-        _PlaceholderRow(label: label3, fallback2: fallback2, onTap: onTap),
-        _PlaceholderRow(label: label4, fallback2: fallback2, onTap: onTap),
-      ],
-     fallback: fallback);
-  }
-}
-
-class _SectionTile extends StatelessWidget {
-  _SectionTile({required this.fallback, 
+class NotifSettingsSectionTile extends StatelessWidget {
+  NotifSettingsSectionTile({required this.fallback, 
     required this.emoji,
     required this.title,
     required this.children,

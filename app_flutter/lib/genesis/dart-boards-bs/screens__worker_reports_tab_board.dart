@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 8.
+// מקור-החיווט: screens__worker_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/worker_reports_tab.dart';
@@ -29,9 +29,7 @@ class WorkerReportsTabBoard extends ConsumerWidget {
     return WorkerReportsTabComposed(
       onTap: () {} /* TODO-לוח */,
       children: const [] /* TODO-לוח: List<Widget> */,
-      glyph: '' /* TODO-לוח: String */,
       label: '' /* TODO-לוח: String */,
-      photo: null /* TODO-לוח: String? */,
       title: '' /* TODO-לוח: String */,
       titleId: null /* TODO-לוח: String? */,
       value: '' /* TODO-לוח: String */,

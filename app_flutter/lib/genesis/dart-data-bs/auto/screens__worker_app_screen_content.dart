@@ -9,3 +9,7 @@ const String propose_task_button_label = 'הוסף משימה';
 const String propose_task_button_fallback = 'הוסף משימה';
 const String submit_button_label = 'שלח לאישור';
 const String submit_button_fallback = '📸 שלח לאישור';
+const String worker_nav_label = 'משימות';
+const String worker_nav_label2 = 'שיחות';
+const String worker_nav_label3 = 'דוחות';
+const String worker_nav_label4 = 'אזור אישי';

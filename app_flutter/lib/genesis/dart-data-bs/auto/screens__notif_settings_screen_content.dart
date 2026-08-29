@@ -1,4 +1,8 @@
 // 📦 דאטה · תוכן-שהורם ע"י data-lift מ-screens__notif_settings_screen — verbatim מהמקור, אל תערוך ידנית.
+const String notif_settings_section_tile_fallback = 'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות';
+const String notif_settings_section_tile_fallback2 = 'בבנייה';
+const String notif_settings_section_tile_fallback3 = 'דורש חיבור שרת — לא זמין בגרסה זו';
+const String notif_settings_section_tile_fallback4 = 'בבנייה — עדיין לא משפיע';
 const String notif_settings_switch_row_fallback = 'דורש חיבור שרת — לא זמין בגרסה זו';
 const String notif_settings_switch_row_fallback2 = 'בבנייה — עדיין לא משפיע';
 const String quick_actions_section_title = 'פעולות מהירות';
@@ -7,12 +11,9 @@ const String quick_actions_section_label2 = 'אישור בלי פתיחת אפל
 const String quick_actions_section_label3 = 'דחייה מהירה';
 const String quick_actions_section_label4 = 'תשובה ישירה';
 const String quick_actions_section_fallback = 'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות';
-const String quick_actions_section_fallback2 = 'דורש חיבור שרת — לא זמין בגרסה זו';
-const String quick_actions_section_fallback3 = 'בבנייה — עדיין לא משפיע';
-const String quick_actions_section_fallback4 = 'בבנייה';
-const String quick_actions_section_fallback5 = 'בבנייה';
-const String quick_actions_section_fallback6 = 'דורש חיבור שרת — לא זמין בגרסה זו';
-const String quick_actions_section_fallback7 = 'בבנייה — עדיין לא משפיע';
+const String quick_actions_section_fallback2 = 'בבנייה';
+const String quick_actions_section_fallback3 = 'דורש חיבור שרת — לא זמין בגרסה זו';
+const String quick_actions_section_fallback4 = 'בבנייה — עדיין לא משפיע';
 const String snooze_sheet_label = '15 דקות';
 const String snooze_sheet_label2 = 'שעה';
 const String snooze_sheet_label3 = '4 שעות';

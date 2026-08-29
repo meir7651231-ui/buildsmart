@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__lipskey_products_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 8.
+// מקור-החיווט: screens__lipskey_products_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 10.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
@@ -30,12 +30,14 @@ class LipskeyProductsScreenBoard extends ConsumerWidget {
       onTap: () {} /* TODO-לוח */,
       count: 0 /* TODO-לוח: int */,
       icon: Icons.remove,
+      isOpen: false /* TODO-לוח: bool */,
       label: '' /* TODO-לוח: String */,
       label2: '' /* TODO-לוח: String */,
       message: '' /* TODO-לוח: String */,
       message2: '' /* TODO-לוח: String */,
       smartTree: false /* TODO-לוח: bool */,
       title: '' /* TODO-לוח: String */,
+      word: '' /* TODO-לוח: String */,
       t: LipskeyProductsScreenTokens(),
     );
   }

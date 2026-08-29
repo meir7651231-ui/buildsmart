@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__notif_settings_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 9.
+// מקור-החיווט: screens__notif_settings_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
@@ -17,15 +17,7 @@ class NotifSettingsScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return NotifSettingsScreenComposed(
-      onChanged: () {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,
-      onTap2: () {} /* TODO-לוח */,
-      onTap3: () {} /* TODO-לוח */,
-      onTap4: () {} /* TODO-לוח */,
-      label: '' /* TODO-לוח: String */,
-      requiresServer: false /* TODO-לוח: bool */,
-      underConstruction: false /* TODO-לוח: bool */,
-      value: false /* TODO-לוח: bool */,
       t: NotifSettingsScreenTokens(),
     );
   }

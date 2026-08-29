@@ -17,7 +17,7 @@ class SubRow extends StatelessWidget {
   Widget build(BuildContext context) {
     // Guard the divisor (mirrors the guarded aggregate above): allocated == 0
     // would make spent/allocated NaN/Infinity and .round() THROW.
-    final pct =
+    late final pct =
         allocated > 0 ? (spent / allocated * 100).round() : 0;
     final over = pct > 100;
     return Container(

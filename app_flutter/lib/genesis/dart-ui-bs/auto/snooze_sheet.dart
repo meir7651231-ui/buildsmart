@@ -14,7 +14,7 @@ class SnoozeSheet extends StatelessWidget {
   final String fallback;
   final VoidCallback onTap;
 
-  static final _options = [
+  late final _options = [
     (mins: 15, label: label),
     (mins: 60, label: label2),
     (mins: 240, label: label3),

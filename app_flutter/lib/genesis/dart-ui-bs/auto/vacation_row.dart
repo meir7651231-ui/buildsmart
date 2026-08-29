@@ -21,7 +21,7 @@ class VacationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pending = status == kVacationPending;
+    late final pending = status == kVacationPending;
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(

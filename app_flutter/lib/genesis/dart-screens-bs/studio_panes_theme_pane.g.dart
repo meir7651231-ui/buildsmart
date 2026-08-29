@@ -2,6 +2,7 @@
 // מקור: screens__studio__panes__theme_pane.manifest.json · המסך = דאטה; הקוד הזה = חיווט-בלבד (חוק-2).
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
+import '../dart-ui-bs/auto/contrast_warning.dart';
 import '../dart-ui-bs/auto/label.dart';
 import '../dart-ui-bs/auto/swatch.dart';
 import '../dart-data-bs/auto/screens__studio__panes__theme_pane_content.dart';
@@ -21,9 +22,10 @@ class StudioPanesThemePaneTokens {
 }
 
 class StudioPanesThemePaneComposed extends StatelessWidget {
-  const StudioPanesThemePaneComposed({required this.swatchItems, required this.text, required this.t, super.key});
+  const StudioPanesThemePaneComposed({required this.ratio, required this.swatchItems, required this.text, required this.t, super.key});
 
 
+  final double ratio;
   final List<SwatchItem> swatchItems;
   final String text;
   final StudioPanesThemePaneTokens t;
@@ -45,6 +47,11 @@ class StudioPanesThemePaneComposed extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
+          ContrastWarning(
+            label: contrast_warning_label,
+            label2: contrast_warning_label2,
+            ratio: ratio,
+          ),
         ],
       );
 }
