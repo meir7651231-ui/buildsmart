@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
 
-class Placeholder extends StatelessWidget {
-  const Placeholder(this.msg);
+class StudioPanesFindReplacePanePlaceholder extends StatelessWidget {
+  const StudioPanesFindReplacePanePlaceholder(this.msg);
 
   final String msg;
 

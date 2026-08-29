@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__trade_builder__connection_rule_studio.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/trade_builder/connection_rule_studio.dart';
 import 'package:buildsmart/domain/connection_resolver.dart';
 import 'package:buildsmart/domain/connection_schema.dart';
 import 'package:buildsmart/state/trades_store.dart';

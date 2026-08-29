@@ -3,7 +3,6 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/approval_card.dart';
-import '../dart-ui-bs/auto/card.dart';
 import '../dart-ui-bs/auto/done_all.dart';
 import '../dart-ui-bs/auto/intro.dart';
 import '../dart-ui-bs/auto/log_button.dart';
@@ -11,6 +10,7 @@ import '../dart-ui-bs/auto/new_task_button.dart';
 import '../dart-ui-bs/auto/primary_btn.dart';
 import '../dart-ui-bs/auto/proposal_card.dart';
 import '../dart-ui-bs/auto/sec_h.dart';
+import '../dart-ui-bs/auto/worker_reports_tab_card.dart';
 import '../dart-data-bs/auto/screens__tasks_screen_content.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
@@ -103,7 +103,7 @@ class TasksScreenComposed extends StatelessWidget {
             label: label,
             onTap: onTap,
           ),
-          Card(
+          WorkerReportsTabCard(
             title: title,
             titleId: titleId,
             children: children,

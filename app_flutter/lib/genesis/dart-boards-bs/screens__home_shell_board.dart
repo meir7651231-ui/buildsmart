@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__home_shell.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 5.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -47,7 +48,7 @@ class HomeShellBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return HomeShellComposed(
-      cfgId: '' /* TODO-לוח: String? */,
+      cfgId: null /* TODO-לוח: String? */,
       count: 0 /* TODO-לוח: int */,
       emoji: '' /* TODO-לוח: String */,
       icon: Icons.circle /* TODO-לוח: IconData */,

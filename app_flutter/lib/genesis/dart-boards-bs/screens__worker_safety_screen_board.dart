@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__worker_safety_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/worker_safety_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';

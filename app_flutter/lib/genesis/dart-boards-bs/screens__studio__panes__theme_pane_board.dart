@@ -2,7 +2,7 @@
 // מקור-החיווט: screens__studio__panes__theme_pane.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:buildsmart/screens/studio/panes/theme_pane.dart';
 import '../dart-screens-bs/studio_panes_theme_pane.g.dart';
 
 class StudioPanesThemePaneBoard extends ConsumerWidget {

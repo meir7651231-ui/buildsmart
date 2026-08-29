@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__projects_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 5.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/projects_screen.dart';
 import 'package:buildsmart/screens/budget_screen.dart';
 import 'package:buildsmart/screens/smart_project_screen.dart';
 import 'package:buildsmart/screens/tasks_screen.dart';

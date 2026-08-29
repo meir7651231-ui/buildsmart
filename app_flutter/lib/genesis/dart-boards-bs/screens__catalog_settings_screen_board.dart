@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__catalog_settings_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 0.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/home_content_reorder.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';

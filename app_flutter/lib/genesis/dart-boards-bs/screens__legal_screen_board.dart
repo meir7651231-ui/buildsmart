@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__legal_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 0.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/data/legal_texts.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';

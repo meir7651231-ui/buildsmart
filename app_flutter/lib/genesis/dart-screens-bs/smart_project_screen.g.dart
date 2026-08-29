@@ -2,8 +2,8 @@
 // מקור: screens__smart_project_screen.manifest.json · המסך = דאטה; הקוד הזה = חיווט-בלבד (חוק-2).
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
-import '../dart-ui-bs/auto/hero.dart';
 import '../dart-ui-bs/auto/project_done.dart';
+import '../dart-ui-bs/auto/smart_project_hero.dart';
 import '../dart-data-bs/auto/screens__smart_project_screen_content.dart';
 
 
@@ -28,9 +28,9 @@ class SmartProjectScreenComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
-          Hero(
-            label: hero_label,
-            label2: hero_label2,
+          SmartProjectHero(
+            label: smart_project_hero_label,
+            label2: smart_project_hero_label2,
             title: title,
             done: done,
             total: total,

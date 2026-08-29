@@ -2,8 +2,8 @@
 // מקור: screens__persona_picking_sheet.manifest.json · המסך = דאטה; הקוד הזה = חיווט-בלבד (חוק-2).
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
-import '../dart-ui-bs/auto/banner.dart';
 import '../dart-ui-bs/auto/grip.dart';
+import '../dart-ui-bs/auto/persona_picking_sheet_banner.dart';
 import '../dart-ui-bs/auto/split_control.dart';
 import '../dart-data-bs/auto/screens__persona_picking_sheet_content.dart';
 
@@ -31,7 +31,7 @@ class PersonaPickingSheetComposed extends StatelessWidget {
           Grip(
             
           ),
-          Banner(
+          PersonaPickingSheetBanner(
             text: text,
             bg: t.bg,
             fg: t.fg,

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
 import 'package:buildsmart/theme/config_theme.dart';
 
-class Hero extends StatelessWidget {
-  Hero(
+class SmartProjectHero extends StatelessWidget {
+  SmartProjectHero(
       {required this.label, required this.label2, required this.title,
       required this.done,
       required this.total,

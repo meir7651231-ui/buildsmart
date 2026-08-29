@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__courier_certs_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/courier_certs_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';

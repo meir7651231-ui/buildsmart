@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__worker_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 8.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/worker_reports_tab.dart';
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/logic/calendar_days.dart';
@@ -30,9 +31,9 @@ class WorkerReportsTabBoard extends ConsumerWidget {
       children: const [] /* TODO-לוח: List<Widget> */,
       glyph: '' /* TODO-לוח: String */,
       label: '' /* TODO-לוח: String */,
-      photo: '' /* TODO-לוח: String? */,
+      photo: null /* TODO-לוח: String? */,
       title: '' /* TODO-לוח: String */,
-      titleId: '' /* TODO-לוח: String? */,
+      titleId: null /* TODO-לוח: String? */,
       value: '' /* TODO-לוח: String */,
       t: WorkerReportsTabTokens(),
     );

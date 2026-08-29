@@ -2,8 +2,8 @@
 // מקור: screens__lipskey_product_sheet.manifest.json · המסך = דאטה; הקוד הזה = חיווט-בלבד (חוק-2).
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
-import '../dart-ui-bs/auto/divider.dart';
 import '../dart-ui-bs/auto/empty_hint.dart';
+import '../dart-ui-bs/auto/lipskey_product_sheet_divider.dart';
 import '../dart-ui-bs/auto/picker_option.dart';
 import '../dart-ui-bs/auto/qty_stepper.dart';
 import '../dart-ui-bs/auto/section_title.dart';
@@ -59,7 +59,7 @@ class LipskeyProductSheetComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
-          Divider(
+          LipskeyProductSheetDivider(
             
           ),
           SectionTitle(

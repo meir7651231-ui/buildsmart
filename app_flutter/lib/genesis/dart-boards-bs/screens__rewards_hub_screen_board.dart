@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__rewards_hub_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/rewards_hub_screen.dart';
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/under_construction.dart';

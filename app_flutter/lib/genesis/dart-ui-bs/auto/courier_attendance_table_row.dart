@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
 
-class TableRow extends StatelessWidget {
-  const TableRow({
+class CourierAttendanceTableRow extends StatelessWidget {
+  const CourierAttendanceTableRow({
     required this.date,
     required this.inText,
     required this.outText,

@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__install_studio_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/config/app_brand.dart';

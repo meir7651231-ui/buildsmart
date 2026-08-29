@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__budget_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/budget_screen.dart';
 import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/data/repositories/site_local.dart';
 import 'package:buildsmart/logic/input_validators.dart';
@@ -18,8 +19,8 @@ class BudgetScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return BudgetScreenComposed(
       onTap: () {} /* TODO-לוח */,
-      child: null /* TODO-לוח: Widget */,
-      controller: null /* TODO-לוח: TextEditingController */,
+      child: const SizedBox.shrink() /* TODO-לוח: Widget */,
+      controller: TextEditingController() /* TODO-לוח: TextEditingController */,
       label: '' /* TODO-לוח: String */,
       name: '' /* TODO-לוח: String */,
       number: false /* TODO-לוח: bool */,

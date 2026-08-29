@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__ai_hub_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 11.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';

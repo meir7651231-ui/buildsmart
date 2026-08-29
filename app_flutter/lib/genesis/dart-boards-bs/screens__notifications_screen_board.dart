@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__notifications_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';

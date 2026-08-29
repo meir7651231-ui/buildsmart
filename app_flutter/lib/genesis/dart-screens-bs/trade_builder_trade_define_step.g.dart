@@ -2,8 +2,8 @@
 // מקור: screens__trade_builder__trade_define_step.manifest.json · המסך = דאטה; הקוד הזה = חיווט-בלבד (חוק-2).
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
-import '../dart-ui-bs/auto/color_swatch.dart';
 import '../dart-ui-bs/auto/save_draft_button.dart';
+import '../dart-ui-bs/auto/trade_builder_trade_define_step_color_swatch.dart';
 import '../dart-data-bs/auto/screens__trade_builder__trade_define_step_content.dart';
 
 
@@ -28,8 +28,8 @@ class TradeBuilderTradeDefineStepComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
-          ColorSwatch(
-            label: color_swatch_label,
+          TradeBuilderTradeDefineStepColorSwatch(
+            label: trade_builder_trade_define_step_color_swatch_label,
             color: color,
             index: index,
             selected: selected,

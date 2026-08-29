@@ -3,7 +3,7 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/courier_attendance_send_report_button.dart';
-import '../dart-ui-bs/auto/table_row.dart';
+import '../dart-ui-bs/auto/courier_attendance_table_row.dart';
 import '../dart-ui-bs/auto/today_stat.dart';
 import '../dart-data-bs/auto/screens__courier_attendance_screen_content.dart';
 
@@ -44,7 +44,7 @@ class CourierAttendanceScreenComposed extends StatelessWidget {
             label: label,
             value: value,
           ),
-          TableRow(
+          CourierAttendanceTableRow(
             date: date,
             inText: inText,
             outText: outText,

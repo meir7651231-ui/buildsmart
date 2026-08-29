@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__lipskey_product_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 16.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -39,7 +40,7 @@ class LipskeyProductSheetBoard extends ConsumerWidget {
       pickerOptionItems: const [] /* TODO-לוח: List<PickerOptionItem> */,
       qty: 0 /* TODO-לוח: int */,
       stageRowItems: const [] /* TODO-לוח: List<StageRowItem> */,
-      subtitle: '' /* TODO-לוח: String? */,
+      subtitle: null /* TODO-לוח: String? */,
       tag: '' /* TODO-לוח: String */,
       text: 'אין קבוצה',
       title2: '' /* TODO-לוח: String */,

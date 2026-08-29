@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__finance_hub_sheets.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 19.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/finance_hub_sheets.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/logic/finance_report_pdf.dart';
 import 'package:buildsmart/logic/input_validators.dart';
@@ -32,9 +33,9 @@ class FinanceHubSheetsBoard extends ConsumerWidget {
       label: this.label,
       label2: '' /* TODO-לוח: String */,
       name: '' /* TODO-לוח: String */,
-      note: '' /* TODO-לוח: String? */,
-      secondLabel: '' /* TODO-לוח: String? */,
-      secondValue: '' /* TODO-לוח: String? */,
+      note: null /* TODO-לוח: String? */,
+      secondLabel: null /* TODO-לוח: String? */,
+      secondValue: null /* TODO-לוח: String? */,
       spent: 0 /* TODO-לוח: int */,
       sub: '' /* TODO-לוח: String */,
       text: 'אין בקשות לאישור',

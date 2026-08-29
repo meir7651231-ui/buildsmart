@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__manager_copilot_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/logic/manager_copilot.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -14,7 +15,7 @@ class ManagerCopilotScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ManagerCopilotScreenComposed(
       onSend: () {} /* TODO-לוח */,
-      controller: null /* TODO-לוח: TextEditingController */,
+      controller: TextEditingController() /* TODO-לוח: TextEditingController */,
       enabled: false /* TODO-לוח: bool */,
       t: ManagerCopilotScreenTokens(),
     );

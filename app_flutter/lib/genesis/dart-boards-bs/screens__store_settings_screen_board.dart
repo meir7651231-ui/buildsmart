@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__store_settings_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 11.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/store_settings.dart';
@@ -23,11 +24,11 @@ class StoreSettingsScreenBoard extends ConsumerWidget {
       onChanged: () {} /* TODO-לוח */,
       onTap: () => showToast(context, '$label — בבנייה'),
       buttonLabel: '' /* TODO-לוח: String */,
-      errorText: '' /* TODO-לוח: String? */,
+      errorText: null /* TODO-לוח: String? */,
       fallback: '' /* TODO-לוח: String */,
       hint: '' /* TODO-לוח: String */,
       label: '' /* TODO-לוח: String */,
-      subtitleNote: '' /* TODO-לוח: String? */,
+      subtitleNote: null /* TODO-לוח: String? */,
       underConstruction: false /* TODO-לוח: bool */,
       value: '' /* TODO-לוח: String */,
       value2: false /* TODO-לוח: bool */,

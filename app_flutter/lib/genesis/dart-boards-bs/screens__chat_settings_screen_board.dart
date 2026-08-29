@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__chat_settings_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/under_construction.dart';

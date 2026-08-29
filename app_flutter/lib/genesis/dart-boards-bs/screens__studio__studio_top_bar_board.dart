@@ -2,7 +2,7 @@
 // מקור-החיווט: screens__studio__studio_top_bar.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:buildsmart/screens/studio/studio_top_bar.dart';
 import '../dart-screens-bs/studio_studio_top_bar.g.dart';
 
 class StudioStudioTopBarBoard extends ConsumerWidget {

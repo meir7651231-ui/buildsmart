@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__smart_project_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/smart_project_screen.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/smart_project_engine.dart';

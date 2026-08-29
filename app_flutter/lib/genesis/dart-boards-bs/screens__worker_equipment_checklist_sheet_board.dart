@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__worker_equipment_checklist_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/worker_equipment_checklist_sheet.dart';
 import 'package:buildsmart/data/task_skus_local.dart';
 import 'package:buildsmart/logic/equipment_stock_join.dart';
 import 'package:buildsmart/logic/install_kit.dart';

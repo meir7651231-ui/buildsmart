@@ -4,10 +4,10 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/action_card.dart';
 import '../dart-ui-bs/auto/big_button.dart';
-import '../dart-ui-bs/auto/chip.dart';
 import '../dart-ui-bs/auto/flat_card.dart';
 import '../dart-ui-bs/auto/portal_tile_button.dart';
 import '../dart-ui-bs/auto/stat.dart';
+import '../dart-ui-bs/auto/store_dashboard_chip.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class PortalTileButtonItem {
@@ -60,7 +60,7 @@ class StoreDashboardScreenComposed extends StatelessWidget {
             label: label,
             onTap: onTap,
           ),
-          Chip(
+          StoreDashboardChip(
             label: label,
             on: on,
             onTap: onTap,

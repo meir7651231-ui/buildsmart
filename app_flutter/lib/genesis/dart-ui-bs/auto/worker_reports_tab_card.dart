@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'bs_tokens.dart';
 
-class Card extends StatelessWidget {
-  const Card({required this.title, required this.children, this.titleId});
+class WorkerReportsTabCard extends StatelessWidget {
+  const WorkerReportsTabCard({required this.title, required this.children, this.titleId});
 
   final String title;
 

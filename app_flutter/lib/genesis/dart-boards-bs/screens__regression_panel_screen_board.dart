@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__regression_panel_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 11.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/test_harness/regression_state.dart';
 import 'package:buildsmart/test_harness/runner.dart';
 import 'package:buildsmart/test_harness/types.dart';

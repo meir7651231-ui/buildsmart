@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__lipskey_brand_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 5.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';

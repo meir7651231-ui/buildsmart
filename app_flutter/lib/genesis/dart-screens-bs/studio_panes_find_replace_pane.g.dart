@@ -2,7 +2,7 @@
 // מקור: screens__studio__panes__find_replace_pane.manifest.json · המסך = דאטה; הקוד הזה = חיווט-בלבד (חוק-2).
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
-import '../dart-ui-bs/auto/placeholder.dart';
+import '../dart-ui-bs/auto/studio_panes_find_replace_pane_placeholder.dart';
 import '../dart-ui-bs/auto/wide_warning.dart';
 import '../dart-data-bs/auto/screens__studio__panes__find_replace_pane_content.dart';
 
@@ -26,7 +26,7 @@ class StudioPanesFindReplacePaneComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
-          Placeholder(
+          StudioPanesFindReplacePanePlaceholder(
             msg: msg,
           ),
           WideWarning(

@@ -2,10 +2,10 @@
 // מקור: screens__worker_reports_tab.manifest.json · המסך = דאטה; הקוד הזה = חיווט-בלבד (חוק-2).
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
-import '../dart-ui-bs/auto/card.dart';
 import '../dart-ui-bs/auto/kpi_box.dart';
 import '../dart-ui-bs/auto/proof_thumb.dart';
 import '../dart-ui-bs/auto/thumb_placeholder.dart';
+import '../dart-ui-bs/auto/worker_reports_tab_card.dart';
 import '../dart-ui-bs/auto/worker_reports_tab_kv_row.dart';
 import '../dart-data-bs/auto/screens__worker_reports_tab_content.dart';
 
@@ -40,7 +40,7 @@ class WorkerReportsTabComposed extends StatelessWidget {
             label: label,
             onTap: onTap,
           ),
-          Card(
+          WorkerReportsTabCard(
             title: title,
             titleId: titleId,
             children: children,

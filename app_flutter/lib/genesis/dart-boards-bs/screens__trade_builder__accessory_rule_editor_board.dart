@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__trade_builder__accessory_rule_editor.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 10.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/trade_builder/accessory_rule_editor.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -23,7 +24,7 @@ class TradeBuilderAccessoryRuleEditorBoard extends ConsumerWidget {
       label: '' /* TODO-לוח: String */,
       mustHave: false /* TODO-לוח: bool */,
       nameHe: '' /* TODO-לוח: String */,
-      price: 0 /* TODO-לוח: int? */,
+      price: null /* TODO-לוח: int? */,
       price2: 0 /* TODO-לוח: int */,
       whyHe: '' /* TODO-לוח: String */,
       t: TradeBuilderAccessoryRuleEditorTokens(),

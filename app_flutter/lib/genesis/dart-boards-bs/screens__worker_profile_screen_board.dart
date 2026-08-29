@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__worker_profile_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/worker_profile_screen.dart';
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';

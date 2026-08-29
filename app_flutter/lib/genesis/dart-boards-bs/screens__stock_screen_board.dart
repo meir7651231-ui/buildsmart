@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__stock_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/stock_screen.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/stock_firebase.dart';
 import 'package:buildsmart/data/repositories/stock_local.dart';

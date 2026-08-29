@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
 
-class Banner extends StatelessWidget {
-  const Banner({required this.text, required this.bg, required this.fg});
+class PersonaPickingSheetBanner extends StatelessWidget {
+  const PersonaPickingSheetBanner({required this.text, required this.bg, required this.fg});
   final String text;
   final Color bg;
   final Color fg;

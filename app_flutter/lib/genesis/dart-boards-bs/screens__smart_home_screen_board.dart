@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__smart_home_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/smart_home_screen.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
@@ -24,9 +25,9 @@ class SmartHomeScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SmartHomeScreenComposed(
-      child: null /* TODO-לוח: Widget */,
+      child: const SizedBox.shrink() /* TODO-לוח: Widget */,
       emoji: '' /* TODO-לוח: String */,
-      subtitle: '' /* TODO-לוח: String? */,
+      subtitle: null /* TODO-לוח: String? */,
       title: '' /* TODO-לוח: String */,
       t: SmartHomeScreenTokens(),
     );

@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__profile_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/login_sheet.dart';
@@ -27,7 +28,7 @@ class ProfileScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ProfileScreenComposed(
       onTap: () {} /* TODO-לוח */,
-      controller: null /* TODO-לוח: TextEditingController */,
+      controller: TextEditingController() /* TODO-לוח: TextEditingController */,
       label: '' /* TODO-לוח: String */,
       number: false /* TODO-לוח: bool */,
       text: 'פרטים אישיים',

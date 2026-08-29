@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__courier_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/courier_dashboard_screen.dart';
 import 'package:buildsmart/data/repositories/courier_clock_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/courier_delivery_detail_sheet.dart';
@@ -39,7 +40,7 @@ class CourierDashboardScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return CourierDashboardScreenComposed(
       onTap: () {} /* TODO-לוח */,
-      child: null /* TODO-לוח: Widget */,
+      child: const SizedBox.shrink() /* TODO-לוח: Widget */,
       ic: '' /* TODO-לוח: String */,
       label: '' /* TODO-לוח: String */,
       name: '' /* TODO-לוח: String */,

@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__defects_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/defects_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';

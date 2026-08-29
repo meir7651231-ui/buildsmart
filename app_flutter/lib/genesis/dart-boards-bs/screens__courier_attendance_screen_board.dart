@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__courier_attendance_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 8.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/courier_attendance_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_hr.dart';

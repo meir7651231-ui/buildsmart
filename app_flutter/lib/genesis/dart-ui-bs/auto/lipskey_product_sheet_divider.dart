@@ -2,8 +2,8 @@
 // מוצא: screens__lipskey_product_sheet:_Divider (בנייה-חכמה main) · Stateless
 import 'package:flutter/material.dart';
 
-class Divider extends StatelessWidget {
-  const Divider();
+class LipskeyProductSheetDivider extends StatelessWidget {
+  const LipskeyProductSheetDivider();
 
   @override
   Widget build(BuildContext context) => const Divider(

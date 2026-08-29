@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__trade_builder__trade_builder_home.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/trade_builder/trade_builder_home.dart';
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/screens/trade_builder/category_tree_editor.dart';

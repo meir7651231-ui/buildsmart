@@ -2,6 +2,7 @@
 // מקור-החיווט: features__catalog_config__catalog_config_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/features/catalog_config/catalog_config_screen.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/features/catalog_config/browse_model.dart';

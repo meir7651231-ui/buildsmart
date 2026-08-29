@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__worker_settings_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/worker_settings_screen.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';

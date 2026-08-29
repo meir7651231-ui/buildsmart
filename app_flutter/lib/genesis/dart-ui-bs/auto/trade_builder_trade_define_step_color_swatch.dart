@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
 
-class ColorSwatch extends StatelessWidget {
-  ColorSwatch({required this.label, 
+class TradeBuilderTradeDefineStepColorSwatch extends StatelessWidget {
+  TradeBuilderTradeDefineStepColorSwatch({required this.label, 
     required this.color,
     required this.index,
     required this.selected,

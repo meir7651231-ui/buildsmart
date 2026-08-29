@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__worker_app_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 13.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/task_skus_local.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';

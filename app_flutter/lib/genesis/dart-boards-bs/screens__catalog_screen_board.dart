@@ -2,6 +2,7 @@
 // מקור-החיווט: screens__catalog_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 22.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/atoms/atom_flag.dart';
@@ -72,9 +73,9 @@ class CatalogScreenBoard extends ConsumerWidget {
       onQtyChanged: () {} /* TODO-לוח */,
       onTap: () => showCompanyCatalogImportSheet(context),
       onToggle: () {} /* TODO-לוח */,
-      activeMatch: const [] /* TODO-לוח: List<String>? */,
+      activeMatch: null /* TODO-לוח: List<String>? */,
       axisChipItems: const [] /* TODO-לוח: List<AxisChipItem> */,
-      child: null /* TODO-לוח: Widget */,
+      child: const SizedBox.shrink() /* TODO-לוח: Widget */,
       count: 0 /* TODO-לוח: int */,
       emoji: '' /* TODO-לוח: String */,
       expanded: false /* TODO-לוח: bool */,
@@ -84,10 +85,10 @@ class CatalogScreenBoard extends ConsumerWidget {
       label: '' /* TODO-לוח: String */,
       name: '' /* TODO-לוח: String */,
       options: const [] /* TODO-לוח: List<String> */,
-      price: 0 /* TODO-לוח: int? */,
+      price: null /* TODO-לוח: int? */,
       qty: 0 /* TODO-לוח: int */,
       savedVersionChipItems: const [] /* TODO-לוח: List<SavedVersionChipItem> */,
-      selected: '' /* TODO-לוח: String? */,
+      selected: null /* TODO-לוח: String? */,
       selected2: false /* TODO-לוח: bool */,
       text: '' /* TODO-לוח: String */,
       title: '' /* TODO-לוח: String */,
