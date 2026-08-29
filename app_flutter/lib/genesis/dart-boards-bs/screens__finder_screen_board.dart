@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/finder_screen.dart';
+import 'package:buildsmart/features/word_finder/narrow_axis.dart';
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart';

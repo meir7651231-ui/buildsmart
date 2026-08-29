@@ -13,6 +13,7 @@ import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/services.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import '../dart-screens-bs/store_settings_screen.g.dart';
 
 class StoreSettingsScreenBoard extends ConsumerWidget {

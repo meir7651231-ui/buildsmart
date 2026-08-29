@@ -12,6 +12,7 @@ import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:buildsmart/screens/notif_settings_screen.dart';
 import '../dart-screens-bs/notifications_screen.g.dart';
 
 class NotificationsScreenBoard extends ConsumerWidget {

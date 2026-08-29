@@ -62,6 +62,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_field.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/screens/company_catalog_import_sheet.dart';
 import '../dart-screens-bs/catalog_screen.g.dart';
 
 class CatalogScreenBoard extends ConsumerWidget {

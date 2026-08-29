@@ -14,6 +14,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
 import '../dart-screens-bs/courier_settings_screen.g.dart';
 
 class CourierSettingsScreenBoard extends ConsumerWidget {

@@ -3,6 +3,7 @@
 // התוכן: new/dart-data-bs/auto/screens__catalog_screen_content.dart
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
+import 'package:buildsmart/data/catalog_source.dart';
 
 class CompanyCatalogImportCard extends StatelessWidget {
   CompanyCatalogImportCard({required this.label, required this.label2, required this.label3, required this.label4, required this.onTap});

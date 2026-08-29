@@ -92,7 +92,7 @@ String _grouped(int n) {
   return n < 0 ? '-$buf' : buf.toString();
 }
 
-/
+
 
 class _ManageHint extends StatelessWidget {
   const _ManageHint(this.text);

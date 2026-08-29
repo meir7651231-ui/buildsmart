@@ -11,6 +11,8 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/screens/notif_settings_screen.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
 import '../dart-screens-bs/worker_settings_screen.g.dart';
 
 class WorkerSettingsScreenBoard extends ConsumerWidget {

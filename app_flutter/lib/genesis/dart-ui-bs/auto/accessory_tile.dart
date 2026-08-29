@@ -21,7 +21,7 @@ class AccessoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    late final price = price;
+    late final price = this.price;
     late final hasPills = mustHave || price != null;
     return Semantics(
       label: '${emoji} ${nameHe}',

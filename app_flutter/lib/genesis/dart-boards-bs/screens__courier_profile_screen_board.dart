@@ -28,6 +28,10 @@ import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/services.dart';
+import 'package:buildsmart/screens/courier_attendance_screen.dart';
+import 'package:buildsmart/screens/courier_forms_screen.dart';
+import 'package:buildsmart/screens/courier_certs_screen.dart';
+import 'package:buildsmart/screens/worker_payslips_sheet.dart';
 import '../dart-screens-bs/courier_profile_screen.g.dart';
 
 class CourierProfileScreenBoard extends ConsumerWidget {

@@ -6,6 +6,7 @@ import 'package:buildsmart/screens/consent_modal.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
 import '../dart-screens-bs/consent_modal.g.dart';
 
 class ConsentModalBoard extends ConsumerWidget {

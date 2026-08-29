@@ -16,6 +16,8 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/screens/profile_screen.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
 import '../dart-screens-bs/catalog_settings_screen.g.dart';
 
 class CatalogSettingsScreenBoard extends ConsumerWidget {
