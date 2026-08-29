@@ -26,7 +26,7 @@ class WorkerEquipmentChecklistSheetComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           WorkerEquipmentChecklistSheetSecH(
-            text: text,
+            text,
           ),
           WorkerEquipmentChecklistSheetPrimaryBtn(
             label: label,

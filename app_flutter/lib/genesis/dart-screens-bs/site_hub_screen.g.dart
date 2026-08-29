@@ -77,7 +77,7 @@ class SiteHubScreenComposed extends StatelessWidget {
             text: text,
           ),
           SiteHubCaEmpty(
-            text: text,
+            text,
           ),
           SiteServerNote(
             text: text,

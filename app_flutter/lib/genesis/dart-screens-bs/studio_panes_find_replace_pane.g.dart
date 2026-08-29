@@ -27,7 +27,7 @@ class StudioPanesFindReplacePaneComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           StudioPanesFindReplacePanePlaceholder(
-            msg: msg,
+            msg,
           ),
           WideWarning(
             label: wide_warning_label,

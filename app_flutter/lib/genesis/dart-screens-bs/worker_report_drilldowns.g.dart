@@ -32,7 +32,7 @@ class WorkerReportDrilldownsComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           WorkerEquipmentChecklistSheetSecH(
-            text: text,
+            text,
           ),
           for (final c in kvLineItems) ...[
           KvLine(
