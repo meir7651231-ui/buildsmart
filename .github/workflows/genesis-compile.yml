@@ -49,3 +49,5 @@ jobs:
         with:
           name: genesis-analyze
           path: app_flutter/genesis-analyze.txt
+
+# ריצה-2: אחרי מיזוג-main (הענף היה 1,554 קומיטים מאחורי קו-האמת)
