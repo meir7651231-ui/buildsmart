@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__connection_rule_studio.dart (בנייה-חכמה main) · מחווט: 9 · TODO: 0.
+// מקור-החיווט: screens__trade_builder__connection_rule_studio.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/domain/connection_resolver.dart';
@@ -17,14 +17,14 @@ class TradeBuilderConnectionRuleStudioBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return TradeBuilderConnectionRuleStudioComposed(
-      onDelete: t.onDelete,
+      onDelete: () {} /* TODO-לוח */,
       onPressed: () => Navigator.pop(context, true),
       onPressed2: () => Navigator.pop(context, false),
-      onTap: _addType,
-      enabled: _name.text.trim().isNotEmpty,
-      label: _addType.label,
-      methodLabelHe: rule.methodLabelHe,
-      nameHe: t.nameHe,
+      onTap: () {} /* TODO-לוח */,
+      enabled: false /* TODO-לוח: bool */,
+      label: '' /* TODO-לוח: String */,
+      methodLabelHe: '' /* TODO-לוח: String */,
+      nameHe: '' /* TODO-לוח: String */,
       title: 'מחברים',
       t: TradeBuilderConnectionRuleStudioTokens(),
     );

@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'bs_tokens.dart';
+import 'package:buildsmart/state/under_construction.dart';
 
 class InfoSection extends StatelessWidget {
   InfoSection({required this.title, required this.fallback, required this.fallback2, required this.onTap, required this.onTap2});

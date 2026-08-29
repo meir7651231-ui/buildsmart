@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_app_screen.dart (בנייה-חכמה main) · מחווט: 6 · TODO: 8.
+// מקור-החיווט: screens__worker_app_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 13.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/persona_data.dart';
@@ -45,18 +45,18 @@ class WorkerAppScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerAppScreenComposed(
-      onPressed: _openProposeSheet,
-      onTap: canSave ? widget.onSave : null,
+      onPressed: () {} /* TODO-לוח */,
+      onTap: () {} /* TODO-לוח */,
       deliveryFee: 0 /* TODO-לוח: int */,
-      label: canSave ? widget.onSave : null.label,
+      label: '' /* TODO-לוח: String */,
       label2: '' /* TODO-לוח: String */,
       label3: '' /* TODO-לוח: String */,
       label4: '' /* TODO-לוח: String */,
       label5: '' /* TODO-לוח: String */,
       subtotal: 0 /* TODO-לוח: int */,
       text: 'שם המשימה',
-      total: total,
-      value: inTs == null ? '—' : _fmtTime(inTs),
+      total: 0 /* TODO-לוח: int */,
+      value: '' /* TODO-לוח: String */,
       vat: 0 /* TODO-לוח: int */,
       vatInclusive: false /* TODO-לוח: bool */,
       t: WorkerAppScreenTokens(),

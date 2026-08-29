@@ -3,7 +3,6 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/kv_line.dart';
-import '../dart-ui-bs/auto/mini_status_pill.dart';
 import '../dart-ui-bs/auto/worker_equipment_checklist_sheet_sec_h.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
@@ -20,11 +19,10 @@ class WorkerReportDrilldownsTokens {
 }
 
 class WorkerReportDrilldownsComposed extends StatelessWidget {
-  const WorkerReportDrilldownsComposed({required this.kvLineItems, required this.status, required this.text, required this.t, super.key});
+  const WorkerReportDrilldownsComposed({required this.kvLineItems, required this.text, required this.t, super.key});
 
 
   final List<KvLineItem> kvLineItems;
-  final String status;
   final String text;
   final WorkerReportDrilldownsTokens t;
 
@@ -33,9 +31,6 @@ class WorkerReportDrilldownsComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
-          MiniStatusPill(
-            status: status,
-          ),
           WorkerEquipmentChecklistSheetSecH(
             text: text,
           ),

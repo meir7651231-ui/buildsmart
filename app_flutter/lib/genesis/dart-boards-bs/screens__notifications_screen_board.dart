@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__notifications_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 1.
+// מקור-החיווט: screens__notifications_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/contractor_seeds.dart';
@@ -21,7 +21,7 @@ class NotificationsScreenBoard extends ConsumerWidget {
     return NotificationsScreenComposed(
       onTap: () => Navigator.of(context).push(NotifSettingsScreen.route()),
       fallback: '' /* TODO-לוח: String */,
-      label: item,
+      label: '' /* TODO-לוח: String */,
       t: NotificationsScreenTokens(),
     );
   }

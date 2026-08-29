@@ -3,6 +3,7 @@
 // התוכן: new/dart-data-bs/auto/screens__manager_dashboard_screen_content.dart
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 
 class AppSettingsBody extends StatelessWidget {
   AppSettingsBody({required this.label, required this.label2, required this.label3, required this.text, required this.text2});

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__chats_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 1.
+// מקור-החיווט: screens__chats_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -32,8 +32,8 @@ class ChatsScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ChatsScreenComposed(
       onTap: () {} /* TODO-לוח */,
-      active: selected == i,
-      label: audienceChips[i].label,
+      active: false /* TODO-לוח: bool */,
+      label: '' /* TODO-לוח: String */,
       t: ChatsScreenTokens(),
     );
   }

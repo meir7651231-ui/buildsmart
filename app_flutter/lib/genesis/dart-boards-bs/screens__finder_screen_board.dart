@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__finder_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 0.
+// מקור-החיווט: screens__finder_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
@@ -18,7 +18,7 @@ class FinderScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return FinderScreenComposed(
-      children: chips,
+      children: const [] /* TODO-לוח: List<Widget> */,
       t: FinderScreenTokens(),
     );
   }

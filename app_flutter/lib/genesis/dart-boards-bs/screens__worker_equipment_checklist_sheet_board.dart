@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_equipment_checklist_sheet.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 0.
+// מקור-החיווט: screens__worker_equipment_checklist_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/task_skus_local.dart';
@@ -22,8 +22,8 @@ class WorkerEquipmentChecklistSheetBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerEquipmentChecklistSheetComposed(
-      onTap: _sent ? null : _sendToContractor,
-      label: _sent ? '✓ נשלח לקבלן' : 'שלח רשימה לקבלן',
+      onTap: () {} /* TODO-לוח */,
+      label: '' /* TODO-לוח: String */,
       text: 'צ׳קליסט ציוד',
       t: WorkerEquipmentChecklistSheetTokens(),
     );

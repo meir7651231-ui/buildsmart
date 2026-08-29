@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/input_bar.dart';
 import '../dart-ui-bs/auto/typing.dart';
-import '../dart-ui-bs/auto/welcome.dart';
 import '../dart-data-bs/auto/screens__manager_copilot_screen_content.dart';
 
 
@@ -15,9 +14,8 @@ class ManagerCopilotScreenTokens {
 }
 
 class ManagerCopilotScreenComposed extends StatelessWidget {
-  const ManagerCopilotScreenComposed({required this.onBrief, required this.onSend, required this.controller, required this.enabled, required this.t, super.key});
+  const ManagerCopilotScreenComposed({required this.onSend, required this.controller, required this.enabled, required this.t, super.key});
 
-  final VoidCallback onBrief;
   final VoidCallback onSend;
   final TextEditingController controller;
   final bool enabled;
@@ -28,13 +26,6 @@ class ManagerCopilotScreenComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
-          Welcome(
-            fallback: welcome_fallback,
-            fallback2: welcome_fallback2,
-            fallback3: welcome_fallback3,
-            fallback4: welcome_fallback4,
-            onBrief: onBrief,
-          ),
           Typing(
             
           ),

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__trade_publish_sheet.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 2.
+// מקור-החיווט: screens__trade_builder__trade_publish_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
@@ -16,7 +16,7 @@ class TradeBuilderTradePublishSheetBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return TradeBuilderTradePublishSheetComposed(
       onTap: () {} /* TODO-לוח */,
-      enabled: allPass,
+      enabled: false /* TODO-לוח: bool */,
       label: '' /* TODO-לוח: String */,
       pass: r1,
       t: TradeBuilderTradePublishSheetTokens(),

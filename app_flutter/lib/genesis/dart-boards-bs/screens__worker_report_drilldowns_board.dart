@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_report_drilldowns.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 0.
+// מקור-החיווט: screens__worker_report_drilldowns.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/config/app_brand.dart';
@@ -18,10 +18,7 @@ class WorkerReportDrilldownsBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerReportDrilldownsComposed(
-      kvLineItems: rewards.challenges.map((c) => KvLineItem(label: c.name, value: c.done
-                ? 'הושלם · +${c.reward} 🪙'
-                : '${c.progress}/${c.goal} · +${c.reward} 🪙')).toList(),
-      status: t.status,
+      kvLineItems: const [] /* TODO-לוח: List<KvLineItem> */,
       text: 'צ׳קליסט ציוד',
       t: WorkerReportDrilldownsTokens(),
     );

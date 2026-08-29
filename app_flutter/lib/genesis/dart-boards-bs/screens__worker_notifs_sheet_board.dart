@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_notifs_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 1.
+// מקור-החיווט: screens__worker_notifs_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/state/board_auth.dart';
@@ -19,19 +19,7 @@ class WorkerNotifsSheetBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerNotifsSheetComposed(
       fallback: '' /* TODO-לוח: String */,
-      notifRowItems: notifs.map((n) => NotifRowItem(onTap: username == null || n.read
-                                ? null
-                                : () {
-                                    // route by source: a SERVER bell → the repo;
-                                    // a LOCAL (HR) bell → the local notifier.
-                                    if (serverNotifs.any((x) => x.id == n.id)) {
-                                      notifsRepo?.markRead(serverNotifs, n.id);
-                                    } else {
-                                      ref
-                                          .read(workerNotifsProvider.notifier)
-                                          .markRead(username, n.id);
-                                    }
-                                  })).toList(),
+      notifRowItems: const [] /* TODO-לוח: List<NotifRowItem> */,
       t: WorkerNotifsSheetTokens(),
     );
   }

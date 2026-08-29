@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__persona_portal.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 0.
+// מקור-החיווט: screens__persona_portal.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/supplier_data.dart';
@@ -16,7 +16,7 @@ class PersonaPortalBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PersonaPortalComposed(
-      portalTileButtonItems: tiles.map((t) => PortalTileButtonItem(title: t.title, sub: t.sub, onTap: () => showPortalSheet(context, t))).toList(),
+      portalTileButtonItems: const [] /* TODO-לוח: List<PortalTileButtonItem> */,
       t: PersonaPortalTokens(),
     );
   }

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_profile_screen.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 0.
+// מקור-החיווט: screens__worker_profile_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/board_accounts_local.dart';
@@ -36,10 +36,10 @@ class WorkerProfileScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerProfileScreenComposed(
-      done: done,
-      inReview: inReview,
-      rejected: rejected,
-      total: mine.length,
+      done: 0 /* TODO-לוח: int */,
+      inReview: 0 /* TODO-לוח: int */,
+      rejected: 0 /* TODO-לוח: int */,
+      total: 0 /* TODO-לוח: int */,
       t: WorkerProfileScreenTokens(),
     );
   }

@@ -13,7 +13,6 @@ import '../dart-ui-bs/auto/ai_primary.dart';
 import '../dart-ui-bs/auto/ai_server_note.dart';
 import '../dart-ui-bs/auto/three_col.dart';
 import '../dart-ui-bs/auto/three_way.dart';
-import '../dart-ui-bs/auto/wear.dart';
 import '../dart-data-bs/auto/screens__ai_hub_screen_content.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
@@ -85,13 +84,6 @@ class AiHubScreenComposed extends StatelessWidget {
             label2: three_way_label2,
             label3: three_way_label3,
             fallback: three_way_fallback,
-          ),
-          Wear(
-            title: wear_title,
-            sub: wear_sub,
-            text: wear_text,
-            text2: wear_text2,
-            fallback: wear_fallback,
           ),
           AiServerNote(
             text: text,

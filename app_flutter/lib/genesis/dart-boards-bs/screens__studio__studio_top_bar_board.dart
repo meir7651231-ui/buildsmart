@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__studio__studio_top_bar.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 0.
+// מקור-החיווט: screens__studio__studio_top_bar.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +11,7 @@ class StudioStudioTopBarBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StudioStudioTopBarComposed(
-      count: count,
+      count: 0 /* TODO-לוח: int */,
       t: StudioStudioTopBarTokens(),
     );
   }

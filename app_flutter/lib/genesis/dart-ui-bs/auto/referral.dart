@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'bs_tokens.dart';
+import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart';
 

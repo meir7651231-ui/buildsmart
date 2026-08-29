@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_attendance_screen.dart (בנייה-חכמה main) · מחווט: 5 · TODO: 1.
+// מקור-החיווט: screens__worker_attendance_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/persona_data.dart';
@@ -25,15 +25,11 @@ class WorkerAttendanceScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerAttendanceScreenComposed(
       onPressed: () {} /* TODO-לוח */,
-      onTap: () => openNavSheet(context, label: label, lat: lat, lng: lng),
-      enabled: monthDays.isNotEmpty && !sentThisMonth,
-      label: sentThisMonth
-                ? 'הדוח נשלח ✓'
-                : (monthDays.isNotEmpty
-                    ? '📨 שלח דוח נוכחות לקבלן'
-                    : 'אין רישומים לשליחה בחודש זה'),
-      query: loc,
-      value: inTs == null ? '—' : _fmtTime(inTs),
+      onTap: () {} /* TODO-לוח */,
+      enabled: false /* TODO-לוח: bool */,
+      label: '' /* TODO-לוח: String */,
+      query: '' /* TODO-לוח: String */,
+      value: '' /* TODO-לוח: String */,
       t: WorkerAttendanceScreenTokens(),
     );
   }

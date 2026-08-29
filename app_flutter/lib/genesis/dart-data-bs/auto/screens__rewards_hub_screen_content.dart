@@ -1,8 +1,4 @@
 // 📦 דאטה · תוכן-שהורם ע"י data-lift מ-screens__rewards_hub_screen — verbatim מהמקור, אל תערוך ידנית.
-const String coupons_title = 'קופונים לפי מיקום';
-const String coupons_sub = 'מבצעים זמינים מספקים בקרבת מקום אליך.';
-const String coupons_text = '⚙️ בפרודקשן: איתור לפי מיקום GPS בזמן אמת';
-const String coupons_label = 'שמור קופון';
 const String referral_title = 'הזמן חבר';
 const String referral_sub = 'הזמן קבלן אחר — שניכם תרוויחו BuildCoins.';
 const String referral_fallback = 'קוד ההזמנה שלך';

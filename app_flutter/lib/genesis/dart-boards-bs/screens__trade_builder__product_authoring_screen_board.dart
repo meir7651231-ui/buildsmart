@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__product_authoring_screen.dart (בנייה-חכמה main) · מחווט: 8 · TODO: 0.
+// מקור-החיווט: screens__trade_builder__product_authoring_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/domain/trade_import.dart';
@@ -18,16 +18,13 @@ class TradeBuilderProductAuthoringScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return TradeBuilderProductAuthoringScreenComposed(
-      onDelete: p.onDelete,
-      onTap: _add,
-      categoryTitle: _categoryTitle(doc, p.categoryId),
-      enabled: cats.isNotEmpty &&
-                    _name.text.trim().isNotEmpty &&
-                    _sku.text.trim().isNotEmpty &&
-                    catValue != null,
-      id: p.id,
-      label: _add.label,
-      nameHe: p.nameHe,
+      onDelete: () {} /* TODO-לוח */,
+      onTap: () {} /* TODO-לוח */,
+      categoryTitle: '' /* TODO-לוח: String */,
+      enabled: false /* TODO-לוח: bool */,
+      id: '' /* TODO-לוח: String */,
+      label: '' /* TODO-לוח: String */,
+      nameHe: '' /* TODO-לוח: String */,
       title: 'ייבוא מ-CSV',
       t: TradeBuilderProductAuthoringScreenTokens(),
     );

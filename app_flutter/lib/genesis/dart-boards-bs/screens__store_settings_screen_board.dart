@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__store_settings_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 10.
+// מקור-החיווט: screens__store_settings_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 11.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/logic/input_validators.dart';
@@ -29,7 +29,7 @@ class StoreSettingsScreenBoard extends ConsumerWidget {
       label: '' /* TODO-לוח: String */,
       subtitleNote: '' /* TODO-לוח: String? */,
       underConstruction: false /* TODO-לוח: bool */,
-      value: settings.defaultAddress,
+      value: '' /* TODO-לוח: String */,
       value2: false /* TODO-לוח: bool */,
       value22: 0 /* TODO-לוח: int */,
       t: StoreSettingsScreenTokens(cursorColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, fieldWidth: 12 /* TODO-לוח: טוקן */, fillColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, hintColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, inkColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, labelColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, mutedColor: const Color(0xFF223047) /* TODO-לוח: טוקן */),

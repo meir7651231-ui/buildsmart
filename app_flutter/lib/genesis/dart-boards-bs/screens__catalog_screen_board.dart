@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__catalog_screen.dart (בנייה-חכמה main) · מחווט: 18 · TODO: 6.
+// מקור-החיווט: screens__catalog_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 22.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -69,61 +69,30 @@ class CatalogScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return CatalogScreenComposed(
-      onQtyChanged: a.onQtyChanged,
+      onQtyChanged: () {} /* TODO-לוח */,
       onTap: () => showCompanyCatalogImportSheet(context),
-      onToggle: a.onToggle,
-      activeMatch: _activeStage != null
-                          ? p.stages[_activeStage!].match
-                          : null,
-      axisChipItems: SizeSortAxis.values.map((axis) => AxisChipItem(label: kSizeSortLabel[axis]!, isSelected: active == axis, onTap: () {
-              final wasActive = active == axis;
-              ref.read(variantsSizeSortAxisProvider.notifier).state = axis;
-              ref.read(variantsActiveSubGroupProvider.notifier).state = null;
-              final exp = ref.read(variantsValuesExpandedProvider.notifier);
-              exp.state = wasActive ? !exp.state : true;
-            })).toList(),
+      onToggle: () {} /* TODO-לוח */,
+      activeMatch: const [] /* TODO-לוח: List<String>? */,
+      axisChipItems: const [] /* TODO-לוח: List<AxisChipItem> */,
       child: null /* TODO-לוח: Widget */,
-      count: e.value,
-      emoji: current.emoji,
+      count: 0 /* TODO-לוח: int */,
+      emoji: '' /* TODO-לוח: String */,
       expanded: false /* TODO-לוח: bool */,
-      facetRowItems: options.map((o) => FacetRowItem(label: o.label, desc: o.desc, count: o.count, onTap: () => ref.read(catalogFacetProvider.notifier).state =
-                [...facetSel, o.label])).toList(),
+      facetRowItems: const [] /* TODO-לוח: List<FacetRowItem> */,
       icon: Icons.remove,
-      isSelected: selected.contains(key),
-      label: active,
-      name: a.name,
+      isSelected: false /* TODO-לוח: bool */,
+      label: '' /* TODO-לוח: String */,
+      name: '' /* TODO-לוח: String */,
       options: const [] /* TODO-לוח: List<String> */,
-      price: a.price,
-      qty: _accQty[gi] ?? 1,
-      savedVersionChipItems: versions.map((v) => SavedVersionChipItem(label: v.label, onLoad: () {
-                                                final idx = widget
-                                                    .product.brands
-                                                    .indexWhere((b) =>
-                                                        b.name == v.brandName);
-                                                if (idx >= 0) {
-                                                  setState(() =>
-                                                      _selectedBrand = idx);
-                                                  ref
-                                                      .read(
-                                                          cardSelectionProvider
-                                                              .notifier)
-                                                      .setBrand(p.key,
-                                                          v.brandName);
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                          content: Text(
-                                                              'נטען: "${v.label}"'),
-                                                          duration:
-                                                              const Duration(
-                                                                  seconds: 2)));
-                                                }
-                                              }, onDelete: () => notif.remove(v.id))).toList(),
-      selected: _accSelected[gi] ?? false,
+      price: 0 /* TODO-לוח: int? */,
+      qty: 0 /* TODO-לוח: int */,
+      savedVersionChipItems: const [] /* TODO-לוח: List<SavedVersionChipItem> */,
+      selected: '' /* TODO-לוח: String? */,
       selected2: false /* TODO-לוח: bool */,
       text: '' /* TODO-לוח: String */,
-      title: current.title,
+      title: '' /* TODO-לוח: String */,
       value: '' /* TODO-לוח: String */,
-      why: a.why,
+      why: '' /* TODO-לוח: String */,
       t: CatalogScreenTokens(color: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }

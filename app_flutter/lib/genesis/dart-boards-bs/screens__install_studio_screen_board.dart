@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__install_studio_screen.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 0.
+// מקור-החיווט: screens__install_studio_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -34,8 +34,8 @@ class InstallStudioScreenBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return InstallStudioScreenComposed(
       onTap: () => Navigator.pop(context),
-      broken: !connectsToNext,
-      flow: flow,
+      broken: false /* TODO-לוח: bool */,
+      flow: 0.0 /* TODO-לוח: double */,
       t: InstallStudioScreenTokens(from: const Color(0xFF223047) /* TODO-לוח: טוקן */, to: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }

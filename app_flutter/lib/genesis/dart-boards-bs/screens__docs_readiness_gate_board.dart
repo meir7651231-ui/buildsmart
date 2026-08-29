@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__docs_readiness_gate.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 2.
+// מקור-החיווט: screens__docs_readiness_gate.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 5.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/courier_certs_screen.dart';
@@ -23,10 +23,10 @@ class DocsReadinessGateBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return DocsReadinessGateComposed(
       onPressed: () {} /* TODO-לוח */,
-      emptyText: readiness.missing.emptyText,
+      emptyText: '' /* TODO-לוח: String? */,
       label: '' /* TODO-לוח: String */,
-      lines: readiness.missing,
-      title: readiness.missing.title,
+      lines: const [] /* TODO-לוח: List<String> */,
+      title: '' /* TODO-לוח: String */,
       t: DocsReadinessGateTokens(accent: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }

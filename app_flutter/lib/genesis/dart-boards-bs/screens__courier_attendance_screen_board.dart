@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_attendance_screen.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 5.
+// מקור-החיווט: screens__courier_attendance_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 8.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
@@ -23,17 +23,13 @@ class CourierAttendanceScreenBoard extends ConsumerWidget {
     return CourierAttendanceScreenComposed(
       onPressed: () {} /* TODO-לוח */,
       date: '' /* TODO-לוח: String */,
-      enabled: monthDays.isNotEmpty && !sentThisMonth,
+      enabled: false /* TODO-לוח: bool */,
       header: true,
       inText: '' /* TODO-לוח: String */,
-      label: sentThisMonth
-                    ? 'הדוח נשלח ✓'
-                    : (monthDays.isNotEmpty
-                        ? '📨 שלח דוח נוכחות לחנות'
-                        : 'אין רישומים לשליחה בחודש זה'),
+      label: '' /* TODO-לוח: String */,
       outText: '' /* TODO-לוח: String */,
       totalText: '' /* TODO-לוח: String */,
-      value: inTs == null ? '—' : _fmtTime(inTs),
+      value: '' /* TODO-לוח: String */,
       t: CourierAttendanceScreenTokens(),
     );
   }

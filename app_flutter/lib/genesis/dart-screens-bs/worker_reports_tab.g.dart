@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/card.dart';
 import '../dart-ui-bs/auto/kpi_box.dart';
 import '../dart-ui-bs/auto/proof_thumb.dart';
-import '../dart-ui-bs/auto/status_pill.dart';
 import '../dart-ui-bs/auto/thumb_placeholder.dart';
 import '../dart-ui-bs/auto/worker_reports_tab_kv_row.dart';
 import '../dart-data-bs/auto/screens__worker_reports_tab_content.dart';
@@ -18,14 +17,13 @@ class WorkerReportsTabTokens {
 }
 
 class WorkerReportsTabComposed extends StatelessWidget {
-  const WorkerReportsTabComposed({required this.onTap, required this.children, required this.glyph, required this.label, required this.photo, required this.status, required this.title, required this.titleId, required this.value, required this.t, super.key});
+  const WorkerReportsTabComposed({required this.onTap, required this.children, required this.glyph, required this.label, required this.photo, required this.title, required this.titleId, required this.value, required this.t, super.key});
 
   final VoidCallback onTap;
   final List<Widget> children;
   final String glyph;
   final String label;
   final String? photo;
-  final String status;
   final String title;
   final String? titleId;
   final String value;
@@ -59,9 +57,6 @@ class WorkerReportsTabComposed extends StatelessWidget {
             label: proof_thumb_label,
             onTap: onTap,
             photo: photo,
-          ),
-          StatusPill(
-            status: status,
           ),
           ThumbPlaceholder(
             glyph: glyph,

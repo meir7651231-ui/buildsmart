@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__store_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 5.
+// מקור-החיווט: screens__store_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 8.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/supplier_data.dart';
@@ -48,9 +48,9 @@ class StoreDashboardScreenBoard extends ConsumerWidget {
                         fontSize: 14,
                       ),
                     ),
-      label: f.$2,
-      on: _orderFilter == f.$1,
-      portalTileButtonItems: tiles.map((t) => PortalTileButtonItem(title: t.title, sub: t.sub, onTap: () => showPortalSheet(context, t))).toList(),
+      label: '' /* TODO-לוח: String */,
+      on: false /* TODO-לוח: bool */,
+      portalTileButtonItems: const [] /* TODO-לוח: List<PortalTileButtonItem> */,
       sub: '' /* TODO-לוח: String */,
       title: '' /* TODO-לוח: String */,
       value: '' /* TODO-לוח: String */,

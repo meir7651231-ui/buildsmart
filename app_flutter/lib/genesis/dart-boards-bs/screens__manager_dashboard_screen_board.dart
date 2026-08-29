@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__manager_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 5 · TODO: 1.
+// מקור-החיווט: screens__manager_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/board_accounts_local.dart';
@@ -41,12 +41,12 @@ class ManagerDashboardScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ManagerDashboardScreenComposed(
-      onPressed: onAdvance,
+      onPressed: () {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,
-      max: maxStage,
-      pct: pct,
-      pipelineRowItems: kManagerOrderFlow.map((stage) => PipelineRowItem(label: _stageLabel[stage] ?? stage, count: byStage[stage] ?? 0, color: _stageColor[stage] ?? BsTokens.brand)).toList(),
-      stageIdx: stageIdx,
+      max: 0 /* TODO-לוח: int */,
+      pct: 0 /* TODO-לוח: int */,
+      pipelineRowItems: const [] /* TODO-לוח: List<PipelineRowItem> */,
+      stageIdx: 0 /* TODO-לוח: int */,
       t: ManagerDashboardScreenTokens(color: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }

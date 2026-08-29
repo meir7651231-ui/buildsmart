@@ -3,6 +3,7 @@
 // התוכן: new/dart-data-bs/auto/screens__contractor_hr_sheet_content.dart
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
+import 'package:buildsmart/state/vacation_requests.dart';
 
 class VacationRow extends StatelessWidget {
   VacationRow({required this.label, required this.label2, required this.status, required this.reason, required this.label3, required this.label4, 

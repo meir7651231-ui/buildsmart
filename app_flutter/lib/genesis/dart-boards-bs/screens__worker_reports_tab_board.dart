@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_reports_tab.dart (בנייה-חכמה main) · מחווט: 8 · TODO: 1.
+// מקור-החיווט: screens__worker_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 8.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/config/app_brand.dart';
@@ -26,123 +26,14 @@ class WorkerReportsTabBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerReportsTabComposed(
-      onTap: () => showFullPhotoRefDialog(context, p),
-      children: [
-            if (weekTotal == 0 && noDate == 0)
-              Text(
-                doneTasks.isEmpty
-                    ? 'עוד אין משימות שאושרו — משימה שתאושר תופיע כאן.'
-                    : 'אין משימות שאושרו השבוע.',
-                style: const TextStyle(
-                  color: BsTokens.mutedLight,
-                  fontSize: 13,
-                ),
-              )
-            else ...[
-              _WeekBars(
-                counts: perDay,
-                todayIndex: today.weekday % 7,
-                // #109 — tapping a bar opens that day's clocked tasks.
-                onTapDay:
-                    (i) => showWeekDayDrilldown(
-                      context,
-                      ref,
-                      worker: worker,
-                      day: weekStart.add(Duration(days: i)),
-                    ),
-              ),
-              if (noDate > 0) ...[
-                const SizedBox(height: BsTokens.space2),
-                Text(
-                  // Honest bucket — approved before the task-clock existed.
-                  '🗓️ ללא תאריך: $noDate ${noDate == 1 ? 'משימה שאושרה' : 'משימות שאושרו'} בלי חותמת-זמן (לפני הפעלת שעון המשימות)',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ],
-          ],
+      onTap: () {} /* TODO-לוח */,
+      children: const [] /* TODO-לוח: List<Widget> */,
       glyph: '' /* TODO-לוח: String */,
-      label: t.name,
-      photo: task.photo,
-      status: task.status,
-      title: [
-            if (weekTotal == 0 && noDate == 0)
-              Text(
-                doneTasks.isEmpty
-                    ? 'עוד אין משימות שאושרו — משימה שתאושר תופיע כאן.'
-                    : 'אין משימות שאושרו השבוע.',
-                style: const TextStyle(
-                  color: BsTokens.mutedLight,
-                  fontSize: 13,
-                ),
-              )
-            else ...[
-              _WeekBars(
-                counts: perDay,
-                todayIndex: today.weekday % 7,
-                // #109 — tapping a bar opens that day's clocked tasks.
-                onTapDay:
-                    (i) => showWeekDayDrilldown(
-                      context,
-                      ref,
-                      worker: worker,
-                      day: weekStart.add(Duration(days: i)),
-                    ),
-              ),
-              if (noDate > 0) ...[
-                const SizedBox(height: BsTokens.space2),
-                Text(
-                  // Honest bucket — approved before the task-clock existed.
-                  '🗓️ ללא תאריך: $noDate ${noDate == 1 ? 'משימה שאושרה' : 'משימות שאושרו'} בלי חותמת-זמן (לפני הפעלת שעון המשימות)',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ],
-          ].title,
-      titleId: [
-            if (weekTotal == 0 && noDate == 0)
-              Text(
-                doneTasks.isEmpty
-                    ? 'עוד אין משימות שאושרו — משימה שתאושר תופיע כאן.'
-                    : 'אין משימות שאושרו השבוע.',
-                style: const TextStyle(
-                  color: BsTokens.mutedLight,
-                  fontSize: 13,
-                ),
-              )
-            else ...[
-              _WeekBars(
-                counts: perDay,
-                todayIndex: today.weekday % 7,
-                // #109 — tapping a bar opens that day's clocked tasks.
-                onTapDay:
-                    (i) => showWeekDayDrilldown(
-                      context,
-                      ref,
-                      worker: worker,
-                      day: weekStart.add(Duration(days: i)),
-                    ),
-              ),
-              if (noDate > 0) ...[
-                const SizedBox(height: BsTokens.space2),
-                Text(
-                  // Honest bucket — approved before the task-clock existed.
-                  '🗓️ ללא תאריך: $noDate ${noDate == 1 ? 'משימה שאושרה' : 'משימות שאושרו'} בלי חותמת-זמן (לפני הפעלת שעון המשימות)',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ],
-          ].titleId,
-      value: firstPassLabel,
+      label: '' /* TODO-לוח: String */,
+      photo: '' /* TODO-לוח: String? */,
+      title: '' /* TODO-לוח: String */,
+      titleId: '' /* TODO-לוח: String? */,
+      value: '' /* TODO-לוח: String */,
       t: WorkerReportsTabTokens(),
     );
   }

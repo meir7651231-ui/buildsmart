@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__store_screen.dart (בנייה-חכמה main) · מחווט: 17 · TODO: 3.
+// מקור-החיווט: screens__store_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 18.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/config/app_brand.dart';
@@ -43,63 +43,23 @@ class StoreScreenBoard extends ConsumerWidget {
                     Navigator.pop(context);
                     showToast(context, 'שיחה עם ${c.name} — בבנייה');
                   },
-      active: section == StoreSection.all,
-      badge: favItems.length,
+      active: false /* TODO-לוח: bool */,
+      badge: 0 /* TODO-לוח: int */,
       bold: false /* TODO-לוח: bool */,
-      children: items
-              .map(
-                (item) => _SheetTile(
-                  emoji: item.emoji,
-                  label: item.title,
-                  onTap: () {
-                    Navigator.pop(context);
-                    final svcIdx = _kServiceByEmoji[item.emoji];
-                    if (svcIdx != null) {
-                      _ServicesGrid._openSheet(context, svcIdx);
-                    } else if (item.emoji == '🛒') {
-                      ref.read(storeSectionProvider.notifier).state =
-                          StoreSection.cart;
-                    } else if (item.emoji == '📦') {
-                      ref.read(storeSectionProvider.notifier).state =
-                          StoreSection.orders;
-                    }
-                  },
-                ),
-              )
-              .toList(),
-      deliveryFee: deliveryFee,
-      emoji: items
-              .map(
-                (item) => _SheetTile(
-                  emoji: item.emoji,
-                  label: item.title,
-                  onTap: () {
-                    Navigator.pop(context);
-                    final svcIdx = _kServiceByEmoji[item.emoji];
-                    if (svcIdx != null) {
-                      _ServicesGrid._openSheet(context, svcIdx);
-                    } else if (item.emoji == '🛒') {
-                      ref.read(storeSectionProvider.notifier).state =
-                          StoreSection.cart;
-                    } else if (item.emoji == '📦') {
-                      ref.read(storeSectionProvider.notifier).state =
-                          StoreSection.orders;
-                    }
-                  },
-                ),
-              )
-              .toList().emoji,
+      children: const [] /* TODO-לוח: List<Widget> */,
+      deliveryFee: 0 /* TODO-לוח: int */,
+      emoji: '' /* TODO-לוח: String */,
       icon: Icons.favorite_border,
-      label: vatInclusive ? 'סכום ביניים (ללא מע"מ)' : 'סכום ביניים',
-      qty: line.productQty,
-      query: query,
-      storeProjectChipItems: projects.map((p) => StoreProjectChipItem(label: p, active: p == selected, onTap: () => ref.read(cartProjectProvider.notifier).state = p)).toList(),
-      storeSupplierHeaderItems: grouped.entries.map((entry) => StoreSupplierHeaderItem(name: entry.key)).toList(),
-      subtotal: subtotal,
-      total: total,
-      value: _price(vatInclusive ? subtotal - vat : subtotal),
-      vat: vat,
-      vatInclusive: vatInclusive,
+      label: '' /* TODO-לוח: String */,
+      qty: 0 /* TODO-לוח: int */,
+      query: '' /* TODO-לוח: String */,
+      storeProjectChipItems: const [] /* TODO-לוח: List<StoreProjectChipItem> */,
+      storeSupplierHeaderItems: const [] /* TODO-לוח: List<StoreSupplierHeaderItem> */,
+      subtotal: 0 /* TODO-לוח: int */,
+      total: 0 /* TODO-לוח: int */,
+      value: '' /* TODO-לוח: String */,
+      vat: 0 /* TODO-לוח: int */,
+      vatInclusive: false /* TODO-לוח: bool */,
       t: StoreScreenTokens(color: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }

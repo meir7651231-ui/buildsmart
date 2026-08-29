@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_reports_tab.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 2.
+// מקור-החיווט: screens__courier_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 5.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/config/app_brand.dart';
@@ -28,60 +28,10 @@ class CourierReportsTabBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return CourierReportsTabComposed(
-      children: [
-            if (weekTotal == 0 && noStamp == 0)
-              Text(
-                delivered.isEmpty
-                    ? 'עוד אין מסירות שהושלמו — מסירה שתסומן "נמסר ללקוח" תופיע כאן.'
-                    : 'אין מסירות שנמדדו השבוע.',
-                style: const TextStyle(
-                  color: BsTokens.mutedLight,
-                  fontSize: 13,
-                ),
-              )
-            else ...[
-              _WeekBars(counts: perDay, todayIndex: today.weekday % 7),
-              if (noStamp > 0) ...[
-                const SizedBox(height: BsTokens.space2),
-                Text(
-                  // Honest bucket — delivered before the delivery clock landed.
-                  '🗓️ ללא חותמת: $noStamp ${noStamp == 1 ? 'מסירה' : 'מסירות'} בלי חותמת-זמן (לפני הפעלת שעון-המשלוחים)',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ],
-          ],
-      kvRowItems: timed.map((o) => KvRowItem(label: '📦 ${o.id}', value: _fmtDuration(clock[o.id]!.pickupToDelivered!))).toList(),
+      children: const [] /* TODO-לוח: List<Widget> */,
+      kvRowItems: const [] /* TODO-לוח: List<KvRowItem> */,
       label: '' /* TODO-לוח: String */,
-      title: [
-            if (weekTotal == 0 && noStamp == 0)
-              Text(
-                delivered.isEmpty
-                    ? 'עוד אין מסירות שהושלמו — מסירה שתסומן "נמסר ללקוח" תופיע כאן.'
-                    : 'אין מסירות שנמדדו השבוע.',
-                style: const TextStyle(
-                  color: BsTokens.mutedLight,
-                  fontSize: 13,
-                ),
-              )
-            else ...[
-              _WeekBars(counts: perDay, todayIndex: today.weekday % 7),
-              if (noStamp > 0) ...[
-                const SizedBox(height: BsTokens.space2),
-                Text(
-                  // Honest bucket — delivered before the delivery clock landed.
-                  '🗓️ ללא חותמת: $noStamp ${noStamp == 1 ? 'מסירה' : 'מסירות'} בלי חותמת-זמן (לפני הפעלת שעון-המשלוחים)',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ],
-          ].title,
+      title: '' /* TODO-לוח: String */,
       value: '' /* TODO-לוח: String */,
       t: CourierReportsTabTokens(),
     );

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 6 · TODO: 2.
+// מקור-החיווט: screens__courier_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/repositories/courier_clock_repository.dart';
@@ -38,24 +38,13 @@ class CourierDashboardScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return CourierDashboardScreenComposed(
-      onTap: kHaulTypes[i].onTap,
-      child: Text(
-            toPickup > 0
-                ? '$toPickup משלוחים ממתינים לאיסוף · אסוף מהחנות כדי להתחיל'
-                : active > 0
-                ? '🚚 $onRoad משלוחים בדרך — אין איסופים ממתינים'
-                : '✓ אין משלוחים שמתאימים ל$haulName כרגע',
-            style: const TextStyle(
-              color: BsTokens.inkLight,
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
-          ),
-      ic: kHaulTypes[i].ic,
+      onTap: () {} /* TODO-לוח */,
+      child: null /* TODO-לוח: Widget */,
+      ic: '' /* TODO-לוח: String */,
       label: '' /* TODO-לוח: String */,
-      name: kHaulTypes[i].name,
+      name: '' /* TODO-לוח: String */,
       on: false,
-      preferred: kHaulTypes[i].id == preferred,
+      preferred: false /* TODO-לוח: bool */,
       value: '' /* TODO-לוח: String */,
       t: CourierDashboardScreenTokens(),
     );

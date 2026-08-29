@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__trade_define_step.dart (בנייה-חכמה main) · מחווט: 5 · TODO: 0.
+// מקור-החיווט: screens__trade_builder__trade_define_step.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 5.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/personas.dart';
@@ -17,11 +17,11 @@ class TradeBuilderTradeDefineStepBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return TradeBuilderTradeDefineStepComposed(
-      onTap: _saveDraft,
-      color: _kTradeColors[i],
-      enabled: valid,
-      index: i,
-      selected: _color == _kTradeColors[i],
+      onTap: () {} /* TODO-לוח */,
+      color: 0 /* TODO-לוח: int */,
+      enabled: false /* TODO-לוח: bool */,
+      index: 0 /* TODO-לוח: int */,
+      selected: false /* TODO-לוח: bool */,
       t: TradeBuilderTradeDefineStepTokens(),
     );
   }

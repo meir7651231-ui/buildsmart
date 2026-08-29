@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_portal_tab.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 1.
+// מקור-החיווט: screens__courier_portal_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/supplier_data.dart';
@@ -21,9 +21,8 @@ class CourierPortalTabBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return CourierPortalTabComposed(
       onTap: () {} /* TODO-לוח */,
-      haul: o.haul,
-      sub: t.sub,
-      title: t.title,
+      sub: '' /* TODO-לוח: String */,
+      title: '' /* TODO-לוח: String */,
       t: CourierPortalTabTokens(),
     );
   }

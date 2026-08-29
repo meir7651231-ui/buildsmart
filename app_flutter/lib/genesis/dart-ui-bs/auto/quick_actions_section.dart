@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'bs_tokens.dart';
+import 'package:buildsmart/state/under_construction.dart';
 
 class QuickActionsSection extends StatelessWidget {
   QuickActionsSection({required this.title, required this.label, required this.label2, required this.label3, required this.label4, required this.fallback, required this.fallback2, required this.fallback3, required this.fallback4, required this.onTap, required this.onTap2, required this.fallback5, required this.onTap3, required this.fallback6, required this.fallback7, required this.onTap4});
@@ -35,7 +36,7 @@ class QuickActionsSection extends StatelessWidget {
         _PlaceholderRow(label: label3, fallback5: fallback5, onTap3: onTap3),
         _PlaceholderRow(label: label4, fallback5: fallback5, onTap3: onTap3),
       ],
-    , fallback: fallback, fallback2: fallback2, fallback3: fallback3, fallback4: fallback4, onTap: onTap, onTap2: onTap2, fallback6: fallback6, fallback7: fallback7, onTap4: onTap4);
+    , fallback: fallback, fallback2: fallback2, fallback3: fallback3, fallback4: fallback4, onTap: onTap, onTap2: onTap2, fallback5: fallback5, onTap3: onTap3, fallback6: fallback6, fallback7: fallback7, onTap4: onTap4);
   }
 }
 

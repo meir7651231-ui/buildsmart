@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__manager_copilot_screen.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 0.
+// מקור-החיווט: screens__manager_copilot_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/logic/manager_copilot.dart';
@@ -13,10 +13,9 @@ class ManagerCopilotScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ManagerCopilotScreenComposed(
-      onBrief: _morningBrief,
-      onSend: _controller.onSend,
-      controller: _controller,
-      enabled: !_loading,
+      onSend: () {} /* TODO-לוח */,
+      controller: null /* TODO-לוח: TextEditingController */,
+      enabled: false /* TODO-לוח: bool */,
       t: ManagerCopilotScreenTokens(),
     );
   }

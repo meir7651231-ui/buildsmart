@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_today_strip.dart (בנייה-חכמה main) · מחווט: 5 · TODO: 0.
+// מקור-החיווט: screens__worker_today_strip.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart';
@@ -16,12 +16,11 @@ class WorkerTodayStripBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerTodayStripComposed(
-      onMarkDone: current.onMarkDone,
-      onTap: () =>
-                      showWorkerTaskDetailSheet(context, taskId: stage.taskId),
+      onMarkDone: () {} /* TODO-לוח */,
+      onTap: () {} /* TODO-לוח */,
       emphasized: true,
-      name: current.name,
-      tag: current.tag,
+      name: '' /* TODO-לוח: String */,
+      tag: '' /* TODO-לוח: String */,
       t: WorkerTodayStripTokens(),
     );
   }

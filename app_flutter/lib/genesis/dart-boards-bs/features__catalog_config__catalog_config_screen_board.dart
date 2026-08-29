@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: features__catalog_config__catalog_config_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 0.
+// מקור-החיווט: features__catalog_config__catalog_config_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -20,8 +20,8 @@ class CatalogConfigCatalogConfigScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return CatalogConfigCatalogConfigScreenComposed(
-      count: widget.family.count,
-      index: _matIdx,
+      count: 0 /* TODO-לוח: int */,
+      index: 0 /* TODO-לוח: int */,
       t: CatalogConfigCatalogConfigScreenTokens(),
     );
   }

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__lipskey_product_sheet.dart (בנייה-חכמה main) · מחווט: 14 · TODO: 3.
+// מקור-החיווט: screens__lipskey_product_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 16.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -27,24 +27,22 @@ class LipskeyProductSheetBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return LipskeyProductSheetComposed(
       onChanged: () {} /* TODO-לוח */,
-      onMarkDone: e.value.onMarkDone,
-      body: e.value.body,
-      body2: e.value.body2,
+      onMarkDone: () {} /* TODO-לוח */,
+      body: '' /* TODO-לוח: String */,
+      body2: '' /* TODO-לוח: String */,
       emoji: '' /* TODO-לוח: String */,
-      emphasized: e.value.emphasized,
-      label: e.value.label,
-      label2: e.value.label2,
-      message: e.value.message,
-      name: e.value.name,
-      pickerOptionItems: options.map((opt) => PickerOptionItem(value: opt.$1, isSelected: opt.$2.sku == currentSku, onTap: () => onSelect(opt.$2))).toList(),
-      qty: _qty,
-      stageRowItems: .entries.map((e) => StageRowItem(onTap: () => setState(() =>
-                                _activeStage =
-                                    _activeStage == e.key ? null : e.key))).toList(),
+      emphasized: false /* TODO-לוח: bool */,
+      label: '' /* TODO-לוח: String */,
+      label2: '' /* TODO-לוח: String */,
+      message: '' /* TODO-לוח: String */,
+      name: '' /* TODO-לוח: String */,
+      pickerOptionItems: const [] /* TODO-לוח: List<PickerOptionItem> */,
+      qty: 0 /* TODO-לוח: int */,
+      stageRowItems: const [] /* TODO-לוח: List<StageRowItem> */,
       subtitle: '' /* TODO-לוח: String? */,
-      tag: e.value.tag,
+      tag: '' /* TODO-לוח: String */,
       text: 'אין קבוצה',
-      title2: e.value.title2,
+      title2: '' /* TODO-לוח: String */,
       t: LipskeyProductSheetTokens(),
     );
   }

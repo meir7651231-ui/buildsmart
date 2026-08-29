@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__contractor_hr_sheet.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 3.
+// מקור-החיווט: screens__contractor_hr_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/state/required_docs_policy.dart';
@@ -23,10 +23,9 @@ class ContractorHrSheetBoard extends ConsumerWidget {
       onPressed: () {} /* TODO-לוח */,
       bordered: false /* TODO-לוח: bool */,
       label: '' /* TODO-לוח: String */,
-      reason: r.reason,
-      status: r.status,
-      vacationRowItems: requests.map((r) => VacationRowItem(onApprove: () =>
-                        _decide(context, ref, r, approve: true))).toList(),
+      reason: '' /* TODO-לוח: String */,
+      status: '' /* TODO-לוח: String */,
+      vacationRowItems: const [] /* TODO-לוח: List<VacationRowItem> */,
       t: ContractorHrSheetTokens(color: const Color(0xFF223047) /* TODO-לוח: טוקן */, textColor: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }

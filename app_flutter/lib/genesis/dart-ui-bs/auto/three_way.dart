@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'bs_tokens.dart';
+import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/theme/config_theme.dart';
 import 'package:buildsmart/data/contractor_seeds.dart';
 

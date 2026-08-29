@@ -7,6 +7,3 @@ const String new_task_button_fallback = '＋ משימה חדשה';
 const String proposal_card_label = ' ימים · 📝 ממתין לאישורך';
 const String proposal_card_fallback = '❌ דחה';
 const String proposal_card_label2 = '✅ אשר';
-const String tasks_card_fallback = '✏️ ערוך';
-const String tasks_card_label = ' שלבים · ⏱️ ';
-const String tasks_card_label2 = ' ימים';

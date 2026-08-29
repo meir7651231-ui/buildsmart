@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__category_tree_editor.dart (בנייה-חכמה main) · מחווט: 6 · TODO: 1.
+// מקור-החיווט: screens__trade_builder__category_tree_editor.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
@@ -18,13 +18,13 @@ class TradeBuilderCategoryTreeEditorBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return TradeBuilderCategoryTreeEditorComposed(
-      onDelete: c.onDelete,
-      onTap: c.onTap,
-      emoji: c.emoji,
-      enabled: _name.text.trim().isNotEmpty,
+      onDelete: () {} /* TODO-לוח */,
+      onTap: () {} /* TODO-לוח */,
+      emoji: '' /* TODO-לוח: String */,
+      enabled: false /* TODO-לוח: bool */,
       fallback: '' /* TODO-לוח: String */,
-      label: _add.label,
-      titleHe: c.titleHe,
+      label: '' /* TODO-לוח: String */,
+      titleHe: '' /* TODO-לוח: String */,
       t: TradeBuilderCategoryTreeEditorTokens(),
     );
   }

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__defects_sheet.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 1.
+// מקור-החיווט: screens__defects_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/state/board_auth.dart';
@@ -16,8 +16,8 @@ class DefectsSheetBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return DefectsSheetComposed(
       onTap: () {} /* TODO-לוח */,
-      label: _kSeverities[i],
-      selected: severity == _kSeverities[i],
+      label: '' /* TODO-לוח: String */,
+      selected: false /* TODO-לוח: bool */,
       t: DefectsSheetTokens(),
     );
   }

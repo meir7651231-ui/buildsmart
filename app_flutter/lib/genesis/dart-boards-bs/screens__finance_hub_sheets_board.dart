@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__finance_hub_sheets.dart (בנייה-חכמה main) · מחווט: 9 · TODO: 14.
+// מקור-החיווט: screens__finance_hub_sheets.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 19.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
@@ -22,23 +22,23 @@ class FinanceHubSheetsBoard extends ConsumerWidget {
       onApprove: () {} /* TODO-לוח */,
       onReject: () {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,
-      allocated: s.allocated,
-      amount: p.amount,
+      allocated: 0 /* TODO-לוח: int */,
+      amount: 0 /* TODO-לוח: int */,
       big: false /* TODO-לוח: bool */,
       children: this.children,
       fallback: '' /* TODO-לוח: String */,
       ic: '' /* TODO-לוח: String */,
-      id: p.id,
+      id: '' /* TODO-לוח: String */,
       label: this.label,
       label2: '' /* TODO-לוח: String */,
       name: '' /* TODO-לוח: String */,
       note: '' /* TODO-לוח: String? */,
       secondLabel: '' /* TODO-לוח: String? */,
       secondValue: '' /* TODO-לוח: String? */,
-      spent: s.spent,
+      spent: 0 /* TODO-לוח: int */,
       sub: '' /* TODO-לוח: String */,
       text: 'אין בקשות לאישור',
-      thrRowItems: thr.map((t) => ThrRowItem(label: '${t.$1} — ${t.$2}', hit: pct >= t.$3)).toList(),
+      thrRowItems: const [] /* TODO-לוח: List<ThrRowItem> */,
       title: '' /* TODO-לוח: String */,
       value: this.value,
       workerLabel: '' /* TODO-לוח: String */,

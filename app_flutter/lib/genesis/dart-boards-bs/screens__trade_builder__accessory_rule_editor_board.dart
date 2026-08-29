@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__accessory_rule_editor.dart (בנייה-חכמה main) · מחווט: 9 · TODO: 1.
+// מקור-החיווט: screens__trade_builder__accessory_rule_editor.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 10.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
@@ -16,16 +16,16 @@ class TradeBuilderAccessoryRuleEditorBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return TradeBuilderAccessoryRuleEditorComposed(
-      onDelete: r.onDelete,
-      onTap: _add,
-      emoji: r.emoji,
-      enabled: _name.text.trim().isNotEmpty && catValue != null,
-      label: _add.label,
-      mustHave: r.mustHave,
-      nameHe: r.nameHe,
-      price: r.price,
+      onDelete: () {} /* TODO-לוח */,
+      onTap: () {} /* TODO-לוח */,
+      emoji: '' /* TODO-לוח: String */,
+      enabled: false /* TODO-לוח: bool */,
+      label: '' /* TODO-לוח: String */,
+      mustHave: false /* TODO-לוח: bool */,
+      nameHe: '' /* TODO-לוח: String */,
+      price: 0 /* TODO-לוח: int? */,
       price2: 0 /* TODO-לוח: int */,
-      whyHe: r.whyHe,
+      whyHe: '' /* TODO-לוח: String */,
       t: TradeBuilderAccessoryRuleEditorTokens(),
     );
   }

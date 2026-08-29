@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__smart_project_screen.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 0.
+// מקור-החיווט: screens__smart_project_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/data/persona_data.dart';
@@ -17,10 +17,10 @@ class SmartProjectScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SmartProjectScreenComposed(
-      done: progress.done,
-      pct: progress.pct,
-      title: title,
-      total: progress.total,
+      done: 0 /* TODO-לוח: int */,
+      pct: 0 /* TODO-לוח: int */,
+      title: '' /* TODO-לוח: String */,
+      total: 0 /* TODO-לוח: int */,
       t: SmartProjectScreenTokens(),
     );
   }

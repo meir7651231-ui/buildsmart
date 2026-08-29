@@ -2,6 +2,7 @@
 // מוצא: screens__manager_dashboard_screen:_MiniTracker (בנייה-חכמה main) · Stateless
 import 'package:flutter/material.dart';
 import 'bs_tokens.dart';
+import 'package:buildsmart/logic/manager_dashboard.dart';
 
 class MiniTracker extends StatelessWidget {
   const MiniTracker({required this.stageIdx});

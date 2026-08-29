@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__attribute_schema_editor.dart (בנייה-חכמה main) · מחווט: 5 · TODO: 1.
+// מקור-החיווט: screens__trade_builder__attribute_schema_editor.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
@@ -15,12 +15,12 @@ class TradeBuilderAttributeSchemaEditorBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return TradeBuilderAttributeSchemaEditorComposed(
-      onTap: _addValue,
-      enabled: _value.text.trim().isNotEmpty,
-      label: _addValue.label,
-      matchChipItems: matches.map((m) => MatchChipItem(text: '${m.$1}: ${m.$2}')).toList(),
+      onTap: () {} /* TODO-לוח */,
+      enabled: false /* TODO-לוח: bool */,
+      label: '' /* TODO-לוח: String */,
+      matchChipItems: const [] /* TODO-לוח: List<MatchChipItem> */,
       text: '' /* TODO-לוח: String */,
-      valueChipItems: def.values.map((v) => ValueChipItem(text: v.labelHe)).toList(),
+      valueChipItems: const [] /* TODO-לוח: List<ValueChipItem> */,
       t: TradeBuilderAttributeSchemaEditorTokens(),
     );
   }

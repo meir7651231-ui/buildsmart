@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_safety_screen.dart (בנייה-חכמה main) · מחווט: 3 · TODO: 0.
+// מקור-החיווט: screens__worker_safety_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
@@ -22,9 +22,9 @@ class WorkerSafetyScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerSafetyScreenComposed(
-      onTap: onView,
+      onTap: () {} /* TODO-לוח */,
       icon: Icons.description_outlined,
-      label: onView.label,
+      label: '' /* TODO-לוח: String */,
       t: WorkerSafetyScreenTokens(),
     );
   }

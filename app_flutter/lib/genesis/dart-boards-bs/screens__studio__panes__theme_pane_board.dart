@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__studio__panes__theme_pane.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 0.
+// מקור-החיווט: screens__studio__panes__theme_pane.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +11,7 @@ class StudioPanesThemePaneBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StudioPanesThemePaneComposed(
-      swatchItems: _swatches.map((c) => SwatchItem(color: c, selected: c.toARGB32() == cfg.brand.toARGB32(), onTap: () => notifier.setThemeDraft(cfg.copyWith(brand: c)))).toList(),
+      swatchItems: const [] /* TODO-לוח: List<SwatchItem> */,
       text: 'צבע מותג',
       t: StudioPanesThemePaneTokens(),
     );
