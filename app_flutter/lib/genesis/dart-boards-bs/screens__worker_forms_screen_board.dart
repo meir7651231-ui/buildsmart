@@ -21,7 +21,6 @@ import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/signature_pad.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
-import 'package:buildsmart/state/board_auth.dart';
 import '../dart-screens-bs/worker_forms_screen.g.dart';
 
 class WorkerFormsScreenBoard extends ConsumerWidget {

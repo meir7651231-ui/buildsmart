@@ -20,7 +20,6 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/services.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/state/smart_cart.dart';
 import '../dart-screens-bs/lipskey_products_screen.g.dart';
 
 class LipskeyProductsScreenBoard extends ConsumerWidget {

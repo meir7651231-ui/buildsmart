@@ -39,7 +39,6 @@ import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
-import 'package:buildsmart/screens/notifications_screen.dart';
 import '../dart-screens-bs/home_shell.g.dart';
 
 class HomeShellBoard extends ConsumerWidget {

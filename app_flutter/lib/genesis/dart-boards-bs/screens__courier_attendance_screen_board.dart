@@ -14,7 +14,6 @@ import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
-import 'package:buildsmart/state/board_auth.dart';
 import '../dart-screens-bs/courier_attendance_screen.g.dart';
 
 class CourierAttendanceScreenBoard extends ConsumerWidget {

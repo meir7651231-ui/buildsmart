@@ -11,7 +11,6 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
-import 'package:buildsmart/state/trades_store.dart';
 import '../dart-screens-bs/trade_builder_product_authoring_screen.g.dart';
 
 class TradeBuilderProductAuthoringScreenBoard extends ConsumerWidget {

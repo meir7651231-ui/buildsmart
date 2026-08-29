@@ -10,7 +10,6 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
-import 'package:buildsmart/state/smart_project_engine.dart';
 import '../dart-screens-bs/smart_project_screen.g.dart';
 
 class SmartProjectScreenBoard extends ConsumerWidget {

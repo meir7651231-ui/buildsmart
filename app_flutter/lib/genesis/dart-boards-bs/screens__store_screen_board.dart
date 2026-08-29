@@ -30,7 +30,6 @@ import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_field.dart';
 import 'package:buildsmart/widgets/smart_input/nav/category_suggestion_strip.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:buildsmart/screens/store_screen.dart';
 import '../dart-screens-bs/store_screen.g.dart';
 
 class StoreScreenBoard extends ConsumerWidget {

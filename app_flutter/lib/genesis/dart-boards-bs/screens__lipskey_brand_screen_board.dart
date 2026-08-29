@@ -9,8 +9,6 @@ import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
-import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/lipskey_smart_data.dart';
 import '../dart-screens-bs/lipskey_brand_screen.g.dart';
 
 class LipskeyBrandScreenBoard extends ConsumerWidget {
