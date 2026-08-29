@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__camera_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 7.
+// מקור-החיווט: screens__camera_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -12,15 +12,22 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../dart-screens-bs/camera_sheet.g.dart';
 
-class CameraSheetBoard extends ConsumerWidget {
+class CameraSheetBoard extends ConsumerStatefulWidget {
   const CameraSheetBoard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CameraSheetBoard> createState() => _CameraSheetBoardState();
+}
+
+class _CameraSheetBoardState extends ConsumerState<CameraSheetBoard> {
+  bool _capturing = false;
+
+  @override
+  Widget build(BuildContext context) {
     return CameraSheetComposed(
       onTap: () {} /* TODO-לוח */,
       onTap2: () {} /* TODO-לוח */,
-      busy: false /* TODO-לוח: bool */,
+      busy: _capturing,
       emoji: '' /* TODO-לוח: String */,
       hint: '' /* TODO-לוח: String */,
       icon: Icons.circle /* TODO-לוח: IconData */,

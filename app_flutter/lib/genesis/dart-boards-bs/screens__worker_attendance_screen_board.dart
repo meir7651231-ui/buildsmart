@@ -24,6 +24,7 @@ class WorkerAttendanceScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(boardAuthProvider);
     return WorkerAttendanceScreenComposed(
       onPressed: () {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,

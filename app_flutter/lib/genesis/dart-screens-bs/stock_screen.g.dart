@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/stock_row.dart';
 import '../dart-ui-bs/auto/stock_tab.dart';
 import '../dart-data-bs/auto/screens__stock_screen_content.dart';
+import '../dart-data-bs/auto/screens__stock_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -14,12 +15,11 @@ class StockScreenTokens {
 }
 
 class StockScreenComposed extends StatelessWidget {
-  const StockScreenComposed({required this.onMove, required this.onTap, required this.info, required this.label, required this.name, required this.on, required this.warehouse, required this.t, super.key});
+  const StockScreenComposed({required this.onMove, required this.onTap, required this.info, required this.name, required this.on, required this.warehouse, required this.t, super.key});
 
   final VoidCallback onMove;
   final VoidCallback onTap;
   final ({String img, String why}) info;
-  final String label;
   final String name;
   final bool on;
   final bool warehouse;
@@ -31,7 +31,7 @@ class StockScreenComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           StockTab(
-            label: label,
+            label: stock_tab_label,
             on: on,
             onTap: onTap,
           ),

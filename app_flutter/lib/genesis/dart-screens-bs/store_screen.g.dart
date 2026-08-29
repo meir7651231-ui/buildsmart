@@ -15,6 +15,7 @@ import '../dart-ui-bs/auto/store_summary_line.dart';
 import '../dart-ui-bs/auto/store_supplier_header.dart';
 import '../dart-ui-bs/auto/summary_card.dart';
 import '../dart-data-bs/auto/screens__store_screen_content.dart';
+import '../dart-data-bs/auto/screens__store_screen_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class StoreSupplierHeaderItem {
@@ -37,7 +38,7 @@ class StoreScreenTokens {
 }
 
 class StoreScreenComposed extends StatelessWidget {
-  const StoreScreenComposed({required this.onMinus, required this.onPlus, required this.onTap, required this.onTap2, required this.active, required this.badge, required this.bold, required this.children, required this.deliveryFee, required this.emoji, required this.icon, required this.label, required this.qty, required this.query, required this.storeProjectChipItems, required this.storeSupplierHeaderItems, required this.subtotal, required this.title, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
+  const StoreScreenComposed({required this.onMinus, required this.onPlus, required this.onTap, required this.onTap2, required this.active, required this.badge, required this.bold, required this.children, required this.deliveryFee, required this.icon, required this.label, required this.qty, required this.query, required this.storeProjectChipItems, required this.storeSupplierHeaderItems, required this.subtotal, required this.total, required this.value, required this.vat, required this.vatInclusive, required this.t, super.key});
 
   final VoidCallback onMinus;
   final VoidCallback onPlus;
@@ -48,7 +49,6 @@ class StoreScreenComposed extends StatelessWidget {
   final bool bold;
   final List<Widget> children;
   final int deliveryFee;
-  final String emoji;
   final IconData icon;
   final String label;
   final int qty;
@@ -56,7 +56,6 @@ class StoreScreenComposed extends StatelessWidget {
   final List<StoreProjectChipItem> storeProjectChipItems;
   final List<StoreSupplierHeaderItem> storeSupplierHeaderItems;
   final int subtotal;
-  final String title;
   final int total;
   final String value;
   final int vat;
@@ -73,13 +72,13 @@ class StoreScreenComposed extends StatelessWidget {
             color: t.color,
           ),
           StorePill(
-            label: label,
+            label: store_pill_label,
             active: active,
             onTap: onTap,
           ),
           QuickAction(
             icon: icon,
-            label: label,
+            label: quick_action_label,
             onTap: onTap,
             badge: badge,
           ),
@@ -92,8 +91,8 @@ class StoreScreenComposed extends StatelessWidget {
             onTap: onTap,
           ),
           StoreSheetScaffold(
-            title: title,
-            emoji: emoji,
+            title: store_sheet_scaffold_title,
+            emoji: store_sheet_scaffold_emoji,
             children: children,
           ),
           StoreEmptyState(

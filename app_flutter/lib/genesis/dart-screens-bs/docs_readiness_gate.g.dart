@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/gate_button.dart';
 import '../dart-ui-bs/auto/section_card.dart';
+import '../dart-data-bs/auto/screens__docs_readiness_gate_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -13,13 +14,10 @@ class DocsReadinessGateTokens {
 }
 
 class DocsReadinessGateComposed extends StatelessWidget {
-  const DocsReadinessGateComposed({required this.onPressed, required this.emptyText, required this.label, required this.lines, required this.title, required this.t, super.key});
+  const DocsReadinessGateComposed({required this.onPressed, required this.lines, required this.t, super.key});
 
   final VoidCallback onPressed;
-  final String? emptyText;
-  final String label;
   final List<String> lines;
-  final String title;
   final DocsReadinessGateTokens t;
 
   @override
@@ -28,13 +26,13 @@ class DocsReadinessGateComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           SectionCard(
-            title: title,
+            title: section_card_title,
             lines: lines,
             accent: t.accent,
-            emptyText: emptyText,
+            emptyText: section_card_empty_text,
           ),
           GateButton(
-            label: label,
+            label: gate_button_label,
             onPressed: onPressed,
           ),
         ],

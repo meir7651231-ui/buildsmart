@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/courier_forms_pill_button.dart';
 import '../dart-ui-bs/auto/form_card.dart';
 import '../dart-ui-bs/auto/vacation_row.dart';
+import '../dart-data-bs/auto/screens__courier_forms_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -43,8 +44,8 @@ class CourierFormsScreenComposed extends StatelessWidget {
             children: children,
           ),
           CourierFormsPillButton(
-            id: id,
-            label: label,
+            id: courier_forms_pill_button_id,
+            label: courier_forms_pill_button_label,
             onPressed: onPressed,
             filled: filled,
           ),

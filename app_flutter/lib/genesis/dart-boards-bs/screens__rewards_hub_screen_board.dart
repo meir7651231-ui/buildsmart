@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__rewards_hub_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 4.
+// מקור-החיווט: screens__rewards_hub_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/rewards_hub_screen.dart';
@@ -21,10 +21,10 @@ class RewardsHubScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rw = ref.watch(rewardsProvider);
     return RewardsHubScreenComposed(
-      coins: 0 /* TODO-לוח: int */,
+      coins: rw.coins,
       finTileItems: const [] /* TODO-לוח: List<FinTileItem> */,
-      ic: '' /* TODO-לוח: String */,
       sub: '' /* TODO-לוח: String */,
       title: orgTerm(ref, 'brand.club', AppBrand.club),
       t: RewardsHubScreenTokens(),

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_attendance_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 8.
+// מקור-החיווט: screens__courier_attendance_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/courier_attendance_screen.dart';
@@ -21,15 +21,12 @@ class CourierAttendanceScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(boardAuthProvider);
     return CourierAttendanceScreenComposed(
       onPressed: () {} /* TODO-לוח */,
-      date: '' /* TODO-לוח: String */,
       enabled: false /* TODO-לוח: bool */,
       header: true,
-      inText: '' /* TODO-לוח: String */,
       label: '' /* TODO-לוח: String */,
-      outText: '' /* TODO-לוח: String */,
-      totalText: '' /* TODO-לוח: String */,
       value: '' /* TODO-לוח: String */,
       t: CourierAttendanceScreenTokens(),
     );

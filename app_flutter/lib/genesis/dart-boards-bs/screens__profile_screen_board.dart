@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__profile_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 5.
+// מקור-החיווט: screens__profile_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
@@ -19,6 +19,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/screens/role_picker_sheet.dart';
 import '../dart-screens-bs/profile_screen.g.dart';
 
 class ProfileScreenBoard extends ConsumerWidget {
@@ -27,10 +28,9 @@ class ProfileScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ProfileScreenComposed(
-      onTap: () {} /* TODO-לוח */,
+      onTap: () => showRolePicker(context),
       validator: (_) {} /* TODO-לוח */,
       controller: TextEditingController() /* TODO-לוח: TextEditingController */,
-      label: '' /* TODO-לוח: String */,
       number: false /* TODO-לוח: bool */,
       text: 'פרטים אישיים',
       t: ProfileScreenTokens(),

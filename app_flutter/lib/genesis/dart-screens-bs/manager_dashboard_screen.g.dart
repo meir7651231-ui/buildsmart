@@ -20,6 +20,7 @@ import '../dart-ui-bs/auto/regression_body.dart';
 import '../dart-ui-bs/auto/sheet_advance_button.dart';
 import '../dart-ui-bs/auto/stage_pill.dart';
 import '../dart-data-bs/auto/screens__manager_dashboard_screen_content.dart';
+import '../dart-data-bs/auto/screens__manager_dashboard_screen_content2.dart';
 import '../dart-data-bs/screens__manager_dashboard_screen_content.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
@@ -45,7 +46,7 @@ class ManagerDashboardScreenTokens {
 }
 
 class ManagerDashboardScreenComposed extends StatelessWidget {
-  const ManagerDashboardScreenComposed({required this.onOpen, required this.onPressed, required this.onTap, required this.onTap2, required this.badge, required this.bordered, required this.categoryCount, required this.child, required this.count, required this.emoji, required this.manageRowItems, required this.max, required this.open, required this.pct, required this.pipelineRowItems, required this.productCount, required this.sectionKey, required this.stageIdx, required this.sub, required this.title, required this.titleCfgId, required this.t, super.key});
+  const ManagerDashboardScreenComposed({required this.onOpen, required this.onPressed, required this.onTap, required this.onTap2, required this.badge, required this.bordered, required this.categoryCount, required this.child, required this.count, required this.manageRowItems, required this.max, required this.open, required this.pct, required this.pipelineRowItems, required this.productCount, required this.stageIdx, required this.t, super.key});
 
   final VoidCallback onOpen;
   final VoidCallback onPressed;
@@ -56,18 +57,13 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
   final int categoryCount;
   final Widget child;
   final int count;
-  final String emoji;
   final List<ManageRowItem> manageRowItems;
   final int max;
   final bool open;
   final int pct;
   final List<PipelineRowItem> pipelineRowItems;
   final int productCount;
-  final String sectionKey;
   final int stageIdx;
-  final String sub;
-  final String title;
-  final String titleCfgId;
   final ManagerDashboardScreenTokens t;
 
   @override
@@ -120,11 +116,11 @@ class ManagerDashboardScreenComposed extends StatelessWidget {
             title2: manage_section_title2,
             body: manage_section_body,
             label: manage_section_label,
-            sectionKey: sectionKey,
-            titleCfgId: titleCfgId,
-            emoji: emoji,
-            title: title,
-            sub: sub,
+            sectionKey: manage_section_section_key,
+            titleCfgId: manage_section_title_cfg_id,
+            emoji: manage_section_emoji,
+            title: manage_section_title,
+            sub: manage_section_sub,
             open: open,
             onTap: onTap2,
             child: child,

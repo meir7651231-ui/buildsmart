@@ -28,6 +28,8 @@ class WorkerFormsScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(boardAuthProvider);
+    final employer = ref.watch(employerProfileProvider(session.employerId));
     return WorkerFormsScreenComposed(
       onApprove: () {} /* TODO-לוח */,
       onPressed: () {} /* TODO-לוח */,

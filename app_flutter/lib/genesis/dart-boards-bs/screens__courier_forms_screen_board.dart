@@ -25,6 +25,7 @@ class CourierFormsScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(boardAuthProvider);
     return CourierFormsScreenComposed(
       onApprove: () {} /* TODO-לוח */,
       onPressed: () {} /* TODO-לוח */,

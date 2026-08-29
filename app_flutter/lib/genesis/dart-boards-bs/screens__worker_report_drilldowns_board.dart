@@ -18,6 +18,7 @@ class WorkerReportDrilldownsBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rewards = ref.read(rewardsProvider);
     return WorkerReportDrilldownsComposed(
       kvLineItems: const [] /* TODO-לוח: List<KvLineItem> */,
       text: 'צ׳קליסט ציוד',

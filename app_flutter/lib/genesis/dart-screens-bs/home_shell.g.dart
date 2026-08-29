@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/home_shell_badged_icon.dart';
 import '../dart-ui-bs/auto/home_shell_menu_row.dart';
+import '../dart-data-bs/auto/screens__home_shell_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -13,14 +14,11 @@ class HomeShellTokens {
 }
 
 class HomeShellComposed extends StatelessWidget {
-  const HomeShellComposed({required this.cfgId, required this.count, required this.emoji, required this.icon, required this.label, required this.t, super.key});
+  const HomeShellComposed({required this.count, required this.icon, required this.t, super.key});
 
 
-  final String? cfgId;
   final int count;
-  final String emoji;
   final IconData icon;
-  final String label;
   final HomeShellTokens t;
 
   @override
@@ -33,9 +31,9 @@ class HomeShellComposed extends StatelessWidget {
             count: count,
           ),
           HomeShellMenuRow(
-            emoji: emoji,
-            label: label,
-            cfgId: cfgId,
+            emoji: home_shell_menu_row_emoji,
+            label: home_shell_menu_row_label,
+            cfgId: home_shell_menu_row_cfg_id,
           ),
         ],
       );

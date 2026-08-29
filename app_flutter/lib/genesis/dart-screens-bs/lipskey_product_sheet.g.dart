@@ -9,6 +9,7 @@ import '../dart-ui-bs/auto/qty_stepper.dart';
 import '../dart-ui-bs/auto/section_title.dart';
 import '../dart-ui-bs/auto/zoom_hint.dart';
 import '../dart-data-bs/auto/screens__lipskey_product_sheet_content.dart';
+import '../dart-data-bs/auto/screens__lipskey_product_sheet_content2.dart';
 import '../dart-data-bs/screens__lipskey_product_sheet_content.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
@@ -26,10 +27,9 @@ class LipskeyProductSheetTokens {
 }
 
 class LipskeyProductSheetComposed extends StatelessWidget {
-  const LipskeyProductSheetComposed({required this.onChanged, required this.emoji, required this.pickerOptionItems, required this.qty, required this.subtitle, required this.text, required this.t, super.key});
+  const LipskeyProductSheetComposed({required this.onChanged, required this.pickerOptionItems, required this.qty, required this.subtitle, required this.text, required this.t, super.key});
 
   final ValueChanged<int> onChanged;
-  final String emoji;
   final List<PickerOptionItem> pickerOptionItems;
   final int qty;
   final String? subtitle;
@@ -45,7 +45,7 @@ class LipskeyProductSheetComposed extends StatelessWidget {
             
           ),
           SectionTitle(
-            emoji: emoji,
+            emoji: section_title_emoji,
             title: lineBomSheet.title,
             subtitle: subtitle,
           ),

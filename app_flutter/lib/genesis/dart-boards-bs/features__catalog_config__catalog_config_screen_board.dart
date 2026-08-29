@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: features__catalog_config__catalog_config_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
+// מקור-החיווט: features__catalog_config__catalog_config_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/features/catalog_config/catalog_config_screen.dart';
@@ -15,14 +15,21 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import '../dart-screens-bs/catalog_config_catalog_config_screen.g.dart';
 
-class CatalogConfigCatalogConfigScreenBoard extends ConsumerWidget {
+class CatalogConfigCatalogConfigScreenBoard extends ConsumerStatefulWidget {
   const CatalogConfigCatalogConfigScreenBoard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CatalogConfigCatalogConfigScreenBoard> createState() => _CatalogConfigCatalogConfigScreenBoardState();
+}
+
+class _CatalogConfigCatalogConfigScreenBoardState extends ConsumerState<CatalogConfigCatalogConfigScreenBoard> {
+  int _matIdx = 0;
+
+  @override
+  Widget build(BuildContext context) {
     return CatalogConfigCatalogConfigScreenComposed(
       count: 0 /* TODO-לוח: int */,
-      index: 0 /* TODO-לוח: int */,
+      index: _matIdx,
       t: CatalogConfigCatalogConfigScreenTokens(),
     );
   }

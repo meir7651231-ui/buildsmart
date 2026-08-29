@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/location_button.dart';
 import '../dart-ui-bs/auto/send_report_button.dart';
 import '../dart-ui-bs/auto/today_stat.dart';
 import '../dart-data-bs/auto/screens__worker_attendance_screen_content.dart';
+import '../dart-data-bs/auto/screens__worker_attendance_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -36,7 +37,7 @@ class WorkerAttendanceScreenComposed extends StatelessWidget {
             onPressed: onPressed,
           ),
           TodayStat(
-            label: label,
+            label: today_stat_label,
             value: value,
           ),
           LocationButton(

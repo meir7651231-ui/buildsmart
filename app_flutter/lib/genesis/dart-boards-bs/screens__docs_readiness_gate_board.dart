@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__docs_readiness_gate.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 5.
+// מקור-החיווט: screens__docs_readiness_gate.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/docs_readiness_gate.dart';
@@ -15,6 +15,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
+import 'package:buildsmart/screens/worker_forms_screen.dart';
 import '../dart-screens-bs/docs_readiness_gate.g.dart';
 
 class DocsReadinessGateBoard extends ConsumerWidget {
@@ -23,11 +24,9 @@ class DocsReadinessGateBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DocsReadinessGateComposed(
-      onPressed: () {} /* TODO-לוח */,
-      emptyText: null /* TODO-לוח: String? */,
-      label: '' /* TODO-לוח: String */,
+      onPressed: () =>
+                      Navigator.of(context).push(WorkerFormsScreen.route()),
       lines: const [] /* TODO-לוח: List<String> */,
-      title: '' /* TODO-לוח: String */,
       t: DocsReadinessGateTokens(accent: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }

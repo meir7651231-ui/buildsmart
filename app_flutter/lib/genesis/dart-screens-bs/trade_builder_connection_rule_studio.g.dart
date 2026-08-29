@@ -8,6 +8,7 @@ import '../dart-ui-bs/auto/rule_inspect_dialog.dart';
 import '../dart-ui-bs/auto/section_header.dart';
 import '../dart-ui-bs/auto/trade_builder_accessory_rule_editor_pill_button.dart';
 import '../dart-data-bs/auto/screens__trade_builder__connection_rule_studio_content.dart';
+import '../dart-data-bs/auto/screens__trade_builder__connection_rule_studio_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -17,14 +18,13 @@ class TradeBuilderConnectionRuleStudioTokens {
 }
 
 class TradeBuilderConnectionRuleStudioComposed extends StatelessWidget {
-  const TradeBuilderConnectionRuleStudioComposed({required this.onDelete, required this.onPressed, required this.onPressed2, required this.onTap, required this.enabled, required this.label, required this.methodLabelHe, required this.nameHe, required this.title, required this.t, super.key});
+  const TradeBuilderConnectionRuleStudioComposed({required this.onDelete, required this.onPressed, required this.onPressed2, required this.onTap, required this.enabled, required this.methodLabelHe, required this.nameHe, required this.title, required this.t, super.key});
 
   final VoidCallback onDelete;
   final VoidCallback onPressed;
   final VoidCallback onPressed2;
   final VoidCallback onTap;
   final bool enabled;
-  final String label;
   final String methodLabelHe;
   final String nameHe;
   final String title;
@@ -56,7 +56,7 @@ class TradeBuilderConnectionRuleStudioComposed extends StatelessWidget {
             onDelete: onDelete,
           ),
           TradeBuilderAccessoryRuleEditorPillButton(
-            label: label,
+            label: trade_builder_accessory_rule_editor_pill_button_label,
             onTap: onTap,
             enabled: enabled,
           ),

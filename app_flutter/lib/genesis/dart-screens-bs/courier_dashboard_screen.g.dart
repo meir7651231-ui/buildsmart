@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/flat_card.dart';
 import '../dart-ui-bs/auto/stat.dart';
 import '../dart-ui-bs/auto/vehicle_button.dart';
 import '../dart-data-bs/auto/screens__courier_dashboard_screen_content.dart';
+import '../dart-data-bs/auto/screens__courier_dashboard_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -15,12 +16,11 @@ class CourierDashboardScreenTokens {
 }
 
 class CourierDashboardScreenComposed extends StatelessWidget {
-  const CourierDashboardScreenComposed({required this.onTap, required this.child, required this.ic, required this.label, required this.name, required this.on, required this.preferred, required this.value, required this.t, super.key});
+  const CourierDashboardScreenComposed({required this.onTap, required this.child, required this.ic, required this.name, required this.on, required this.preferred, required this.value, required this.t, super.key});
 
   final VoidCallback onTap;
   final Widget child;
   final String ic;
-  final String label;
   final String name;
   final bool on;
   final bool preferred;
@@ -45,7 +45,7 @@ class CourierDashboardScreenComposed extends StatelessWidget {
           ),
           Stat(
             value: value,
-            label: label,
+            label: stat_label,
           ),
         ],
       );

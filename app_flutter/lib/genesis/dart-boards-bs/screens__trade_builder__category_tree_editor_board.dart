@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__trade_builder__category_tree_editor.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 7.
+// מקור-החיווט: screens__trade_builder__category_tree_editor.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 5.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/trade_builder/category_tree_editor.dart';
@@ -13,18 +13,24 @@ import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import '../dart-screens-bs/trade_builder_category_tree_editor.g.dart';
 
-class TradeBuilderCategoryTreeEditorBoard extends ConsumerWidget {
+class TradeBuilderCategoryTreeEditorBoard extends ConsumerStatefulWidget {
   const TradeBuilderCategoryTreeEditorBoard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TradeBuilderCategoryTreeEditorBoard> createState() => _TradeBuilderCategoryTreeEditorBoardState();
+}
+
+class _TradeBuilderCategoryTreeEditorBoardState extends ConsumerState<TradeBuilderCategoryTreeEditorBoard> {
+  final _name = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
     return TradeBuilderCategoryTreeEditorComposed(
       onDelete: () {} /* TODO-לוח */,
       onTap: () {} /* TODO-לוח */,
       emoji: '' /* TODO-לוח: String */,
-      enabled: false /* TODO-לוח: bool */,
+      enabled: _name.text.trim().isNotEmpty,
       fallback: '' /* TODO-לוח: String */,
-      label: '' /* TODO-לוח: String */,
       titleHe: '' /* TODO-לוח: String */,
       t: TradeBuilderCategoryTreeEditorTokens(),
     );

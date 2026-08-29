@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/courier_personal_area_card.dart';
 import '../dart-ui-bs/auto/stat.dart';
 import '../dart-data-bs/auto/screens__courier_profile_screen_content.dart';
+import '../dart-data-bs/auto/screens__courier_profile_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -14,13 +15,12 @@ class CourierProfileScreenTokens {
 }
 
 class CourierProfileScreenComposed extends StatelessWidget {
-  const CourierProfileScreenComposed({required this.onTap, required this.onTap2, required this.onTap3, required this.onTap4, required this.label, required this.value, required this.t, super.key});
+  const CourierProfileScreenComposed({required this.onTap, required this.onTap2, required this.onTap3, required this.onTap4, required this.value, required this.t, super.key});
 
   final VoidCallback onTap;
   final VoidCallback onTap2;
   final VoidCallback onTap3;
   final VoidCallback onTap4;
-  final String label;
   final String value;
   final CourierProfileScreenTokens t;
 
@@ -31,7 +31,7 @@ class CourierProfileScreenComposed extends StatelessWidget {
           const SizedBox(height: 8),
           Stat(
             value: value,
-            label: label,
+            label: stat_label,
           ),
           CourierPersonalAreaCard(
             title: courier_personal_area_card_title,

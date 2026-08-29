@@ -17,6 +17,7 @@ import '../dart-ui-bs/auto/sheet_section.dart';
 import '../dart-ui-bs/auto/tree_coming_soon.dart';
 import '../dart-ui-bs/auto/value_chip.dart';
 import '../dart-data-bs/auto/screens__catalog_screen_content.dart';
+import '../dart-data-bs/auto/screens__catalog_screen_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class FacetRowItem {
@@ -98,7 +99,7 @@ class CatalogScreenComposed extends StatelessWidget {
           ),
           EmptySection(
             fallback: empty_section_fallback,
-            emoji: emoji,
+            emoji: empty_section_emoji,
             label: label,
           ),
           for (final o in facetRowItems) ...[

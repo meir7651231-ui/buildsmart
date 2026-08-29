@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__store_settings_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 17.
+// מקור-החיווט: screens__store_settings_screen.dart (בנייה-חכמה main) · מחווט: 5 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/store_settings_screen.dart';
@@ -13,6 +13,7 @@ import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/services.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import '../dart-screens-bs/store_settings_screen.g.dart';
 
 class StoreSettingsScreenBoard extends ConsumerWidget {
@@ -20,22 +21,24 @@ class StoreSettingsScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(storeSettingsProvider);
     return StoreSettingsScreenComposed(
-      onChanged: (_) {} /* TODO-לוח */,
-      onChanged2: (_) {} /* TODO-לוח */,
-      onChanged3: (_) {} /* TODO-לוח */,
-      onTap: () {} /* TODO-לוח */,
-      buttonLabel: '' /* TODO-לוח: String */,
+      onChanged: (v) => ref
+                  .read(storeSettingsProvider.notifier)
+                  .update((s) => s.copyWith(defaultAddress: v)),
+      onChanged2: (v) => ref
+                  .read(storeSettingsProvider.notifier)
+                  .update((s) => s.copyWith(selfPickupDefault: v)),
+      onChanged3: (v) => ref
+                  .read(storeSettingsProvider.notifier)
+                  .update((s) => s.copyWith(minOrderAmount: v)),
+      onTap: () => showToast(context, '$label — בבנייה'),
       children: const [] /* TODO-לוח: List<Widget> */,
-      emoji: '' /* TODO-לוח: String */,
       errorText: null /* TODO-לוח: String? */,
       fallback: '' /* TODO-לוח: String */,
-      hint: '' /* TODO-לוח: String */,
-      label: '' /* TODO-לוח: String */,
       subtitleNote: null /* TODO-לוח: String? */,
-      title: '' /* TODO-לוח: String */,
       underConstruction: false /* TODO-לוח: bool */,
-      value: '' /* TODO-לוח: String */,
+      value: settings.defaultAddress,
       value2: false /* TODO-לוח: bool */,
       value22: 0 /* TODO-לוח: int */,
       t: StoreSettingsScreenTokens(cursorColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, fieldWidth: 12 /* TODO-לוח: טוקן */, fillColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, hintColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, inkColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, labelColor: const Color(0xFF223047) /* TODO-לוח: טוקן */, mutedColor: const Color(0xFF223047) /* TODO-לוח: טוקן */),

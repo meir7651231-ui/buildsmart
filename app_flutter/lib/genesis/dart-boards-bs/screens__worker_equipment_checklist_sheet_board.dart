@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_equipment_checklist_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
+// מקור-החיווט: screens__worker_equipment_checklist_sheet.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/worker_equipment_checklist_sheet.dart';
@@ -17,14 +17,21 @@ import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import '../dart-screens-bs/worker_equipment_checklist_sheet.g.dart';
 
-class WorkerEquipmentChecklistSheetBoard extends ConsumerWidget {
+class WorkerEquipmentChecklistSheetBoard extends ConsumerStatefulWidget {
   const WorkerEquipmentChecklistSheetBoard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorkerEquipmentChecklistSheetBoard> createState() => _WorkerEquipmentChecklistSheetBoardState();
+}
+
+class _WorkerEquipmentChecklistSheetBoardState extends ConsumerState<WorkerEquipmentChecklistSheetBoard> {
+  bool _sent = false;
+
+  @override
+  Widget build(BuildContext context) {
     return WorkerEquipmentChecklistSheetComposed(
       onTap: () {} /* TODO-לוח */,
-      label: '' /* TODO-לוח: String */,
+      label: _sent ? '✓ נשלח לקבלן' : 'שלח רשימה לקבלן',
       text: 'צ׳קליסט ציוד',
       t: WorkerEquipmentChecklistSheetTokens(),
     );

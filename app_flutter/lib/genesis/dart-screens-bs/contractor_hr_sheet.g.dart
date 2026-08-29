@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/decide_button.dart';
 import '../dart-ui-bs/auto/status_chip.dart';
 import '../dart-ui-bs/auto/vacation_row.dart';
 import '../dart-data-bs/auto/screens__contractor_hr_sheet_content.dart';
+import '../dart-data-bs/auto/screens__contractor_hr_sheet_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class VacationRowItem {
@@ -22,12 +23,11 @@ class ContractorHrSheetTokens {
 }
 
 class ContractorHrSheetComposed extends StatelessWidget {
-  const ContractorHrSheetComposed({required this.onPressed, required this.bordered, required this.id, required this.label, required this.range, required this.reason, required this.status, required this.vacationRowItems, required this.workerName, required this.t, super.key});
+  const ContractorHrSheetComposed({required this.onPressed, required this.bordered, required this.id, required this.range, required this.reason, required this.status, required this.vacationRowItems, required this.workerName, required this.t, super.key});
 
   final VoidCallback onPressed;
   final bool bordered;
   final String id;
-  final String label;
   final String range;
   final String reason;
   final String status;
@@ -57,7 +57,7 @@ class ContractorHrSheetComposed extends StatelessWidget {
           const SizedBox(height: 8),
         ],
           DecideButton(
-            label: label,
+            label: decide_button_label,
             color: t.color,
             textColor: t.textColor,
             bordered: bordered,

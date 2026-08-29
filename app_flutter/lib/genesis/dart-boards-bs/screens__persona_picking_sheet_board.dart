@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__persona_picking_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
+// מקור-החיווט: screens__persona_picking_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/persona_picking_sheet.dart';
@@ -20,10 +20,10 @@ class PersonaPickingSheetBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final fn = ref.read(fulfillmentProvider.notifier);
     return PersonaPickingSheetComposed(
       onSelect: (_) {} /* TODO-לוח */,
       splitInto: 0 /* TODO-לוח: int */,
-      text: '' /* TODO-לוח: String */,
       t: PersonaPickingSheetTokens(bg: const Color(0xFF223047) /* TODO-לוח: טוקן */, fg: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }

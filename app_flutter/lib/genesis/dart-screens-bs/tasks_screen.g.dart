@@ -12,6 +12,7 @@ import '../dart-ui-bs/auto/proposal_card.dart';
 import '../dart-ui-bs/auto/sec_h.dart';
 import '../dart-ui-bs/auto/worker_reports_tab_card.dart';
 import '../dart-data-bs/auto/screens__tasks_screen_content.dart';
+import '../dart-data-bs/auto/screens__tasks_screen_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class ApprovalCardItem {
@@ -40,13 +41,12 @@ class TasksScreenTokens {
 }
 
 class TasksScreenComposed extends StatelessWidget {
-  const TasksScreenComposed({required this.onTap, required this.approvalCardItems, required this.children, required this.detail, required this.label, required this.proposalCardItems, required this.text, required this.title, required this.titleId, required this.t, super.key});
+  const TasksScreenComposed({required this.onTap, required this.approvalCardItems, required this.children, required this.detail, required this.proposalCardItems, required this.text, required this.title, required this.titleId, required this.t, super.key});
 
   final VoidCallback onTap;
   final List<ApprovalCardItem> approvalCardItems;
   final List<Widget> children;
   final String detail;
-  final String label;
   final List<ProposalCardItem> proposalCardItems;
   final String text;
   final String title;
@@ -100,7 +100,7 @@ class TasksScreenComposed extends StatelessWidget {
           const SizedBox(height: 8),
         ],
           PrimaryBtn(
-            label: label,
+            label: primary_btn_label,
             onTap: onTap,
           ),
           WorkerReportsTabCard(

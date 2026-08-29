@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__catalog_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 25.
+// מקור-החיווט: screens__catalog_screen.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 23.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
@@ -70,6 +70,9 @@ class CatalogScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(catalogSectionProvider);
+    final notif = ref.read(cardVersionsProvider.notifier);
+    final selected = ref.watch(catalogListItemsProvider)[active];
     return CatalogScreenComposed(
       onQtyChanged: (_) {} /* TODO-לוח */,
       onSelect: (_) {} /* TODO-לוח */,
@@ -78,7 +81,13 @@ class CatalogScreenBoard extends ConsumerWidget {
       onToggle: () {} /* TODO-לוח */,
       onToggle2: (_) {} /* TODO-לוח */,
       activeMatch: null /* TODO-לוח: List<String>? */,
-      axisChipItems: const [] /* TODO-לוח: List<AxisChipItem> */,
+      axisChipItems: SizeSortAxis.values.map((axis) => AxisChipItem(label: kSizeSortLabel[axis]!, isSelected: active == axis, onTap: () {
+              final wasActive = active == axis;
+              ref.read(variantsSizeSortAxisProvider.notifier).state = axis;
+              ref.read(variantsActiveSubGroupProvider.notifier).state = null;
+              final exp = ref.read(variantsValuesExpandedProvider.notifier);
+              exp.state = wasActive ? !exp.state : true;
+            })).toList(),
       child: const SizedBox.shrink() /* TODO-לוח: Widget */,
       count: 0 /* TODO-לוח: int */,
       emoji: '' /* TODO-לוח: String */,
@@ -86,7 +95,7 @@ class CatalogScreenBoard extends ConsumerWidget {
       facetRowItems: const [] /* TODO-לוח: List<FacetRowItem> */,
       icon: Icons.remove,
       isSelected: false /* TODO-לוח: bool */,
-      label: '' /* TODO-לוח: String */,
+      label: active,
       name: '' /* TODO-לוח: String */,
       options: const [] /* TODO-לוח: List<String> */,
       price: null /* TODO-לוח: int? */,

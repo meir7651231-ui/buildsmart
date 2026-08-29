@@ -3,6 +3,7 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/action_button.dart';
+import '../dart-data-bs/auto/screens__contractor_material_requests_sheet_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -12,10 +13,10 @@ class ContractorMaterialRequestsSheetTokens {
 }
 
 class ContractorMaterialRequestsSheetComposed extends StatelessWidget {
-  const ContractorMaterialRequestsSheetComposed({required this.onTap, required this.label, required this.t, super.key});
+  const ContractorMaterialRequestsSheetComposed({required this.onTap, required this.t, super.key});
 
   final VoidCallback onTap;
-  final String label;
+
   final ContractorMaterialRequestsSheetTokens t;
 
   @override
@@ -24,7 +25,7 @@ class ContractorMaterialRequestsSheetComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           ActionButton(
-            label: label,
+            label: action_button_label,
             color: t.color,
             onTap: onTap,
           ),

@@ -19,6 +19,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/services.dart';
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import '../dart-screens-bs/lipskey_products_screen.g.dart';
 
 class LipskeyProductsScreenBoard extends ConsumerWidget {
@@ -26,6 +27,8 @@ class LipskeyProductsScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cart = ref.watch(smartCartProvider.notifier);
+    final shown = <(String, LipskeyCatalogProduct, List<LipskeyCatalogProduct>)>[];
     return LipskeyProductsScreenComposed(
       onTap: () {} /* TODO-לוח */,
       count: 0 /* TODO-לוח: int */,

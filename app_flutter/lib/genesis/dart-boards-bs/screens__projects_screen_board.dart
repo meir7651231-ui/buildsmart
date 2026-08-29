@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__projects_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
+// מקור-החיווט: screens__projects_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 0.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/projects_screen.dart';
@@ -14,6 +14,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/screens/budget_screen.dart';
 import '../dart-screens-bs/projects_screen.g.dart';
 
 class ProjectsScreenBoard extends ConsumerWidget {
@@ -22,8 +23,7 @@ class ProjectsScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ProjectsScreenComposed(
-      onTap: () {} /* TODO-לוח */,
-      label: '' /* TODO-לוח: String */,
+      onTap: () => Navigator.of(context).push(BudgetScreen.route()),
       t: ProjectsScreenTokens(),
     );
   }

@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/grip.dart';
 import '../dart-ui-bs/auto/persona_picking_sheet_banner.dart';
 import '../dart-ui-bs/auto/split_control.dart';
 import '../dart-data-bs/auto/screens__persona_picking_sheet_content.dart';
+import '../dart-data-bs/auto/screens__persona_picking_sheet_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -16,11 +17,10 @@ class PersonaPickingSheetTokens {
 }
 
 class PersonaPickingSheetComposed extends StatelessWidget {
-  const PersonaPickingSheetComposed({required this.onSelect, required this.splitInto, required this.text, required this.t, super.key});
+  const PersonaPickingSheetComposed({required this.onSelect, required this.splitInto, required this.t, super.key});
 
   final void Function(int) onSelect;
   final int splitInto;
-  final String text;
   final PersonaPickingSheetTokens t;
 
   @override
@@ -32,7 +32,7 @@ class PersonaPickingSheetComposed extends StatelessWidget {
             
           ),
           PersonaPickingSheetBanner(
-            text: text,
+            text: persona_picking_sheet_banner_text,
             bg: t.bg,
             fg: t.fg,
           ),

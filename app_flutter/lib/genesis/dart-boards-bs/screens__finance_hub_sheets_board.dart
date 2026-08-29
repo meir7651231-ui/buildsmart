@@ -12,6 +12,8 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/finance_local.dart';
 import '../dart-screens-bs/finance_hub_sheets.g.dart';
 
 class FinanceHubSheetsBoard extends ConsumerWidget {
@@ -19,6 +21,9 @@ class FinanceHubSheetsBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pct = buildIndexDeltaPct();
+    final repo = financeRepo();
+    final left = repo.budgetTotal() - repo.budgetSpent();
     return FinanceHubSheetsComposed(
       onApprove: () {} /* TODO-לוח */,
       onReject: () {} /* TODO-לוח */,

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__tasks_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 8.
+// מקור-החיווט: screens__tasks_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/tasks_screen.dart';
@@ -30,7 +30,6 @@ class TasksScreenBoard extends ConsumerWidget {
       approvalCardItems: const [] /* TODO-לוח: List<ApprovalCardItem> */,
       children: const [] /* TODO-לוח: List<Widget> */,
       detail: '' /* TODO-לוח: String */,
-      label: '' /* TODO-לוח: String */,
       proposalCardItems: const [] /* TODO-לוח: List<ProposalCardItem> */,
       text: 'אתה רואה את כל משימות הצוות. אשר עבודות שהוגשו ועקוב אחרי ההתקדמות.',
       title: '' /* TODO-לוח: String */,

@@ -3,6 +3,7 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/link_btn.dart';
+import '../dart-data-bs/auto/screens__projects_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -12,10 +13,10 @@ class ProjectsScreenTokens {
 }
 
 class ProjectsScreenComposed extends StatelessWidget {
-  const ProjectsScreenComposed({required this.onTap, required this.label, required this.t, super.key});
+  const ProjectsScreenComposed({required this.onTap, required this.t, super.key});
 
   final VoidCallback onTap;
-  final String label;
+
   final ProjectsScreenTokens t;
 
   @override
@@ -24,7 +25,7 @@ class ProjectsScreenComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           LinkBtn(
-            label: label,
+            label: link_btn_label,
             onTap: onTap,
           ),
         ],

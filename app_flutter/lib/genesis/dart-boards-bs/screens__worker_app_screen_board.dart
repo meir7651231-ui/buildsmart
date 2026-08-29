@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_app_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 16.
+// מקור-החיווט: screens__worker_app_screen.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 15.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
@@ -40,14 +40,21 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:buildsmart/widgets/voice_dictate_button.dart';
 import '../dart-screens-bs/worker_app_screen.g.dart';
 
-class WorkerAppScreenBoard extends ConsumerWidget {
+class WorkerAppScreenBoard extends ConsumerStatefulWidget {
   const WorkerAppScreenBoard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorkerAppScreenBoard> createState() => _WorkerAppScreenBoardState();
+}
+
+class _WorkerAppScreenBoardState extends ConsumerState<WorkerAppScreenBoard> {
+  int _tab = 0;
+
+  @override
+  Widget build(BuildContext context) {
     return WorkerAppScreenComposed(
       onPressed: () {} /* TODO-לוח */,
-      onTap: (_) {} /* TODO-לוח */,
+      onTap: (i) => setState(() => _tab = i),
       onTap2: () {} /* TODO-לוח */,
       chatOn: false /* TODO-לוח: bool */,
       currentIndex: 0 /* TODO-לוח: int */,

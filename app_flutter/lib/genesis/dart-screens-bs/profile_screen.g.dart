@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/field.dart';
 import '../dart-ui-bs/auto/field_label.dart';
 import '../dart-ui-bs/auto/link_row.dart';
 import '../dart-ui-bs/auto/section_label.dart';
+import '../dart-data-bs/auto/screens__profile_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -15,12 +16,11 @@ class ProfileScreenTokens {
 }
 
 class ProfileScreenComposed extends StatelessWidget {
-  const ProfileScreenComposed({required this.onTap, required this.validator, required this.controller, required this.label, required this.number, required this.text, required this.t, super.key});
+  const ProfileScreenComposed({required this.onTap, required this.validator, required this.controller, required this.number, required this.text, required this.t, super.key});
 
   final VoidCallback onTap;
   final String? Function(String value)? validator;
   final TextEditingController controller;
-  final String label;
   final bool number;
   final String text;
   final ProfileScreenTokens t;
@@ -34,7 +34,7 @@ class ProfileScreenComposed extends StatelessWidget {
             text,
           ),
           Field(
-            label: label,
+            label: field_label,
             controller: controller,
             number: number,
             validator: validator,
@@ -43,7 +43,7 @@ class ProfileScreenComposed extends StatelessWidget {
             text,
           ),
           LinkRow(
-            label: label,
+            label: link_row_label,
             onTap: onTap,
           ),
         ],

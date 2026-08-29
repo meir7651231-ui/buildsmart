@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/match_chip.dart';
 import '../dart-ui-bs/auto/trade_builder_accessory_rule_editor_pill_button.dart';
 import '../dart-ui-bs/auto/value_chip.dart';
 import '../dart-ui-bs/auto/warn_chip.dart';
+import '../dart-data-bs/auto/screens__trade_builder__attribute_schema_editor_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class MatchChipItem {
@@ -26,13 +27,11 @@ class TradeBuilderAttributeSchemaEditorTokens {
 }
 
 class TradeBuilderAttributeSchemaEditorComposed extends StatelessWidget {
-  const TradeBuilderAttributeSchemaEditorComposed({required this.onTap, required this.enabled, required this.label, required this.matchChipItems, required this.text, required this.valueChipItems, required this.t, super.key});
+  const TradeBuilderAttributeSchemaEditorComposed({required this.onTap, required this.enabled, required this.matchChipItems, required this.valueChipItems, required this.t, super.key});
 
   final VoidCallback onTap;
   final bool enabled;
-  final String label;
   final List<MatchChipItem> matchChipItems;
-  final String text;
   final List<ValueChipItem> valueChipItems;
   final TradeBuilderAttributeSchemaEditorTokens t;
 
@@ -42,12 +41,12 @@ class TradeBuilderAttributeSchemaEditorComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           TradeBuilderAccessoryRuleEditorPillButton(
-            label: label,
+            label: trade_builder_accessory_rule_editor_pill_button_label,
             onTap: onTap,
             enabled: enabled,
           ),
           WarnChip(
-            text: text,
+            text: warn_chip_text,
           ),
           for (final m in matchChipItems) ...[
           MatchChip(

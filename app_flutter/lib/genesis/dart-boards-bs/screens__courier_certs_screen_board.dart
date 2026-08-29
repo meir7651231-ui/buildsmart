@@ -22,6 +22,7 @@ class CourierCertsScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final nameCtl = TextEditingController();
     return CourierCertsScreenComposed(
       presetChipItems: const [] /* TODO-לוח: List<PresetChipItem> */,
       t: CourierCertsScreenTokens(),

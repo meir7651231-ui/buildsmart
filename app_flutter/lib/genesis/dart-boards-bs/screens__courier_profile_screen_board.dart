@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_profile_screen.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 2.
+// מקור-החיווט: screens__courier_profile_screen.dart (בנייה-חכמה main) · מחווט: 4 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/courier_profile_screen.dart';
@@ -48,7 +48,6 @@ class CourierProfileScreenBoard extends ConsumerWidget {
       onTap3: () =>
                         Navigator.of(context).push(CourierCertsScreen.route()),
       onTap4: () => showWorkerPayslipsSheet(context),
-      label: '' /* TODO-לוח: String */,
       value: '' /* TODO-לוח: String */,
       t: CourierProfileScreenTokens(),
     );

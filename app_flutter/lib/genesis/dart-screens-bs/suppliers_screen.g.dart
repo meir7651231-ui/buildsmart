@@ -3,6 +3,7 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/supplier_tile.dart';
+import '../dart-data-bs/auto/screens__suppliers_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -12,12 +13,10 @@ class SuppliersScreenTokens {
 }
 
 class SuppliersScreenComposed extends StatelessWidget {
-  const SuppliersScreenComposed({required this.onTap, required this.emoji, required this.subtitle, required this.title, required this.t, super.key});
+  const SuppliersScreenComposed({required this.onTap, required this.subtitle, required this.t, super.key});
 
   final VoidCallback onTap;
-  final String emoji;
   final String subtitle;
-  final String title;
   final SuppliersScreenTokens t;
 
   @override
@@ -26,8 +25,8 @@ class SuppliersScreenComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           SupplierTile(
-            emoji: emoji,
-            title: title,
+            emoji: supplier_tile_emoji,
+            title: supplier_tile_title,
             subtitle: subtitle,
             onTap: onTap,
           ),

@@ -3,6 +3,7 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/rstat.dart';
+import '../dart-data-bs/auto/screens__manager_profile_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -12,10 +13,9 @@ class ManagerProfileScreenTokens {
 }
 
 class ManagerProfileScreenComposed extends StatelessWidget {
-  const ManagerProfileScreenComposed({required this.label, required this.value, required this.t, super.key});
+  const ManagerProfileScreenComposed({required this.value, required this.t, super.key});
 
 
-  final String label;
   final String value;
   final ManagerProfileScreenTokens t;
 
@@ -26,7 +26,7 @@ class ManagerProfileScreenComposed extends StatelessWidget {
           const SizedBox(height: 8),
           RStat(
             value: value,
-            label: label,
+            label: rstat_label,
           ),
         ],
       );

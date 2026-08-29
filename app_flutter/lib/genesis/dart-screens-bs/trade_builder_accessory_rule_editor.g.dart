@@ -8,6 +8,7 @@ import '../dart-ui-bs/auto/must_chip.dart';
 import '../dart-ui-bs/auto/price_chip.dart';
 import '../dart-ui-bs/auto/trade_builder_accessory_rule_editor_pill_button.dart';
 import '../dart-data-bs/auto/screens__trade_builder__accessory_rule_editor_content.dart';
+import '../dart-data-bs/auto/screens__trade_builder__accessory_rule_editor_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -17,13 +18,12 @@ class TradeBuilderAccessoryRuleEditorTokens {
 }
 
 class TradeBuilderAccessoryRuleEditorComposed extends StatelessWidget {
-  const TradeBuilderAccessoryRuleEditorComposed({required this.onDelete, required this.onTap, required this.emoji, required this.enabled, required this.label, required this.mustHave, required this.nameHe, required this.price, required this.price2, required this.whyHe, required this.t, super.key});
+  const TradeBuilderAccessoryRuleEditorComposed({required this.onDelete, required this.onTap, required this.emoji, required this.enabled, required this.mustHave, required this.nameHe, required this.price, required this.price2, required this.whyHe, required this.t, super.key});
 
   final VoidCallback onDelete;
   final VoidCallback onTap;
   final String emoji;
   final bool enabled;
-  final String label;
   final bool mustHave;
   final String nameHe;
   final int? price;
@@ -51,7 +51,7 @@ class TradeBuilderAccessoryRuleEditorComposed extends StatelessWidget {
             onDelete: onDelete,
           ),
           TradeBuilderAccessoryRuleEditorPillButton(
-            label: label,
+            label: trade_builder_accessory_rule_editor_pill_button_label,
             onTap: onTap,
             enabled: enabled,
           ),

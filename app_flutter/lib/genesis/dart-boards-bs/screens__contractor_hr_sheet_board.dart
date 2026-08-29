@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__contractor_hr_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 9.
+// מקור-החיווט: screens__contractor_hr_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 7.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/contractor_hr_sheet.dart';
@@ -13,18 +13,35 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import '../dart-screens-bs/contractor_hr_sheet.g.dart';
 
-class ContractorHrSheetBoard extends ConsumerWidget {
+class ContractorHrSheetBoard extends ConsumerStatefulWidget {
   const ContractorHrSheetBoard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ContractorHrSheetBoard> createState() => _ContractorHrSheetBoardState();
+}
+
+class _ContractorHrSheetBoardState extends ConsumerState<ContractorHrSheetBoard> {
+  final _reqDocController = TextEditingController();
+    void _addRequirement(BuildContext context) {
+    final text = _reqDocController.text.trim();
+    if (text.isEmpty) return;
+    ref
+        .read(requiredDocsPolicyProvider.notifier)
+        .addRequirement(kDemoContractorId, text);
+    _reqDocController.clear();
+    showToast(context, '📋 נוסף מסמך נדרש: $text');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final requests = ref.watch(requestsForEmployer(kDemoContractorId));
     return ContractorHrSheetComposed(
-      onPressed: () {} /* TODO-לוח */,
+      onPressed: () => _addRequirement(context),
       bordered: false /* TODO-לוח: bool */,
       id: '' /* TODO-לוח: String */,
-      label: '' /* TODO-לוח: String */,
       range: '' /* TODO-לוח: String */,
       reason: '' /* TODO-לוח: String */,
       status: '' /* TODO-לוח: String */,

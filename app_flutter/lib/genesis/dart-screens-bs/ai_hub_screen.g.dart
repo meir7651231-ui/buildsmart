@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/ai_fin_tile.dart';
 import '../dart-ui-bs/auto/ai_md_head.dart';
 import '../dart-data-bs/auto/screens__ai_hub_screen_content.dart';
+import '../dart-data-bs/auto/screens__ai_hub_screen_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class AiFinTileItem {
@@ -22,13 +23,10 @@ class AiHubScreenTokens {
 }
 
 class AiHubScreenComposed extends StatelessWidget {
-  const AiHubScreenComposed({required this.aiFinTileItems, required this.ic, required this.sub, required this.title, required this.t, super.key});
+  const AiHubScreenComposed({required this.aiFinTileItems, required this.t, super.key});
 
 
   final List<AiFinTileItem> aiFinTileItems;
-  final String ic;
-  final String sub;
-  final String title;
   final AiHubScreenTokens t;
 
   @override
@@ -37,9 +35,9 @@ class AiHubScreenComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           AiMdHead(
-            ic: ic,
-            title: title,
-            sub: sub,
+            ic: ai_md_head_ic,
+            title: ai_md_head_title,
+            sub: ai_md_head_sub,
           ),
           for (final t in aiFinTileItems) ...[
           AiFinTile(

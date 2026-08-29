@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/worker_equipment_checklist_sheet_sec_h.dart';
 import '../dart-ui-bs/auto/worker_task_detail_sheet_primary_btn.dart';
+import '../dart-data-bs/auto/screens__worker_task_detail_sheet_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -13,10 +14,9 @@ class WorkerTaskDetailSheetTokens {
 }
 
 class WorkerTaskDetailSheetComposed extends StatelessWidget {
-  const WorkerTaskDetailSheetComposed({required this.onTap, required this.label, required this.text, required this.t, super.key});
+  const WorkerTaskDetailSheetComposed({required this.onTap, required this.text, required this.t, super.key});
 
   final VoidCallback onTap;
-  final String label;
   final String text;
   final WorkerTaskDetailSheetTokens t;
 
@@ -29,7 +29,7 @@ class WorkerTaskDetailSheetComposed extends StatelessWidget {
             text,
           ),
           WorkerTaskDetailSheetPrimaryBtn(
-            label: label,
+            label: worker_task_detail_sheet_primary_btn_label,
             onTap: onTap,
           ),
         ],

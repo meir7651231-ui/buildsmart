@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 6.
+// מקור-החיווט: screens__worker_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 4.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/worker_reports_tab.dart';
@@ -26,12 +26,13 @@ class WorkerReportsTabBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final noDate = 0;
+    final perDay = List<int>.filled(7, 0);
+    final weekTotal = perDay.fold<int>(0, (a, b) => a + b);
     return WorkerReportsTabComposed(
       onTap: () {} /* TODO-לוח */,
       children: const [] /* TODO-לוח: List<Widget> */,
       label: '' /* TODO-לוח: String */,
-      title: '' /* TODO-לוח: String */,
-      titleId: null /* TODO-לוח: String? */,
       value: '' /* TODO-לוח: String */,
       t: WorkerReportsTabTokens(),
     );

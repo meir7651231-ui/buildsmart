@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__worker_task_detail_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 2.
+// מקור-החיווט: screens__worker_task_detail_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart';
@@ -29,7 +29,6 @@ class WorkerTaskDetailSheetBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return WorkerTaskDetailSheetComposed(
       onTap: () {} /* TODO-לוח */,
-      label: '' /* TODO-לוח: String */,
       text: 'מה להביא',
       t: WorkerTaskDetailSheetTokens(),
     );

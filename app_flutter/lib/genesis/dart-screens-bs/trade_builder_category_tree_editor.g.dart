@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/category_tile.dart';
 import '../dart-ui-bs/auto/empty_accessories.dart';
 import '../dart-ui-bs/auto/trade_builder_accessory_rule_editor_pill_button.dart';
 import '../dart-data-bs/auto/screens__trade_builder__category_tree_editor_content.dart';
+import '../dart-data-bs/auto/screens__trade_builder__category_tree_editor_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -15,14 +16,13 @@ class TradeBuilderCategoryTreeEditorTokens {
 }
 
 class TradeBuilderCategoryTreeEditorComposed extends StatelessWidget {
-  const TradeBuilderCategoryTreeEditorComposed({required this.onDelete, required this.onTap, required this.emoji, required this.enabled, required this.fallback, required this.label, required this.titleHe, required this.t, super.key});
+  const TradeBuilderCategoryTreeEditorComposed({required this.onDelete, required this.onTap, required this.emoji, required this.enabled, required this.fallback, required this.titleHe, required this.t, super.key});
 
   final VoidCallback onDelete;
   final VoidCallback onTap;
   final String emoji;
   final bool enabled;
   final String fallback;
-  final String label;
   final String titleHe;
   final TradeBuilderCategoryTreeEditorTokens t;
 
@@ -43,7 +43,7 @@ class TradeBuilderCategoryTreeEditorComposed extends StatelessWidget {
             onDelete: onDelete,
           ),
           TradeBuilderAccessoryRuleEditorPillButton(
-            label: label,
+            label: trade_builder_accessory_rule_editor_pill_button_label,
             onTap: onTap,
             enabled: enabled,
           ),

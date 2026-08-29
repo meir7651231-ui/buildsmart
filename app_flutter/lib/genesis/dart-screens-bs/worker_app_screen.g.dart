@@ -12,6 +12,7 @@ import '../dart-ui-bs/auto/today_stat.dart';
 import '../dart-ui-bs/auto/worker_app_stat.dart';
 import '../dart-ui-bs/auto/worker_nav.dart';
 import '../dart-data-bs/auto/screens__worker_app_screen_content.dart';
+import '../dart-data-bs/auto/screens__worker_app_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -84,12 +85,12 @@ class WorkerAppScreenComposed extends StatelessWidget {
             onPressed: onPressed,
           ),
           TodayStat(
-            label: label,
+            label: today_stat_label,
             value: value,
           ),
           WorkerAppStat(
             value: value,
-            label: label,
+            label: worker_app_stat_label,
           ),
           SubmitButton(
             label: submit_button_label,
@@ -100,7 +101,7 @@ class WorkerAppScreenComposed extends StatelessWidget {
             text,
           ),
           ProposePrimaryBtn(
-            label: label,
+            label: propose_primary_btn_label,
             onTap: onTap2,
           ),
         ],

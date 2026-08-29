@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/field.dart';
 import '../dart-ui-bs/auto/num_box.dart';
 import '../dart-ui-bs/auto/site_row.dart';
 import '../dart-ui-bs/auto/tappable.dart';
+import '../dart-data-bs/auto/screens__budget_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -15,13 +16,12 @@ class BudgetScreenTokens {
 }
 
 class BudgetScreenComposed extends StatelessWidget {
-  const BudgetScreenComposed({required this.onTap, required this.validator, required this.child, required this.controller, required this.label, required this.name, required this.number, required this.value, required this.t, super.key});
+  const BudgetScreenComposed({required this.onTap, required this.validator, required this.child, required this.controller, required this.name, required this.number, required this.value, required this.t, super.key});
 
   final VoidCallback onTap;
   final String? Function(String value)? validator;
   final Widget child;
   final TextEditingController controller;
-  final String label;
   final String name;
   final bool number;
   final String value;
@@ -38,7 +38,7 @@ class BudgetScreenComposed extends StatelessWidget {
           ),
           NumBox(
             value: value,
-            label: label,
+            label: num_box_label,
             color: t.color,
             onTap: onTap,
           ),
@@ -47,7 +47,7 @@ class BudgetScreenComposed extends StatelessWidget {
             value: value,
           ),
           Field(
-            label: label,
+            label: field_label,
             controller: controller,
             number: number,
             validator: validator,

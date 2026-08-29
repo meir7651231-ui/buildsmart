@@ -11,6 +11,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
+import 'package:buildsmart/state/worker_notifs.dart';
 import '../dart-screens-bs/worker_notifs_sheet.g.dart';
 
 class WorkerNotifsSheetBoard extends ConsumerWidget {
@@ -18,6 +19,9 @@ class WorkerNotifsSheetBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final notifs = ref.watch(currentWorkerNotifsProvider);
+    final serverNotifs = ref.watch(workerNotifsServerProvider).asData?.value ?? const <WorkerNotif>[];
+    final notifsRepo = ref.watch(workerNotifsRepositoryProvider);
     return WorkerNotifsSheetComposed(
       fallback: '' /* TODO-לוח: String */,
       notifRowItems: const [] /* TODO-לוח: List<NotifRowItem> */,

@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/check_row.dart';
 import '../dart-ui-bs/auto/trade_builder_accessory_rule_editor_pill_button.dart';
+import '../dart-data-bs/auto/screens__trade_builder__trade_publish_sheet_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -13,11 +14,10 @@ class TradeBuilderTradePublishSheetTokens {
 }
 
 class TradeBuilderTradePublishSheetComposed extends StatelessWidget {
-  const TradeBuilderTradePublishSheetComposed({required this.onTap, required this.enabled, required this.label, required this.pass, required this.t, super.key});
+  const TradeBuilderTradePublishSheetComposed({required this.onTap, required this.enabled, required this.pass, required this.t, super.key});
 
   final VoidCallback onTap;
   final bool enabled;
-  final String label;
   final bool pass;
   final TradeBuilderTradePublishSheetTokens t;
 
@@ -28,10 +28,10 @@ class TradeBuilderTradePublishSheetComposed extends StatelessWidget {
           const SizedBox(height: 8),
           CheckRow(
             pass: pass,
-            label: label,
+            label: check_row_label,
           ),
           TradeBuilderAccessoryRuleEditorPillButton(
-            label: label,
+            label: trade_builder_accessory_rule_editor_pill_button_label,
             onTap: onTap,
             enabled: enabled,
           ),

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__lipskey_product_sheet.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 5.
+// מקור-החיווט: screens__lipskey_product_sheet.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
@@ -21,16 +21,22 @@ import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/services.dart';
 import '../dart-screens-bs/lipskey_product_sheet.g.dart';
 
-class LipskeyProductSheetBoard extends ConsumerWidget {
+class LipskeyProductSheetBoard extends ConsumerStatefulWidget {
   const LipskeyProductSheetBoard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LipskeyProductSheetBoard> createState() => _LipskeyProductSheetBoardState();
+}
+
+class _LipskeyProductSheetBoardState extends ConsumerState<LipskeyProductSheetBoard> {
+  int _qty = 1;
+
+  @override
+  Widget build(BuildContext context) {
     return LipskeyProductSheetComposed(
       onChanged: (_) {} /* TODO-לוח */,
-      emoji: '' /* TODO-לוח: String */,
       pickerOptionItems: const [] /* TODO-לוח: List<PickerOptionItem> */,
-      qty: 0 /* TODO-לוח: int */,
+      qty: _qty,
       subtitle: null /* TODO-לוח: String? */,
       text: 'אין קבוצה',
       t: LipskeyProductSheetTokens(),

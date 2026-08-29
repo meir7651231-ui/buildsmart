@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__store_profile_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
+// מקור-החיווט: screens__store_profile_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 0.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/store_profile_screen.dart';
@@ -27,8 +27,13 @@ class StoreProfileScreenBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final orders = ref.watch(sysOrdersProvider);
     return StoreProfileScreenComposed(
-      sStatItems: const [] /* TODO-לוח: List<SStatItem> */,
+      sStatItems: const [
+                OrderStage.newOrder,
+                OrderStage.preparing,
+                OrderStage.ready,
+              ].map((s) => SStatItem(value: '${orders.countAt(s)}', label: kOrderStageLabel[s]!)).toList(),
       t: StoreProfileScreenTokens(),
     );
   }

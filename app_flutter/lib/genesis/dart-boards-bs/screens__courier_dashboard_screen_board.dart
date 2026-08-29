@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 7.
+// מקור-החיווט: screens__courier_dashboard_screen.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/courier_dashboard_screen.dart';
@@ -42,7 +42,6 @@ class CourierDashboardScreenBoard extends ConsumerWidget {
       onTap: () {} /* TODO-לוח */,
       child: const SizedBox.shrink() /* TODO-לוח: Widget */,
       ic: '' /* TODO-לוח: String */,
-      label: '' /* TODO-לוח: String */,
       name: '' /* TODO-לוח: String */,
       on: false,
       preferred: false /* TODO-לוח: bool */,

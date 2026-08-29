@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__manager_profile_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
+// מקור-החיווט: screens__manager_profile_screen.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
@@ -19,7 +19,6 @@ class ManagerProfileScreenBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ManagerProfileScreenComposed(
-      label: '' /* TODO-לוח: String */,
       value: '' /* TODO-לוח: String */,
       t: ManagerProfileScreenTokens(),
     );

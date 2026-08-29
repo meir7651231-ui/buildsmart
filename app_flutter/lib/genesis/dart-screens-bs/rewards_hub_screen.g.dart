@@ -6,6 +6,7 @@ import '../dart-ui-bs/auto/coin_banner.dart';
 import '../dart-ui-bs/auto/fin_tile.dart';
 import '../dart-ui-bs/auto/md_head.dart';
 import '../dart-data-bs/auto/screens__rewards_hub_screen_content.dart';
+import '../dart-data-bs/auto/screens__rewards_hub_screen_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class FinTileItem {
@@ -23,12 +24,11 @@ class RewardsHubScreenTokens {
 }
 
 class RewardsHubScreenComposed extends StatelessWidget {
-  const RewardsHubScreenComposed({required this.coins, required this.finTileItems, required this.ic, required this.sub, required this.title, required this.t, super.key});
+  const RewardsHubScreenComposed({required this.coins, required this.finTileItems, required this.sub, required this.title, required this.t, super.key});
 
 
   final int coins;
   final List<FinTileItem> finTileItems;
-  final String ic;
   final String sub;
   final String title;
   final RewardsHubScreenTokens t;
@@ -39,9 +39,9 @@ class RewardsHubScreenComposed extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           MdHead(
-            ic: ic,
+            ic: md_head_ic,
             title: title,
-            sub: sub,
+            sub: md_head_sub,
           ),
           CoinBanner(
             coins: coins,

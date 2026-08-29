@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/kv_row.dart';
 import '../dart-ui-bs/auto/rcard.dart';
 import '../dart-ui-bs/auto/rstat.dart';
+import '../dart-data-bs/auto/screens__courier_reports_tab_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.
 class KvRowItem {
@@ -20,13 +21,11 @@ class CourierReportsTabTokens {
 }
 
 class CourierReportsTabComposed extends StatelessWidget {
-  const CourierReportsTabComposed({required this.children, required this.kvRowItems, required this.label, required this.title, required this.value, required this.t, super.key});
+  const CourierReportsTabComposed({required this.children, required this.kvRowItems, required this.value, required this.t, super.key});
 
 
   final List<Widget> children;
   final List<KvRowItem> kvRowItems;
-  final String label;
-  final String title;
   final String value;
   final CourierReportsTabTokens t;
 
@@ -37,10 +36,10 @@ class CourierReportsTabComposed extends StatelessWidget {
           const SizedBox(height: 8),
           RStat(
             value: value,
-            label: label,
+            label: rstat_label,
           ),
           RCard(
-            title: title,
+            title: rcard_title,
             children: children,
           ),
           for (final o in kvRowItems) ...[

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__courier_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 5.
+// מקור-החיווט: screens__courier_reports_tab.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/courier_reports_tab.dart';
@@ -28,11 +28,12 @@ class CourierReportsTabBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final noStamp = 0;
+    final perDay = List<int>.filled(7, 0);
+    final weekTotal = perDay.fold<int>(0, (a, b) => a + b);
     return CourierReportsTabComposed(
       children: const [] /* TODO-לוח: List<Widget> */,
       kvRowItems: const [] /* TODO-לוח: List<KvRowItem> */,
-      label: '' /* TODO-לוח: String */,
-      title: '' /* TODO-לוח: String */,
       value: '' /* TODO-לוח: String */,
       t: CourierReportsTabTokens(),
     );

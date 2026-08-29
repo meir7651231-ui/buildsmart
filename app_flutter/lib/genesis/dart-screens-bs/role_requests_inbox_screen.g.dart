@@ -3,6 +3,7 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/role_requests_inbox_empty.dart';
+import '../dart-data-bs/auto/screens__role_requests_inbox_screen_content2.dart';
 
 
 /// טוקני-העיצוב שהמסך צורך — הלוח מזרים מקטלוג-הטוקנים.
@@ -12,11 +13,10 @@ class RoleRequestsInboxScreenTokens {
 }
 
 class RoleRequestsInboxScreenComposed extends StatelessWidget {
-  const RoleRequestsInboxScreenComposed({required this.icon, required this.text, required this.t, super.key});
+  const RoleRequestsInboxScreenComposed({required this.icon, required this.t, super.key});
 
 
   final IconData icon;
-  final String text;
   final RoleRequestsInboxScreenTokens t;
 
   @override
@@ -26,7 +26,7 @@ class RoleRequestsInboxScreenComposed extends StatelessWidget {
           const SizedBox(height: 8),
           RoleRequestsInboxEmpty(
             icon: icon,
-            text: text,
+            text: role_requests_inbox_empty_text,
           ),
         ],
       );

@@ -10,6 +10,8 @@ class StudioPanesThemePaneBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cfg = ref.watch(configThemeProvider);
+    final notifier = ref.read(configStoreProvider.notifier);
     return StudioPanesThemePaneComposed(
       ratio: 0.0 /* TODO-לוח: double */,
       swatchItems: const [] /* TODO-לוח: List<SwatchItem> */,

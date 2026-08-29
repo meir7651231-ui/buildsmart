@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__home_shell.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 5.
+// מקור-החיווט: screens__home_shell.dart (בנייה-חכמה main) · מחווט: 1 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/home_shell.dart';
@@ -46,12 +46,10 @@ class HomeShellBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(notifUnreadCountProvider);
     return HomeShellComposed(
-      cfgId: null /* TODO-לוח: String? */,
-      count: 0 /* TODO-לוח: int */,
-      emoji: '' /* TODO-לוח: String */,
+      count: unreadCount,
       icon: Icons.circle /* TODO-לוח: IconData */,
-      label: '' /* TODO-לוח: String */,
       t: HomeShellTokens(),
     );
   }

@@ -1,5 +1,5 @@
 // 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
-// מקור-החיווט: screens__contractor_material_requests_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 2.
+// מקור-החיווט: screens__contractor_material_requests_sheet.dart (בנייה-חכמה main) · מחווט: 0 · TODO: 1.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/screens/contractor_material_requests_sheet.dart';
@@ -15,7 +15,6 @@ class ContractorMaterialRequestsSheetBoard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ContractorMaterialRequestsSheetComposed(
       onTap: () {} /* TODO-לוח */,
-      label: '' /* TODO-לוח: String */,
       t: ContractorMaterialRequestsSheetTokens(color: const Color(0xFF223047) /* TODO-לוח: טוקן */),
     );
   }
