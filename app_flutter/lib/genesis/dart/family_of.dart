@@ -25,15 +25,15 @@ bool _is45(String name) => name.contains('45');
 
 /// משפחת-המנוע של מוצר-קטלוג, או `null` כשאין התאמה (צינור · אומגה · כלי ·
 /// ריתוך-חשמלי · קטגוריה לא-אביזרית). `null` = **fallback כן**, לא כשל-מנוע (M1).
-String? familyOf(LipskeyCatalogProduct p, {required Map<String, String> kCategoryFamily}) {
+String? familyOf(LipskeyCatalogProduct p, {required String Function(String) term, required Map<String, String> kCategoryFamily}) {
   final base = kCategoryFamily[p.categoryHe];
   if (base == null) return null; // צינור/אומגה/כלי/electrofusion → fallback
-  if (base == 'מצמד') {
+  if (base == term('mtsmd')) {
     // מצרה = מצמד דו-קוטרי (שני קטרים נבדלים). מצמד ישר = קוטר יחיד.
     final m = _kReducer.firstMatch(p.nameHe);
-    if (m != null && m.group(1) != m.group(2)) return 'מצרה';
-    return 'מצמד';
+    if (m != null && m.group(1) != m.group(2)) return term('mtsrh');
+    return term('mtsmd');
   }
-  if (base == 'ברך 90°' && _is45(p.nameHe)) return 'ברך 45°';
+  if (base == term('brk') && _is45(p.nameHe)) return term('t3');
   return base;
 }

@@ -16,9 +16,9 @@
 
 /// True only when [mats] contains BOTH a copper-group metal (נחושת/פליז) and an
 /// iron-group metal (פלדה/נירוסטה) — verbatim install_engine.dart:158-164.
-bool galvanicallyDissimilar(Iterable<String> mats) {
-  const copperGroup = {'נחושת', 'פליז'};
-  const ironGroup = {'פלדה', 'נירוסטה'};
+bool galvanicallyDissimilar(Iterable<String> mats, {required String Function(String) term}) {
+  final copperGroup = {term('nchvsht'), term('plyz')};
+  final ironGroup = {term('pldh'), term('nyrvsth')};
   final s = mats.toSet();
   return s.intersection(copperGroup).isNotEmpty &&
       s.intersection(ironGroup).isNotEmpty;
