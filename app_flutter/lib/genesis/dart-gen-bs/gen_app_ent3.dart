@@ -1,14 +1,44 @@
-// ✨ חולל ע"י מנוע-הרינדור (render-ds) על מערכת-העיצוב — סכמה ⇒ מסך-פרימיום. אל תערוך ידנית.
+// ✨ חולל ע"י מנוע-הרינדור (render-ds) — מסך-חי מחווט (טופס→חנות→טבלה + לוגיקה). אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_app_ent3_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
-import '../dart-ui-bs/ds/ds_date_field.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
-import '../dart-ui-bs/ds/ds_number_field.dart';
-import '../dart-ui-bs/ds/ds_toggle_tile.dart';
+import '../dart-ui-bs/ds/ds_store.dart';
+import '../dart-maor/advance-status.dart';
+import '../dart-maor/fmt-date.dart';
+import '../dart-maor/gematria.dart';
+import '../dart-maor/month-he-of.dart';
+import '../dart/angle_digits.dart';
 import 'package:flutter/material.dart';
 
-class GenAppEnt3Screen extends StatelessWidget {
+class GenAppEnt3Screen extends StatefulWidget {
   const GenAppEnt3Screen({super.key});
+
+  @override
+  State<GenAppEnt3Screen> createState() => _GenAppEnt3ScreenState();
+}
+
+class _GenAppEnt3ScreenState extends State<GenAppEnt3Screen> {
+  final Map<int, String> _v = {};
+
+  void _save() {
+    if (_v.values.where((x) => x.trim().isNotEmpty).isEmpty) return;
+    appStore.add(gen_app_ent3_c7, <String, String>{gen_app_ent3_c8: _v[0] ?? '', gen_app_ent3_c10: _v[1] ?? '', gen_app_ent3_c12: _v[2] ?? '', gen_app_ent3_c13: _v[3] ?? '', gen_app_ent3_c14: _v[4] ?? '', gen_app_ent3_c15: _v[5] ?? '', gen_app_ent3_c16: _v[6] ?? '', gen_app_ent3_c17: _v[7] ?? '', gen_app_ent3_c19: _v[8] ?? '', gen_app_ent3_c20: _v[9] ?? '', gen_app_ent3_c22: _v[10] ?? '', gen_app_ent3_c23: _v[11] ?? ''});
+    setState(() => _v.clear());
+  }
+
+  Widget _live(String label, String out) => Padding(
+        padding: const EdgeInsets.only(top: 2, bottom: 6),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(11),
+          decoration: BoxDecoration(color: DsTokens.accentSoft, borderRadius: BorderRadius.circular(DsTokens.rSm)),
+          child: Row(children: [
+            const Icon(Icons.bolt, size: 15, color: DsTokens.accentDark),
+            const SizedBox(width: 7),
+            Expanded(child: Text('$label · $out', style: const TextStyle(color: DsTokens.accentDark, fontSize: 13, fontWeight: FontWeight.w700))),
+          ]),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -16,24 +46,41 @@ class GenAppEnt3Screen extends StatelessWidget {
       title: gen_app_ent3_c0,
       subtitle: gen_app_ent3_c1,
       icon: gen_app_ent3_c2,
-      bottomBar: DsPrimaryButton(label: gen_app_ent3_c3),
+      bottomBar: DsPrimaryButton(label: gen_app_ent3_c3, onTap: _save),
       children: [
-      DsWorkflow(steps: const [gen_app_ent3_c7, gen_app_ent3_c8, gen_app_ent3_c9, gen_app_ent3_c10, gen_app_ent3_c11, gen_app_ent3_c12], current: 2),
-      DsSection(title: gen_app_ent3_c4, children: [
-        DsNumberField(label: gen_app_ent3_c13),
-        DsField(label: gen_app_ent3_c14, hint: '', value: '', onChanged: (_) {}),
-        DsField(label: gen_app_ent3_c15, hint: '', value: '', onChanged: (_) {}),
-        DsField(label: gen_app_ent3_c16, hint: '', value: '', onChanged: (_) {}),
-        DsField(label: gen_app_ent3_c17, hint: '', value: '', onChanged: (_) {}),
-        DsNumberField(label: gen_app_ent3_c18),
-        DsField(label: gen_app_ent3_c19, hint: '', value: '', onChanged: (_) {}),
-        DsNumberField(label: gen_app_ent3_c20),
-        DsNumberField(label: gen_app_ent3_c21),
-        DsDateField(label: gen_app_ent3_c22),
-        DsDateField(label: gen_app_ent3_c23),
-        DsToggleTile(label: gen_app_ent3_c24),
-      ]),
-      DsSection(title: gen_app_ent3_c5, children: const [DsEmpty(label: gen_app_ent3_c6)]),
+        DsWorkflow(steps: const [gen_app_ent3_c25, gen_app_ent3_c26, gen_app_ent3_c27, gen_app_ent3_c28, gen_app_ent3_c29, gen_app_ent3_c30], current: 2),
+        DsSection(title: gen_app_ent3_c4, children: [
+          DsField(label: gen_app_ent3_c8, hint: '', value: _v[0] ?? '', onChanged: (v) => setState(() => _v[0] = v)),
+          if ((_v[0] ?? '').trim().isNotEmpty) _live(gen_app_ent3_c9, gem((num.tryParse(_v[0] ?? '') ?? 0))),
+          DsField(label: gen_app_ent3_c10, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v)),
+          if ((_v[1] ?? '').trim().isNotEmpty) _live(gen_app_ent3_c11, monthHeOf((_v[1] ?? ''))),
+          DsField(label: gen_app_ent3_c12, hint: '', value: _v[2] ?? '', onChanged: (v) => setState(() => _v[2] = v)),
+          DsField(label: gen_app_ent3_c13, hint: '', value: _v[3] ?? '', onChanged: (v) => setState(() => _v[3] = v)),
+          DsField(label: gen_app_ent3_c14, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v)),
+          DsField(label: gen_app_ent3_c15, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
+          DsField(label: gen_app_ent3_c16, hint: '', value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v)),
+          DsField(label: gen_app_ent3_c17, hint: '', value: _v[7] ?? '', onChanged: (v) => setState(() => _v[7] = v)),
+          if ((_v[7] ?? '').trim().isNotEmpty) _live(gen_app_ent3_c18, angleDigits((_v[7] ?? ''))),
+          DsField(label: gen_app_ent3_c19, hint: '', value: _v[8] ?? '', onChanged: (v) => setState(() => _v[8] = v)),
+          DsField(label: gen_app_ent3_c20, hint: '', value: _v[9] ?? '', onChanged: (v) => setState(() => _v[9] = v)),
+          if ((_v[9] ?? '').trim().isNotEmpty) _live(gen_app_ent3_c21, fmtDate((_v[9] ?? ''))),
+          DsField(label: gen_app_ent3_c22, hint: '', value: _v[10] ?? '', onChanged: (v) => setState(() => _v[10] = v)),
+          DsField(label: gen_app_ent3_c23, hint: '', value: _v[11] ?? '', onChanged: (v) => setState(() => _v[11] = v)),
+          if ((_v[11] ?? '').trim().isNotEmpty) _live(gen_app_ent3_c24, advanceStatus((_v[11] ?? ''))),
+        ]),
+        DsSection(title: gen_app_ent3_c5, children: [
+          AnimatedBuilder(
+            animation: appStore,
+            builder: (context, _) {
+              final rs = appStore.records(gen_app_ent3_c7);
+              if (rs.isEmpty) return const DsEmpty(label: gen_app_ent3_c6);
+              return Column(children: [
+                for (final r in rs)
+                  DsRecordCard(labels: const [gen_app_ent3_c8, gen_app_ent3_c10, gen_app_ent3_c12, gen_app_ent3_c13, gen_app_ent3_c14, gen_app_ent3_c15, gen_app_ent3_c16, gen_app_ent3_c17, gen_app_ent3_c19, gen_app_ent3_c20, gen_app_ent3_c22, gen_app_ent3_c23], values: [r[gen_app_ent3_c8] ?? '', r[gen_app_ent3_c10] ?? '', r[gen_app_ent3_c12] ?? '', r[gen_app_ent3_c13] ?? '', r[gen_app_ent3_c14] ?? '', r[gen_app_ent3_c15] ?? '', r[gen_app_ent3_c16] ?? '', r[gen_app_ent3_c17] ?? '', r[gen_app_ent3_c19] ?? '', r[gen_app_ent3_c20] ?? '', r[gen_app_ent3_c22] ?? '', r[gen_app_ent3_c23] ?? '']),
+              ]);
+            },
+          ),
+        ]),
       ],
     );
   }

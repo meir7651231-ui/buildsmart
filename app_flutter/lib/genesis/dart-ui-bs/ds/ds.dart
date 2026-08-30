@@ -182,8 +182,9 @@ class DsWorkflow extends StatelessWidget {
 
 // ── כפתור-ראשי (gradient) ──
 class DsPrimaryButton extends StatelessWidget {
-  const DsPrimaryButton({required this.label, super.key});
+  const DsPrimaryButton({required this.label, this.onTap, super.key});
   final String label;
+  final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
@@ -195,7 +196,7 @@ class DsPrimaryButton extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: () {},
+            onTap: onTap ?? () {},
             child: Container(
               height: 50,
               alignment: Alignment.center,
@@ -299,6 +300,40 @@ class DsNavTile extends StatelessWidget {
           ),
         ),
       );
+}
+
+// ── כרטיס-רשומה: תווית:ערך לכל שדה (מציג רשומה חיה מהחנות) ──
+class DsRecordCard extends StatelessWidget {
+  const DsRecordCard({required this.labels, required this.values, super.key});
+  final List<String> labels, values;
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var i = 0; i < labels.length && i < values.length; i++) {
+      if (values[i].trim().isEmpty) continue;
+      rows.add(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(width: 110, child: Text(labels[i], style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w600))),
+            const SizedBox(width: 8),
+            Expanded(child: Text(values[i], style: const TextStyle(color: DsTokens.ink, fontSize: 13.5, fontWeight: FontWeight.w600))),
+          ],
+        ),
+      ));
+    }
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(DsTokens.rSm),
+        border: Border.all(color: DsTokens.line),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows.isEmpty ? [const Text('—', style: TextStyle(color: DsTokens.faint))] : rows),
+    );
+  }
 }
 
 // ── מצב-ריק (טבלת-רשומות ריקה) ──
