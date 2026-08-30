@@ -8,5 +8,5 @@ const String gen_capclockcalendar_stat_label2 = 'מספר סידורי של';
 const String gen_capclockcalendar_stat_label3 = 'תאריך לתצוגה';
 const String gen_capclockcalendar_chip_option = '13:05';
 const String gen_capclockcalendar_chip_option2 = '07:45';
-const String gen_capclockcalendar_banner_sub = 'ההרכבה שמצאתי';
+const String gen_capclockcalendar_banner_sub = 'ההרכבה שמצאתי - timeToMin ⟵ excelSerialToIso ⟵ fmtDate - כל הדוגמאות עברו';
 const String gen_capclockcalendar_app_bar_title = 'מסע-בזמן של השעון - שעת-יממה נהפכת לתאריך-תצוגה כשכל דקה מחצות נספרת כיום שלם בלוח';
