@@ -23,8 +23,7 @@ final _emailRe = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]{2,}$');
 String _digits(dynamic x) =>
     _truthy(x) ? x.toString().replaceAll(RegExp(r'\D'), '') : '';
 
-List runAudit(dynamic db,
-    [dynamic todayIso = '', dynamic extra = true, dynamic config, Map? deps]) {
+List runAudit(dynamic db, Map<String, dynamic> T2, [dynamic todayIso = '', dynamic extra = true, dynamic config, Map? deps]) {
   final termOf = deps!['termOf'];
   final normName = deps['normName'];
   final validIsraeliId = deps['validIsraeliId'];
@@ -63,12 +62,12 @@ List runAudit(dynamic db,
     final a = g1[k] as List;
     if (a.length > 1 && !(k as String).endsWith('|')) {
       add(
-          'כפילות',
-          'שם + שם האם זהים: "' +
+          (T2['k1'] as String),
+          (T2['k2'] as String) +
               _jsStr(a[0]['name']) +
               '" — ' +
               _jsStr(a.length) +
-              ' רשומות',
+              (T2['k3'] as String),
           a[0]['id']);
     }
   }
@@ -81,13 +80,13 @@ List runAudit(dynamic db,
       if (!seenPair.contains(key)) {
         seenPair.add(key);
         add(
-            'כפילות',
-            'טלפון ' +
+            (T2['k1'] as String),
+            (T2['k4'] as String) +
                 _jsStr(k) +
-                ' משותף ל-' +
+                (T2['k5'] as String) +
                 _jsStr(a.length) +
                 ' ' +
-                _jsStr(T('nav.families', 'משפחות')) +
+                _jsStr(T('nav.families', (T2['k7'] as String))) +
                 ': ' +
                 _jsJoin(a.map((f) => f['name']).take(3), ', '),
             a[0]['id']);
@@ -98,13 +97,13 @@ List runAudit(dynamic db,
     final a = _dedupe(g3[k] as List);
     if (a.length > 1) {
       add(
-          'כפילות',
-          'ת"ז ' +
+          (T2['k1'] as String),
+          (T2['k8'] as String) +
               _jsStr(k) +
-              ' מופיעה ב-' +
+              (T2['k9'] as String) +
               _jsStr(a.length) +
               ' ' +
-              _jsStr(T('nav.families', 'משפחות')) +
+              _jsStr(T('nav.families', (T2['k7'] as String))) +
               ': ' +
               _jsJoin(a.map((f) => f['name']).take(2), ', '),
           a[0]['id']);
@@ -113,21 +112,21 @@ List runAudit(dynamic db,
   // ——— בדיקות פר-משפחה ———
   for (final f in families()) {
     for (final pair in [
-      [f['fatherId'], 'אב'],
-      [f['motherId'], 'אם'],
+      [f['fatherId'], (T2['k10'] as String)],
+      [f['motherId'], (T2['k11'] as String)],
     ]) {
       final idn = pair[0];
       final who = pair[1];
       final d = _digits(idn);
       if (d.isNotEmpty && !_truthy(validIsraeliId(d))) {
         add(
-            'ת"ז',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k12'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(f['name']) +
-                ': ת"ז ' +
+                (T2['k15'] as String) +
                 _jsStr(who) +
-                ' לא עוברת ספרת ביקורת (' +
+                (T2['k16'] as String) +
                 _jsStr(idn) +
                 ')',
             f['id']);
@@ -137,8 +136,8 @@ List runAudit(dynamic db,
       final pi = phoneIssue(p);
       if (_truthy(pi)) {
         add(
-            'טלפון',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k17'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(f['name']) +
                 ': ' +
@@ -148,11 +147,11 @@ List runAudit(dynamic db,
     }
     if (_truthy(f['email']) && !_emailRe.hasMatch(f['email'].toString())) {
       add(
-          'אימייל',
-          _jsStr(T('entity.familyOf', 'משפחת')) +
+          (T2['k18'] as String),
+          _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
               ' ' +
               _jsStr(f['name']) +
-              ': אימייל לא תקין (' +
+              (T2['k19'] as String) +
               _jsStr(f['email']) +
               ')',
           f['id']);
@@ -160,34 +159,34 @@ List runAudit(dynamic db,
     if (f['status'] != 'inactive') {
       if (!_truthy(f['city'])) {
         add(
-            'כתובת',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k21'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(f['name']) +
-                ': חסרה עיר',
+                (T2['k22'] as String),
             f['id']);
       } else if (!_truthy(f['address'])) {
         add(
-            'כתובת',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k21'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(f['name']) +
-                ': יש עיר אבל חסרה כתובת',
+                (T2['k23'] as String),
             f['id']);
       }
     }
-    final single = f['maritalStatus'] == 'אלמן/ה' ||
-        f['maritalStatus'] == 'גרושים' ||
-        f['maritalStatus'] == 'פרודים';
+    final single = f['maritalStatus'] == (T2['k24'] as String) ||
+        f['maritalStatus'] == (T2['k25'] as String) ||
+        f['maritalStatus'] == (T2['k26'] as String);
     if (single && _truthy(f['father']) && _truthy(f['mother'])) {
       add(
-          'לוגיקה',
-          _jsStr(T('entity.familyOf', 'משפחת')) +
+          (T2['k27'] as String),
+          _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
               ' ' +
               _jsStr(f['name']) +
-              ': מסומנת "' +
+              (T2['k28'] as String) +
               _jsStr(f['maritalStatus']) +
-              '" — אמורה להיות בלי בן/בת זוג, אבל רשומים שניים (' +
+              (T2['k29'] as String) +
               _jsStr(f['father']) +
               ' + ' +
               _jsStr(f['mother']) +
@@ -197,36 +196,36 @@ List runAudit(dynamic db,
         _digits(f['fatherId']).isNotEmpty &&
         _digits(f['motherId']).isNotEmpty) {
       add(
-          'לוגיקה',
-          _jsStr(T('entity.familyOf', 'משפחת')) +
+          (T2['k27'] as String),
+          _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
               ' ' +
               _jsStr(f['name']) +
-              ': מסומנת "' +
+              (T2['k28'] as String) +
               _jsStr(f['maritalStatus']) +
-              '" אבל רשומות שתי תעודות זהות של בני זוג',
+              (T2['k30'] as String),
           f['id']);
     }
-    if (f['maritalStatus'] == 'נשואים' &&
+    if (f['maritalStatus'] == (T2['k31'] as String) &&
         f['status'] == 'active' &&
         !_truthy(f['father']) &&
         !_truthy(f['mother'])) {
       add(
-          'לוגיקה',
-          _jsStr(T('entity.familyOf', 'משפחת')) +
+          (T2['k27'] as String),
+          _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
               ' ' +
               _jsStr(f['name']) +
-              ': מסומנת נשואים אבל לא רשום אף בן זוג',
+              (T2['k33'] as String),
           f['id']);
     }
     if (_digits(f['phone']).isEmpty &&
         _digits(f['phone2']).isEmpty &&
         !_truthy(f['email'])) {
       add(
-          'קשר',
-          _jsStr(T('entity.familyOf', 'משפחת')) +
+          (T2['k34'] as String),
+          _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
               ' ' +
               _jsStr(f['name']) +
-              ': אין שום פרט קשר (טלפון או אימייל)',
+              (T2['k35'] as String),
           f['id']);
     }
     final seenKid = <String>{};
@@ -234,36 +233,36 @@ List runAudit(dynamic db,
       if (_truthy(m['isParent'])) {
         if (_truthy(m['idNum']) && !_truthy(validIsraeliId(m['idNum']))) {
           add(
-              'ת"ז',
-              _jsStr(T('entity.familyOf', 'משפחת')) +
+              (T2['k12'] as String),
+              _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                   ' ' +
                   _jsStr(f['name']) +
-                  ': ת"ז של ' +
+                  (T2['k36'] as String) +
                   _jsStr(m['first']) +
-                  ' (הורה) לא תקינה',
+                  (T2['k37'] as String),
               f['id']);
         }
         continue;
       }
       if (!_truthy(m['birth'])) {
         add(
-            'ילדים',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k38'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(f['name']) +
-                ': ל' +
+                (T2['k39'] as String) +
                 _jsStr(m['first']) +
-                ' אין תאריך לידה',
+                (T2['k40'] as String),
             f['id']);
       } else {
         final a = ageOf(m['birth']);
         if (a != null && (_jsNum(a) < 0 || _jsNum(a) > 25)) {
           add(
-              'ילדים',
-              _jsStr(T('entity.familyOf', 'משפחת')) +
+              (T2['k38'] as String),
+              _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                   ' ' +
                   _jsStr(f['name']) +
-                  ': גיל חריג ל' +
+                  (T2['k41'] as String) +
                   _jsStr(m['first']) +
                   ' (' +
                   _jsStr(a) +
@@ -273,23 +272,23 @@ List runAudit(dynamic db,
       }
       if (_truthy(m['idNum']) && !_truthy(validIsraeliId(m['idNum']))) {
         add(
-            'ת"ז',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k12'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(f['name']) +
-                ': ת"ז של ' +
+                (T2['k36'] as String) +
                 _jsStr(m['first']) +
-                ' לא תקינה',
+                (T2['k42'] as String),
             f['id']);
       }
       final mp = phoneIssue(m['phone']);
       if (_truthy(mp)) {
         add(
-            'טלפון',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k17'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(f['name']) +
-                ': טלפון של ' +
+                (T2['k43'] as String) +
                 _jsStr(m['first']) +
                 ' — ' +
                 _jsStr(mp),
@@ -299,13 +298,13 @@ List runAudit(dynamic db,
           _jsStr(m['first']) + '|' + _jsStr(_truthy(m['birth']) ? m['birth'] : '');
       if (seenKid.contains(kk)) {
         add(
-            'כפילות',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k1'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(f['name']) +
-                ': הילד/ה ' +
+                (T2['k44'] as String) +
                 _jsStr(m['first']) +
-                ' מופיע/ה פעמיים',
+                (T2['k45'] as String),
             f['id']);
       }
       seenKid.add(kk);
@@ -330,15 +329,15 @@ List runAudit(dynamic db,
       final fam = famByMember[e['memberId']];
       if (fam != null) {
         add(
-            'לוגיקה',
-            _jsStr(T('entity.familyOf', 'משפחת')) +
+            (T2['k27'] as String),
+            _jsStr(T('entity.familyOf', (T2['k14'] as String))) +
                 ' ' +
                 _jsStr(fam['name']) +
-                ': שולם ₪' +
+                (T2['k46'] as String) +
                 _jsConcat(paid) + // `+ paid` פולימורפי: מחרוזת נשמרת ('012')
-                ' — יותר מסה"כ העסקה (₪' +
+                (T2['k47'] as String) +
                 _concatProp(e, 'totalDue') +
-                '). בדקו החזר או עדכנו את הסכום',
+                (T2['k48'] as String),
             fam['id']);
       }
     }
@@ -352,10 +351,10 @@ List runAudit(dynamic db,
         _digits(sp['idNum']).isNotEmpty &&
         !_truthy(validIsraeliId(sp['idNum']))) {
       issues.add({
-        'cat': 'ת"ז',
-        'title': 'תומכ/ת ' +
+        'cat': (T2['k12'] as String),
+        'title': (T2['k49'] as String) +
             _jsStr(sp['name']) +
-            ': ת"ז לא תקינה (' +
+            (T2['k50'] as String) +
             _jsStr(sp['idNum']) +
             ')',
         'spId': sp['id'],
@@ -364,17 +363,17 @@ List runAudit(dynamic db,
     final pi = phoneIssue(sp['phone']);
     if (_truthy(pi)) {
       issues.add({
-        'cat': 'טלפון',
-        'title': 'תומכ/ת ' + _jsStr(sp['name']) + ': ' + _jsStr(pi),
+        'cat': (T2['k17'] as String),
+        'title': (T2['k49'] as String) + _jsStr(sp['name']) + ': ' + _jsStr(pi),
         'spId': sp['id'],
       });
     }
     if (_truthy(sp['email']) && !_emailRe.hasMatch(sp['email'].toString())) {
       issues.add({
-        'cat': 'אימייל',
-        'title': 'תומכ/ת ' +
+        'cat': (T2['k18'] as String),
+        'title': (T2['k49'] as String) +
             _jsStr(sp['name']) +
-            ': אימייל לא תקין (' +
+            (T2['k19'] as String) +
             _jsStr(sp['email']) +
             ')',
         'spId': sp['id'],
@@ -388,25 +387,25 @@ List runAudit(dynamic db,
         off(sp['usd'], agg['usd']) ||
         _or(sp['count'], 0) != agg['count']) {
       issues.add({
-        'cat': 'לוגיקה',
-        'title': 'תומכ/ת ' +
+        'cat': (T2['k27'] as String),
+        'title': (T2['k49'] as String) +
             _jsStr(sp['name']) +
-            ': הסכום המצטבר הרשום (₪' +
+            (T2['k51'] as String) +
             _jsStr(_or(sp['ils'], 0)) +
             (_truthy(sp['usd']) ? ' + \$' + _jsStr(sp['usd']) : '') +
             ' · ' +
             _jsStr(_or(sp['count'], 0)) +
             ' ' +
-            _jsStr(T('entity.donations', 'תרומות')) +
-            ') לא תואם את פירוט ה' +
-            _jsStr(T('entity.donations', 'תרומות')) +
+            _jsStr(T('entity.donations', (T2['k53'] as String))) +
+            (T2['k54'] as String) +
+            _jsStr(T('entity.donations', (T2['k53'] as String))) +
             ' (₪' +
             _jsStr(agg['ils']) +
             (_truthy(agg['usd']) ? ' + \$' + _jsStr(agg['usd']) : '') +
             ' · ' +
             _jsStr(agg['count']) +
             ' ' +
-            _jsStr(T('entity.donations', 'תרומות')) +
+            _jsStr(T('entity.donations', (T2['k53'] as String))) +
             ')',
         'spId': sp['id'],
       });
@@ -417,8 +416,8 @@ List runAudit(dynamic db,
         _truthy(sp['nextDate']) &&
         _jsLt(sp['nextDate'], todayIso)) {
       issues.add({
-        'cat': 'קשר',
-        'title': 'עבר יעד הקשר של "' +
+        'cat': (T2['k34'] as String),
+        'title': (T2['k55'] as String) +
             _jsStr(sp['name']) +
             '" (' +
             _jsStr(sp['nextDate']) +
@@ -431,11 +430,11 @@ List runAudit(dynamic db,
           in (sp['donations'] is List) ? sp['donations'] as List : []) {
         if (!(_jsNum(d['amount']) > 0)) {
           issues.add({
-            'cat': 'לוגיקה',
-            'title': _jsStr(T('entity.donation', 'תרומה')) +
-                ' בסכום ' +
+            'cat': (T2['k27'] as String),
+            'title': _jsStr(T('entity.donation', (T2['k57'] as String))) +
+                (T2['k58'] as String) +
                 _concatProp(d, 'amount') + // null-מפורש⇒'null' · מפתח-חסר⇒'undefined'
-                ' אצל "' +
+                (T2['k59'] as String) +
                 _jsStr(sp['name']) +
                 '" (' +
                 _jsStr(d['rid']) +
@@ -460,12 +459,12 @@ List runAudit(dynamic db,
       }
       if (sp != null) {
         issues.add({
-          'cat': 'כפילות',
-          'title': 'תומכ/ת בשם "' +
+          'cat': (T2['k1'] as String),
+          'title': (T2['k60'] as String) +
               _jsStr(sp['name']) +
-              '" מופיע/ה ' +
+              (T2['k61'] as String) +
               _jsStr(ids.length) +
-              ' פעמים',
+              (T2['k62'] as String),
           'spId': sp['id'],
         });
       }

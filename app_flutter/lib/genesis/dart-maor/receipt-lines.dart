@@ -76,13 +76,11 @@ String _gregorian(String raw) {
 }
 
 /// Verbatim port of new/atoms/receipt-lines.mjs (`receiptLines`); ארבעת השכנים כשקעים.
-List<String> receiptLines(
-  Map<String, dynamic> o,
+List<String> receiptLines(Map<String, dynamic> o,
   String Function(dynamic iso) hebDateFull,
   String Function(dynamic amount, dynamic sym) amountInWords,
   String Function(dynamic rid, dynamic amount, dynamic cur, dynamic date) receiptVerifyCode,
-  String Function(dynamic iso) hebrewLocaleDate,
-) {
+  String Function(dynamic iso) hebrewLocaleDate, Map<String, dynamic> T) {
   final cur = _or(o['currency'], '₪');
   final gregorian = _gregorian(o['date'].toString());
   final heb = hebDateFull(o['date']);
@@ -92,30 +90,30 @@ List<String> receiptLines(
     final curSym = cur == '\$' ? '\$' : '₪';
     final words = amountInWords(o['amount'], cur == '\$' ? '\$' : '₪');
     return <String>[
-      if (o['mark'] != false) (_truthy(o['copy']) ? 'העתק נאמן למקור' : 'מקור'),
-      _or(o['orgName'], 'מאור החסד').toString(),
-      _truthy(o['orgTaxId']) ? 'מס׳ עמותה/מלכ"ר: ' + o['orgTaxId'].toString() : '',
+      if (o['mark'] != false) (_truthy(o['copy']) ? (T['k1'] as String) : (T['k2'] as String)),
+      _or(o['orgName'], (T['k3'] as String)).toString(),
+      _truthy(o['orgTaxId']) ? (T['k4'] as String) + o['orgTaxId'].toString() : '',
       '',
-      'קבלה על תרומה — לפי סעיף 46 לפקודת מס הכנסה',
-      'קבלה מס׳: ' + o['rid'].toString(),
+      (T['k5'] as String),
+      (T['k6'] as String) + o['rid'].toString(),
       if (_truthy(o['verify']))
-        'קוד-אימות: ' + receiptVerifyCode(o['rid'], o['amount'], cur, o['date']),
-      'תאריך: ' + (_truthy(heb) ? heb + ' · ' : '') + gregorian,
+        (T['k7'] as String) + receiptVerifyCode(o['rid'], o['amount'], cur, o['date']),
+      (T['k8'] as String) + (_truthy(heb) ? heb + ' · ' : '') + gregorian,
       '',
-      'התקבל בתודה מאת: ' + o['payer'].toString(),
-      _truthy(o['payerId']) ? 'ת"ז / ח"פ: ' + o['payerId'].toString() : '',
-      'סכום: ' + curSym + _heGroup(o['amount'] as num),
-      'במילים: ' + words,
-      _truthy(o['method']) ? 'אמצעי תשלום: ' + o['method'].toString() : '',
-      'עבור: ' + o['forWhat'].toString(),
+      (T['k9'] as String) + o['payer'].toString(),
+      _truthy(o['payerId']) ? (T['k10'] as String) + o['payerId'].toString() : '',
+      (T['k11'] as String) + curSym + _heGroup(o['amount'] as num),
+      (T['k12'] as String) + words,
+      _truthy(o['method']) ? (T['k13'] as String) + o['method'].toString() : '',
+      (T['k14'] as String) + o['forWhat'].toString(),
       '',
-      'תרומה זו מוכרת לצורכי מס לפי סעיף 46 לפקודת מס הכנסה.',
-      'קבלה זו מהווה אסמכתא לתרומה שהתקבלה.',
+      (T['k15'] as String),
+      (T['k16'] as String),
       '',
-      'בכבוד רב,',
+      (T['k17'] as String),
       (_truthy(o['signatory']) ? o['signatory'].toString() : '') + '  ______________________',
-      'חתימה וחותמת',
-      _truthy(o['site']) ? 'אתר: ' + o['site'].toString() : '',
+      (T['k18'] as String),
+      _truthy(o['site']) ? (T['k19'] as String) + o['site'].toString() : '',
     ];
   }
 
@@ -127,33 +125,33 @@ List<String> receiptLines(
   final summaryMap = hasSummary ? (summary as Map) : null;
   final hasNext = hasSummary && _truthy(summaryMap!['nextDate']);
   return <String>[
-    if (o['mark'] != false) (_truthy(o['copy']) ? 'העתק נאמן למקור' : 'מקור'),
-    (isShopConfirmation ? 'אישור תשלום — ' : 'קבלה — ') + _or(o['orgName'], 'מאור החסד').toString(),
-    (isShopConfirmation ? 'אישור מס׳: ' : 'קבלה מס׳: ') + o['rid'].toString(),
+    if (o['mark'] != false) (_truthy(o['copy']) ? (T['k1'] as String) : (T['k2'] as String)),
+    (isShopConfirmation ? (T['k20'] as String) : (T['k21'] as String)) + _or(o['orgName'], (T['k3'] as String)).toString(),
+    (isShopConfirmation ? (T['k22'] as String) : (T['k6'] as String)) + o['rid'].toString(),
     if (_truthy(o['verify']))
-      'קוד-אימות: ' + receiptVerifyCode(o['rid'], o['amount'], cur, o['date']),
+      (T['k7'] as String) + receiptVerifyCode(o['rid'], o['amount'], cur, o['date']),
     // תאריך עברי + לועזי, כמו באב-טיפוס
-    'תאריך: ' + (_truthy(heb) ? heb + ' · ' : '') + gregorian,
-    'התקבל מאת: ' + o['payer'].toString(),
-    'סכום: ' + cur.toString() + _jsNum(o['amount']),
-    _truthy(o['method']) ? 'אמצעי תשלום: ' + o['method'].toString() : '',
-    'עבור: ' + o['forWhat'].toString(),
+    (T['k8'] as String) + (_truthy(heb) ? heb + ' · ' : '') + gregorian,
+    (T['k23'] as String) + o['payer'].toString(),
+    (T['k11'] as String) + cur.toString() + _jsNum(o['amount']),
+    _truthy(o['method']) ? (T['k13'] as String) + o['method'].toString() : '',
+    (T['k14'] as String) + o['forWhat'].toString(),
     // סיכום העסקה — verbatim מלגאסי receipt() (legacy:1264-1265)
     hasSummary
-        ? 'סה"כ עסקה: ₪' +
+        ? (T['k24'] as String) +
             _jsNum(summaryMap!['totalDue']) +
-            ' · שולם עד כה: ₪' +
+            (T['k25'] as String) +
             _jsNum(summaryMap['paidSoFar']) +
-            ' · יתרה: ₪' +
+            (T['k26'] as String) +
             _jsNum(summaryMap['balance'])
         : '',
     hasNext
-        ? 'תשלום הבא: ' +
+        ? (T['k27'] as String) +
             hebDateFull(summaryMap!['nextDate']) +
             ' · ' +
             hebrewLocaleDate(summaryMap['nextDate'])
         : '',
-    _truthy(o['site']) ? 'אתר: ' + o['site'].toString() : '',
-    'תודה על תמיכתכם',
+    _truthy(o['site']) ? (T['k19'] as String) + o['site'].toString() : '',
+    (T['k28'] as String),
   ];
 }
