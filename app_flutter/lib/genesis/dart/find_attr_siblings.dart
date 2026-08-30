@@ -1,3 +1,4 @@
+import '../dart-data/find_attr_siblings-brand.dart';
 // ⚛️ אטום-Dart · findAttrSiblings — מנוע-נקי (מנגנון-בלבד, אפס-דאטה · הכרעת-בעלים "אפס-דאטה במנוע").
 // מוצא: buildsmart/.../screens/lipskey_products_screen.dart:1839-1910 (findAttrSiblings; חוק-2).
 // טוהר-מוחלט: אפס import. **מילון-אוצר-המילים חולץ לדאטה** (dart-data/lipskey-vocab.dart) ומוזרק
@@ -16,7 +17,7 @@ class LipRow {
   final Map<String, dynamic>? dims;
   const LipRow({
     required this.nameHe,
-    this.brand = 'ליפסקי',
+    this.brand = kDefaultBrand,
     this.categoryHe = '',
     this.dims,
   });
@@ -50,7 +51,7 @@ class _LipVocab {
         };
 }
 
-bool isSizeToken(String w) {
+bool isSizeToken(String w, {required String Function(String) term}) {
   if (RegExp(r'^DN', caseSensitive: false).hasMatch(w)) return true;
   // A leading Ø (diameter symbol) is a noise prefix on inch sizes —
   // strip it and re-test so `Ø1/2"` is recognised the same as `1/2"`.
@@ -61,13 +62,13 @@ bool isSizeToken(String w) {
   // digit) is recognised the same as `parseSizeTokens` does — keeping the two
   // tokenizers in agreement (no chip the finder surfaces that the card's
   // word-classifier would treat as a plain link).
-  return RegExp(r'^[\d¼½¾⅛⅜⅝⅞]+([./×xX\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
+  return RegExp(term('t0'))
           .hasMatch(stripped) &&
       RegExp(r'[\d¼½¾⅛⅜⅝⅞]').hasMatch(stripped);
 }
 
-AttrKind? _attrKindFor(String word, _LipVocab vocab) {
-  if (isSizeToken(word)) return AttrKind.size;
+AttrKind? _attrKindFor(String word, _LipVocab vocab, {required String Function(String) term}) {
+  if (isSizeToken(word, term: term)) return AttrKind.size;
   if (vocab.pprMaterials.contains(word)) return AttrKind.material;
   if (RegExp(r'^PN\d').hasMatch(word)) return AttrKind.pressure;
   if (RegExp(r'^SDR', caseSensitive: false).hasMatch(word)) return AttrKind.sdr;
@@ -78,7 +79,7 @@ AttrKind? _attrKindFor(String word, _LipVocab vocab) {
   return null;
 }
 
-String _stripWordsOfKind(String name, AttrKind kind, _LipVocab vocab) {
+String _stripWordsOfKind(String name, AttrKind kind, _LipVocab vocab, {required String Function(String) term}) {
   var result = name;
   // Strip multi-word subtype/color entries first (e.g. "דו כיווני", "ניקל מוברש").
   if (kind == AttrKind.subtype) {
@@ -107,15 +108,15 @@ String _stripWordsOfKind(String name, AttrKind kind, _LipVocab vocab) {
       .where((w) =>
           w.isNotEmpty &&
           (kind == AttrKind.size
-              ? !isSizeToken(w)
+              ? !isSizeToken(w, term: term)
               : (kind == AttrKind.pressure || kind == AttrKind.sdr)
-                  ? _attrKindFor(w, vocab) != kind
+                  ? _attrKindFor(w, vocab, term: term) != kind
                   : !wordSet.contains(w)))
       .join(' ')
       .trim();
 }
 
-String _getCompoundType(LipRow p, _LipVocab vocab) {
+String _getCompoundType(LipRow p, _LipVocab vocab, {required String Function(String) term}) {
   final name = p.nameHe;
   final words = name.split(RegExp(r'\s+'));
 
@@ -133,22 +134,22 @@ String _getCompoundType(LipRow p, _LipVocab vocab) {
     if (idx < 0) continue;
     if (idx + 1 >= words.length) return typeWord;
     final next = words[idx + 1];
-    if (_attrKindFor(next, vocab) != null) return typeWord;
+    if (_attrKindFor(next, vocab, term: term) != null) return typeWord;
     if (vocab.colorModifiers.contains(next)) return typeWord;
-    if (next.length > 2 && (next.startsWith('ל') || next.startsWith('ב'))) return typeWord;
+    if (next.length > 2 && (next.startsWith(term('l')) || next.startsWith(term('b')))) return typeWord;
     return '$typeWord $next';
   }
   return '';
 }
 
 /// Stored in dims (not the name), so the maker chip is synthetic.
-String _makerOf(LipRow p) =>
-    (p.dims?['יצרן'] as String?)?.trim() ?? '';
+String _makerOf(LipRow p, {required String Function(String) term}) =>
+    (p.dims?[term('ytsrn')] as String?)?.trim() ?? '';
 
 /// Nominal bore (dn) used to match the same product across manufacturers.
-String _nominalBore(LipRow p) {
+String _nominalBore(LipRow p, {required String Function(String) term}) {
   final d = p.dims;
-  final raw = (d?['dn נומינלי'] ?? d?['קוטר חיצוני'] ?? d?['de קוטר חיצוני'])
+  final raw = (d?[term('nvmynly')] ?? d?[term('kvtr-chytsvny')] ?? d?[term('t6')])
       ?.toString();
   final src = raw ?? p.nameHe;
   return RegExp(r'\d+(?:\.\d+)?').firstMatch(src)?.group(0) ?? '';
@@ -156,8 +157,8 @@ String _nominalBore(LipRow p) {
 
 /// Spec signature identical for the same product from different manufacturers,
 /// so the maker picker pairs e.g. the Heliroma and Aquatherm faser 20×2.8.
-String _makerSignature(LipRow p, _LipVocab vocab) =>
-    '${p.categoryHe}|${_getCompoundType(p, vocab)}|${_nominalBore(p)}'
+String _makerSignature(LipRow p, _LipVocab vocab, {required String Function(String) term}) =>
+    '${p.categoryHe}|${_getCompoundType(p, vocab, term: term)}|${_nominalBore(p, term: term)}'
     '|${p.dims?['PN'] ?? ''}|${p.dims?['SDR'] ?? ''}';
 
 /// Find sibling products for a given attribute kind.
@@ -165,7 +166,7 @@ String _makerSignature(LipRow p, _LipVocab vocab) =>
 List<LipRow> findAttrSiblings(
   LipRow p,
   String word,
-  AttrKind kind, {
+  AttrKind kind, {required String Function(String) term, 
   required List<LipRow> catalog,
   required List<String> models,
   required List<String> types,
@@ -186,13 +187,13 @@ List<LipRow> findAttrSiblings(
   );
   // Manufacturer: same spec from a different maker (cross-line, cross-category).
   if (kind == AttrKind.maker) {
-    final sig = _makerSignature(p, vocab);
+    final sig = _makerSignature(p, vocab, term: term);
     final seen = <String>{};
     final res = <LipRow>[];
     // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
     for (final q in catalog) {
-      if (q.brand != vocab.polyrollBrand || _makerSignature(q, vocab) != sig) continue;
-      final m = _makerOf(q);
+      if (q.brand != vocab.polyrollBrand || _makerSignature(q, vocab, term: term) != sig) continue;
+      final m = _makerOf(q, term: term);
       if (m.isEmpty || !seen.add(m)) continue;
       res.add(q);
     }
@@ -203,7 +204,7 @@ List<LipRow> findAttrSiblings(
   // (PPR/PPRCT), line/subtype (פייזר ↔ אספקת מים), size, etc. — even across the
   // separate per-line categories.
   if (p.brand == vocab.polyrollBrand) {
-    final pType = _getCompoundType(p, vocab);
+    final pType = _getCompoundType(p, vocab, term: term);
     // Size is a within-line dimension: a faser pipe's size variants are the
     // other faser sizes — never another line's (drainage 160/200…). Restrict
     // it to the same category so the picker isn't flooded with every pipe
@@ -213,11 +214,11 @@ List<LipRow> findAttrSiblings(
     final seen = <String>{};
     final res = <LipRow>[];
     for (final q in catalog) {
-      if (q.brand != vocab.polyrollBrand || _getCompoundType(q, vocab) != pType) continue;
+      if (q.brand != vocab.polyrollBrand || _getCompoundType(q, vocab, term: term) != pType) continue;
       if (sameLineOnly && q.categoryHe != p.categoryHe) continue;
       final v = q.nameHe
           .split(RegExp(r'\s+'))
-          .where((w) => _attrKindFor(w, vocab) == kind)
+          .where((w) => _attrKindFor(w, vocab, term: term) == kind)
           .join(' ');
       if (v.isEmpty || !seen.add(v)) continue;
       res.add(q);
@@ -232,7 +233,7 @@ List<LipRow> findAttrSiblings(
       if (q.categoryHe != p.categoryHe) continue;
       final modelWord = q.nameHe
           .split(RegExp(r'\s+'))
-          .firstWhere((w) => _attrKindFor(w, vocab) == AttrKind.model,
+          .firstWhere((w) => _attrKindFor(w, vocab, term: term) == AttrKind.model,
               orElse: () => '');
       if (modelWord.isEmpty) continue;
       if (seen.add(modelWord)) result.add(q);
@@ -240,14 +241,14 @@ List<LipRow> findAttrSiblings(
     return result.length <= 1 ? [p] : result;
   }
 
-  final pFrame = _stripWordsOfKind(p.nameHe, kind, vocab);
+  final pFrame = _stripWordsOfKind(p.nameHe, kind, vocab, term: term);
   if (pFrame.length < 2) return [p];
   return catalog.where((q) {
     if (q.categoryHe != p.categoryHe) return false;
-    if (_stripWordsOfKind(q.nameHe, kind, vocab) != pFrame) return false;
+    if (_stripWordsOfKind(q.nameHe, kind, vocab, term: term) != pFrame) return false;
     if (kind == AttrKind.colorMod) return true;
     return q.nameHe
         .split(RegExp(r'\s+'))
-        .any((w) => _attrKindFor(w, vocab) == kind);
+        .any((w) => _attrKindFor(w, vocab, term: term) == kind);
   }).toList();
 }

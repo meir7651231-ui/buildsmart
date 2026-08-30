@@ -1,3 +1,4 @@
+import '../dart-data/brand_value-brand.dart';
 // ⚛️ אטום-Dart (דרגת-חוזה) · brandValue
 // מוצא: buildsmart/app_flutter/lib/features/word_finder/distinct_label.dart:112-122
 //        (_brandValue; חוק-4 — התנהגות זהה, לא-משופרת).
@@ -47,7 +48,7 @@ class LipskeyCatalogProduct {
     this.imageFiles,
     this.specImageFile,
     this.specImageFiles,
-    this.brand = 'ליפסקי',
+    this.brand = kDefaultBrand,
     this.imageAssetOverride,
   });
 }

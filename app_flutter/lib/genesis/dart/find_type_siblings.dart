@@ -1,3 +1,4 @@
+import '../dart-data/find_type_siblings-brand.dart';
 // ⚛️ אטום-Dart · findTypeSiblings — מנוע-נקי (מנגנון-בלבד, אפס-דאטה · הכרעת-בעלים "אפס-דאטה במנוע").
 // מוצא: buildsmart/.../screens/lipskey_products_screen.dart:1972-1992 (findTypeSiblings; חוק-2).
 // טוהר-מוחלט: אפס import. **מילון-אוצר-המילים חולץ לדאטה** (dart-data/lipskey-vocab.dart, משותף עם
@@ -13,7 +14,7 @@ class LipRow {
   final String categoryHe;
   const LipRow({
     required this.nameHe,
-    this.brand = 'ליפסקי',
+    this.brand = kDefaultBrand,
     this.categoryHe = '',
   });
 }
@@ -36,7 +37,7 @@ class _LipVocab {
   });
 }
 
-bool isSizeToken(String w) {
+bool isSizeToken(String w, {required String Function(String) term}) {
   if (RegExp(r'^DN', caseSensitive: false).hasMatch(w)) return true;
   // A leading Ø (diameter symbol) is a noise prefix on inch sizes —
   // strip it and re-test so `Ø1/2"` is recognised the same as `1/2"`.
@@ -47,13 +48,13 @@ bool isSizeToken(String w) {
   // digit) is recognised the same as `parseSizeTokens` does — keeping the two
   // tokenizers in agreement (no chip the finder surfaces that the card's
   // word-classifier would treat as a plain link).
-  return RegExp(r'^[\d¼½¾⅛⅜⅝⅞]+([./×xX\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
+  return RegExp(term('t0'))
           .hasMatch(stripped) &&
       RegExp(r'[\d¼½¾⅛⅜⅝⅞]').hasMatch(stripped);
 }
 
-AttrKind? _attrKindFor(String word, _LipVocab vocab) {
-  if (isSizeToken(word)) return AttrKind.size;
+AttrKind? _attrKindFor(String word, _LipVocab vocab, {required String Function(String) term}) {
+  if (isSizeToken(word, term: term)) return AttrKind.size;
   if (vocab.pprMaterials.contains(word)) return AttrKind.material;
   if (RegExp(r'^PN\d').hasMatch(word)) return AttrKind.pressure;
   if (RegExp(r'^SDR', caseSensitive: false).hasMatch(word)) return AttrKind.sdr;
@@ -64,7 +65,7 @@ AttrKind? _attrKindFor(String word, _LipVocab vocab) {
   return null;
 }
 
-String _getCompoundType(LipRow p, _LipVocab vocab) {
+String _getCompoundType(LipRow p, _LipVocab vocab, {required String Function(String) term}) {
   final name = p.nameHe;
   final words = name.split(RegExp(r'\s+'));
 
@@ -82,26 +83,26 @@ String _getCompoundType(LipRow p, _LipVocab vocab) {
     if (idx < 0) continue;
     if (idx + 1 >= words.length) return typeWord;
     final next = words[idx + 1];
-    if (_attrKindFor(next, vocab) != null) return typeWord;
+    if (_attrKindFor(next, vocab, term: term) != null) return typeWord;
     if (vocab.colorModifiers.contains(next)) return typeWord;
-    if (next.length > 2 && (next.startsWith('ל') || next.startsWith('ב'))) return typeWord;
+    if (next.length > 2 && (next.startsWith(term('l')) || next.startsWith(term('b')))) return typeWord;
     return '$typeWord $next';
   }
   return '';
 }
 
-String _leadingType(LipRow p, _LipVocab vocab) {
+String _leadingType(LipRow p, _LipVocab vocab, {required String Function(String) term}) {
   for (final w in p.nameHe.split(RegExp(r'\s+'))) {
     if (vocab.types.contains(w)) return w;
   }
-  return _getCompoundType(p, vocab);
+  return _getCompoundType(p, vocab, term: term);
 }
 
 /// Type siblings: one representative per distinct compound type in the same
 /// category. Type is the top-level dimension — no frame restriction needed.
 /// (verbatim · lipskey_products_screen.dart:1972-1992; `resolvedCatalogProducts`⇒`catalog`.)
 List<LipRow> findTypeSiblings(
-  LipRow p, {
+  LipRow p, {required String Function(String) term, 
   required List<LipRow> catalog,
   required List<String> models,
   required List<String> types,
@@ -120,7 +121,7 @@ List<LipRow> findTypeSiblings(
     colorModifiers: colorModifiers,
     polyrollBrand: polyrollBrand,
   );
-  final compound = _getCompoundType(p, vocab);
+  final compound = _getCompoundType(p, vocab, term: term);
   if (compound.isEmpty) return [p];
   // Same category only — no cross-product (pipe→valve→drill). For PPR, key by
   // the LEADING type word (not _getCompoundType, which matches whichever
@@ -128,7 +129,7 @@ List<LipRow> findTypeSiblings(
   // רקורד" into fake types). This keeps real splits (collar↔flange) but collapses
   // duplicates.
   final ppr = p.brand == vocab.polyrollBrand;
-  String keyOf(LipRow q) => ppr ? _leadingType(q, vocab) : _getCompoundType(q, vocab);
+  String keyOf(LipRow q) => ppr ? _leadingType(q, vocab, term: term) : _getCompoundType(q, vocab, term: term);
   final byCompound = <String, LipRow>{};
   byCompound[keyOf(p)] = p;
   for (final q in catalog) {
