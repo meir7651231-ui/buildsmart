@@ -115,14 +115,12 @@ DateTime _parseIso(String iso) {
 
 /// בונה שורות-CSV לדו"ח-מותאם. פלט: List של שורות; שורה[0]=כותרות, השאר=נתונים.
 /// התנהגות זהה-ביט למקור-ה-JS `buildCustomExport`.
-List<List<String>> buildCustomExport(
-  dynamic cfg,
+List<List<String>> buildCustomExport(dynamic cfg,
   Map db,
   String target,
   Map range,
   List<String> selectedKeys,
-  ExportSockets s,
-) {
+  ExportSockets s, Map<String, dynamic> T) {
   final defs = s
       .expFieldDefs(cfg, target)
       .where((f) => selectedKeys.contains(f['key']))
@@ -187,19 +185,19 @@ List<List<String>> buildCustomExport(
 
       final schedule = s
           .sessionsOf(c)
-          .map((ss) => ('יום ' +
+          .map((ss) => ((T['k2'] as String) +
                   (s.dayNames[((ss['day']) as int)] as String) +
                   (_truthy(ss['time']) ? ' ' + (ss['time'] as String) : ''))
               .trim())
           .join(' · ');
 
       final modelWord = c['model'] == 'punch'
-          ? 'כרטיסייה'
+          ? (T['k4'] as String)
           : c['model'] == 'half_year'
-              ? 'מנוי חצי-שנתי'
+              ? (T['k6'] as String)
               : c['model'] == 'year'
-                  ? 'מנוי שנתי'
-                  : 'מנוי חודשי';
+                  ? (T['k8'] as String)
+                  : (T['k9'] as String);
 
       final teacher = (_truthy(t?['name']) ? (t['name'] as String) : '') +
           (_truthy(t?['phone']) ? ' ' + (t['phone'] as String) : '');
@@ -224,7 +222,7 @@ List<List<String>> buildCustomExport(
             final bal = due < 0 ? 0 : due;
             return (mi['first'] as String) +
                 (_truthy(mi['phone']) ? ' ' + (mi['phone'] as String) : '') +
-                ' · יתרה ₪' +
+                (T['k10'] as String) +
                 bal.toString();
           })
           .where((x) => _truthy(x))
@@ -243,9 +241,9 @@ List<List<String>> buildCustomExport(
         'occ': occ,
         'students': students,
         'studentsFull': studentsFull,
-        'pays': '$payN תשלומים · ₪$paySum',
+        'pays': '$payN${(T['k11'] as String)}$paySum',
         'revenue': '₪$revenue',
-        'abs': '$absN חיסורים',
+        'abs': '$absN${(T['k12'] as String)}',
         'notes': _truthy(c['notes']) ? c['notes'] : '',
       }));
     }
@@ -307,7 +305,7 @@ List<List<String>> buildCustomExport(
         'time': o['time'],
         'fam': o['fam'],
         'notes': o['notes'],
-        'done': _truthy(o['done']) ? 'כן' : 'לא',
+        'done': _truthy(o['done']) ? (T['k14'] as String) : (T['k15'] as String),
       }));
     }
     return rows;
@@ -337,7 +335,7 @@ List<List<String>> buildCustomExport(
       }
     }
 
-    final donationsTerm = s.termOf(cfg, 'entity.donations', 'תרומות');
+    final donationsTerm = s.termOf(cfg, 'entity.donations', (T['k18'] as String));
     final Map obj = {
       'name': sp['name'],
       'phone': _truthy(sp['phone']) ? sp['phone'] : '',
@@ -363,7 +361,7 @@ List<List<String>> buildCustomExport(
       }).join(' · ');
       obj['eyesTotal'] =
           (a['names'] as List).fold<num>(0, (x, n) => x + _plus(n['eyes'])).toString();
-      obj['paid'] = _truthy(a['paid']) ? 'כן' : 'לא';
+      obj['paid'] = _truthy(a['paid']) ? (T['k14'] as String) : (T['k15'] as String);
       obj['answers'] = answers.map((x) => x['note']).join(' | ');
       obj['next'] = _truthy(a['nextTalk'])
           ? _fmtD(a['nextTalk'] as String) +

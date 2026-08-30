@@ -1,14 +1,14 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: יכולת מאולתרת - שרשרת חמישה
-// 🧬 בקשה: יכולת מאולתרת - שרשרת חמישה: · הירו 🎲 יכולת מאולתרת - חמישה אטומים שהגרלתי וחיברתי לבד | תבחר 5 אטומים רנדלמיים תחבר בין ותוציא את היכולת הכי טוב וחדשה שלה · כותרת ערבוב שלושת המדפים - דאטה אקראית מהמדף מוזרמת לשרשרת מנועים אקראית · דאטה HUNDREDS HUNDREDS · חישוב מפתח חודש (monthKey) · חישוב אבחון תקינות מספר טלפון תקין (phoneIssue) · חישוב קוד זמנה דטרמיניסטי (genJoinCode) · חישוב נירמול מספר טלפון למפתח זיהוי (phoneKey) · חישוב מפתח מטמון לקונפיג מהענן (cloudCfgCacheKey) · באנר הגרלתי אטום-דאטה ושרשרת-מנועים משני מדפים שונים וחיברתי אותם לצינור חי אחד - מחר הגרלה חדשה
+// 🧬 בקשה: יכולת מאולתרת - שרשרת חמישה: · הירו 🎲 יכולת מאולתרת - חמישה אטומים שהגרלתי וחיברתי לבד | תבחר 5 אטומים רנדלמיים תחבר בין ותוציא את היכולת הכי טוב וחדשה שלה · כותרת ערבוב שלושת המדפים - דאטה אקראית מהמדף מוזרמת לשרשרת מנועים אקראית · דאטה HUNDREDS HUNDREDS · חישוב מפתח חודש (monthKey) · חישוב נירמול טלפון לזיהוי כפילויות (normalizePhone) · חישוב קוד זמנה דטרמיניסטי (genJoinCode) · חישוב מפתח מטמון לקונפיג מהענן (cloudCfgCacheKey) · חישוב סיווג אזור של מספר טלפון (phoneRegion) · באנר הגרלתי אטום-דאטה ושרשרת-מנועים משני מדפים שונים וחיברתי אותם לצינור חי אחד - מחר הגרלה חדשה
 // 🧬 אטומים שנבחרו: HeroCard · CaSubTitle · ChipWrap · CoinBanner · RStat · RStat · RStat · RStat · RStat
 import '../dart-data-bs/auto/gen_improv_content.dart';
 import '../dart-data-maor/amount-in-words-data.dart';
 import '../dart-maor/cloud-cfg-cache-key.dart';
 import '../dart-maor/gen-join-code.dart';
 import '../dart-maor/month-key.dart';
-import '../dart-maor/phone-issue.dart';
-import '../dart-maor/phone-key.dart';
+import '../dart-maor/normalize-phone.dart';
+import '../dart-maor/phone-region.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/chip_wrap.dart';
@@ -45,10 +45,10 @@ class _GenImprovScreenState extends State<GenImprovScreen> {
           CaSubTitle(gen_improv_header_text),
           ChipWrap(options: HUNDREDS, selected: _t1, onSelect: (v) => setState(() => _t1 = v)),
           Row(children: [RStat(value: monthKey(_t1), label: gen_improv_stat_label)]),
-          Row(children: [RStat(value: phoneIssue((monthKey(_t1))) ?? '', label: gen_improv_stat_label2)]),
-          Row(children: [RStat(value: genJoinCode((phoneIssue((monthKey(_t1))) ?? '')), label: gen_improv_stat_label3)]),
-          Row(children: [RStat(value: phoneKey((genJoinCode((phoneIssue((monthKey(_t1))) ?? '')))), label: gen_improv_stat_label4)]),
-          Row(children: [RStat(value: cloudCfgCacheKey((phoneKey((genJoinCode((phoneIssue((monthKey(_t1))) ?? '')))))), label: gen_improv_stat_label5)]),
+          Row(children: [RStat(value: normalizePhone((monthKey(_t1))), label: gen_improv_stat_label2)]),
+          Row(children: [RStat(value: genJoinCode((normalizePhone((monthKey(_t1))))), label: gen_improv_stat_label3)]),
+          Row(children: [RStat(value: cloudCfgCacheKey((genJoinCode((normalizePhone((monthKey(_t1))))))), label: gen_improv_stat_label4)]),
+          Row(children: [RStat(value: phoneRegion((cloudCfgCacheKey((genJoinCode((normalizePhone((monthKey(_t1))))))))), label: gen_improv_stat_label5)]),
           CoinBanner(coins: 0, sub: gen_improv_banner_sub),
           ],
         ),

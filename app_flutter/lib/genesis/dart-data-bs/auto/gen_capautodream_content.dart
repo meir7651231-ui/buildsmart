@@ -1,4 +1,14 @@
 // 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_capautodream_calc_arg = 'כנראה חסרה ספרת 0 מובילה: ';
+const String gen_capautodream_calc_arg2 = 'קצר מדי: ';
+const String gen_capautodream_calc_arg3 = 'לא מתחיל ב-0: ';
+const String gen_capautodream_calc_arg4 = 'אורך חריג (';
+const String gen_capautodream_calc_arg5 = ' ספרות): ';
+const String gen_capautodream_calc_arg6 = 'כנראה חסרה ספרת 0 מובילה: ';
+const String gen_capautodream_calc_arg7 = 'קצר מדי: ';
+const String gen_capautodream_calc_arg8 = 'לא מתחיל ב-0: ';
+const String gen_capautodream_calc_arg9 = 'אורך חריג (';
+const String gen_capautodream_calc_arg10 = ' ספרות): ';
 const String gen_capautodream_card_glyph = '🧪';
 const String gen_capautodream_card_title = 'הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז אבחון תקינות מספר';
 const String gen_capautodream_card_sub = 'יכולת שהוזמנה ולא היתה קיימת - הרכבתי אותה לבד מ-2 אטומים והוכחתי על 2 דוגמאות';
