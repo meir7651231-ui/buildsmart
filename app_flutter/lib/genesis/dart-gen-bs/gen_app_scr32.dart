@@ -1,5 +1,5 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: הירו 🎯 דשבורד מנהל אתר עם משימות היום | נבנה מתיאור חופשי
+// 🧬 שם: 🎯 דשבורד מנהל אתר עם משימות היום
 // 🧬 בקשה: הירו 🎯 דשבורד מנהל אתר עם משימות היום | נבנה מתיאור חופשי · אטום StripGroupCard דשבורד מנהל אתר עם משימות היום · אטום StockTab דשבורד מנהל אתר עם משימות היום · אטום ChipCloud דשבורד מנהל אתר עם משימות היום · אטום EmptyStateCard דשבורד מנהל אתר עם משימות היום · אטום BareStat דשבורד מנהל אתר עם משימות היום · אטום WorkerNav דשבורד מנהל אתר עם משימות היום · אטום SummaryCard דשבורד מנהל אתר עם משימות היום · אטום TitledSection דשבורד מנהל אתר עם משימות היום · אטום MiniCalendar משימות היום · אטום HeroCard עובדים באתר · אטום InfoHeadLine חומרים · כותרת דשבורד מנהל אתר עם משימות היום · לוגיקה חיה · חישוב כרעת מנהל (isAdmin) · באנר המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות
 // 🧬 אטומים שנבחרו: StripGroupCard · StockTab · ChipCloud · EmptyStateCard · BareStat · WorkerNav · SummaryCard · TitledSection · MiniCalendar · HeroCard · InfoHeadLine · CaSubTitle · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_scr32_content.dart';

@@ -1,5 +1,5 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: הירו ⚙️ הגדרות | סנכרון · גיבוי · הרשאות
+// 🧬 שם: ⚙️ הגדרות
 // 🧬 בקשה: הירו ⚙️ הגדרות | סנכרון · גיבוי · הרשאות · אטום LiveStatusDot מחובר · מסונכרן · אטום AnimatedToggle עבודה אופליין · אטום NeonButton גיבוי עכשיו · באנר סנכרון · זיהוי-התנגשויות · גיבוי · ייצוא
 // 🧬 אטומים שנבחרו: LiveStatusDot · AnimatedToggle · NeonButton · CoinBanner
 import '../dart-data-bs/auto/gen_app_settings_content.dart';

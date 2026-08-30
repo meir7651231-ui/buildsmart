@@ -4,4 +4,4 @@ const String gen_app_settings_toggle_label = 'עבודה אופליין';
 const String gen_app_settings_neon_label = 'גיבוי עכשיו';
 const String gen_app_settings_neon_toast = 'גיבוי עכשיו';
 const String gen_app_settings_banner_sub = 'סנכרון · זיהוי-התנגשויות · גיבוי · ייצוא';
-const String gen_app_settings_app_bar_title = 'הירו ⚙️ הגדרות | סנכרון · גיבוי · הרשאות';
+const String gen_app_settings_app_bar_title = '⚙️ הגדרות';

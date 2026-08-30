@@ -22,4 +22,4 @@ const String gen_app_scr32_other_text = 'חומרים';
 const String gen_app_scr32_header_text = 'דשבורד מנהל אתר עם משימות היום · לוגיקה חיה';
 const String gen_app_scr32_stat_label2 = 'כרעת מנהל';
 const String gen_app_scr32_banner_sub = 'המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות';
-const String gen_app_scr32_app_bar_title = 'הירו 🎯 דשבורד מנהל אתר עם משימות היום | נבנה מתיאור חופשי';
+const String gen_app_scr32_app_bar_title = '🎯 דשבורד מנהל אתר עם משימות היום';

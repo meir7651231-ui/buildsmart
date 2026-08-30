@@ -1,5 +1,5 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: הירו 🎚️ דגלי-יכולת | הפעלה/כיבוי מודולים
+// 🧬 שם: 🎚️ דגלי-יכולת
 // 🧬 בקשה: הירו 🎚️ דגלי-יכולת | הפעלה/כיבוי מודולים · כותרת מודולים · אטום AnimatedToggle ליד · אטום AnimatedToggle לקוח · אטום AnimatedToggle פרויקט · אטום AnimatedToggle שדה · אטום AnimatedToggle סעיף כתב כמויות · אטום AnimatedToggle אומדן · אטום AnimatedToggle הצעה · אטום AnimatedToggle חוזה · אטום AnimatedToggle תקציב · אטום AnimatedToggle משימה · אטום AnimatedToggle דוח יומי · אטום AnimatedToggle עובד · באנר כיבוי מודול לא מוחק נתונים — rollback נשמר
 // 🧬 אטומים שנבחרו: CaSubTitle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · AnimatedToggle · CoinBanner
 import '../dart-data-bs/auto/gen_app_flags_content.dart';

@@ -1,5 +1,5 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: הירו 🎯 דשבורד בטיחות עם בדיקות פתוחות | נבנה מתיאור חופשי
+// 🧬 שם: 🎯 דשבורד בטיחות עם בדיקות פתוחות
 // 🧬 בקשה: הירו 🎯 דשבורד בטיחות עם בדיקות פתוחות | נבנה מתיאור חופשי · אטום QuickToolsList דשבורד בטיחות עם בדיקות פתוחות · אטום CartChatBubble דשבורד בטיחות עם בדיקות פתוחות · אטום SlideSheet דשבורד בטיחות עם בדיקות פתוחות · אטום ProjectDone דשבורד בטיחות עם בדיקות פתוחות · אטום PaymentChip דשבורד בטיחות עם בדיקות פתוחות · אטום CartItemRow דשבורד בטיחות עם בדיקות פתוחות · אטום OrderCard דשבורד בטיחות עם בדיקות פתוחות · אטום ColorSwatchRow דשבורד בטיחות עם בדיקות פתוחות · אטום Timeline אירועים · כותרת דשבורד בטיחות עם בדיקות פתוחות · לוגיקה חיה · חישוב סיווג אזור של מספר (phoneRegion) · באנר המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות
 // 🧬 אטומים שנבחרו: QuickToolsList · CartChatBubble · SlideSheet · ProjectDone · PaymentChip · CartItemRow · OrderCard · ColorSwatchRow · Timeline · CaSubTitle · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_scr34_content.dart';

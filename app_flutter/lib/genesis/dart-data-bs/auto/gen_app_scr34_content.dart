@@ -28,4 +28,4 @@ const String gen_app_scr34_card_toast = 'דשבורד בטיחות עם בדיק
 const String gen_app_scr34_header_text = 'דשבורד בטיחות עם בדיקות פתוחות · לוגיקה חיה';
 const String gen_app_scr34_stat_label = 'סיווג אזור של מספר';
 const String gen_app_scr34_banner_sub = 'המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות';
-const String gen_app_scr34_app_bar_title = 'הירו 🎯 דשבורד בטיחות עם בדיקות פתוחות | נבנה מתיאור חופשי';
+const String gen_app_scr34_app_bar_title = '🎯 דשבורד בטיחות עם בדיקות פתוחות';

@@ -22,4 +22,4 @@ const String gen_app_scr33_row_label22 = 'דשבורד כספים עם הכנס�
 const String gen_app_scr33_row_ic2 = 'דשבורד כספים עם הכנסות';
 const String gen_app_scr33_row_name = 'דשבורד כספים עם הכנסות';
 const String gen_app_scr33_banner_sub = 'המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות';
-const String gen_app_scr33_app_bar_title = 'הירו 🎯 דשבורד כספים עם הכנסות | נבנה מתיאור חופשי';
+const String gen_app_scr33_app_bar_title = '🎯 דשבורד כספים עם הכנסות';

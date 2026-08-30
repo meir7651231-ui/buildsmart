@@ -13,4 +13,4 @@ const String gen_app_flags_toggle_label10 = 'משימה'; // t_363ce3ab
 const String gen_app_flags_toggle_label11 = 'דוח יומי';
 const String gen_app_flags_toggle_label12 = 'עובד'; // t_2e131aef
 const String gen_app_flags_banner_sub = 'כיבוי מודול לא מוחק נתונים — rollback נשמר';
-const String gen_app_flags_app_bar_title = 'הירו 🎚️ דגלי-יכולת | הפעלה/כיבוי מודולים';
+const String gen_app_flags_app_bar_title = '🎚️ דגלי-יכולת';

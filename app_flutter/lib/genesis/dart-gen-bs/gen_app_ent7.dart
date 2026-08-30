@@ -1,21 +1,16 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: הירו 🗂️ הצעה | ישות מורכבת — טופס + טבלה
-// 🧬 בקשה: הירו 🗂️ הצעה | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail הצעה: טיוטה / נשלחה / במשא ומתן / אושרה / נדחתה · כותרת טופס הצעה · אטום NumberStepper מספר · אטום InlineTextRow לקוח · אטום GlowField פרויקט · אטום QtyStepper מחיר · אטום InlineTextRow מס · אטום DatePills תוקף · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם לנשלחה · כותרת חוקים פר-שדה · חישוב מספר סידורי של (excelSerialToIso) · כותרת רשומות הצעה · אטום DataGrid הצעה · באנר ישות הצעה: 7 שדות · 5-שלבי workflow · 1 חוקים · מהמדף
-// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · NumberStepper · InlineTextRow · GlowField · QtyStepper · InlineTextRow · DatePills · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · RStat · CaSubTitle · DataGrid · CoinBanner
+// 🧬 שם: 🗂️ הצעה
+// 🧬 בקשה: הירו 🗂️ הצעה | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail הצעה: טיוטה / נשלחה / במשא ומתן / אושרה / נדחתה · כותרת טופס הצעה · אטום NumberStepper מספר · אטום FieldRow לקוח · אטום FieldRow פרויקט · אטום NumberStepper מחיר · אטום FieldRow מס · אטום FieldRow תוקף · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם לנשלחה · כותרת רשומות הצעה · אטום DataGrid הצעה · באנר ישות הצעה: 7 שדות · 5-שלבי workflow · מהמדף
+// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · NumberStepper · FieldRow · FieldRow · NumberStepper · FieldRow · FieldRow · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · DataGrid · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent7_content.dart';
-import '../dart-maor/excel-serial-to-iso.dart';
 import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
-import '../dart-ui-bs/auto/inline_text_row.dart';
-import '../dart-ui-bs/auto/qty_stepper.dart';
-import '../dart-ui-bs/auto/rstat.dart';
 import '../dart-ui-bs/breadcrumb_trail.dart';
 import '../dart-ui-bs/data_grid.dart';
-import '../dart-ui-bs/date_pills.dart';
 import '../dart-ui-bs/fab_menu.dart';
-import '../dart-ui-bs/glow_field.dart';
+import '../dart-ui-bs/field_row.dart';
 import '../dart-ui-bs/neon_button.dart';
 import '../dart-ui-bs/number_stepper.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +24,9 @@ class GenAppEnt7Screen extends StatefulWidget {
 
 class _GenAppEnt7ScreenState extends State<GenAppEnt7Screen> {
   String _t1 = '';
-  int _n2 = 0;
+  String _t2 = '';
   String _t3 = '';
+  String _t4 = '';
 
   void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
@@ -49,17 +45,15 @@ class _GenAppEnt7ScreenState extends State<GenAppEnt7Screen> {
           BreadcrumbTrail(labels: const <String>[gen_app_ent7_crumbs_option, gen_app_ent7_crumbs_option2, gen_app_ent7_crumbs_option3, gen_app_ent7_crumbs_option4, gen_app_ent7_crumbs_option5], height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_app_ent7_header_text),
           NumberStepper(label: gen_app_ent7_numstep_label, height: 16, target: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          InlineTextRow(label: gen_app_ent7_textfield_label, hint: gen_app_ent7_textfield_hint, value: _t1, onChanged: (v) => setState(() => _t1 = v)),
-          GlowField(hint: gen_app_ent7_glowfield_hint, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          QtyStepper(qty: _n2, onChanged: (v) => setState(() => _n2 = v)),
-          InlineTextRow(label: gen_app_ent7_textfield_label2, hint: gen_app_ent7_textfield_hint2, value: _t3, onChanged: (v) => setState(() => _t3 = v)),
-          DatePills(height: 16, days: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          FieldRow(label: gen_app_ent7_textfield_label, hint: gen_app_ent7_textfield_hint, value: _t1, onChanged: (v) => setState(() => _t1 = v), inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, accentColor: BsTokens.brand, fillColor: BsTokens.cardLight, borderColor: BsTokens.divider),
+          FieldRow(label: gen_app_ent7_textfield_label2, hint: gen_app_ent7_textfield_hint2, value: _t2, onChanged: (v) => setState(() => _t2 = v), inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, accentColor: BsTokens.brand, fillColor: BsTokens.cardLight, borderColor: BsTokens.divider),
+          NumberStepper(label: gen_app_ent7_numstep_label2, height: 16, target: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          FieldRow(label: gen_app_ent7_textfield_label3, hint: gen_app_ent7_textfield_hint3, value: _t3, onChanged: (v) => setState(() => _t3 = v), inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, accentColor: BsTokens.brand, fillColor: BsTokens.cardLight, borderColor: BsTokens.divider),
+          FieldRow(label: gen_app_ent7_textfield_label4, hint: gen_app_ent7_textfield_hint4, value: _t4, onChanged: (v) => setState(() => _t4 = v), inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, accentColor: BsTokens.brand, fillColor: BsTokens.cardLight, borderColor: BsTokens.divider),
           AnimatedToggle(label: gen_app_ent7_toggle_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           FabMenu(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           NeonButton(label: gen_app_ent7_neon_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, onPressed: () => _toast(gen_app_ent7_neon_toast)),
           CaSubTitle(gen_app_ent7_header_text2),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: excelSerialToIso(null), label: gen_app_ent7_stat_label)])),
-          CaSubTitle(gen_app_ent7_header_text3),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CoinBanner(coins: 0, sub: gen_app_ent7_banner_sub),
           ],

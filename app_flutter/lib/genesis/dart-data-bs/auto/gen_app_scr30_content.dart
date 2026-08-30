@@ -28,4 +28,4 @@ const String gen_app_scr30_chip_toast2 = 'פרויקטים בסיכון';
 const String gen_app_scr30_header_text = 'דשבורד הנהלה עם פרויקטים · לוגיקה חיה';
 const String gen_app_scr30_stat_label = 'כרעת מנהל';
 const String gen_app_scr30_banner_sub = 'המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות';
-const String gen_app_scr30_app_bar_title = 'הירו 🎯 דשבורד הנהלה עם פרויקטים | נבנה מתיאור חופשי';
+const String gen_app_scr30_app_bar_title = '🎯 דשבורד הנהלה עם פרויקטים';

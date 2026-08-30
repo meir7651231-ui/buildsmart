@@ -1,5 +1,5 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: הירו 🎯 דשבורד הנהלה עם פרויקטים | נבנה מתיאור חופשי
+// 🧬 שם: 🎯 דשבורד הנהלה עם פרויקטים
 // 🧬 בקשה: הירו 🎯 דשבורד הנהלה עם פרויקטים | נבנה מתיאור חופשי · אטום FinHead דשבורד הנהלה עם פרויקטים · אטום FinRow דשבורד הנהלה עם פרויקטים · אטום FinRows דשבורד הנהלה עם פרויקטים · אטום FinCallout דשבורד הנהלה עם פרויקטים · אטום CaPrimary דשבורד הנהלה עם פרויקטים · אטום GridHubCard דשבורד הנהלה עם פרויקטים · אטום AiFinTile דשבורד הנהלה עם פרויקטים · אטום SubRow דשבורד הנהלה עם פרויקטים · אטום ProjectChip פרויקטים · אטום ProjectChip פרויקטים בסיכון · כותרת דשבורד הנהלה עם פרויקטים · לוגיקה חיה · חישוב כרעת מנהל (isAdmin) · באנר המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות
 // 🧬 אטומים שנבחרו: FinHead · FinRow · FinRows · FinCallout · CaPrimary · GridHubCard · AiFinTile · SubRow · ProjectChip · ProjectChip · CaSubTitle · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_scr30_content.dart';
