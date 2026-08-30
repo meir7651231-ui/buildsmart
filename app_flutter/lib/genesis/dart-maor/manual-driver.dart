@@ -14,17 +14,18 @@
 
 /// קישור-חיוג מטלפון שמור: מנקה לספרות/‎+‎; קצר-מדי (<6 ספרות) ⇒ null.
 /// התנהגות-verbatim של telHref במקור-ה-JS.
-String? telHref(String? phone) {
+String? telHref(String? phone, Map<String, String> T) {
   final cleaned = (phone ?? '').replaceAll(RegExp(r'[^\d+]'), '');
   final digits = cleaned.replaceAll(RegExp(r'\D'), '');
   if (digits.length < 6) return null; // קצר מדי = לא מספר-חיוג תקין
-  return 'tel:' + cleaned;
+  return T['k1']! + cleaned;
 }
 
 /// בורר-הנהג הפעיל — כרגע ידני-בלבד (downstream). callHref = ערך-פונקציה (כמו במקור).
-final Map<String, dynamic> manualDriver = {
-  'id': 'manual',
-  'label': 'חיוג בלחיצה (טלפון קיים)',
+/// מפעל-T (הכרעה 16) — מקביל ל-makeManualDriver(T) בצד-ה-JS.
+Map<String, dynamic> makeManualDriver(Map<String, String> T) => {
+  'id': T['k2']!,
+  'label': T['k3']!,
   'capabilities': {'autoDial': false, 'record': false, 'screenPop': true},
-  'callHref': (String? phone) => telHref(phone),
+  'callHref': (String? phone) => telHref(phone, T),
 };

@@ -24,24 +24,25 @@ typedef Family = Map<String, dynamic>;
 typedef DupField = ({String key, String label, String Function(Family) get});
 
 /// The 18 family duplicate-merge fields (key · label · get), verbatim port of
-/// new/atoms/dup-fields.mjs (`DUP_FIELDS`). Order and labels are source-sacred.
-final List<DupField> dupFields = <DupField>[
-  (key: 'name', label: 'שם משפחה', get: (f) => (f['name'] ?? '') as String),
-  (key: 'mother', label: 'שם האם', get: (f) => (f['mother'] ?? '') as String),
-  (key: 'father', label: 'שם האב', get: (f) => (f['father'] ?? '') as String),
-  (key: 'phone', label: 'טלפון', get: (f) => (f['phone'] ?? '') as String),
-  (key: 'phone2', label: 'טלפון 2', get: (f) => (f['phone2'] ?? '') as String),
-  (key: 'email', label: 'אימייל', get: (f) => (f['email'] ?? '') as String),
-  (key: 'city', label: 'עיר', get: (f) => (f['city'] ?? '') as String),
-  (key: 'address', label: 'כתובת', get: (f) => (f['address'] ?? '') as String),
-  (key: 'motherId', label: 'ת"ז אם', get: (f) => (f['motherId'] ?? '') as String),
-  (key: 'fatherId', label: 'ת"ז אב', get: (f) => (f['fatherId'] ?? '') as String),
-  (key: 'community', label: 'קהילה', get: (f) => (f['community'] ?? '') as String),
-  (key: 'language', label: 'שפה', get: (f) => (f['language'] ?? '') as String),
-  (key: 'maritalStatus', label: 'מצב משפחתי', get: (f) => (f['maritalStatus'] ?? '') as String),
-  (key: 'status', label: 'סטטוס', get: (f) => (f['status'] ?? '') as String),
-  (key: 'kidsHome', label: 'ילדים בבית', get: (f) => f['kidsHome'] == null ? '' : f['kidsHome'].toString()),
-  (key: 'kidsMarried', label: 'ילדים נשואים', get: (f) => f['kidsMarried'] == null ? '' : f['kidsMarried'].toString()),
-  (key: 'createdAt', label: 'נרשמה', get: (f) => (f['createdAt'] ?? '') as String),
-  (key: 'notes', label: 'הערות', get: (f) => (f['notes'] ?? '') as String),
+/// new/atoms/dup-fields.mjs (`makeDUP_FIELDS(T)`). מפתחות+תוויות = שקע-T (הכרעה 16);
+/// הסדר קדוש-מקור.
+List<DupField> makeDupFields(Map<String, String> T) => <DupField>[
+  (key: T['k1']!, label: T['k2']!, get: (f) => (f['name'] ?? '') as String),
+  (key: T['k3']!, label: T['k4']!, get: (f) => (f['mother'] ?? '') as String),
+  (key: T['k5']!, label: T['k6']!, get: (f) => (f['father'] ?? '') as String),
+  (key: T['k7']!, label: T['k8']!, get: (f) => (f['phone'] ?? '') as String),
+  (key: T['k9']!, label: T['k10']!, get: (f) => (f['phone2'] ?? '') as String),
+  (key: T['k11']!, label: T['k12']!, get: (f) => (f['email'] ?? '') as String),
+  (key: T['k13']!, label: T['k14']!, get: (f) => (f['city'] ?? '') as String),
+  (key: T['k15']!, label: T['k16']!, get: (f) => (f['address'] ?? '') as String),
+  (key: T['k17']!, label: T['k18']!, get: (f) => (f['motherId'] ?? '') as String),
+  (key: T['k19']!, label: T['k20']!, get: (f) => (f['fatherId'] ?? '') as String),
+  (key: T['k21']!, label: T['k22']!, get: (f) => (f['community'] ?? '') as String),
+  (key: T['k23']!, label: T['k24']!, get: (f) => (f['language'] ?? '') as String),
+  (key: T['k25']!, label: T['k26']!, get: (f) => (f['maritalStatus'] ?? '') as String),
+  (key: T['k27']!, label: T['k28']!, get: (f) => (f['status'] ?? '') as String),
+  (key: T['k29']!, label: T['k30']!, get: (f) => f['kidsHome'] == null ? '' : f['kidsHome'].toString()),
+  (key: T['k31']!, label: T['k32']!, get: (f) => f['kidsMarried'] == null ? '' : f['kidsMarried'].toString()),
+  (key: T['k33']!, label: T['k34']!, get: (f) => (f['createdAt'] ?? '') as String),
+  (key: T['k35']!, label: T['k36']!, get: (f) => (f['notes'] ?? '') as String),
 ];
