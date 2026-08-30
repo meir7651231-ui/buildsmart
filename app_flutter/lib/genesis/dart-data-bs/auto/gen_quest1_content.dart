@@ -1,0 +1,21 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_quest1_card_glyph = '🎯';
+const String gen_quest1_card_title = 'עולם משחק שלם של מסע בריחה - חדרים שמובילים זה אל זה חידות חיות שמגיבות לשחקן ושערים נסתרים בדרך אל היציאה';
+const String gen_quest1_card_sub = 'מטרה אחת קיבלתי - את המבנה האטומים והחיבורים בחרתי לבד';
+const String gen_quest1_card_toast = 'עולם משחק שלם של מסע בריחה - חדרים שמובילים זה אל זה חידות חיות שמגיבות לשחקן ושערים נסתרים בדרך אל היציאה';
+const String gen_quest1_header_text = 'תחנת הבחירה - הדאטה מתוך האטום והבחירה מוזרמת למנוע';
+const String gen_quest1_stat_label = 'סטטוס בא במסירת חלוקה קדימה בלבד';
+const String gen_quest1_chip_option = 'pickup';
+const String gen_quest1_chip_option2 = 'enroute';
+const String gen_quest1_chip_option3 = 'delivered';
+const String gen_quest1_header_text2 = 'תחנת ההזנה - כל הקלדה מפעילה שרשרת מנועים';
+const String gen_quest1_stat_label2 = 'סיווג אזור של מספר טלפון';
+const String gen_quest1_stat_label3 = 'תקינות של ארגון';
+const String gen_quest1_stat_label4 = 'מפתח פיצול של תרומה מסלול';
+const String gen_quest1_textfield_label = 'הקלידו ערך עבור סיווג אזור של מספר טלפון';
+const String gen_quest1_textfield_hint = 'הקלידו ערך עבור סיווג אזור של מספר טלפון';
+const String gen_quest1_card_glyph2 = '🔹';
+const String gen_quest1_card_title2 = 'השער אל החדר הבא';
+const String gen_quest1_card_sub2 = 'המסע ממשיך';
+const String gen_quest1_banner_sub = 'מטרה אחת קיבלתי מהבעלים - את כל השאר תכננתי בחרתי וחיווטתי לבד מהמדף החי';
+const String gen_quest1_app_bar_title = 'עולם משחק שלם - חדר 1';
