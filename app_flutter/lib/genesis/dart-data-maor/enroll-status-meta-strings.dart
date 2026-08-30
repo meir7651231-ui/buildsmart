@@ -1,5 +1,5 @@
-// אטום-דאטה · enroll-status-meta-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/enroll-status-meta-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · enroll-status-meta-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: תווית צבעי יפ לסטטוס שיבוץ
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/enroll-status-meta-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> ENROLL_STATUS_META_T = {
   'k1': 'paused',
   'k2': 'מוקפא',

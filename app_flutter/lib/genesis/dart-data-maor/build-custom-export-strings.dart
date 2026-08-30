@@ -1,5 +1,5 @@
-// אטום-דאטה · build-custom-export-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/build-custom-export-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · build-custom-export-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: בונה דו מותאם חוגים אירועים תומכות לפי
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/build-custom-export-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> BUILD_CUSTOM_EXPORT_T = {
   'k1': 'courses',
   'k2': 'יום ',

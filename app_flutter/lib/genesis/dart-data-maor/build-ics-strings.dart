@@ -1,5 +1,5 @@
-// אטום-דאטה · build-ics-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/build-ics-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · build-ics-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: בניית קובץ שלם ממופעים קונקרטיים
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/build-ics-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> BUILD_ICS_T = {
   'k1': 'BEGIN:VCALENDAR',
   'k2': 'VERSION:2.0',

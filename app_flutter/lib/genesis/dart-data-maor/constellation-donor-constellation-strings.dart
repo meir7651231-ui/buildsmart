@@ -1,5 +1,5 @@
-// אטום-דאטה · constellation-donor-constellation-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/constellation-donor-constellation-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · constellation-donor-constellation-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/constellation-donor-constellation-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> CONSTELLATION_DONOR_CONSTELLATION_T = {
   'k1': 'dormant',
   'k2': 2166136261,

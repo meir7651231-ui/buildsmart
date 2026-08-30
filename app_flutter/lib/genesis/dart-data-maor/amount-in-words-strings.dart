@@ -1,5 +1,5 @@
-// אטום-דאטה · amount-in-words-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/amount-in-words-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · amount-in-words-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: קודם אוטומטית אפיון
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/amount-in-words-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> AMOUNT_IN_WORDS_T = {
   'k1': 'אלף',
   'k2': 'אלפיים',

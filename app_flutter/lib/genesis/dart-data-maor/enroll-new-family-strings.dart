@@ -1,5 +1,5 @@
-// אטום-דאטה · enroll-new-family-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/enroll-new-family-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · enroll-new-family-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: קבוע קודם אוטומטית צילום ערך
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/enroll-new-family-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> ENROLL_NEW_FAMILY_T = {
   'k1': '__new',
   'k2': 'כ',

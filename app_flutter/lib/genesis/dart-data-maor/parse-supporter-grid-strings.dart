@@ -1,5 +1,5 @@
-// אטום-דאטה · parse-supporter-grid-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/parse-supporter-grid-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · parse-supporter-grid-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: פענוח רשת תאים לשורות ייבוא תומכות
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/parse-supporter-grid-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> PARSE_SUPPORTER_GRID_T = {
   'k1': 'טלפון',
   'k2': 'נייד',

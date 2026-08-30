@@ -1,5 +1,5 @@
-// אטום-דאטה · preview-telephony-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/preview-telephony-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · preview-telephony-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: תצוגה מקדימה חיה לקונפיג טלפוניה סימולטור דוח אמון
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/preview-telephony-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> PREVIEW_TELEPHONY_T = {
   'k1': 'sim',
   'k2': 'virtual',

@@ -1,5 +1,5 @@
-// אטום-דאטה · default-prices-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/default-prices-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · default-prices-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: טבלת מחירי ברירת המחדל של התמחור
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/default-prices-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, int> DEFAULT_PRICES_T = {
   'k1': 290,
   'k2': 120,

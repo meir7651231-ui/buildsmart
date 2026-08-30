@@ -1,5 +1,5 @@
-// אטום-דאטה · suggestions-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/suggestions-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · suggestions-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: מקדים הצורך חג מתקרב גיל בית ספר תינוק
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/suggestions-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> SUGGESTIONS_T = {
   'k1': 'active',
   'k2': 'shop',

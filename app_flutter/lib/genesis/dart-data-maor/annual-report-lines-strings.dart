@@ -1,5 +1,5 @@
-// אטום-דאטה · annual-report-lines-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/annual-report-lines-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · annual-report-lines-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: שורות דוח שנתי לתורם
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/annual-report-lines-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> ANNUAL_REPORT_LINES_T = {
   'k1': '        דוח תרומות שנתי — שנת ',
   'k2': 'הארגון: ',

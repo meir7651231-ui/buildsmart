@@ -1,5 +1,5 @@
-// אטום-דאטה · integer-in-words-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/integer-in-words-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · integer-in-words-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: מספר שלם במילים עבריות זכר לקבלת
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/integer-in-words-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> INTEGER_IN_WORDS_T = {
   'k1': 'אפס',
   'k2': 'מיליון',

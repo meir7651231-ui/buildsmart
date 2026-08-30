@@ -1,5 +1,5 @@
-// אטום-דאטה · cockpit-calls-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/cockpit-calls-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · cockpit-calls-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/cockpit-calls-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> COCKPIT_CALLS_T = {
   'k1': 'תורם/ת מרכזי/ת',
   'k2': 'תורם/ת מהותי/ת',

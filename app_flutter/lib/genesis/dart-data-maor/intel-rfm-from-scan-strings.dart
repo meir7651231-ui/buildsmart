@@ -1,5 +1,5 @@
-// אטום-דאטה · intel-rfm-from-scan-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/intel-rfm-from-scan-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · intel-rfm-from-scan-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/intel-rfm-from-scan-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, int> INTEL_RFM_FROM_SCAN_T = {
   'k1': 30,
   'k2': 350,

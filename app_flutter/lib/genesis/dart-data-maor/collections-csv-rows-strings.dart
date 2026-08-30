@@ -1,5 +1,5 @@
-// אטום-דאטה · collections-csv-rows-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/collections-csv-rows-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · collections-csv-rows-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: שורות של ריקוני קופות הצדקה
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/collections-csv-rows-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> COLLECTIONS_CSV_ROWS_T = {
   'k1': 'תאריך',
   'k2': 'רכז',

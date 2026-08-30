@@ -1,5 +1,5 @@
-// אטום-דאטה · receipt-html-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/receipt-html-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · receipt-html-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: הקבלה מוכן להדפסה טהור מחרוזת בלבד
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/receipt-html-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> RECEIPT_HTML_T = {
   'k1': '&amp;',
   'k2': '<div class="ln">',

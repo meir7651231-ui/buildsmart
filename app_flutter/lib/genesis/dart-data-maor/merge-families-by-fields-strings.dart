@@ -1,5 +1,5 @@
-// אטום-דאטה · merge-families-by-fields-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/merge-families-by-fields-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · merge-families-by-fields-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: מיזוג כפולים לפי בחירת שדות בסיס בטוח דריסה
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/merge-families-by-fields-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> MERGE_FAMILIES_BY_FIELDS_T = {
   'k1': 'kidsHome',
   'k2': 'kidsMarried',

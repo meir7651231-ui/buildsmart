@@ -1,5 +1,5 @@
-// אטום-דאטה · apply-meta-partial-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/apply-meta-partial-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · apply-meta-partial-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: מיזוג מסמך מרוחק הענן מנצח מונים רק עולים
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/apply-meta-partial-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> APPLY_META_PARTIAL_T = {
   'k1': 'orgName',
   'k2': 'orgSite',

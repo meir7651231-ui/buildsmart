@@ -1,5 +1,5 @@
-// אטום-דאטה · guide-sections-of-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/guide-sections-of-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · guide-sections-of-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: שורות המדריך למצב מערכת סינון לפי מודולים פעילים
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/guide-sections-of-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> GUIDE_SECTIONS_OF_T = {
   'k1': 'כרטיס משפחה',
   'k2': 'כרטיס ',

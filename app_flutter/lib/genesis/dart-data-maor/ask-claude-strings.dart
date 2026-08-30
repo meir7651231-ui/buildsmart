@@ -1,5 +1,5 @@
-// אטום-דאטה · ask-claude-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/ask-claude-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · ask-claude-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: קריאה מהדפדפן פרומפט טקסט או שגיאה בעברית
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/ask-claude-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> ASK_CLAUDE_T = {
   'k1': 'https://api.anthropic.com/v1/messages',
   'k2': 'POST',

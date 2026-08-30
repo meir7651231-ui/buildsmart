@@ -1,5 +1,5 @@
-// אטום-דאטה · grantable-staff-features-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/grantable-staff-features-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · grantable-staff-features-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: קבוע קודם אוטומטית צילום ערך
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/grantable-staff-features-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> GRANTABLE_STAFF_FEATURES_T = {
   'k1': 'supporters.bulkselect',
   'k2': 'supporters.bulkdelete',

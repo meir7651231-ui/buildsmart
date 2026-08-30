@@ -1,5 +1,5 @@
-// אטום-דאטה · lib-config-terms — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/lib-config-terms.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · lib-config-terms — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: הקונפיגורציה של
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/lib-config-terms.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> LIB_CONFIG_TERMS = {
   'k1': 'families',
   'k2': 'courses',

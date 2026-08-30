@@ -1,5 +1,5 @@
-// אטום-דאטה · reenroll-list-text-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/reenroll-list-text-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · reenroll-list-text-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: טקסט תדפיס קריא לרשימת הרישום מחדש שורה לתלמיד
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/reenroll-list-text-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> REENROLL_LIST_TEXT_T = {
   'k1': 'yes',
   'k2': 'ממשיך',

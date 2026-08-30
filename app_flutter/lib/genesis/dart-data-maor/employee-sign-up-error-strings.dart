@@ -1,5 +1,5 @@
-// אטום-דאטה · employee-sign-up-error-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/employee-sign-up-error-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · employee-sign-up-error-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: ולידציית הרשמת עובד קוד מהבוס
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/employee-sign-up-error-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> EMPLOYEE_SIGN_UP_ERROR_T = {
   'k1': 'כתובת האימייל אינה תקינה',
   'k2': 'מספר טלפון תקין הוא שדה חובה',

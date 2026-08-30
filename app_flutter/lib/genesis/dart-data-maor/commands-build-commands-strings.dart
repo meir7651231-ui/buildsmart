@@ -1,5 +1,5 @@
-// אטום-דאטה · commands-build-commands-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/commands-build-commands-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · commands-build-commands-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/commands-build-commands-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> COMMANDS_BUILD_COMMANDS_T = {
   'k1': 'cmd:add',
   'k2': 'add',

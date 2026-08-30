@@ -1,5 +1,5 @@
-// אטום-דאטה · exp-field-defs-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/exp-field-defs-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · exp-field-defs-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: הגדרות שדות הדו המותאם לפי יעד
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/exp-field-defs-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> EXP_FIELD_DEFS_T = {
   'k1': 'reports.custom.full',
   'k2': 'courses',

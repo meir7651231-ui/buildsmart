@@ -1,5 +1,5 @@
-// אטום-דאטה · plan-demo-cleanup-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/plan-demo-cleanup-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · plan-demo-cleanup-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: תכנון ניקוי נתוני דמו שהתערבבו בנתונים האמיתיים
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/plan-demo-cleanup-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> PLAN_DEMO_CLEANUP_T = {
   'k1': 'name',
   'k2': 'father',

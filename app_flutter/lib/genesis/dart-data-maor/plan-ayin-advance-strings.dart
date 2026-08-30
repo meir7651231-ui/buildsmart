@@ -1,5 +1,5 @@
-// אטום-דאטה · plan-ayin-advance-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/plan-ayin-advance-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · plan-ayin-advance-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: תכנון פעולת הכפתור החכם של תיק המעקב
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/plan-ayin-advance-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> PLAN_AYIN_ADVANCE_T = {
   'k1': 'new',
   'k2': 'lead',

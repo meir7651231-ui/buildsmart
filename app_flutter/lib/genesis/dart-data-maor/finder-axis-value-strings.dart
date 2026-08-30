@@ -1,5 +1,5 @@
-// אטום-דאטה · finder-axis-value-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/finder-axis-value-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · finder-axis-value-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: ערך המשפחה בציר צלילה נתון
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/finder-axis-value-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> FINDER_AXIS_VALUE_T = {
   'k1': 'city',
   'k2': 'comm',

@@ -1,5 +1,5 @@
-// אטום-דאטה · heb-annual-eq-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/heb-annual-eq-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · heb-annual-eq-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: שוויון יום חודש עברי לחזרה שנתית סימטרי עוגן
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/heb-annual-eq-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> HEB_ANNUAL_EQ_T = {
   'k1': 'Adar',
   'k2': 'Adar I',

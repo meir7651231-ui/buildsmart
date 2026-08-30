@@ -1,5 +1,5 @@
-// אטום-דאטה · ayin-sheet-rows-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/ayin-sheet-rows-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · ayin-sheet-rows-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: שורות ייצוא גיליון העיניים
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/ayin-sheet-rows-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> AYIN_SHEET_ROWS_T = {
   'k1': 'תומכת',
   'k2': 'טלפון',

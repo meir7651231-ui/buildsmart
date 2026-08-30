@@ -1,5 +1,5 @@
-// אטום-דאטה · segments-segment-counts-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/segments-segment-counts-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · segments-segment-counts-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/segments-segment-counts-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> SEGMENTS_SEGMENT_COUNTS_T = {
   'k1': 'atrisk',
   'k2': 'בסיכון נטישה',

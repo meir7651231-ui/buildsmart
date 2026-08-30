@@ -1,5 +1,5 @@
-// אטום-דאטה · parse-ayin-sheet-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/parse-ayin-sheet-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · parse-ayin-sheet-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: פענוח גיליון העיניים שחזר מהלגאסי
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/parse-ayin-sheet-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> PARSE_AYIN_SHEET_T = {
   'k1': 'הקובץ ריק או לא בפורמט CSV',
   'k2': 'תומכת',

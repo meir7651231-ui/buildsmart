@@ -1,5 +1,5 @@
-// אטום-דאטה · caller-kind-label-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/caller-kind-label-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · caller-kind-label-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: תווית סוג המתקשר דרך מילון המונחים
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/caller-kind-label-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> CALLER_KIND_LABEL_T = {
   'k1': 'family',
   'k2': 'entity.family',

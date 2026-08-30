@@ -1,5 +1,5 @@
-// אטום-דאטה · events-csv-rows-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/events-csv-rows-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · events-csv-rows-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: שורות ייצוא של האירועים
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/events-csv-rows-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> EVENTS_CSV_ROWS_T = {
   'k1': 'רגיל (ירוק)',
   'k2': 'בינוני (כתום)',

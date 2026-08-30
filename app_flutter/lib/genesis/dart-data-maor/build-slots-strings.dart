@@ -1,5 +1,5 @@
-// אטום-דאטה · build-slots-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/build-slots-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · build-slots-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: משבצות היום של חדר ביומן
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/build-slots-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> BUILD_SLOTS_T = {
   'k1': 'clean',
   'k2': 'cleaning',

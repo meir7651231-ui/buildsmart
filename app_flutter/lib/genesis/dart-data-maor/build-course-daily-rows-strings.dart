@@ -1,5 +1,5 @@
-// אטום-דאטה · build-course-daily-rows-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/build-course-daily-rows-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · build-course-daily-rows-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: דו נוכחות יומי מפורט לחוג מפגש מפגש
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/build-course-daily-rows-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> BUILD_COURSE_DAILY_ROWS_T = {
   'k1': 'תאריך עברי',
   'k2': 'תאריך לועזי',

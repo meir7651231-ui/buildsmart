@@ -1,5 +1,5 @@
-// אטום-דאטה · needs-care-shop-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/needs-care-shop-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · needs-care-shop-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: רשימת הטיפול של מודול החנות מה מגיע מלאי
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/needs-care-shop-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> NEEDS_CARE_SHOP_T = {
   'k1': 'stockOut',
   'k2': ' — המלאי אזל',

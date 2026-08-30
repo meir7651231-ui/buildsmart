@@ -1,5 +1,5 @@
-// אטום-דאטה · segments-match-segment-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/segments-match-segment-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · segments-match-segment-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/segments-match-segment-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> SEGMENTS_MATCH_SEGMENT_T = {
   'k1': 'atrisk',
   'k2': 'goldsilent',

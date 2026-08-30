@@ -1,5 +1,5 @@
-// אטום-דאטה · delete-org-completely-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/delete-org-completely-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · delete-org-completely-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: מחיקת לקוח מלאה מהענן מצבת
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/delete-org-completely-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> DELETE_ORG_COMPLETELY_T = {
   'k1': 'donations',
   'k2': 'auditlog',

@@ -1,5 +1,5 @@
-// אטום-דאטה · parse-families-csv-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/parse-families-csv-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · parse-families-csv-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: תכנון ייבוא משפחות עמודות ענף המשפחות בלגאסי
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/parse-families-csv-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> PARSE_FAMILIES_CSV_T = {
   'k1': 'שם פרטי שם משפחה',
   'k2': '#NAME?',

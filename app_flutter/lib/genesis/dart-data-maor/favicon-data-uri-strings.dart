@@ -1,5 +1,5 @@
-// אטום-דאטה · favicon-data-uri-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/favicon-data-uri-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · favicon-data-uri-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: קודם אוטומטית אפיון
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/favicon-data-uri-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, String> FAVICON_DATA_URI_T = {
   'k1': '</text></svg>',
   'k2': 'data:image/svg+xml,',

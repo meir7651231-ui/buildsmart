@@ -1,5 +1,5 @@
-// אטום-דאטה · telephony-to-tenant-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
-// המקור: new/atoms/telephony-to-tenant-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+// אטום-דאטה · telephony-to-tenant-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש · מהות-המוצא: תצורת אשף טלפוניה למנוע
+// (מנוע-ההמרה-מחדש · הכרעה 19) המקור: new/atoms/telephony-to-tenant-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
 const Map<String, Object> TELEPHONY_TO_TENANT_T = {
   'k1': 'sim-in-gateway',
   'k2': 'customer-forward',
