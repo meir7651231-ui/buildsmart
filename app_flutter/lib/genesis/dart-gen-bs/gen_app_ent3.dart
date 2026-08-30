@@ -1,19 +1,15 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: הירו 🗂️ משימה | ישות מורכבת — טופס + טבלה
-// 🧬 בקשה: הירו 🗂️ משימה | ישות מורכבת — טופס + טבלה · כותרת טופס משימה · אטום InlineTextRow שם · אטום GlowField אחראי · אטום DatePills תאריך יעד · אטום InlineTextRow עדיפות · אטום NumberStepper אחוז ביצוע · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · כותרת רשומות משימה · אטום DataGrid משימה · כותרת מעבר-סטטוס · אטום NeonButton קדם סטטוס · באנר ישות משימה: 6 שדות · טופס + טבלה מהמדף
-// 🧬 אטומים שנבחרו: CaSubTitle · InlineTextRow · GlowField · DatePills · InlineTextRow · NumberStepper · AnimatedToggle · FabMenu · CaSubTitle · DataGrid · CaSubTitle · NeonButton · CoinBanner
+// 🧬 שם: הירו 🗂️ לקוח | ישות מורכבת — טופס + טבלה
+// 🧬 בקשה: הירו 🗂️ לקוח | ישות מורכבת — טופס + טבלה · כותרת טופס לקוח · אטום InlineTextRow שם · אטום GlowField חברה · אטום InlineTextRow טלפון · אטום InlineTextRow מייל · אטום InlineTextRow כתובת · אטום FabMenu שמירה · כותרת רשומות לקוח · אטום DataGrid לקוח · באנר ישות לקוח: 5 שדות · מהמדף
+// 🧬 אטומים שנבחרו: CaSubTitle · InlineTextRow · GlowField · InlineTextRow · InlineTextRow · InlineTextRow · FabMenu · CaSubTitle · DataGrid · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent3_content.dart';
-import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
 import '../dart-ui-bs/auto/inline_text_row.dart';
 import '../dart-ui-bs/data_grid.dart';
-import '../dart-ui-bs/date_pills.dart';
 import '../dart-ui-bs/fab_menu.dart';
 import '../dart-ui-bs/glow_field.dart';
-import '../dart-ui-bs/neon_button.dart';
-import '../dart-ui-bs/number_stepper.dart';
 import 'package:flutter/material.dart';
 
 class GenAppEnt3Screen extends StatefulWidget {
@@ -26,6 +22,8 @@ class GenAppEnt3Screen extends StatefulWidget {
 class _GenAppEnt3ScreenState extends State<GenAppEnt3Screen> {
   String _t1 = '';
   String _t2 = '';
+  String _t3 = '';
+  String _t4 = '';
 
   void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
@@ -44,15 +42,12 @@ class _GenAppEnt3ScreenState extends State<GenAppEnt3Screen> {
           CaSubTitle(gen_app_ent3_header_text),
           InlineTextRow(label: gen_app_ent3_textfield_label, hint: gen_app_ent3_textfield_hint, value: _t1, onChanged: (v) => setState(() => _t1 = v)),
           GlowField(hint: gen_app_ent3_glowfield_hint, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          DatePills(height: 16, days: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           InlineTextRow(label: gen_app_ent3_textfield_label2, hint: gen_app_ent3_textfield_hint2, value: _t2, onChanged: (v) => setState(() => _t2 = v)),
-          NumberStepper(label: gen_app_ent3_numstep_label, height: 16, target: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          AnimatedToggle(label: gen_app_ent3_toggle_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          InlineTextRow(label: gen_app_ent3_textfield_label3, hint: gen_app_ent3_textfield_hint3, value: _t3, onChanged: (v) => setState(() => _t3 = v)),
+          InlineTextRow(label: gen_app_ent3_textfield_label4, hint: gen_app_ent3_textfield_hint4, value: _t4, onChanged: (v) => setState(() => _t4 = v)),
           FabMenu(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_app_ent3_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          CaSubTitle(gen_app_ent3_header_text3),
-          NeonButton(label: gen_app_ent3_neon_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, onPressed: () => _toast(gen_app_ent3_neon_toast)),
           CoinBanner(coins: 0, sub: gen_app_ent3_banner_sub),
           ],
         ),

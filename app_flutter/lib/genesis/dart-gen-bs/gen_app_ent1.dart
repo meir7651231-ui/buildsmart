@@ -1,13 +1,14 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: הירו 🗂️ פרויקט | ישות מורכבת — טופס + טבלה
-// 🧬 בקשה: הירו 🗂️ פרויקט | ישות מורכבת — טופס + טבלה · כותרת טופס פרויקט · אטום InlineTextRow שם · אטום GlowField כתובת · אטום NumberStepper תקציב · אטום DatePills תאריך התחלה · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · כותרת רשומות פרויקט · אטום DataGrid פרויקט · כותרת מעבר-סטטוס · אטום NeonButton קדם סטטוס · באנר ישות פרויקט: 5 שדות · טופס + טבלה מהמדף
-// 🧬 אטומים שנבחרו: CaSubTitle · InlineTextRow · GlowField · NumberStepper · DatePills · AnimatedToggle · FabMenu · CaSubTitle · DataGrid · CaSubTitle · NeonButton · CoinBanner
+// 🧬 בקשה: הירו 🗂️ פרויקט | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail פרויקט: תכנון / הצעה / חוזה / ביצוע / מסירה / נסגר · כותרת טופס פרויקט · אטום InlineTextRow שם · אטום GlowField כתובת · אטום NumberStepper תקציב · אטום DatePills תאריך התחלה · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם להצעה · כותרת רשומות פרויקט · אטום DataGrid פרויקט · באנר ישות פרויקט: 5 שדות · 6-שלבי workflow · מהמדף
+// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · InlineTextRow · GlowField · NumberStepper · DatePills · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · DataGrid · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent1_content.dart';
 import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
 import '../dart-ui-bs/auto/inline_text_row.dart';
+import '../dart-ui-bs/breadcrumb_trail.dart';
 import '../dart-ui-bs/data_grid.dart';
 import '../dart-ui-bs/date_pills.dart';
 import '../dart-ui-bs/fab_menu.dart';
@@ -40,6 +41,7 @@ class _GenAppEnt1ScreenState extends State<GenAppEnt1Screen> {
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12),
           children: [
+          BreadcrumbTrail(labels: const <String>[gen_app_ent1_crumbs_option, gen_app_ent1_crumbs_option2, gen_app_ent1_crumbs_option3, gen_app_ent1_crumbs_option4, gen_app_ent1_crumbs_option5, gen_app_ent1_crumbs_option6], height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_app_ent1_header_text),
           InlineTextRow(label: gen_app_ent1_textfield_label, hint: gen_app_ent1_textfield_hint, value: _t1, onChanged: (v) => setState(() => _t1 = v)),
           GlowField(hint: gen_app_ent1_glowfield_hint, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
@@ -47,10 +49,9 @@ class _GenAppEnt1ScreenState extends State<GenAppEnt1Screen> {
           DatePills(height: 16, days: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           AnimatedToggle(label: gen_app_ent1_toggle_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           FabMenu(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          NeonButton(label: gen_app_ent1_neon_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, onPressed: () => _toast(gen_app_ent1_neon_toast)),
           CaSubTitle(gen_app_ent1_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          CaSubTitle(gen_app_ent1_header_text3),
-          NeonButton(label: gen_app_ent1_neon_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, onPressed: () => _toast(gen_app_ent1_neon_toast)),
           CoinBanner(coins: 0, sub: gen_app_ent1_banner_sub),
           ],
         ),
