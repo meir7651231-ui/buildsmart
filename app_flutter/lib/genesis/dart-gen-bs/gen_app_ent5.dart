@@ -3,7 +3,6 @@ import '../dart-data-bs/auto/gen_app_ent5_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
-import '../dart-maor/advance-status.dart';
 import '../dart-maor/gen-join-code.dart';
 import '../dart/size_system.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +56,6 @@ class _GenAppEnt5ScreenState extends State<GenAppEnt5Screen> {
           DsField(label: gen_app_ent5_c15, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
           DsField(label: gen_app_ent5_c16, hint: '', value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v)),
           DsField(label: gen_app_ent5_c17, hint: '', value: _v[7] ?? '', onChanged: (v) => setState(() => _v[7] = v)),
-          if ((_v[7] ?? '').trim().isNotEmpty) _live(gen_app_ent5_c18, advanceStatus((_v[7] ?? ''))),
         ]),
         DsSection(title: gen_app_ent5_c5, children: [
           AnimatedBuilder(

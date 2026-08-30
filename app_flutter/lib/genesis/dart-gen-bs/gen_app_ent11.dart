@@ -3,7 +3,6 @@ import '../dart-data-bs/auto/gen_app_ent11_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
-import '../dart-maor/advance-status.dart';
 import '../dart-maor/fmt-date.dart';
 import '../dart-maor/task-identity.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +55,6 @@ class _GenAppEnt11ScreenState extends State<GenAppEnt11Screen> {
           DsField(label: gen_app_ent11_c14, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v)),
           DsField(label: gen_app_ent11_c15, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
           DsField(label: gen_app_ent11_c16, hint: '', value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v)),
-          if ((_v[6] ?? '').trim().isNotEmpty) _live(gen_app_ent11_c17, advanceStatus((_v[6] ?? ''))),
         ]),
         DsSection(title: gen_app_ent11_c5, children: [
           AnimatedBuilder(

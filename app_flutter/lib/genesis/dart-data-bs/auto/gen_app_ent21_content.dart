@@ -15,4 +15,3 @@ const String gen_app_ent21_c12 = 'תאריך';
 const String gen_app_ent21_c13 = 'fmtDate';
 const String gen_app_ent21_c14 = 'תוצאה';
 const String gen_app_ent21_c15 = 'סטטוס';
-const String gen_app_ent21_c16 = 'advanceStatus';

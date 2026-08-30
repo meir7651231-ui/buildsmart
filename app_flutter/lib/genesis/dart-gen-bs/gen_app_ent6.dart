@@ -3,9 +3,7 @@ import '../dart-data-bs/auto/gen_app_ent6_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
-import '../dart-maor/advance-status.dart';
 import '../dart-maor/fmt-date.dart';
-import '../dart-maor/room-info-label.dart';
 import 'package:flutter/material.dart';
 
 class GenAppEnt6Screen extends StatefulWidget {
@@ -20,7 +18,7 @@ class _GenAppEnt6ScreenState extends State<GenAppEnt6Screen> {
 
   void _save() {
     if (_v.values.where((x) => x.trim().isNotEmpty).isEmpty) return;
-    appStore.add(gen_app_ent6_c7, <String, String>{gen_app_ent6_c8: _v[0] ?? '', gen_app_ent6_c9: _v[1] ?? '', gen_app_ent6_c10: _v[2] ?? '', gen_app_ent6_c11: _v[3] ?? '', gen_app_ent6_c13: _v[4] ?? '', gen_app_ent6_c15: _v[5] ?? '', gen_app_ent6_c16: _v[6] ?? '', gen_app_ent6_c17: _v[7] ?? '', gen_app_ent6_c18: _v[8] ?? ''});
+    appStore.add(gen_app_ent6_c7, <String, String>{gen_app_ent6_c8: _v[0] ?? '', gen_app_ent6_c9: _v[1] ?? '', gen_app_ent6_c10: _v[2] ?? '', gen_app_ent6_c11: _v[3] ?? '', gen_app_ent6_c13: _v[4] ?? '', gen_app_ent6_c14: _v[5] ?? '', gen_app_ent6_c15: _v[6] ?? '', gen_app_ent6_c16: _v[7] ?? '', gen_app_ent6_c17: _v[8] ?? ''});
     setState(() => _v.clear());
   }
 
@@ -53,12 +51,10 @@ class _GenAppEnt6ScreenState extends State<GenAppEnt6Screen> {
           DsField(label: gen_app_ent6_c11, hint: '', value: _v[3] ?? '', onChanged: (v) => setState(() => _v[3] = v)),
           if ((_v[3] ?? '').trim().isNotEmpty) _live(gen_app_ent6_c12, fmtDate((_v[3] ?? ''))),
           DsField(label: gen_app_ent6_c13, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v)),
-          if ((_v[4] ?? '').trim().isNotEmpty) _live(gen_app_ent6_c14, roomInfoLabel((_v[4] ?? ''))),
-          DsField(label: gen_app_ent6_c15, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
-          DsField(label: gen_app_ent6_c16, hint: '', value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v)),
-          DsField(label: gen_app_ent6_c17, hint: '', value: _v[7] ?? '', onChanged: (v) => setState(() => _v[7] = v)),
-          DsField(label: gen_app_ent6_c18, hint: '', value: _v[8] ?? '', onChanged: (v) => setState(() => _v[8] = v)),
-          if ((_v[8] ?? '').trim().isNotEmpty) _live(gen_app_ent6_c19, advanceStatus((_v[8] ?? ''))),
+          DsField(label: gen_app_ent6_c14, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
+          DsField(label: gen_app_ent6_c15, hint: '', value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v)),
+          DsField(label: gen_app_ent6_c16, hint: '', value: _v[7] ?? '', onChanged: (v) => setState(() => _v[7] = v)),
+          DsField(label: gen_app_ent6_c17, hint: '', value: _v[8] ?? '', onChanged: (v) => setState(() => _v[8] = v)),
         ]),
         DsSection(title: gen_app_ent6_c5, children: [
           AnimatedBuilder(
@@ -68,7 +64,7 @@ class _GenAppEnt6ScreenState extends State<GenAppEnt6Screen> {
               if (rs.isEmpty) return const DsEmpty(label: gen_app_ent6_c6);
               return Column(children: [
                 for (final r in rs)
-                  DsRecordCard(labels: const [gen_app_ent6_c8, gen_app_ent6_c9, gen_app_ent6_c10, gen_app_ent6_c11, gen_app_ent6_c13, gen_app_ent6_c15, gen_app_ent6_c16, gen_app_ent6_c17, gen_app_ent6_c18], values: [r[gen_app_ent6_c8] ?? '', r[gen_app_ent6_c9] ?? '', r[gen_app_ent6_c10] ?? '', r[gen_app_ent6_c11] ?? '', r[gen_app_ent6_c13] ?? '', r[gen_app_ent6_c15] ?? '', r[gen_app_ent6_c16] ?? '', r[gen_app_ent6_c17] ?? '', r[gen_app_ent6_c18] ?? '']),
+                  DsRecordCard(labels: const [gen_app_ent6_c8, gen_app_ent6_c9, gen_app_ent6_c10, gen_app_ent6_c11, gen_app_ent6_c13, gen_app_ent6_c14, gen_app_ent6_c15, gen_app_ent6_c16, gen_app_ent6_c17], values: [r[gen_app_ent6_c8] ?? '', r[gen_app_ent6_c9] ?? '', r[gen_app_ent6_c10] ?? '', r[gen_app_ent6_c11] ?? '', r[gen_app_ent6_c13] ?? '', r[gen_app_ent6_c14] ?? '', r[gen_app_ent6_c15] ?? '', r[gen_app_ent6_c16] ?? '', r[gen_app_ent6_c17] ?? '']),
               ]);
             },
           ),

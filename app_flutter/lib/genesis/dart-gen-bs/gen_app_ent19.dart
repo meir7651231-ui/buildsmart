@@ -3,7 +3,6 @@ import '../dart-data-bs/auto/gen_app_ent19_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
-import '../dart-maor/advance-status.dart';
 import '../dart-maor/fmt-date.dart';
 import 'package:flutter/material.dart';
 
@@ -45,7 +44,7 @@ class _GenAppEnt19ScreenState extends State<GenAppEnt19Screen> {
       icon: gen_app_ent19_c2,
       bottomBar: DsPrimaryButton(label: gen_app_ent19_c3, onTap: _save),
       children: [
-        DsWorkflow(steps: const [gen_app_ent19_c17, gen_app_ent19_c18, gen_app_ent19_c19, gen_app_ent19_c20, gen_app_ent19_c21], current: 2),
+        DsWorkflow(steps: const [gen_app_ent19_c16, gen_app_ent19_c17, gen_app_ent19_c18, gen_app_ent19_c19, gen_app_ent19_c20], current: 2),
         DsSection(title: gen_app_ent19_c4, children: [
           DsField(label: gen_app_ent19_c8, hint: '', value: _v[0] ?? '', onChanged: (v) => setState(() => _v[0] = v)),
           DsField(label: gen_app_ent19_c9, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v)),
@@ -55,7 +54,6 @@ class _GenAppEnt19ScreenState extends State<GenAppEnt19Screen> {
           if ((_v[4] ?? '').trim().isNotEmpty) _live(gen_app_ent19_c13, fmtDate((_v[4] ?? ''))),
           DsField(label: gen_app_ent19_c14, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
           DsField(label: gen_app_ent19_c15, hint: '', value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v)),
-          if ((_v[6] ?? '').trim().isNotEmpty) _live(gen_app_ent19_c16, advanceStatus((_v[6] ?? ''))),
         ]),
         DsSection(title: gen_app_ent19_c5, children: [
           AnimatedBuilder(

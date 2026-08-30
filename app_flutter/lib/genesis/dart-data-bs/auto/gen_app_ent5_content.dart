@@ -17,4 +17,3 @@ const String gen_app_ent5_c14 = 'כמות';
 const String gen_app_ent5_c15 = 'מחיר יחידה';
 const String gen_app_ent5_c16 = 'מחיר מכירה';
 const String gen_app_ent5_c17 = 'סטטוס';
-const String gen_app_ent5_c18 = 'advanceStatus';

@@ -3,7 +3,6 @@ import '../dart-data-bs/auto/gen_app_ent27_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
-import '../dart-maor/advance-status.dart';
 import '../dart-maor/phone-region.dart';
 import 'package:flutter/material.dart';
 
@@ -45,7 +44,7 @@ class _GenAppEnt27ScreenState extends State<GenAppEnt27Screen> {
       icon: gen_app_ent27_c2,
       bottomBar: DsPrimaryButton(label: gen_app_ent27_c3, onTap: _save),
       children: [
-        DsWorkflow(steps: const [gen_app_ent27_c16, gen_app_ent27_c17, gen_app_ent27_c18, gen_app_ent27_c19], current: 2),
+        DsWorkflow(steps: const [gen_app_ent27_c15, gen_app_ent27_c16, gen_app_ent27_c17, gen_app_ent27_c18], current: 2),
         DsSection(title: gen_app_ent27_c4, children: [
           DsField(label: gen_app_ent27_c8, hint: '', value: _v[0] ?? '', onChanged: (v) => setState(() => _v[0] = v)),
           DsField(label: gen_app_ent27_c9, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v)),
@@ -54,7 +53,6 @@ class _GenAppEnt27ScreenState extends State<GenAppEnt27Screen> {
           DsField(label: gen_app_ent27_c12, hint: '', value: _v[3] ?? '', onChanged: (v) => setState(() => _v[3] = v)),
           DsField(label: gen_app_ent27_c13, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v)),
           DsField(label: gen_app_ent27_c14, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
-          if ((_v[5] ?? '').trim().isNotEmpty) _live(gen_app_ent27_c15, advanceStatus((_v[5] ?? ''))),
         ]),
         DsSection(title: gen_app_ent27_c5, children: [
           AnimatedBuilder(

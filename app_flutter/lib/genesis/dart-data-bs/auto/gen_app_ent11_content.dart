@@ -16,4 +16,3 @@ const String gen_app_ent11_c13 = 'taskIdentity';
 const String gen_app_ent11_c14 = 'שעות';
 const String gen_app_ent11_c15 = 'אחוז התקדמות';
 const String gen_app_ent11_c16 = 'סטטוס';
-const String gen_app_ent11_c17 = 'advanceStatus';

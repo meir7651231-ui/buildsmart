@@ -3,7 +3,6 @@ import '../dart-data-bs/auto/gen_app_ent21_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
-import '../dart-maor/advance-status.dart';
 import '../dart-maor/fmt-date.dart';
 import 'package:flutter/material.dart';
 
@@ -54,7 +53,6 @@ class _GenAppEnt21ScreenState extends State<GenAppEnt21Screen> {
           if ((_v[4] ?? '').trim().isNotEmpty) _live(gen_app_ent21_c13, fmtDate((_v[4] ?? ''))),
           DsField(label: gen_app_ent21_c14, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
           DsField(label: gen_app_ent21_c15, hint: '', value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v)),
-          if ((_v[6] ?? '').trim().isNotEmpty) _live(gen_app_ent21_c16, advanceStatus((_v[6] ?? ''))),
         ]),
         DsSection(title: gen_app_ent21_c5, children: [
           AnimatedBuilder(
