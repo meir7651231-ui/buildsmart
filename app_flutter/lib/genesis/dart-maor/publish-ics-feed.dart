@@ -60,11 +60,10 @@ Future<dynamic> publishIcsFeed(
   required ReadToken readToken,
   required MintToken mintToken,
   required WriteFeed writeFeed,
-  NowIso? nowIso,
-}) async {
+  NowIso? nowIso, required Map<String, dynamic> T}) async {
   final now = nowIso ?? () => DateTime.now().toUtc().toIso8601String();
   if (_utf8ByteLength(ics as String) > _maxIcsBytes) {
-    throw StateError('לוח-השנה גדול מדי לפרסום כפיד — פנו לתמיכה');
+    throw StateError((T['k1'] as String));
   }
   final rotate = opts != null && _truthy(opts['rotate']);
   final token = (rotate ? null : await readToken(slug)) ?? mintToken();
