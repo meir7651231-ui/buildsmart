@@ -12,5 +12,7 @@ const String gen_app_ent11_numstep_label = 'שעות';
 const String gen_app_ent11_numstep_label2 = 'אחוז התקדמות';
 const String gen_app_ent11_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent11_header_text2 = 'רשומות דוח יומי';
+const String gen_app_ent11_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent11_stat_label = 'תאריך לתצוגה';
 const String gen_app_ent11_banner_sub = 'ישות דוח יומי';
 const String gen_app_ent11_app_bar_title = '🗂️ דוח יומי';

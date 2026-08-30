@@ -1,18 +1,21 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: 🗂️ משימה
-// 🧬 בקשה: הירו 🗂️ משימה | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail משימה: מתוכננת / מוכנה / בתהליך / בבדיקה / הושלמה · כותרת טופס משימה · אטום FieldRow שם · אטום FieldRow אחראי · אטום FieldRow מיקום · אטום FieldRow תאריך יעד · אטום FieldRow עדיפות · אטום NumberStepper אחוז ביצוע · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם למוכנה · כותרת רשומות משימה · אטום DataGrid משימה · באנר ישות משימה: 7 שדות · 5-שלבי workflow · מהמדף
-// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · FieldRow · FieldRow · FieldRow · FieldRow · FieldRow · NumberStepper · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · DataGrid · CoinBanner
+// 🧬 בקשה: הירו 🗂️ משימה | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail משימה: מתוכננת / מוכנה / בתהליך / בבדיקה / הושלמה · כותרת טופס משימה · אטום FieldRow שם · אטום FieldRow אחראי · אטום FieldRow מיקום · אטום FieldRow תאריך יעד · אטום FieldRow עדיפות · אטום NumberStepper אחוז ביצוע · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם למוכנה · כותרת רשומות משימה · אטום DataGrid משימה · כותרת 🔗 מנוע-חוקים חי · 2 חוקים מהמדף · חישוב אין שקעים שם פרטי (kForType) · חישוב תאריך לתצוגה (fmtDate) · באנר ישות משימה: 7 שדות · 5-שלבי workflow · 2 חוקים חיים · מהמדף
+// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · FieldRow · FieldRow · FieldRow · FieldRow · FieldRow · NumberStepper · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · DataGrid · CaSubTitle · RStat · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent10_content.dart';
+import '../dart-maor/fmt-date.dart';
 import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
+import '../dart-ui-bs/auto/rstat.dart';
 import '../dart-ui-bs/breadcrumb_trail.dart';
 import '../dart-ui-bs/data_grid.dart';
 import '../dart-ui-bs/fab_menu.dart';
 import '../dart-ui-bs/field_row.dart';
 import '../dart-ui-bs/neon_button.dart';
 import '../dart-ui-bs/number_stepper.dart';
+import '../dart/k_for_type.dart';
 import 'package:flutter/material.dart';
 
 class GenAppEnt10Screen extends StatefulWidget {
@@ -56,6 +59,8 @@ class _GenAppEnt10ScreenState extends State<GenAppEnt10Screen> {
           NeonButton(label: gen_app_ent10_neon_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, onPressed: () => _toast(gen_app_ent10_neon_toast)),
           CaSubTitle(gen_app_ent10_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          CaSubTitle(gen_app_ent10_header_text3),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: kForType(null).toString(), label: gen_app_ent10_stat_label), RStat(value: fmtDate(null), label: gen_app_ent10_stat_label2)])),
           CoinBanner(coins: 0, sub: gen_app_ent10_banner_sub),
           ],
         ),

@@ -14,5 +14,7 @@ const String gen_app_ent24_numstep_label = 'שעות';
 const String gen_app_ent24_textfield_label6 = 'אישור'; // t_f21acb6a
 const String gen_app_ent24_textfield_hint6 = '';
 const String gen_app_ent24_header_text2 = 'רשומות נוכחות';
+const String gen_app_ent24_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent24_stat_label = 'תאריך לתצוגה';
 const String gen_app_ent24_banner_sub = 'ישות נוכחות';
 const String gen_app_ent24_app_bar_title = '🗂️ נוכחות';

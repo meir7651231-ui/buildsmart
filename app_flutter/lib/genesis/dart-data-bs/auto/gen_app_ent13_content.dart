@@ -20,5 +20,7 @@ const String gen_app_ent13_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent13_neon_label = 'קדם לנבדק';
 const String gen_app_ent13_neon_toast = 'קדם לנבדק';
 const String gen_app_ent13_header_text2 = 'רשומות קבלן משנה';
+const String gen_app_ent13_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent13_stat_label = 'אין שקעים שם פרטי';
 const String gen_app_ent13_banner_sub = 'ישות קבלן משנה';
 const String gen_app_ent13_app_bar_title = '🗂️ קבלן משנה';

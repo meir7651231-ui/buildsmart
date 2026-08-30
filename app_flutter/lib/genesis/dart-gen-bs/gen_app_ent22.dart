@@ -1,13 +1,16 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: 🗂️ ליקוי
-// 🧬 בקשה: הירו 🗂️ ליקוי | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail ליקוי: נפתח / בטיפול / תוקן / נבדק / נסגר · כותרת טופס ליקוי · אטום NumberStepper מספר · אטום FieldRow מיקום · אטום InlineTextRow תיאור · אטום FieldRow חומרה · אטום FieldRow אחראי · אטום FieldRow תאריך יעד · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם לבטיפול · כותרת רשומות ליקוי · אטום DataGrid ליקוי · באנר ישות ליקוי: 7 שדות · 5-שלבי workflow · מהמדף
-// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · NumberStepper · FieldRow · InlineTextRow · FieldRow · FieldRow · FieldRow · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · DataGrid · CoinBanner
+// 🧬 בקשה: הירו 🗂️ ליקוי | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail ליקוי: נפתח / בטיפול / תוקן / נבדק / נסגר · כותרת טופס ליקוי · אטום NumberStepper מספר · אטום FieldRow מיקום · אטום InlineTextRow תיאור · אטום FieldRow חומרה · אטום FieldRow אחראי · אטום FieldRow תאריך יעד · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם לבטיפול · כותרת רשומות ליקוי · אטום DataGrid ליקוי · כותרת 🔗 מנוע-חוקים חי · 2 חוקים מהמדף · חישוב מספר סידורי של (excelSerialToIso) · חישוב תאריך לתצוגה (fmtDate) · באנר ישות ליקוי: 7 שדות · 5-שלבי workflow · 2 חוקים חיים · מהמדף
+// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · NumberStepper · FieldRow · InlineTextRow · FieldRow · FieldRow · FieldRow · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · DataGrid · CaSubTitle · RStat · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent22_content.dart';
+import '../dart-maor/excel-serial-to-iso.dart';
+import '../dart-maor/fmt-date.dart';
 import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
 import '../dart-ui-bs/auto/inline_text_row.dart';
+import '../dart-ui-bs/auto/rstat.dart';
 import '../dart-ui-bs/breadcrumb_trail.dart';
 import '../dart-ui-bs/data_grid.dart';
 import '../dart-ui-bs/fab_menu.dart';
@@ -57,6 +60,8 @@ class _GenAppEnt22ScreenState extends State<GenAppEnt22Screen> {
           NeonButton(label: gen_app_ent22_neon_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, onPressed: () => _toast(gen_app_ent22_neon_toast)),
           CaSubTitle(gen_app_ent22_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          CaSubTitle(gen_app_ent22_header_text3),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: excelSerialToIso(null), label: gen_app_ent22_stat_label), RStat(value: fmtDate(null), label: gen_app_ent22_stat_label2)])),
           CoinBanner(coins: 0, sub: gen_app_ent22_banner_sub),
           ],
         ),

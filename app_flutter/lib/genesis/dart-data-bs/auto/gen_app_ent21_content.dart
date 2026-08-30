@@ -14,5 +14,7 @@ const String gen_app_ent21_textfield_label6 = 'תוצאה';
 const String gen_app_ent21_textfield_hint6 = '';
 const String gen_app_ent21_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent21_header_text2 = 'רשומות בדיקת איכות';
+const String gen_app_ent21_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent21_stat_label = 'תאריך לתצוגה';
 const String gen_app_ent21_banner_sub = 'ישות בדיקת איכות';
 const String gen_app_ent21_app_bar_title = '🗂️ בדיקת איכות';

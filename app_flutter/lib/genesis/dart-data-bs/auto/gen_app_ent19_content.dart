@@ -21,5 +21,7 @@ const String gen_app_ent19_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent19_neon_label = 'קדם לבבדיקה';
 const String gen_app_ent19_neon_toast = 'קדם לבבדיקה';
 const String gen_app_ent19_header_text2 = 'רשומות שדה';
+const String gen_app_ent19_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent19_stat_label = 'תאריך לתצוגה';
 const String gen_app_ent19_banner_sub = 'ישות שדה';
 const String gen_app_ent19_app_bar_title = '🗂️ שדה';

@@ -1,16 +1,19 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: 🗂️ ציוד
-// 🧬 בקשה: הירו 🗂️ ציוד | ישות מורכבת — טופס + טבלה · כותרת טופס ציוד · אטום FieldRow שם · אטום FieldRow סוג · אטום NumberStepper מספר סידורי · אטום FieldRow מיקום · אטום FieldRow תוקף בדיקה · אטום NumberStepper שעות שימוש · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · כותרת רשומות ציוד · אטום DataGrid ציוד · באנר ישות ציוד: 7 שדות · מהמדף
-// 🧬 אטומים שנבחרו: CaSubTitle · FieldRow · FieldRow · NumberStepper · FieldRow · FieldRow · NumberStepper · AnimatedToggle · FabMenu · CaSubTitle · DataGrid · CoinBanner
+// 🧬 בקשה: הירו 🗂️ ציוד | ישות מורכבת — טופס + טבלה · כותרת טופס ציוד · אטום FieldRow שם · אטום FieldRow סוג · אטום NumberStepper מספר סידורי · אטום FieldRow מיקום · אטום FieldRow תוקף בדיקה · אטום NumberStepper שעות שימוש · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · כותרת רשומות ציוד · אטום DataGrid ציוד · כותרת 🔗 מנוע-חוקים חי · 2 חוקים מהמדף · חישוב אין שקעים שם פרטי (kForType) · חישוב מספר סידורי של (excelSerialToIso) · באנר ישות ציוד: 7 שדות · 2 חוקים חיים · מהמדף
+// 🧬 אטומים שנבחרו: CaSubTitle · FieldRow · FieldRow · NumberStepper · FieldRow · FieldRow · NumberStepper · AnimatedToggle · FabMenu · CaSubTitle · DataGrid · CaSubTitle · RStat · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent16_content.dart';
+import '../dart-maor/excel-serial-to-iso.dart';
 import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
+import '../dart-ui-bs/auto/rstat.dart';
 import '../dart-ui-bs/data_grid.dart';
 import '../dart-ui-bs/fab_menu.dart';
 import '../dart-ui-bs/field_row.dart';
 import '../dart-ui-bs/number_stepper.dart';
+import '../dart/k_for_type.dart';
 import 'package:flutter/material.dart';
 
 class GenAppEnt16Screen extends StatefulWidget {
@@ -51,6 +54,8 @@ class _GenAppEnt16ScreenState extends State<GenAppEnt16Screen> {
           FabMenu(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_app_ent16_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          CaSubTitle(gen_app_ent16_header_text3),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: kForType(null).toString(), label: gen_app_ent16_stat_label), RStat(value: excelSerialToIso(null), label: gen_app_ent16_stat_label2)])),
           CoinBanner(coins: 0, sub: gen_app_ent16_banner_sub),
           ],
         ),

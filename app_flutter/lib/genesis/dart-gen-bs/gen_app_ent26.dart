@@ -1,12 +1,14 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: 🗂️ מסירה
-// 🧬 בקשה: הירו 🗂️ מסירה | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail מסירה: בדיקות / ליקויים / תיקונים / חתימה / הושלם · כותרת טופס מסירה · אטום FieldRow פרויקט · אטום FieldRow לקוח · אטום FieldRow תאריך · אטום FieldRow חשבון סופי · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם לליקויים · כותרת רשומות מסירה · אטום DataGrid מסירה · באנר ישות מסירה: 5 שדות · 5-שלבי workflow · מהמדף
-// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · FieldRow · FieldRow · FieldRow · FieldRow · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · DataGrid · CoinBanner
+// 🧬 בקשה: הירו 🗂️ מסירה | ישות מורכבת — טופס + טבלה · אטום BreadcrumbTrail מסירה: בדיקות / ליקויים / תיקונים / חתימה / הושלם · כותרת טופס מסירה · אטום FieldRow פרויקט · אטום FieldRow לקוח · אטום FieldRow תאריך · אטום FieldRow חשבון סופי · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · אטום NeonButton קדם לליקויים · כותרת רשומות מסירה · אטום DataGrid מסירה · כותרת 🔗 מנוע-חוקים חי · 1 חוקים מהמדף · חישוב תאריך לתצוגה (fmtDate) · באנר ישות מסירה: 5 שדות · 5-שלבי workflow · 1 חוקים חיים · מהמדף
+// 🧬 אטומים שנבחרו: BreadcrumbTrail · CaSubTitle · FieldRow · FieldRow · FieldRow · FieldRow · AnimatedToggle · FabMenu · NeonButton · CaSubTitle · DataGrid · CaSubTitle · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent26_content.dart';
+import '../dart-maor/fmt-date.dart';
 import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
+import '../dart-ui-bs/auto/rstat.dart';
 import '../dart-ui-bs/breadcrumb_trail.dart';
 import '../dart-ui-bs/data_grid.dart';
 import '../dart-ui-bs/fab_menu.dart';
@@ -52,6 +54,8 @@ class _GenAppEnt26ScreenState extends State<GenAppEnt26Screen> {
           NeonButton(label: gen_app_ent26_neon_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, onPressed: () => _toast(gen_app_ent26_neon_toast)),
           CaSubTitle(gen_app_ent26_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          CaSubTitle(gen_app_ent26_header_text3),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: fmtDate(null), label: gen_app_ent26_stat_label)])),
           CoinBanner(coins: 0, sub: gen_app_ent26_banner_sub),
           ],
         ),

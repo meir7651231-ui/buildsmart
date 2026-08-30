@@ -17,5 +17,7 @@ const String gen_app_ent26_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent26_neon_label = 'קדם לליקויים';
 const String gen_app_ent26_neon_toast = 'קדם לליקויים';
 const String gen_app_ent26_header_text2 = 'רשומות מסירה';
+const String gen_app_ent26_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent26_stat_label = 'תאריך לתצוגה';
 const String gen_app_ent26_banner_sub = 'ישות מסירה';
 const String gen_app_ent26_app_bar_title = '🗂️ מסירה';

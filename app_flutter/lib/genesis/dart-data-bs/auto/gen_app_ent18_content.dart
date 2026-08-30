@@ -22,5 +22,7 @@ const String gen_app_ent18_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent18_neon_label = 'קדם לנשלח';
 const String gen_app_ent18_neon_toast = 'קדם לנשלח';
 const String gen_app_ent18_header_text2 = 'רשומות שדה';
+const String gen_app_ent18_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent18_stat_label = 'מספר סידורי של';
 const String gen_app_ent18_banner_sub = 'ישות שדה';
 const String gen_app_ent18_app_bar_title = '🗂️ שדה';

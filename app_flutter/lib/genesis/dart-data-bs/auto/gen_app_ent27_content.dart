@@ -18,5 +18,7 @@ const String gen_app_ent27_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent27_neon_label = 'קדם לאושר';
 const String gen_app_ent27_neon_toast = 'קדם לאושר';
 const String gen_app_ent27_header_text2 = 'רשומות אחריות';
+const String gen_app_ent27_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent27_stat_label = 'סיווג אזור של מספר';
 const String gen_app_ent27_banner_sub = 'ישות אחריות';
 const String gen_app_ent27_app_bar_title = '🗂️ אחריות';

@@ -19,5 +19,7 @@ const String gen_app_ent29_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent29_neon_label = 'קדם לאושר מנהל';
 const String gen_app_ent29_neon_toast = 'קדם לאושר מנהל';
 const String gen_app_ent29_header_text2 = 'רשומות חשבון חלקי';
+const String gen_app_ent29_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent29_stat_label = 'אין שקעים שם פרטי';
 const String gen_app_ent29_banner_sub = 'ישות חשבון חלקי';
 const String gen_app_ent29_app_bar_title = '🗂️ חשבון חלקי';

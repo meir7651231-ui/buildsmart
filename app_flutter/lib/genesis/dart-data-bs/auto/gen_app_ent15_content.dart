@@ -14,5 +14,7 @@ const String gen_app_ent15_textfield_hint5 = '';
 const String gen_app_ent15_textfield_label6 = 'נקודת הזמנה';
 const String gen_app_ent15_textfield_hint6 = '';
 const String gen_app_ent15_header_text2 = 'רשומות חומר';
+const String gen_app_ent15_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent15_stat_label = 'אין שקעים שם פרטי';
 const String gen_app_ent15_banner_sub = 'ישות חומר';
 const String gen_app_ent15_app_bar_title = '🗂️ חומר';

@@ -1,11 +1,13 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: 🗂️ נוכחות
-// 🧬 בקשה: הירו 🗂️ נוכחות | ישות מורכבת — טופס + טבלה · כותרת טופס נוכחות · אטום FieldRow עובד · אטום FieldRow פרויקט · אטום FieldRow תאריך · אטום FieldRow כניסה · אטום FieldRow יציאה · אטום NumberStepper שעות · אטום FieldRow אישור · אטום FabMenu שמירה · כותרת רשומות נוכחות · אטום DataGrid נוכחות · באנר ישות נוכחות: 7 שדות · מהמדף
-// 🧬 אטומים שנבחרו: CaSubTitle · FieldRow · FieldRow · FieldRow · FieldRow · FieldRow · NumberStepper · FieldRow · FabMenu · CaSubTitle · DataGrid · CoinBanner
+// 🧬 בקשה: הירו 🗂️ נוכחות | ישות מורכבת — טופס + טבלה · כותרת טופס נוכחות · אטום FieldRow עובד · אטום FieldRow פרויקט · אטום FieldRow תאריך · אטום FieldRow כניסה · אטום FieldRow יציאה · אטום NumberStepper שעות · אטום FieldRow אישור · אטום FabMenu שמירה · כותרת רשומות נוכחות · אטום DataGrid נוכחות · כותרת 🔗 מנוע-חוקים חי · 1 חוקים מהמדף · חישוב תאריך לתצוגה (fmtDate) · באנר ישות נוכחות: 7 שדות · 1 חוקים חיים · מהמדף
+// 🧬 אטומים שנבחרו: CaSubTitle · FieldRow · FieldRow · FieldRow · FieldRow · FieldRow · NumberStepper · FieldRow · FabMenu · CaSubTitle · DataGrid · CaSubTitle · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent24_content.dart';
+import '../dart-maor/fmt-date.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
+import '../dart-ui-bs/auto/rstat.dart';
 import '../dart-ui-bs/data_grid.dart';
 import '../dart-ui-bs/fab_menu.dart';
 import '../dart-ui-bs/field_row.dart';
@@ -52,6 +54,8 @@ class _GenAppEnt24ScreenState extends State<GenAppEnt24Screen> {
           FabMenu(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_app_ent24_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          CaSubTitle(gen_app_ent24_header_text3),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: fmtDate(null), label: gen_app_ent24_stat_label)])),
           CoinBanner(coins: 0, sub: gen_app_ent24_banner_sub),
           ],
         ),

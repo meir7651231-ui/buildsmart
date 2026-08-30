@@ -19,5 +19,7 @@ const String gen_app_ent7_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent7_neon_label = 'קדם לנשלחה';
 const String gen_app_ent7_neon_toast = 'קדם לנשלחה';
 const String gen_app_ent7_header_text2 = 'רשומות הצעה';
+const String gen_app_ent7_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent7_stat_label = 'מספר סידורי של';
 const String gen_app_ent7_banner_sub = 'ישות הצעה';
 const String gen_app_ent7_app_bar_title = '🗂️ הצעה';

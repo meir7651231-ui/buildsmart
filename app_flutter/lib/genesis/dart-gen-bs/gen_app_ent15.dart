@@ -1,15 +1,17 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: 🗂️ חומר
-// 🧬 בקשה: הירו 🗂️ חומר | ישות מורכבת — טופס + טבלה · כותרת טופס חומר · אטום FieldRow קוד · אטום FieldRow שם · אטום FieldRow קטגוריה · אטום FieldRow יחידת מידה · אטום NumberStepper מחיר · אטום FieldRow מינימום · אטום FieldRow נקודת הזמנה · אטום FabMenu שמירה · כותרת רשומות חומר · אטום DataGrid חומר · באנר ישות חומר: 7 שדות · מהמדף
-// 🧬 אטומים שנבחרו: CaSubTitle · FieldRow · FieldRow · FieldRow · FieldRow · NumberStepper · FieldRow · FieldRow · FabMenu · CaSubTitle · DataGrid · CoinBanner
+// 🧬 בקשה: הירו 🗂️ חומר | ישות מורכבת — טופס + טבלה · כותרת טופס חומר · אטום FieldRow קוד · אטום FieldRow שם · אטום FieldRow קטגוריה · אטום FieldRow יחידת מידה · אטום NumberStepper מחיר · אטום FieldRow מינימום · אטום FieldRow נקודת הזמנה · אטום FabMenu שמירה · כותרת רשומות חומר · אטום DataGrid חומר · כותרת 🔗 מנוע-חוקים חי · 1 חוקים מהמדף · חישוב אין שקעים שם פרטי (kForType) · באנר ישות חומר: 7 שדות · 1 חוקים חיים · מהמדף
+// 🧬 אטומים שנבחרו: CaSubTitle · FieldRow · FieldRow · FieldRow · FieldRow · NumberStepper · FieldRow · FieldRow · FabMenu · CaSubTitle · DataGrid · CaSubTitle · RStat · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent15_content.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
+import '../dart-ui-bs/auto/rstat.dart';
 import '../dart-ui-bs/data_grid.dart';
 import '../dart-ui-bs/fab_menu.dart';
 import '../dart-ui-bs/field_row.dart';
 import '../dart-ui-bs/number_stepper.dart';
+import '../dart/k_for_type.dart';
 import 'package:flutter/material.dart';
 
 class GenAppEnt15Screen extends StatefulWidget {
@@ -52,6 +54,8 @@ class _GenAppEnt15ScreenState extends State<GenAppEnt15Screen> {
           FabMenu(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_app_ent15_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          CaSubTitle(gen_app_ent15_header_text3),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: kForType(null).toString(), label: gen_app_ent15_stat_label)])),
           CoinBanner(coins: 0, sub: gen_app_ent15_banner_sub),
           ],
         ),

@@ -19,5 +19,7 @@ const String gen_app_ent20_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent20_neon_label = 'קדם לתומחר';
 const String gen_app_ent20_neon_toast = 'קדם לתומחר';
 const String gen_app_ent20_header_text2 = 'רשומות שינוי עבודה';
+const String gen_app_ent20_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent20_stat_label = 'מספר סידורי של';
 const String gen_app_ent20_banner_sub = 'ישות שינוי עבודה';
 const String gen_app_ent20_app_bar_title = '🗂️ שינוי עבודה';

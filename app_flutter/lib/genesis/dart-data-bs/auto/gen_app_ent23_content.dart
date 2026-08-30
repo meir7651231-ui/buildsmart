@@ -21,5 +21,7 @@ const String gen_app_ent23_toggle_label = 'סטטוס'; // t_c184d0ed
 const String gen_app_ent23_neon_label = 'קדם לנחסם';
 const String gen_app_ent23_neon_toast = 'קדם לנחסם';
 const String gen_app_ent23_header_text2 = 'רשומות אירוע בטיחות';
+const String gen_app_ent23_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
+const String gen_app_ent23_stat_label = 'תאריך לתצוגה';
 const String gen_app_ent23_banner_sub = 'ישות אירוע בטיחות';
 const String gen_app_ent23_app_bar_title = '🗂️ אירוע בטיחות';
