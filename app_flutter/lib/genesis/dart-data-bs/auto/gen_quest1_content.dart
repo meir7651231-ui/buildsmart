@@ -11,7 +11,6 @@ const String gen_quest1_chip_option3 = 'delivered';
 const String gen_quest1_header_text2 = 'תחנת ההזנה - כל הקלדה מפעילה שרשרת מנועים';
 const String gen_quest1_stat_label2 = 'סיווג אזור של מספר טלפון';
 const String gen_quest1_stat_label3 = 'תקינות של ארגון';
-const String gen_quest1_stat_label4 = 'מפתח פיצול של תרומה מסלול';
 const String gen_quest1_textfield_label = 'הקלידו ערך עבור סיווג אזור של מספר טלפון';
 const String gen_quest1_textfield_hint = 'הקלידו ערך עבור סיווג אזור של מספר טלפון';
 const String gen_quest1_card_glyph2 = '🔹';

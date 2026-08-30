@@ -1,21 +1,90 @@
-// אטום-דאטה · heb-cal-data — קבועי הלוח העברי-לועזי ושמותיו. כל המשמעות גרה כאן.
-// תאום נאמן ל-new/atoms/heb-cal-data.mjs (חוק-4). המנגנונים עיוורים; הקופסה מצמידה.
-const int hebCalAnchor = -1373427;
-const int hebCalApproxA = 98496, hebCalApproxB = 35975351;
-const int hebCalLeapA = 7, hebCalLeapB = 1, hebCalLeapM = 19, hebCalLeapT = 7;
-const int hebCalMonthsA = 235, hebCalMonthsB = 234, hebCalMonthsC = 19;
-const int hebCalCarryBase = 29, hebCalCarryP0 = 12084, hebCalCarryQ = 13753, hebCalCarryParts = 25920;
-const int hebCalPostM = 3, hebCalPostK = 7, hebCalPostT = 3;
-const int hebCalSpanHi = 356, hebCalSpanLo = 382;
-const List<int> hebCalLongMid = [355, 385];
-const List<int> hebCalShortMid = [353, 383];
-const List<int> hebCalShortMonths = [2, 4, 6, 10, 13];
-const int hebCalFlexLong = 8, hebCalFlexShort = 9, hebCalLeapFlex = 12;
-const int hebCalMonthsInLeap = 13, hebCalMonthsInPlain = 12;
-const int hebCalShortLen = 29, hebCalLongLen = 30;
-const int hebCalNisan = 1, hebCalTishrei = 7;
-const List<String> hebCalNames = ['ניסן', 'אייר', 'סיוון', 'תמוז', 'אב', 'אלול', 'תשרי', 'חשוון', 'כסלו', 'טבת', 'שבט', 'אדר', 'אדר ב׳'];
-const String hebCalLeapName12 = 'אדר א׳';
-const int hebCalGregYearDays = 365, hebCalGregC4 = 4, hebCalGregC100 = 100, hebCalGregC400 = 400;
-const int hebCalGregMA = 367, hebCalGregMB = 362, hebCalGregMC = 12;
-const int hebCalGregLeapAdj = -1, hebCalGregPlainAdj = -2;
+// אטום-דאטה · heb-cal-data — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
+// המקור: new/atoms/heb-cal-data.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+const Map<String, Object> HEB_CAL = {
+  'anchor': -1373427,
+  'hebYearOffset': 3761,
+  'scanWindowDays': 440,
+  'approx': {
+    'a': 98496,
+    'b': 35975351,
+  },
+  'leap': {
+    'a': 7,
+    'b': 1,
+    'm': 19,
+    't': 7,
+  },
+  'months': {
+    'a': 235,
+    'b': 234,
+    'c': 19,
+  },
+  'carry': {
+    'base': 29,
+    'p0': 12084,
+    'q': 13753,
+    'parts': 25920,
+  },
+  'postpone': {
+    'm': 3,
+    'k': 7,
+    't': 3,
+  },
+  'span': {
+    'hi': 356,
+    'lo': 382,
+  },
+  'yearLens': {
+    'longMid': [
+      355,
+      385,
+    ],
+    'shortMid': [
+      353,
+      383,
+    ],
+  },
+  'shortMonths': [
+    2,
+    4,
+    6,
+    10,
+    13,
+  ],
+  'flexLong': 8,
+  'flexShort': 9,
+  'leapFlex': 12,
+  'monthsInLeap': 13,
+  'monthsInPlain': 12,
+  'shortLen': 29,
+  'longLen': 30,
+  'nisan': 1,
+  'tishrei': 7,
+  'names': [
+    'ניסן',
+    'אייר',
+    'סיוון',
+    'תמוז',
+    'אב',
+    'אלול',
+    'תשרי',
+    'חשוון',
+    'כסלו',
+    'טבת',
+    'שבט',
+    'אדר',
+    'אדר ב׳',
+  ],
+  'leapName12': 'אדר א׳',
+  'greg': {
+    'yearDays': 365,
+    'c4': 4,
+    'c100': 100,
+    'c400': 400,
+    'mA': 367,
+    'mB': 362,
+    'mC': 12,
+    'leapAdj': -1,
+    'plainAdj': -2,
+  },
+};

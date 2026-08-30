@@ -1,0 +1,14 @@
+// אטום-דאטה · pull-sola-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
+// המקור: new/atoms/pull-sola-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+const Map<String, String> PULL_SOLA_T = {
+  'k1': 'כתובת-משיכה לא-תקינה (חייבת https)',
+  'k2': 'נדרשת התחברות-ענן',
+  'k3': 'root',
+  'k4': 'org',
+  'k5': 'default',
+  'k6': 'vault',
+  'k7': 'reset',
+  'k8': 'POST',
+  'k9': 'Bearer ',
+  'k10': 'משיכה נכשלה (',
+};

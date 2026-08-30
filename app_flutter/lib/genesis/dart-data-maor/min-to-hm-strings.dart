@@ -1,0 +1,5 @@
+// אטום-דאטה · min-to-hm-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
+// המקור: new/atoms/min-to-hm-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+const Map<String, int> MIN_TO_HM_T = {
+  'k1': 60,
+};

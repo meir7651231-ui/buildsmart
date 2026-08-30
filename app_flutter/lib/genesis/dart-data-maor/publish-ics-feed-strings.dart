@@ -1,0 +1,6 @@
+// אטום-דאטה · publish-ics-feed-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
+// המקור: new/atoms/publish-ics-feed-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+const Map<String, Object> PUBLISH_ICS_FEED_T = {
+  'k1': 'לוח-השנה גדול מדי לפרסום כפיד — פנו לתמיכה',
+  'tbl1': 900000,
+};

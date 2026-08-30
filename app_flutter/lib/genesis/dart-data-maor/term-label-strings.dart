@@ -1,0 +1,6 @@
+// אטום-דאטה · term-label-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
+// המקור: new/atoms/term-label-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+const Map<String, String> TERM_LABEL_T = {
+  'k1': 'months',
+  'k2': ' חודשים',
+};

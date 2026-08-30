@@ -1,0 +1,9 @@
+// אטום-דאטה · room-info-label-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
+// המקור: new/atoms/room-info-label-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+const Map<String, String> ROOM_INFO_LABEL_T = {
+  'k1': 'משבצות של ',
+  'k2': ' דק׳',
+  'k3': ' · עד ',
+  'k4': ' משתתפים',
+  'k5': ' · נגיש',
+};

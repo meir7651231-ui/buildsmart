@@ -1,0 +1,7 @@
+// אטום-דאטה · explain-one-strings — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
+// המקור: new/atoms/explain-one-strings.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+const Map<String, Object> EXPLAIN_ONE_T = {
+  'k1': '⚠️ תצורה לא-תקינה: ',
+  'k2': 'invalid',
+  'k3': 400,
+};

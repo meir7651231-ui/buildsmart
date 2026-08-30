@@ -1,0 +1,3 @@
+// אטום-דאטה · preview-telephony-data — תאום-Dart שנפלט אוטומטית מהמקור-הקדוש (מנוע-ההמרה-מחדש · הכרעה 19).
+// המקור: new/atoms/preview-telephony-data.mjs — אל תערוך ידנית; שינוי = במקור + פליטה-מחדש.
+const String caller = '050-1234567';
