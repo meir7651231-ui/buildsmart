@@ -1,0 +1,23 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent20_crumbs_option = 'בקשה';
+const String gen_app_ent20_crumbs_option2 = 'תומחר';
+const String gen_app_ent20_crumbs_option3 = 'אושר פנימי';
+const String gen_app_ent20_crumbs_option4 = 'אושר לקוח';
+const String gen_app_ent20_crumbs_option5 = 'בוצע'; // t_fcecc670
+const String gen_app_ent20_header_text = 'טופס שינוי עבודה';
+const String gen_app_ent20_numstep_label = 'מספר'; // t_c19510f4
+const String gen_app_ent20_textfield_label = 'פרויקט'; // t_5a15099c
+const String gen_app_ent20_textfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent20_glowfield_hint = 'סיבה'; // t_254e3506
+const String gen_app_ent20_textfield_label2 = 'השפעה על זמן';
+const String gen_app_ent20_textfield_hint2 = 'השפעה על זמן';
+const String gen_app_ent20_textfield_label3 = 'מאשר';
+const String gen_app_ent20_textfield_hint3 = 'מאשר';
+const String gen_app_ent20_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent20_neon_label = 'קדם לתומחר';
+const String gen_app_ent20_neon_toast = 'קדם לתומחר';
+const String gen_app_ent20_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent20_stat_label = 'מספר סידורי של';
+const String gen_app_ent20_header_text3 = 'רשומות שינוי עבודה';
+const String gen_app_ent20_banner_sub = 'ישות שינוי עבודה';
+const String gen_app_ent20_app_bar_title = 'הירו 🗂️ שינוי עבודה | ישות מורכבת — טופס + טבלה';

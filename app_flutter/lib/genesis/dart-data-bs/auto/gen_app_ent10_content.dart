@@ -1,0 +1,24 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent10_crumbs_option = 'מתוכננת';
+const String gen_app_ent10_crumbs_option2 = 'מוכנה';
+const String gen_app_ent10_crumbs_option3 = 'בתהליך'; // t_dd2254e7
+const String gen_app_ent10_crumbs_option4 = 'בבדיקה';
+const String gen_app_ent10_crumbs_option5 = 'הושלמה';
+const String gen_app_ent10_header_text = 'טופס משימה';
+const String gen_app_ent10_textfield_label = 'שם'; // t_8b1aa6b1
+const String gen_app_ent10_textfield_hint = 'שם'; // t_8b1aa6b1
+const String gen_app_ent10_glowfield_hint = 'אחראי';
+const String gen_app_ent10_textfield_label2 = 'מיקום'; // t_26d0e7de
+const String gen_app_ent10_textfield_hint2 = 'מיקום'; // t_26d0e7de
+const String gen_app_ent10_textfield_label3 = 'עדיפות';
+const String gen_app_ent10_textfield_hint3 = 'עדיפות';
+const String gen_app_ent10_numstep_label = 'אחוז ביצוע';
+const String gen_app_ent10_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent10_neon_label = 'קדם למוכנה';
+const String gen_app_ent10_neon_toast = 'קדם למוכנה';
+const String gen_app_ent10_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent10_stat_label = 'אין שקעים שם פרטי';
+const String gen_app_ent10_stat_label2 = 'תאריך לתצוגה';
+const String gen_app_ent10_header_text3 = 'רשומות משימה';
+const String gen_app_ent10_banner_sub = 'ישות משימה';
+const String gen_app_ent10_app_bar_title = 'הירו 🗂️ משימה | ישות מורכבת — טופס + טבלה';

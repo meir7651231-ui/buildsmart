@@ -1,0 +1,22 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent28_crumbs_option = 'טיוטה'; // t_25fd43cd
+const String gen_app_ent28_crumbs_option2 = 'הופקה';
+const String gen_app_ent28_crumbs_option3 = 'נשלחה';
+const String gen_app_ent28_crumbs_option4 = 'שולמה';
+const String gen_app_ent28_header_text = 'טופס חשבונית';
+const String gen_app_ent28_numstep_label = 'מספר'; // t_c19510f4
+const String gen_app_ent28_textfield_label = 'לקוח'; // t_9c2118be
+const String gen_app_ent28_textfield_hint = 'לקוח'; // t_9c2118be
+const String gen_app_ent28_glowfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent28_textfield_label2 = 'מס';
+const String gen_app_ent28_textfield_hint2 = 'מס';
+const String gen_app_ent28_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent28_neon_label = 'קדם להופקה';
+const String gen_app_ent28_neon_toast = 'קדם להופקה';
+const String gen_app_ent28_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent28_stat_label = 'מספר סידורי של';
+const String gen_app_ent28_stat_label2 = 'עיטוף סכום שקלים לתצוגה';
+const String gen_app_ent28_stat_label3 = 'תאריך לתצוגה';
+const String gen_app_ent28_header_text3 = 'רשומות חשבונית';
+const String gen_app_ent28_banner_sub = 'ישות חשבונית';
+const String gen_app_ent28_app_bar_title = 'הירו 🗂️ חשבונית | ישות מורכבת — טופס + טבלה';

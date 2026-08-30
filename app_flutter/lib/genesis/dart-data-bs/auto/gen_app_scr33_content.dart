@@ -1,0 +1,25 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_scr33_other_ic = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_other_title = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_other_sub = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_label = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_other_label = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_other_label2 = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_other_toast = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_card_glyph = '🔹';
+const String gen_app_scr33_card_title = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_card_preview = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_card_fav_add_label = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_card_fav_remove_label = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_card_toast = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_card_toast2 = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_ic = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_title = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_sub = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_toast = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_label2 = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_label22 = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_ic2 = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_row_name = 'דשבורד כספים עם הכנסות';
+const String gen_app_scr33_banner_sub = 'המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות';
+const String gen_app_scr33_app_bar_title = 'הירו 🎯 דשבורד כספים עם הכנסות | נבנה מתיאור חופשי';

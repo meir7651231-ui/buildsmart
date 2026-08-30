@@ -1,0 +1,23 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent17_crumbs_option = 'טיוטה'; // t_25fd43cd
+const String gen_app_ent17_crumbs_option2 = 'נבדק';
+const String gen_app_ent17_crumbs_option3 = 'אושר'; // t_db4a9245
+const String gen_app_ent17_header_text = 'טופס מסמך';
+const String gen_app_ent17_textfield_label = 'פרויקט'; // t_5a15099c
+const String gen_app_ent17_textfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent17_glowfield_hint = 'סוג'; // t_f45000d5
+const String gen_app_ent17_textfield_label2 = 'שם'; // t_8b1aa6b1
+const String gen_app_ent17_textfield_hint2 = 'שם'; // t_8b1aa6b1
+const String gen_app_ent17_textfield_label3 = 'גרסה';
+const String gen_app_ent17_textfield_hint3 = 'גרסה';
+const String gen_app_ent17_textfield_label4 = 'מאשר';
+const String gen_app_ent17_textfield_hint4 = 'מאשר';
+const String gen_app_ent17_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent17_neon_label = 'קדם לנבדק';
+const String gen_app_ent17_neon_toast = 'קדם לנבדק';
+const String gen_app_ent17_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent17_stat_label = 'אין שקעים שם פרטי';
+const String gen_app_ent17_stat_label2 = 'תאריך לתצוגה';
+const String gen_app_ent17_header_text3 = 'רשומות מסמך';
+const String gen_app_ent17_banner_sub = 'ישות מסמך';
+const String gen_app_ent17_app_bar_title = 'הירו 🗂️ מסמך | ישות מורכבת — טופס + טבלה';

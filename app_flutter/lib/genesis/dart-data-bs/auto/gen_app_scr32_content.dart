@@ -1,0 +1,25 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_scr32_other_label = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_other_toast = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_card_glyph = '🔹';
+const String gen_app_scr32_card_message = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_stat_label = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_other_label2 = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_other_label22 = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_other_label3 = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_other_label4 = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_card_label = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_card_label2 = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_card_label3 = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_card_label4 = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_card_label5 = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_header_title = 'דשבורד מנהל אתר עם משימות היום';
+const String gen_app_scr32_card_glyph2 = '🔹';
+const String gen_app_scr32_card_title = 'עובדים באתר';
+const String gen_app_scr32_card_sub = 'עובדים באתר';
+const String gen_app_scr32_card_toast = 'עובדים באתר';
+const String gen_app_scr32_other_text = 'חומרים';
+const String gen_app_scr32_header_text = 'דשבורד מנהל אתר עם משימות היום · לוגיקה חיה';
+const String gen_app_scr32_stat_label2 = 'כרעת מנהל';
+const String gen_app_scr32_banner_sub = 'המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות';
+const String gen_app_scr32_app_bar_title = 'הירו 🎯 דשבורד מנהל אתר עם משימות היום | נבנה מתיאור חופשי';

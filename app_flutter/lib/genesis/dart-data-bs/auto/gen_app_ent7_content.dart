@@ -1,0 +1,21 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent7_crumbs_option = 'טיוטה'; // t_25fd43cd
+const String gen_app_ent7_crumbs_option2 = 'נשלחה';
+const String gen_app_ent7_crumbs_option3 = 'במשא ומתן';
+const String gen_app_ent7_crumbs_option4 = 'אושרה'; // t_1cb3f6a3
+const String gen_app_ent7_crumbs_option5 = 'נדחתה'; // t_9e6fa499
+const String gen_app_ent7_header_text = 'טופס הצעה';
+const String gen_app_ent7_numstep_label = 'מספר'; // t_c19510f4
+const String gen_app_ent7_textfield_label = 'לקוח'; // t_9c2118be
+const String gen_app_ent7_textfield_hint = 'לקוח'; // t_9c2118be
+const String gen_app_ent7_glowfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent7_textfield_label2 = 'מס';
+const String gen_app_ent7_textfield_hint2 = 'מס';
+const String gen_app_ent7_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent7_neon_label = 'קדם לנשלחה';
+const String gen_app_ent7_neon_toast = 'קדם לנשלחה';
+const String gen_app_ent7_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent7_stat_label = 'מספר סידורי של';
+const String gen_app_ent7_header_text3 = 'רשומות הצעה';
+const String gen_app_ent7_banner_sub = 'ישות הצעה';
+const String gen_app_ent7_app_bar_title = 'הירו 🗂️ הצעה | ישות מורכבת — טופס + טבלה';

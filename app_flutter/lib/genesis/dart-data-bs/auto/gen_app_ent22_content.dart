@@ -1,0 +1,24 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent22_crumbs_option = 'נפתח';
+const String gen_app_ent22_crumbs_option2 = 'בטיפול';
+const String gen_app_ent22_crumbs_option3 = 'תוקן';
+const String gen_app_ent22_crumbs_option4 = 'נבדק';
+const String gen_app_ent22_crumbs_option5 = 'נסגר';
+const String gen_app_ent22_header_text = 'טופס ליקוי';
+const String gen_app_ent22_numstep_label = 'מספר'; // t_c19510f4
+const String gen_app_ent22_textfield_label = 'מיקום'; // t_26d0e7de
+const String gen_app_ent22_textfield_hint = 'מיקום'; // t_26d0e7de
+const String gen_app_ent22_textfield_label2 = 'תיאור'; // t_927492f8
+const String gen_app_ent22_textfield_hint2 = 'תיאור'; // t_927492f8
+const String gen_app_ent22_glowfield_hint = 'חומרה'; // t_6d1d6810
+const String gen_app_ent22_textfield_label3 = 'אחראי';
+const String gen_app_ent22_textfield_hint3 = 'אחראי';
+const String gen_app_ent22_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent22_neon_label = 'קדם לבטיפול';
+const String gen_app_ent22_neon_toast = 'קדם לבטיפול';
+const String gen_app_ent22_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent22_stat_label = 'מספר סידורי של';
+const String gen_app_ent22_stat_label2 = 'תאריך לתצוגה';
+const String gen_app_ent22_header_text3 = 'רשומות ליקוי';
+const String gen_app_ent22_banner_sub = 'ישות ליקוי';
+const String gen_app_ent22_app_bar_title = 'הירו 🗂️ ליקוי | ישות מורכבת — טופס + טבלה';

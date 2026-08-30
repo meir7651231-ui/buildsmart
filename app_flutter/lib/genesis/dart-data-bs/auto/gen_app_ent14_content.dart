@@ -1,0 +1,20 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent14_crumbs_option = 'בקשה';
+const String gen_app_ent14_crumbs_option2 = 'אושר'; // t_db4a9245
+const String gen_app_ent14_crumbs_option3 = 'הוזמן'; // t_38ac4ee4
+const String gen_app_ent14_crumbs_option4 = 'נמסר'; // t_8b72a1ae
+const String gen_app_ent14_header_text = 'טופס הזמנת רכש';
+const String gen_app_ent14_numstep_label = 'מספר'; // t_c19510f4
+const String gen_app_ent14_textfield_label = 'ספק'; // t_7c71c3ed
+const String gen_app_ent14_textfield_hint = 'ספק'; // t_7c71c3ed
+const String gen_app_ent14_glowfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent14_numstep_label2 = 'מחיר'; // t_cc097285
+const String gen_app_ent14_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent14_neon_label = 'קדם לאושר';
+const String gen_app_ent14_neon_toast = 'קדם לאושר';
+const String gen_app_ent14_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent14_stat_label = 'מספר סידורי של';
+const String gen_app_ent14_stat_label2 = 'תאריך לתצוגה';
+const String gen_app_ent14_header_text3 = 'רשומות הזמנת רכש';
+const String gen_app_ent14_banner_sub = 'ישות הזמנת רכש';
+const String gen_app_ent14_app_bar_title = 'הירו 🗂️ הזמנת רכש | ישות מורכבת — טופס + טבלה';

@@ -1,0 +1,24 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent19_crumbs_option = 'הוגש';
+const String gen_app_ent19_crumbs_option2 = 'בבדיקה';
+const String gen_app_ent19_crumbs_option3 = 'תיקונים';
+const String gen_app_ent19_crumbs_option4 = 'אושר'; // t_db4a9245
+const String gen_app_ent19_crumbs_option5 = 'נסגר';
+const String gen_app_ent19_header_text = 'טופס שדה';
+const String gen_app_ent19_textfield_label = 'פרויקט'; // t_5a15099c
+const String gen_app_ent19_textfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent19_glowfield_hint = 'חומר'; // t_9a215501
+const String gen_app_ent19_textfield_label2 = 'יצרן'; // t_ae3831b4
+const String gen_app_ent19_textfield_hint2 = 'יצרן'; // t_ae3831b4
+const String gen_app_ent19_textfield_label3 = 'ספק'; // t_7c71c3ed
+const String gen_app_ent19_textfield_hint3 = 'ספק'; // t_7c71c3ed
+const String gen_app_ent19_textfield_label4 = 'בודק';
+const String gen_app_ent19_textfield_hint4 = 'בודק';
+const String gen_app_ent19_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent19_neon_label = 'קדם לבבדיקה';
+const String gen_app_ent19_neon_toast = 'קדם לבבדיקה';
+const String gen_app_ent19_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent19_stat_label = 'תאריך לתצוגה';
+const String gen_app_ent19_header_text3 = 'רשומות שדה';
+const String gen_app_ent19_banner_sub = 'ישות שדה';
+const String gen_app_ent19_app_bar_title = 'הירו 🗂️ שדה | ישות מורכבת — טופס + טבלה';

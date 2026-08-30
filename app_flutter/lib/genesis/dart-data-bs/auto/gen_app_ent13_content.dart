@@ -1,0 +1,23 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent13_crumbs_option = 'מועמד';
+const String gen_app_ent13_crumbs_option2 = 'נבדק';
+const String gen_app_ent13_crumbs_option3 = 'אושר'; // t_db4a9245
+const String gen_app_ent13_crumbs_option4 = 'פעיל'; // t_91181c78
+const String gen_app_ent13_header_text = 'טופס קבלן משנה';
+const String gen_app_ent13_textfield_label = 'שם'; // t_8b1aa6b1
+const String gen_app_ent13_textfield_hint = 'שם'; // t_8b1aa6b1
+const String gen_app_ent13_glowfield_hint = 'חברה';
+const String gen_app_ent13_textfield_label2 = 'תחום';
+const String gen_app_ent13_textfield_hint2 = 'תחום';
+const String gen_app_ent13_textfield_label3 = 'רישיון';
+const String gen_app_ent13_textfield_hint3 = 'רישיון';
+const String gen_app_ent13_textfield_label4 = 'דירוג';
+const String gen_app_ent13_textfield_hint4 = 'דירוג';
+const String gen_app_ent13_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent13_neon_label = 'קדם לנבדק';
+const String gen_app_ent13_neon_toast = 'קדם לנבדק';
+const String gen_app_ent13_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent13_stat_label = 'אין שקעים שם פרטי';
+const String gen_app_ent13_header_text3 = 'רשומות קבלן משנה';
+const String gen_app_ent13_banner_sub = 'ישות קבלן משנה';
+const String gen_app_ent13_app_bar_title = 'הירו 🗂️ קבלן משנה | ישות מורכבת — טופס + טבלה';

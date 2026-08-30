@@ -1,0 +1,22 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent8_crumbs_option = 'טיוטה'; // t_25fd43cd
+const String gen_app_ent8_crumbs_option2 = 'נחתם';
+const String gen_app_ent8_crumbs_option3 = 'פעיל'; // t_91181c78
+const String gen_app_ent8_crumbs_option4 = 'הושלם';
+const String gen_app_ent8_header_text = 'טופס חוזה';
+const String gen_app_ent8_numstep_label = 'מספר'; // t_c19510f4
+const String gen_app_ent8_textfield_label = 'סוג'; // t_f45000d5
+const String gen_app_ent8_textfield_hint = 'סוג'; // t_f45000d5
+const String gen_app_ent8_glowfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent8_textfield_label2 = 'עיכבון';
+const String gen_app_ent8_textfield_hint2 = 'עיכבון';
+const String gen_app_ent8_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent8_neon_label = 'קדם לנחתם';
+const String gen_app_ent8_neon_toast = 'קדם לנחתם';
+const String gen_app_ent8_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent8_stat_label = 'מספר סידורי של';
+const String gen_app_ent8_stat_label2 = 'עיטוף סכום שקלים לתצוגה';
+const String gen_app_ent8_stat_label3 = 'תאריך לתצוגה';
+const String gen_app_ent8_header_text3 = 'רשומות חוזה';
+const String gen_app_ent8_banner_sub = 'ישות חוזה';
+const String gen_app_ent8_app_bar_title = 'הירו 🗂️ חוזה | ישות מורכבת — טופס + טבלה';

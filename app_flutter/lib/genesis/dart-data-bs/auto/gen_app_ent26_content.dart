@@ -1,0 +1,20 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent26_crumbs_option = 'בדיקות';
+const String gen_app_ent26_crumbs_option2 = 'ליקויים'; // t_d9f9c588
+const String gen_app_ent26_crumbs_option3 = 'תיקונים';
+const String gen_app_ent26_crumbs_option4 = 'חתימה';
+const String gen_app_ent26_crumbs_option5 = 'הושלם';
+const String gen_app_ent26_header_text = 'טופס מסירה';
+const String gen_app_ent26_textfield_label = 'פרויקט'; // t_5a15099c
+const String gen_app_ent26_textfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent26_glowfield_hint = 'לקוח'; // t_9c2118be
+const String gen_app_ent26_textfield_label2 = 'חשבון סופי';
+const String gen_app_ent26_textfield_hint2 = 'חשבון סופי';
+const String gen_app_ent26_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent26_neon_label = 'קדם לליקויים';
+const String gen_app_ent26_neon_toast = 'קדם לליקויים';
+const String gen_app_ent26_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent26_stat_label = 'תאריך לתצוגה';
+const String gen_app_ent26_header_text3 = 'רשומות מסירה';
+const String gen_app_ent26_banner_sub = 'ישות מסירה';
+const String gen_app_ent26_app_bar_title = 'הירו 🗂️ מסירה | ישות מורכבת — טופס + טבלה';

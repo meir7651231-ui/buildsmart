@@ -1,0 +1,24 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent23_crumbs_option = 'דווח';
+const String gen_app_ent23_crumbs_option2 = 'נחסם';
+const String gen_app_ent23_crumbs_option3 = 'בתחקיר';
+const String gen_app_ent23_crumbs_option4 = 'טופל';
+const String gen_app_ent23_crumbs_option5 = 'נסגר';
+const String gen_app_ent23_header_text = 'טופס אירוע בטיחות';
+const String gen_app_ent23_textfield_label = 'מיקום'; // t_26d0e7de
+const String gen_app_ent23_textfield_hint = 'מיקום'; // t_26d0e7de
+const String gen_app_ent23_glowfield_hint = 'חומרה'; // t_6d1d6810
+const String gen_app_ent23_textfield_label2 = 'מעורבים';
+const String gen_app_ent23_textfield_hint2 = 'מעורבים';
+const String gen_app_ent23_textfield_label3 = 'תיאור'; // t_927492f8
+const String gen_app_ent23_textfield_hint3 = 'תיאור'; // t_927492f8
+const String gen_app_ent23_textfield_label4 = 'גורם שורש';
+const String gen_app_ent23_textfield_hint4 = 'גורם שורש';
+const String gen_app_ent23_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent23_neon_label = 'קדם לנחסם';
+const String gen_app_ent23_neon_toast = 'קדם לנחסם';
+const String gen_app_ent23_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent23_stat_label = 'תאריך לתצוגה';
+const String gen_app_ent23_header_text3 = 'רשומות אירוע בטיחות';
+const String gen_app_ent23_banner_sub = 'ישות אירוע בטיחות';
+const String gen_app_ent23_app_bar_title = 'הירו 🗂️ אירוע בטיחות | ישות מורכבת — טופס + טבלה';

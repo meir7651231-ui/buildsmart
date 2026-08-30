@@ -1,0 +1,22 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent25_crumbs_option = 'דווח';
+const String gen_app_ent25_crumbs_option2 = 'סווג';
+const String gen_app_ent25_crumbs_option3 = 'בטיפול';
+const String gen_app_ent25_crumbs_option4 = 'תוקן';
+const String gen_app_ent25_crumbs_option5 = 'נסגר';
+const String gen_app_ent25_header_text = 'טופס קריאת תחזוקה';
+const String gen_app_ent25_textfield_label = 'ציוד';
+const String gen_app_ent25_textfield_hint = 'ציוד';
+const String gen_app_ent25_glowfield_hint = 'מיקום'; // t_26d0e7de
+const String gen_app_ent25_textfield_label2 = 'תיאור'; // t_927492f8
+const String gen_app_ent25_textfield_hint2 = 'תיאור'; // t_927492f8
+const String gen_app_ent25_textfield_label3 = 'דחיפות';
+const String gen_app_ent25_textfield_hint3 = 'דחיפות';
+const String gen_app_ent25_textfield_label4 = 'אחראי';
+const String gen_app_ent25_textfield_hint4 = 'אחראי';
+const String gen_app_ent25_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent25_neon_label = 'קדם לסווג';
+const String gen_app_ent25_neon_toast = 'קדם לסווג';
+const String gen_app_ent25_header_text2 = 'רשומות קריאת תחזוקה';
+const String gen_app_ent25_banner_sub = 'ישות קריאת תחזוקה';
+const String gen_app_ent25_app_bar_title = 'הירו 🗂️ קריאת תחזוקה | ישות מורכבת — טופס + טבלה';

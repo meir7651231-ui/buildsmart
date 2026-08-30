@@ -1,0 +1,24 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_app_ent18_crumbs_option = 'חדש';
+const String gen_app_ent18_crumbs_option2 = 'נשלח';
+const String gen_app_ent18_crumbs_option3 = 'בבדיקה';
+const String gen_app_ent18_crumbs_option4 = 'נענה';
+const String gen_app_ent18_crumbs_option5 = 'מאושר'; // t_8270663e
+const String gen_app_ent18_crumbs_option6 = 'סגור'; // t_55247199
+const String gen_app_ent18_header_text = 'טופס שדה';
+const String gen_app_ent18_numstep_label = 'מספר'; // t_c19510f4
+const String gen_app_ent18_textfield_label = 'פרויקט'; // t_5a15099c
+const String gen_app_ent18_textfield_hint = 'פרויקט'; // t_5a15099c
+const String gen_app_ent18_glowfield_hint = 'תחום';
+const String gen_app_ent18_textfield_label2 = 'שאלה';
+const String gen_app_ent18_textfield_hint2 = 'שאלה';
+const String gen_app_ent18_textfield_label3 = 'דחיפות';
+const String gen_app_ent18_textfield_hint3 = 'דחיפות';
+const String gen_app_ent18_toggle_label = 'סטטוס'; // t_c184d0ed
+const String gen_app_ent18_neon_label = 'קדם לנשלח';
+const String gen_app_ent18_neon_toast = 'קדם לנשלח';
+const String gen_app_ent18_header_text2 = 'חוקים פר-שדה';
+const String gen_app_ent18_stat_label = 'מספר סידורי של';
+const String gen_app_ent18_header_text3 = 'רשומות שדה';
+const String gen_app_ent18_banner_sub = 'ישות שדה';
+const String gen_app_ent18_app_bar_title = 'הירו 🗂️ שדה | ישות מורכבת — טופס + טבלה';
