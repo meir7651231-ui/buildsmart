@@ -25,6 +25,10 @@ jobs:
         working-directory: app_flutter
         run: flutter pub get
 
+      # ‏version.g.dart מחולל-בבנייה (כמו ב-genesis-preview) — בלעדיו שלב-הבנייה נופל
+      - name: Gen version
+        run: bash scripts/gen_version.sh
+
       - name: Analyze genesis (הדוח המלא נשמר תמיד)
         working-directory: app_flutter
         run: |
