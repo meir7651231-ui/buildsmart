@@ -1,20 +1,15 @@
-// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
-const String gen_app_ent24_header_text = 'טופס נוכחות';
-const String gen_app_ent24_textfield_label = 'עובד'; // t_2e131aef
-const String gen_app_ent24_textfield_hint = '';
-const String gen_app_ent24_textfield_label2 = 'פרויקט'; // t_5a15099c
-const String gen_app_ent24_textfield_hint2 = '';
-const String gen_app_ent24_textfield_label3 = 'תאריך'; // t_c87f355d
-const String gen_app_ent24_textfield_hint3 = '';
-const String gen_app_ent24_textfield_label4 = 'כניסה'; // t_2f6783cd
-const String gen_app_ent24_textfield_hint4 = '';
-const String gen_app_ent24_textfield_label5 = 'יציאה'; // t_b939061e
-const String gen_app_ent24_textfield_hint5 = '';
-const String gen_app_ent24_numstep_label = 'שעות';
-const String gen_app_ent24_textfield_label6 = 'אישור'; // t_f21acb6a
-const String gen_app_ent24_textfield_hint6 = '';
-const String gen_app_ent24_header_text2 = 'רשומות נוכחות';
-const String gen_app_ent24_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
-const String gen_app_ent24_stat_label = 'תאריך לתצוגה';
-const String gen_app_ent24_banner_sub = 'ישות נוכחות';
-const String gen_app_ent24_app_bar_title = '🗂️ נוכחות';
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_ent24_c0 = 'נוכחות';
+const String gen_app_ent24_c1 = '7 שדות';
+const String gen_app_ent24_c2 = '🗂️';
+const String gen_app_ent24_c3 = 'שמירה';
+const String gen_app_ent24_c4 = 'פרטי הרשומה';
+const String gen_app_ent24_c5 = 'רשומות';
+const String gen_app_ent24_c6 = 'אין נוכחות עדיין — הרשומה הראשונה תופיע כאן';
+const String gen_app_ent24_c7 = 'עובד';
+const String gen_app_ent24_c8 = 'פרויקט';
+const String gen_app_ent24_c9 = 'תאריך';
+const String gen_app_ent24_c10 = 'כניסה';
+const String gen_app_ent24_c11 = 'יציאה';
+const String gen_app_ent24_c12 = 'שעות';
+const String gen_app_ent24_c13 = 'אישור';

@@ -1,69 +1,34 @@
-// 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: 🎯 דשבורד מנהל אתר עם משימות היום
-// 🧬 בקשה: הירו 🎯 דשבורד מנהל אתר עם משימות היום | נבנה מתיאור חופשי · אטום StripGroupCard ליד | 9 שדות · 7 שלבים · אטום StockTab לקוח | 8 שדות · אטום ChipCloud פרויקט | 12 שדות · 6 שלבים · אטום EmptyStateCard שדה | 10 שדות · אטום BareStat סעיף כתב כמויות | 8 שדות · אטום WorkerNav אומדן | 9 שדות · אטום SummaryCard הצעה | 7 שדות · 5 שלבים · אטום TitledSection חוזה | 9 שדות · 4 שלבים · אטום MiniCalendar משימות היום · אטום HeroCard עובדים באתר · אטום InfoHeadLine חומרים · כותרת דשבורד מנהל אתר עם משימות היום · לוגיקה חיה · חישוב כרעת מנהל (isAdmin) · באנר המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות
-// 🧬 אטומים שנבחרו: StripGroupCard · StockTab · ChipCloud · EmptyStateCard · BareStat · WorkerNav · SummaryCard · TitledSection · MiniCalendar · HeroCard · InfoHeadLine · CaSubTitle · RStat · CoinBanner
+// ✨ חולל ע"י מנוע-הרינדור (render-ds) — דשבורד מנתוני-הישויות. אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_app_scr32_content.dart';
-import '../dart-maor/is-admin.dart';
-import '../dart-ui-bs/auto/bs_tokens.dart';
-import '../dart-ui-bs/auto/ca_sub_title.dart';
-import '../dart-ui-bs/auto/coin_banner.dart';
-import '../dart-ui-bs/auto/rstat.dart';
-import '../dart-ui-bs/auto/stock_tab.dart';
-import '../dart-ui-bs/auto/summary_card.dart';
-import '../dart-ui-bs/auto/worker_nav.dart';
-import '../dart-ui-bs/bare_stat.dart';
-import '../dart-ui-bs/chip_cloud.dart';
-import '../dart-ui-bs/empty_state_card.dart';
-import '../dart-ui-bs/hero_card.dart';
-import '../dart-ui-bs/mini_calendar.dart';
-import '../dart-ui-bs/screens__lipskey_product_sheet/info_head_line.dart';
-import '../dart-ui-bs/screens__lipskey_product_sheet/strip_group_card.dart';
-import '../dart-ui-bs/titled_section.dart';
+import '../dart-ui-bs/ds/ds.dart';
 import 'package:flutter/material.dart';
 
-class GenAppScr32Screen extends StatefulWidget {
+class GenAppScr32Screen extends StatelessWidget {
   const GenAppScr32Screen({super.key});
 
   @override
-  State<GenAppScr32Screen> createState() => _GenAppScr32ScreenState();
-}
-
-class _GenAppScr32ScreenState extends State<GenAppScr32Screen> {
-  String _t1 = '';
-  int _n2 = 0;
-  String _t3 = '';
-
-  void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
-      );
-
-  @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
-        appBar: AppBar(title: Text(gen_app_scr32_app_bar_title)),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          children: [
-          StripGroupCard(children: const <Widget>[], surfaceColor: BsTokens.cardLight, borderColor: BsTokens.divider),
-          StockTab(label: gen_app_scr32_other_label, on: false, onTap: () => _toast(gen_app_scr32_other_toast)),
-          ChipCloud(labels: const <String>[], height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          EmptyStateCard(glyph: gen_app_scr32_card_glyph, message: gen_app_scr32_card_message, surfaceColor: BsTokens.cardLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
-          BareStat(value: _t1, label: gen_app_scr32_stat_label, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight),
-          WorkerNav(label: gen_app_scr32_other_label2, label2: gen_app_scr32_other_label22, label3: gen_app_scr32_other_label3, label4: gen_app_scr32_other_label4, currentIndex: _n2, onTap: (v) => setState(() => _n2 = v), chatOn: false),
-          SummaryCard(label: gen_app_scr32_card_label, label2: gen_app_scr32_card_label2, label3: gen_app_scr32_card_label3, label4: gen_app_scr32_card_label4, value: _t3, label5: gen_app_scr32_card_label5, subtotal: 0, vat: 0, deliveryFee: 0, total: 0, vatInclusive: false),
-          TitledSection(title: gen_app_scr32_header_title, inkColor: BsTokens.inkLight, child: const SizedBox(height: 4)),
-          MiniCalendar(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          HeroCard(glyph: gen_app_scr32_card_glyph2, title: gen_app_scr32_card_title, sub: gen_app_scr32_card_sub, onTap: () => _toast(gen_app_scr32_card_toast), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
-          InfoHeadLine(text: gen_app_scr32_other_text, tint: BsTokens.inkLight),
-          CaSubTitle(gen_app_scr32_header_text),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: isAdmin(null, null).toString(), label: gen_app_scr32_stat_label2)])),
-          CoinBanner(coins: 0, sub: gen_app_scr32_banner_sub),
-          ],
-        ),
-      ),
+    return DsScaffold(
+      title: gen_app_scr32_c0,
+      subtitle: gen_app_scr32_c1,
+      icon: gen_app_scr32_c2,
+      children: [
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c3, value: gen_app_scr32_c4, sub: gen_app_scr32_c5, glyph: gen_app_scr32_c6)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c7, value: gen_app_scr32_c8, sub: gen_app_scr32_c9, glyph: gen_app_scr32_c10))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c11, value: gen_app_scr32_c12, sub: gen_app_scr32_c13, glyph: gen_app_scr32_c14)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c15, value: gen_app_scr32_c16, sub: gen_app_scr32_c17, glyph: gen_app_scr32_c18))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c19, value: gen_app_scr32_c20, sub: gen_app_scr32_c21, glyph: gen_app_scr32_c22)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c23, value: gen_app_scr32_c24, sub: gen_app_scr32_c25, glyph: gen_app_scr32_c26))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c27, value: gen_app_scr32_c28, sub: gen_app_scr32_c29, glyph: gen_app_scr32_c30)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c31, value: gen_app_scr32_c32, sub: gen_app_scr32_c33, glyph: gen_app_scr32_c34))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c35, value: gen_app_scr32_c36, sub: gen_app_scr32_c37, glyph: gen_app_scr32_c38)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c39, value: gen_app_scr32_c40, sub: gen_app_scr32_c41, glyph: gen_app_scr32_c42))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c43, value: gen_app_scr32_c44, sub: gen_app_scr32_c45, glyph: gen_app_scr32_c46)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c47, value: gen_app_scr32_c48, sub: gen_app_scr32_c49, glyph: gen_app_scr32_c50))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c51, value: gen_app_scr32_c52, sub: gen_app_scr32_c53, glyph: gen_app_scr32_c54)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c55, value: gen_app_scr32_c56, sub: gen_app_scr32_c57, glyph: gen_app_scr32_c58))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c59, value: gen_app_scr32_c60, sub: gen_app_scr32_c61, glyph: gen_app_scr32_c62)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c63, value: gen_app_scr32_c64, sub: gen_app_scr32_c65, glyph: gen_app_scr32_c66))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c67, value: gen_app_scr32_c68, sub: gen_app_scr32_c69, glyph: gen_app_scr32_c70)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c71, value: gen_app_scr32_c72, sub: gen_app_scr32_c73, glyph: gen_app_scr32_c74))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c75, value: gen_app_scr32_c76, sub: gen_app_scr32_c77, glyph: gen_app_scr32_c78)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c79, value: gen_app_scr32_c80, sub: gen_app_scr32_c81, glyph: gen_app_scr32_c82))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c83, value: gen_app_scr32_c84, sub: gen_app_scr32_c85, glyph: gen_app_scr32_c86)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c87, value: gen_app_scr32_c88, sub: gen_app_scr32_c89, glyph: gen_app_scr32_c90))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c91, value: gen_app_scr32_c92, sub: gen_app_scr32_c93, glyph: gen_app_scr32_c94)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c95, value: gen_app_scr32_c96, sub: gen_app_scr32_c97, glyph: gen_app_scr32_c98))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c99, value: gen_app_scr32_c100, sub: gen_app_scr32_c101, glyph: gen_app_scr32_c102)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c103, value: gen_app_scr32_c104, sub: gen_app_scr32_c105, glyph: gen_app_scr32_c106))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c107, value: gen_app_scr32_c108, sub: gen_app_scr32_c109, glyph: gen_app_scr32_c110)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr32_c111, value: gen_app_scr32_c112, sub: gen_app_scr32_c113, glyph: gen_app_scr32_c114))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr32_c115, value: gen_app_scr32_c116, sub: gen_app_scr32_c117, glyph: gen_app_scr32_c118)), const SizedBox(width: 12), const Expanded(child: SizedBox())]))),
+      ],
     );
   }
 }

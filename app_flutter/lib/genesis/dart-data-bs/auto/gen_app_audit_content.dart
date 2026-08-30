@@ -1,5 +1,6 @@
-// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
-const String gen_app_audit_header_text = 'פעולות אחרונות';
-const String gen_app_audit_row_label = 'תיעוד פעולה (runAudit)';
-const String gen_app_audit_banner_sub = 'audit';
-const String gen_app_audit_app_bar_title = '🧾 יומן פעולות';
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_audit_c0 = 'יומן פעולות';
+const String gen_app_audit_c1 = 'שכבת-מערכת';
+const String gen_app_audit_c2 = '🧾';
+const String gen_app_audit_c3 = 'פעולות אחרונות';
+const String gen_app_audit_c4 = 'כל שינוי במערכת יתועד כאן';

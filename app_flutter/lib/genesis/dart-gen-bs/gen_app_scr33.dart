@@ -1,57 +1,34 @@
-// 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: 🎯 דשבורד כספים עם הכנסות
-// 🧬 בקשה: הירו 🎯 דשבורד כספים עם הכנסות | נבנה מתיאור חופשי · אטום FinHead ליד | 9 שדות · 7 שלבים · אטום FinRow לקוח | 8 שדות · אטום FinRows פרויקט | 12 שדות · 6 שלבים · אטום FinCallout שדה | 10 שדות · אטום CaPrimary סעיף כתב כמויות | 8 שדות · אטום GridHubCard אומדן | 9 שדות · אטום AiFinTile הצעה | 7 שדות · 5 שלבים · אטום SubRow חוזה | 9 שדות · 4 שלבים · באנר המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות
-// 🧬 אטומים שנבחרו: FinHead · FinRow · FinRows · FinCallout · CaPrimary · GridHubCard · AiFinTile · SubRow · CoinBanner
+// ✨ חולל ע"י מנוע-הרינדור (render-ds) — דשבורד מנתוני-הישויות. אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_app_scr33_content.dart';
-import '../dart-ui-bs/auto/ai_fin_tile.dart';
-import '../dart-ui-bs/auto/bs_tokens.dart';
-import '../dart-ui-bs/auto/ca_primary.dart';
-import '../dart-ui-bs/auto/coin_banner.dart';
-import '../dart-ui-bs/auto/fin_callout.dart';
-import '../dart-ui-bs/auto/fin_head.dart';
-import '../dart-ui-bs/auto/fin_row.dart';
-import '../dart-ui-bs/auto/fin_rows.dart';
-import '../dart-ui-bs/auto/sub_row.dart';
-import '../dart-ui-bs/screens__store_screen/grid_hub_card.dart';
+import '../dart-ui-bs/ds/ds.dart';
 import 'package:flutter/material.dart';
 
-class GenAppScr33Screen extends StatefulWidget {
+class GenAppScr33Screen extends StatelessWidget {
   const GenAppScr33Screen({super.key});
 
   @override
-  State<GenAppScr33Screen> createState() => _GenAppScr33ScreenState();
-}
-
-class _GenAppScr33ScreenState extends State<GenAppScr33Screen> {
-  String _t1 = '';
-  String _t2 = '';
-
-  void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
-      );
-
-  @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
-        appBar: AppBar(title: Text(gen_app_scr33_app_bar_title)),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          children: [
-          FinHead(ic: gen_app_scr33_other_ic, title: gen_app_scr33_other_title, sub: gen_app_scr33_other_sub),
-          FinRow(gen_app_scr33_row_label, _t1),
-          FinRows(const <Widget>[]),
-          FinCallout(label: gen_app_scr33_other_label, value: _t2),
-          CaPrimary(label: gen_app_scr33_other_label2, onTap: () => _toast(gen_app_scr33_other_toast)),
-          GridHubCard(emoji: gen_app_scr33_card_glyph, title: gen_app_scr33_card_title, preview: gen_app_scr33_card_preview, isFav: false, favAddLabel: gen_app_scr33_card_fav_add_label, favRemoveLabel: gen_app_scr33_card_fav_remove_label, onFavToggle: () => _toast(gen_app_scr33_card_toast), onTap: () => _toast(gen_app_scr33_card_toast2), surfaceColor: BsTokens.cardLight, borderColor: BsTokens.divider, badgeColor: BsTokens.inkLight, badgeInkColor: BsTokens.inkLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, favActiveColor: BsTokens.brand, favIdleColor: BsTokens.inkLight),
-          AiFinTile(ic: gen_app_scr33_row_ic, title: gen_app_scr33_row_title, sub: gen_app_scr33_row_sub, onTap: () => _toast(gen_app_scr33_row_toast)),
-          SubRow(label: gen_app_scr33_row_label2, label2: gen_app_scr33_row_label22, allocated: 0, spent: 0, ic: gen_app_scr33_row_ic2, name: gen_app_scr33_row_name),
-          CoinBanner(coins: 0, sub: gen_app_scr33_banner_sub),
-          ],
-        ),
-      ),
+    return DsScaffold(
+      title: gen_app_scr33_c0,
+      subtitle: gen_app_scr33_c1,
+      icon: gen_app_scr33_c2,
+      children: [
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c3, value: gen_app_scr33_c4, sub: gen_app_scr33_c5, glyph: gen_app_scr33_c6)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c7, value: gen_app_scr33_c8, sub: gen_app_scr33_c9, glyph: gen_app_scr33_c10))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c11, value: gen_app_scr33_c12, sub: gen_app_scr33_c13, glyph: gen_app_scr33_c14)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c15, value: gen_app_scr33_c16, sub: gen_app_scr33_c17, glyph: gen_app_scr33_c18))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c19, value: gen_app_scr33_c20, sub: gen_app_scr33_c21, glyph: gen_app_scr33_c22)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c23, value: gen_app_scr33_c24, sub: gen_app_scr33_c25, glyph: gen_app_scr33_c26))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c27, value: gen_app_scr33_c28, sub: gen_app_scr33_c29, glyph: gen_app_scr33_c30)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c31, value: gen_app_scr33_c32, sub: gen_app_scr33_c33, glyph: gen_app_scr33_c34))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c35, value: gen_app_scr33_c36, sub: gen_app_scr33_c37, glyph: gen_app_scr33_c38)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c39, value: gen_app_scr33_c40, sub: gen_app_scr33_c41, glyph: gen_app_scr33_c42))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c43, value: gen_app_scr33_c44, sub: gen_app_scr33_c45, glyph: gen_app_scr33_c46)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c47, value: gen_app_scr33_c48, sub: gen_app_scr33_c49, glyph: gen_app_scr33_c50))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c51, value: gen_app_scr33_c52, sub: gen_app_scr33_c53, glyph: gen_app_scr33_c54)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c55, value: gen_app_scr33_c56, sub: gen_app_scr33_c57, glyph: gen_app_scr33_c58))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c59, value: gen_app_scr33_c60, sub: gen_app_scr33_c61, glyph: gen_app_scr33_c62)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c63, value: gen_app_scr33_c64, sub: gen_app_scr33_c65, glyph: gen_app_scr33_c66))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c67, value: gen_app_scr33_c68, sub: gen_app_scr33_c69, glyph: gen_app_scr33_c70)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c71, value: gen_app_scr33_c72, sub: gen_app_scr33_c73, glyph: gen_app_scr33_c74))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c75, value: gen_app_scr33_c76, sub: gen_app_scr33_c77, glyph: gen_app_scr33_c78)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c79, value: gen_app_scr33_c80, sub: gen_app_scr33_c81, glyph: gen_app_scr33_c82))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c83, value: gen_app_scr33_c84, sub: gen_app_scr33_c85, glyph: gen_app_scr33_c86)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c87, value: gen_app_scr33_c88, sub: gen_app_scr33_c89, glyph: gen_app_scr33_c90))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c91, value: gen_app_scr33_c92, sub: gen_app_scr33_c93, glyph: gen_app_scr33_c94)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c95, value: gen_app_scr33_c96, sub: gen_app_scr33_c97, glyph: gen_app_scr33_c98))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c99, value: gen_app_scr33_c100, sub: gen_app_scr33_c101, glyph: gen_app_scr33_c102)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c103, value: gen_app_scr33_c104, sub: gen_app_scr33_c105, glyph: gen_app_scr33_c106))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c107, value: gen_app_scr33_c108, sub: gen_app_scr33_c109, glyph: gen_app_scr33_c110)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr33_c111, value: gen_app_scr33_c112, sub: gen_app_scr33_c113, glyph: gen_app_scr33_c114))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr33_c115, value: gen_app_scr33_c116, sub: gen_app_scr33_c117, glyph: gen_app_scr33_c118)), const SizedBox(width: 12), const Expanded(child: SizedBox())]))),
+      ],
     );
   }
 }

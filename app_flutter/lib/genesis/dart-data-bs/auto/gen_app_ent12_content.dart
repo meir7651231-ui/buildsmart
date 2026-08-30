@@ -1,18 +1,14 @@
-// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
-const String gen_app_ent12_header_text = 'טופס עובד';
-const String gen_app_ent12_textfield_label = 'שם'; // t_8b1aa6b1
-const String gen_app_ent12_textfield_hint = '';
-const String gen_app_ent12_textfield_label2 = 'תפקיד'; // t_ed927047
-const String gen_app_ent12_textfield_hint2 = '';
-const String gen_app_ent12_textfield_label3 = 'טלפון'; // t_737232c2
-const String gen_app_ent12_textfield_hint3 = '';
-const String gen_app_ent12_textfield_label4 = 'חברה';
-const String gen_app_ent12_textfield_hint4 = '';
-const String gen_app_ent12_numstep_label = 'עלות לשעה';
-const String gen_app_ent12_toggle_label = 'סטטוס'; // t_c184d0ed
-const String gen_app_ent12_header_text2 = 'רשומות עובד';
-const String gen_app_ent12_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
-const String gen_app_ent12_stat_label = 'אין שקעים שם פרטי';
-const String gen_app_ent12_stat_label2 = 'נרמול טלפון למפתח דדופ';
-const String gen_app_ent12_banner_sub = 'ישות עובד';
-const String gen_app_ent12_app_bar_title = '🗂️ עובד';
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_ent12_c0 = 'עובד';
+const String gen_app_ent12_c1 = '6 שדות';
+const String gen_app_ent12_c2 = '🗂️';
+const String gen_app_ent12_c3 = 'שמירה';
+const String gen_app_ent12_c4 = 'פרטי הרשומה';
+const String gen_app_ent12_c5 = 'רשומות';
+const String gen_app_ent12_c6 = 'אין עובד עדיין — הרשומה הראשונה תופיע כאן';
+const String gen_app_ent12_c7 = 'שם';
+const String gen_app_ent12_c8 = 'תפקיד';
+const String gen_app_ent12_c9 = 'טלפון';
+const String gen_app_ent12_c10 = 'חברה';
+const String gen_app_ent12_c11 = 'עלות לשעה';
+const String gen_app_ent12_c12 = 'סטטוס';

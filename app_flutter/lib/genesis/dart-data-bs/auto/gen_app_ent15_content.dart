@@ -1,20 +1,15 @@
-// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
-const String gen_app_ent15_header_text = 'טופס חומר';
-const String gen_app_ent15_textfield_label = 'קוד'; // t_2e916690
-const String gen_app_ent15_textfield_hint = '';
-const String gen_app_ent15_textfield_label2 = 'שם'; // t_8b1aa6b1
-const String gen_app_ent15_textfield_hint2 = '';
-const String gen_app_ent15_textfield_label3 = 'קטגוריה'; // t_b593ae97
-const String gen_app_ent15_textfield_hint3 = '';
-const String gen_app_ent15_textfield_label4 = 'יחידת מידה';
-const String gen_app_ent15_textfield_hint4 = '';
-const String gen_app_ent15_numstep_label = 'מחיר'; // t_cc097285
-const String gen_app_ent15_textfield_label5 = 'מינימום';
-const String gen_app_ent15_textfield_hint5 = '';
-const String gen_app_ent15_textfield_label6 = 'נקודת הזמנה';
-const String gen_app_ent15_textfield_hint6 = '';
-const String gen_app_ent15_header_text2 = 'רשומות חומר';
-const String gen_app_ent15_header_text3 = 'מנוע-חוקים חי · חוקים מהמדף';
-const String gen_app_ent15_stat_label = 'אין שקעים שם פרטי';
-const String gen_app_ent15_banner_sub = 'ישות חומר';
-const String gen_app_ent15_app_bar_title = '🗂️ חומר';
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_ent15_c0 = 'חומר';
+const String gen_app_ent15_c1 = '7 שדות';
+const String gen_app_ent15_c2 = '🗂️';
+const String gen_app_ent15_c3 = 'שמירה';
+const String gen_app_ent15_c4 = 'פרטי הרשומה';
+const String gen_app_ent15_c5 = 'רשומות';
+const String gen_app_ent15_c6 = 'אין חומר עדיין — הרשומה הראשונה תופיע כאן';
+const String gen_app_ent15_c7 = 'קוד';
+const String gen_app_ent15_c8 = 'שם';
+const String gen_app_ent15_c9 = 'קטגוריה';
+const String gen_app_ent15_c10 = 'יחידת מידה';
+const String gen_app_ent15_c11 = 'מחיר';
+const String gen_app_ent15_c12 = 'מינימום';
+const String gen_app_ent15_c13 = 'נקודת הזמנה';

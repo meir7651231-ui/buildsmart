@@ -1,51 +1,34 @@
-// 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: 🎯 דשבורד מנהל פרויקט עם התקדמות
-// 🧬 בקשה: הירו 🎯 דשבורד מנהל פרויקט עם התקדמות | נבנה מתיאור חופשי · אטום LinearProgress התקדמות · אטום GanttBar גאנט · אטום BreadcrumbTrail נתיב קריטי · כותרת דשבורד מנהל פרויקט עם התקדמות · לוגיקה חיה · חישוב כרעת מנהל (isAdmin) · באנר המחולל מרכיב UI + לוגיקה מהמדף, ובחר לבד לפי משמעות
-// 🧬 אטומים שנבחרו: LinearProgress · GanttBar · BreadcrumbTrail · CaSubTitle · RStat · CoinBanner
+// ✨ חולל ע"י מנוע-הרינדור (render-ds) — דשבורד מנתוני-הישויות. אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_app_scr31_content.dart';
-import '../dart-maor/is-admin.dart';
-import '../dart-ui-bs/auto/bs_tokens.dart';
-import '../dart-ui-bs/auto/ca_sub_title.dart';
-import '../dart-ui-bs/auto/coin_banner.dart';
-import '../dart-ui-bs/auto/rstat.dart';
-import '../dart-ui-bs/breadcrumb_trail.dart';
-import '../dart-ui-bs/gantt_bar.dart';
-import '../dart-ui-bs/linear_progress.dart';
+import '../dart-ui-bs/ds/ds.dart';
 import 'package:flutter/material.dart';
 
-class GenAppScr31Screen extends StatefulWidget {
+class GenAppScr31Screen extends StatelessWidget {
   const GenAppScr31Screen({super.key});
 
   @override
-  State<GenAppScr31Screen> createState() => _GenAppScr31ScreenState();
-}
-
-class _GenAppScr31ScreenState extends State<GenAppScr31Screen> {
-  
-
-  void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
-      );
-
-  @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
-        appBar: AppBar(title: Text(gen_app_scr31_app_bar_title)),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          children: [
-          LinearProgress(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          GanttBar(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          BreadcrumbTrail(labels: const <String>[], height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          CaSubTitle(gen_app_scr31_header_text),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [RStat(value: isAdmin(null, null).toString(), label: gen_app_scr31_stat_label)])),
-          CoinBanner(coins: 0, sub: gen_app_scr31_banner_sub),
-          ],
-        ),
-      ),
+    return DsScaffold(
+      title: gen_app_scr31_c0,
+      subtitle: gen_app_scr31_c1,
+      icon: gen_app_scr31_c2,
+      children: [
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c3, value: gen_app_scr31_c4, sub: gen_app_scr31_c5, glyph: gen_app_scr31_c6)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c7, value: gen_app_scr31_c8, sub: gen_app_scr31_c9, glyph: gen_app_scr31_c10))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c11, value: gen_app_scr31_c12, sub: gen_app_scr31_c13, glyph: gen_app_scr31_c14)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c15, value: gen_app_scr31_c16, sub: gen_app_scr31_c17, glyph: gen_app_scr31_c18))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c19, value: gen_app_scr31_c20, sub: gen_app_scr31_c21, glyph: gen_app_scr31_c22)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c23, value: gen_app_scr31_c24, sub: gen_app_scr31_c25, glyph: gen_app_scr31_c26))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c27, value: gen_app_scr31_c28, sub: gen_app_scr31_c29, glyph: gen_app_scr31_c30)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c31, value: gen_app_scr31_c32, sub: gen_app_scr31_c33, glyph: gen_app_scr31_c34))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c35, value: gen_app_scr31_c36, sub: gen_app_scr31_c37, glyph: gen_app_scr31_c38)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c39, value: gen_app_scr31_c40, sub: gen_app_scr31_c41, glyph: gen_app_scr31_c42))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c43, value: gen_app_scr31_c44, sub: gen_app_scr31_c45, glyph: gen_app_scr31_c46)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c47, value: gen_app_scr31_c48, sub: gen_app_scr31_c49, glyph: gen_app_scr31_c50))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c51, value: gen_app_scr31_c52, sub: gen_app_scr31_c53, glyph: gen_app_scr31_c54)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c55, value: gen_app_scr31_c56, sub: gen_app_scr31_c57, glyph: gen_app_scr31_c58))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c59, value: gen_app_scr31_c60, sub: gen_app_scr31_c61, glyph: gen_app_scr31_c62)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c63, value: gen_app_scr31_c64, sub: gen_app_scr31_c65, glyph: gen_app_scr31_c66))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c67, value: gen_app_scr31_c68, sub: gen_app_scr31_c69, glyph: gen_app_scr31_c70)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c71, value: gen_app_scr31_c72, sub: gen_app_scr31_c73, glyph: gen_app_scr31_c74))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c75, value: gen_app_scr31_c76, sub: gen_app_scr31_c77, glyph: gen_app_scr31_c78)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c79, value: gen_app_scr31_c80, sub: gen_app_scr31_c81, glyph: gen_app_scr31_c82))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c83, value: gen_app_scr31_c84, sub: gen_app_scr31_c85, glyph: gen_app_scr31_c86)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c87, value: gen_app_scr31_c88, sub: gen_app_scr31_c89, glyph: gen_app_scr31_c90))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c91, value: gen_app_scr31_c92, sub: gen_app_scr31_c93, glyph: gen_app_scr31_c94)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c95, value: gen_app_scr31_c96, sub: gen_app_scr31_c97, glyph: gen_app_scr31_c98))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c99, value: gen_app_scr31_c100, sub: gen_app_scr31_c101, glyph: gen_app_scr31_c102)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c103, value: gen_app_scr31_c104, sub: gen_app_scr31_c105, glyph: gen_app_scr31_c106))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c107, value: gen_app_scr31_c108, sub: gen_app_scr31_c109, glyph: gen_app_scr31_c110)), const SizedBox(width: 12), Expanded(child: DsStat(label: gen_app_scr31_c111, value: gen_app_scr31_c112, sub: gen_app_scr31_c113, glyph: gen_app_scr31_c114))]))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Expanded(child: DsStat(label: gen_app_scr31_c115, value: gen_app_scr31_c116, sub: gen_app_scr31_c117, glyph: gen_app_scr31_c118)), const SizedBox(width: 12), const Expanded(child: SizedBox())]))),
+      ],
     );
   }
 }

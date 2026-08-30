@@ -1,46 +1,25 @@
-// 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: ⚙️ הגדרות
-// 🧬 בקשה: הירו ⚙️ הגדרות | סנכרון · גיבוי · הרשאות · אטום LiveStatusDot מחובר · מסונכרן · אטום AnimatedToggle עבודה אופליין · אטום NeonButton גיבוי עכשיו · באנר סנכרון · זיהוי-התנגשויות · גיבוי · ייצוא
-// 🧬 אטומים שנבחרו: LiveStatusDot · AnimatedToggle · NeonButton · CoinBanner
+// ✨ חולל ע"י מנוע-הרינדור (render-ds) — מסך-מערכת. אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_app_settings_content.dart';
-import '../dart-ui-bs/animated_toggle.dart';
-import '../dart-ui-bs/auto/bs_tokens.dart';
-import '../dart-ui-bs/auto/coin_banner.dart';
-import '../dart-ui-bs/live_status_dot.dart';
-import '../dart-ui-bs/neon_button.dart';
+import '../dart-ui-bs/ds/ds.dart';
+import '../dart-ui-bs/ds/ds_toggle_tile.dart';
 import 'package:flutter/material.dart';
 
-class GenAppSettingsScreen extends StatefulWidget {
+class GenAppSettingsScreen extends StatelessWidget {
   const GenAppSettingsScreen({super.key});
 
   @override
-  State<GenAppSettingsScreen> createState() => _GenAppSettingsScreenState();
-}
-
-class _GenAppSettingsScreenState extends State<GenAppSettingsScreen> {
-  
-
-  void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
-      );
-
-  @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
-        appBar: AppBar(title: Text(gen_app_settings_app_bar_title)),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          children: [
-          LiveStatusDot(label: gen_app_settings_statusdot_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          AnimatedToggle(label: gen_app_settings_toggle_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          NeonButton(label: gen_app_settings_neon_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, onPressed: () => _toast(gen_app_settings_neon_toast)),
-          CoinBanner(coins: 0, sub: gen_app_settings_banner_sub),
-          ],
-        ),
-      ),
+    return DsScaffold(
+      title: gen_app_settings_c0,
+      subtitle: gen_app_settings_c1,
+      icon: gen_app_settings_c2,
+      children: [
+        DsSection(title: gen_app_settings_c3, children: [
+        DsToggleTile(label: gen_app_settings_c4),
+        DsToggleTile(label: gen_app_settings_c5),
+        DsToggleTile(label: gen_app_settings_c6),
+        ]),
+      ],
     );
   }
 }
