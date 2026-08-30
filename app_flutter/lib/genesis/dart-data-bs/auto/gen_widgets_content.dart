@@ -1,0 +1,22 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_widgets_card_glyph = '🧩';
+const String gen_widgets_card_title = 'וידג\'טים מורכבים';
+const String gen_widgets_card_sub = 'טאבים אקורדיון והיפוך שהמחולל מרכיב ממשפט';
+const String gen_widgets_card_toast = 'וידג\'טים מורכבים';
+const String gen_widgets_header_text = 'ניווט ותוכן';
+const String gen_widgets_tabs_option = 'בית'; // t_dda9882b
+const String gen_widgets_tabs_option2 = 'פרופיל'; // t_e1ea2811
+const String gen_widgets_tabs_option3 = 'הגדרות'; // t_47cfdefb
+const String gen_widgets_accordion_option = 'שאלה ראשונה';
+const String gen_widgets_accordion_option2 = 'שאלה שנייה';
+const String gen_widgets_accordion_option3 = 'שאלה שלישית';
+const String gen_widgets_header_text2 = 'אינטראקציה';
+const String gen_widgets_flip_front = 'הקש להיפוך';
+const String gen_widgets_flip_back = 'הצד השני';
+const String gen_widgets_chips_option = 'עברית'; // t_6e254acf
+const String gen_widgets_chips_option2 = 'עיצוב'; // t_a6d788d6
+const String gen_widgets_chips_option3 = 'הנפשה';
+const String gen_widgets_chips_option4 = 'פלאטר';
+const String gen_widgets_header_text3 = 'נתונים';
+const String gen_widgets_banner_sub = 'כל וידג\'ט כאן חי ומגיב - נבחר ממילה בעברית';
+const String gen_widgets_app_bar_title = 'רכיבים חיים - וידג\'טים מורכבים';

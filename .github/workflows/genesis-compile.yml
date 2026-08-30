@@ -6,7 +6,7 @@ on:
   push:
     branches: ['claude/**']
     paths:
-      - 'app_flutter/lib/genesis/atoms/**'
+      - 'app_flutter/lib/genesis/**'
       - '.github/workflows/genesis-compile.yml'
   workflow_dispatch:
 
@@ -26,4 +26,4 @@ jobs:
       - name: Pub get
         run: flutter pub get
       - name: Analyze genesis atoms
-        run: flutter analyze lib/genesis/atoms
+        run: flutter analyze lib/genesis

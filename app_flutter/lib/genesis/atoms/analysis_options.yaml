@@ -1,8 +1,0 @@
-# שער-קומפילציה לאטומי-המחולל: בלי very_good — רק שגיאות-אמת (compile errors/warnings),
-# לא ליטוש-סגנון. המטרה: "האם זה מתקמפל", לא "האם זה בסגנון-הבית".
-analyzer:
-  errors:
-    prefer_const_constructors: ignore
-    prefer_const_literals_to_create_immutables: ignore
-linter:
-  rules: {}

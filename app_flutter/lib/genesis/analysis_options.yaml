@@ -1,0 +1,9 @@
+# שער-הקומפילציה של המחולל: הפלט המלא (17 מסכים + 86 ווידג'טים + דאטה).
+# בלי very_good — רק שגיאות-אמת (compile), לא ליטוש-סגנון.
+analyzer:
+  errors:
+    prefer_const_constructors: ignore
+    prefer_const_literals_to_create_immutables: ignore
+    unused_element: ignore
+linter:
+  rules: {}

@@ -1,0 +1,21 @@
+// 📦 דאטה · תוכן-המחולל (genesis-gen) — התוויות מן-הבקשה, verbatim. אל תערוך ידנית.
+const String gen_components_card_glyph = '🧩';
+const String gen_components_card_title = 'רכיבים חיים';
+const String gen_components_card_sub = 'כפתורים וחלונות שהמחולל מרכיב ממשפט';
+const String gen_components_card_toast = 'רכיבים חיים';
+const String gen_components_header_text = 'כפתורים אינטראקטיביים';
+const String gen_components_neon_label = 'שגר עכשיו';
+const String gen_components_neon_toast = 'שגר עכשיו';
+const String gen_components_ripple_label = 'גל מגע';
+const String gen_components_ripple_toast = 'גל מגע';
+const String gen_components_gradientbtn_label = 'גרדיאנט נודד';
+const String gen_components_gradientbtn_toast = 'גרדיאנט נודד';
+const String gen_components_magnet_label = 'משיכה מגנטית';
+const String gen_components_magnet_toast = 'משיכה מגנטית';
+const String gen_components_header_text2 = 'חלונות';
+const String gen_components_glass_title = 'חלון זכוכית';
+const String gen_components_glass_sub = 'שקוף ומטושטש עם כניסה מונפשת';
+const String gen_components_spotlight_title = 'זרקור נע';
+const String gen_components_spotlight_sub = 'אור סורק מתחת לטקסט';
+const String gen_components_banner_sub = 'כל רכיב כאן אינטראקטיבי וחי - נבחר ממילה בעברית';
+const String gen_components_app_bar_title = 'רכיבים חיים - כפתורים וחלונות';
