@@ -4,7 +4,7 @@
 // טוהר: פונקציית top-level עצמאית, אפס import פנימי (רק dart:core — RegExp/split).
 //
 // שקעים/הטבעות (חוק-3, דיבר-3):
-//   • `_kColorModifiers` (lipskey_products_screen.dart:1783) — מוטבע verbatim;
+//   • `kColorModifiers` (lipskey_products_screen.dart:1783) — מוטבע verbatim;
 //     מילון קבוע ({'מוברש','מט'}), לא קטלוג מתחלף.
 //   • המחלקה LipskeyCatalogProduct קורסת ל-`ColorProduct` — מחזיק-קלט טהור,
 //     רק השדה `nameHe` ש-_colorModifier קורא.
@@ -19,13 +19,12 @@ class ColorProduct {
 }
 
 /// מילות finish/modifier — verbatim (lipskey_products_screen.dart:1783).
-const Set<String> _kColorModifiers = {'מוברש', 'מט'};
 
 /// מילת-ה-finish ("מוברש"/"מט") של [product], או null.
 /// התנהגות verbatim של lipskey_products_screen.dart:802-808.
-String? colorModifier(ColorProduct product) {
+String? colorModifier(ColorProduct product, {required Set<String> kColorModifiers}) {
   final w = product.nameHe
       .split(RegExp(r'\s+'))
-      .firstWhere((w) => _kColorModifiers.contains(w), orElse: () => '');
+      .firstWhere((w) => kColorModifiers.contains(w), orElse: () => '');
   return w.isEmpty ? null : w;
 }

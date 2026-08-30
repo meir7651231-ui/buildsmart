@@ -9,9 +9,9 @@
 // פלט:  String? — מזהה-קבוצה גלווני, או null אם החומר אינו באחת הקבוצות.
 
 /// The galvanic group of a plumbing material. Verbatim of plumbing_trade_seed.dart:46-69.
-String? galvanicGroup(String m) {
-  const copper = {'נחושת', 'פליז'};
-  const iron = {'פלדה', 'נירוסטה'};
+String? galvanicGroup(String m, {required String Function(String) term}) {
+  final copper = {term('nchvsht'), term('plyz')};
+  final iron = {term('pldh'), term('nyrvsth')};
   if (copper.contains(m)) return 'copper-group';
   if (iron.contains(m)) return 'iron-group';
   return null;

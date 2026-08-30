@@ -186,7 +186,7 @@ class GenesisGallery extends StatelessWidget {
 
   static final List<_GEntry> _screens = [
     _GEntry('🧬 פרופיל עסק', 'נוצר מהמחולל — חיווט-מלא', () => const GenBusinessScreen()),
-    _GEntry('🧬 הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז אבחון תקינות מספר', 'נוצר מהמחולל — חיווט-מלא', () => const GenCapautodreamScreen()),
+    _GEntry('🧬 הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז נרמול מייל', 'נוצר מהמחולל — חיווט-מלא', () => const GenCapautodreamScreen()),
     _GEntry('🧬 מסע-בזמן של השעון - שעת-יממה נהפכת לתאריך-תצוגה כשכל דקה מחצות נספרת כיום שלם בלוח', 'נוצר מהמחולל — חיווט-מלא', () => const GenCapclockcalendarScreen()),
     _GEntry('🧬 שחזור מספר טלפון לתצוגה ישראלית תקנית מתוך שורה שהגיעה עטופה בקידוד-מייל ישן', 'נוצר מהמחולל — חיווט-מלא', () => const GenCapmailphoneScreen()),
     _GEntry('🧬 חתימת-אותיות עברית לשעה על השעון - כמה דקות עברו מחצות הלילה כתוב בגימטריה', 'נוצר מהמחולל — חיווט-מלא', () => const GenCaptimegematriaScreen()),

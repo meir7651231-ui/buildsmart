@@ -1,10 +1,10 @@
 // ⚛️ אטום-Dart (דרגת-חוזה) · flowRole
 // מוצא: buildsmart/app_flutter/lib/logic/install_engine.dart:310-317
 //        (‏flowRole; חוק-4 — התנהגות זהה בדיוק, לא-משופרת).
-//        אימות-עוגן: ‏install_engine.dart:310 = `FlowRole flowRole(p) {` וגוף :311-316.
+//        אימות-עוגן: ‏install_engine.dart:310 = `FlowRole flowRole(p, fixtureCats: fixtureCats, structuralCats: structuralCats) {` וגוף :311-316.
 // טוהר: פונקציית top-level עצמאית, אפס import פנימי (רק שפה/סטנדרט).
 //       ‏enum FlowRole (מחזיק-פלט טהור) מוגדר מקומית (מקור:295).
-//       ‏_accessorySkus (מקור:301-308) · _fixtureCats (263-267) · _structuralCats
+//       ‏_accessorySkus (מקור:301-308) · fixtureCats (263-267) · structuralCats
 //       (268-271) = דאטה-קבוע פנימי (רשימות-SKU/קטגוריות, לא הקשר/זהות/סוד).
 //
 // שקע שהוזרק (קריאה-לשכן ⇒ פרמטר-שקע · חוק-3, דיבר-3):
@@ -38,28 +38,18 @@ const _accessorySkus = {
 };
 
 /// Fixture categories — terminal devices (verbatim: install_engine.dart:263-267).
-const _fixtureCats = {
-  'אסלות וכיורים', 'מושבי אסלה', 'אביזרי אסלה', 'מערכות אמבטיה', 'ערכות רחצה',
-  'חלקים סניטריים', 'אביזרי חדר רחצה', 'התקנה נמוכה', 'התקנה גבוהה',
-  'התקנה צמודה', 'דיורים ופיות',
-};
 
 /// Structural categories — hangers/clamps/tools (verbatim: install_engine.dart:268-271).
-const _structuralCats = {
-  'חבקי תליה', 'חבקי צינור', 'עוגנים ובנדים', 'כלי עבודה', 'מצופים',
-  'ידיות אחיזה', 'ארונות מחלק',
-};
 
 FlowRole flowRole(
   String sku,
   String categoryHe, {
-  Set<String> hotWaterAccessorySkus = const {},
-}) {
+  Set<String> hotWaterAccessorySkus = const {}, required Set fixtureCats, required Set structuralCats}) {
   if (_accessorySkus.contains(sku) || hotWaterAccessorySkus.contains(sku)) {
     return FlowRole.accessory;
   }
   final c = categoryHe;
-  if (_structuralCats.contains(c)) return FlowRole.accessory;
-  if (_fixtureCats.contains(c)) return FlowRole.fixture;
+  if (structuralCats.contains(c)) return FlowRole.accessory;
+  if (fixtureCats.contains(c)) return FlowRole.fixture;
   return FlowRole.connector;
 }

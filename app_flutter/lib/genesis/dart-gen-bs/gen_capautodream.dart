@@ -1,9 +1,9 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז אבחון תקינות מספר
-// 🧬 בקשה: הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז אבחון תקינות מספר: · הירו 🧪 הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז אבחון תקינות מספר | יכולת שהוזמנה ולא היתה קיימת - הרכבתי אותה לבד מ-2 אטומים והוכחתי על 2 דוגמאות · כותרת תחנת ההוכחה - הדוגמאות שהוזמנו מדליקות את השרשרת · אטום ChipWrap הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז אבחון תקינות מספר: חמישי / שש מאות · חישוב מיון חוטי תמיכה לא נקרא מנהל ראשון ואז חדש ראשון (sortSupportThreads) · חישוב אבחון תקינות מספר טלפון תקין (phoneIssue) · כותרת תחנת הקלט החופשי - הקלידו כל ערך והשרשרת רצה חיה · שדה הקלידו ערך עבור הזמנה-עצמית - יכולת · חישוב מיון חוטי תמיכה לא נקרא מנהל ראשון ואז חדש ראשון (sortSupportThreads) · חישוב אבחון תקינות מספר טלפון תקין (phoneIssue) · באנר ההרכבה שמצאתי - sortSupportThreads ⟵ phoneIssue - כל הדוגמאות עברו
+// 🧬 שם: הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז נרמול מייל
+// 🧬 בקשה: הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז נרמול מייל: · הירו 🧪 הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז נרמול מייל | יכולת שהוזמנה ולא היתה קיימת - הרכבתי אותה לבד מ-2 אטומים והוכחתי על 2 דוגמאות · כותרת תחנת ההוכחה - הדוגמאות שהוזמנו מדליקות את השרשרת · אטום ChipWrap הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז נרמול מייל: אחת / Kislev · חישוב מיון חוטי תמיכה לא נקרא מנהל ראשון ואז חדש ראשון (sortSupportThreads) · חישוב נרמול מייל (normEmail) · כותרת תחנת הקלט החופשי - הקלידו כל ערך והשרשרת רצה חיה · שדה הקלידו ערך עבור הזמנה-עצמית - יכולת · חישוב מיון חוטי תמיכה לא נקרא מנהל ראשון ואז חדש ראשון (sortSupportThreads) · חישוב נרמול מייל (normEmail) · באנר ההרכבה שמצאתי - sortSupportThreads ⟵ normEmail - כל הדוגמאות עברו
 // 🧬 אטומים שנבחרו: HeroCard · CaSubTitle · ChipWrap · CaSubTitle · InlineTextRow · CoinBanner · RStat · RStat · RStat · RStat
 import '../dart-data-bs/auto/gen_capautodream_content.dart';
-import '../dart-maor/phone-issue.dart';
+import '../dart-maor/norm-email.dart';
 import '../dart-maor/sort-support-threads.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
@@ -43,11 +43,11 @@ class _GenCapautodreamScreenState extends State<GenCapautodreamScreen> {
           CaSubTitle(gen_capautodream_header_text),
           ChipWrap(options: const <String>[gen_capautodream_chip_option, gen_capautodream_chip_option2], selected: _t1, onSelect: (v) => setState(() => _t1 = v)),
           Row(children: [RStat(value: sortSupportThreads(_t1).toString(), label: gen_capautodream_stat_label)]),
-          Row(children: [RStat(value: phoneIssue((sortSupportThreads(_t1).toString()), const {'k1': gen_capautodream_calc_arg, 'k2': gen_capautodream_calc_arg2, 'k3': gen_capautodream_calc_arg3, 'k4': gen_capautodream_calc_arg4, 'k5': gen_capautodream_calc_arg5, 'k6': 10}) ?? '', label: gen_capautodream_stat_label2)]),
+          Row(children: [RStat(value: normEmail((sortSupportThreads(_t1).toString())), label: gen_capautodream_stat_label2)]),
           CaSubTitle(gen_capautodream_header_text2),
           InlineTextRow(label: gen_capautodream_textfield_label, hint: gen_capautodream_textfield_hint, value: _t2, onChanged: (v) => setState(() => _t2 = v)),
           Row(children: [RStat(value: sortSupportThreads(_t2).toString(), label: gen_capautodream_stat_label3)]),
-          Row(children: [RStat(value: phoneIssue((sortSupportThreads(_t2).toString()), const {'k1': gen_capautodream_calc_arg6, 'k2': gen_capautodream_calc_arg7, 'k3': gen_capautodream_calc_arg8, 'k4': gen_capautodream_calc_arg9, 'k5': gen_capautodream_calc_arg10, 'k6': 10}) ?? '', label: gen_capautodream_stat_label4)]),
+          Row(children: [RStat(value: normEmail((sortSupportThreads(_t2).toString())), label: gen_capautodream_stat_label4)]),
           CoinBanner(coins: 0, sub: gen_capautodream_banner_sub),
           ],
         ),
