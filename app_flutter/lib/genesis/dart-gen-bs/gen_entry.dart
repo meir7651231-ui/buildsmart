@@ -18,7 +18,8 @@ import '../dart-ui-bs/screens__lipskey_product_sheet/unit_segment_toggle.dart';
 import 'gen_business.dart';
 import 'gen_improv.dart';
 import 'gen_mission.dart';
-import 'gen_quest.dart';
+import 'gen_quest1.dart';
+import 'gen_quest2.dart';
 import 'gen_shipping.dart';
 import 'gen_team.dart';
 import 'package:flutter/material.dart';
@@ -67,8 +68,8 @@ class _GenEntryScreenState extends State<GenEntryScreen> {
           HeroCard(glyph: gen_entry_card_glyph2, title: gen_entry_card_title2, sub: gen_entry_card_sub2, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenBusinessScreen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           HeroCard(glyph: gen_entry_card_glyph3, title: gen_entry_card_title3, sub: gen_entry_card_sub3, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenImprovScreen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           HeroCard(glyph: gen_entry_card_glyph4, title: gen_entry_card_title4, sub: gen_entry_card_sub4, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenMissionScreen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
-          HeroCard(glyph: gen_entry_card_glyph5, title: gen_entry_card_title5, sub: gen_entry_card_sub5, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenQuestScreen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
-          HeroCard(glyph: gen_entry_card_glyph6, title: gen_entry_card_title6, sub: gen_entry_card_sub6, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenQuestScreen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
+          HeroCard(glyph: gen_entry_card_glyph5, title: gen_entry_card_title5, sub: gen_entry_card_sub5, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenQuest1Screen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
+          HeroCard(glyph: gen_entry_card_glyph6, title: gen_entry_card_title6, sub: gen_entry_card_sub6, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenQuest2Screen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           HeroCard(glyph: gen_entry_card_glyph7, title: gen_entry_card_title7, sub: gen_entry_card_sub7, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenShippingScreen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           HeroCard(glyph: gen_entry_card_glyph8, title: gen_entry_card_title8, sub: gen_entry_card_sub8, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenTeamScreen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           ChipWrap(options: const <String>[gen_entry_chip_option, gen_entry_chip_option2, gen_entry_chip_option3, gen_entry_chip_option4, gen_entry_chip_option5, gen_entry_chip_option6, gen_entry_chip_option7, gen_entry_chip_option8, gen_entry_chip_option9, gen_entry_chip_option10, gen_entry_chip_option11, gen_entry_chip_option12], selected: _t6, onSelect: (v) => setState(() => _t6 = v)),

@@ -9,7 +9,7 @@ import '../dart-ui-bs/auto/coin_banner.dart';
 import '../dart-ui-bs/auto/rstat.dart';
 import '../dart-ui-bs/auto/switch_row.dart';
 import '../dart-ui-bs/hero_card.dart';
-import 'gen_quest.dart';
+import 'gen_quest1.dart';
 import 'package:flutter/material.dart';
 
 class GenQuest2Screen extends StatefulWidget {
@@ -39,7 +39,7 @@ class _GenQuest2ScreenState extends State<GenQuest2Screen> {
           HeroCard(glyph: gen_quest2_card_glyph, title: gen_quest2_card_title, sub: gen_quest2_card_sub, onTap: () => _toast(gen_quest2_card_toast), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           SwitchRow(label: gen_quest2_switch_label, value: _v1, onChanged: (v) => setState(() => _v1 = v)),
           if (_v1) Row(children: [RStat(value: hebMonthHe(DateTime.now()), label: gen_quest2_stat_label)]),
-          HeroCard(glyph: gen_quest2_card_glyph2, title: gen_quest2_card_title2, sub: gen_quest2_card_sub2, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenQuestScreen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
+          HeroCard(glyph: gen_quest2_card_glyph2, title: gen_quest2_card_title2, sub: gen_quest2_card_sub2, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GenQuest1Screen())), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           CoinBanner(coins: 0, sub: gen_quest2_banner_sub),
           ],
         ),
