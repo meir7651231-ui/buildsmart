@@ -25,30 +25,18 @@ bool _truthy(Object? v) {
   return true;
 }
 
-String _decWord(Object? d) => d == 'yes'
-    ? 'ממשיך'
+String _decWord(Object? d, Map<String, String> T) => d == T['k1']
+    ? T['k2']!
     : d == 'no'
-        ? 'לא ממשיך'
-        : d == 'hold'
-            ? 'בהמתנה'
+        ? T['k3']!
+        : d == T['k4']
+            ? T['k5']!
             : '';
 
 /// Builds the CSV matrix (header row + one row per enrollment) for the
 /// "re-enroll for next year" export. Verbatim behaviour of the JS source
-/// `reenrollCsvRows`. Fully pure — no sockets.
-List<List<String>> reenrollCsvRows(List<Map<String, Object?>> rows) {
-  final head = <String>[
-    'תלמיד/ה',
-    'משפחה',
-    'חוג',
-    'נוכחות',
-    'חיסורים',
-    'יתרה ₪',
-    'סטטוס',
-    'החלטה',
-    'נרשם לשנה הבאה',
-    'הערה',
-  ];
+/// `reenrollCsvRows`. שקעים: head (שורת-הכותרת) + T (מילון-ההחלטות) — הכרעה 16.
+List<List<String>> reenrollCsvRows(List<Map<String, Object?>> rows, List<String> head, Map<String, String> T) {
   final out = <List<String>>[head];
   for (final r in rows) {
     final summary = (r['summary'] as Map<String, Object?>?) ?? const {};
@@ -61,8 +49,8 @@ List<List<String>> reenrollCsvRows(List<Map<String, Object?>> rows) {
       '${summary['absences']}',
       '${summary['balance']}',
       (summary['statusLabel'] ?? '') as String,
-      _decWord(r['decision']),
-      _truthy(r['renewed']) ? 'כן' : '',
+      _decWord(r['decision'], T),
+      _truthy(r['renewed']) ? T['k6']! : '',
       (e['renewNote'] ?? '') as String,
     ]);
   }
