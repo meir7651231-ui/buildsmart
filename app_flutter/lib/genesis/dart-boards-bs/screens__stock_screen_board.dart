@@ -24,7 +24,7 @@ class StockScreenBoard extends ConsumerWidget {
       onTap: () =>
                           ref.read(stockTabProvider.notifier).state =
                               'warehouse',
-      info: (null as dynamic) /* TODO-לוח: ({String img, String why}) */,
+      info: (img: '', why: '') /* TODO-לוח: ({String img, String why}) */,
       name: '' /* TODO-לוח: String */,
       on: tab == 'warehouse',
       warehouse: tab == 'warehouse',
