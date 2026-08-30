@@ -1,3 +1,4 @@
+import '../dart-data/recommended_kit_for_product-uidata.dart';
 // ⚛️ אטום-Dart (דרגת-חוזה) · recommendedKitForProduct
 // מוצא: buildsmart/app_flutter/lib/logic/install_kit.dart:42-149
 //        (‏recommendedKitForProduct; חוק-4 — התנהגות זהה בדיוק, לא-משופרת).
@@ -66,9 +67,9 @@ class KitItem {
   final Severity severity;
 
   String get severityHe => switch (severity) {
-        Severity.required => 'חובה',
-        Severity.recommended => 'מומלץ',
-        Severity.optional => 'אופציונלי',
+        Severity.required => '${k1}',
+        Severity.recommended => '${k2}',
+        Severity.optional => '${k3}',
       };
 }
 
@@ -93,8 +94,8 @@ List<KitItem> recommendedKitForProduct(
       ),
       const KitItem(
         kind: KitKind.tool,
-        label: 'מכונת ריתוך-שקע 260°C',
-        reason: 'מחממת את הצינור ואת השקע בו-זמנית',
+        label: '${k4}',
+        reason: '${k5}',
       ),
       KitItem(
         kind: KitKind.tool,
@@ -103,19 +104,19 @@ List<KitItem> recommendedKitForProduct(
       ),
       const KitItem(
         kind: KitKind.tool,
-        label: 'מספריים/חותך צינור PPR',
-        reason: 'חיתוך ניצב ונקי של הצינור',
+        label: '${k6}',
+        reason: '${k7}',
       ),
       const KitItem(
         kind: KitKind.tool,
-        label: 'מסיר גרדים + מטלית ניקוי',
-        reason: 'ניקוי וייבוש הקצה לפני ריתוך',
+        label: '${k8}',
+        reason: '${k9}',
         severity: Severity.recommended,
       ),
       const KitItem(
         kind: KitKind.tool,
-        label: 'עט סימון עומק',
-        reason: 'סימון עומק ההחדרה לשקע על הצינור',
+        label: '${k10}',
+        reason: '${k11}',
         severity: Severity.recommended,
       ),
     ];
@@ -134,8 +135,8 @@ List<KitItem> recommendedKitForProduct(
       if (isPipe)
         const KitItem(
           kind: KitKind.tool,
-          label: 'חותך צינורות SmartLock',
-          reason: 'חיתוך ניצב ונקי לצינור PP במידות 32-63',
+          label: '${k12}',
+          reason: '${k13}',
         ),
       KitItem(
         kind: KitKind.tool,
@@ -158,8 +159,8 @@ List<KitItem> recommendedKitForProduct(
       ));
       add('ptfe', const KitItem(
         kind: KitKind.sealant,
-        label: 'סרט טפלון (PTFE)',
-        reason: 'איטום כל חיבור הברגה זכר',
+        label: '${k14}',
+        reason: '${k15}',
       ));
     } else if (e.type == EndType.hdpeCompression) {
       add('wrench-comp-${spec.material}-${e.size}', KitItem(

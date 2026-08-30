@@ -1,3 +1,4 @@
+import '../dart-data/recommended_kit_for-uidata.dart';
 // ⚛️ אטום-Dart (דרגת-חוזה) · recommendedKitFor
 // מוצא: buildsmart/app_flutter/lib/logic/install_kit.dart:130-260
 //        (‏recommendedKitFor; חוק-4 — התנהגות זהה בדיוק, לא-משופרת).
@@ -74,9 +75,9 @@ class KitItem {
   final Severity severity;
 
   String get severityHe => switch (severity) {
-        Severity.required => 'חובה',
-        Severity.recommended => 'מומלץ',
-        Severity.optional => 'אופציונלי',
+        Severity.required => '${k1}',
+        Severity.recommended => '${k2}',
+        Severity.optional => '${k3}',
       };
 }
 
@@ -124,14 +125,14 @@ List<KitItem> recommendedKitFor(
       addItem('wrench-bsp-${jointA.size}',
           KitItem(
             kind: KitKind.tool,
-            label: 'מפתח שוודי מתכוונן לחיבור הברגה ${jointA.size}',
-            reason: 'הידוק חיבורי BSP בקו',
+            label: '${k4}${jointA.size}',
+            reason: '${k5}',
           ));
       addItem('ptfe',
           const KitItem(
             kind: KitKind.sealant,
-            label: 'סרט טפלון (PTFE)',
-            reason: 'איטום כל חיבור הברגה זכר',
+            label: '${k6}',
+            reason: '${k7}',
           ));
     }
 
@@ -140,20 +141,20 @@ List<KitItem> recommendedKitFor(
       addItem('ppr-welder',
           const KitItem(
             kind: KitKind.tool,
-            label: 'מכונת ריתוך-שקע PPR (260°C)',
-            reason: 'ריתוך-שקע למצמד / ברך / מסעף PPR',
+            label: '${k8}',
+            reason: '${k9}',
           ));
       addItem('ppr-die-${jointA.size}',
           KitItem(
             kind: KitKind.tool,
-            label: 'תבנית ריתוך ⌀${jointA.size} מ"מ',
-            reason: 'זוג תבניות (זכר+נקבה) לקוטר הקו',
+            label: '${k10}${jointA.size}${k11}',
+            reason: '${k12}',
           ));
       addItem('ppr-cutter',
           const KitItem(
             kind: KitKind.tool,
-            label: 'חותך צינור PPR',
-            reason: 'חיתוך ניצב לפני ריתוך',
+            label: '${k13}',
+            reason: '${k14}',
           ));
     }
     // Compression / pipe-bridged joint → compression-nut wrench.
@@ -162,8 +163,8 @@ List<KitItem> recommendedKitFor(
       addItem('wrench-comp-$mat-${jointA.size}',
           KitItem(
             kind: KitKind.tool,
-            label: 'מפתח חבישה DN${jointA.size} ל-$mat',
-            reason: 'הידוק אום compression על צינור',
+            label: '${k15}${jointA.size}${k16}$mat',
+            reason: '${k17}',
           ));
     }
 
@@ -172,8 +173,8 @@ List<KitItem> recommendedKitFor(
       addItem('crimper-pex-${jointA.size}',
           KitItem(
             kind: KitKind.tool,
-            label: 'מכווץ PEX (Crimper) ל-${jointA.size}',
-            reason: 'לחיצת שרוול על צינור PEX',
+            label: '${k18}${jointA.size}',
+            reason: '${k19}',
           ));
     }
 
@@ -182,8 +183,8 @@ List<KitItem> recommendedKitFor(
       addItem('press-cu-${jointA.size}',
           KitItem(
             kind: KitKind.tool,
-            label: 'כלי לחיצה לנחושת ${jointA.size}',
-            reason: 'לחיצת O-ring על צינור נחושת',
+            label: '${k20}${jointA.size}',
+            reason: '${k21}',
           ));
     }
 
@@ -191,23 +192,23 @@ List<KitItem> recommendedKitFor(
     // separation) and a sealant suited to the meeting metals.
     final ma = sa.material, mb = sb.material;
     if (ma != mb) {
-      const supplyMetal = {'נחושת', 'פליז', 'פלדה', 'נירוסטה'};
+      const supplyMetal = {'${k22}', '${k23}', '${k24}', '${k25}'};
       final aMetal = supplyMetal.contains(ma);
       final bMetal = supplyMetal.contains(mb);
       if (aMetal && bMetal) {
         addItem('dielectric',
             const KitItem(
               kind: KitKind.safety,
-              label: 'רקורד דיאלקטרי',
-              reason: 'הפרדה גלוונית בין שתי מתכות שונות (קורוזיה)',
+              label: '${k26}',
+              reason: '${k27}',
             ));
       }
       // Cross-material always benefits from extra thread sealant.
       addItem('hemp',
           const KitItem(
             kind: KitKind.sealant,
-            label: 'חמצן (hemp) או טפלון עבה',
-            reason: 'איטום מעבר חומרים מוגבר',
+            label: '${k28}',
+            reason: '${k29}',
             severity: Severity.recommended,
           ));
     }

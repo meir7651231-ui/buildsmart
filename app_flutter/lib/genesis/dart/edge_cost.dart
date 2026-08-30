@@ -1,3 +1,4 @@
+import '../dart-data/edge_cost-data.dart';
 // ⚛️ אטום-Dart (דרגת-חוזה) · edgeCost
 // מוצא: buildsmart/app_flutter/lib/logic/install_engine.dart:683-729
 //        (במקור `_edgeCost`; חוק-4 — התנהגות זהה בדיוק, לא-משופרת).
@@ -15,7 +16,7 @@
 //   • isFitting(b) (install_engine.dart:727, ההגדרה :622) ⇒ שקע `isFitting`:
 //     bool Function(String categoryHe). ברירת-המחדל = חברוּת ב-_fittingCats
 //     (install_engine.dart:615-620), verbatim.
-// הקבוצה `_drainageFamily` (install_engine.dart:651) נשמרת כ-const מקומי — במקור
+// הקבוצה `kDrainageFamily` (install_engine.dart:651) נשמרת כ-const מקומי — במקור
 //   היא inline בגוף _edgeCost, לא קריאה-לשכן.
 //
 // קלט:  a, b        — EdgeNode (sku · categoryHe).
@@ -56,13 +57,7 @@ double? _noBore(String sku) => null;
 
 /// קטגוריות-החיבור שמותר למלא-בהן פער (install_engine.dart:615-620) — ברירת-מחדל
 /// ל-isFitting.
-const _fittingCats = {
-  'אביזרי נחושת', 'אביזרי תבריג', 'מחברי HDPE', 'מחברי NTM', 'אביזרי שקע-תקע',
-  'ברכיים', 'מסעפים וחיבורי אסלה', 'אטמים ופקקים', 'מצמדים וצינורות', 'צינורות',
-  'צינורות אפורות', 'צינורות PP', 'אביזרי חיבור', 'סטי הידוק וחיבורים',
-  'פקקים וצינורות', 'זקיף אסלה',
-};
-bool _isFittingDefault(String categoryHe) => _fittingCats.contains(categoryHe);
+bool _isFittingDefault(String categoryHe) => kFittingCats.contains(categoryHe);
 
 /// ברירת-מחדל לשקע-ההתאמה-הישירה — verbatim ConnectorEnd.directMatesWith
 /// (lipskey_verified_connections.dart:38-48).
@@ -76,7 +71,7 @@ bool _directMatesDefault(EndPart a, EndPart b) {
 }
 
 /// משפחת-הניקוז — מעבר-חומר בתוכה זול (install_engine.dart:651).
-const _drainageFamily = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
+
 
 /// מחיר-קשת לחיפוש-המסלול — התנהגות verbatim של install_engine.dart:683-729.
 int edgeCost(
@@ -95,7 +90,7 @@ int edgeCost(
   int transition;
   if (ma == null || mb == null || ma == mb) {
     transition = 0;
-  } else if (_drainageFamily.contains(ma) && _drainageFamily.contains(mb)) {
+  } else if (kDrainageFamily.contains(ma) && kDrainageFamily.contains(mb)) {
     transition = 1; // PVC↔PP↔multi-layer↔ceramic — common drainage transition
   } else {
     transition = 4; // brass↔HDPE, copper↔PEX — needs adapter + sealant choice

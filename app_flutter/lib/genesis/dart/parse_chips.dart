@@ -1,3 +1,4 @@
+import '../dart-data/parse_chips-data.dart';
 // ⚛️ אטום-Dart · parseChips — מנוע-נקי (מנגנון-בלבד, אפס-דאטה · הכרעת-בעלים "אפס-דאטה במנוע").
 // מוצא: buildsmart/app_flutter/lib/data/chip_hierarchy.dart:196-315 (parseChips; טיפוס ChipPath :154-194; חוק-2).
 // טוהר-מוחלט: פונקציית top-level, אפס import, **אפס דאטה צרובה**. 12 מילוני-הסיווג חולצו
@@ -43,15 +44,15 @@ class ChipPath {
   String levelLabelOf(int pathIndex) {
     if (pathIndex < 0) return '';
     var i = pathIndex;
-    if (i < level1.length) return 'חיבור';
+    if (i < level1.length) return kLevelLabels[0];
     i -= level1.length;
-    if (i < level2.length) return 'צורה';
+    if (i < level2.length) return kLevelLabels[1];
     i -= level2.length;
-    if (i < level3.length) return 'תכונה';
+    if (i < level3.length) return kLevelLabels[2];
     i -= level3.length;
-    if (i < level4.length) return 'תבריג';
+    if (i < level4.length) return kLevelLabels[3];
     i -= level4.length;
-    if (i == 0 && level5 != null) return 'מידה';
+    if (i == 0 && level5 != null) return kLevelLabels[4];
     return '';
   }
 }
