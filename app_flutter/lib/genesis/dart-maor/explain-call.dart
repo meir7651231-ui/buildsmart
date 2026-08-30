@@ -26,7 +26,6 @@
 //  • הערת-חתימה: ב-JS ל-call/opts יש ברירת-מחדל {}; כאן הם positional-required (בכל
 //    דוגמאות-החוזה הם נמסרים במפורש ⇒ זהה-התנהגות לכל קלט-נבדק).
 
-const List<String> _dowHe = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
 // truthiness של JS: null/false/''/0/NaN ⇒ false, אחרת true.
 bool _truthy(dynamic v) {
@@ -59,11 +58,11 @@ String? _extJoin(dynamic node) {
 dynamic _leaf(dynamic node, String key) => node is Map ? node[key] : null;
 
 // סיבת-סגירה להצגה — רק ספציפית (חג/שבת/dnd/חירום), לא הגנרית "מחוץ-לשעות".
-String _closedTag(dynamic reason) {
+String _closedTag(dynamic reason, Map<String, String> T) {
   if (reason != null &&
       reason != '' &&
-      reason != 'מחוץ-לשעות' &&
-      reason != 'שעות-פעילות') {
+      reason != T['k1']! &&
+      reason != T['k2']!) {
     return ' (' + reason.toString() + ')';
   }
   return '';
@@ -87,13 +86,11 @@ String _pathValue(List path, String prefix, int cut, String fallback) {
 /// {outcome, reason, summary, lines, sim} — [sim] is the exact object the socket
 /// returned (identity), summary = lines.join(' '). [simulateCall] and [featureOn]
 /// are injected sockets (Law 1/3 — no internal imports).
-Map<String, dynamic> explainCall(
-  dynamic tenant,
+Map<String, dynamic> explainCall(dynamic tenant,
   Map<String, dynamic> call,
   Map<String, dynamic> opts,
   Map<String, dynamic> Function(dynamic tenant, Map<String, dynamic> call, Map<String, dynamic> opts) simulateCall,
-  bool Function(dynamic tenant, String key) featureOn,
-) {
+  bool Function(dynamic tenant, String key) featureOn, List<String> DOW_HE, Map<String, String> T) {
   final sim = simulateCall(tenant, call, opts); // R6-8: אופק-חלון מושחל
   final lines = <String>[];
 
@@ -104,7 +101,7 @@ Map<String, dynamic> explainCall(
 
   final String when;
   if (call['dow'] != null) {
-    when = 'יום ' + _dowHe[call['dow'] as int] + ' ' + _orStr(call['hhmm'], '');
+    when = T['k32']! + DOW_HE[call['dow'] as int] + ' ' + _orStr(call['hhmm'], '');
   } else if (_truthy(call['date'])) {
     when = '${call['date']} ' + _orStr(call['hhmm'], '');
   } else {
@@ -112,16 +109,16 @@ Map<String, dynamic> explainCall(
   }
 
   if (call['direction'] == 'outbound') {
-    lines.add('📞 חיוג-יוצא: ' + _orStr(call['did'], ''));
+    lines.add(T['k33']! + _orStr(call['did'], ''));
     final o = sim['outcome'];
     if (o == 'non-kosher-blocked') {
-      lines.add('⛔ מצב-כשר: ניסיון-יציאה דרך SIM לא-כשר — נחסם.');
+      lines.add(T['k5']!);
     } else if (o == 'no-such-sim') {
-      lines.add('⚠️ הערוץ שנבחר לא-קיים.');
+      lines.add(T['k7']!);
     } else if (o == 'no-default') {
-      lines.add('⚠️ אין SIM ליציאת-ברירת-מחדל.');
+      lines.add(T['k9']!);
     } else {
-      lines.add('✅ יוצא דרך: ' + o.toString().replaceFirst('via:', ''));
+      lines.add(T['k34']! + o.toString().replaceFirst('via:', ''));
     }
     return {
       'outcome': sim['outcome'],
@@ -133,7 +130,7 @@ Map<String, dynamic> explainCall(
   }
 
   if (_truthy(call['callerId'])) {
-    lines.add('📲 מתקשר ' +
+    lines.add(T['k36']! +
         call['callerId'].toString() +
         (when.isNotEmpty ? ' · ' + when : ''));
   }
@@ -141,66 +138,66 @@ Map<String, dynamic> explainCall(
   final outcome = sim['outcome'];
   switch (outcome) {
     case 'unknown-did':
-      lines.add('❓ המספר שחויג אינו מוכר למרכזייה — לא ינותב.');
+      lines.add(T['k11']!);
       break;
     case 'blocked':
       lines.add((sim['path'] as List).contains('allowlist')
-          ? '⛔ המתקשר אינו ברשימת-ההיתר (או חסוי) — נותק.'
-          : '⛔ המתקשר ברשימת-החסומים — נותק.');
+          ? T['k14']!
+          : T['k15']!);
       break;
     case 'priority':
-      lines.add('🆘 מוקד-מצוקה: מתקשר-בסיכון — מנותב ישירות לאחראי (' +
+      lines.add(T['k37']! +
           _pathValue(sim['path'] as List, 'resp:', 5, manager) +
-          '), עוקף שעות/חג.');
+          T['k39']!);
       break;
     case 'mourning':
-      lines.add('🕯️ מצב-שבעה פעיל: מנותב למחליף (' +
+      lines.add(T['k40']! +
           _pathValue(sim['path'] as List, 'sub:', 4, manager) +
           ').');
       break;
     case 'announcement':
-      lines.add('📢 קו-הכרזה: משמיע הודעה מוקלטת ומנתק.');
+      lines.add(T['k19']!);
       break;
     case 'office':
-      lines.add('✅ בשעות-פעילות → מצלצל במשרד (' + office + ').');
+      lines.add(T['k42']! + office + ').');
       break;
     case 'ivr-menu':
-      lines.add('✅ בשעות → תפריט-קולי (IVR) ממתין לבחירה.');
+      lines.add(T['k22']!);
       break;
     case 'queue':
-      lines.add('✅ בשעות → תור-המתנה עד שנציג מושך את השיחה.');
+      lines.add(T['k24']!);
       break;
     case 'voicemail':
-      lines.add('🌙 מחוץ-לשעות' +
-          _closedTag(sim['reason']) +
-          ' → מנהל (' +
+      lines.add(T['k43']! +
+          _closedTag(sim['reason'], T) +
+          T['k44']! +
           manager +
-          ') → תא-קולי (' +
+          T['k45']! +
           vm +
           ').');
       break;
     case 'manager':
-      lines.add('🌙 מחוץ-לשעות' +
-          _closedTag(sim['reason']) +
-          ' → מנהל (' +
+      lines.add(T['k43']! +
+          _closedTag(sim['reason'], T) +
+          T['k44']! +
           manager +
-          ') (בלי תא-קולי).');
+          T['k46']!);
       break;
     case 'afterhours':
       // F11: מודע-voicemail — כשהתא-הקולי כבוי, אחרי-שעות מנגן צליל-תפוס ומנתק.
       final trg = (sim['path'] as List).contains('ivr-invalid')
-          ? 'בחירה לא-תקינה ב-IVR'
-          : 'אין-מענה במשרד';
+          ? T['k29']!
+          : T['k30']!;
       lines.add(featureOn(tenant, 'voicemail')
-          ? '🌙 ' + trg + ' → מנהל (' + manager + ') → תא-קולי.'
-          : '🌙 ' + trg + ' → מנהל (' + manager + ') → צליל-תפוס (אין תא-קולי).');
+          ? '🌙 ' + trg + T['k44']! + manager + T['k47']!
+          : '🌙 ' + trg + T['k44']! + manager + T['k48']!);
       break;
     default:
       final os = '${sim['outcome']}';
       if (os.startsWith('ivr:')) {
-        lines.add('✅ בחירת-IVR → ' + os.substring(4) + '.');
+        lines.add(T['k49']! + os.substring(4) + '.');
       } else {
-        lines.add('תוצאה: ' + os);
+        lines.add(T['k50']! + os);
       }
   }
 

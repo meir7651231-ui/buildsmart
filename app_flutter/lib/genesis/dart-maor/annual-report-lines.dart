@@ -29,11 +29,9 @@ bool _isFinite(dynamic x) => x is num && x.isFinite;
 /// A single supporter's yearly donation report. Verbatim port of
 /// new/atoms/annual-report-lines.mjs (`annualReportLines`); the neighbours
 /// donationsOfYear and money are injected as sockets (Law 1/3).
-List<String> annualReportLines(
-  Map<String, dynamic> inp,
+List<String> annualReportLines(Map<String, dynamic> inp,
   List<dynamic> Function(dynamic donations, dynamic year) donationsOfYear,
-  String Function(dynamic amount, [dynamic cur]) money,
-) {
+  String Function(dynamic amount, [dynamic cur]) money, Map<String, dynamic> T) {
   final rows = donationsOfYear(inp['donations'], inp['year']);
   final ils = rows
       .where((d) => (d as Map)['cur'] != '\$')
@@ -43,19 +41,19 @@ List<String> annualReportLines(
       .fold<num>(0, (a, d) => a + (_isFinite((d as Map)['amount']) ? d['amount'] as num : 0));
   final out = <String>[
     '=' * 46,
-    '        דוח תרומות שנתי — שנת ' + inp['year'].toString(),
+    T['k1']! + inp['year'].toString(),
     '=' * 46,
     '',
-    'הארגון: ' + inp['orgName'].toString(),
-    if (_truthy(inp['orgTaxId'])) 'מס׳ עמותה/מלכ"ר: ' + inp['orgTaxId'].toString(),
-    'התורם/ת: ' +
+    T['k2']! + inp['orgName'].toString(),
+    if (_truthy(inp['orgTaxId'])) T['k3']! + inp['orgTaxId'].toString(),
+    T['k4']! +
         inp['supporterName'].toString() +
-        (_truthy(inp['payerId']) ? ' · ת"ז ' + inp['payerId'].toString() : ''),
+        (_truthy(inp['payerId']) ? T['k5']! + inp['payerId'].toString() : ''),
     '',
     '-' * 46,
   ];
   if (rows.length == 0) {
-    out.add('אין תרומות רשומות בשנת ' + inp['year'].toString() + '.');
+    out.add(T['k6']! + inp['year'].toString() + '.');
   } else {
     for (final d in rows) {
       final m = d as Map;
@@ -63,19 +61,19 @@ List<String> annualReportLines(
         m['date'].toString() +
             '  ' +
             money(m['amount'], m['cur']).padLeft(12) +
-            (_truthy(m['rid']) ? '  קבלה ' + m['rid'].toString() : '') +
+            (_truthy(m['rid']) ? T['k7']! + m['rid'].toString() : '') +
             (_truthy(m['designation']) ? '  · ' + m['designation'].toString() : ''),
       );
     }
   }
   out.add('-' * 46);
-  out.add('סה"כ ' + rows.length.toString() + ' תרומות בשנת ' + inp['year'].toString());
-  if (ils > 0) out.add('סה"כ בשקלים: ' + money(ils));
-  if (usd > 0) out.add('סה"כ בדולרים: ' + money(usd, '\$'));
+  out.add(T['k8']! + rows.length.toString() + T['k9']! + inp['year'].toString());
+  if (ils > 0) out.add(T['k10']! + money(ils));
+  if (usd > 0) out.add(T['k11']! + money(usd, '\$'));
   if (_truthy(inp['orgTaxId'])) {
     out.add('');
-    out.add('לארגון אישור מוסד ציבורי לעניין תרומות לפי סעיף 46 לפקודת מס הכנסה.');
-    out.add('דוח-ריכוז זה אינו קבלה — הקבלות המקוריות צוינו לצד כל תרומה.');
+    out.add(T['k12']!);
+    out.add(T['k13']!);
   }
   if (_truthy(inp['site'])) {
     out.add('');

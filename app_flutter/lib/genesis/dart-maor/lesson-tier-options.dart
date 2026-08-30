@@ -41,18 +41,18 @@ String _jsNum(Object? v) {
 
 /// Discount-tier selector options for a per-lesson course.
 /// Verbatim port of new/atoms/lesson-tier-options.mjs (`lessonTierOptions`).
-List<Map<String, String>> lessonTierOptions(Map<String, Object?> c) {
+List<Map<String, String>> lessonTierOptions(Map<String, Object?> c, Map<String, String> T) {
   final out = <Map<String, String>>[
     {
       'v': '',
-      't': 'מחיר מלא · ₪' +
+      't': T['k1']! +
           _jsNum(_falsy(c['lessonPrice']) ? 0 : c['lessonPrice']),
     },
   ];
   if (!_falsy(c['lessonPrice1'])) {
     out.add({
       'v': '1',
-      't': (_falsy(c['price1Name']) ? 'הנחה 1' : c['price1Name'].toString()) +
+      't': (_falsy(c['price1Name']) ? T['k2']! : c['price1Name'].toString()) +
           ' · ₪' +
           _jsNum(c['lessonPrice1']),
     });
@@ -60,7 +60,7 @@ List<Map<String, String>> lessonTierOptions(Map<String, Object?> c) {
   if (!_falsy(c['lessonPrice2'])) {
     out.add({
       'v': '2',
-      't': (_falsy(c['price2Name']) ? 'הנחה 2' : c['price2Name'].toString()) +
+      't': (_falsy(c['price2Name']) ? T['k3']! : c['price2Name'].toString()) +
           ' · ₪' +
           _jsNum(c['lessonPrice2']),
     });
@@ -68,7 +68,7 @@ List<Map<String, String>> lessonTierOptions(Map<String, Object?> c) {
   if (!_falsy(c['lessonPrice3'])) {
     out.add({
       'v': '3',
-      't': (_falsy(c['price3Name']) ? 'הנחה 3' : c['price3Name'].toString()) +
+      't': (_falsy(c['price3Name']) ? T['k4']! : c['price3Name'].toString()) +
           ' · ₪' +
           _jsNum(c['lessonPrice3']),
     });

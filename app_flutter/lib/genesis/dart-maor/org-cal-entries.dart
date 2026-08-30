@@ -14,10 +14,8 @@ bool _truthy(dynamic v) {
   return true;
 }
 
-List<Map<String, dynamic>> orgCalEntries(
-  List<Map<String, dynamic>> supporters,
-  List<Map<String, dynamic>> Function(Map<String, dynamic>) supDonEvents,
-) {
+List<Map<String, dynamic>> orgCalEntries(List<Map<String, dynamic>> supporters,
+  List<Map<String, dynamic>> Function(Map<String, dynamic>) supDonEvents, Map<String, String> T) {
   final out = <Map<String, dynamic>>[];
   for (final sp in supporters) {
     for (final e in supDonEvents(sp)) {
@@ -50,7 +48,7 @@ List<Map<String, dynamic>> orgCalEntries(
         'date': am['date'],
         'amount': 0,
         'cur': '',
-        'src': '📞 תשובה: ' + (am['note'] as String),
+        'src': T['k1']! + (am['note'] as String),
         'name': sp['name'],
         'spId': sp['id'],
       });
@@ -60,7 +58,7 @@ List<Map<String, dynamic>> orgCalEntries(
         'date': ayin!['nextTalk'],
         'amount': 0,
         'cur': '',
-        'src': '🔁 לדבר שוב',
+        'src': T['k2']!,
         'name': sp['name'],
         'spId': sp['id'],
       });

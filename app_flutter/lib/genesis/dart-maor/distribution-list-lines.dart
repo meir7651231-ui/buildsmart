@@ -25,13 +25,11 @@ bool _truthy(Object? v) {
 
 /// Builds the printable distribution list for a shop product package.
 /// Verbatim behaviour of the JS source `distributionListLines`.
-List<String> distributionListLines(
-  Map<String, dynamic> db,
+List<String> distributionListLines(Map<String, dynamic> db,
   Object? productId,
   Object? config,
   Map<String, dynamic> Function(Map<String, dynamic> db, dynamic component) itemOf,
-  String Function(Map<String, dynamic> db, dynamic assignment, Object? config) beneficiaryLabel,
-) {
+  String Function(Map<String, dynamic> db, dynamic assignment, Object? config) beneficiaryLabel, Map<String, dynamic> T) {
   final products = (db['shopProducts'] as List?) ?? const [];
   Map<String, dynamic>? product;
   for (final p in products) {
@@ -42,7 +40,7 @@ List<String> distributionListLines(
   }
 
   final lines = <String>[
-    'רשימת חלוקה — ' + ((product?['name'] as String?) ?? ''),
+    T['k1']! + ((product?['name'] as String?) ?? ''),
     '=' * 30,
   ];
 
@@ -80,11 +78,11 @@ List<String> distributionListLines(
       famAddr,
       (fam?['phone'] as String?) ?? '',
       comps,
-      '☐ נמסר',
+      T['k3']!,
     ];
     lines.add(parts.where(_truthy).map((e) => e as String).join(' · '));
   }
 
-  if (active.isEmpty) lines.add('אין שיוכים פעילים לחבילה');
+  if (active.isEmpty) lines.add(T['k4']!);
   return lines;
 }

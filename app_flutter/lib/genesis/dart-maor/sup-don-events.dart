@@ -117,8 +117,7 @@ Object? _deUndef(Object? v) => identical(v, _undefined) ? null : v;
 
 /// מיזוג כל אירועי-הכסף של תומכת לרשימת-תצוגה אחת, ממוינת מהחדש לישן.
 /// התנהגות זהה-ביט למקור-ה-JS `supDonEvents` (new/atoms/sup-don-events.mjs).
-List<Map<String, dynamic>> supDonEvents(dynamic sp,
-    [dynamic Function(String key, String fallback)? term]) {
+List<Map<String, dynamic>> supDonEvents(dynamic sp, Map<String, String> T2, [dynamic Function(String key, String fallback)? term]) {
   // ‏const T = (k, fb) => (term ? term(k, fb) : fb) — פונקציה תמיד truthy ב-JS.
   dynamic T(String k, String fb) => term != null ? term(k, fb) : fb;
 
@@ -132,7 +131,7 @@ List<Map<String, dynamic>> supDonEvents(dynamic sp,
       'date': _prop(d, 'date'),
       'amount': _prop(d, 'amount'),
       'cur': _jsTruthy(cur) ? cur : '₪',
-      'src': 'קבלה ' + _jsStr(_prop(d, 'rid')),
+      'src': T2['k1']! + _jsStr(_prop(d, 'rid')),
       'rid': _prop(d, 'rid'),
     });
   }
@@ -152,18 +151,18 @@ List<Map<String, dynamic>> supDonEvents(dynamic sp,
     // ‏[x && 'טקסט'+x, …].filter(Boolean) ⇒ collection-if על truthiness;
     // ‏join של JS ממחרז איברים-לא-מחרוזת דרך String(v) ⇒ map(_jsStr).
     final metaParts = <Object?>[
-      if (_jsTruthy(receipt)) 'קבלה ' + _jsStr(receipt),
-      if (_jsTruthy(txn)) 'עסקה ' + _jsStr(txn),
-      if (_jsTruthy(ref)) 'אסמכתא ' + _jsStr(ref),
+      if (_jsTruthy(receipt)) T2['k1']! + _jsStr(receipt),
+      if (_jsTruthy(txn)) T2['k2']! + _jsStr(txn),
+      if (_jsTruthy(ref)) T2['k3']! + _jsStr(ref),
       if (_jsTruthy(brand)) brand,
       if (_jsTruthy(last4)) '•' + _jsStr(last4),
       if (_jsTruthy(clearer)) clearer,
-      if (_jsTruthy(pays) && _jsGt1(pays)) _jsStr(pays) + ' תשלומים',
+      if (_jsTruthy(pays) && _jsGt1(pays)) _jsStr(pays) + T2['k4']!,
       if (_jsTruthy(status)) status,
     ];
     final meta = metaParts.map(_jsStr).join(' · ');
     // הכרעת-בעלים 19.8: רשומה עם clearer ⇒ "תרומה" (דרך השקע); בלעדיו ⇒ "מהקובץ ההיסטורי".
-    final label = _jsTruthy(clearer) ? T('entity.donation', 'תרומה') : 'מהקובץ ההיסטורי';
+    final label = _jsTruthy(clearer) ? T('entity.donation', T2['k6']!) : T2['k7']!;
     final c = _prop(h, 'c');
     out.add({
       'date': _prop(h, 'd'),
@@ -184,7 +183,7 @@ List<Map<String, dynamic>> supDonEvents(dynamic sp,
         'date': first,
         'amount': 0,
         'cur': '',
-        'src': _jsStr(T('entity.donation', 'תרומה')) + ' ראשונה (מהקובץ)',
+        'src': _jsStr(T('entity.donation', T2['k6']!)) + T2['k8']!,
       });
     }
     if (_jsTruthy(last) && !_strictEq(last, first) && !seen.contains(last)) {
@@ -192,7 +191,7 @@ List<Map<String, dynamic>> supDonEvents(dynamic sp,
         'date': last,
         'amount': 0,
         'cur': '',
-        'src': _jsStr(T('entity.donation', 'תרומה')) + ' אחרונה (מהקובץ)',
+        'src': _jsStr(T('entity.donation', T2['k6']!)) + T2['k9']!,
       });
     }
   }

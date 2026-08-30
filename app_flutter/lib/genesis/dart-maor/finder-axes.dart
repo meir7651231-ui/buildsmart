@@ -6,15 +6,15 @@
 List<List<String>> finderAxes(
   Map<String, dynamic> config,
   String Function(Map<String, dynamic> config, String key, String fallback) termOf,
- {required String Function(String) term}) {
+ {required String Function(String) term, required Map<String, String> T}) {
   return [
     ['city', term('ayr')],
     ['comm', term('khylh')],
     ['marital', term('mtsb-mshpchty')],
     ['status', term('sttvs')],
-    ['cred', termOf(config, 'entity.cred', 'אמינות')],
+    ['cred', termOf(config, 'entity.cred', T['k11']!)],
     ['kids', term('yldym')],
-    ['enrolled', termOf(config, 'nav.courses', 'חוגים')],
+    ['enrolled', termOf(config, 'nav.courses', T['k16']!)],
     ['sefach', term('spch-mla')],
     ['lang', term('shph')],
   ];

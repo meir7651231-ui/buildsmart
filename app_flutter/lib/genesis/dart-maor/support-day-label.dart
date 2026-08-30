@@ -20,7 +20,7 @@ String _slice10(String s) => s.length <= 10 ? s : s.substring(0, 10);
 /// (הוזרק inline מ-js-compat-reference.dart::parseV8Local — חוק-1: אטום לא-מייבא.)
 /// ⚠️ התיקון (FIXES: "פרסור-V8: שנה-מורחבת +002026 מתקבלת ⇒ להרחיב regex"):
 ///    ה-regex תומך בשנה-מורחבת ±YYYYYY (‏[+-]?\d{4,6}) במקום \d{4} הצר של-ההסגר.
-DateTime? _parseV8Local(String iso) {
+DateTime? _parseV8Local(String iso, Map<String, dynamic> T) {
   final m = RegExp(r'^([+-]?\d{4,6})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?)?$')
       .firstMatch(iso);
   if (m == null) return null;
@@ -37,12 +37,12 @@ DateTime? _parseV8Local(String iso) {
   return DateTime(year, mon, day, hour, min, sec);
 }
 
-dynamic supportDayLabel(dynamic at, dynamic todayIso) {
+dynamic supportDayLabel(dynamic at, dynamic todayIso, Map<String, dynamic> T) {
   final day = _slice10(at as String);
-  if (day == todayIso) return 'היום';
+  if (day == todayIso) return T['k1']!;
   // אתמול = יום-אחד לפני todayIso (חישוב על ה-ISO, צהריים מקומי).
   // המקור: new Date(todayIso + 'T12:00:00') — מפרסמים את המחרוזת המשורשרת בדיוק.
-  final t = _parseV8Local((todayIso as String) + 'T12:00:00');
+  final t = _parseV8Local((todayIso as String) + 'T12:00:00', T);
   String y, m, dd;
   if (t == null) {
     // Invalid Date ב-JS: getFullYear/getMonth/getDate = NaN ⇒ String(NaN)='NaN'.
@@ -55,7 +55,7 @@ dynamic supportDayLabel(dynamic at, dynamic todayIso) {
     m = yst.month.toString().padLeft(2, '0');
     dd = yst.day.toString().padLeft(2, '0');
   }
-  if (day == '$y-$m-$dd') return 'אתמול';
+  if (day == '$y-$m-$dd') return T['k2']!;
   // const [yy, mm, d2] = day.split('-') — פירוק JS: איבר-חסר = undefined (null).
   final parts = day.split('-');
   final yy = parts.isNotEmpty ? parts[0] : null;

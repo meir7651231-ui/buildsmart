@@ -11,18 +11,18 @@ bool _truthy(dynamic v) {
   return true;
 }
 
-dynamic wizardStepError(dynamic step, dynamic s, dynamic Function(dynamic, dynamic, dynamic, dynamic, dynamic, dynamic) signUpError) {
+dynamic wizardStepError(dynamic step, dynamic s, dynamic Function(dynamic, dynamic, dynamic, dynamic, dynamic, dynamic) signUpError, Map<String, String> T) {
   switch (step) {
     case 0:
-      return _truthy(s['industry']) ? null : 'בחרו את תחום העסק כדי להמשיך';
+      return _truthy(s['industry']) ? null : T['k1']!;
     case 1:
-      return _truthy(s['size']) ? null : 'בחרו את גודל הארגון';
+      return _truthy(s['size']) ? null : T['k2']!;
     case 2:
       return null; // צרכים — אופציונלי
     case 3:
-      if (!_truthy((s['orgName'] as String).trim())) return 'שם הארגון חובה';
-      if (!_truthy((s['contactName'] as String).trim())) return 'שם איש קשר חובה';
-      if (!_truthy((s['phone'] as String).trim())) return 'טלפון חובה — נחזור אליכם לאישור';
+      if (!_truthy((s['orgName'] as String).trim())) return T['k3']!;
+      if (!_truthy((s['contactName'] as String).trim())) return T['k4']!;
+      if (!_truthy((s['phone'] as String).trim())) return T['k5']!;
       return null;
     case 4:
       final e = signUpError(s['orgName'], s['contactName'], s['phone'], s['email'], s['password'], s['password2']);

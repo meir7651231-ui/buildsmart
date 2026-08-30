@@ -39,7 +39,7 @@ num _monthsAgoIso(String iso, String todayIso) {
 ///  - no hok / flag off ⇒ false
 ///  - manual hok (no kevaId) ⇒ trusts the flag ⇒ true
 ///  - clearing hok (kevaId): true unless the latest נדרים/סולה charge is > 2 months old.
-bool hokEffectivelyActive(Map<String, Object?> sp, String todayIso) {
+bool hokEffectivelyActive(Map<String, Object?> sp, String todayIso, Map<String, dynamic> T) {
   final h = sp['hok'];
   if (h is! Map || !_truthy(h['active'])) return false;
   if (!_truthy(h['kevaId'])) return true; // הו"ק ידני — אין לאפ-אוטומטי
@@ -51,7 +51,7 @@ bool hokEffectivelyActive(Map<String, Object?> sp, String todayIso) {
     if (e is! Map) continue;
     final clearer = e['clearer'];
     final ed = _truthy(e['d']) ? e['d'] as String : '';
-    if ((clearer == 'נדרים' || clearer == 'סולה') && ed.compareTo(last) > 0) {
+    if ((clearer == T['k1']! || clearer == T['k2']!) && ed.compareTo(last) > 0) {
       last = ed;
     }
   }

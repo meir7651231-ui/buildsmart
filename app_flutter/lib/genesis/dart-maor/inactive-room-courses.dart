@@ -20,12 +20,10 @@ bool _truthy(dynamic v) => !_falsy(v);
 
 /// Live courses assigned to an inactive / non-existent room (diary warnings).
 /// Verbatim behaviour of the JS source `inactiveRoomCourses`. Output order = db.courses order.
-List<Map<String, dynamic>> inactiveRoomCourses(
-  Map<String, dynamic> db,
+List<Map<String, dynamic>> inactiveRoomCourses(Map<String, dynamic> db,
   String iso,
   dynamic config,
-  String Function(dynamic config, String key, String fallback) termOf,
-) {
+  String Function(dynamic config, String key, String fallback) termOf, Map<String, String> T) {
   final out = <Map<String, dynamic>>[];
   final courses = (db['courses'] as List?) ?? const [];
   final rooms = (db['rooms'] as List?) ?? const [];
@@ -45,7 +43,7 @@ List<Map<String, dynamic>> inactiveRoomCourses(
     if (room == null) {
       out.add({
         'course': c,
-        'roomName': termOf(config, 'entity.room', 'חדר') + ' לא קיים',
+        'roomName': termOf(config, 'entity.room', T['k2']!) + T['k3']!,
       });
     } else if (_falsy(room['active'])) {
       out.add({'course': c, 'roomName': room['name']});

@@ -42,8 +42,7 @@ String _jsTrim(String s) {
   return s.substring(start, end);
 }
 
-Map<String, dynamic> telephonyToTenant(
-    dynamic tc, dynamic orgName, dynamic tenantId) {
+Map<String, dynamic> telephonyToTenant(dynamic tc, dynamic orgName, dynamic tenantId, Map<String, dynamic> T) {
   var gw = 0;
   final rawNumbers = (tc['numbers'] ?? []) as List;
   final numbers = <Map<String, dynamic>>[];
@@ -100,7 +99,7 @@ Map<String, dynamic> telephonyToTenant(
 
   final result = <String, dynamic>{
     'tenantId': tenantId,
-    'orgName': _falsy(orgName) ? 'ארגון' : orgName,
+    'orgName': _falsy(orgName) ? T['k7']! : orgName,
     'timezone': 'Asia/Jerusalem',
   };
   // JS: ...(tc.city ? { city: tc.city } : {}) — בין timezone ל-officeHours.

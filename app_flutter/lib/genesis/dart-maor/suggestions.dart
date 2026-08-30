@@ -107,12 +107,10 @@ dynamic _find(dynamic list, bool Function(dynamic) pred) {
 
 /// המנוע: 4 כללים ⇒ רשימת-הצעות {key,emoji,title,detail,famId?,courseId?,act}.
 /// ‏sockets = {termOf, moduleOn, upcomingHoliday, ageAt} — שקעי-השכנים המוזרקים.
-List<dynamic> suggestions(
-  dynamic db,
+List<dynamic> suggestions(dynamic db,
   dynamic todayIso,
   dynamic config,
-  Map<String, dynamic> sockets,
-) {
+  Map<String, dynamic> sockets, Map<String, dynamic> T2) {
   final dynamic termOf = sockets['termOf'];
   final dynamic moduleOn = sockets['moduleOn'];
   final dynamic upcomingHoliday = sockets['upcomingHoliday'];
@@ -136,9 +134,9 @@ List<dynamic> suggestions(
     out.add(<String, dynamic>{
       'key': 'sug:holiday:${_strAt(hol, 'name')}:${_strAt(hol, 'hebYear')}',
       'emoji': '🎁',
-      'title': 'מתנת-חג · ${_strAt(hol, 'name')} בעוד ${_strAt(hol, 'inDays')} ימים',
+      'title': '${T2['k8']!}${_strAt(hol, 'name')}${T2['k9']!}${_strAt(hol, 'inDays')}${T2['k10']!}',
       'detail':
-          '${_jsNum(activeFams.length)} ${_jsStr(t('nav.families', 'משפחות'))} פעילות — שקלו חלוקת מתנות לקראת החג',
+          '${_jsNum(activeFams.length)} ${_jsStr(t('nav.families', 'משפחות'))}${T2['k13']!}',
       'act': 'shop',
     });
   }
@@ -153,8 +151,8 @@ List<dynamic> suggestions(
         out.add(<String, dynamic>{
           'key': 'sug:school:${_strAt(m, 'id')}:${_jsStr(age)}',
           'emoji': '🎒',
-          'title': 'ערכת בית-ספר · ${_strAt(m, 'first')} (${_strAt(f, 'name')})',
-          'detail': 'בן/בת ${_jsStr(age)} — לקראת/בתחילת כיתה א׳',
+          'title': '${T2['k15']!}${_strAt(m, 'first')} (${_strAt(f, 'name')})',
+          'detail': '${T2['k16']!}${_jsStr(age)}${T2['k17']!}',
           'famId': f['id'],
           'act': 'families',
         });
@@ -163,9 +161,9 @@ List<dynamic> suggestions(
           'key': 'sug:baby:${_strAt(m, 'id')}',
           'emoji': '👶',
           'title':
-              'ערכת תינוק · ${_jsStr(t('entity.familyOf', 'משפחת'))} ${_strAt(f, 'name')}',
+              '${T2['k19']!}${_jsStr(t('entity.familyOf', 'משפחת'))} ${_strAt(f, 'name')}',
           'detail':
-              '${_strAt(m, 'first')} — תינוק/ת חדש/ה ב${_jsStr(t('entity.family', 'משפחה'))}',
+              '${_strAt(m, 'first')}${T2['k22']!}${_jsStr(t('entity.family', 'משפחה'))}',
           'famId': f['id'],
           'act': 'families',
         });
@@ -194,8 +192,8 @@ List<dynamic> suggestions(
       'key': 'sug:renew:${_strAt(e, 'id')}:${_strAt(e, 'purchased')}',
       'emoji': '🎫',
       'title':
-          'חידוש כרטיסייה · ${_jsStr((member is Map ? member['first'] : null) ?? '—')} · ${_jsStr((course is Map ? course['name'] : null) ?? '—')}',
-      'detail': rem <= 0 ? 'הכרטיסייה נגמרה' : 'נותרו ${_jsStr(rem)} ניקובים',
+          '${T2['k26']!}${_jsStr((member is Map ? member['first'] : null) ?? '—')} · ${_jsStr((course is Map ? course['name'] : null) ?? '—')}',
+      'detail': rem <= 0 ? T2['k6']! : '${T2['k27']!}${_jsStr(rem)}${T2['k28']!}',
       'famId': fam == null ? null : fam['id'],
       'courseId': e['courseId'],
       'act': 'courses',

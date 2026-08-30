@@ -18,7 +18,6 @@
 //  · truthiness של JS (`!c.start` / `abs` / `ss.label` / `x || ''`) ⇒ null-או-'' מפורש.
 //  · padStart(2,'0') ⇒ padLeft(2,'0'); String.split; compareTo להשוואת-iso לקסיקוגרפית.
 
-const List<String> _dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
 String _isoOf(DateTime d) {
   String p2(int n) => n.toString().padLeft(2, '0');
@@ -36,16 +35,14 @@ String _fmtD(String iso) {
 /// Builds the detailed daily attendance report for a course. Verbatim behaviour
 /// of the JS source `buildCourseDailyRows`. `termOf`/`hebDateFull` are injected
 /// sockets. Returns {'rows': List<List<String>>, 'days': int}.
-Map<String, Object?> buildCourseDailyRows(
-  Map<String, Object?> c,
+Map<String, Object?> buildCourseDailyRows(Map<String, Object?> c,
   Map<String, Object?> db,
   Map<String, Object?>? config,
   String Function(Map<String, Object?> config, String key, String fb) termOf,
-  String Function(String iso) hebDateFull,
-) {
+  String Function(String iso) hebDateFull, List<String> DAY_NAMES, Map<String, dynamic> T2) {
   String T(String k, String fb) => config != null ? termOf(config, k, fb) : fb;
   final rows = <List<String>>[
-    ['תאריך עברי', 'תאריך לועזי', 'יום', 'קבוצה/שעה', 'סטטוס יום', 'תלמידה פעילה', T('entity.family', 'משפחה'), 'סטטוס נוכחות'],
+    [T2['k1']!, T2['k2']!, T2['k3']!, T2['k4']!, T2['k5']!, T2['k6']!, T('entity.family', T2['k8']!), T2['k9']!],
   ];
   final cStart = c['start'];
   final cEnd = c['end'];
@@ -94,7 +91,7 @@ Map<String, Object?> buildCourseDailyRows(
     for (final ss in sess) {
       final ssLabel = ss['label'];
       final ssTime = ss['time'];
-      final slot = ((ssLabel == null || ssLabel == '') ? 'קבוצה' : ssLabel as String) + ' · ' + ((ssTime ?? '') as String);
+      final slot = ((ssLabel == null || ssLabel == '') ? T2['k10']! : ssLabel as String) + ' · ' + ((ssTime ?? '') as String);
       // תלמידה "פעילה" במפגש — שובצה עד היום ושייכת לקבוצת המפגש. שיבוץ שהסתיים
       // (#8) עדיין כלול במפגשים שקדמו לתאריך-הסיום שלו; בלי endedAt נשאר מוחרג.
       final active = enrolls.where((e) {
@@ -114,7 +111,7 @@ Map<String, Object?> buildCourseDailyRows(
         return true;
       }).toList();
       if (active.isEmpty) {
-        rows.add([hebDateFull(iso), _fmtD(iso), _dayNames[dow], slot, 'אין רשומות', '', '', '']);
+        rows.add([hebDateFull(iso), _fmtD(iso), DAY_NAMES[dow], slot, T2['k13']!, '', '', '']);
         continue;
       }
       for (final e in active) {
@@ -128,25 +125,25 @@ Map<String, Object?> buildCourseDailyRows(
           }
         }
         final status = e['status'];
-        final dayStatus = status == 'paused' ? 'מוקפא' : 'מתקיים';
+        final dayStatus = status == 'paused' ? T2['k15']! : T2['k16']!;
         String attend;
         if (status == 'paused') {
-          attend = 'מוקפא';
+          attend = T2['k15']!;
         } else if (abs != null) {
           final noshow = abs['noshow'];
           if (noshow == true) {
-            attend = 'לא הופיעה';
+            attend = T2['k17']!;
           } else {
             final reason = abs['reason'];
-            attend = 'חיסור' + ((reason != null && reason != '') ? ' · ' + (reason as String) : '');
+            attend = T2['k18']! + ((reason != null && reason != '') ? ' · ' + (reason as String) : '');
           }
         } else {
-          attend = 'פעיל';
+          attend = T2['k19']!;
         }
         rows.add([
           hebDateFull(iso),
           _fmtD(iso),
-          _dayNames[dow],
+          DAY_NAMES[dow],
           slot,
           dayStatus,
           (mf?['first'] ?? '') as String,
@@ -157,7 +154,7 @@ Map<String, Object?> buildCourseDailyRows(
     }
   }
   if (truncated) {
-    rows.add(['—', '—', '—', '—', 'הדוח נקטע ב-$MAX_DAYS ימי מפגש — בדקו את תאריך הסיום של ה${T('entity.course', 'חוג')}', '', '', '']);
+    rows.add(['—', '—', '—', '—', '${T2['k20']!}$MAX_DAYS${T2['k21']!}${T('entity.course', 'חוג')}', '', '', '']);
   }
   return {'rows': rows, 'days': days};
 }

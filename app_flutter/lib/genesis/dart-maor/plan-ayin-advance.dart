@@ -28,8 +28,7 @@ bool _truthy(Object? v) {
 /// Plans the smart stage-advance action of a care-tracking case. Verbatim
 /// behaviour of the JS source `planAyinAdvance`: returns a `{patch, event, toast}`
 /// plan for the next stage, or null when the action button is hidden.
-Map? planAyinAdvance(
-  Map cfg,
+Map? planAyinAdvance(Map cfg,
   String name,
   Map a,
   bool Function(Map) ayinActionVisible,
@@ -37,8 +36,7 @@ Map? planAyinAdvance(
   String Function(Map) itemLabel,
   String Function(Map) unitLabel,
   String Function(Map, String) stageLabel,
-  num Function(Map) eyesTotal,
-) {
+  num Function(Map) eyesTotal, Map<String, String> T) {
   if (!ayinActionVisible(a)) return null;
   final feat = featLabel(cfg);
   final item = itemLabel(cfg);
@@ -53,7 +51,7 @@ Map? planAyinAdvance(
             '$feat: ${stageLabel(cfg, 'lead')} — $name (${names.length} $item)',
         'done': false,
       },
-      'toast': 'נרשמו ${names.length} — נכנס ללוח: ${stageLabel(cfg, 'lead')}',
+      'toast': '${T['k8']!}${names.length}${T['k9']!}${stageLabel(cfg, 'lead')}',
     };
   }
   if (st == 'lead') {
@@ -63,7 +61,7 @@ Map? planAyinAdvance(
         'title': '$feat: ${stageLabel(cfg, 'lead')} ✓ — $name',
         'done': true,
       },
-      'toast': 'אושר — נרשם בלוח ובדוח. עכשיו: ${stageLabel(cfg, 'eyes')}',
+      'toast': '${T['k10']!}${stageLabel(cfg, 'eyes')}',
     };
   }
   if (st == 'eyes') {
@@ -74,7 +72,7 @@ Map? planAyinAdvance(
         'title': '$feat: ${stageLabel(cfg, 'answer')} — $name ($eyes $unit)',
         'done': false,
       },
-      'toast': 'נרשם — נכנס ללוח: ${stageLabel(cfg, 'answer')}',
+      'toast': '${T['k11']!}${stageLabel(cfg, 'answer')}',
     };
   }
   // st === 'answer'
@@ -85,7 +83,7 @@ Map? planAyinAdvance(
         'title': '$feat: ${stageLabel(cfg, 'answer')} — $name',
         'done': false,
       },
-      'toast': 'נמסר — נרשם בלוח היומי ובכרטיס',
+      'toast': T['k5']!,
     };
   }
   return {
@@ -94,6 +92,6 @@ Map? planAyinAdvance(
       'title': '$feat: ${stageLabel(cfg, 'done')} — $name',
       'done': true,
     },
-    'toast': 'הטיפול הושלם ✓ — נרשם בלוח',
+    'toast': T['k7']!,
   };
 }
