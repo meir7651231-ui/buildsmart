@@ -17,13 +17,14 @@ String _jsStr(dynamic t) {
 
 /// נרמול-חיפוש מוטמע (מקור: maor/src/lib/validate.ts:51-59) — regex/string, אפס-IO.
 /// זהה-למקור: lower → הסרת-ניקוד → סופיות→רגילות → הסרת-פיסוק → trim.
-String normSearch(dynamic t) {
-  const Map<String, String> finals = {
-    'ך': 'כ',
-    'ם': 'מ',
-    'ן': 'נ',
-    'ף': 'פ',
-    'ץ': 'צ',
+String normSearch(dynamic t, Map<String, String> T) {
+  // מפתח-עברי שקושר-שקע = חיווט; הערכים מאטום-הדאטה norm-search-sockets (הכרעה 16)
+  final Map<String, String> finals = {
+    'ך': T['k1']!,
+    'ם': T['k2']!,
+    'ן': T['k3']!,
+    'ף': T['k4']!,
+    'ץ': T['k5']!,
   };
   return _jsStr(t)
       .toLowerCase()
@@ -37,6 +38,6 @@ String normSearch(dynamic t) {
 }
 
 /// נרמול שם להשוואה — כמו normName במקור (normSearch + הסרת רווחים).
-String normNameLocal(dynamic s) {
-  return normSearch(s).replaceAll(RegExp(r'\s'), '');
+String normNameLocal(dynamic s, Map<String, String> T) {
+  return normSearch(s, T).replaceAll(RegExp(r'\s'), '');
 }
