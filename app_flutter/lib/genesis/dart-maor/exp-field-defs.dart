@@ -33,7 +33,7 @@ List<Map<String, String>> expFieldDefs<C>(
   String Function(C) featLabel,
   String Function(C) itemLabel,
   String Function(C) unitLabel,
- {required String Function(String) term}) {
+ {required String Function(String) term, required Map<String, String> T}) {
   final full = featureOn(cfg, 'reports.custom.full');
   if (target == 'courses') {
     if (!full) {
@@ -42,22 +42,22 @@ List<Map<String, String>> expFieldDefs<C>(
         {'key': 'teacher', 'label': term('mvrh-tlpvn')},
         {'key': 'model', 'label': term('mslvl-vmchyr')},
         {'key': 'occ', 'label': term('tpvsh')},
-        {'key': 'students', 'label': term('rshymt') + termOf(cfg, 'entity.students', 'תלמידים')},
+        {'key': 'students', 'label': term('rshymt') + termOf(cfg, 'entity.students', T['k14']!)},
         {'key': 'pays', 'label': term('tshlvmym-btvvch')},
         {'key': 'abs', 'label': term('chysvrym-btvvch')},
       ];
     }
     return [
-      {'key': 'name', 'label': term('shm-h') + termOf(cfg, 'entity.course', 'חוג')},
-      {'key': 'teacher', 'label': termOf(cfg, 'entity.teacher', 'מורה') + term('tlpvn')},
+      {'key': 'name', 'label': term('shm-h') + termOf(cfg, 'entity.course', T['k21']!)},
+      {'key': 'teacher', 'label': termOf(cfg, 'entity.teacher', T['k23']!) + term('tlpvn')},
       {'key': 'grade', 'label': term('kytvt')},
       {'key': 'audience', 'label': term('khl-yad')},
-      {'key': 'room', 'label': termOf(cfg, 'entity.room', 'חדר')},
+      {'key': 'room', 'label': termOf(cfg, 'entity.room', T['k31']!)},
       {'key': 'schedule', 'label': term('yvm-vshah')},
       {'key': 'model', 'label': term('mslvl-vmchyr')},
       {'key': 'occ', 'label': term('tpvsh')},
-      {'key': 'students', 'label': term('rshymt') + termOf(cfg, 'entity.students', 'תלמידים')},
-      {'key': 'studentsFull', 'label': termOf(cfg, 'entity.students', 'תלמידים') + term('tlpvn-ytrh')},
+      {'key': 'students', 'label': term('rshymt') + termOf(cfg, 'entity.students', T['k14']!)},
+      {'key': 'studentsFull', 'label': termOf(cfg, 'entity.students', T['k14']!) + term('tlpvn-ytrh')},
       {'key': 'pays', 'label': term('tshlvmym-btvvch')},
       {'key': 'revenue', 'label': term('shk-hknsvt')},
       {'key': 'abs', 'label': term('chysvrym-btvvch')},
@@ -71,7 +71,7 @@ List<Map<String, String>> expFieldDefs<C>(
       {'key': 'hdate', 'label': term('taryk-abry')},
       {'key': 'gdate', 'label': term('taryk-lvazy')},
       {'key': 'time', 'label': term('shah')},
-      {'key': 'fam', 'label': termOf(cfg, 'entity.family', 'משפחה')},
+      {'key': 'fam', 'label': termOf(cfg, 'entity.family', T['k53']!)},
       {'key': 'notes', 'label': term('harvt')},
       {'key': 'done', 'label': term('bvtsa')},
     ];
@@ -82,7 +82,7 @@ List<Map<String, String>> expFieldDefs<C>(
       {'key': 'name', 'label': term('shm')},
       {'key': 'phone', 'label': term('t22')},
       {'key': 'email', 'label': term('aymyyl')},
-      {'key': 'dons', 'label': termOf(cfg, 'entity.donations', 'תרומות') + term('btvvch-mspr-skvm')},
+      {'key': 'dons', 'label': termOf(cfg, 'entity.donations', T['k64']!) + term('btvvch-mspr-skvm')},
     ];
     if (ayinOn) {
       defs.add({'key': 'stage', 'label': term('shlb') + featLabel(cfg)});
@@ -100,8 +100,8 @@ List<Map<String, String>> expFieldDefs<C>(
     {'key': 'city', 'label': term('ayr')},
     {'key': 'cat', 'label': term('ktgvryh')},
     {'key': 'forWho', 'label': term('abvr-my')},
-    {'key': 'dons', 'label': termOf(cfg, 'entity.donations', 'תרומות') + term('btvvch-mspr-skvm')},
-    {'key': 'donsAll', 'label': term('shk') + termOf(cfg, 'entity.donations', 'תרומות') + term('kl-hzmn')},
+    {'key': 'dons', 'label': termOf(cfg, 'entity.donations', T['k64']!) + term('btvvch-mspr-skvm')},
+    {'key': 'donsAll', 'label': term('shk') + termOf(cfg, 'entity.donations', T['k64']!) + term('kl-hzmn')},
     {'key': 'tier', 'label': term('dyrvg')},
   ];
   if (ayinOn) {
