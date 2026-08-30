@@ -41,19 +41,19 @@ List<String> annualReportLines(Map<String, dynamic> inp,
       .fold<num>(0, (a, d) => a + (_isFinite((d as Map)['amount']) ? d['amount'] as num : 0));
   final out = <String>[
     '=' * 46,
-    T['k1']! + inp['year'].toString(),
+    (T['k1'] as String) + inp['year'].toString(),
     '=' * 46,
     '',
-    T['k2']! + inp['orgName'].toString(),
-    if (_truthy(inp['orgTaxId'])) T['k3']! + inp['orgTaxId'].toString(),
-    T['k4']! +
+    (T['k2'] as String) + inp['orgName'].toString(),
+    if (_truthy(inp['orgTaxId'])) (T['k3'] as String) + inp['orgTaxId'].toString(),
+    (T['k4'] as String) +
         inp['supporterName'].toString() +
-        (_truthy(inp['payerId']) ? T['k5']! + inp['payerId'].toString() : ''),
+        (_truthy(inp['payerId']) ? (T['k5'] as String) + inp['payerId'].toString() : ''),
     '',
     '-' * 46,
   ];
   if (rows.length == 0) {
-    out.add(T['k6']! + inp['year'].toString() + '.');
+    out.add((T['k6'] as String) + inp['year'].toString() + '.');
   } else {
     for (final d in rows) {
       final m = d as Map;
@@ -61,19 +61,19 @@ List<String> annualReportLines(Map<String, dynamic> inp,
         m['date'].toString() +
             '  ' +
             money(m['amount'], m['cur']).padLeft(12) +
-            (_truthy(m['rid']) ? T['k7']! + m['rid'].toString() : '') +
+            (_truthy(m['rid']) ? (T['k7'] as String) + m['rid'].toString() : '') +
             (_truthy(m['designation']) ? '  · ' + m['designation'].toString() : ''),
       );
     }
   }
   out.add('-' * 46);
-  out.add(T['k8']! + rows.length.toString() + T['k9']! + inp['year'].toString());
-  if (ils > 0) out.add(T['k10']! + money(ils));
-  if (usd > 0) out.add(T['k11']! + money(usd, '\$'));
+  out.add((T['k8'] as String) + rows.length.toString() + (T['k9'] as String) + inp['year'].toString());
+  if (ils > 0) out.add((T['k10'] as String) + money(ils));
+  if (usd > 0) out.add((T['k11'] as String) + money(usd, '\$'));
   if (_truthy(inp['orgTaxId'])) {
     out.add('');
-    out.add(T['k12']!);
-    out.add(T['k13']!);
+    out.add((T['k12'] as String));
+    out.add((T['k13'] as String));
   }
   if (_truthy(inp['site'])) {
     out.add('');

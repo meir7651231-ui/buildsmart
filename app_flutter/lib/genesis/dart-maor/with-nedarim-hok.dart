@@ -78,7 +78,7 @@ Map<String, Object?> withNedarimHok(Map<String, Object?> sp,
     'cur': curOf(charge),
     'day': hokDayFromDate(cd),
     'method': 'card',
-    'note': '${T['k2']!}$keva',
+    'note': '${(T['k2'] as String)}$keva',
     'active': true,
     'startedAt': prevStart.isNotEmpty && prevStart.compareTo(cd) < 0
         ? prevStart

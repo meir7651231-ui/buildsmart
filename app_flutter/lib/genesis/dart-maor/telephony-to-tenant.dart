@@ -99,7 +99,7 @@ Map<String, dynamic> telephonyToTenant(dynamic tc, dynamic orgName, dynamic tena
 
   final result = <String, dynamic>{
     'tenantId': tenantId,
-    'orgName': _falsy(orgName) ? T['k7']! : orgName,
+    'orgName': _falsy(orgName) ? (T['k7'] as String) : orgName,
     'timezone': 'Asia/Jerusalem',
   };
   // JS: ...(tc.city ? { city: tc.city } : {}) — בין timezone ל-officeHours.

@@ -39,7 +39,7 @@ DateTime? _parseV8Local(String iso, Map<String, dynamic> T) {
 
 dynamic supportDayLabel(dynamic at, dynamic todayIso, Map<String, dynamic> T) {
   final day = _slice10(at as String);
-  if (day == todayIso) return T['k1']!;
+  if (day == todayIso) return (T['k1'] as String);
   // אתמול = יום-אחד לפני todayIso (חישוב על ה-ISO, צהריים מקומי).
   // המקור: new Date(todayIso + 'T12:00:00') — מפרסמים את המחרוזת המשורשרת בדיוק.
   final t = _parseV8Local((todayIso as String) + 'T12:00:00', T);
@@ -55,7 +55,7 @@ dynamic supportDayLabel(dynamic at, dynamic todayIso, Map<String, dynamic> T) {
     m = yst.month.toString().padLeft(2, '0');
     dd = yst.day.toString().padLeft(2, '0');
   }
-  if (day == '$y-$m-$dd') return T['k2']!;
+  if (day == '$y-$m-$dd') return (T['k2'] as String);
   // const [yy, mm, d2] = day.split('-') — פירוק JS: איבר-חסר = undefined (null).
   final parts = day.split('-');
   final yy = parts.isNotEmpty ? parts[0] : null;

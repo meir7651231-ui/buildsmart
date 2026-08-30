@@ -40,7 +40,7 @@ List<String> distributionListLines(Map<String, dynamic> db,
   }
 
   final lines = <String>[
-    T['k1']! + ((product?['name'] as String?) ?? ''),
+    (T['k1'] as String) + ((product?['name'] as String?) ?? ''),
     '=' * 30,
   ];
 
@@ -78,11 +78,11 @@ List<String> distributionListLines(Map<String, dynamic> db,
       famAddr,
       (fam?['phone'] as String?) ?? '',
       comps,
-      T['k3']!,
+      (T['k3'] as String),
     ];
     lines.add(parts.where(_truthy).map((e) => e as String).join(' · '));
   }
 
-  if (active.isEmpty) lines.add(T['k4']!);
+  if (active.isEmpty) lines.add((T['k4'] as String));
   return lines;
 }

@@ -42,7 +42,7 @@ List<String> coordinatorPrintLines(Map<String, dynamic> db,
       .where((b) => (b as Map)['status'] == 'home' || b['status'] == 'office')
       .toList();
   final lines = <String>[
-    T2['k3']! + (((coord as dynamic)?['name']) ?? '').toString(),
+    (T2['k3'] as String) + (((coord as dynamic)?['name']) ?? '').toString(),
     '=' * 30,
   ];
   for (final b in boxes) {
@@ -51,13 +51,13 @@ List<String> coordinatorPrintLines(Map<String, dynamic> db,
     final last = lastCollectionIso(b);
     final parts = <dynamic>[
       '#' + bm['num'].toString(),
-      fam != null ? T('entity.familyOf', T2['k5']!) + ' ' + fam['name'].toString() : T2['k6']!,
+      fam != null ? T('entity.familyOf', (T2['k5'] as String)) + ' ' + fam['name'].toString() : (T2['k6'] as String),
       fam != null ? [fam['address'], fam['city']].where(_truthy).join(', ') : '',
       ((fam as dynamic)?['phone']) ?? '',
-      _truthy(last) ? T2['k7']! + last : T2['k8']!,
+      _truthy(last) ? (T2['k7'] as String) + last : (T2['k8'] as String),
     ];
     lines.add(parts.where(_truthy).join(' · '));
   }
-  if (boxes.isEmpty) lines.add(T2['k9']!);
+  if (boxes.isEmpty) lines.add((T2['k9'] as String));
   return lines;
 }

@@ -42,7 +42,7 @@ Map<String, Object?> buildCourseDailyRows(Map<String, Object?> c,
   String Function(String iso) hebDateFull, List<String> DAY_NAMES, Map<String, dynamic> T2) {
   String T(String k, String fb) => config != null ? termOf(config, k, fb) : fb;
   final rows = <List<String>>[
-    [T2['k1']!, T2['k2']!, T2['k3']!, T2['k4']!, T2['k5']!, T2['k6']!, T('entity.family', T2['k8']!), T2['k9']!],
+    [(T2['k1'] as String), (T2['k2'] as String), (T2['k3'] as String), (T2['k4'] as String), (T2['k5'] as String), (T2['k6'] as String), T('entity.family', (T2['k8'] as String)), (T2['k9'] as String)],
   ];
   final cStart = c['start'];
   final cEnd = c['end'];
@@ -91,7 +91,7 @@ Map<String, Object?> buildCourseDailyRows(Map<String, Object?> c,
     for (final ss in sess) {
       final ssLabel = ss['label'];
       final ssTime = ss['time'];
-      final slot = ((ssLabel == null || ssLabel == '') ? T2['k10']! : ssLabel as String) + ' · ' + ((ssTime ?? '') as String);
+      final slot = ((ssLabel == null || ssLabel == '') ? (T2['k10'] as String) : ssLabel as String) + ' · ' + ((ssTime ?? '') as String);
       // תלמידה "פעילה" במפגש — שובצה עד היום ושייכת לקבוצת המפגש. שיבוץ שהסתיים
       // (#8) עדיין כלול במפגשים שקדמו לתאריך-הסיום שלו; בלי endedAt נשאר מוחרג.
       final active = enrolls.where((e) {
@@ -111,7 +111,7 @@ Map<String, Object?> buildCourseDailyRows(Map<String, Object?> c,
         return true;
       }).toList();
       if (active.isEmpty) {
-        rows.add([hebDateFull(iso), _fmtD(iso), DAY_NAMES[dow], slot, T2['k13']!, '', '', '']);
+        rows.add([hebDateFull(iso), _fmtD(iso), DAY_NAMES[dow], slot, (T2['k13'] as String), '', '', '']);
         continue;
       }
       for (final e in active) {
@@ -125,20 +125,20 @@ Map<String, Object?> buildCourseDailyRows(Map<String, Object?> c,
           }
         }
         final status = e['status'];
-        final dayStatus = status == 'paused' ? T2['k15']! : T2['k16']!;
+        final dayStatus = status == 'paused' ? (T2['k15'] as String) : (T2['k16'] as String);
         String attend;
         if (status == 'paused') {
-          attend = T2['k15']!;
+          attend = (T2['k15'] as String);
         } else if (abs != null) {
           final noshow = abs['noshow'];
           if (noshow == true) {
-            attend = T2['k17']!;
+            attend = (T2['k17'] as String);
           } else {
             final reason = abs['reason'];
-            attend = T2['k18']! + ((reason != null && reason != '') ? ' · ' + (reason as String) : '');
+            attend = (T2['k18'] as String) + ((reason != null && reason != '') ? ' · ' + (reason as String) : '');
           }
         } else {
-          attend = T2['k19']!;
+          attend = (T2['k19'] as String);
         }
         rows.add([
           hebDateFull(iso),
@@ -154,7 +154,7 @@ Map<String, Object?> buildCourseDailyRows(Map<String, Object?> c,
     }
   }
   if (truncated) {
-    rows.add(['—', '—', '—', '—', '${T2['k20']!}$MAX_DAYS${T2['k21']!}${T('entity.course', 'חוג')}', '', '', '']);
+    rows.add(['—', '—', '—', '—', '${(T2['k20'] as String)}$MAX_DAYS${(T2['k21'] as String)}${T('entity.course', 'חוג')}', '', '', '']);
   }
   return {'rows': rows, 'days': days};
 }

@@ -51,7 +51,7 @@ bool hokEffectivelyActive(Map<String, Object?> sp, String todayIso, Map<String, 
     if (e is! Map) continue;
     final clearer = e['clearer'];
     final ed = _truthy(e['d']) ? e['d'] as String : '';
-    if ((clearer == T['k1']! || clearer == T['k2']!) && ed.compareTo(last) > 0) {
+    if ((clearer == (T['k1'] as String) || clearer == (T['k2'] as String)) && ed.compareTo(last) > 0) {
       last = ed;
     }
   }

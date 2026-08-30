@@ -134,9 +134,9 @@ List<dynamic> suggestions(dynamic db,
     out.add(<String, dynamic>{
       'key': 'sug:holiday:${_strAt(hol, 'name')}:${_strAt(hol, 'hebYear')}',
       'emoji': '🎁',
-      'title': '${T2['k8']!}${_strAt(hol, 'name')}${T2['k9']!}${_strAt(hol, 'inDays')}${T2['k10']!}',
+      'title': '${(T2['k8'] as String)}${_strAt(hol, 'name')}${(T2['k9'] as String)}${_strAt(hol, 'inDays')}${(T2['k10'] as String)}',
       'detail':
-          '${_jsNum(activeFams.length)} ${_jsStr(t('nav.families', 'משפחות'))}${T2['k13']!}',
+          '${_jsNum(activeFams.length)} ${_jsStr(t('nav.families', 'משפחות'))}${(T2['k13'] as String)}',
       'act': 'shop',
     });
   }
@@ -151,8 +151,8 @@ List<dynamic> suggestions(dynamic db,
         out.add(<String, dynamic>{
           'key': 'sug:school:${_strAt(m, 'id')}:${_jsStr(age)}',
           'emoji': '🎒',
-          'title': '${T2['k15']!}${_strAt(m, 'first')} (${_strAt(f, 'name')})',
-          'detail': '${T2['k16']!}${_jsStr(age)}${T2['k17']!}',
+          'title': '${(T2['k15'] as String)}${_strAt(m, 'first')} (${_strAt(f, 'name')})',
+          'detail': '${(T2['k16'] as String)}${_jsStr(age)}${(T2['k17'] as String)}',
           'famId': f['id'],
           'act': 'families',
         });
@@ -161,9 +161,9 @@ List<dynamic> suggestions(dynamic db,
           'key': 'sug:baby:${_strAt(m, 'id')}',
           'emoji': '👶',
           'title':
-              '${T2['k19']!}${_jsStr(t('entity.familyOf', 'משפחת'))} ${_strAt(f, 'name')}',
+              '${(T2['k19'] as String)}${_jsStr(t('entity.familyOf', 'משפחת'))} ${_strAt(f, 'name')}',
           'detail':
-              '${_strAt(m, 'first')}${T2['k22']!}${_jsStr(t('entity.family', 'משפחה'))}',
+              '${_strAt(m, 'first')}${(T2['k22'] as String)}${_jsStr(t('entity.family', 'משפחה'))}',
           'famId': f['id'],
           'act': 'families',
         });
@@ -192,8 +192,8 @@ List<dynamic> suggestions(dynamic db,
       'key': 'sug:renew:${_strAt(e, 'id')}:${_strAt(e, 'purchased')}',
       'emoji': '🎫',
       'title':
-          '${T2['k26']!}${_jsStr((member is Map ? member['first'] : null) ?? '—')} · ${_jsStr((course is Map ? course['name'] : null) ?? '—')}',
-      'detail': rem <= 0 ? T2['k6']! : '${T2['k27']!}${_jsStr(rem)}${T2['k28']!}',
+          '${(T2['k26'] as String)}${_jsStr((member is Map ? member['first'] : null) ?? '—')} · ${_jsStr((course is Map ? course['name'] : null) ?? '—')}',
+      'detail': rem <= 0 ? (T2['k6'] as String) : '${(T2['k27'] as String)}${_jsStr(rem)}${(T2['k28'] as String)}',
       'famId': fam == null ? null : fam['id'],
       'courseId': e['courseId'],
       'act': 'courses',

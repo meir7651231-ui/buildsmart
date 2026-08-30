@@ -20,7 +20,7 @@
 /// Intl English Hebrew-month name ⇒ Hebrew display label; unknown ⇒ ''.
 /// Exact, case-sensitive match. Verbatim behaviour of the JS source
 /// new/atoms/month-he-of.mjs.
-String monthHeOf(dynamic en, List<dynamic> MONTHS) {
+String monthHeOf(dynamic en, List<List<String>> MONTHS) {
   for (final m in MONTHS) {
     if (m[0] == en) return m[1];
   }

@@ -44,36 +44,36 @@ List<Map<String, dynamic>> famHistoryOf(Map<String, dynamic> db,
   }
 
   if (_truthy(fam['createdAt'])) {
-    push(fam['createdAt'], T['k1']!, '#e7edf5', '#3a5a86',
-        T['k3']! + termOf(config, 'entity.family', T['k5']!) + T['k6']!);
+    push(fam['createdAt'], (T['k1'] as String), '#e7edf5', '#3a5a86',
+        (T['k3'] as String) + termOf(config, 'entity.family', (T['k5'] as String)) + (T['k6'] as String));
   }
 
   // אירועי הלוח של המשפחה (P3 פריט 9) — נשזרים בציר, כולל סימון ✓ בוצע
   for (final ev in (db['events'] as List)) {
     final e = ev as Map;
     if (e['famId'] != fam['id'] || !_truthy(e['date'])) continue;
-    push(e['date'], T['k7']!, '#efe7f3', '#7c3aed',
+    push(e['date'], (T['k7'] as String), '#efe7f3', '#7c3aed',
         e['title'].toString() +
             (_truthy(e['time']) ? ' · ' + e['time'].toString() : '') +
-            (_truthy(e['done']) ? T['k10']! : ''));
+            (_truthy(e['done']) ? (T['k10'] as String) : ''));
   }
 
   final credLog = (fam['cred'] as Map?)?['log'] ?? [];
   for (final l in (credLog as List)) {
     final lg = l as Map;
-    push(lg['date'], termOf(config, 'entity.cred', T['k12']!), '#f6ead1',
+    push(lg['date'], termOf(config, 'entity.cred', (T['k12'] as String)), '#f6ead1',
         '#9a6414',
         lg['reason'].toString() +
             ' (' +
             ((lg['delta'] as num) > 0 ? '+' : '') +
             lg['delta'].toString() +
-            T['k14']!);
+            (T['k14'] as String));
   }
 
   for (final d in (fam['docs'] as List)) {
     final dc = d as Map;
-    push(dc['addedAt'], T['k15']!, '#eceae2', '#4d463c',
-        T['k17']! + dc['name'].toString());
+    push(dc['addedAt'], (T['k15'] as String), '#eceae2', '#4d463c',
+        (T['k17'] as String) + dc['name'].toString());
   }
 
   final ids = <dynamic>{for (final m in (fam['members'] as List)) (m as Map)['id']};
@@ -88,21 +88,21 @@ List<Map<String, dynamic>> famHistoryOf(Map<String, dynamic> db,
     final cname = (courMatch.isNotEmpty ? courMatch.first['name'] : null) ?? '';
     push(
       e['enrolledAt'],
-      termOf(config, 'entity.enrollment', T['k19']!),
+      termOf(config, 'entity.enrollment', (T['k19'] as String)),
       '#eef7e6',
       '#3f6212',
       // 'wait' מסומן — אחרת שיבוץ-בהמתנה נראה בהיסטוריה/בתדפיס כרישום רגיל
-      T['k21']! +
+      (T['k21'] as String) +
           first.toString() +
-          T['k22']! +
+          (T['k22'] as String) +
           cname.toString() +
           (_truthy(e['group']) ? ' · ' + e['group'].toString() : '') +
-          (e['status'] == 'wait' ? T['k24']! : ''),
+          (e['status'] == 'wait' ? (T['k24'] as String) : ''),
     );
     for (final p in (e['payments'] as List)) {
       final pm = p as Map;
-      push(pm['date'], T['k25']!, '#e4f5ea', '#12803c',
-          T['k26']! +
+      push(pm['date'], (T['k25'] as String), '#e4f5ea', '#12803c',
+          (T['k26'] as String) +
               pm['amount'].toString() +
               ' (' +
               pm['method'].toString() +
@@ -115,13 +115,13 @@ List<Map<String, dynamic>> famHistoryOf(Map<String, dynamic> db,
       final ab = a as Map;
       push(
         ab['date'],
-        _truthy(ab['noshow']) ? 'No-Show' : T['k28']!,
+        _truthy(ab['noshow']) ? 'No-Show' : (T['k28'] as String),
         '#fdeaea',
         '#b91c1c',
-        T['k30']! +
+        (T['k30'] as String) +
             cname.toString() +
             (_truthy(ab['reason']) ? ' · ' + ab['reason'].toString() : '') +
-            (_truthy(ab['makeup']) ? T['k31']! : ''),
+            (_truthy(ab['makeup']) ? (T['k31'] as String) : ''),
       );
     }
   }
