@@ -5,8 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:buildsmart/widgets/toast.dart' show bsNavigatorKey;
 import '../dart-gen-bs/gen_business.dart';
+import '../dart-gen-bs/gen_capautodream.dart';
+import '../dart-gen-bs/gen_capclockcalendar.dart';
+import '../dart-gen-bs/gen_capmailphone.dart';
+import '../dart-gen-bs/gen_captimegematria.dart';
 import '../dart-gen-bs/gen_entry.dart';
+import '../dart-gen-bs/gen_improv.dart';
+import '../dart-gen-bs/gen_mission.dart';
+import '../dart-gen-bs/gen_quest1.dart';
+import '../dart-gen-bs/gen_quest2.dart';
+import '../dart-gen-bs/gen_quest3.dart';
 import '../dart-gen-bs/gen_shipping.dart';
+import '../dart-gen-bs/gen_showcase.dart';
 import '../dart-gen-bs/gen_team.dart';
 import 'screens__ai_hub_screen_board.dart';
 import 'screens__budget_screen_board.dart';
@@ -176,8 +186,18 @@ class GenesisGallery extends StatelessWidget {
 
   static final List<_GEntry> _screens = [
     _GEntry('🧬 פרופיל עסק', 'נוצר מהמחולל — חיווט-מלא', () => const GenBusinessScreen()),
+    _GEntry('🧬 הזמנה-עצמית - יכולת שחלמתי היום והוכחתי לבד - מיון חוטי תמיכה ואז אבחון תקינות מספר', 'נוצר מהמחולל — חיווט-מלא', () => const GenCapautodreamScreen()),
+    _GEntry('🧬 מסע-בזמן של השעון - שעת-יממה נהפכת לתאריך-תצוגה כשכל דקה מחצות נספרת כיום שלם בלוח', 'נוצר מהמחולל — חיווט-מלא', () => const GenCapclockcalendarScreen()),
+    _GEntry('🧬 שחזור מספר טלפון לתצוגה ישראלית תקנית מתוך שורה שהגיעה עטופה בקידוד-מייל ישן', 'נוצר מהמחולל — חיווט-מלא', () => const GenCapmailphoneScreen()),
+    _GEntry('🧬 חתימת-אותיות עברית לשעה על השעון - כמה דקות עברו מחצות הלילה כתוב בגימטריה', 'נוצר מהמחולל — חיווט-מלא', () => const GenCaptimegematriaScreen()),
     _GEntry('🧬 המחולל', 'נוצר מהמחולל — חיווט-מלא', () => const GenEntryScreen()),
+    _GEntry('🧬 יכולת מאולתרת - שרשרת חמישה', 'נוצר מהמחולל — חיווט-מלא', () => const GenImprovScreen()),
+    _GEntry('🧬 חדר בקרה - משימה לירח', 'נוצר מהמחולל — חיווט-מלא', () => const GenMissionScreen()),
+    _GEntry('🧬 עולם משחק שלם - חדר 1', 'נוצר מהמחולל — חיווט-מלא', () => const GenQuest1Screen()),
+    _GEntry('🧬 עולם משחק שלם - חדר 2', 'נוצר מהמחולל — חיווט-מלא', () => const GenQuest2Screen()),
+    _GEntry('🧬 עולם משחק שלם - חדר 3', 'נוצר מהמחולל — חיווט-מלא', () => const GenQuest3Screen()),
     _GEntry('🧬 הגדרות משלוחים', 'נוצר מהמחולל — חיווט-מלא', () => const GenShippingScreen()),
+    _GEntry('🧬 ראווה - כרטיס-הביקור החי של המחולל', 'נוצר מהמחולל — חיווט-מלא', () => const GenShowcaseScreen()),
     _GEntry('🧬 ניהול צוות', 'נוצר מהמחולל — חיווט-מלא', () => const GenTeamScreen()),
     _GEntry('ai hub screen', 'מחווט: 0 · ממתין-לחיווט: 1', () => const AiHubScreenBoard()),
     _GEntry('budget screen', 'מחווט: 2 · ממתין-לחיווט: 5', () => const BudgetScreenBoard()),
