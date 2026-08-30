@@ -1,6 +1,7 @@
 // ⚛️ אטום-Dart (דרגת-חוזה) · snapOdToDn
 // מוצא: buildsmart/app_flutter/lib/features/catalog_config/dn_scale.dart:37-56 (חצב-AST · חוק-4 — התנהגות זהה, לא-משופרת).
 // טוהר: פונקציית top-level עצמאית, אפס-import (אומת ע"י פותר-המזהים).
+// מהות: הצמדת-קוטר-חיצוני לדרגת-DN הקרובה בסולם.
 
 /// Snap an outer-diameter magnitude to the nearest [kDnRungs] step.
 int snapOdToDn(num od, {required List<int> kDnRungs}) {
