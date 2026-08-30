@@ -29,8 +29,10 @@ List<Map<String, dynamic>> donorConstellation(
   required Map Function(Map, String) rfmFromScan,
   required num Function(Map, String) churnFromScan,
   required Map Function(num) supTier,
+  required Map<String, String> TIER_KEY,
+  required Map<String, String> T,
 }) {
-  const tierKey = {'זהב': 'gold', 'כסף': 'silver', 'ארד': 'bronze', 'רדומה': 'dormant'};
+  final Map<String, String> tierKey = TIER_KEY;
   double hash01(String s) {
     int h = 2166136261;
     for (int i = 0; i < s.length; i++) {
@@ -63,7 +65,7 @@ List<Map<String, dynamic>> donorConstellation(
     final scan = donorScan(sp, todayIso, rate, 12);
     if ((scan['count'] as num) == 0) continue;
     final days = dayDiff(scan['last'], todayIso);
-    final tier = tierKey[supTier(rfmFromScan(scan, todayIso)['score'] as num)['label']] ?? 'dormant';
+    final tier = tierKey[supTier(rfmFromScan(scan, todayIso)['score'] as num)['label']] ?? T['k1']!;
     final churn = churnFromScan(scan, todayIso);
     final double lg = log((scan['ils'] as num) + 1) / ln10;
     if (lg > maxLog) maxLog = lg;
