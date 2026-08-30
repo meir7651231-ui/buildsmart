@@ -28,8 +28,7 @@ bool _isIntegerNum(dynamic v) =>
 
 /// כרטיס-אמון לוועד: מאגד את האורקלים לרשימת-בדיקות + ציון משוקלל-חומרה,
 /// דרגה A–F ומוכנות-להפעלה. המרה נאמנה של new/atoms/trust-report.mjs.
-Map<String, dynamic> trustReport(dynamic bundle,
-    [dynamic opt = const <String, dynamic>{},
+Map<String, dynamic> trustReport(dynamic bundle, Map<String, dynamic> T, [dynamic opt = const <String, dynamic>{},
     dynamic eng = const <String, dynamic>{}]) {
   final featureOn = eng['featureOn'];
   final auditRoutes = eng['auditRoutes'];
@@ -52,24 +51,24 @@ Map<String, dynamic> trustReport(dynamic bundle,
   final ar = auditRoutes(bundle);
   add(
       'route-closure',
-      'סגירת-מסלולים (אין ניתוב-יתום)',
+      (T['k2'] as String),
       ar['ok'],
       'critical',
       _truthy(ar['ok'])
-          ? 'כל גשר/transfer/שער מוביל ליעד-קיים'
-          : 'יתומים: ' +
+          ? (T['k4'] as String)
+          : (T['k39'] as String) +
               [...((ar['dangling']) as Iterable), ...((ar['orphanTransfers']) as Iterable), ...((ar['missingGateways']) as Iterable)]
                   .join(', '));
 
   // 2. מסלול-חירום (fail-safe) — תמיד יש מנהל לחזור אליו.
   final fs = failsafeRoute(tenant);
-  add('failsafe', 'מסלול-חירום (השיחה תמיד עונה)', fs['ok'], 'critical',
-      _truthy(fs['ok']) ? 'נפילה למנהל ${fs['fallback']}' : 'אין מנהל — מבוי-סתום אפשרי');
+  add('failsafe', (T['k6'] as String), fs['ok'], 'critical',
+      _truthy(fs['ok']) ? '${(T['k40'] as String)}${fs['fallback']}' : (T['k7'] as String));
 
   // 3. תקרות-toll-fraud — הגנת חשבון-הסלולר.
   final toll = featureOn(tenant, 'voice.hardening');
-  add('toll-caps', 'תקרות חיוג-יוצא (toll-fraud)', toll, 'high',
-      _truthy(toll) ? 'בו-זמניות+משך מוגבלים' : 'כבוי — cred-גנוב יכול להצטבר (voice.hardening)');
+  add('toll-caps', (T['k10'] as String), toll, 'high',
+      _truthy(toll) ? (T['k12'] as String) : (T['k13'] as String));
 
   // 4. שלמות-כשרות — מצב-כשר עם SIM-כשר ליציאה.
   if (_truthy(featureOn(tenant, 'voice.kosher'))) {
@@ -79,8 +78,8 @@ Map<String, dynamic> trustReport(dynamic bundle,
         n['onramp'] == 'sim-in-gateway' &&
         _isIntegerNum(n['gatewayChannel']) &&
         ((_truthy(n['channels']) ? n['channels'] : <dynamic>[]) as List).contains('voice'));
-    add('kosher-integrity', 'שלמות-כשרות (יציאה כשרה)', hasK, 'high',
-        hasK ? 'יש SIM-כשר ליציאה' : 'מצב-כשר בלי SIM-כשר — יציאה מושבתת');
+    add('kosher-integrity', (T['k18'] as String), hasK, 'high',
+        hasK ? (T['k19'] as String) : (T['k20'] as String));
   }
 
   // 5. הצפנת-הקלטות (במנוחה) — רק אם הקלטה פעילה. **נחיל-5 F4:** דורמנטי ⇒
@@ -89,31 +88,31 @@ Map<String, dynamic> trustReport(dynamic bundle,
     final rec = recordingEncryption(tenant);
     add(
         'recording-encryption',
-        'הצפנת-הקלטות',
+        (T['k23'] as String),
         false,
         'high',
         _truthy(rec['enabled'])
-            ? 'מוגדר אך דורמנטי — record_session כותב .wav גולמי, REC_KEY טרם מחווט (חלון-בעלים)'
-            : 'הקלטות פעילות בלי הצפנה');
+            ? (T['k24'] as String)
+            : (T['k25'] as String));
   }
 
   // 6. preflight-סודות — env מלא (אם נמסר).
   if (_truthy(opt['env'])) {
     final pf = secretPreflight([bundle], opt['env']);
-    add('secrets', 'סודות-סביבה מוזרקים', pf['ok'], 'critical',
-        _truthy(pf['ok']) ? 'כל הסודות קיימים' : 'חסרים ${pf['missing'].length} (שער-דומם)');
+    add('secrets', (T['k27'] as String), pf['ok'], 'critical',
+        _truthy(pf['ok']) ? (T['k28'] as String) : '${(T['k41'] as String)}${pf['missing'].length}${(T['k42'] as String)}');
   }
 
   // 7. בידוד חוצה-דיירים — אם נמסרו peers.
   if (opt['peers'] is List && _truthy((opt['peers'] as List).length)) {
     final leak = crossTenantLeakScan(<dynamic>[bundle, ...((opt['peers']) as Iterable)]);
-    add('isolation', 'בידוד חוצה-דיירים', leak['clean'], 'critical',
-        _truthy(leak['clean']) ? 'אין דליפת-סוד/זהות בין-לקוחות' : '${leak['violations'].length} דליפות');
+    add('isolation', (T['k30'] as String), leak['clean'], 'critical',
+        _truthy(leak['clean']) ? (T['k31'] as String) : '${leak['violations'].length}${(T['k43'] as String)}');
   }
 
   // 8. אינווריאנטים (תמיד עוברים — הצהרה לוועד).
-  add('downstream', 'pure-downstream (אין תלות-ספק)', true, 'info', 'מדבר רק עם ציוד-הלקוח');
-  add('cti-readonly', 'זיהוי-מתקשר קריאה-בלבד', true, 'info', 'לעולם לא כותב למאור');
+  add('downstream', (T['k33'] as String), true, 'info', (T['k35'] as String));
+  add('cti-readonly', (T['k37'] as String), true, 'info', (T['k38'] as String));
 
   final failing = checks.where((c) => !_truthy(c['pass'])).toList();
   // ציון: משוקלל לפי חומרה (critical=3, high=2, info=1).

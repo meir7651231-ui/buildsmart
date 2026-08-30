@@ -41,8 +41,7 @@ bool _falsy(dynamic v) {
 /// componentId, label, hint}. Read-only; expiry alerts are gated shop.expiry (no config ⇒
 /// bit-identical, on). Verbatim port of new/atoms/needs-care-shop.mjs; all 11 neighbours
 /// are injected as sockets (Law 1/3).
-List<Map<String, dynamic>> needsCare(
-  Map<String, dynamic> db,
+List<Map<String, dynamic>> needsCare(Map<String, dynamic> db,
   String todayIso,
   dynamic config,
   List<dynamic> Function(String todayIso, int dueDays) upcomingHolidays,
@@ -56,8 +55,7 @@ List<Map<String, dynamic>> needsCare(
   String Function(dynamic a, dynamic ri) couponExpiry,
   bool Function(dynamic config, String key) featureOn,
   List<dynamic> Function(Map<String, dynamic> db, String todayIso) expiringIntakes,
-  int shopHolidayDueDays,
-) {
+  int shopHolidayDueDays, Map<String, String> T) {
   final holidays = upcomingHolidays(todayIso, shopHolidayDueDays);
   final due = <Map<String, dynamic>>[];
   final meetings = <Map<String, dynamic>>[];
@@ -74,8 +72,8 @@ List<Map<String, dynamic>> needsCare(
         'kind': 'stockOut',
         'assignmentId': '',
         'componentId': item['id'],
-        'label': '${item['name']} — המלאי אזל',
-        'hint': 'לחדש מלאי או לעדכן את הפריט',
+        'label': '${item['name']}${T['k2']!}',
+        'hint': T['k3']!,
       });
     } else if (item['minStock'] != null && rem != null && rem < ((item['minStock']) as num)) {
       // מלאי מינימום (SHOP6 חנות 25): מתחת לסף — "להצטייד" לפני שאוזל
@@ -83,8 +81,8 @@ List<Map<String, dynamic>> needsCare(
         'kind': 'restock',
         'assignmentId': '',
         'componentId': item['id'],
-        'label': '${item['name']} — המלאי נמוך',
-        'hint': 'להצטייד: נותרו $rem מתחת ל-${item['minStock']}',
+        'label': '${item['name']}${T['k5']!}',
+        'hint': '${T['k6']!}$rem${T['k7']!}${item['minStock']}',
       });
     }
     // רשימת המתנה (SHOP6 חנות 27): ממתינים + מלאי חזר (>0 או בלי-מעקב) —
@@ -95,8 +93,8 @@ List<Map<String, dynamic>> needsCare(
         'kind': 'waitingRestocked',
         'assignmentId': '',
         'componentId': item['id'],
-        'label': '${waiting.length} ממתינים ל${item['name']}',
-        'hint': 'המלאי חזר — אפשר לחלק לרשימת ההמתנה',
+        'label': '${waiting.length}${T['k9']!}${item['name']}',
+        'hint': T['k10']!,
       });
     }
   }
@@ -112,8 +110,8 @@ List<Map<String, dynamic>> needsCare(
           'kind': 'stockOut',
           'assignmentId': '',
           'componentId': comp['id'],
-          'label': '${comp['label']} (${p['name']}) — המלאי אזל',
-          'hint': 'לחדש מלאי או לעדכן את הרכיב במוצר',
+          'label': '${comp['label']} (${p['name']}${T['k11']!}',
+          'hint': T['k12']!,
         });
       }
     }
@@ -142,7 +140,7 @@ List<Map<String, dynamic>> needsCare(
               'assignmentId': a['id'],
               'componentId': comp['id'],
               'label': '$who — ${ri['name']}',
-              'hint': '${h['name']} ב-${h['iso']} — טרם נמסרה',
+              'hint': '${h['name']}${T['k16']!}${h['iso']}${T['k17']!}',
             });
           }
         }
@@ -152,7 +150,7 @@ List<Map<String, dynamic>> needsCare(
           'assignmentId': a['id'],
           'componentId': comp['id'],
           'label': '$who — ${ri['name']}',
-          'hint': 'פגישת ליווי טרם התקיימה',
+          'hint': T['k20']!,
         });
       } else if (ri['kind'] == 'coupon' && !assignmentRedeemed(a, comp['id'])) {
         final expiry = couponExpiry(a, ri);
@@ -162,7 +160,7 @@ List<Map<String, dynamic>> needsCare(
             'assignmentId': a['id'],
             'componentId': comp['id'],
             'label': '$who — ${ri['name']}',
-            'hint': 'הקופון פג בתוקף ב-$expiry וטרם מומש',
+            'hint': '${T['k23']!}$expiry${T['k24']!}',
           });
         } else {
           coupons.add({
@@ -170,7 +168,7 @@ List<Map<String, dynamic>> needsCare(
             'assignmentId': a['id'],
             'componentId': comp['id'],
             'label': '$who — ${ri['name']}',
-            'hint': expiry.isNotEmpty ? 'קופון טרם מומש · בתוקף עד $expiry' : 'קופון טרם מומש',
+            'hint': expiry.isNotEmpty ? '${T['k26']!}$expiry' : T['k27']!,
           });
         }
       }
@@ -189,7 +187,7 @@ List<Map<String, dynamic>> needsCare(
       'assignmentId': '',
       'componentId': intake['itemId'],
       'label': '${x['itemName']}${isExpired ? ' — פג תוקף' : ' — עומד לפוג'}',
-      'hint': '${isExpired ? 'פג ב-' : 'בתוקף עד '}${intake['expiry']} · אצווה ${intake['qty']} יח׳',
+      'hint': '${isExpired ? 'פג ב-' : 'בתוקף עד '}${intake['expiry']}${T['k34']!}${intake['qty']}${T['k35']!}',
     };
   }).toList();
 

@@ -26,8 +26,7 @@ bool _truthy(dynamic v) {
 /// Builds the personal-calendar rows for a supporter: projected donation events
 /// (via the injected `supDonEvents` neighbour), an optional next-contact target,
 /// eye-log / answers / next-talk entries, then filters out rows with a falsy date.
-List<Map<String, dynamic>> personalCalEntries(
-    Map sp, List Function(Map) supDonEvents) {
+List<Map<String, dynamic>> personalCalEntries(Map sp, List Function(Map) supDonEvents, Map<String, String> T) {
   final out = <Map<String, dynamic>>[];
   for (final e in supDonEvents(sp)) {
     out.add({
@@ -42,7 +41,7 @@ List<Map<String, dynamic>> personalCalEntries(
       'date': sp['nextDate'],
       'amount': 0,
       'cur': '',
-      'src': '🎯 תאריך יעד לקשר הבא',
+      'src': T['k1']!,
     });
   }
   final ayin = sp['ayin'];
@@ -63,7 +62,7 @@ List<Map<String, dynamic>> personalCalEntries(
       'date': an['date'],
       'amount': 0,
       'cur': '',
-      'src': '📞 תשובה: ' + an['note'].toString(),
+      'src': T['k2']! + an['note'].toString(),
     });
   }
   final nextTalk = ayin is Map ? ayin['nextTalk'] : null;
@@ -72,7 +71,7 @@ List<Map<String, dynamic>> personalCalEntries(
       'date': nextTalk,
       'amount': 0,
       'cur': '',
-      'src': '🔁 לדבר שוב',
+      'src': T['k3']!,
     });
   }
   return out.where((e) => _truthy(e['date'])).toList();

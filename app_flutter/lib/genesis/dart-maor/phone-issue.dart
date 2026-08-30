@@ -22,12 +22,12 @@
 String _digits(String x) => x.replaceAll(RegExp(r'\D'), '');
 
 /// Verbatim port of new/atoms/phone-issue.mjs (`phoneIssue`).
-String? phoneIssue(String? p) {
+String? phoneIssue(String? p, Map<String, dynamic> T) {
   if (p == null || p == '' || p == '-') return null;
   final d = _digits(p);
   if ((d.length == 9 || d.length == 10) && d.startsWith('0')) return null;
-  if (d.length == 8) return 'כנראה חסרה ספרת 0 מובילה: $p';
-  if (d.length < 7) return 'קצר מדי: $p';
-  if (!d.startsWith('0')) return 'לא מתחיל ב-0: $p';
-  return 'אורך חריג (${d.length} ספרות): $p';
+  if (d.length == 8) return '${(T['k1'] as String)}$p';
+  if (d.length < 7) return '${(T['k2'] as String)}$p';
+  if (!d.startsWith('0')) return '${(T['k3'] as String)}$p';
+  return '${(T['k4'] as String)}${d.length}${(T['k5'] as String)}$p';
 }

@@ -22,10 +22,8 @@ String esc(String s) =>
 
 /// הקבלה כ-HTML מוכן-להדפסה. o=פרטי-הקבלה (דורש o['rid']) ·
 /// receiptLines=שקע: (o)=>List<String> שורות-הטקסט של הקבלה.
-String receiptHtml(
-  Map<String, dynamic> o,
-  List<String> Function(Map<String, dynamic>) receiptLines,
-) {
+String receiptHtml(Map<String, dynamic> o,
+  List<String> Function(Map<String, dynamic>) receiptLines, Map<String, String> T) {
   final lines = receiptLines(o).where((x) => x != '').toList();
   final first = lines[0];
   final rest = lines.sublist(1);
@@ -33,7 +31,7 @@ String receiptHtml(
       rest.map((ln) => '<div class="ln">' + esc(ln) + '</div>').join('\n');
   return ('<!doctype html><html dir="rtl" lang="he"><head><meta charset="utf-8">' +
       '<title>' +
-      esc('קבלה ' + o['rid'].toString()) +
+      esc(T['k6']! + o['rid'].toString()) +
       '</title>' +
       '<style>' +
       'body{font-family:"Segoe UI",Arial,"Noto Sans Hebrew",sans-serif;color:#111;margin:0;padding:32px;direction:rtl}' +

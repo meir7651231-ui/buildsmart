@@ -31,18 +31,16 @@ bool _truthy(Object? x) {
 
 /// אפשרויות שיוך-קבוצה. מחזיר [] אם למפגש יחיד (או פחות); אחרת {'v','t'} לכל מפגש.
 /// התנהגות verbatim של המקור groupOptionsOf ב-JS.
-List<dynamic> groupOptionsOf(
-  dynamic c,
+List<dynamic> groupOptionsOf(dynamic c,
   dynamic Function(dynamic) sessionsOf,
   dynamic Function(dynamic, int) groupLabelOf,
-  List<dynamic> dayNames,
-) {
+  List<dynamic> dayNames, Map<String, String> T) {
   final ss = sessionsOf(c);
   if (_rqTruthy(ss.length <= 1)) return [];
   return List.generate(((ss.length) as int), (i) {
     final s = ss[i];
     final v = groupLabelOf(s, i);
     final timeStr = _truthy(s['time']) ? s['time'] : '';
-    return {'v': v, 't': '$v · יום ${dayNames[((s['day']) as int)]} $timeStr'.trim()};
+    return {'v': v, 't': '$v${T['k1']!}${dayNames[((s['day']) as int)]} $timeStr'.trim()};
   });
 }
