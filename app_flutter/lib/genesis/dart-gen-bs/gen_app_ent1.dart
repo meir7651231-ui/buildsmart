@@ -1,11 +1,11 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: הירו 🗂️ פרויקט | ישות מורכבת — טופס + טבלה
-// 🧬 בקשה: הירו 🗂️ פרויקט | ישות מורכבת — טופס + טבלה · כותרת טופס פרויקט · אטום InlineTextRow שם · אטום GlowField כתובת · אטום NumberStepper תקציב · אטום DatePills תאריך התחלה · אטום ChatSettingsSwitchRow סטטוס · אטום FabMenu שמירה · כותרת רשומות פרויקט · אטום DataGrid פרויקט · כותרת מעבר-סטטוס · אטום NeonButton קדם סטטוס · באנר ישות פרויקט: 5 שדות · טופס + טבלה מהמדף
-// 🧬 אטומים שנבחרו: CaSubTitle · InlineTextRow · GlowField · NumberStepper · DatePills · ChatSettingsSwitchRow · FabMenu · CaSubTitle · DataGrid · CaSubTitle · NeonButton · CoinBanner
+// 🧬 בקשה: הירו 🗂️ פרויקט | ישות מורכבת — טופס + טבלה · כותרת טופס פרויקט · אטום InlineTextRow שם · אטום GlowField כתובת · אטום NumberStepper תקציב · אטום DatePills תאריך התחלה · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · כותרת רשומות פרויקט · אטום DataGrid פרויקט · כותרת מעבר-סטטוס · אטום NeonButton קדם סטטוס · באנר ישות פרויקט: 5 שדות · טופס + טבלה מהמדף
+// 🧬 אטומים שנבחרו: CaSubTitle · InlineTextRow · GlowField · NumberStepper · DatePills · AnimatedToggle · FabMenu · CaSubTitle · DataGrid · CaSubTitle · NeonButton · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent1_content.dart';
+import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
-import '../dart-ui-bs/auto/chat_settings_switch_row.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
 import '../dart-ui-bs/auto/inline_text_row.dart';
 import '../dart-ui-bs/data_grid.dart';
@@ -25,7 +25,6 @@ class GenAppEnt1Screen extends StatefulWidget {
 
 class _GenAppEnt1ScreenState extends State<GenAppEnt1Screen> {
   String _t1 = '';
-  bool _v2 = false;
 
   void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
@@ -46,7 +45,7 @@ class _GenAppEnt1ScreenState extends State<GenAppEnt1Screen> {
           GlowField(hint: gen_app_ent1_glowfield_hint, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           NumberStepper(label: gen_app_ent1_numstep_label, height: 16, target: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           DatePills(height: 16, days: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          ChatSettingsSwitchRow(fallback: gen_app_ent1_switch_fallback, label: gen_app_ent1_switch_label, value: _v2, onChanged: (v) => setState(() => _v2 = v)),
+          AnimatedToggle(label: gen_app_ent1_toggle_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           FabMenu(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_app_ent1_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),

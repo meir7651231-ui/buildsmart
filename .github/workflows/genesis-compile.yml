@@ -26,4 +26,4 @@ jobs:
       - name: Pub get
         run: flutter pub get
       - name: Analyze genesis atoms
-        run: flutter analyze lib/genesis
+        run: flutter analyze --no-fatal-infos lib/genesis

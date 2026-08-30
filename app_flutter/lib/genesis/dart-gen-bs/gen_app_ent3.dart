@@ -1,11 +1,11 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: הירו 🗂️ משימה | ישות מורכבת — טופס + טבלה
-// 🧬 בקשה: הירו 🗂️ משימה | ישות מורכבת — טופס + טבלה · כותרת טופס משימה · אטום InlineTextRow שם · אטום GlowField אחראי · אטום DatePills תאריך יעד · אטום InlineTextRow עדיפות · אטום NumberStepper אחוז ביצוע · אטום ChatSettingsSwitchRow סטטוס · אטום FabMenu שמירה · כותרת רשומות משימה · אטום DataGrid משימה · כותרת מעבר-סטטוס · אטום NeonButton קדם סטטוס · באנר ישות משימה: 6 שדות · טופס + טבלה מהמדף
-// 🧬 אטומים שנבחרו: CaSubTitle · InlineTextRow · GlowField · DatePills · InlineTextRow · NumberStepper · ChatSettingsSwitchRow · FabMenu · CaSubTitle · DataGrid · CaSubTitle · NeonButton · CoinBanner
+// 🧬 בקשה: הירו 🗂️ משימה | ישות מורכבת — טופס + טבלה · כותרת טופס משימה · אטום InlineTextRow שם · אטום GlowField אחראי · אטום DatePills תאריך יעד · אטום InlineTextRow עדיפות · אטום NumberStepper אחוז ביצוע · אטום AnimatedToggle סטטוס · אטום FabMenu שמירה · כותרת רשומות משימה · אטום DataGrid משימה · כותרת מעבר-סטטוס · אטום NeonButton קדם סטטוס · באנר ישות משימה: 6 שדות · טופס + טבלה מהמדף
+// 🧬 אטומים שנבחרו: CaSubTitle · InlineTextRow · GlowField · DatePills · InlineTextRow · NumberStepper · AnimatedToggle · FabMenu · CaSubTitle · DataGrid · CaSubTitle · NeonButton · CoinBanner
 import '../dart-data-bs/auto/gen_app_ent3_content.dart';
+import '../dart-ui-bs/animated_toggle.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
-import '../dart-ui-bs/auto/chat_settings_switch_row.dart';
 import '../dart-ui-bs/auto/coin_banner.dart';
 import '../dart-ui-bs/auto/inline_text_row.dart';
 import '../dart-ui-bs/data_grid.dart';
@@ -26,7 +26,6 @@ class GenAppEnt3Screen extends StatefulWidget {
 class _GenAppEnt3ScreenState extends State<GenAppEnt3Screen> {
   String _t1 = '';
   String _t2 = '';
-  bool _v3 = false;
 
   void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
@@ -48,7 +47,7 @@ class _GenAppEnt3ScreenState extends State<GenAppEnt3Screen> {
           DatePills(height: 16, days: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           InlineTextRow(label: gen_app_ent3_textfield_label2, hint: gen_app_ent3_textfield_hint2, value: _t2, onChanged: (v) => setState(() => _t2 = v)),
           NumberStepper(label: gen_app_ent3_numstep_label, height: 16, target: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          ChatSettingsSwitchRow(fallback: gen_app_ent3_switch_fallback, label: gen_app_ent3_switch_label, value: _v3, onChanged: (v) => setState(() => _v3 = v)),
+          AnimatedToggle(label: gen_app_ent3_toggle_label, height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           FabMenu(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_app_ent3_header_text2),
           DataGrid(height: 16, rows: 0, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
