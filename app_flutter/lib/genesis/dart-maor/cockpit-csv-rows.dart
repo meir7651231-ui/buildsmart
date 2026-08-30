@@ -8,10 +8,10 @@
 
 /// CSV rows for the task queue (header + one row per task).
 /// Verbatim port of new/atoms/cockpit-csv-rows.mjs (KIND_LABEL inlined).
-List<List> cockpitCsvRows(Map queue) {
-  const kindLabel = {'call': 'שיחה', 'thanks': 'תודה', 'hok': 'הו״ק'};
+List<List> cockpitCsvRows(Map queue, Map<String, String> T) {
+  final kindLabel = {'call': T['k1']!, 'thanks': T['k2']!, 'hok': T['k3']!};
   return [
-    ['קבוצה', 'שם', 'טלפון', 'סיבה'],
+    [T['k4']!, T['k5']!, T['k6']!, T['k7']!],
     for (final tt in (queue['tasks'] as List))
       [
         kindLabel[(tt as Map)['kind']],

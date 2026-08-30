@@ -3,11 +3,6 @@
 /// הומר מ-new/atoms/events-csv-rows.mjs — התנהגות זהה-לחלוטין (חוק-4).
 /// אפס-import (dart-core בלבד).
 
-const Map<String, String> _priorityLabel = {
-  'green': 'רגיל (ירוק)',
-  'orange': 'בינוני (כתום)',
-  'red': 'דחוף (אדום)',
-};
 
 // truthiness של JS: false/0/''/null/undefined/NaN הם falsy (כלל-המרה 7).
 bool _falsy(dynamic v) {
@@ -27,26 +22,29 @@ String _fmtD(dynamic iso) {
   return '$d/$m/$y';
 }
 
-List<List<dynamic>> eventsCsvRows(
-  dynamic db,
+List<List<dynamic>> eventsCsvRows(dynamic db,
   dynamic config,
   dynamic termOf,
   dynamic hebDateFull,
-  dynamic evMeta,
-) {
+  dynamic evMeta, Map<String, String> T2) {
+  final Map<String, String> _priorityLabel = {
+  'green': T2['k1']!,
+  'orange': T2['k2']!,
+  'red': T2['k3']!,
+};
   dynamic T(String k, String fb) => _falsy(config) ? fb : termOf(config, k, fb);
 
   final rows = <List<dynamic>>[
     [
-      'כותרת',
-      'סוג אירוע',
-      'תאריך עברי',
-      'תאריך לועזי',
-      'שעה',
-      T('entity.family', 'משפחה'),
-      'עדיפות',
-      'הערות',
-      'בוצע',
+      T2['k4']!,
+      T2['k5']!,
+      T2['k6']!,
+      T2['k7']!,
+      T2['k8']!,
+      T('entity.family', T2['k10']!),
+      T2['k11']!,
+      T2['k12']!,
+      T2['k13']!,
     ],
   ];
 
@@ -93,7 +91,7 @@ List<List<dynamic>> eventsCsvRows(
       famName,
       priCell,
       _falsy(ev['notes']) ? '' : ev['notes'],
-      _falsy(ev['done']) ? 'לא' : 'כן',
+      _falsy(ev['done']) ? T2['k15']! : T2['k14']!,
     ]);
   }
   return rows;
