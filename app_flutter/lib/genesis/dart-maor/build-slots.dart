@@ -41,7 +41,7 @@ List<Map<String, dynamic>> buildSlots(
   String Function(dynamic min) minToHM,
   List<dynamic> Function(dynamic c) sessionsOf,
   bool Function(dynamic c, dynamic iso) courseOnDate,
-  String Function(dynamic cfg, dynamic key, dynamic fb) termOf, [
+  String Function(dynamic cfg, dynamic key, dynamic fb) termOf, Map<String, dynamic> T, [
   bool cleaningOn = true,
 ]) {
   final num from = timeToMin(room['from']).isNaN ? 8 * 60 : timeToMin(room['from']);
@@ -62,7 +62,7 @@ List<Map<String, dynamic>> buildSlots(
         'key': 'clean' + hh,
         'time': hh,
         'kind': 'cleaning',
-        'label': 'ניקיון יומי (15:00–16:00)',
+        'label': (T['k3'] as String),
         'bg': '#eceae2',
         'c': '#4d463c',
       });
@@ -81,7 +81,7 @@ List<Map<String, dynamic>> buildSlots(
             'key': 'crs|' + hh + '|' + (c as Map)['id'].toString() + '|' + i.toString(),
             'time': _or(sess['time'], hh),
             'kind': 'course',
-            'label': termOf(config, 'entity.course', 'חוג') + ': ' + (c)['name'].toString(),
+            'label': termOf(config, 'entity.course', (T['k7'] as String)) + ': ' + (c)['name'].toString(),
             'bg': '#fdf1d4',
             'c': '#9a6414',
             'course': c,
@@ -109,7 +109,7 @@ List<Map<String, dynamic>> buildSlots(
         'key': 'ev|' + hh + '|' + oe['id'].toString(),
         'time': _or(oe['time'], hh),
         'kind': 'event',
-        'label': 'אירוע: ' + oe['title'].toString(),
+        'label': (T['k10'] as String) + oe['title'].toString(),
         'bg': '#e7edf5',
         'c': '#3a5a86',
         'event': oe,
@@ -119,7 +119,7 @@ List<Map<String, dynamic>> buildSlots(
         'key': 'blk' + hh,
         'time': hh,
         'kind': 'blocked',
-        'label': 'חסום — ' + blocked.toString(),
+        'label': (T['k14'] as String) + blocked.toString(),
         'bg': '#fdeaea',
         'c': '#b91c1c',
       });
@@ -128,7 +128,7 @@ List<Map<String, dynamic>> buildSlots(
         'key': 'free' + hh,
         'time': hh,
         'kind': 'free',
-        'label': 'פנוי',
+        'label': (T['k17'] as String),
         'bg': '#e4f5ea',
         'c': '#12803c',
       });
@@ -147,10 +147,10 @@ List<Map<String, dynamic>> buildSlots(
         'key': 'out|' + (c as Map)['id'].toString() + '|' + i.toString(),
         'time': _or(sess['time'], '—'),
         'kind': 'course',
-        'label': termOf(config, 'entity.course', 'חוג') +
+        'label': termOf(config, 'entity.course', (T['k7'] as String)) +
             ': ' +
             (c)['name'].toString() +
-            ' · מחוץ לשעות הפעילות של החדר',
+            (T['k18'] as String),
         'bg': '#fdf1d4',
         'c': '#9a6414',
         'course': c,

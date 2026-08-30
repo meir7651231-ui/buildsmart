@@ -1,0 +1,3 @@
+// 📚 אטום-דאטה · שקעי-build-slots — חולץ ע"י purify-dart (מבצע-המאה) מאמת-הקרקע של בדיקת-ה-JS.
+// מהות-המוצא: ערכי-השקעים של buildSlots — זהים ביט-לביט לצד-ה-JS (new/atoms/build-slots.test.mjs).
+const Map<String, dynamic> buildSlots_T = {'k1': 'clean', 'k2': 'cleaning', 'k3': 'ניקיון יומי (15:00–16:00)', 'k4': '#eceae2', 'k5': 'course', 'k6': 'entity.course', 'k7': 'חוג', 'k8': '#fdf1d4', 'k9': 'event', 'k10': 'אירוע: ', 'k11': '#e7edf5', 'k12': 'blk', 'k13': 'blocked', 'k14': 'חסום — ', 'k15': '#fdeaea', 'k16': 'free', 'k17': 'פנוי', 'k18': ' · מחוץ לשעות הפעילות של החדר', 'k19': 'crs|', 'k20': 'out|', 'k21': 60, 'k22': 20, 'k23': 96, 'k24': 900, 'k25': 960};
