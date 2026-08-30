@@ -1,9 +1,13 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
-// 🧬 שם: יכולת מאולתרת - צינור חי
-// 🧬 בקשה: יכולת מאולתרת - צינור חי: · הירו 🎲 יכולת מאולתרת - חמישה אטומים שהגרלתי וחיברתי לבד | תבחר 5 אטומים רנדלמיים תחבר בין ותוציא את היכולת הכי טוב וחדשה שלה · כותרת צינור חי - הדאטה מתוך האטום עצמו והבחירה מוזרמת לפונקציה · אטום ChipWrap סטטוס בא במסירת חלוקה קדימה בלבד: pickup / enroute / delivered · חישוב סטטוס בא במסירת חלוקה קדימה בלבד · באנר מצאתי לבד פונקציה עם תחום ערכים מוצהר חילצתי את הדאטה שלה וחיברתי צינור - בחירה מחושבת לתוצאה
-// 🧬 אטומים שנבחרו: HeroCard · CaSubTitle · ChipWrap · CoinBanner · RStat
+// 🧬 שם: יכולת מאולתרת - שרשרת חמישה
+// 🧬 בקשה: יכולת מאולתרת - שרשרת חמישה: · הירו 🎲 יכולת מאולתרת - חמישה אטומים שהגרלתי וחיברתי לבד | תבחר 5 אטומים רנדלמיים תחבר בין ותוציא את היכולת הכי טוב וחדשה שלה · כותרת שרשרת חיה - חמישה אטומי לוגיקה מחוברים - פלט כל שלב מוזרם לשלב הבא · אטום ChipWrap סטטוס בא במסירת חלוקה קדימה בלבד: pickup / enroute / delivered · חישוב סטטוס בא במסירת חלוקה קדימה בלבד (advanceStatus) · חישוב מפתח מטמון לקונפיג מהענן (cloudCfgCacheKey) · חישוב קוד זמנה דטרמיניסטי (genJoinCode) · חישוב נירמול מספר טלפון למפתח זיהוי (phoneKey) · חישוב אבחון תקינות מספר טלפון תקין (phoneIssue) · באנר הגרלתי חמישה אטומי לוגיקה ושרשרתי אותם לצינור אחד - יכולת שלא היתה בשום מסך - מחר שרשרת חדשה
+// 🧬 אטומים שנבחרו: HeroCard · CaSubTitle · ChipWrap · CoinBanner · RStat · RStat · RStat · RStat · RStat
 import '../dart-data-bs/auto/gen_improv_content.dart';
 import '../dart-maor/advance-status.dart';
+import '../dart-maor/cloud-cfg-cache-key.dart';
+import '../dart-maor/gen-join-code.dart';
+import '../dart-maor/phone-issue.dart';
+import '../dart-maor/phone-key.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
 import '../dart-ui-bs/auto/ca_sub_title.dart';
 import '../dart-ui-bs/auto/chip_wrap.dart';
@@ -40,6 +44,10 @@ class _GenImprovScreenState extends State<GenImprovScreen> {
           CaSubTitle(gen_improv_header_text),
           ChipWrap(options: const <String>[gen_improv_chip_option, gen_improv_chip_option2, gen_improv_chip_option3], selected: _t1, onSelect: (v) => setState(() => _t1 = v)),
           Row(children: [RStat(value: advanceStatus(_t1), label: gen_improv_stat_label)]),
+          Row(children: [RStat(value: cloudCfgCacheKey((advanceStatus(_t1))), label: gen_improv_stat_label2)]),
+          Row(children: [RStat(value: genJoinCode((cloudCfgCacheKey((advanceStatus(_t1))))), label: gen_improv_stat_label3)]),
+          Row(children: [RStat(value: phoneKey((genJoinCode((cloudCfgCacheKey((advanceStatus(_t1))))))), label: gen_improv_stat_label4)]),
+          Row(children: [RStat(value: phoneIssue((phoneKey((genJoinCode((cloudCfgCacheKey((advanceStatus(_t1))))))))) ?? '', label: gen_improv_stat_label5)]),
           CoinBanner(coins: 0, sub: gen_improv_banner_sub),
           ],
         ),
