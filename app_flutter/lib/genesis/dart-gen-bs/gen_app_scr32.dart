@@ -52,7 +52,7 @@ class _GenAppScr32ScreenState extends State<GenAppScr32Screen> {
           ChipCloud(labels: const <String>[], height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           EmptyStateCard(glyph: gen_app_scr32_card_glyph, message: gen_app_scr32_card_message, surfaceColor: BsTokens.cardLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           BareStat(value: _t1, label: gen_app_scr32_stat_label, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight),
-          WorkerNav(label: gen_app_scr32_other_label2, label2: gen_app_scr32_other_label22, label3: gen_app_scr32_other_label3, label4: gen_app_scr32_other_label4, currentIndex: 0, onTap: (v) => setState(() => _n2 = v), chatOn: false),
+          WorkerNav(label: gen_app_scr32_other_label2, label2: gen_app_scr32_other_label22, label3: gen_app_scr32_other_label3, label4: gen_app_scr32_other_label4, currentIndex: _n2, onTap: (v) => setState(() => _n2 = v), chatOn: false),
           SummaryCard(label: gen_app_scr32_card_label, label2: gen_app_scr32_card_label2, label3: gen_app_scr32_card_label3, label4: gen_app_scr32_card_label4, value: _t3, label5: gen_app_scr32_card_label5, subtotal: 0, vat: 0, deliveryFee: 0, total: 0, vatInclusive: false),
           TitledSection(title: gen_app_scr32_header_title, inkColor: BsTokens.inkLight, child: const SizedBox(height: 4)),
           MiniCalendar(height: 16, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
