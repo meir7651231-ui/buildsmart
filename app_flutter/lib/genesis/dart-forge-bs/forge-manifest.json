@@ -1,0 +1,23 @@
+{
+  "families": {
+    "action": 49,
+    "card": 31,
+    "chat": 6,
+    "composite": 18,
+    "dataviz": 24,
+    "feedback": 26,
+    "header": 27,
+    "input": 27,
+    "list": 16,
+    "media": 27,
+    "motion": 8,
+    "nav": 12,
+    "selection": 26,
+    "spatial": 6,
+    "status": 27,
+    "temporal": 7,
+    "text": 16
+  },
+  "total": 353,
+  "generatedBy": "machtzev/ds-forge.mjs"
+}
