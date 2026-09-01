@@ -46,6 +46,11 @@ class DsPure {
   static const teal = DsPureTheme(aHi: Color(0xFF6FE6D5), a: Color(0xFF1FB8A6), a800: Color(0xFF0C7E72), gl: Color(0x6B1FB8A6), c2: Color(0xFF4FB6E6), c3: Color(0xFF43D08C));
   static const amber = DsPureTheme(aHi: Color(0xFFF2C87E), a: Color(0xFFD99A3C), a800: Color(0xFF9E6B1E), gl: Color(0x6BD99A3C), c2: Color(0xFFE8863C), c3: Color(0xFFE67BA6));
 
+  // ── קיצורי-אקצנט לברירת-המחדל (Color ישיר — לטוקנים דורמנטיים כמו BsPure) ──
+  static const accentHi = Color(0xFFB0A4FF);
+  static const accent = Color(0xFF7A6BF0);
+  static const accentDark = Color(0xFF4B3ECB);
+
   static const String defaultTheme = 't-indigo';
   static const Map<String, DsPureTheme> themes = {'t-indigo': indigo, 't-teal': teal, 't-amber': amber};
 
