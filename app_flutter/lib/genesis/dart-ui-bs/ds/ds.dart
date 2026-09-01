@@ -3,28 +3,29 @@
 // אפס-דאטה (כל טקסט מוזרק בחיווט); material בלבד; פוקוס/מצב פנימיים. חוק-1/חוק-5.
 // ⚠️ חתימות-הבנאי קפואות (תפר atom-census) — כאן משתנה רק המראה (build/צבעים/צללים).
 import 'package:flutter/material.dart';
+import 'ds_pure.dart'; // 🎨 עיצוב-Pure (הכרעת-בעלים 1.9) — הפלטה מופנית ל-DsPure. הפיך: שחזור-קובץ ⇒ הישן.
 
 class DsTokens {
   // ── זהות · בהירות-הערכה (טוקן=דאטה · המנוע קורא-עיוור, לא מכריע) ──
   // חילוף כהה↔בהיר = שינוי הטוקן הזה בלבד. הכרעה 19.
   static const brightness = Brightness.dark;
-  // ── פלטה · כהה-קולנועי + מבטא-ניאון ──
-  static const bg = Color(0xFF07070D);
-  static const bg2 = Color(0xFF0B0B16);
-  static const card = Color(0xFF101127);
-  static const cardAlt = Color(0xFF0C0D1E);    // משטח-משנה (כרטיס-רשומה מקונן)
-  static const ink = Color(0xFFF2F3FF);
-  static const muted = Color(0xFF9AA0BE);
-  static const faint = Color(0xFF5B6180);
-  static const line = Color(0x17FFFFFF);        // מסגרת-זכוכית דקה (לבן 9%)
-  static const track = Color(0xFF1A1B33);       // רקע-מסילה (פסים · התקדמות · שבב-נייטרל)
-  static const accent = Color(0xFF7C3AED);      // סגול-ניאון (מבטא ראשי)
-  static const accentDark = Color(0xFFA855F7);
-  static const accentSoft = Color(0x1F7C3AED);  // סגול-שקוף (רקע-שבב)
-  static const magenta = Color(0xFFEC4899);
-  static const cyan = Color(0xFF22D3EE);
-  static const success = Color(0xFF34D399);
-  static const successSoft = Color(0x1F34D399);
+  // ── פלטה · Pure (מופנית ל-DsPure · חוק-7 הפיך) ──
+  static const bg = DsPure.canvas;
+  static const bg2 = DsPure.sunken;
+  static const card = DsPure.surface;
+  static const cardAlt = DsPure.raised;        // משטח-משנה (כרטיס-רשומה מקונן)
+  static const ink = DsPure.ink;
+  static const muted = DsPure.mut;
+  static const faint = DsPure.faint;
+  static const line = DsPure.hair;             // מסגרת-זכוכית דקה
+  static const track = DsPure.raised2;         // רקע-מסילה (פסים · התקדמות · שבב-נייטרל)
+  static const accent = DsPure.accent;         // אינדיגו-Pure (מבטא ראשי)
+  static const accentDark = DsPure.accentHi;
+  static const accentSoft = Color(0x1F7A6BF0); // אינדיגו-שקוף (רקע-שבב)
+  static const magenta = Color(0xFFB57BE6);
+  static const cyan = Color(0xFF4CC6E6);
+  static const success = Color(0xFF43D08C);
+  static const successSoft = Color(0x1F43D08C);
   // ── רדיוסים · דרגות ──
   static const r = 16.0;
   static const rSm = 11.0;
