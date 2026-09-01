@@ -1,6 +1,6 @@
-// ✨ חולל ע"י capability.mjs — כוונה⇒הרכבה (§23). המשפט: "אני צריך לנטר את הטמפרטורה ולקבל התראה כשהטמפרטורה חורגת מהמקסימום".
-// הפירוק נגזר: ערך⇒GaugeMeter · קריאה⇒PremiumRing (selectAtom·צורה) · התראה⇒AlertBanner (match·מטרה).
-// השוואה(">") מהדקדוק-היחסי · אפס שם-אטום חרוט · אפס-מילון-דומייני (§20-א).
+// ✨ חולל ע"י capability.mjs (מרכיב) — כוונה⇒הרכבה (§23). המשפט: "אני צריך לנטר את הטמפרטורה ולקבל התראה כשהטמפרטורה חורגת מהמקסימום".
+// **המבנה נגזר, לא חרוט:** 1 יחידות (1 תנאים) ⇒ 1× ערך⇒GaugeMeter/PremiumRing + 1× התראה⇒AlertBanner.
+// אפס שם-אטום חרוט · אפס-מילון-דומייני · מספר-היחידות מהמבנה (§20-ב · הרכבה-עד-שמושג).
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
@@ -28,22 +28,21 @@ class GenCapScreen extends StatefulWidget {
 }
 
 class _GenCapScreenState extends State<GenCapScreen> {
-  double _x = 55; // טמפרטורה
-  final double _y = 70; // מקסימום
+  double _v0 = 55;
   @override
   Widget build(BuildContext context) {
-    final bool over = _x > _y; // ← פעולת-היסוד מהמשפט
-    final double norm = (_x / (_y == 0 ? 1 : _y * 1.4)).clamp(0.0, 1.0);
     return DsScaffold(
-      title: 'ניטור טמפרטורה',
-      subtitle: 'חוּלל ממשפט · טמפרטורה > מקסימום',
+      title: 'מסך שחולל',
+      subtitle: '11 ניטורים',
       icon: '📟',
       children: [
-        Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Center(child: GaugeMeter(value: norm))),
-        Padding(padding: const EdgeInsets.all(12), child: PremiumRing(value: _x, label: over ? 'חריגה · טמפרטורה' : 'תקין · טמפרטורה')),
-        if (over)
-          const Padding(padding: EdgeInsets.all(12), child: AlertBanner(label: 'חריגה — טמפרטורה מעל מקסימום', height: 46, radius: 14, accentColor: DsPure.err, baseColor: DsPure.raised, fillColor: DsPure.surface)),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), child: Slider(value: _x, max: 100, onChanged: (v) => setState(() => _x = v))),
+        Padding(padding: const EdgeInsets.only(top: 10, right: 14), child: Align(alignment: Alignment.centerRight, child: Text('טמפרטורה', style: const TextStyle(color: DsPure.mut, fontSize: 13)))),
+        Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Center(child: GaugeMeter(value: (_v0 / 100).clamp(0.0, 1.0)))),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: PremiumRing(value: _v0, label: (_v0 > 60) ? 'חריגה · טמפרטורה' : 'תקין · טמפרטורה')),
+        if (_v0 > 60)
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: AlertBanner(label: 'חריגה — טמפרטורה', height: 46, radius: 14, accentColor: DsPure.err, baseColor: DsPure.raised, fillColor: DsPure.surface)),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Slider(value: _v0, max: 100, onChanged: (v) => setState(() => _v0 = v))),
+        const Divider(color: DsPure.hair, height: 24),
       ],
     );
   }
