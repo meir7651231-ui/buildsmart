@@ -36,9 +36,10 @@ class DsPure {
   static const hair = Color(0x17ECE9E2);
   static const hair2 = Color(0x0DECE9E2);
 
-  // ── סמנטי · err/warn/gold — קבוע (error נשאר אדום, gold נשאר זהב) ──
-  static const err = Color(0xFFE0574E);
+  // ── סמנטי · ok/warn/err/gold — קבוע (error נשאר אדום, gold נשאר זהב) ──
+  static const ok = Color(0xFF43D08C);
   static const warn = Color(0xFFE6B84F);
+  static const err = Color(0xFFE0574E);
   static const gold = Color(0xFFE6C766);
 
   // ── ערכות-אקצנט · מורפות יחד ──
