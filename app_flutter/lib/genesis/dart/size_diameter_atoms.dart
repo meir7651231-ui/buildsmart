@@ -1,3 +1,4 @@
+import '../dart-data/size_diameter_atoms-data.dart';
 // ⚛️ אטום-Dart · sizeDiameterAtoms
 // מוצא: buildsmart/app_flutter/lib/data/variant_families.dart:187-215 (חצב-בינה · מפל-מינימום · חוק-4).
 
@@ -26,7 +27,7 @@ List<String> sizeDiameterAtoms(String size) {
     } else {
       // זנב-מספרי חשוף (200, 250) → אטום-אורך.
       if (RegExp(r'^\d+$').hasMatch(chunk)) {
-        out.add('${chunk} ס"מ');
+        out.add('${chunk} ${kUnitCm}');
       } else {
         out.add(_normAtom(chunk));
       }

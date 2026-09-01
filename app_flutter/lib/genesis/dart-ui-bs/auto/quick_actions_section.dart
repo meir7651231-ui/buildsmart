@@ -37,7 +37,7 @@ class _SectionTile extends StatelessWidget {
     required this.emoji,
     required this.title,
     required this.children,
-    this.underConstruction = false, // ignore: unused_element_parameter
+    this.underConstruction = false,
   });
   final String fallback;
 
@@ -168,8 +168,8 @@ class _SwitchRow extends StatelessWidget implements _Inert {
     required this.label,
     required this.value,
     required this.onChanged,
-    this.underConstruction = false, // ignore: unused_element_parameter
-    this.requiresServer = false, // ignore: unused_element_parameter
+    this.underConstruction = false,
+    this.requiresServer = false,
   });
   final String fallback3;
   final String fallback4;

@@ -33,13 +33,11 @@ bool _falsy(Object? v) {
 }
 
 /// פורט מילולי של new/atoms/overdue-contact-task-drafts.mjs.
-List<Map<String, dynamic>> overdueContactTaskDrafts(
-  List<Map<String, dynamic>> supporters,
+List<Map<String, dynamic>> overdueContactTaskDrafts(List<Map<String, dynamic>> supporters,
   List<Map<String, dynamic>> existing,
   Object? assignee,
   String todayIso,
-  String Function(Object?) taskIdentity,
-) {
+  String Function(Object?) taskIdentity, Map<String, String> T) {
   final me = taskIdentity(assignee);
   final already = <dynamic>{
     for (final t in existing)
@@ -55,7 +53,7 @@ List<Map<String, dynamic>> overdueContactTaskDrafts(
           !already.contains(sp['id']))
         <String, dynamic>{
           'assignee': me,
-          'title': '📞 להתקשר — ' + (sp['name'] as String),
+          'title': T['k2']! + (sp['name'] as String),
           'ref': <String, dynamic>{'kind': 'supporter', 'id': sp['id']},
           'pri': 1,
           'due': todayIso,

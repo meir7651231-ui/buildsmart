@@ -31,14 +31,12 @@ bool _falsy(Object? v) {
 /// payload with the password + recovery key, then open the DEK. A falsy DEK
 /// throws a Hebrew error. Verbatim behaviour of the JS source
 /// new/atoms/create-cloud-key.mjs.
-Future<Map<String, dynamic>> createCloudKey(
-  dynamic password,
+Future<Map<String, dynamic>> createCloudKey(dynamic password,
   dynamic recoveryKey,
   EncryptDb encryptDb,
-  OpenDek openDek,
-) async {
+  OpenDek openDek, Map<String, String> T) async {
   final env = await encryptDb('', password, recoveryKey);
   final dek = await openDek(env, password, 'pass');
-  if (_falsy(dek)) throw StateError('יצירת מפתח-הצפנה נכשלה');
+  if (_falsy(dek)) throw StateError(T['k2']!);
   return {'env': env, 'dek': dek};
 }

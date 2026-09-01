@@ -6,19 +6,19 @@
 // פלט:  זיהוי "מערכת-המידה": אינץ' (תבריג) · HDPE מ"מ · DN ניקוז · אחר.
 
 /// מזהה את מערכת-המידה של [size]. טהור.
-String sizeSystem(String size) {
+String sizeSystem(String size, {required String Function(String) term}) {
   final s = size.trim();
-  if (s.contains('DN') || s.contains('dn')) return 'DN ניקוז';
+  if (s.contains('DN') || s.contains('dn')) return term('nykvz');
   if (s.contains('"') || s.contains('½') || s.contains('¼') || s.contains('¾') ||
       RegExp(r'\d/\d').hasMatch(s)) {
-    return 'תבריג (אינץ\')';
+    return term('tbryg-aynts');
   }
   if (RegExp(r'^\d+(?:[×x]\d+)*( \d+)?$').hasMatch(s)) {
     final firstNum = int.tryParse(RegExp(r'^\d+').firstMatch(s)?.group(0) ?? '');
     if (firstNum != null) {
-      if (firstNum >= 16 && firstNum <= 63) return 'HDPE (מ"מ)';
-      if (firstNum >= 75) return 'DN ניקוז';
+      if (firstNum >= 16 && firstNum <= 63) return term('mm');
+      if (firstNum >= 75) return term('nykvz');
     }
   }
-  return 'אחר';
+  return term('achr');
 }

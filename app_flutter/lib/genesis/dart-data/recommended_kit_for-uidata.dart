@@ -1,0 +1,31 @@
+// 🗄️ דאטה · תוויות-UI של recommended_kit_for (הורם מ-interpolation/ליטרל).
+
+const String k1 = 'חובה';
+const String k2 = 'מומלץ';
+const String k3 = 'אופציונלי';
+const String k4 = 'מפתח שוודי מתכוונן לחיבור הברגה ';
+const String k5 = 'הידוק חיבורי BSP בקו';
+const String k6 = 'סרט טפלון (PTFE)';
+const String k7 = 'איטום כל חיבור הברגה זכר';
+const String k8 = 'מכונת ריתוך-שקע PPR (260°C)';
+const String k9 = 'ריתוך-שקע למצמד / ברך / מסעף PPR';
+const String k10 = 'תבנית ריתוך ⌀';
+const String k11 = ' מ"מ';
+const String k12 = 'זוג תבניות (זכר+נקבה) לקוטר הקו';
+const String k13 = 'חותך צינור PPR';
+const String k14 = 'חיתוך ניצב לפני ריתוך';
+const String k15 = 'מפתח חבישה DN';
+const String k16 = ' ל-';
+const String k17 = 'הידוק אום compression על צינור';
+const String k18 = 'מכווץ PEX (Crimper) ל-';
+const String k19 = 'לחיצת שרוול על צינור PEX';
+const String k20 = 'כלי לחיצה לנחושת ';
+const String k21 = 'לחיצת O-ring על צינור נחושת';
+const String k22 = 'נחושת';
+const String k23 = 'פליז';
+const String k24 = 'פלדה';
+const String k25 = 'נירוסטה';
+const String k26 = 'רקורד דיאלקטרי';
+const String k27 = 'הפרדה גלוונית בין שתי מתכות שונות (קורוזיה)';
+const String k28 = 'חמצן (hemp) או טפלון עבה';
+const String k29 = 'איטום מעבר חומרים מוגבר';

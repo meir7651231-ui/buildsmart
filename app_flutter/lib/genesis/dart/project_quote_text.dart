@@ -1,3 +1,4 @@
+import '../dart-data/project_quote_text-data.dart';
 // ⚛️ אטום-Dart · projectQuoteText
 // מוצא: buildsmart/app_flutter/lib/state/card_projects.dart:81-95
 //        (‏projectQuoteText; חוק-2 — verbatim, לא-משופר).
@@ -44,7 +45,7 @@ String projectQuoteText(
   int? Function(String sku) unitPriceOf = _noPrice,
   String brandName = 'BuildSmart',
 }) {
-  final lines = <String>['הצעת מחיר — פרויקט "$project"'];
+  final lines = <String>['${kpqTitle}$project"'];
   var total = 0;
   for (final it in items) {
     final unit = unitPriceOf(it.sku) ?? 0;
@@ -52,7 +53,7 @@ String projectQuoteText(
     total += sub;
     lines.add('• ${it.location}: ${it.brandName} ×${it.qty} — ~₪$sub');
   }
-  lines.add('סה"כ משוער: ~₪$total');
-  lines.add('— נוצר ב-$brandName');
+  lines.add('${kpqTotal}$total');
+  lines.add('${kpqMadeBy}$brandName');
   return lines.join('\n');
 }

@@ -16,9 +16,9 @@
 
 /// Canonical worker identity for tasks: trimmed, lower-cased email; empty/null
 /// falls back to 'מקומי'. Bit-identical to the JS source `taskIdentity`.
-String taskIdentity(dynamic email) {
+String taskIdentity(dynamic email, Map<String, String> T) {
   final String e = _toLowerJs(_trimJs((email ?? '') as String));
-  return e.isEmpty ? 'מקומי' : e; // '' כוזב ב-JS ⇒ ברירת-המחדל
+  return e.isEmpty ? T['k1']! : e; // '' כוזב ב-JS ⇒ ברירת-המחדל
 }
 
 /// קבוצת-הרווחים של ES (WhiteSpace ∪ LineTerminator) — בלי U+0085 ובלי U+180E.

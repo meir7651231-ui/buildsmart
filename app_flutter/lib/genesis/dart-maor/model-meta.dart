@@ -10,7 +10,7 @@
 //
 // אבחון-ההסגר (FIXES.md · model-meta · כלל-12): העוזר הישן `_jsNum` השתמש ב-
 //   `truncate()` ⇒ רוויית-int64 לדאבל שלם ≥2^63. size=1e21 ⇒ JS "1e+21" מול
-//   בעוד Dart "9223372036854775807"; 1e19 נרווה גם הוא. התיקון: החלפת שרשור-המספר
+//   Dart "9223372036854775807"; 1e19 נרווה גם הוא. התיקון: החלפת שרשור-המספר
 //   ב-`_jsStr` הנאמן-ל-JS (shortest-round-trip): שלם-בטוח בלי ".0"; טווח
 //   [2^53,1e21) עשרוני-מלא בלי truncate; ≥1e21 כתיב-מעריכי; שבר = toString הקצר.
 //
@@ -23,21 +23,21 @@
 
 /// Label + pricing-track colors for a course, verbatim port of
 /// new/atoms/model-meta.mjs (`modelMeta`). Unknown model ⇒ 'מנוי חודשי'.
-Map<String, dynamic> modelMeta(dynamic c) {
+Map<String, dynamic> modelMeta(dynamic c, Map<String, String> T) {
   if (c['model'] == 'punch') {
     return {
-      'label': 'כרטיסייה · ' + _jsStrField(c, 'size') + ' ניקובים',
+      'label': T['k2']! + _jsStrField(c, 'size') + T['k3']!,
       'bg': '#fdf1d4',
       'c': '#9a6414',
     };
   }
   if (c['model'] == 'half_year') {
-    return {'label': 'מנוי חצי-שנתי', 'bg': '#e7edf5', 'c': '#3a5a86'};
+    return {'label': T['k6']!, 'bg': '#e7edf5', 'c': '#3a5a86'};
   }
   if (c['model'] == 'year') {
-    return {'label': 'מנוי שנתי', 'bg': '#efe7f3', 'c': '#7c3aed'};
+    return {'label': T['k9']!, 'bg': '#efe7f3', 'c': '#7c3aed'};
   }
-  return {'label': 'מנוי חודשי', 'bg': '#e4f5ea', 'c': '#12803c'};
+  return {'label': T['k12']!, 'bg': '#e4f5ea', 'c': '#12803c'};
 }
 
 /// JS-style string coercion of `'' + c.<key>` — מבחין חסר (⇒'undefined') מ-null

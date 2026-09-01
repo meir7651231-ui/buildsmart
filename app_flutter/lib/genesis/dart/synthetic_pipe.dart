@@ -1,3 +1,4 @@
+import '../dart-data/synthetic_pipe-brand.dart';
 // ⚛️ אטום-Dart (דרגת-חוזה) · syntheticPipe
 // מוצא: buildsmart/app_flutter/lib/logic/install_engine.dart:1016-1041
 //        (‏_syntheticPipe; חוק-4 — התנהגות זהה בדיוק, לא-משופרת).
@@ -50,7 +51,7 @@ class LipskeyCatalogProduct {
     required this.categoryEn,
     required this.categoryEmoji,
     required this.page,
-    this.brand = 'ליפסקי',
+    this.brand = kDefaultBrand,
   });
   final String sku;
   final String nameHe;

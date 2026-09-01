@@ -17,12 +17,10 @@
 /// Verbatim port of new/atoms/parse-supporter-grid.mjs (`parseSupporterGrid`).
 /// [rows] — grid of cells (rows of cells; cells are strings or null).
 /// Shims (wired to real atoms in the box): [supNameKeys], [parseAnyDate], [excelSerialToIso].
-List<Map<String, dynamic>> parseSupporterGrid(
-  List<List<Object?>> rows,
+List<Map<String, dynamic>> parseSupporterGrid(List<List<Object?>> rows,
   List<String> supNameKeys,
   String Function(String) parseAnyDate,
-  String Function(num) excelSerialToIso,
-) {
+  String Function(num) excelSerialToIso, Map<String, dynamic> T) {
   if (rows.isEmpty) return [];
 
   String s(Object? v) => v == null ? '' : v.toString();
@@ -44,25 +42,25 @@ List<Map<String, dynamic>> parseSupporterGrid(
       header.indexWhere((h) => keys.any((k) => h.contains(k)));
 
   int iName = find(supNameKeys);
-  int iPhone = find(['טלפון', 'נייד']);
-  int iEmail = find(['אימייל', 'מייל', 'email']);
-  int iId = find(['ת"ז', 'תז', 'זהות']);
-  int iAddr = find(['כתובת']);
-  int iCat = find(['קטגוריה']);
-  int iFor = find(['עבור', 'ייעוד']);
+  int iPhone = find([(T['k1'] as String), (T['k2'] as String)]);
+  int iEmail = find([(T['k3'] as String), (T['k4'] as String), 'email']);
+  int iId = find([(T['k6'] as String), (T['k7'] as String), (T['k8'] as String)]);
+  int iAddr = find([(T['k9'] as String)]);
+  int iCat = find([(T['k10'] as String)]);
+  int iFor = find([(T['k11'] as String), (T['k12'] as String)]);
   // קובץ מסוף-הסליקה (ExportHistory): עמודות סכום/תאריך-עסקה/מטבע ⇒ היסטוריה-ללא-קבלה.
-  final iAmount = find(['סכום']);
-  final iTxDate = find(['תאריך']);
-  final iCur = find(['מטבע']);
+  final iAmount = find([(T['k13'] as String)]);
+  final iTxDate = find([(T['k14'] as String)]);
+  final iCur = find([(T['k15'] as String)]);
   // כל שאר עמודות-הסליקה נקלטות למטא-דאטה של רשומת-ההיסטוריה.
-  final iRef = find(['אסמכתא']);
-  final iTxn = find(['מספר עסקה']);
-  final iReceipt = find(['מספר קבלה']);
-  final iBrand = find(['מותג']);
-  final iLast4 = find(['4 ספרות', 'ספרות']);
-  final iClearer = find(['חברה סולקת', 'סולק']);
-  final iPays = find(['תשלומים']);
-  final iStatus = find(['סטטוס']);
+  final iRef = find([(T['k16'] as String)]);
+  final iTxn = find([(T['k17'] as String)]);
+  final iReceipt = find([(T['k18'] as String)]);
+  final iBrand = find([(T['k19'] as String)]);
+  final iLast4 = find([(T['k20'] as String), (T['k21'] as String)]);
+  final iClearer = find([(T['k22'] as String), (T['k23'] as String)]);
+  final iPays = find([(T['k24'] as String)]);
+  final iStatus = find([(T['k25'] as String)]);
 
   int start = hdrIdx >= 0 ? hdrIdx + 1 : 1;
   if (iName < 0) {
@@ -123,7 +121,7 @@ List<Map<String, dynamic>> parseSupporterGrid(
         if (g(r, iLast4).isNotEmpty) hist['last4'] = g(r, iLast4);
         if (g(r, iClearer).isNotEmpty) {
           hist['clearer'] =
-              nedRe.hasMatch(g(r, iClearer)) ? 'נדרים' : g(r, iClearer);
+              nedRe.hasMatch(g(r, iClearer)) ? (T['k26'] as String) : g(r, iClearer);
         }
         if (iPays >= 0 && pays.isFinite && pays > 0) hist['pays'] = pays;
         if (g(r, iStatus).isNotEmpty) hist['status'] = g(r, iStatus);

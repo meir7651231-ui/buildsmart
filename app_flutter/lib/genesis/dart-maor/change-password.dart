@@ -41,18 +41,16 @@ String? _emailOf(dynamic u) {
 /// Change the signed-in user's password: re-authenticate with the current
 /// password, then update. Hebrew errors; verbatim behaviour of the JS source
 /// new/atoms/change-password.mjs.
-Future<void> changePassword(
-  String currentPass,
+Future<void> changePassword(String currentPass,
   String nextPass,
   GetUser getUser,
   Reauth reauth,
   UpdatePass update,
-  HebrewAuthError hebrewAuthError,
-) async {
+  HebrewAuthError hebrewAuthError, Map<String, String> T) async {
   final u = getUser();
   final email = _emailOf(u);
   if (u == null || email == null || email.isEmpty) {
-    throw StateError('אין משתמש מחובר — התחברו ונסו שוב');
+    throw StateError(T['k1']!);
   }
   try {
     await reauth(u, currentPass);
@@ -61,7 +59,7 @@ Future<void> changePassword(
     if (code == 'auth/wrong-password' ||
         code == 'auth/invalid-credential' ||
         code == 'auth/invalid-login-credentials') {
-      throw StateError('הסיסמה הנוכחית שגויה');
+      throw StateError(T['k5']!);
     }
     throw hebrewAuthError(e);
   }
@@ -70,7 +68,7 @@ Future<void> changePassword(
   } catch (e) {
     final code = _codeOf(e);
     if (code == 'auth/weak-password') {
-      throw StateError('הסיסמה החדשה חלשה מדי — לפחות 6 תווים');
+      throw StateError(T['k7']!);
     }
     throw hebrewAuthError(e);
   }

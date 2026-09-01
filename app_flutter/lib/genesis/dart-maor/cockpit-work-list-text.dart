@@ -11,12 +11,12 @@
 
 /// Task list as text (one line per task) — for copy/share.
 /// Verbatim port of new/atoms/cockpit-work-list-text.mjs (KIND_ICON inlined).
-String cockpitWorkListText(Map queue) {
-  const kindIcon = {'call': '📞 שיחה', 'thanks': '💛 תודה', 'hok': '🔁 הו״ק'};
+String cockpitWorkListText(Map queue, Map<String, String> T) {
+  final kindIcon = {'call': T['k1']!, 'thanks': T['k2']!, 'hok': T['k3']!};
   return (queue['tasks'] as List).map((tt) {
     final t = tt as Map;
     final name = t['name'];
-    final nm = (name == null || name == '') ? 'ללא שם' : name;
+    final nm = (name == null || name == '') ? T['k4']! : name;
     final phone = t['phone'];
     final ph = (phone == null || phone == '') ? '' : ' · ' + (phone as String);
     return kindIcon[t['kind']]! + ' · ' + (nm as String) + ph + ' — ' + (t['reason'] as String);

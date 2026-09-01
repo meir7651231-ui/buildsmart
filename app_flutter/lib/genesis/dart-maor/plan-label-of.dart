@@ -31,22 +31,20 @@ String _numStr(num n) {
 /// then ' · מוקפא ⏸' | ' · הסתיים' (paused/ended, exclusive), ' · <N> חיס׳' when absences,
 /// ' · 💳 ₪<bal>' when payBal(e) > 0. Verbatim port of new/atoms/plan-label-of.mjs
 /// (`planLabelOf`); neighbours planWord/payBal injected as sockets (Law 1/3).
-String planLabelOf(
-  Map<String, dynamic> e,
+String planLabelOf(Map<String, dynamic> e,
   String Function(String) planWord,
-  num Function(Map<String, dynamic>) payBal,
-) {
+  num Function(Map<String, dynamic>) payBal, Map<String, String> T) {
   var s = e['plan'] == 'punch'
-      ? 'כרטיסייה · ' + _numStr(e['purchased'] as num)
+      ? T['k2']! + _numStr(e['purchased'] as num)
       : planWord(e['plan'] as String);
   if (e['status'] == 'paused') {
-    s += ' · מוקפא ⏸';
+    s += T['k4']!;
   } else if (e['status'] == 'ended') {
-    s += ' · הסתיים';
+    s += T['k6']!;
   }
   final absences = e['absences'] as List;
   if (absences.isNotEmpty) {
-    s += ' · ' + absences.length.toString() + ' חיס׳';
+    s += ' · ' + absences.length.toString() + T['k7']!;
   }
   final bal = payBal(e);
   if (bal > 0) {

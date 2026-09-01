@@ -115,37 +115,13 @@ List<int> _fixedToHebrew(int date) {
 }
 
 // fmtHM: שם-החודש העברי (זהה לפלט Intl he-u-ca-hebrew, month:'long').
-String _hebrewMonthName(int year, int month) {
-  switch (month) {
-    case 1:
-      return 'ניסן';
-    case 2:
-      return 'אייר';
-    case 3:
-      return 'סיוון';
-    case 4:
-      return 'תמוז';
-    case 5:
-      return 'אב';
-    case 6:
-      return 'אלול';
-    case 7:
-      return 'תשרי';
-    case 8:
-      return 'חשוון';
-    case 9:
-      return 'כסלו';
-    case 10:
-      return 'טבת';
-    case 11:
-      return 'שבט';
-    case 12:
-      return _hebrewLeapYear(year) ? 'אדר א׳' : 'אדר';
-    case 13:
-      return 'אדר ב׳';
-    default:
-      return '';
-  }
+// שמות-החודשים = שקע-דאטה (הכרעה 16): monthNames — אינדקסים 0..10 = ניסן..שבט ·
+// 11 = אדר (פשוטה) · 12 = אדר א׳ · 13 = אדר ב׳ (dart-data-maor/heb-date-full-sockets.dart).
+String _hebrewMonthName(int year, int month, List<String> monthNames) {
+  if (month >= 1 && month <= 11) return monthNames[month - 1];
+  if (month == 12) return _hebrewLeapYear(year) ? monthNames[12] : monthNames[11];
+  if (month == 13) return monthNames[13];
+  return '';
 }
 
 // מחקה `new Date(head+'T12:00:00')` של V8: מחזיר DateTime בצהריים או null (isNaN).
@@ -166,12 +142,14 @@ DateTime? _parseNoon(String head) {
 
 /// "ט״ו אלול תשפ״ו" מתוך [iso] (צהריים-מקומי — חסין-אזורי-זמן). ריק/שבור ⇒ ''.
 /// שקעים: [gem] (גימטריית-יום) · [gemYear] (גימטריית-שנה מ-"5786") · [hebParts]
-/// (רכיבי-התאריך-העברי — נלקח רק day). התנהגות זהה למקור-ה-JS (חוק-4).
+/// (רכיבי-התאריך-העברי — נלקח רק day) · [monthNames] (שמות-החודשים — שקע-דאטה,
+/// הכרעה 16). התנהגות זהה למקור-ה-JS (חוק-4).
 String hebDateFull(
   String? iso,
   String Function(num n) gem,
   String Function(String y) gemYear,
   Map<String, Object> Function(DateTime d) hebParts,
+  List<String> monthNames,
 ) {
   if (iso == null || iso.isEmpty) return ''; // JS: if (!iso) return ''
   final String head = iso.length >= 10 ? iso.substring(0, 10) : iso; // slice(0,10)
@@ -180,7 +158,7 @@ String hebDateFull(
   final int day = (hebParts(d)['day'] as num).toInt(); // gem(hebParts(d).day)
   final int fixed = _gregorianToFixed(d.year, d.month, d.day);
   final List<int> heb = _fixedToHebrew(fixed);
-  final String month = _hebrewMonthName(heb[0], heb[1]); // fmtHM.format(d)
+  final String month = _hebrewMonthName(heb[0], heb[1], monthNames); // fmtHM.format(d)
   final String yearStr = heb[0].toString(); // fmtHY.format(d) ⇒ "5786"
   return '${gem(day)} $month ${gemYear(yearStr)}';
 }

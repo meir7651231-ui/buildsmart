@@ -26,7 +26,7 @@ dynamic _or(dynamic v, dynamic fallback) => _falsy(v) ? fallback : v;
 
 /// האם חיוב-ההו"ק של החודש-הנוכחי כבר נרשם — התאמה בתרומות (קטגוריה או סכום+מטבע)
 /// או ב-hist (נדרים/סולה בלי דרישת-סכום, או סכום-מדויק+מטבע ברשומת-לגאסי).
-bool hokRecordedThisMonth(Map sp, String todayIso, String hokCat) {
+bool hokRecordedThisMonth(Map sp, String todayIso, String hokCat, Map<String, String> T) {
   if (_falsy(sp['hok'])) return false;
   final month = todayIso.substring(0, 7);
   final hok = sp['hok'] as Map;
@@ -42,8 +42,8 @@ bool hokRecordedThisMonth(Map sp, String todayIso, String hokCat) {
   return hist.any((h) {
     final hd = (h['d'] ?? '') as String;
     return hd.startsWith(month) &&
-        (h['clearer'] == 'נדרים' ||
-            h['clearer'] == 'סולה' ||
+        (h['clearer'] == T['k1']! ||
+            h['clearer'] == T['k2']! ||
             (h['a'] == hok['amount'] && _or(h['c'], '₪') == hok['cur']));
   });
 }

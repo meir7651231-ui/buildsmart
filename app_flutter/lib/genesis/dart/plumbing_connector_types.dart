@@ -81,14 +81,14 @@ WaterSystem _systemOfEndType(EndType e) => switch (e) {
 
 /// ConnectorType אחד פר-[EndType], ממוין לפי id — verbatim
 /// plumbing_trade_seed.dart:271-299 (‏kVerifiedSpecs ⇒ שקע-הקצוות). PURE.
-List<ConnectorType> plumbingConnectorTypes(Iterable<ConnectorEnd> verifiedEnds) {
-  const nameHe = <EndType, String>{
-    EndType.hdpeCompression: 'הידוק HDPE',
-    EndType.pexPress: 'PEX פרס',
-    EndType.copperPress: 'נחושת פרס',
-    EndType.bspMale: 'תבריג זכר (BSP)',
-    EndType.bspFemale: 'תבריג נקבה (BSP)',
-    EndType.drainOpening: 'פתח ניקוז',
+List<ConnectorType> plumbingConnectorTypes(Iterable<ConnectorEnd> verifiedEnds, {required String Function(String) term}) {
+  final nameHe = <EndType, String>{
+    EndType.hdpeCompression: term('hydvk'),
+    EndType.pexPress: term('prs'),
+    EndType.copperPress: term('nchvsht-prs'),
+    EndType.bspMale: term('tbryg-zkr'),
+    EndType.bspFemale: term('tbryg-nkbh'),
+    EndType.drainOpening: term('ptch-nykvz'),
   };
   // Collect the distinct sizes per end-type across every verified spec.
   final sizesByType = <EndType, Set<String>>{

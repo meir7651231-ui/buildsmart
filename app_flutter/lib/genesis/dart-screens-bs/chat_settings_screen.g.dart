@@ -3,6 +3,7 @@
 // שערים/callbacks/טוקנים מוזרקים ע"י הלוח — אפס-IO, אפס-תוכן, אפס-הכרעות כאן.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/screens__chat_settings_screen/quick_reply_banner.dart';
+import '../dart-data-bs/auto/screens__chat_settings_screen_content.dart';
 import '../dart-data-bs/screens__chat_settings_screen_content.dart';
 
 

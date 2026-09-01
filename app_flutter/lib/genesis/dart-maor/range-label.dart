@@ -19,10 +19,10 @@
 bool _truthy(Object? v) => v != null && v != '';
 
 /// תווית עברית לטווח-תאריכים {from,to} במסך הדוחות. fmtDate מעצב כל גבול.
-String rangeLabel(Map r, String Function(String) fmtDate) {
+String rangeLabel(Map r, String Function(String) fmtDate, Map<String, String> T) {
   final from = r['from'];
   final to = r['to'];
-  if (!_truthy(from) && !_truthy(to)) return 'כל התאריכים';
+  if (!_truthy(from) && !_truthy(to)) return T['k1']!;
   if (_truthy(from) && _truthy(to)) return '${fmtDate(from as String)} – ${fmtDate(to as String)}';
-  return _truthy(from) ? 'מ-' + fmtDate(from as String) : 'עד ' + fmtDate(to as String);
+  return _truthy(from) ? T['k2']! + fmtDate(from as String) : T['k3']! + fmtDate(to as String);
 }

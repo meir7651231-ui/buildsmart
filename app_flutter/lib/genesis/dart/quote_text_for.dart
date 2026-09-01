@@ -1,3 +1,4 @@
+import '../dart-data/quote_text_for-data.dart';
 // ⚛️ אטום-Dart · quoteTextFor
 // מוצא: buildsmart/app_flutter/lib/data/related_info.dart:1259-1279
 //        (‏quoteTextFor; חוק-2 — verbatim, לא-משופר).
@@ -56,17 +57,17 @@ String quoteTextFor(
       ? brandIndex
       : sp.brands.indexOf(sp.recBrand);
   final b = sp.brands[idx];
-  final lines = <String>['הצעת מחיר — ${sp.name}', 'מותג: ${b.name}'];
+  final lines = <String>['${kqTitle}${sp.name}', '${kqBrand}${b.name}'];
   final cost = lineCostEstimate(idx);
   if (cost != null) {
-    lines.add('מוצר: ~₪${cost.product}');
-    if (cost.accessories > 0) lines.add('אביזרים: ~₪${cost.accessories}');
-    if (cost.labour > 0) lines.add('עבודה (משוער): ~₪${cost.labour}');
-    lines.add('סה"כ משוער: ~₪${cost.total}');
+    lines.add('${kqProduct}${cost.product}');
+    if (cost.accessories > 0) lines.add('${kqAccessories}${cost.accessories}');
+    if (cost.labour > 0) lines.add('${kqLabour}${cost.labour}');
+    lines.add('${kqTotal}${cost.total}');
   } else if (b.price != null) {
-    lines.add('מחיר: ~₪${b.price}');
+    lines.add('${kqPrice}${b.price}');
   }
   lines.add('🔗 ${deepLink(idx)}');
-  lines.add('— נוצר ב-$brandName');
+  lines.add('${kqMadeBy}$brandName');
   return lines.join('\n');
 }

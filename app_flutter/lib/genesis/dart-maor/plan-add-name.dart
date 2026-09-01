@@ -25,20 +25,18 @@
 num _jsUnaryPlus(dynamic v) => v is num ? v : (num.tryParse(v.toString()) ?? 0);
 
 /// Verbatim port of new/atoms/plan-add-name.mjs (`planAddName`).
-Map<String, dynamic> planAddName(
-  Map<String, dynamic> a,
+Map<String, dynamic> planAddName(Map<String, dynamic> a,
   String rawName,
   dynamic eyes,
   String id,
   String Function(String) normName,
-  String Function() isoToday,
-) {
+  String Function() isoToday, Map<String, String> T) {
   final nm = rawName.trim();
-  if (nm.isEmpty) return {'ok': false, 'error': 'הקלידו שם לפני ההוספה'};
+  if (nm.isEmpty) return {'ok': false, 'error': T['k1']!};
   final key = normName(nm);
   final srcNames = a['names'] as List;
   if (srcNames.any((x) => normName((x as Map)['name'] as String) == key)) {
-    return {'ok': false, 'error': 'השם "$nm" כבר ברשימה'};
+    return {'ok': false, 'error': '${T['k2']!}$nm${T['k3']!}'};
   }
   final names = [
     ...srcNames,

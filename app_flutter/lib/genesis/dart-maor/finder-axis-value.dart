@@ -46,8 +46,7 @@ String finderAxisValue(
   required Map<String, dynamic> Function(num score) tierOf,
   required List<dynamic> Function(dynamic db, Map<String, dynamic> f)
       famLiveEnrollments,
-  required Map<String, dynamic> STATUS_META,
-}) {
+  required Map<String, dynamic> STATUS_META, required Map<String, dynamic> T2}) {
   String T(String k, String fb) => (config != null) ? termOf(config, k, fb) : fb;
   switch (axis) {
     case 'city':
@@ -55,7 +54,7 @@ String finderAxisValue(
     case 'comm':
       return _orStr(f['community'], '');
     case 'marital':
-      return _orStr(f['maritalStatus'], 'לא ידוע');
+      return _orStr(f['maritalStatus'], (T2['k4'] as String));
     case 'status':
       return (STATUS_META[f['status']] as Map)['label'] as String;
     case 'cred':
@@ -65,14 +64,14 @@ String finderAxisValue(
     case 'kids':
       return (f['members'] as List)
               .any((m) => !_truthy((m as Map)['isParent']))
-          ? 'עם ילדים'
-          : 'בלי ילדים';
+          ? (T2['k8'] as String)
+          : (T2['k9'] as String);
     case 'enrolled':
       return famLiveEnrollments(db, f).isNotEmpty
-          ? 'משתתפות ב' + T('nav.courses', 'חוגים')
-          : 'לא משתתפות';
+          ? (T2['k11'] as String) + T('nav.courses', (T2['k13'] as String))
+          : (T2['k14'] as String);
     case 'sefach':
-      return _truthy(f['fullSefach']) ? 'קיים' : 'חסר';
+      return _truthy(f['fullSefach']) ? (T2['k16'] as String) : (T2['k17'] as String);
     case 'lang':
       return _orStr(f['language'], '');
     default:

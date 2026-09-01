@@ -26,9 +26,9 @@ bool _falsy(Object? v) {
 
 /// שער-ידית Firestore. פורט מילולי של new/atoms/cloud-db.mjs (`cloudDb`):
 /// ידית אמיתית ⇒ מוחזרת כמות-שהיא; falsy ⇒ זריקת שגיאה בעברית.
-Object cloudDb(Object? fsDb) {
+Object cloudDb(Object? fsDb, Map<String, String> T) {
   if (_falsy(fsDb)) {
-    throw StateError('הענן לא אותחל — פנו למנהל המערכת');
+    throw StateError(T['k1']!);
   }
   return fsDb!;
 }

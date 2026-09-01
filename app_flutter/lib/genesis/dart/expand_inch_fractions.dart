@@ -1,6 +1,7 @@
 // ⚛️ אטום-Dart (דרגת-חוזה) · expandInchFractions
 // מוצא: buildsmart/app_flutter/lib/data/lipskey_catalog.dart:265-275 (חצב-AST · חוק-4 — התנהגות זהה, לא-משופרת).
 // טוהר: פונקציית top-level עצמאית, אפס-import (אומת ע"י פותר-המזהים).
+// מהות: הרחבת שברי-אינץ' מקוצרים לצורתם המלאה.
 
 /// Normalise unicode inch fractions so the size engine recognises them
 /// (צעד 22): 1¼ → 1.25 · 1½ → 1.5 · 2½ → 2.5 · ¾ → 0.75 ...

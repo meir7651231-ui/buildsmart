@@ -1,6 +1,6 @@
 // ⚛️ אטום-Dart (דרגת-חוזה) · parseAyinSheet — פענוח גיליון-העיניים שחזר (round-trip מהלגאסי).
 // מוצא: maor/src/lib/ayin.ts:443-501 · המקור: new/atoms/parse-ayin-sheet.mjs
-//        (`export function parseAyinSheet(rows, supporters, normName)` — קריאת-השכן normName שוקעה, חוק-1).
+//        (`export function parseAyinSheet(rows, supporters, normName, T)` — קריאת-השכן normName שוקעה, חוק-1).
 // טוהר: פונקציית top-level עצמאית, אפס import (רק שפה/סטנדרט: dart:core). חוק-4 — התנהגות
 //        זהה-ביט למקור-ה-JS (המקור קדוש). normName = שקע (פרמטר), לא מיובא.
 //
@@ -36,10 +36,9 @@ List _ayinNames(Map x) {
 /// Parses a round-tripped "eyes sheet" ([rows], header+data) against [supporters]
 /// using the [normName] socket, returning `{upds, miss}` on success or
 /// `{upds, miss, error}` on a bad file. Verbatim port of new/atoms/parse-ayin-sheet.mjs.
-Map<String, dynamic> parseAyinSheet(
-    List rows, List supporters, String Function(dynamic) normName) {
+Map<String, dynamic> parseAyinSheet(List rows, List supporters, String Function(dynamic) normName, Map<String, String> T) {
   if (rows.length < 2) {
-    return {'upds': [], 'miss': 0, 'error': 'הקובץ ריק או לא בפורמט CSV'};
+    return {'upds': [], 'miss': 0, 'error': T['k1']!};
   }
   String clean(dynamic x) =>
       (x ?? '').toString().replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -47,18 +46,18 @@ Map<String, dynamic> parseAyinSheet(
       ((rows[0] ?? const []) as List).map((h) => clean(h)).toList();
   int hIdx(List<String> keys) =>
       header.indexWhere((h) => keys.any((k) => h.contains(k)));
-  final iSup = hIdx(['תומכת', 'תומך']);
-  final iNm = hIdx(['שם למסירה', 'שם לעופרת', 'שם']);
-  final iEyes = hIdx(['עיניים']);
-  final iDone = hIdx(['נמסר']);
-  final iPaid = hIdx(['שולם', 'תשלום']);
-  final iAns = hIdx(['תשובה', 'הערה']);
-  final iLead = hIdx(['עופרת']);
+  final iSup = hIdx([T['k2']!, T['k3']!]);
+  final iNm = hIdx([T['k4']!, T['k5']!, T['k6']!]);
+  final iEyes = hIdx([T['k7']!]);
+  final iDone = hIdx([T['k8']!]);
+  final iPaid = hIdx([T['k9']!, T['k10']!]);
+  final iAns = hIdx([T['k11']!, T['k12']!]);
+  final iLead = hIdx([T['k13']!]);
   if (iNm < 0 || iEyes < 0) {
     return {
       'upds': [],
       'miss': 0,
-      'error': 'חסרות עמודות "שם למסירה" ו/או "כמה עיניים"'
+      'error': T['k14']!
     };
   }
   bool yes(String v) =>

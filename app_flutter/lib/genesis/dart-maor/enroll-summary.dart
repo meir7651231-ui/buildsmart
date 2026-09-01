@@ -2,12 +2,7 @@
 /// המרה נאמנה מ-new/atoms/enroll-summary.mjs (חוק-4: המקור קדוש).
 /// STATUS_LABEL היה קבוע פרטי באותו קובץ — נבלע לחוט; payBal/paidOf שקעים (חוק-1).
 /// אפס import (dart-core בלבד).
-const _statusLabel = {
-  'active': 'פעיל',
-  'paused': 'מושהה',
-  'ended': 'הסתיים',
-  'wait': 'רשימת-המתנה',
-};
+
 
 /// שקע-truthiness (DART-PORTING-RULES כלל 7): JS falsy = false/0/''/null/NaN.
 bool _falsy(dynamic v) =>
@@ -17,11 +12,15 @@ bool _falsy(dynamic v) =>
     v == '' ||
     (v is double && v.isNaN);
 
-Map<String, dynamic> enrollSummary(
-  Map<String, dynamic> e,
+Map<String, dynamic> enrollSummary(Map<String, dynamic> e,
   dynamic Function(Map<String, dynamic>) payBal,
-  dynamic Function(Map<String, dynamic>) paidOf,
-) {
+  dynamic Function(Map<String, dynamic>) paidOf, Map<String, String> T) {
+  final _statusLabel = {
+  'active': T['k1']!,
+  'paused': T['k2']!,
+  'ended': T['k3']!,
+  'wait': T['k4']!,
+};
   final presentsList = (e['presents'] ?? const []) as List;
   final absencesList = (e['absences'] ?? const []) as List;
   final presents = presentsList.length;

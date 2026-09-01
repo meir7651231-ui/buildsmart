@@ -30,25 +30,25 @@ bool _truthy(dynamic v) {
 
 /// Thank-you-letter prompt builder (AI add-on) — verbatim port of
 /// new/atoms/thanks-prompt.mjs (`thanksPrompt`). Optional lines only when supplied.
-String thanksPrompt(dynamic inp) {
+String thanksPrompt(dynamic inp, Map<String, String> T) {
   return [
-    'כתוב מכתב תודה קצר (4-6 שורות), חם ואישי, בעברית, מארגון "' +
-        (_truthy(inp['orgName']) ? inp['orgName'].toString() : 'הארגון') +
+    T['k1']! +
+        (_truthy(inp['orgName']) ? inp['orgName'].toString() : T['k2']!) +
         '"',
-    'לתורם/ת בשם "' +
+    T['k3']! +
         inp['supporterName'].toString() +
-        '" על תרומה של ' +
+        T['k4']! +
         inp['lastAmount'].toString() +
         '.',
     _truthy(inp['designation'])
-        ? 'התרומה יועדה ל: ' + inp['designation'].toString() + '.'
+        ? T['k5']! + inp['designation'].toString() + '.'
         : '',
     _truthy(inp['totalSoFar'])
-        ? 'סה"כ תרומותיו/ה עד כה: ' +
+        ? T['k6']! +
             inp['totalSoFar'].toString() +
-            ' — אפשר לרמוז לנאמנות בעדינות.'
+            T['k7']!
         : '',
-    'בלי הגזמות, בלי סופרלטיבים ריקים, בלי לציין סכומים מעבר לנאמר. לסיים בברכה חמה.',
-    'להחזיר את המכתב בלבד — בלי הקדמות.',
+    T['k8']!,
+    T['k9']!,
   ].where(_truthy).join('\n');
 }

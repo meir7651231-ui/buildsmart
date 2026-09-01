@@ -357,7 +357,7 @@ const hygienePanel = (
 const attributeChipLabels = (
   type: 'סוג', // t_f45000d5
   subtype: 'תת-סוג', // t_ccb77538
-  size: 'גודל', // t_a4617429 · the value is wrapped in an LTR embed in the box
+  size: 'גודל', // t_a4617429 · הערך עטוף LTR-embed (‪…‬) בקופסה
   color: 'צבע', // t_be49d01c
   model: 'דגם', // t_8cd6a827
   length: 'אורך', // t_4f70dfd4 · גם מפתח-dims (:3399)

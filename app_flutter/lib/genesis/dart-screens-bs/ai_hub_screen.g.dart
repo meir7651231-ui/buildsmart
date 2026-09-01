@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/auto/ai_fin_tile.dart';
 import '../dart-ui-bs/auto/ai_md_head.dart';
+import '../dart-data-bs/auto/screens__ai_hub_screen_content.dart';
 import '../dart-data-bs/auto/screens__ai_hub_screen_content2.dart';
 
 /// שורת-נתונים לסקציית-repeat — הלוח ממפה את הרשימה-החיה לפריטים.

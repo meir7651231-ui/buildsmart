@@ -30,21 +30,19 @@ dynamic _find(dynamic list, bool Function(dynamic) pred) {
 /// A coordinator's field print-out (boxes to visit this round). Verbatim port of
 /// new/atoms/coordinator-print-lines.mjs; the neighbours termOf, coordinatorBoxes
 /// and lastCollectionIso are injected as sockets (Law 1/3).
-List<String> coordinatorPrintLines(
-  Map<String, dynamic> db,
+List<String> coordinatorPrintLines(Map<String, dynamic> db,
   String coordinatorId,
   Map<String, dynamic>? config,
   String Function(Map<String, dynamic> config, String key, String fb) termOf,
   List<dynamic> Function(dynamic boxes, String coordId) coordinatorBoxes,
-  String Function(dynamic box) lastCollectionIso,
-) {
+  String Function(dynamic box) lastCollectionIso, Map<String, dynamic> T2) {
   String T(String k, String fb) => config != null ? termOf(config, k, fb) : fb;
   final coord = _find(db['tzCoordinators'], (c) => (c as Map)['id'] == coordinatorId);
   final boxes = coordinatorBoxes(db['tzBoxes'], coordinatorId)
       .where((b) => (b as Map)['status'] == 'home' || b['status'] == 'office')
       .toList();
   final lines = <String>[
-    'רשימת קופות — ' + (((coord as dynamic)?['name']) ?? '').toString(),
+    (T2['k3'] as String) + (((coord as dynamic)?['name']) ?? '').toString(),
     '=' * 30,
   ];
   for (final b in boxes) {
@@ -53,13 +51,13 @@ List<String> coordinatorPrintLines(
     final last = lastCollectionIso(b);
     final parts = <dynamic>[
       '#' + bm['num'].toString(),
-      fam != null ? T('entity.familyOf', 'משפחת') + ' ' + fam['name'].toString() : 'במשרד',
+      fam != null ? T('entity.familyOf', (T2['k5'] as String)) + ' ' + fam['name'].toString() : (T2['k6'] as String),
       fam != null ? [fam['address'], fam['city']].where(_truthy).join(', ') : '',
       ((fam as dynamic)?['phone']) ?? '',
-      _truthy(last) ? 'ריקון אחרון: ' + last : 'טרם רוקנה',
+      _truthy(last) ? (T2['k7'] as String) + last : (T2['k8'] as String),
     ];
     lines.add(parts.where(_truthy).join(' · '));
   }
-  if (boxes.isEmpty) lines.add('אין קופות פעילות');
+  if (boxes.isEmpty) lines.add((T2['k9'] as String));
   return lines;
 }

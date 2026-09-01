@@ -19,6 +19,9 @@ class LocationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final parts = query.split(',');
+    final lat = parts.length == 2 ? double.tryParse(parts[0]) : null;
+    final lng = parts.length == 2 ? double.tryParse(parts[1]) : null;
     return Semantics(
       button: true,
       label: label2,

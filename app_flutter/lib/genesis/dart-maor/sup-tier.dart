@@ -124,15 +124,15 @@ bool _jsGte(dynamic v, num rhs) {
 }
 
 /// חוט · sup-tier — התנהגות זהת-ביט ל-new/atoms/sup-tier.mjs.
-Map<String, String> supTier(dynamic sc) {
+Map<String, String> supTier(dynamic sc, Map<String, dynamic> T) {
   if (_jsGte(sc, 800)) {
-    return {'label': 'זהב', 'bg': '#fdf3dd', 'c': '#9a6414', 'dot': '#f3c76b'};
+    return {'label': (T['k1'] as String), 'bg': '#fdf3dd', 'c': '#9a6414', 'dot': '#f3c76b'};
   }
   if (_jsGte(sc, 600)) {
-    return {'label': 'כסף', 'bg': '#eef1f5', 'c': '#44546a', 'dot': '#94a3b8'};
+    return {'label': (T['k3'] as String), 'bg': '#eef1f5', 'c': '#44546a', 'dot': '#94a3b8'};
   }
   if (_jsGte(sc, 400)) {
-    return {'label': 'ארד', 'bg': '#f6ead1', 'c': '#9a6414', 'dot': '#d97706'};
+    return {'label': (T['k5'] as String), 'bg': '#f6ead1', 'c': '#9a6414', 'dot': '#d97706'};
   }
-  return {'label': 'רדומה', 'bg': '#eceae2', 'c': '#8b8474', 'dot': '#a8a29e'};
+  return {'label': (T['k7'] as String), 'bg': '#eceae2', 'c': '#8b8474', 'dot': '#a8a29e'};
 }

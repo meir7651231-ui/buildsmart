@@ -45,15 +45,13 @@ num _numOr1(String s) {
 /// Verbatim behaviour of the JS source `detectRecurringHok`. Returns
 /// `{'supporters': List<Map>, 'detected': int}`. Untouched supporters keep the
 /// exact same Map reference; detected ones get a fresh `{...sp, 'hok': ...}` map.
-Map<String, Object?> detectRecurringHok(
-  List<Map<String, Object?>> supporters,
+Map<String, Object?> detectRecurringHok(List<Map<String, Object?>> supporters,
   String todayIso,
   int minMonths,
   List<String> clearingProviders,
   String Function(List<String>) modeStr,
   num Function(List<num>) modeOf,
-  int Function(String, String) monthsAgo,
-) {
+  int Function(String, String) monthsAgo, Map<String, dynamic> T) {
   var detected = 0;
   final out = <Map<String, Object?>>[];
 
@@ -101,10 +99,10 @@ Map<String, Object?> detectRecurringHok(
     final dates = [for (final h in nd) h['d'] as String]..sort();
     final md = modeOf([for (final h in nd) _numOr1(_slice(h['d'] as String, 8, 10))]);
     final day = md < 1 ? 1 : (md > 28 ? 28 : md);
-    final clearer0 = _truthy(nd[0]['clearer']) ? nd[0]['clearer'] : 'סליקה';
+    final clearer0 = _truthy(nd[0]['clearer']) ? nd[0]['clearer'] : (T['k3'] as String);
     final note = kevaCharge != null
-        ? 'הו״ק $clearer0 · ${kevaCharge['kevaId']}'
-        : 'הו״ק $clearer0 (זוהה מהיסטוריה · ${distinctMonths.length} חודשים)';
+        ? '${(T['k2'] as String)}$clearer0 · ${kevaCharge['kevaId']}'
+        : '${(T['k2'] as String)}$clearer0${(T['k4'] as String)}${distinctMonths.length}${(T['k5'] as String)}';
     out.add({
       ...sp,
       'hok': <String, Object?>{

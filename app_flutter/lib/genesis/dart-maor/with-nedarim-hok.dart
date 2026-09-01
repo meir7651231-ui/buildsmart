@@ -58,12 +58,10 @@ String _strOr(Object? v) => v is String && v.isNotEmpty ? v : '';
 /// charge (kevaId). Returns a new supporter map with a fully-populated hok, or
 /// the very same `sp` reference when untouched (amount≤0, no kevaId, or an
 /// existing manual hok). Pure — `sp` is never mutated. Verbatim JS behaviour.
-Map<String, Object?> withNedarimHok(
-  Map<String, Object?> sp,
+Map<String, Object?> withNedarimHok(Map<String, Object?> sp,
   Map<String, Object?> charge,
   String Function(Map<String, Object?>) curOf,
-  num Function(String) hokDayFromDate,
-) {
+  num Function(String) hokDayFromDate, Map<String, dynamic> T) {
   final amt = charge['amount'];
   if (!(amt is num && amt > 0)) return sp; // זיכוי/ביטול (Amount≤0) לא ממלא/מעדכן הו"ק
   final keva = _trimEs(_strOr(charge['kevaId']));
@@ -80,7 +78,7 @@ Map<String, Object?> withNedarimHok(
     'cur': curOf(charge),
     'day': hokDayFromDate(cd),
     'method': 'card',
-    'note': 'הו״ק נדרים · $keva',
+    'note': '${(T['k2'] as String)}$keva',
     'active': true,
     'startedAt': prevStart.isNotEmpty && prevStart.compareTo(cd) < 0
         ? prevStart

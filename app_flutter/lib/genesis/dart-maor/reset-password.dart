@@ -29,21 +29,19 @@ String _codeOf(Object? e) {
 
 /// Send a password-reset email, mapping Firebase-Auth failures to Hebrew.
 /// Verbatim behaviour of the JS source new/atoms/reset-password.mjs.
-Future<void> resetPassword(
-  String email,
+Future<void> resetPassword(String email,
   RequireAuth requireAuth,
   SendReset sendReset,
-  HebrewAuthError hebrewAuthError,
-) async {
+  HebrewAuthError hebrewAuthError, Map<String, String> T) async {
   try {
     await sendReset(requireAuth(), email);
   } catch (e) {
     final code = _codeOf(e);
     if (code == 'auth/user-not-found') {
-      throw StateError('לא נמצא משתמש עם האימייל הזה');
+      throw StateError(T['k2']!);
     }
     if (code == 'auth/invalid-email') {
-      throw StateError('כתובת האימייל אינה תקינה');
+      throw StateError(T['k4']!);
     }
     throw hebrewAuthError(e);
   }

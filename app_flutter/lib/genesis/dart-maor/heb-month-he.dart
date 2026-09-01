@@ -119,43 +119,19 @@ List<int> _fixedToHebrew(int date) {
   return <int>[year, month, day];
 }
 
-String _hebrewMonthName(int year, int month) {
-  switch (month) {
-    case 1:
-      return 'ניסן';
-    case 2:
-      return 'אייר';
-    case 3:
-      return 'סיוון';
-    case 4:
-      return 'תמוז';
-    case 5:
-      return 'אב';
-    case 6:
-      return 'אלול';
-    case 7:
-      return 'תשרי';
-    case 8:
-      return 'חשוון';
-    case 9:
-      return 'כסלו';
-    case 10:
-      return 'טבת';
-    case 11:
-      return 'שבט';
-    case 12:
-      return _hebrewLeapYear(year) ? 'אדר א׳' : 'אדר';
-    case 13:
-      return 'אדר ב׳';
-    default:
-      return '';
-  }
+// שמות-החודשים = שקע-דאטה (הכרעה 16): אינדקסים 0..10 = ניסן..שבט · 11 = אדר ·
+// 12 = אדר א׳ · 13 = אדר ב׳ (dart-data-maor/heb-month-he-sockets.dart).
+String _hebrewMonthName(int year, int month, List<String> monthNames) {
+  if (month >= 1 && month <= 11) return monthNames[month - 1];
+  if (month == 12) return _hebrewLeapYear(year) ? monthNames[12] : monthNames[11];
+  if (month == 13) return monthNames[13];
+  return '';
 }
 
 /// שם-החודש העברי עבור [d]. תאריך לא-תקין (null) ⇒ '' (מקביל ל-isNaN במקור).
-String hebMonthHe(DateTime? d) {
+String hebMonthHe(DateTime? d, List<String> monthNames) {
   if (d == null) return '';
   final int fixed = _gregorianToFixed(d.year, d.month, d.day);
   final List<int> heb = _fixedToHebrew(fixed);
-  return _hebrewMonthName(heb[0], heb[1]);
+  return _hebrewMonthName(heb[0], heb[1], monthNames);
 }

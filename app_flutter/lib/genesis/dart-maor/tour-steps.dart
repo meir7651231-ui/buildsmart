@@ -50,22 +50,21 @@ String _jsReplaceFirst(String str, String pattern, String replacement) {
 /// בניית צעדי-הסיור: סינון לפי מודולים פעילים (צעד בלי module תמיד נשאר)
 /// + מיתוג-מחדש דרך termOf. בלי config ⇒ הצעד מוחזר זהה-זהות (אפס-העתקה).
 List<dynamic> tourSteps(
-    List<dynamic> steps, dynamic isModuleOn, dynamic termOf,
-    [dynamic config]) {
+    List<dynamic> steps, dynamic isModuleOn, dynamic termOf, Map<String, String> T2, [dynamic config]) {
   dynamic t(String k, String fb) =>
       _falsy(config) ? fb : termOf(config, k, fb);
 
   dynamic loc(dynamic s) {
     final origCaption = s['caption'] as String;
     var caption = _jsReplaceFirst(
-        origCaption, 'מאתר המשפחות', 'מאתר ה${t('nav.families', 'משפחות')}');
+        origCaption, T2['k1']!, '${T2['k2']!}${t('nav.families', 'משפחות')}');
     caption = _jsReplaceFirst(
-        caption, 'מאתר החוגים', 'מאתר ה${t('nav.courses', 'חוגים')}');
+        caption, T2['k5']!, '${T2['k2']!}${t('nav.courses', 'חוגים')}');
     caption = _jsReplaceFirst(
-        caption, 'חיזוי חוגים', 'חיזוי ${t('nav.courses', 'חוגים')}');
+        caption, T2['k8']!, '${T2['k9']!}${t('nav.courses', 'חוגים')}');
     final origAnchor = s['anchorText'];
-    final anchorText = origAnchor == 'מצא חוג'
-        ? 'מצא ${t('entity.course', 'חוג')}'
+    final anchorText = origAnchor == T2['k10']!
+        ? '${T2['k11']!}${t('entity.course', 'חוג')}'
         : origAnchor;
     return caption == origCaption && anchorText == origAnchor
         ? s

@@ -5,5 +5,14 @@ analyzer:
     prefer_const_constructors: ignore
     prefer_const_literals_to_create_immutables: ignore
     unused_element: ignore
+    # ליטוש-סגנון על קוד מחולל-אוטומטית (המרת JS→Dart · data-lift · gen-screen) —
+    # מודמן ל-info (לא-קטלני) לפי מנדט-השער "רק שגיאות-אמת, לא ליטוש-סגנון". אינם באגי-קומפילציה.
+    unnecessary_cast: info
+    unnecessary_non_null_assertion: info
+    unused_local_variable: info
+    unused_element_parameter: info
+    unused_import: info
+    invalid_language_version_override: info
+    text_direction_code_point_in_comment: info
 linter:
   rules: {}

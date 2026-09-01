@@ -7,7 +7,8 @@
 //
 // שקעים (חוק-1 — קריאות-לשכנים הוזרקו):
 //   sessionsOf(course) ⇒ מערך מפגשים {day, time, …} — חובה, אין ברירת-מחדל.
-//   dayNames — שמות-הימים לאינדקס day; ברירת-מחדל = ערך-המוצא DAY_NAMES.
+//   dayNames — שמות-הימים לאינדקס day (ערכי-המוצא: dart-data-maor/schedule-clash-text-sockets.dart).
+//   T — מחרוזות-הדאטה (k1='ended' · k2/k3 נוסח-האזהרה) — אפס דאטה במנגנון (הכרעה 16).
 //
 // הערות-המרה (מקור→Dart):
 //   · אובייקטי-JS ⇒ Map (גישת-מפתח ['k']); מפתח-חסר ב-Map ≙ undefined ב-JS.
@@ -64,13 +65,14 @@ dynamic scheduleClashText(
   dynamic db,
   dynamic memberId,
   dynamic course,
-  dynamic sessionsOf, [
-  dynamic dayNames = const ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'],
-]) {
+  dynamic sessionsOf,
+  dynamic dayNames,
+  Map<String, dynamic> T,
+) {
   final target = sessionsOf(course);
   for (final e in (db['enrollments'] as List)) {
     if (e['memberId'] != memberId ||
-        e['status'] == 'ended' ||
+        e['status'] == T['k1'] ||
         e['courseId'] == course['id']) {
       continue;
     }
@@ -88,9 +90,9 @@ dynamic scheduleClashText(
         if (s1['day'] == s2['day'] &&
             _truthy(s1['time']) &&
             s1['time'] == s2['time']) {
-          return '⚠ התנגשות לו"ז: כבר משובצ/ת ל"' +
+          return (T['k2'] as String) +
               _concatStr(other, 'name') +
-              '" — יום ' +
+              (T['k3'] as String) +
               _atIdx(dayNames, s1['day']) +
               ' ' +
               _concatStr(s1, 'time');

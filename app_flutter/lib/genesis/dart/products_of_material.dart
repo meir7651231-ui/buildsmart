@@ -13,31 +13,14 @@ class LipskeyCatalogProduct {
 }
 
 /// חומר → רשימת מונחי-הזיהוי שלו. סדר-המפתחות = סדר-הקדימות.
-const Map<String, List<String>> kMaterials = <String, List<String>>{
-  'נחושת': ['נחושת', 'פליז'], // OWNER-REVIEW
-  'PPR': ['PPR'], // OWNER-REVIEW
-  'HDPE': ['HDPE', 'פוליאתילן'], // OWNER-REVIEW
-  'רב-שכבתי': ['רב שכבתי', 'רב-שכבתי'], // OWNER-REVIEW
-  'פקס': ['פקסגול', 'פקס', 'PEX'], // OWNER-REVIEW
-  'נירוסטה': ['נירוסטה'], // OWNER-REVIEW
-  'פלדה': ['פלדה'], // OWNER-REVIEW
-};
 
 /// דריסת-חומר לכל-הקטגוריה — fallback אחרי היוריסטיקת-המונחים (מוסיפה, לא-משנה).
-const Map<String, String> kCategoryMaterial = <String, String>{
-  'ברזי ניל': 'נחושת',
-  'ברזי מעבר': 'נחושת',
-  'ברזי קיר': 'נחושת',
-  'ברזי כיור': 'נחושת',
-  'מחלקים': 'נחושת',
-  'נקודות מים': 'נחושת',
-};
 
 /// The material of [p]: the FIRST [kMaterials] key whose any term is a substring
 /// of the `'<nameHe> <categoryHe>'` text (so [kMaterials] order is the precedence);
 /// else the [kCategoryMaterial] whole-category override for its `categoryHe`; else
 /// null. PURE & deterministic.
-String? materialOf(LipskeyCatalogProduct p) {
+String? materialOf(LipskeyCatalogProduct p, {required Map<String, List<String>> kMaterials, required Map<String, String> kCategoryMaterial}) {
   final haystack = '${p.nameHe} ${p.categoryHe}';
   for (final entry in kMaterials.entries) {
     for (final term in entry.value) {
@@ -51,6 +34,5 @@ String? materialOf(LipskeyCatalogProduct p) {
 /// PURE & deterministic.
 List<LipskeyCatalogProduct> productsOfMaterial(
   List<LipskeyCatalogProduct> pool,
-  String material,
-) =>
-    pool.where((p) => materialOf(p) == material).toList();
+  String material, {required Map<String, List<String>> kMaterials, required Map<String, String> kCategoryMaterial}) =>
+    pool.where((p) => materialOf(p, kMaterials: kMaterials, kCategoryMaterial: kCategoryMaterial) == material).toList();

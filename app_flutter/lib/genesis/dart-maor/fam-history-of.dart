@@ -32,12 +32,10 @@ bool _truthy(dynamic v) => v != null && v != false && v != '' && v != 0;
 /// A family's derived history timeline. Verbatim port of
 /// new/atoms/fam-history-of.mjs (`famHistoryOf`); the neighbour termOf is
 /// injected as a socket (Law 1/3).
-List<Map<String, dynamic>> famHistoryOf(
-  Map<String, dynamic> db,
+List<Map<String, dynamic>> famHistoryOf(Map<String, dynamic> db,
   Map<String, dynamic> fam,
   Map<String, dynamic> config,
-  String Function(dynamic config, dynamic key, dynamic fallback) termOf,
-) {
+  String Function(dynamic config, dynamic key, dynamic fallback) termOf, Map<String, dynamic> T) {
   final out = <Map<String, dynamic>>[];
   void push(dynamic date, dynamic tag, dynamic bg, dynamic c, dynamic text) {
     if (_truthy(date)) {
@@ -46,36 +44,36 @@ List<Map<String, dynamic>> famHistoryOf(
   }
 
   if (_truthy(fam['createdAt'])) {
-    push(fam['createdAt'], 'הצטרפות', '#e7edf5', '#3a5a86',
-        'ה' + termOf(config, 'entity.family', 'משפחה') + ' הצטרפה');
+    push(fam['createdAt'], (T['k1'] as String), '#e7edf5', '#3a5a86',
+        (T['k3'] as String) + termOf(config, 'entity.family', (T['k5'] as String)) + (T['k6'] as String));
   }
 
   // אירועי הלוח של המשפחה (P3 פריט 9) — נשזרים בציר, כולל סימון ✓ בוצע
   for (final ev in (db['events'] as List)) {
     final e = ev as Map;
     if (e['famId'] != fam['id'] || !_truthy(e['date'])) continue;
-    push(e['date'], 'אירוע', '#efe7f3', '#7c3aed',
+    push(e['date'], (T['k7'] as String), '#efe7f3', '#7c3aed',
         e['title'].toString() +
             (_truthy(e['time']) ? ' · ' + e['time'].toString() : '') +
-            (_truthy(e['done']) ? ' · ✓ בוצע' : ''));
+            (_truthy(e['done']) ? (T['k10'] as String) : ''));
   }
 
   final credLog = (fam['cred'] as Map?)?['log'] ?? [];
   for (final l in (credLog as List)) {
     final lg = l as Map;
-    push(lg['date'], termOf(config, 'entity.cred', 'אמינות'), '#f6ead1',
+    push(lg['date'], termOf(config, 'entity.cred', (T['k12'] as String)), '#f6ead1',
         '#9a6414',
         lg['reason'].toString() +
             ' (' +
             ((lg['delta'] as num) > 0 ? '+' : '') +
             lg['delta'].toString() +
-            ' נק׳)');
+            (T['k14'] as String));
   }
 
   for (final d in (fam['docs'] as List)) {
     final dc = d as Map;
-    push(dc['addedAt'], 'מסמך', '#eceae2', '#4d463c',
-        'מסמך נוסף: ' + dc['name'].toString());
+    push(dc['addedAt'], (T['k15'] as String), '#eceae2', '#4d463c',
+        (T['k17'] as String) + dc['name'].toString());
   }
 
   final ids = <dynamic>{for (final m in (fam['members'] as List)) (m as Map)['id']};
@@ -90,21 +88,21 @@ List<Map<String, dynamic>> famHistoryOf(
     final cname = (courMatch.isNotEmpty ? courMatch.first['name'] : null) ?? '';
     push(
       e['enrolledAt'],
-      termOf(config, 'entity.enrollment', 'שיבוץ'),
+      termOf(config, 'entity.enrollment', (T['k19'] as String)),
       '#eef7e6',
       '#3f6212',
       // 'wait' מסומן — אחרת שיבוץ-בהמתנה נראה בהיסטוריה/בתדפיס כרישום רגיל
-      'נרשמ/ה ' +
+      (T['k21'] as String) +
           first.toString() +
-          ' ל' +
+          (T['k22'] as String) +
           cname.toString() +
           (_truthy(e['group']) ? ' · ' + e['group'].toString() : '') +
-          (e['status'] == 'wait' ? ' · ברשימת-המתנה' : ''),
+          (e['status'] == 'wait' ? (T['k24'] as String) : ''),
     );
     for (final p in (e['payments'] as List)) {
       final pm = p as Map;
-      push(pm['date'], 'תשלום', '#e4f5ea', '#12803c',
-          'תשלום ₪' +
+      push(pm['date'], (T['k25'] as String), '#e4f5ea', '#12803c',
+          (T['k26'] as String) +
               pm['amount'].toString() +
               ' (' +
               pm['method'].toString() +
@@ -117,13 +115,13 @@ List<Map<String, dynamic>> famHistoryOf(
       final ab = a as Map;
       push(
         ab['date'],
-        _truthy(ab['noshow']) ? 'No-Show' : 'היעדרות',
+        _truthy(ab['noshow']) ? 'No-Show' : (T['k28'] as String),
         '#fdeaea',
         '#b91c1c',
-        'היעדרות — ' +
+        (T['k30'] as String) +
             cname.toString() +
             (_truthy(ab['reason']) ? ' · ' + ab['reason'].toString() : '') +
-            (_truthy(ab['makeup']) ? ' · זכאי/ת השלמה' : ''),
+            (_truthy(ab['makeup']) ? (T['k31'] as String) : ''),
       );
     }
   }

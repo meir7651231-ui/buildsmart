@@ -69,7 +69,7 @@ List<dynamic> _jsOwnKeys(Map m) {
 
 /// Room info line: slot length (default 60) · capacity · accessibility · up to
 /// 3 enabled equipment keys. Verbatim behaviour of the JS `roomInfoLabel`.
-String roomInfoLabel(dynamic room) {
+String roomInfoLabel(dynamic room, Map<String, String> T) {
   final eqRaw = room['eq'];
   final Map eq = _truthy(eqRaw) ? eqRaw as Map : const {};
   final eqOn = <dynamic>[];
@@ -78,10 +78,10 @@ String roomInfoLabel(dynamic room) {
   }
   final slot = room['slot'];
   final cap = room['cap'];
-  return 'משבצות של ' +
+  return T['k1']! +
       _jsStr(_truthy(slot) ? slot : 60) +
-      ' דק׳' +
-      (_truthy(cap) ? ' · עד ' + _jsStr(cap) + ' משתתפים' : '') +
-      (_truthy(room['access']) ? ' · נגיש' : '') +
+      T['k2']! +
+      (_truthy(cap) ? T['k3']! + _jsStr(cap) + T['k4']! : '') +
+      (_truthy(room['access']) ? T['k5']! : '') +
       (eqOn.isNotEmpty ? ' · ' + eqOn.take(3).map(_jsStr).join(', ') : '');
 }

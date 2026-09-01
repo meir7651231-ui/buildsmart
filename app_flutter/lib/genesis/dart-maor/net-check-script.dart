@@ -50,13 +50,13 @@ String _jsConcat(Object? v) {
 
 /// Verbatim port of new/atoms/net-check-script.mjs (`netCheckScript`).
 /// Builds a Hebrew request listing every blocked domain; '' when none are blocked.
-String netCheckScript(List<dynamic> results) {
+String netCheckScript(List<dynamic> results, Map<String, String> T) {
   final blocked = results.where((r) => !_truthy(_prop(r, 'ok'))).toList();
   if (blocked.isEmpty) return '';
   return [
-    'שלום, אני משתמש/ת במערכת ניהול לעמותה לצורכי עבודה,',
-    'ואבקש לפתוח את הכתובות הבאות (כלי-עבודה, ללא תוכן גולשים):',
+    T['k1']!,
+    T['k2']!,
     ...blocked.map((r) => '• ' + _jsConcat(_prop(r, 'domain'))),
-    'תודה רבה!',
+    T['k3']!,
   ].join('\n');
 }

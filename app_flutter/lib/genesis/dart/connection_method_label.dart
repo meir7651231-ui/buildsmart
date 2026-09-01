@@ -83,7 +83,7 @@ bool _pipeShared(ConnEnd a, ConnEnd b) =>
 /// [trade]: optional s41 authored-trade delegation seam — see [TradeResolution].
 String connectionMethodLabel<P>(
   P a,
-  P b, {
+  P b, {required String Function(String) term, 
   required List<ConnEnd>? Function(P) endsOf,
   TradeResolution<P>? trade,
 }) {
@@ -108,19 +108,19 @@ String connectionMethodLabel<P>(
       if (_directMates(eA, eB)) {
         switch (eA.type) {
           case EndType.pexPress:
-            return 'Press / טבעת כיווץ';
+            return term('tbat-kyvvts');
           case EndType.copperPress:
             return 'Press / O-ring';
           case EndType.bspMale:
           case EndType.bspFemale:
-            return 'תבריג + PTFE';
+            return term('tbryg');
           case EndType.hdpeCompression:
-            return 'אום הידוק';
+            return term('avm-hydvk');
           case EndType.drainOpening:
-            return 'כיסוי ניקוז';
+            return term('kysvy-nykvz');
         }
       }
-      if (_pipeShared(eA, eB)) return 'אום הידוק (compression)';
+      if (_pipeShared(eA, eB)) return term('t4');
     }
   }
   return '';

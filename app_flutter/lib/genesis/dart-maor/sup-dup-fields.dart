@@ -28,15 +28,16 @@ dynamic _orEmpty(dynamic v) {
 }
 
 /// The 9 supporter duplicate-merge fields (key · label · get), verbatim port of
-/// new/atoms/sup-dup-fields.mjs (`SUP_DUP_FIELDS`). Order and labels are source-sacred.
-final List<SupDupField> supDupFields = <SupDupField>[
-  (key: 'name', label: 'שם', get: (s) => _orEmpty(s['name'])),
-  (key: 'phone', label: 'טלפון', get: (s) => _orEmpty(s['phone'])),
-  (key: 'email', label: 'אימייל', get: (s) => _orEmpty(s['email'])),
-  (key: 'idNum', label: 'ת"ז', get: (s) => _orEmpty(s['idNum'])),
-  (key: 'city', label: 'עיר', get: (s) => _orEmpty(s['city'])),
-  (key: 'address', label: 'כתובת', get: (s) => _orEmpty(s['address'])),
-  (key: 'cat', label: 'קטגוריה', get: (s) => _orEmpty(s['cat'])),
-  (key: 'forWho', label: 'ייעוד', get: (s) => _orEmpty(s['forWho'])),
-  (key: 'notes', label: 'הערות', get: (s) => _orEmpty(s['notes'])),
+/// new/atoms/sup-dup-fields.mjs (`makeSUP_DUP_FIELDS(T)`). מפתחות+תוויות = שקע-T
+/// (הכרעה 16); הסדר קדוש-מקור.
+List<SupDupField> makeSupDupFields(Map<String, String> T) => <SupDupField>[
+  (key: T['k1']!, label: T['k2']!, get: (s) => _orEmpty(s['name'])),
+  (key: T['k3']!, label: T['k4']!, get: (s) => _orEmpty(s['phone'])),
+  (key: T['k5']!, label: T['k6']!, get: (s) => _orEmpty(s['email'])),
+  (key: T['k7']!, label: T['k8']!, get: (s) => _orEmpty(s['idNum'])),
+  (key: T['k9']!, label: T['k10']!, get: (s) => _orEmpty(s['city'])),
+  (key: T['k11']!, label: T['k12']!, get: (s) => _orEmpty(s['address'])),
+  (key: T['k13']!, label: T['k14']!, get: (s) => _orEmpty(s['cat'])),
+  (key: T['k15']!, label: T['k16']!, get: (s) => _orEmpty(s['forWho'])),
+  (key: T['k17']!, label: T['k18']!, get: (s) => _orEmpty(s['notes'])),
 ];
