@@ -99,19 +99,17 @@ List<KitItem> recommendedKitFor(
     if (sa == null || sb == null) continue;
 
     // Find the joint that actually mates between a and b.
-    KitEnd? jointA, jointB;
+    KitEnd? jointA;
     bool isDirect = false;
     for (final eA in sa.ends) {
       for (final eB in sb.ends) {
         if (eA.directMatesWith(eB)) {
           jointA = eA;
-          jointB = eB;
           isDirect = true;
           break;
         }
         if (eA.pipeSharedWith(eB) && jointA == null) {
           jointA = eA;
-          jointB = eB;
         }
       }
       if (isDirect) break;

@@ -91,7 +91,6 @@ class _AiMdHead extends StatelessWidget {
     required this.ic,
     required this.title,
     required this.sub,
-    super.key,
   });
 
   final String ic;
@@ -124,7 +123,7 @@ class _AiMdHead extends StatelessWidget {
 }
 
 class _AiServerNote extends StatelessWidget {
-  const _AiServerNote(this.text, {super.key});
+  const _AiServerNote(this.text);
 
   final String text;
 
@@ -145,7 +144,7 @@ class _AiServerNote extends StatelessWidget {
 }
 
 class _AiCard extends StatelessWidget {
-  const _AiCard({required this.child, required this.overdue, super.key});
+  const _AiCard({required this.child, required this.overdue});
 
   final Widget child;
   final bool overdue;
@@ -172,7 +171,6 @@ class _AiCardTop extends StatelessWidget {
     required this.title,
     required this.pill,
     this.danger = false,
-    super.key,
   });
 
   final String title;

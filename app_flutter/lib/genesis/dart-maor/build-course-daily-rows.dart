@@ -149,8 +149,8 @@ Map<String, Object?> buildCourseDailyRows(
           _dayNames[dow],
           slot,
           dayStatus,
-          (mf?['first'] ?? '') as String,
-          (mf?['famName'] ?? '') as String,
+          (mf?['first'] ?? ''),
+          (mf?['famName'] ?? ''),
           attend,
         ]);
       }

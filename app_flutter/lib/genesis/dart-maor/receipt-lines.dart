@@ -149,7 +149,7 @@ List<String> receiptLines(
         : '',
     hasNext
         ? 'תשלום הבא: ' +
-            hebDateFull(summaryMap!['nextDate']) +
+            hebDateFull(summaryMap['nextDate']) +
             ' · ' +
             hebrewLocaleDate(summaryMap['nextDate'])
         : '',
