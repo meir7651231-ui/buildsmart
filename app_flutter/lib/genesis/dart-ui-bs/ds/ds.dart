@@ -26,6 +26,8 @@ class DsTokens {
   static const cyan = Color(0xFF4CC6E6);
   static const success = Color(0xFF43D08C);
   static const successSoft = Color(0x1F43D08C);
+  // ── טיפוגרפיה · Pure (הכרעת-בעלים 1.9): כותרות = Frank Ruhl Libre · גוף = Heebo (theme) ──
+  static const fontHead = 'FrankRuhlLibre';
   // ── רדיוסים · דרגות ──
   static const r = 16.0;
   static const rSm = 11.0;
@@ -108,7 +110,7 @@ class DsScaffold extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.ink, fontSize: 19, fontWeight: FontWeight.w800, height: 1.1, letterSpacing: -0.3)),
+                            Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.ink, fontSize: 19, fontWeight: FontWeight.w800, height: 1.1, letterSpacing: -0.3, fontFamily: DsTokens.fontHead)),
                             if (subtitle.isNotEmpty) Padding(
                               padding: const EdgeInsets.only(top: 2),
                               child: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w500)),
@@ -172,7 +174,7 @@ class DsSection extends StatelessWidget {
               child: Row(
                 children: [
                   Container(width: 3, height: 16, margin: const EdgeInsets.only(left: 9), decoration: BoxDecoration(gradient: DsTokens.accentGrad, borderRadius: BorderRadius.circular(2))),
-                  Expanded(child: Text(title, style: const TextStyle(color: DsTokens.ink, fontSize: 15.5, fontWeight: FontWeight.w800, letterSpacing: -0.2))),
+                  Expanded(child: Text(title, style: const TextStyle(color: DsTokens.ink, fontSize: 15.5, fontWeight: FontWeight.w800, letterSpacing: -0.2, fontFamily: DsTokens.fontHead))),
                   if (trailing != null) trailing!,
                 ],
               ),
@@ -315,7 +317,7 @@ class DsStat extends StatelessWidget {
                 const Spacer(),
                 ShaderMask(
                   shaderCallback: (r) => DsTokens.inkGrad.createShader(r),
-                  child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w800, letterSpacing: -0.6)),
+                  child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w800, letterSpacing: -0.6, fontFamily: DsTokens.fontHead)),
                 ),
               ],
             ),
