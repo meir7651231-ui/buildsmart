@@ -1,11 +1,11 @@
 // ✨ חולל ע"י capability.mjs — כוונה⇒הרכבה (§23). המשפט: "אני צריך לנטר את הטמפרטורה ולקבל התראה כשהטמפרטורה חורגת מהמקסימום".
-// פירוק ממבנה-המשפט: תנאי("כש") + השוואה(">") ⇒ AlertBanner מותנה + מד-רמה + קריאה.
-// אפס-מתכון · אפס-מילון-דומייני · אטומים נבחרו לפי-מטרה/צורה (§20-א).
+// הפירוק נגזר: ערך⇒GaugeMeter · קריאה⇒PremiumRing (selectAtom·צורה) · התראה⇒AlertBanner (match·מטרה).
+// השוואה(">") מהדקדוק-היחסי · אפס שם-אטום חרוט · אפס-מילון-דומייני (§20-א).
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/premium/dataviz/gauge_meter.dart';
-import '../dart-ui-bs/premium/showcase/premium_stat.dart';
+import '../dart-ui-bs/premium/showcase/premium_ring.dart';
 import '../dart-ui-bs/alert_banner.dart';
 
 void main() => runApp(const _CapApp());
@@ -39,8 +39,8 @@ class _GenCapScreenState extends State<GenCapScreen> {
       subtitle: 'חוּלל ממשפט · טמפרטורה > מקסימום',
       icon: '📟',
       children: [
-        Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Center(child: GaugeMeter(value: norm, size: 170))),
-        Padding(padding: const EdgeInsets.all(12), child: PremiumStat(label: over ? 'חריגה · טמפרטורה' : 'תקין · טמפרטורה', value: _x, unit: '/ מקסימום', delta: _x - _y)),
+        Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Center(child: GaugeMeter(value: norm))),
+        Padding(padding: const EdgeInsets.all(12), child: PremiumRing(value: _x, label: over ? 'חריגה · טמפרטורה' : 'תקין · טמפרטורה')),
         if (over)
           const Padding(padding: EdgeInsets.all(12), child: AlertBanner(label: 'חריגה — טמפרטורה מעל מקסימום', height: 46, radius: 14, accentColor: DsPure.err, baseColor: DsPure.raised, fillColor: DsPure.surface)),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), child: Slider(value: _x, max: 100, onChanged: (v) => setState(() => _x = v))),
