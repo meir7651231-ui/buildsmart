@@ -1,0 +1,21 @@
+// 🗄️ שמות · חולצו מ-dart-maor/parse-families-csv.dart (מכונת-AST). מטרה→שם; מתחלף פר-וורטיקל.
+const Map<String, String> kTerms = {
+  'shm-prty-shm-mshpchh': 'שם פרטי שם משפחה',
+  'yryd-chnvkh': 'יריד חנוכה',
+  'yryd-chnvkh-tshp': '-?\\s*יריד חנוכה תשפ..?',
+  'rgyl': 'רגיל',
+  'bytr': 'ביתר',
+  'bytr-alyt': 'ביתר עלית',
+  'bytr-aylyt': 'ביתר עילית',
+  'sttvs': 'סטטוס:\\s*([^\\n]+)',
+  'la-payl': 'לא פעיל',
+  'almn': 'אלמנ',
+  't10': 'אלמן',
+  'almnh': 'אלמן/ה',
+  'grvsh': 'גרוש',
+  'grvshym': 'גרושים',
+  'nshvaym': 'נשואים',
+  'abryt': 'עברית',
+  'chsydy': 'חסידי',
+  'hshttph-byryd-chnvkh-tshpv': 'השתתפה ביריד חנוכה תשפ\"ו',
+};

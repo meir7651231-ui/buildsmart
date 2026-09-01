@@ -41,7 +41,7 @@ class _DsFieldState extends State<DsField> {
                 hintText: widget.hint,
                 hintStyle: const TextStyle(color: DsTokens.faint, fontSize: 14),
                 filled: true,
-                fillColor: const Color(0xFFF8FAFC),
+                fillColor: DsTokens.cardAlt,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(DsTokens.rSm), borderSide: const BorderSide(color: DsTokens.line)),
                 focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(DsTokens.rSm), borderSide: const BorderSide(color: DsTokens.accent, width: 1.6)),

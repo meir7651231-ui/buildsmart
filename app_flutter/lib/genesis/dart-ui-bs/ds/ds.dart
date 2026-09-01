@@ -1,31 +1,69 @@
 // ✨ מערכת-העיצוב של המחולל (Design System · חוט-טהור) — טוקנים + פרימיטיבים
-// מעוצבים ברמת-מוצר: מרווחים, טיפוגרפיה, צל רך, פינות, ערכת-צבע מרוסנת. אפס-דאטה
-// (כל טקסט מוזרק בחיווט); material בלבד; פוקוס/מצב פנימיים. חוק-1/חוק-5.
+// זהות "מקסימום": כהה-עמוק · ניאון סגול/מגנטה/ציאן · זוהר · זכוכית · גרדיאנט-טקסט.
+// אפס-דאטה (כל טקסט מוזרק בחיווט); material בלבד; פוקוס/מצב פנימיים. חוק-1/חוק-5.
+// ⚠️ חתימות-הבנאי קפואות (תפר atom-census) — כאן משתנה רק המראה (build/צבעים/צללים).
 import 'package:flutter/material.dart';
 
 class DsTokens {
-  static const bg = Color(0xFFF4F6FA);
-  static const card = Color(0xFFFFFFFF);
-  static const ink = Color(0xFF0F172A);
-  static const muted = Color(0xFF64748B);
-  static const faint = Color(0xFF94A3B8);
-  static const line = Color(0xFFE6E9F0);
-  static const accent = Color(0xFFF97316);
-  static const accentDark = Color(0xFFEA580C);
-  static const accentSoft = Color(0xFFFFF1E7);
-  static const success = Color(0xFF16A34A);
-  static const successSoft = Color(0xFFE9F7EF);
+  // ── זהות · בהירות-הערכה (טוקן=דאטה · המנוע קורא-עיוור, לא מכריע) ──
+  // חילוף כהה↔בהיר = שינוי הטוקן הזה בלבד. הכרעה 19.
+  static const brightness = Brightness.dark;
+  // ── פלטה · כהה-קולנועי + מבטא-ניאון ──
+  static const bg = Color(0xFF07070D);
+  static const bg2 = Color(0xFF0B0B16);
+  static const card = Color(0xFF101127);
+  static const cardAlt = Color(0xFF0C0D1E);    // משטח-משנה (כרטיס-רשומה מקונן)
+  static const ink = Color(0xFFF2F3FF);
+  static const muted = Color(0xFF9AA0BE);
+  static const faint = Color(0xFF5B6180);
+  static const line = Color(0x17FFFFFF);        // מסגרת-זכוכית דקה (לבן 9%)
+  static const track = Color(0xFF1A1B33);       // רקע-מסילה (פסים · התקדמות · שבב-נייטרל)
+  static const accent = Color(0xFF7C3AED);      // סגול-ניאון (מבטא ראשי)
+  static const accentDark = Color(0xFFA855F7);
+  static const accentSoft = Color(0x1F7C3AED);  // סגול-שקוף (רקע-שבב)
+  static const magenta = Color(0xFFEC4899);
+  static const cyan = Color(0xFF22D3EE);
+  static const success = Color(0xFF34D399);
+  static const successSoft = Color(0x1F34D399);
+  // ── רדיוסים · דרגות ──
   static const r = 16.0;
   static const rSm = 11.0;
+  static const rLg = 20.0;
   static const pad = 20.0;
   static const gap = 16.0;
+  // ── גרדיאנטים · ספרייה נקובה ──
+  static const accentGrad = LinearGradient(
+    begin: Alignment.topLeft, end: Alignment.bottomRight,
+    colors: [accent, magenta],
+  );
+  static const neonGrad = LinearGradient(
+    begin: Alignment.topLeft, end: Alignment.bottomRight,
+    colors: [cyan, accent, magenta],
+  );
+  static const inkGrad = LinearGradient(
+    begin: Alignment.topLeft, end: Alignment.bottomRight,
+    colors: [Color(0xFFFFFFFF), Color(0xFF9BF0FF)],
+  );
+  // ── ראמפת-צל · כפולת-שכבה (מגע קרוב + עומק רחוק) ──
+  static const List<BoxShadow> shadowSm = [
+    BoxShadow(color: Color(0x40000000), blurRadius: 4, offset: Offset(0, 2)),
+  ];
   static const List<BoxShadow> shadow = [
-    BoxShadow(color: Color(0x14101828), blurRadius: 4, offset: Offset(0, 2)),
-    BoxShadow(color: Color(0x0A101828), blurRadius: 2, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x59000000), blurRadius: 18, offset: Offset(0, 9)),
+    BoxShadow(color: Color(0x33000000), blurRadius: 4, offset: Offset(0, 1)),
+  ];
+  static const List<BoxShadow> shadowLg = [
+    BoxShadow(color: Color(0x66000000), blurRadius: 40, offset: Offset(0, 20)),
+    BoxShadow(color: Color(0x40000000), blurRadius: 8, offset: Offset(0, 3)),
+  ];
+  // ── זוהר-ניאון (מבטא) — לכפתורים/הדגשות ──
+  static const List<BoxShadow> glow = [
+    BoxShadow(color: Color(0x807C3AED), blurRadius: 26, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x40EC4899), blurRadius: 12, offset: Offset(0, 2)),
   ];
 }
 
-// ── שלד-מסך: רקע רך + כותרת נקייה + גוף גלילה מרווח ──
+// ── שלד-מסך: רקע כהה + כותרת-זכוכית + גוף גלילה מרווח ──
 class DsScaffold extends StatelessWidget {
   const DsScaffold({required this.title, required this.subtitle, required this.icon, required this.children, this.bottomBar, super.key});
   final String title, subtitle, icon;
@@ -39,60 +77,69 @@ class DsScaffold extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: DsTokens.bg,
-        body: SafeArea(
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                decoration: const BoxDecoration(
-                  color: DsTokens.card,
-                  border: Border(bottom: BorderSide(color: DsTokens.line)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 42, height: 42,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(color: DsTokens.accentSoft, borderRadius: BorderRadius.circular(12)),
-                      child: Text(icon, style: const TextStyle(fontSize: 22)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.ink, fontSize: 19, fontWeight: FontWeight.w800, height: 1.1)),
-                          if (subtitle.isNotEmpty) Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w500)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (canPop)
-                      IconButton(
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.arrow_forward, color: DsTokens.muted, size: 22),
-                      ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-                  children: children,
-                ),
-              ),
-              if (bottomBar != null)
+        body: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(-0.7, -1.1), radius: 1.5,
+              colors: [Color(0x267C3AED), Color(0x0007070D)],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
                 Container(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                   decoration: const BoxDecoration(
                     color: DsTokens.card,
-                    border: Border(top: BorderSide(color: DsTokens.line)),
+                    border: Border(bottom: BorderSide(color: DsTokens.line)),
+                    boxShadow: DsTokens.shadowSm,
                   ),
-                  child: SafeArea(top: false, child: bottomBar!),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42, height: 42,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(gradient: DsTokens.accentGrad, borderRadius: BorderRadius.circular(12), boxShadow: DsTokens.glow),
+                        child: Text(icon, style: const TextStyle(fontSize: 22)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.ink, fontSize: 19, fontWeight: FontWeight.w800, height: 1.1, letterSpacing: -0.3)),
+                            if (subtitle.isNotEmpty) Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w500)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (canPop)
+                        IconButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          icon: const Icon(Icons.arrow_forward, color: DsTokens.muted, size: 22),
+                        ),
+                    ],
+                  ),
                 ),
-            ],
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+                    children: children,
+                  ),
+                ),
+                if (bottomBar != null)
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    decoration: const BoxDecoration(
+                      color: DsTokens.card,
+                      border: Border(top: BorderSide(color: DsTokens.line)),
+                    ),
+                    child: SafeArea(top: false, child: bottomBar!),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -100,7 +147,7 @@ class DsScaffold extends StatelessWidget {
   }
 }
 
-// ── כרטיס-סקשן: כותרת + ילדים במרווח אחיד ──
+// ── כרטיס-סקשן: כותרת + ילדים במרווח אחיד (זכוכית-כהה) ──
 class DsSection extends StatelessWidget {
   const DsSection({required this.title, required this.children, this.trailing, super.key});
   final String title;
@@ -110,7 +157,12 @@ class DsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(bottom: DsTokens.gap),
-        decoration: BoxDecoration(color: DsTokens.card, borderRadius: BorderRadius.circular(DsTokens.r), boxShadow: DsTokens.shadow),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF141534), Color(0xFF101127)]),
+          borderRadius: BorderRadius.circular(DsTokens.r),
+          border: Border.all(color: DsTokens.line),
+          boxShadow: DsTokens.shadow,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -118,7 +170,8 @@ class DsSection extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(DsTokens.pad, 16, DsTokens.pad, 12),
               child: Row(
                 children: [
-                  Expanded(child: Text(title, style: const TextStyle(color: DsTokens.ink, fontSize: 15.5, fontWeight: FontWeight.w800))),
+                  Container(width: 3, height: 16, margin: const EdgeInsets.only(left: 9), decoration: BoxDecoration(gradient: DsTokens.accentGrad, borderRadius: BorderRadius.circular(2))),
+                  Expanded(child: Text(title, style: const TextStyle(color: DsTokens.ink, fontSize: 15.5, fontWeight: FontWeight.w800, letterSpacing: -0.2))),
                   if (trailing != null) trailing!,
                 ],
               ),
@@ -148,7 +201,7 @@ class DsWorkflow extends StatelessWidget {
     for (var i = 0; i < steps.length; i++) {
       final done = i <= current;
       if (i > 0) {
-        items.add(Expanded(child: Container(height: 2, margin: const EdgeInsets.only(bottom: 20), color: i <= current ? DsTokens.accent : DsTokens.line)));
+        items.add(Expanded(child: Container(height: 2, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(gradient: i <= current ? DsTokens.accentGrad : null, color: i <= current ? null : DsTokens.line))));
       }
       items.add(Column(
         mainAxisSize: MainAxisSize.min,
@@ -157,9 +210,11 @@ class DsWorkflow extends StatelessWidget {
             width: 30, height: 30,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: done ? DsTokens.accent : DsTokens.card,
+              gradient: done ? DsTokens.accentGrad : null,
+              color: done ? null : DsTokens.card,
               shape: BoxShape.circle,
-              border: Border.all(color: done ? DsTokens.accent : DsTokens.line, width: 2),
+              border: Border.all(color: done ? Colors.transparent : DsTokens.line, width: 2),
+              boxShadow: i == current ? DsTokens.glow : null,
             ),
             child: Text('${i + 1}', style: TextStyle(color: done ? Colors.white : DsTokens.faint, fontSize: 13, fontWeight: FontWeight.w800)),
           ),
@@ -174,13 +229,13 @@ class DsWorkflow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: DsTokens.gap),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      decoration: BoxDecoration(color: DsTokens.card, borderRadius: BorderRadius.circular(DsTokens.r), boxShadow: DsTokens.shadow),
+      decoration: BoxDecoration(color: DsTokens.card, borderRadius: BorderRadius.circular(DsTokens.r), border: Border.all(color: DsTokens.line), boxShadow: DsTokens.shadow),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: items),
     );
   }
 }
 
-// ── כפתור-ראשי (gradient) ──
+// ── כפתור-ראשי (gradient-ניאון + זוהר) ──
 class DsPrimaryButton extends StatelessWidget {
   const DsPrimaryButton({required this.label, this.onTap, super.key});
   final String label;
@@ -188,19 +243,23 @@ class DsPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: const LinearGradient(colors: [DsTokens.accent, DsTokens.accentDark]),
-          boxShadow: const [BoxShadow(color: Color(0x33F97316), blurRadius: 12, offset: Offset(0, 4))],
+          borderRadius: BorderRadius.circular(13),
+          gradient: DsTokens.accentGrad,
+          boxShadow: DsTokens.glow,
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(13),
             onTap: onTap ?? () {},
             child: Container(
               height: 50,
               alignment: Alignment.center,
-              child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 15.5, fontWeight: FontWeight.w700)),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: const Color(0x24FFFFFF)),
+              ),
+              child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 15.5, fontWeight: FontWeight.w800, letterSpacing: 0.2)),
             ),
           ),
         ),
@@ -214,24 +273,32 @@ class DsChip extends StatelessWidget {
   final int tone; // 0 accent · 1 success · 2 muted
   @override
   Widget build(BuildContext context) {
-    final bg = tone == 1 ? DsTokens.successSoft : tone == 2 ? const Color(0xFFF1F5F9) : DsTokens.accentSoft;
+    final bg = tone == 1 ? DsTokens.successSoft : tone == 2 ? DsTokens.track : DsTokens.accentSoft;
     final fg = tone == 1 ? DsTokens.success : tone == 2 ? DsTokens.muted : DsTokens.accentDark;
+    final bd = tone == 1 ? const Color(0x3334D399) : tone == 2 ? DsTokens.line : const Color(0x407C3AED);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20), border: Border.all(color: bd)),
       child: Text(label, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w700)),
     );
   }
 }
 
-// ── אריח-KPI (דשבורד) ──
+// ── אריח-KPI (דשבורד) — ערך בגרדיאנט-טקסט ──
 class DsStat extends StatelessWidget {
-  const DsStat({required this.label, required this.value, required this.sub, required this.glyph, super.key});
+  const DsStat({required this.label, required this.value, required this.sub, required this.glyph, this.onTap, super.key});
   final String label, value, sub, glyph;
+  final VoidCallback? onTap;
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final card = Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: DsTokens.card, borderRadius: BorderRadius.circular(DsTokens.r), boxShadow: DsTokens.shadow),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF16173A), Color(0xFF101127)]),
+          borderRadius: BorderRadius.circular(DsTokens.r),
+          border: Border.all(color: DsTokens.line),
+          boxShadow: DsTokens.shadow,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,11 +308,14 @@ class DsStat extends StatelessWidget {
                 Container(
                   width: 34, height: 34,
                   alignment: Alignment.center,
-                  decoration: BoxDecoration(color: DsTokens.accentSoft, borderRadius: BorderRadius.circular(9)),
+                  decoration: BoxDecoration(color: DsTokens.accentSoft, borderRadius: BorderRadius.circular(9), border: Border.all(color: const Color(0x337C3AED))),
                   child: Text(glyph, style: const TextStyle(fontSize: 17)),
                 ),
                 const Spacer(),
-                Text(value, style: const TextStyle(color: DsTokens.ink, fontSize: 24, fontWeight: FontWeight.w800)),
+                ShaderMask(
+                  shaderCallback: (r) => DsTokens.inkGrad.createShader(r),
+                  child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w800, letterSpacing: -0.6)),
+                ),
               ],
             ),
             const SizedBox(height: 10),
@@ -255,6 +325,13 @@ class DsStat extends StatelessWidget {
           ],
         ),
       );
+    if (onTap == null) return card;
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(DsTokens.r),
+      child: InkWell(borderRadius: BorderRadius.circular(DsTokens.r), onTap: onTap, child: card),
+    );
+  }
 }
 
 // ── שורת-ניווט (לוח) ──
@@ -266,20 +343,20 @@ class DsNavTile extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Material(
-          color: DsTokens.card,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(DsTokens.r),
           child: InkWell(
             borderRadius: BorderRadius.circular(DsTokens.r),
             onTap: onTap,
             child: Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(DsTokens.r), border: Border.all(color: DsTokens.line)),
+              decoration: BoxDecoration(color: DsTokens.card, borderRadius: BorderRadius.circular(DsTokens.r), border: Border.all(color: DsTokens.line), boxShadow: DsTokens.shadowSm),
               child: Row(
                 children: [
                   Container(
                     width: 44, height: 44,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(color: DsTokens.accentSoft, borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(gradient: DsTokens.accentGrad, borderRadius: BorderRadius.circular(12), boxShadow: DsTokens.glow),
                     child: Text(glyph, style: const TextStyle(fontSize: 21)),
                   ),
                   const SizedBox(width: 13),
@@ -293,7 +370,7 @@ class DsNavTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_left, color: DsTokens.faint, size: 22),
+                  const Icon(Icons.chevron_left, color: DsTokens.accentDark, size: 22),
                 ],
               ),
             ),
@@ -302,36 +379,132 @@ class DsNavTile extends StatelessWidget {
       );
 }
 
-// ── כרטיס-רשומה: תווית:ערך לכל שדה (מציג רשומה חיה מהחנות) ──
+// ── כרטיס-רשומה: תווית:ערך לכל שדה + שבב-שלב חי + קידום + עריכה (הקשה) + מחיקה ──
 class DsRecordCard extends StatelessWidget {
-  const DsRecordCard({required this.labels, required this.values, super.key});
+  const DsRecordCard({required this.labels, required this.values, this.stage = '', this.stageDone = false, this.stages = const [], this.stageIndex = 0, this.onStage, this.onAdvance, this.onEdit, this.onDelete, this.footer, this.blockedReason, this.confirmMessage, this.hidden = const {}, super.key});
   final List<String> labels, values;
+  final Set<int> hidden;   // RLS · אינדקסי-עמודה מוסתרים לתפקיד-הנוכחי (סינון-תצוגה)
+  final Widget? footer;   // תוכן-תחתית (למשל שבבי קשר-הפוך)
+  final String? blockedReason;   // שלמות-קשר · חסימה: מחיקה חסומה + סיבה (טוסט)
+  final String? confirmMessage;  // שלמות-קשר · מפל: אישור לפני מחיקת-שרשרת
+  final String stage;         // שם השלב-הנוכחי (ריק = לישות אין מסע)
+  final bool stageDone;       // האם הגיע לשלב-האחרון
+  final List<String> stages;  // כל השלבים (למסע לא-ליניארי — קפיצה לכל שלב)
+  final int stageIndex;       // אינדקס השלב-הנוכחי
+  final ValueChanged<int>? onStage;   // קפיצה לשלב שנבחר
+  final VoidCallback? onAdvance, onEdit, onDelete;
   @override
   Widget build(BuildContext context) {
     final rows = <Widget>[];
     for (var i = 0; i < labels.length && i < values.length; i++) {
+      if (hidden.contains(i)) continue;   // RLS · עמודה מוסתרת לתפקיד
       if (values[i].trim().isEmpty) continue;
       rows.add(Padding(
         padding: const EdgeInsets.symmetric(vertical: 3),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 110, child: Text(labels[i], style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w600))),
+            SizedBox(width: 110, child: Text(labels[i], style: const TextStyle(color: DsTokens.faint, fontSize: 12.5, fontWeight: FontWeight.w600))),
             const SizedBox(width: 8),
             Expanded(child: Text(values[i], style: const TextStyle(color: DsTokens.ink, fontSize: 13.5, fontWeight: FontWeight.w600))),
           ],
         ),
       ));
     }
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (stage.isNotEmpty || onDelete != null) Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            children: [
+              if (stage.isNotEmpty && (stages.isEmpty || onStage == null))
+                DsChip(label: stage, tone: stageDone ? 1 : 0),
+              if (stage.isNotEmpty && stages.isNotEmpty && onStage != null)
+                PopupMenuButton<int>(
+                  onSelected: onStage,
+                  tooltip: 'קפוץ לשלב',
+                  itemBuilder: (_) => [
+                    for (var i = 0; i < stages.length; i++)
+                      PopupMenuItem<int>(
+                        value: i,
+                        child: Row(children: [
+                          Icon(i == stageIndex ? Icons.radio_button_checked : Icons.radio_button_off, size: 16, color: i == stageIndex ? DsTokens.accent : DsTokens.faint),
+                          const SizedBox(width: 8),
+                          Text(stages[i], style: const TextStyle(fontSize: 13.5)),
+                        ]),
+                      ),
+                  ],
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    DsChip(label: stage, tone: stageDone ? 1 : 0),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.expand_more, size: 15, color: DsTokens.faint),
+                  ]),
+                ),
+              const Spacer(),
+              if (stage.isNotEmpty && !stageDone && onAdvance != null)
+                Material(
+                  color: DsTokens.accentSoft,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: onAdvance,
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Text('קדם שלב', style: TextStyle(color: DsTokens.accentDark, fontSize: 12, fontWeight: FontWeight.w700)),
+                        SizedBox(width: 4),
+                        Icon(Icons.arrow_back, size: 14, color: DsTokens.accentDark),
+                      ]),
+                    ),
+                  ),
+                ),
+              if (onDelete != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: IconButton(
+                    onPressed: blockedReason != null
+                        ? () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(blockedReason!)))
+                        : confirmMessage != null
+                            ? () async {
+                                final ok = await showDialog<bool>(
+                                  context: context,
+                                  builder: (c) => AlertDialog(
+                                    content: Text(confirmMessage!),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('ביטול')),
+                                      TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('מחק')),
+                                    ],
+                                  ),
+                                );
+                                if (ok == true) onDelete?.call();
+                              }
+                            : onDelete,
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                    icon: Icon(Icons.delete_outline, size: 18, color: blockedReason != null ? DsTokens.faint : DsTokens.muted),
+                    tooltip: blockedReason != null ? 'מחיקה חסומה' : 'מחק',
+                  ),
+                ),
+            ],
+          ),
+        ),
+        ...rows.isEmpty ? [const Text('—', style: TextStyle(color: DsTokens.faint))] : rows,
+        if (footer != null) Padding(padding: const EdgeInsets.only(top: 10), child: footer),
+      ],
+    );
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: DsTokens.cardAlt,
         borderRadius: BorderRadius.circular(DsTokens.rSm),
         border: Border.all(color: DsTokens.line),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows.isEmpty ? [const Text('—', style: TextStyle(color: DsTokens.faint))] : rows),
+      clipBehavior: Clip.antiAlias,
+      child: onEdit == null
+          ? Padding(padding: const EdgeInsets.all(14), child: body)
+          : InkWell(onTap: onEdit, child: Padding(padding: const EdgeInsets.all(14), child: body)),
     );
   }
 }
@@ -348,7 +521,7 @@ class DsEmpty extends StatelessWidget {
             Container(
               width: 46, height: 46,
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(13)),
+              decoration: BoxDecoration(color: DsTokens.track, borderRadius: BorderRadius.circular(13), border: Border.all(color: DsTokens.line)),
               child: const Icon(Icons.inbox_outlined, color: DsTokens.faint, size: 24),
             ),
             const SizedBox(height: 10),

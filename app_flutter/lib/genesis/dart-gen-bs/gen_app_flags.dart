@@ -16,17 +16,6 @@ class GenAppFlagsScreen extends StatelessWidget {
       children: [
         DsSection(title: gen_app_flags_c3, children: [
         DsToggleTile(label: gen_app_flags_c4),
-        DsToggleTile(label: gen_app_flags_c5),
-        DsToggleTile(label: gen_app_flags_c6),
-        DsToggleTile(label: gen_app_flags_c7),
-        DsToggleTile(label: gen_app_flags_c8),
-        DsToggleTile(label: gen_app_flags_c9),
-        DsToggleTile(label: gen_app_flags_c10),
-        DsToggleTile(label: gen_app_flags_c11),
-        DsToggleTile(label: gen_app_flags_c12),
-        DsToggleTile(label: gen_app_flags_c13),
-        DsToggleTile(label: gen_app_flags_c14),
-        DsToggleTile(label: gen_app_flags_c15),
         ]),
       ],
     );
