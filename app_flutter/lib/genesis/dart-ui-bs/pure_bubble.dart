@@ -3,7 +3,6 @@
 // system=מתאר מרוכז · sending=raised. timestamp LTR+tnum · read-tick=accent-מורף, delivered=שחור-רך.
 // נייטרל/דיו קבועים (DsPure); רק האקצנט+הפונט זורמים דרך החריץ (DsSeam). התוכן מוזרק (חוק-5/6). material בלבד.
 import 'package:flutter/material.dart';
-import 'ds/ds_pure.dart';
 import 'ds/ds_seam.dart';
 
 enum PureBubbleKind { incoming, outgoing, system, sending }
@@ -27,6 +26,7 @@ class PureBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context); // ערכת-האקצנט הפעילה
     final fonts = DsSeam.fontsOf(context); // חבילת-הפונט הפעילה
+    final skin = DsSeam.skinOf(context); // עור-העיצוב הפעיל (נייטרל+סמנטי) — פרמטר הפיך
 
     if (kind == PureBubbleKind.system) {
       return Align(
@@ -34,10 +34,10 @@ class PureBubble extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           decoration: BoxDecoration(
-            border: Border.all(color: DsPure.hair),
+            border: Border.all(color: skin.hair),
             borderRadius: BorderRadius.circular(999),
           ),
-          child: Text(text, style: TextStyle(color: DsPure.mut, fontSize: 11.5, fontFamily: fonts.grotesk)),
+          child: Text(text, style: TextStyle(color: skin.mut, fontSize: 11.5, fontFamily: fonts.grotesk)),
         ),
       );
     }
@@ -51,11 +51,11 @@ class PureBubble extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 280),
         padding: const EdgeInsets.fromLTRB(13, 9, 13, 7),
         decoration: BoxDecoration(
-          color: sending ? DsPure.raised : (out ? null : DsPure.surface),
+          color: sending ? skin.raised : (out ? null : skin.surface),
           gradient: (out && !sending)
               ? LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topLeft, end: Alignment.bottomRight)
               : null,
-          border: out ? null : Border.all(color: DsPure.hair),
+          border: out ? null : Border.all(color: skin.hair),
           borderRadius: BorderRadiusDirectional.only(
             topStart: Radius.circular(out ? 16 : 5),
             topEnd: Radius.circular(out ? 5 : 16),
@@ -70,7 +70,7 @@ class PureBubble extends StatelessWidget {
             Text(
               text,
               style: TextStyle(
-                color: out ? DsPure.sunken : (sending ? DsPure.mut : DsPure.ink),
+                color: out ? skin.sunken : (sending ? skin.mut : skin.ink),
                 fontSize: 13.5,
                 height: 1.42,
                 fontFamily: fonts.he,
@@ -89,7 +89,7 @@ class PureBubble extends StatelessWidget {
                         fontFamily: fonts.grotesk,
                         fontFeatures: const [FontFeature.tabularFigures()],
                         fontSize: 9.5,
-                        color: out ? Colors.black54 : DsPure.faint,
+                        color: out ? Colors.black54 : skin.faint,
                       ),
                     ),
                     if (out && receipt != PureReceipt.none) ...[

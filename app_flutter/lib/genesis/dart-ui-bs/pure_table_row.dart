@@ -25,20 +25,22 @@ class PureTableRow extends StatelessWidget {
     this.zebra = false,
   });
 
-  Color get _statusColor => switch (status) {
-        PureRowStatus.ok => DsPure.ok,
-        PureRowStatus.warn => DsPure.warn,
-        PureRowStatus.err => DsPure.err,
+  // סמנטי דרך העור — עור-העיצוב מוזרק (חוק-6), לא קבוע באטום.
+  Color _statusColor(DsPureSkin skin) => switch (status) {
+        PureRowStatus.ok => skin.ok,
+        PureRowStatus.warn => skin.warn,
+        PureRowStatus.err => skin.err,
       };
 
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context); // ערכת-האקצנט הפעילה
     final fonts = DsSeam.fontsOf(context); // חבילת-הפונט הפעילה — פרמטר הפיך
+    final skin = DsSeam.skinOf(context); // עור-העיצוב הפעיל (נייטרל+סמנטי) — פרמטר הפיך
     final Color bg = selected
         ? theme.a.withValues(alpha: 0.12)
         : zebra
-            ? DsPure.ink.withValues(alpha: 0.018)
+            ? skin.ink.withValues(alpha: 0.018)
             : Colors.transparent;
     return Container(
       constraints: const BoxConstraints(minHeight: 44),
@@ -53,7 +55,7 @@ class PureTableRow extends StatelessWidget {
         children: [
           Expanded(
             flex: 3,
-            child: Text(label, style: TextStyle(color: DsPure.ink, fontSize: 13, fontFamily: fonts.he)),
+            child: Text(label, style: TextStyle(color: skin.ink, fontSize: 13, fontFamily: fonts.he)),
           ),
           Expanded(
             flex: 2,
@@ -62,7 +64,7 @@ class PureTableRow extends StatelessWidget {
               textDirection: TextDirection.ltr,
               textAlign: TextAlign.left,
               style: TextStyle(
-                color: DsPure.ink,
+                color: skin.ink,
                 fontFamily: fonts.grotesk,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -72,7 +74,7 @@ class PureTableRow extends StatelessWidget {
           ),
           Expanded(
             flex: 2,
-            child: Text(meta, style: TextStyle(color: DsPure.mut, fontSize: 12, fontFamily: fonts.he)),
+            child: Text(meta, style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he)),
           ),
           Expanded(
             flex: 2,
@@ -82,10 +84,10 @@ class PureTableRow extends StatelessWidget {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: BoxDecoration(color: _statusColor, shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: _statusColor(skin), shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 7),
-                Text(label, style: TextStyle(color: DsPure.mut, fontSize: 11, fontFamily: fonts.he)),
+                Text(label, style: TextStyle(color: skin.mut, fontSize: 11, fontFamily: fonts.he)),
               ],
             ),
           ),

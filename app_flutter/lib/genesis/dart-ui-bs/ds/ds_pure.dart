@@ -1,6 +1,6 @@
 // ✨ מאגר-העיצוב · שפת-Pure (Layer B · הטמעה) — **מחולל ע"י machtzev/ds-pure.mjs מ-new/atoms/pure-look.mjs.**
-// אל תערוך ידנית: שנה את הזרע (pure-look) והרץ את המנוע. נייטרל+סמנטי **קבועים**; אקצנט **מורף**
-// פר-ערכה (t-indigo / t-teal / t-amber). דורמנטי לצד DsScale/DsDark — הזהות מוזרקת בחיווט (חוק-6). material בלבד.
+// אל תערוך ידנית: שנה את הזרע (pure-look) והרץ את המנוע. נייטרל+סמנטי זורמים כ-DsPureSkin **הפיך**
+// (ברירת-מחדל=טוקני-Pure); אקצנט **מורף** פר-ערכה (t-indigo / t-teal / t-amber). הזהות מוזרקת בחיווט (חוק-6). material בלבד.
 import 'package:flutter/material.dart';
 
 /// ערכת-אקצנט אחת — מורפת יחד בהחלפת-ערכה (חוק-5: האטום לא יודע איזו ערכה).
@@ -38,6 +38,43 @@ class DsPureFonts {
   });
 }
 
+/// עור-העיצוב · נייטרל+סמנטי — **פרמטר הפיך, לא קבוע**: כל טוקני-הרקע/דיו/קו/סמנטי כחבילה
+/// שזורמת דרך PureScope. ברירת-המחדל = טוקני-Pure (חוק-7: היעדר-הזרקה ⇒ פלט ביט-זהה). כך
+/// האטום קורא את **מלוא-העיצוב** מהחריץ — שום צבע אינו צרוב באטום (חוק-5/6). material בלבד.
+@immutable
+class DsPureSkin {
+  final Color canvas;
+  final Color sunken;
+  final Color surface;
+  final Color raised;
+  final Color raised2;
+  final Color ink;
+  final Color mut;
+  final Color faint;
+  final Color hair;
+  final Color hair2;
+  final Color ok;
+  final Color warn;
+  final Color err;
+  final Color gold;
+  const DsPureSkin({
+    required this.canvas,
+    required this.sunken,
+    required this.surface,
+    required this.raised,
+    required this.raised2,
+    required this.ink,
+    required this.mut,
+    required this.faint,
+    required this.hair,
+    required this.hair2,
+    required this.ok,
+    required this.warn,
+    required this.err,
+    required this.gold,
+  });
+}
+
 /// שפת-Pure כטוקני-Dart. נייטרל+סמנטי קבועים; 3 ערכות-אקצנט; themeOf() = resolver.
 class DsPure {
   // ── נייטרל · סולם-רקע/דיו/קו — לא מורף בהחלפת-ערכה ──
@@ -70,6 +107,9 @@ class DsPure {
 
   // ── חבילת-פונט · ברירת-מחדל (פרמטר הפיך — ניתנת להחלפה דרך PureScope, אינה מורפת פר-ערכה) ──
   static const DsPureFonts fonts = DsPureFonts(serif: "Fraunces", serifHe: "Frank Ruhl Libre", grotesk: "Space Grotesk", he: "Heebo");
+
+  // ── עור-העיצוב · ברירת-מחדל (פרמטר הפיך — נייטרל+סמנטי כחבילה שזורמת דרך PureScope) ──
+  static const DsPureSkin skin = DsPureSkin(canvas: canvas, sunken: sunken, surface: surface, raised: raised, raised2: raised2, ink: ink, mut: mut, faint: faint, hair: hair, hair2: hair2, ok: ok, warn: warn, err: err, gold: gold);
 
   static const String defaultTheme = 't-indigo';
   static const Map<String, DsPureTheme> themes = {'t-indigo': indigo, 't-teal': teal, 't-amber': amber};

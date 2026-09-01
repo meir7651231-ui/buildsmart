@@ -9,18 +9,20 @@ import 'ds_pure.dart';
 class PureScope extends InheritedWidget {
   final DsPureTheme theme;
   final DsPureFonts fonts;
+  final DsPureSkin skin;
   const PureScope({
     super.key,
     required this.theme,
     this.fonts = DsPure.fonts,
+    this.skin = DsPure.skin,
     required super.child,
   });
 
   @override
-  bool updateShouldNotify(PureScope old) => old.theme != theme || old.fonts != fonts;
+  bool updateShouldNotify(PureScope old) => old.theme != theme || old.fonts != fonts || old.skin != skin;
 }
 
-/// גישת-החריץ: הערכה/הפונט הפעילים מ-PureScope, או ברירות-המחדל של DsPure כשאין (דורמנטי, הפיך).
+/// גישת-החריץ: הערכה/הפונט/העור הפעילים מ-PureScope, או ברירות-המחדל של DsPure כשאין (דורמנטי, הפיך).
 class DsSeam {
   const DsSeam._();
 
@@ -31,4 +33,8 @@ class DsSeam {
   /// חבילת-הפונט הפעילה — פרמטר הפיך. אין PureScope ⇒ DsPure.fonts (ברירת-מחדל Pure).
   static DsPureFonts fontsOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<PureScope>()?.fonts ?? DsPure.fonts;
+
+  /// עור-העיצוב הפעיל (נייטרל+סמנטי) — פרמטר הפיך. אין PureScope ⇒ DsPure.skin (ברירת-מחדל Pure).
+  static DsPureSkin skinOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<PureScope>()?.skin ?? DsPure.skin;
 }

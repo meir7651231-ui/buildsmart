@@ -3,7 +3,6 @@
 // נייטרל/דיו קבועים (DsPure); רק ערכת-האקצנט מורפת דרך DsSeam.of(context) (חוק-5/6). המספר מוזרק,
 // LTR + tnum; האטום לא יודע זהות/דומיין. material בלבד.
 import 'package:flutter/material.dart';
-import 'ds/ds_pure.dart';
 import 'ds/ds_seam.dart';
 
 enum PureDateState { normal, today, selected, event, disabled }
@@ -23,16 +22,17 @@ class PureDateCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context); // ערכת-האקצנט הפעילה — הזרקת-חיווט
     final fonts = DsSeam.fontsOf(context); // חבילת-הפונט הפעילה — פרמטר הפיך
+    final skin = DsSeam.skinOf(context); // עור-העיצוב הפעיל (נייטרל+סמנטי) — פרמטר הפיך
     final selected = state == PureDateState.selected;
     final today = state == PureDateState.today;
     final disabled = state == PureDateState.disabled;
     final Color textColor = selected
-        ? DsPure.sunken
+        ? skin.sunken
         : today
             ? theme.aHi
             : disabled
-                ? DsPure.faint
-                : DsPure.ink;
+                ? skin.faint
+                : skin.ink;
     return Container(
       width: size,
       height: size,

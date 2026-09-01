@@ -3,7 +3,6 @@
 // disabled(faint). נייטרל/דיו קבועים; רק האקצנט מורף דרך DsSeam.of(context). material בלבד
 // (CustomPaint לטיפת-הסמן). התוכן (מונה-האשכול) מוזרק — אפס-דומיין (חוק-5/6).
 import 'package:flutter/material.dart';
-import 'ds/ds_pure.dart';
 import 'ds/ds_seam.dart';
 
 enum PureMarkerState { normal, selected, cluster, disabled }
@@ -17,6 +16,7 @@ class PureMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context); // ערכת-האקצנט הפעילה
     final fonts = DsSeam.fontsOf(context); // חבילת-הפונט הפעילה — פרמטר הפיך
+    final skin = DsSeam.skinOf(context); // עור-העיצוב הפעיל (נייטרל+סמנטי) — פרמטר הפיך
     if (state == PureMarkerState.cluster) {
       return Container(
         width: 34,
@@ -27,7 +27,7 @@ class PureMarker extends StatelessWidget {
           '$count',
           textDirection: TextDirection.ltr,
           style: TextStyle(
-            color: DsPure.sunken,
+            color: skin.sunken,
             fontFamily: fonts.grotesk,
             fontWeight: FontWeight.w700,
             fontSize: 13,
@@ -38,15 +38,15 @@ class PureMarker extends StatelessWidget {
     }
     final selected = state == PureMarkerState.selected;
     final disabled = state == PureMarkerState.disabled;
-    final Color stroke = disabled ? DsPure.faint : theme.aHi;
+    final Color stroke = disabled ? skin.faint : theme.aHi;
     return SizedBox(
       width: selected ? 38 : 30,
       height: selected ? 46 : 38,
       child: CustomPaint(
         painter: _PinPainter(
-          fill: selected ? theme.a : DsPure.surface,
-          stroke: selected ? theme.aHi : (disabled ? DsPure.faint : theme.a),
-          dot: selected ? DsPure.sunken : stroke,
+          fill: selected ? theme.a : skin.surface,
+          stroke: selected ? theme.aHi : (disabled ? skin.faint : theme.a),
+          dot: selected ? skin.sunken : stroke,
         ),
       ),
     );
