@@ -53,7 +53,8 @@ class ForgeInputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Row(mainAxisSize: MainAxisSize.min, children: [Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M22 2L11 13M22 2l-7 20-4-9-9-4z", skin.mut, 1.8, false, 24))]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(13, 0, 13, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13))), Container(width: 34, height: 34, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(50)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M22 2L11 13M22 2l-7 20-4-9-9-4z", skin.mut, 1.8, false, 24)))]);
   }
 }

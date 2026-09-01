@@ -11,6 +11,6 @@ class Forge7Atoms extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Text("ABC · 123", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontSize: 11, fontWeight: FontWeight.w600)), Text("inherit Overline →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Eyebrow"), Text("Overline"), Text("SectionLabel"), Text("SectionTitle"), Text("CaSubTitle"), Text("FieldLabel"), Text("EmojiSectionTitle")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Text("ABC · 123", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontSize: 11, fontWeight: FontWeight.w600)), Text("inherit Overline →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Eyebrow"), Text("Overline"), Text("SectionLabel"), Text("SectionTitle"), Text("CaSubTitle"), Text("FieldLabel"), Text("EmojiSectionTitle")])]);
   }
 }

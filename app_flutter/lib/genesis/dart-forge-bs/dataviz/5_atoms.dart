@@ -8,6 +8,6 @@ class Forge5Atoms extends StatelessWidget {
   const Forge5Atoms({super.key});
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Text("inherit DonutChart →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("DonutChart"), Text("RadialGauge"), Text("ProgressRing"), Text("RadarChart"), Text("StoryRing")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Text("inherit DonutChart →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("DonutChart"), Text("RadialGauge"), Text("ProgressRing"), Text("RadarChart"), Text("StoryRing")])]);
   }
 }

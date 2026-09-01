@@ -53,6 +53,6 @@ class Forge10Atoms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 5 h 18 v 14 h -18 Z", skin.mut, 1.8, false, 24)), Text("inherit EmptyState →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("DsEmpty"), Text("Empty"), Text("CaEmpty"), Text("EmptyProducts"), Text("EmptyConnectors"), Text("EmptyAccessories"), Text("EmptySection"), Text("JourneyEmpty"), Text("StoreEmptyState"), Text("RoleRequestsInboxEmpty")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(width: 34, height: 34, child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 5 h 18 v 14 h -18 Z", skin.mut, 1.8, false, 24))), Text("inherit EmptyState →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("DsEmpty"), Text("Empty"), Text("CaEmpty"), Text("EmptyProducts"), Text("EmptyConnectors"), Text("EmptyAccessories"), Text("EmptySection"), Text("JourneyEmpty"), Text("StoreEmptyState"), Text("RoleRequestsInboxEmpty")])]);
   }
 }

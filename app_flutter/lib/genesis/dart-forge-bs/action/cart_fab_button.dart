@@ -54,6 +54,6 @@ class ForgeCartFabButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(16)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 5h2l2 11h9l2-7H7 M 9 20 a 1 1 0 1 0 2 0 a 1 1 0 1 0 -2 0 M 16 20 a 1 1 0 1 0 2 0 a 1 1 0 1 0 -2 0", skin.mut, 1.8, false, 24)), Text("2")]));
+    return Container(width: 52, height: 52, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 12), blurRadius: 26, spreadRadius: 0)]), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 5h2l2 11h9l2-7H7 M 9 20 a 1 1 0 1 0 2 0 a 1 1 0 1 0 -2 0 M 16 20 a 1 1 0 1 0 2 0 a 1 1 0 1 0 -2 0", skin.mut, 1.8, false, 24)), Text("2")]));
   }
 }

@@ -11,6 +11,6 @@ class ForgeOverline extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 24), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Row(mainAxisSize: MainAxisSize.min, spacing: 12, children: [const SizedBox.shrink(), Text("Overline · Meta", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]));
+    return Container(padding: const EdgeInsets.fromLTRB(24, 22, 24, 22), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 12, children: [const SizedBox.shrink(), Text("Overline · Meta", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]));
   }
 }

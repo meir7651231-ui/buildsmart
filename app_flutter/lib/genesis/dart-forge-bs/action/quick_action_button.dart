@@ -55,6 +55,6 @@ class ForgeQuickActionButton extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a, theme.a800], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, spacing: 7, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M13 2L4 14h7l-1 8 9-12h-7z", skin.mut, 1.8, false, 24)), Text("Action", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]));
+    return Container(height: 44, padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(color: theme.a, border: Border.all(color: theme.a), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M13 2L4 14h7l-1 8 9-12h-7z", skin.mut, 1.8, false, 24)), Text("Action", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]));
   }
 }

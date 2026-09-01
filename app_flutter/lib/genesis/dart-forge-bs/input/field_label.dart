@@ -11,6 +11,6 @@ class ForgeFieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("*")]), Text("Meta · required label atom", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontSize: 9.5))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("*")]), Text("Meta · required label atom", textAlign: TextAlign.right, style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontSize: 9.5))]);
   }
 }

@@ -53,6 +53,6 @@ class ForgeAnimatedEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 10, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 3l2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z", skin.mut, 1.8, false, 24)), Text("Label"), Text("Meta")]));
+    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 3l2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z", skin.mut, 1.8, false, 24)), Text("Label"), Text("Meta")]));
   }
 }

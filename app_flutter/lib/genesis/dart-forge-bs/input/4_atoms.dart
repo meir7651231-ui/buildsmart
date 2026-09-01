@@ -10,6 +10,6 @@ class Forge4Atoms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, children: [Text("−"), Text("2"), Text("+")])), Text("inherit NumberStepper →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("QtyStepper"), Text("StoreSmartQtyStepper"), Text("NumberRow"), Text("SettingsNumberRow")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("−"), Text("2"), Text("+")])), Text("inherit NumberStepper →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("QtyStepper"), Text("StoreSmartQtyStepper"), Text("NumberRow"), Text("SettingsNumberRow")])]);
   }
 }

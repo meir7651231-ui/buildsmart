@@ -8,6 +8,6 @@ class ForgeOtpInput extends StatelessWidget {
   const ForgeOtpInput({super.key});
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 9, children: [Text("2"), Text("6"), const SizedBox.shrink(), const SizedBox.shrink()]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Text("2"), Text("6"), const SizedBox.shrink(), const SizedBox.shrink()]);
   }
 }

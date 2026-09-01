@@ -9,7 +9,8 @@ class ForgeLinkBtn extends StatelessWidget {
   const ForgeLinkBtn({super.key});
   @override
   Widget build(BuildContext context) {
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Text("Action →", style: TextStyle(color: const Color(0xFF0B0B0D), fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700));
+    return Container(padding: const EdgeInsets.fromLTRB(6, 0, 6, 0), decoration: BoxDecoration(borderRadius: BorderRadius.circular(11)), child: Text("Action →", style: TextStyle(color: theme.aHi, fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700)));
   }
 }

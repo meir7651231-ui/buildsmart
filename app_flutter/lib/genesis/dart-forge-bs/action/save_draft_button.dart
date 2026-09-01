@@ -9,7 +9,8 @@ class ForgeSaveDraftButton extends StatelessWidget {
   const ForgeSaveDraftButton({super.key});
   @override
   Widget build(BuildContext context) {
+    final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Text("Action", style: TextStyle(color: const Color(0xFF0B0B0D), fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700));
+    return Container(height: 44, padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Text("Action", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700)));
   }
 }

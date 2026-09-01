@@ -10,6 +10,6 @@ class ForgeTintedBadgeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2), child: Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: [Text("Label 3", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 9.5, fontWeight: FontWeight.w700)), Text("Label 12", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 9.5, fontWeight: FontWeight.w700)), Text("Label 99+", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 9.5, fontWeight: FontWeight.w700))]));
+    return Container(padding: const EdgeInsets.fromLTRB(2, 8, 2, 8), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Container(padding: const EdgeInsets.fromLTRB(8, 3, 8, 3), decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)), child: Text("Label 3", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 9.5, fontWeight: FontWeight.w700))), Container(padding: const EdgeInsets.fromLTRB(8, 3, 8, 3), decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)), child: Text("Label 12", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 9.5, fontWeight: FontWeight.w700))), Container(padding: const EdgeInsets.fromLTRB(8, 3, 8, 3), decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)), child: Text("Label 99+", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 9.5, fontWeight: FontWeight.w700)))]));
   }
 }

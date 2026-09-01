@@ -53,6 +53,6 @@ class ForgeRadialGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0), child: Row(mainAxisSize: MainAxisSize.min, spacing: 20, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 10 56 a 46 46 0 1 0 92 0 a 46 46 0 1 0 -92 0 M 10 56 a 46 46 0 1 0 92 0 a 46 46 0 1 0 -92 0", skin.mut, 1.8, false, 112)), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("72"), Text("Label")])])]));
+    return Container(padding: const EdgeInsets.fromLTRB(0, 4, 0, 4), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, spacing: 20, children: [Container(width: 112, height: 112, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 10 56 a 46 46 0 1 0 92 0 a 46 46 0 1 0 -92 0 M 10 56 a 46 46 0 1 0 92 0 a 46 46 0 1 0 -92 0", skin.mut, 1.8, false, 112)), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("72"), Text("Label")])]))]));
   }
 }

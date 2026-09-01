@@ -54,6 +54,6 @@ class ForgeDsNumberField extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 6, children: [Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 11, fontWeight: FontWeight.w600)), Row(mainAxisSize: MainAxisSize.min, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 9h16M4 15h16M10 3L8 21M16 3l-2 18", skin.mut, 1.8, false, 24)), Text("12", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13))])]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [Text("Label", textAlign: TextAlign.right, style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 11, fontWeight: FontWeight.w600)), Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 9h16M4 15h16M10 3L8 21M16 3l-2 18", skin.mut, 1.8, false, 24)), Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(13, 0, 13, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Text("12", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13)))])]);
   }
 }

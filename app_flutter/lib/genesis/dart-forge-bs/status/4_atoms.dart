@@ -8,6 +8,6 @@ class Forge4Atoms extends StatelessWidget {
   const Forge4Atoms({super.key});
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [const SizedBox.shrink(), Text("inherit LinearProgress →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("ProgressStatRow"), Text("MaterialDots"), Text("CapacityBar"), Text("BudgetMeter")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(width: 60, child: const SizedBox.shrink()), Text("inherit LinearProgress →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("ProgressStatRow"), Text("MaterialDots"), Text("CapacityBar"), Text("BudgetMeter")])]);
   }
 }

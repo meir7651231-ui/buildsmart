@@ -10,6 +10,6 @@ class Forge5Atoms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: Text("5")), Text("inherit NotifyBadge →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("CatalogCountBadge"), Text("ManagerDashboardCountBadge"), Text("CatalogConfigCountBadge"), Text("ZoomHintBadge"), Text("HomeShellBadgedIcon")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(width: 28, height: 28, decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: Container(height: 15, constraints: const BoxConstraints(minWidth: 15), child: Text("5"))), Text("inherit NotifyBadge →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("CatalogCountBadge"), Text("ManagerDashboardCountBadge"), Text("CatalogConfigCountBadge"), Text("ZoomHintBadge"), Text("HomeShellBadgedIcon")])]);
   }
 }

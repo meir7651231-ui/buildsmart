@@ -53,6 +53,6 @@ class ForgeSearchEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 10, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 11 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0 M21 21l-4-4", skin.mut, 1.8, false, 24)), Text("Label"), Text("Meta · no results")]));
+    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 11 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0 M21 21l-4-4", skin.mut, 1.8, false, 24)), Text("Label"), Text("Meta · no results")]));
   }
 }

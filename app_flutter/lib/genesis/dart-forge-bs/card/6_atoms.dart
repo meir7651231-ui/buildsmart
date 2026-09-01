@@ -53,6 +53,6 @@ class Forge6Atoms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 4 h 16 v 16 h -16 Z", skin.mut, 1.8, false, 24)), Text("inherit HubTile →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("DsNavTile"), Text("CategoryTile"), Text("ServiceTile"), Text("ConnectorTile"), Text("AccessoryTile"), Text("SiteHubCaCard")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(width: 30, height: 30, child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 4 h 16 v 16 h -16 Z", skin.mut, 1.8, false, 24))), Text("inherit HubTile →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("DsNavTile"), Text("CategoryTile"), Text("ServiceTile"), Text("ConnectorTile"), Text("AccessoryTile"), Text("SiteHubCaCard")])]);
   }
 }

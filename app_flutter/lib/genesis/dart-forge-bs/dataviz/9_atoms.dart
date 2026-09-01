@@ -8,6 +8,6 @@ class Forge9Atoms extends StatelessWidget {
   const Forge9Atoms({super.key});
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Text("inherit BarChart →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("BarChart"), Text("Bar"), Text("RatingBars"), Text("WaveformBars"), Text("GanttBar"), Text("CreditBar"), Text("ManagerDashboardCreditBar"), Text("AiBar"), Text("IntelBar")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Text("inherit BarChart →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("BarChart"), Text("Bar"), Text("RatingBars"), Text("WaveformBars"), Text("GanttBar"), Text("CreditBar"), Text("ManagerDashboardCreditBar"), Text("AiBar"), Text("IntelBar")])]);
   }
 }

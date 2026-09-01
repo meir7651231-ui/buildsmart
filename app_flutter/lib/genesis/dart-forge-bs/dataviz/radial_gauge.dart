@@ -53,6 +53,6 @@ class ForgeRadialGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 11, children: [Text("Label"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12,68 A48,48 0 0 1 108,68 M12,68 A48,48 0 0 1 92,32", skin.mut, 1.8, false, 120))]));
+    return Container(constraints: const BoxConstraints(minHeight: 170), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [Text("Label"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12,68 A48,48 0 0 1 108,68 M12,68 A48,48 0 0 1 92,32", skin.mut, 1.8, false, 120))]));
   }
 }

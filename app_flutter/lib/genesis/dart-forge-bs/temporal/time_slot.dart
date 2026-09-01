@@ -8,6 +8,6 @@ class ForgeTimeSlot extends StatelessWidget {
   const ForgeTimeSlot({super.key});
   @override
   Widget build(BuildContext context) {
-    return Container(padding: const EdgeInsets.all(16), child: const SizedBox.shrink());
+    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: const SizedBox.shrink());
   }
 }

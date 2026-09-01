@@ -10,6 +10,6 @@ class ForgeHierarchyChipPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2), child: Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: [Text("Label", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10.5, fontWeight: FontWeight.w700)), Text("Label", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10.5, fontWeight: FontWeight.w700))]));
+    return Container(padding: const EdgeInsets.fromLTRB(2, 8, 2, 8), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Container(constraints: const BoxConstraints(minHeight: 26), padding: const EdgeInsets.fromLTRB(11, 5, 11, 5), decoration: BoxDecoration(borderRadius: BorderRadius.circular(999)), child: Text("Label", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10.5, fontWeight: FontWeight.w700))), Container(constraints: const BoxConstraints(minHeight: 26), padding: const EdgeInsets.fromLTRB(11, 5, 11, 5), decoration: BoxDecoration(borderRadius: BorderRadius.circular(7)), child: Text("Label", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10.5, fontWeight: FontWeight.w700)))]));
   }
 }

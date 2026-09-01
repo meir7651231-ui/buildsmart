@@ -10,6 +10,6 @@ class ForgeParallaxTilt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(decoration: BoxDecoration(color: skin.sunken), child: const SizedBox.shrink());
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: const SizedBox.shrink());
   }
 }

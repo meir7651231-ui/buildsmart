@@ -54,6 +54,6 @@ class ForgeAnimatedToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.centerLeft, end: Alignment.centerRight), border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M5 13l4 4L19 7", skin.mut, 1.8, false, 24)));
+    return Container(width: 46, height: 27, padding: const EdgeInsets.fromLTRB(3, 3, 3, 3), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.centerLeft, end: Alignment.centerRight), border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 3), blurRadius: 10, spreadRadius: 0), BoxShadow(color: theme.gl, offset: const Offset(0, 0), blurRadius: 14, spreadRadius: 0)]), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M5 13l4 4L19 7", skin.mut, 1.8, false, 24)));
   }
 }

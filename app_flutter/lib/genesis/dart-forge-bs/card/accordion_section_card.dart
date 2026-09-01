@@ -53,6 +53,6 @@ class ForgeAccordionSectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Label"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M6 9l6 6 6-6", skin.mut, 2, false, 24))]), Text("Meta")]));
+    return Container(decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M6 9l6 6 6-6", skin.mut, 2, false, 24))]), Text("Meta")]));
   }
 }

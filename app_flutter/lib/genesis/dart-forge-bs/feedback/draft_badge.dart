@@ -9,7 +9,9 @@ class ForgeDraftBadge extends StatelessWidget {
   const ForgeDraftBadge({super.key});
   @override
   Widget build(BuildContext context) {
+    final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 20, children: [Text("DRAFT", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10, fontWeight: FontWeight.w700)), Text("WIP", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10, fontWeight: FontWeight.w700)), Text("LIVE", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10, fontWeight: FontWeight.w700))]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 20, children: [Container(padding: const EdgeInsets.fromLTRB(8, 3, 8, 3), decoration: BoxDecoration(color: skin.warn, border: Border.all(color: skin.warn), borderRadius: BorderRadius.circular(999)), child: Text("DRAFT", style: TextStyle(color: skin.warn, fontFamily: fonts.grotesk, fontSize: 10, fontWeight: FontWeight.w700))), Container(padding: const EdgeInsets.fromLTRB(8, 3, 8, 3), decoration: BoxDecoration(color: theme.a, border: Border.all(color: theme.a), borderRadius: BorderRadius.circular(999)), child: Text("WIP", style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontSize: 10, fontWeight: FontWeight.w700))), Container(padding: const EdgeInsets.fromLTRB(8, 3, 8, 3), decoration: BoxDecoration(color: skin.ok, border: Border.all(color: skin.ok), borderRadius: BorderRadius.circular(999)), child: Text("LIVE", style: TextStyle(color: skin.ok, fontFamily: fonts.grotesk, fontSize: 10, fontWeight: FontWeight.w700)))]);
   }
 }

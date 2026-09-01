@@ -8,6 +8,6 @@ class ForgeRangePicker extends StatelessWidget {
   const ForgeRangePicker({super.key});
   @override
   Widget build(BuildContext context) {
-    return Container(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 3, children: [Text("א"), Text("ב"), Text("ג"), Text("ד"), Text("ה"), Text("ו"), Text("ש")]), const SizedBox.shrink()]));
+    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(margin: const EdgeInsets.fromLTRB(0, 0, 0, 5), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 3, children: [Text("א"), Text("ב"), Text("ג"), Text("ד"), Text("ה"), Text("ו"), Text("ש")])), const SizedBox.shrink()]));
   }
 }

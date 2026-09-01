@@ -58,8 +58,8 @@ class ForgePremiumField extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
     return switch (state) {
-      ForgePremiumFieldState.rest => Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0", skin.mut, 1.8, false, 24)), Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)), Text("Label"), const SizedBox.shrink()]),
-      ForgePremiumFieldState.focusFilled => Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0", skin.mut, 1.8, false, 24)), Text("Value", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)), Text("Label"), const SizedBox.shrink()]),
+      ForgePremiumFieldState.rest => Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0", skin.mut, 1.8, false, 24)), Container(constraints: const BoxConstraints(minHeight: 44), child: Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13))), Text("Label"), const SizedBox.shrink()])),
+      ForgePremiumFieldState.focusFilled => Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0", skin.mut, 1.8, false, 24)), Container(constraints: const BoxConstraints(minHeight: 44), child: Text("Value", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13))), Text("Label"), const SizedBox.shrink()])),
     };
   }
 }

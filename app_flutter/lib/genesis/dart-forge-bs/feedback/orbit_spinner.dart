@@ -10,6 +10,6 @@ class ForgeOrbitSpinner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 9, children: [Container(decoration: BoxDecoration(border: Border.all(color: skin.raised2), borderRadius: BorderRadius.circular(50)))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Container(width: 34, height: 34, decoration: BoxDecoration(border: Border.all(color: skin.raised2), borderRadius: BorderRadius.circular(50)))]);
   }
 }

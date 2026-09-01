@@ -11,6 +11,6 @@ class ForgeGlowSlider extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(4, 14, 4, 6), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("58", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)), Text("58")]));
+    return Container(padding: const EdgeInsets.fromLTRB(4, 14, 4, 6), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(constraints: const BoxConstraints(minHeight: 44), child: Text("58", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13))), Text("58")]));
   }
 }

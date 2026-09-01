@@ -54,6 +54,6 @@ class ForgeGalleryAllBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a, theme.a800], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, spacing: 7, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z", skin.mut, 1.8, false, 24))]));
+    return Container(width: 44, height: 44, padding: const EdgeInsets.fromLTRB(0, 0, 0, 0), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a, theme.a800], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: const Color(0x66000000), offset: const Offset(0, 1), blurRadius: 2, spreadRadius: 0), BoxShadow(color: theme.gl, offset: const Offset(0, 7), blurRadius: 18, spreadRadius: 0)]), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z", skin.mut, 1.8, false, 24))]));
   }
 }

@@ -8,6 +8,6 @@ class Forge6Atoms extends StatelessWidget {
   const Forge6Atoms({super.key});
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: [const SizedBox.shrink()]), Text("inherit StatusDot →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Dot"), Text("LiveDot"), Text("StatusDotChip"), Text("MaterialDots"), Text("DotsLoader"), Text("BadgedIcon")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 6, children: [const SizedBox.shrink()]), Text("inherit StatusDot →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Dot"), Text("LiveDot"), Text("StatusDotChip"), Text("MaterialDots"), Text("DotsLoader"), Text("BadgedIcon")])]);
   }
 }

@@ -53,6 +53,6 @@ class ForgeMediaPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.all(22), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 8, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 4 h 18 v 16 h -18 Z M 6.9 9 a 1.6 1.6 0 1 0 3.2 0 a 1.6 1.6 0 1 0 -3.2 0 M4 18l5-5 3.5 3.5", skin.mut, 1.8, false, 24)), Text("empty")]));
+    return Container(constraints: const BoxConstraints(minHeight: 120), padding: const EdgeInsets.fromLTRB(22, 22, 22, 22), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 4 h 18 v 16 h -18 Z M 6.9 9 a 1.6 1.6 0 1 0 3.2 0 a 1.6 1.6 0 1 0 -3.2 0 M4 18l5-5 3.5 3.5", skin.mut, 1.8, false, 24)), Text("empty")]));
   }
 }

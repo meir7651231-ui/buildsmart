@@ -12,6 +12,6 @@ class ForgeTypeWriter extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(decoration: BoxDecoration(color: skin.sunken), child: Text("Label", style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontSize: 15)));
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Container(padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), child: Text("Label", style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontSize: 15))));
   }
 }

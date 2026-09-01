@@ -10,6 +10,6 @@ class ForgeConfettiBurst extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(decoration: BoxDecoration(color: skin.sunken), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Action · burst"), const SizedBox.shrink()]));
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Action · burst"), const SizedBox.shrink()]));
   }
 }

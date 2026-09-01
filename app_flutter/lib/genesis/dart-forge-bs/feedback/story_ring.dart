@@ -10,6 +10,6 @@ class ForgeStoryRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 9, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(color: theme.c2, borderRadius: BorderRadius.circular(50)), child: const SizedBox.shrink())]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Container(width: 56, height: 56, padding: const EdgeInsets.fromLTRB(3, 3, 3, 3), decoration: BoxDecoration(color: theme.c2, borderRadius: BorderRadius.circular(50)), child: const SizedBox.shrink())]);
   }
 }

@@ -53,6 +53,6 @@ class ForgePinPad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 9, children: [Text("1"), Text("2"), Text("3"), Text("4"), Text("5"), Text("6"), Text("7"), Text("8"), Text("9"), const SizedBox.shrink(), Text("0"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M20 6H9L4 12l5 6h11a1 1 0 001-1V7a1 1 0 00-1-1zM17 9l-5 6M12 9l5 6", skin.mut, 1.8, false, 24))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 9, children: [Text("1"), Text("2"), Text("3"), Text("4"), Text("5"), Text("6"), Text("7"), Text("8"), Text("9"), const SizedBox.shrink(), Text("0"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M20 6H9L4 12l5 6h11a1 1 0 001-1V7a1 1 0 00-1-1zM17 9l-5 6M12 9l5 6", skin.mut, 1.8, false, 24))]);
   }
 }

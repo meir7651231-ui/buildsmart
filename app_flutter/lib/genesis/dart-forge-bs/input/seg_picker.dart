@@ -10,6 +10,6 @@ class ForgeSegPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, children: [const SizedBox.shrink(), Text("Label"), Text("Label"), Text("Label")]));
+    return Container(padding: const EdgeInsets.fromLTRB(3, 3, 3, 3), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [const SizedBox.shrink(), Text("Label"), Text("Label"), Text("Label")]));
   }
 }

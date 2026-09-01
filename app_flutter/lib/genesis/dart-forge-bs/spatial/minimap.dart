@@ -53,6 +53,6 @@ class ForgeMinimap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.all(16), child: Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 0 44 L 220 44 M 0 88 L 220 88 M 73 0 L 73 132 M 146 0 L 146 132 M22 84 C42 52 78 46 108 60 C136 72 150 44 182 50 C200 53 208 74 200 92 C188 116 128 120 88 110 C58 102 34 108 22 84 Z M 118 34 h 66 v 50 h -66 Z M 148 59 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0", skin.mut, 1.8, false, 220))));
+    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 0 44 L 220 44 M 0 88 L 220 88 M 73 0 L 73 132 M 146 0 L 146 132 M22 84 C42 52 78 46 108 60 C136 72 150 44 182 50 C200 53 208 74 200 92 C188 116 128 120 88 110 C58 102 34 108 22 84 Z M 118 34 h 66 v 50 h -66 Z M 148 59 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0", skin.mut, 1.8, false, 220))));
   }
 }

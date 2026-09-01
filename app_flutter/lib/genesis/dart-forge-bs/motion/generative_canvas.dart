@@ -11,6 +11,6 @@ class ForgeGenerativeCanvas extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(decoration: BoxDecoration(color: skin.sunken), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Row(mainAxisSize: MainAxisSize.min, spacing: 6, children: [const SizedBox.shrink(), Text("Organism", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]), const SizedBox.shrink()]));
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 6, children: [const SizedBox.shrink(), Text("Organism", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]), const SizedBox.shrink()]));
   }
 }

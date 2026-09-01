@@ -53,6 +53,7 @@ class Forge5Atoms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Container(padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14), decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, spacing: 11, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 3v18M3 12h18", skin.mut, 1.8, false, 24)), Text("Label")])), Text("inherit AlertBanner →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("TintedBanner"), Text("CoinBanner"), Text("QuickReplyBanner"), Text("RecommendedKitBanner"), Text("PersonaPickingSheetBanner")])]);
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(constraints: const BoxConstraints(minWidth: 180), padding: const EdgeInsets.fromLTRB(14, 12, 14, 12), decoration: BoxDecoration(color: theme.a, borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 11, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 3v18M3 12h18", skin.mut, 1.8, false, 24)), Text("Label")])), Text("inherit AlertBanner →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("TintedBanner"), Text("CoinBanner"), Text("QuickReplyBanner"), Text("RecommendedKitBanner"), Text("PersonaPickingSheetBanner")])]);
   }
 }

@@ -10,6 +10,6 @@ class Forge9Atoms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Text("Label", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10.5, fontWeight: FontWeight.w700)), Text("inherit StatusChip →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Pill"), Text("BadgePill"), Text("CaPill"), Text("StorePill"), Text("IntelPill"), Text("RewardsHubPill"), Text("SectionPill"), Text("FilterChipPill"), Text("DraftBadge")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(constraints: const BoxConstraints(minHeight: 26), padding: const EdgeInsets.fromLTRB(9, 4, 9, 4), decoration: BoxDecoration(borderRadius: BorderRadius.circular(999)), child: Text("Label", style: TextStyle(fontFamily: fonts.grotesk, fontSize: 10.5, fontWeight: FontWeight.w700))), Text("inherit StatusChip →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Pill"), Text("BadgePill"), Text("CaPill"), Text("StorePill"), Text("IntelPill"), Text("RewardsHubPill"), Text("SectionPill"), Text("FilterChipPill"), Text("DraftBadge")])]);
   }
 }

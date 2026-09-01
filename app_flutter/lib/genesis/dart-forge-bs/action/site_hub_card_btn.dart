@@ -53,6 +53,6 @@ class ForgeSiteHubCardBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, spacing: 9, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M3 21V9l9-6 9 6v12h-6v-7H9v7z", skin.mut, 1.8, false, 24)), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Label"), Text("Meta")]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 6l-6 6 6 6", skin.mut, 2, false, 24))]));
+    return Container(padding: const EdgeInsets.fromLTRB(12, 12, 12, 12), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M3 21V9l9-6 9 6v12h-6v-7H9v7z", skin.mut, 1.8, false, 24)), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label"), Text("Meta")]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 6l-6 6 6 6", skin.mut, 2, false, 24))]));
   }
 }

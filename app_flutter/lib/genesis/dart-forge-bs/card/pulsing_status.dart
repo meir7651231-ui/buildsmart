@@ -11,6 +11,6 @@ class ForgePulsingStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: [const SizedBox.shrink(), Text("Label · Meta", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])]);
+    return Container(padding: const EdgeInsets.fromLTRB(2, 10, 2, 10), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [const SizedBox.shrink(), Text("Label · Meta", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])]));
   }
 }

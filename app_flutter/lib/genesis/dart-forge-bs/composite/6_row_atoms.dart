@@ -8,6 +8,6 @@ class Forge6RowAtoms extends StatelessWidget {
   const Forge6RowAtoms({super.key});
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Text("inherit SettingsGroup →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("SettingsSwitchRow"), Text("SettingsSectionTile"), Text("SettingsRadioGroupRow"), Text("SettingsTimeRow"), Text("SettingsActionRow"), Text("RegressionPanelCheckRow")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Text("inherit SettingsGroup →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("SettingsSwitchRow"), Text("SettingsSectionTile"), Text("SettingsRadioGroupRow"), Text("SettingsTimeRow"), Text("SettingsActionRow"), Text("RegressionPanelCheckRow")])]);
   }
 }

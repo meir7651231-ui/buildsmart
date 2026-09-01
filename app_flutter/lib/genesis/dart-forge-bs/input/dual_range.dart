@@ -10,6 +10,6 @@ class ForgeDualRange extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.fromLTRB(4, 14, 4, 6), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Container(decoration: BoxDecoration(color: skin.raised2, borderRadius: BorderRadius.circular(999)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [const SizedBox.shrink(), const SizedBox.shrink(), const SizedBox.shrink()])), Text("26 — 74")]));
+    return Container(padding: const EdgeInsets.fromLTRB(4, 14, 4, 6), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(height: 6, decoration: BoxDecoration(color: skin.raised2, borderRadius: BorderRadius.circular(999)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [const SizedBox.shrink(), const SizedBox.shrink(), const SizedBox.shrink()])), Text("26 — 74")]));
   }
 }

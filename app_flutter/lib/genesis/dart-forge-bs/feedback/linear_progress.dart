@@ -11,6 +11,6 @@ class ForgeLinearProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 9, children: [Container(decoration: BoxDecoration(color: skin.raised2, borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("62%", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 11))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Container(height: 8, decoration: BoxDecoration(color: skin.raised2, borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("62%", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 11))]);
   }
 }

@@ -53,7 +53,8 @@ class ForgeSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Row(mainAxisSize: MainAxisSize.min, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 11 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0 M21 21l-4-4", skin.mut, 1.8, false, 24)), Text("Value", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M6 6l12 12M18 6L6 18", skin.mut, 1.8, false, 24))]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 11 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0 M21 21l-4-4", skin.mut, 1.8, false, 24)), Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(13, 0, 13, 0), decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 3)]), child: Text("Value", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13))), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M6 6l12 12M18 6L6 18", skin.mut, 1.8, false, 24))]);
   }
 }

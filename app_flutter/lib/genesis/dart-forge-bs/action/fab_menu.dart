@@ -10,6 +10,6 @@ class ForgeFabMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: const Color(0x73E6B84F)), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: [Text("FabMenu"), Text("ZERO · no seam")]));
+    return Container(padding: const EdgeInsets.fromLTRB(12, 12, 12, 12), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: const Color(0x73E6B84F)), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("FabMenu"), Text("ZERO · no seam")]));
   }
 }

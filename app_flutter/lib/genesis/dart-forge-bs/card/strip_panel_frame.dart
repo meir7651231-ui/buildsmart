@@ -9,7 +9,7 @@ class ForgeStripPanelFrame extends StatelessWidget {
   const ForgeStripPanelFrame({super.key});
   @override
   Widget build(BuildContext context) {
-    final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Label"), Text("Meta")]));
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
+    return Container(padding: const EdgeInsets.fromLTRB(14, 14, 14, 14), decoration: BoxDecoration(border: Border.all(color: theme.a), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label", style: TextStyle(fontSize: 12.5)), Text("Meta")]));
   }
 }

@@ -8,6 +8,6 @@ class Forge6Atoms extends StatelessWidget {
   const Forge6Atoms({super.key});
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Text("inherit LinearProgress →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("LinearProgress"), Text("ProgressStatRow"), Text("CreditBar"), Text("RatingBars"), Text("SegmentedMeter"), Text("ManagerDashboardCreditBar")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Text("inherit LinearProgress →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("LinearProgress"), Text("ProgressStatRow"), Text("CreditBar"), Text("RatingBars"), Text("SegmentedMeter"), Text("ManagerDashboardCreditBar")])]);
   }
 }

@@ -54,6 +54,6 @@ class ForgeProgressRing extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 9, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 28 a 24 24 0 1 0 48 0 a 24 24 0 1 0 -48 0 M 4 28 a 24 24 0 1 0 48 0 a 24 24 0 1 0 -48 0", skin.mut, 1.8, false, 56)), Text("65%", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 11))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 28 a 24 24 0 1 0 48 0 a 24 24 0 1 0 -48 0 M 4 28 a 24 24 0 1 0 48 0 a 24 24 0 1 0 -48 0", skin.mut, 1.8, false, 56)), Text("65%", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 11))]);
   }
 }

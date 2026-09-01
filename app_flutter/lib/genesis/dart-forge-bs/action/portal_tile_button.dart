@@ -53,6 +53,6 @@ class ForgePortalTileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, spacing: 9, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 3h6v6M21 3l-9 9M10 5H5a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5", skin.mut, 1.8, false, 24)), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Label"), Text("Meta")]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 6l-6 6 6 6", skin.mut, 2, false, 24))]));
+    return Container(padding: const EdgeInsets.fromLTRB(12, 12, 12, 12), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 3h6v6M21 3l-9 9M10 5H5a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5", skin.mut, 1.8, false, 24)), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label"), Text("Meta")]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 6l-6 6 6 6", skin.mut, 2, false, 24))]));
   }
 }

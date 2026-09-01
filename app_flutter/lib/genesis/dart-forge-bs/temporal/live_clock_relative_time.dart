@@ -11,6 +11,6 @@ class ForgeLiveClockRelativeTime extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Container(padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("14:32:07"), Text("Label · Meta")])), Row(mainAxisSize: MainAxisSize.min, spacing: 7, children: [const SizedBox.shrink(), Text("RelativeTime ·", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Meta")])]));
+    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.fromLTRB(0, 12, 0, 12), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("14:32:07"), Text("Label · Meta")])), Container(margin: const EdgeInsets.fromLTRB(0, 10, 0, 0), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [const SizedBox.shrink(), Text("RelativeTime ·", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Meta")]))]));
   }
 }

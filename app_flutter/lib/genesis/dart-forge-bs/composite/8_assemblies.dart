@@ -8,6 +8,6 @@ class Forge8Assemblies extends StatelessWidget {
   const Forge8Assemblies({super.key});
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Text("inherit FormCard →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("FamilyForm"), Text("CourseForm"), Text("SupporterForm"), Text("DonationModal"), Text("RoomForm"), Text("ManageModal"), Text("CallbackModal"), Text("IntakePanel")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Text("inherit FormCard →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("FamilyForm"), Text("CourseForm"), Text("SupporterForm"), Text("DonationModal"), Text("RoomForm"), Text("ManageModal"), Text("CallbackModal"), Text("IntakePanel")])]);
   }
 }

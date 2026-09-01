@@ -54,6 +54,6 @@ class Forge6Atoms extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Row(mainAxisSize: MainAxisSize.min, spacing: 14, children: [Container(decoration: BoxDecoration(color: theme.gl, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(9)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 6h16M4 12h16M4 18h10", skin.mut, 1.8, false, 24))), Text("inherit SectionHeader →"), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("TitledSection"), Text("SectionTitle"), Text("EmojiSectionTitle"), Text("LensGroupHeader"), Text("CaSubTitle"), Text("SettingsSectionHead")])]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(width: 26, height: 26, decoration: BoxDecoration(color: theme.gl, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(9)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 6h16M4 12h16M4 18h10", skin.mut, 1.8, false, 24))), Text("inherit SectionHeader →"), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("TitledSection"), Text("SectionTitle"), Text("EmojiSectionTitle"), Text("LensGroupHeader"), Text("CaSubTitle"), Text("SettingsSectionHead")])]);
   }
 }
