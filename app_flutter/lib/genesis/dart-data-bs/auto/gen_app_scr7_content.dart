@@ -1,0 +1,25 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_scr7_c0 = 'לוח בקרה';
+const String gen_app_scr7_c1 = '📊';
+const String gen_app_scr7_c2 = 'חללית';
+const String gen_app_scr7_c3 = 'מונה · חללית';
+const String gen_app_scr7_c4 = '🔢';
+const String gen_app_scr7_c5 = 'משימה';
+const String gen_app_scr7_c6 = 'מונה · משימה';
+const String gen_app_scr7_c7 = '🔢';
+const String gen_app_scr7_c8 = 'כמות';
+const String gen_app_scr7_c9 = 'סכום · אספקה';
+const String gen_app_scr7_c10 = '🧮';
+const String gen_app_scr7_c11 = 'כמות';
+const String gen_app_scr7_c12 = 'דלק';
+const String gen_app_scr7_c13 = 'ממוצע · חללית';
+const String gen_app_scr7_c14 = '📈';
+const String gen_app_scr7_c15 = 'דלק';
+const String gen_app_scr7_c16 = 'תחזוקה';
+const String gen_app_scr7_c17 = 'חללית · תחזוקה';
+const String gen_app_scr7_c18 = '⚠️';
+const String gen_app_scr7_c19 = 'סטטוס';
+const String gen_app_scr7_c20 = 'סטטוס';
+const String gen_app_scr7_c21 = 'תחזוקה';
+const String gen_app_scr7_c22 = '5 מדדים · סקירת-על';
+const String gen_app_scr7_c23 = 'השוואה חיה';

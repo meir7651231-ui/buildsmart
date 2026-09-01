@@ -21,10 +21,11 @@ class _GenAppRec1ScreenState extends State<GenAppRec1Screen> {
         animation: appStore,
         builder: (context, _) {
           final recs = appStore.records('app_ent1');
-          if (recs.isEmpty) return Center(child: Text(gen_app_rec1_c7));
+          if (recs.isEmpty) return Center(child: Text(gen_app_rec1_c20));
           final i0 = _sel ?? (widget.initialId != null ? recs.indexWhere((r) => r['__id'] == widget.initialId) : 0);
           final i = (i0 < 0 ? 0 : i0).clamp(0, recs.length - 1);
           final r = recs[i];
+          final id = r['__id'] ?? '';
           return ListView(
             padding: const EdgeInsets.only(bottom: 24, top: 8),
             children: [
@@ -44,6 +45,19 @@ class _GenAppRec1ScreenState extends State<GenAppRec1Screen> {
               Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_rec1_c1] ?? '', label: gen_app_rec1_c2)),
               Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_rec1_c3] ?? '', label: gen_app_rec1_c4)),
               Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_rec1_c5] ?? '', label: gen_app_rec1_c6)),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_rec1_c7] ?? '', label: gen_app_rec1_c8)),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_rec1_c9] ?? '', label: gen_app_rec1_c10)),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_rec1_c11] ?? '', label: gen_app_rec1_c12)),
+              const SizedBox(height: 8),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(gen_app_rec1_c19, style: const TextStyle(fontWeight: FontWeight.w800))),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Wrap(spacing: 10, runSpacing: 10, children: [
+                Callout(value: appStore.countRef('app_ent2', gen_app_rec1_c13, id).toString(), label: gen_app_rec1_c14),
+                Callout(value: appStore.countRef('app_ent4', gen_app_rec1_c15, id).toString(), label: gen_app_rec1_c16),
+                Callout(value: appStore.countRef('app_ent6', gen_app_rec1_c17, id).toString(), label: gen_app_rec1_c18),
+                ]),
+              ),
             ],
           );
         },
