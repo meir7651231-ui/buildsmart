@@ -31,10 +31,10 @@ class DsPureFonts {
   final String grotesk;
   final String he;
   const DsPureFonts({
-    this.serif,
-    this.serifHe,
-    this.grotesk,
-    this.he,
+    required this.serif,
+    required this.serifHe,
+    required this.grotesk,
+    required this.he,
   });
 }
 
