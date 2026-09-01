@@ -10,6 +10,7 @@ class ForgeConfettiBurst extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Action · burst"), const SizedBox.shrink()]));
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Stack(clipBehavior: Clip.none, children: [const SizedBox.shrink(), Positioned.fill(child: Container(constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(15, 9, 15, 9), decoration: BoxDecoration(border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text("Action · burst", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 10))))]));
   }
 }

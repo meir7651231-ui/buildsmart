@@ -12,6 +12,6 @@ class ForgeAuroraField extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 6, children: [const SizedBox.shrink(), Text("Aurora", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]), Opacity(opacity: 0.55, child: Container(decoration: BoxDecoration(color: theme.c2)))]));
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Stack(clipBehavior: Clip.none, children: [Positioned(top: 10, left: 10, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 6, children: [const SizedBox.shrink(), Text("Aurora", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])), Positioned.fill(child: Opacity(opacity: 0.55, child: Container(decoration: BoxDecoration(color: theme.c2))))]));
   }
 }

@@ -53,6 +53,8 @@ class ForgeSearchEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 11 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0 M21 21l-4-4", skin.mut, 1.8, false, 24)), Text("Label"), Text("Meta · no results")]));
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Container(width: 56, height: 56, decoration: BoxDecoration(color: theme.gl, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 11 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0 M21 21l-4-4", skin.mut, 1.8, false, 24))), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700)), Text("Meta · no results", style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he))]));
   }
 }

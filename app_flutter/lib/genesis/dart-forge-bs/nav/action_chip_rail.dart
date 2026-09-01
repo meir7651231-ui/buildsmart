@@ -10,6 +10,7 @@ class ForgeActionChipRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Container(padding: const EdgeInsets.fromLTRB(0, 0, 0, 4), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("Label"), Text("Label"), Text("Label"), Text("Label"), Text("Label"), Text("Label")])));
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Container(padding: const EdgeInsets.fromLTRB(0, 0, 0, 4), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])));
   }
 }

@@ -10,6 +10,7 @@ class ForgeMiniQtyBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("−"), Text("3"), Text("+")]));
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("−", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Container(constraints: const BoxConstraints(minWidth: 40), child: Text("3", textAlign: TextAlign.center, style: TextStyle(color: skin.ink, fontFamily: fonts.grotesk, fontSize: 12, fontWeight: FontWeight.w600))), Text("+", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]));
   }
 }

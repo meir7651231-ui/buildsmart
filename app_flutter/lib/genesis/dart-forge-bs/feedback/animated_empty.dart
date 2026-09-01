@@ -53,6 +53,8 @@ class ForgeAnimatedEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 3l2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z", skin.mut, 1.8, false, 24)), Text("Label"), Text("Meta")]));
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Container(width: 56, height: 56, decoration: BoxDecoration(color: theme.gl, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 3l2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z", skin.mut, 1.8, false, 24))), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700)), Text("Meta", style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he))]));
   }
 }

@@ -10,7 +10,8 @@ class ForgeLinearProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Container(height: 8, decoration: BoxDecoration(color: skin.raised2, borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("62%", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 11))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Container(height: 8, decoration: BoxDecoration(color: skin.raised2, borderRadius: BorderRadius.circular(999)), child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.centerLeft, end: Alignment.centerRight), borderRadius: BorderRadius.circular(999), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 0), blurRadius: 12, spreadRadius: 0)]))), Text("62%", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 11))]);
   }
 }

@@ -10,6 +10,7 @@ class ForgeTruncOne extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.fromLTRB(24, 22, 24, 22), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("single-line · ellipsis"), Text("לורם איפסום דולור סיט אמט קונסקטורר אדיפיסינג אלית נתונים בזרם")]));
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(padding: const EdgeInsets.fromLTRB(24, 22, 24, 22), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(margin: const EdgeInsets.fromLTRB(0, 0, 0, 6), child: Text("single-line · ellipsis", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontSize: 9))), Text("לורם איפסום דולור סיט אמט קונסקטורר אדיפיסינג אלית נתונים בזרם", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 14))]));
   }
 }

@@ -53,6 +53,8 @@ class ForgeBreadcrumbTrail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 4, children: [Text("Label"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 6l-6 6 6 6", skin.mut, 2, false, 24)), Text("Label"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 6l-6 6 6 6", skin.mut, 2, false, 24)), Text("Label")]));
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 4, children: [Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 6l-6 6 6 6", skin.mut, 2, false, 24)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M15 6l-6 6 6 6", skin.mut, 2, false, 24)), Container(padding: const EdgeInsets.fromLTRB(7, 5, 7, 5), child: Text("Label", style: TextStyle(color: theme.aHi, fontWeight: FontWeight.w600, fontFamily: fonts.he)))]));
   }
 }

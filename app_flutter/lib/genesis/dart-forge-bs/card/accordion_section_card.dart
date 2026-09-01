@@ -53,6 +53,7 @@ class ForgeAccordionSectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label"), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M6 9l6 6 6-6", skin.mut, 2, false, 24))]), Text("Meta")]));
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.fromLTRB(15, 13, 15, 13), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M6 9l6 6 6-6", skin.mut, 2, false, 24))])), Container(padding: const EdgeInsets.fromLTRB(15, 0, 15, 13), child: Text("Meta", style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he)))]));
   }
 }

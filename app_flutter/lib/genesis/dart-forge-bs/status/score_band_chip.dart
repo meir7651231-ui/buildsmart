@@ -2,12 +2,15 @@
 // machtzev/pure/status-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
 // חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
 import 'package:flutter/material.dart';
+import '../../dart-ui-bs/ds/ds_seam.dart';
 
 /// ScoreBandChip — seam:fields
 class ForgeScoreBandChip extends StatelessWidget {
   const ForgeScoreBandChip({super.key});
   @override
   Widget build(BuildContext context) {
-    return Container(padding: const EdgeInsets.fromLTRB(4, 14, 4, 4), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 10, children: [Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("76"), const SizedBox.shrink()]), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [const SizedBox.shrink(), const SizedBox.shrink(), const SizedBox.shrink()]), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("0"), Text("40"), Text("70"), Text("100")])]));
+    final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(padding: const EdgeInsets.fromLTRB(4, 14, 4, 4), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 10, children: [Container(height: 20, child: Stack(clipBehavior: Clip.none, children: [Positioned(top: -16, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("76", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Container(margin: const EdgeInsets.fromLTRB(0, 2, 0, 0))]))])), Container(height: 9, decoration: BoxDecoration(borderRadius: BorderRadius.circular(999)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [Container(decoration: BoxDecoration(color: skin.err)), Container(decoration: BoxDecoration(color: skin.warn)), Container(decoration: BoxDecoration(color: skin.ok))])), Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("0", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("40", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("70", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("100", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])]));
   }
 }
