@@ -11,6 +11,6 @@ class ForgeGradientText extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 24), decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("כותרת מדורגת", style: TextStyle(fontFamily: fonts.serifHe, fontSize: 34, fontWeight: FontWeight.w700)), Text("GRADIENT · TEXT", style: TextStyle(fontFamily: fonts.serifHe, fontSize: 34, fontWeight: FontWeight.w700))]));
+    return Container(padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 24), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("כותרת מדורגת", style: TextStyle(fontFamily: fonts.serifHe, fontSize: 34, fontWeight: FontWeight.w700)), Text("GRADIENT · TEXT", style: TextStyle(fontFamily: fonts.serifHe, fontSize: 34, fontWeight: FontWeight.w700))]));
   }
 }

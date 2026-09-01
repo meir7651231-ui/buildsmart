@@ -4,8 +4,48 @@
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
-// אייקון-פלייסהולדר ניטרלי (SVG המקורי אינו מתורגם — נשמר כתצורה, לא כפיקסל)
-Widget _icon(Color c) => Icon(Icons.circle_outlined, size: 15, color: c);
+class _SvgPaint extends CustomPainter {
+  final String d; final Color color; final double sw; final bool filled; final double vb;
+  const _SvgPaint(this.d, this.color, this.sw, this.filled, this.vb);
+  @override
+  void paint(Canvas canvas, Size size) {
+    Path raw;
+    try { raw = _parse(d); } catch (_) { return; }   // path פגום ⇒ ריקון-רך, לא זריקה
+    final m = Matrix4.identity()..scale(size.width / vb, size.height / vb);
+    final p = raw.transform(m.storage);
+    canvas.drawPath(p, Paint()
+      ..color = color
+      ..style = filled ? PaintingStyle.fill : PaintingStyle.stroke
+      ..strokeWidth = sw
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round);
+  }
+  @override
+  bool shouldRepaint(_SvgPaint o) => o.d != d || o.color != color || o.sw != sw || o.filled != filled;
+}
+Path _parse(String d) {
+  final path = Path();
+  final t = RegExp(r'[a-zA-Z]|-?\d*\.?\d+(?:e-?\d+)?').allMatches(d).map((x) => x.group(0)!).toList();
+  double cx = 0, cy = 0, sx = 0, sy = 0; String cmd = ''; int i = 0;
+  double n() => double.parse(t[i++]);
+  while (i < t.length) {
+    if (RegExp(r'[a-zA-Z]').hasMatch(t[i])) { cmd = t[i]; i++; }
+    if (i > t.length) break;
+    final rel = cmd == cmd.toLowerCase(); final C = cmd.toUpperCase();
+    switch (C) {
+      case 'M': { double x = n(), y = n(); if (rel) { x += cx; y += cy; } path.moveTo(x, y); cx = x; cy = y; sx = x; sy = y; cmd = rel ? 'l' : 'L'; break; }
+      case 'L': { double x = n(), y = n(); if (rel) { x += cx; y += cy; } path.lineTo(x, y); cx = x; cy = y; break; }
+      case 'H': { double x = n(); if (rel) x += cx; path.lineTo(x, cy); cx = x; break; }
+      case 'V': { double y = n(); if (rel) y += cy; path.lineTo(cx, y); cy = y; break; }
+      case 'C': { double x1 = n(), y1 = n(), x2 = n(), y2 = n(), x = n(), y = n(); if (rel) { x1 += cx; y1 += cy; x2 += cx; y2 += cy; x += cx; y += cy; } path.cubicTo(x1, y1, x2, y2, x, y); cx = x; cy = y; break; }
+      case 'Q': { double x1 = n(), y1 = n(), x = n(), y = n(); if (rel) { x1 += cx; y1 += cy; x += cx; y += cy; } path.quadraticBezierTo(x1, y1, x, y); cx = x; cy = y; break; }
+      case 'A': { double rx = n(), ry = n(), rot = n(), laf = n(), sf = n(), x = n(), y = n(); if (rel) { x += cx; y += cy; } path.arcToPoint(Offset(x, y), radius: Radius.elliptical(rx, ry), rotation: rot, largeArc: laf != 0, clockwise: sf != 0); cx = x; cy = y; break; }
+      case 'Z': path.close(); cx = sx; cy = sy; break;
+      default: if (i < t.length) i++;
+    }
+  }
+  return path;
+}
 
 /// TrendChart — seam:series
 class ForgeTrendChart extends StatelessWidget {
@@ -14,6 +54,6 @@ class ForgeTrendChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 11, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Label"), Row(mainAxisSize: MainAxisSize.min, spacing: 3, children: [_icon(skin.mut), Text("9%", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])]), _icon(skin.mut)]));
+    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 11, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text("Label"), Row(mainAxisSize: MainAxisSize.min, spacing: 3, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M7 17L17 7M17 7H9M17 7v8", skin.mut, 1.8, false, 24)), Text("9%", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 0 30 L 240 30 M 0 60 L 240 60 M 0 88 L 240 88 M2,60 C34,54 54,40 84,44 C114,48 128,30 160,34 C192,38 214,26 238,22 M2,74 C34,72 54,66 84,68 C114,70 128,58 160,62 C192,66 214,58 238,54 M2,80 C34,82 54,78 84,80 C114,82 128,74 160,78 C192,82 214,78 238,72", skin.mut, 1.8, false, 240))]));
   }
 }

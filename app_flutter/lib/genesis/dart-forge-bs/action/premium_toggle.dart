@@ -4,12 +4,20 @@
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
-/// PremiumToggle — seam:fields
+/// PremiumToggle — seam:fields · מצבים חיים
+enum ForgePremiumToggleState { state, state1, state2, state3 }
+
 class ForgePremiumToggle extends StatelessWidget {
-  const ForgePremiumToggle({super.key});
+  final ForgePremiumToggleState state;
+  const ForgePremiumToggle({super.key, this.state = ForgePremiumToggleState.state});
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(padding: const EdgeInsets.fromLTRB(0, 4, 0, 2), child: Row(mainAxisSize: MainAxisSize.min, spacing: 18, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 8, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(color: theme.aHi, border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("on")]), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 8, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(color: theme.aHi, border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("off")]), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 8, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(color: theme.aHi, border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("focus")]), Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 8, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(color: theme.aHi, border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("disabled")])]));
+    return switch (state) {
+      ForgePremiumToggleState.state => Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.centerLeft, end: Alignment.centerRight), border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("on")]),
+      ForgePremiumToggleState.state1 => Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.centerLeft, end: Alignment.centerRight), border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("off")]),
+      ForgePremiumToggleState.state2 => Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.centerLeft, end: Alignment.centerRight), border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("focus")]),
+      ForgePremiumToggleState.state3 => Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.centerLeft, end: Alignment.centerRight), border: Border.all(color: const Color(0x2EFFFFFF)), borderRadius: BorderRadius.circular(999)), child: const SizedBox.shrink()), Text("disabled")]),
+    };
   }
 }

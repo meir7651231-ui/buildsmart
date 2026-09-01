@@ -10,6 +10,6 @@ class ForgeDateHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 22), decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Container(padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2), child: Row(mainAxisSize: MainAxisSize.min, spacing: 12, children: [Text("03"), Text("Label"), const SizedBox.shrink(), Text("4 items")])));
+    return Container(padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 22), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Container(padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2), child: Row(mainAxisSize: MainAxisSize.min, spacing: 12, children: [Text("03"), Text("Label"), const SizedBox.shrink(), Text("4 items")])));
   }
 }

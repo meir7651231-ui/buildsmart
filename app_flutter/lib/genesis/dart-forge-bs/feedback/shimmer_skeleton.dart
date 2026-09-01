@@ -10,6 +10,6 @@ class ForgeShimmerSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 10, children: [Container(decoration: BoxDecoration(color: skin.raised, borderRadius: BorderRadius.circular(7))), Container(decoration: BoxDecoration(color: skin.raised, borderRadius: BorderRadius.circular(7))), Container(decoration: BoxDecoration(color: skin.raised, borderRadius: BorderRadius.circular(7)))]);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, spacing: 10, children: [Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.raised, skin.raised2, skin.raised], begin: Alignment.centerLeft, end: Alignment.centerRight), borderRadius: BorderRadius.circular(7))), Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.raised, skin.raised2, skin.raised], begin: Alignment.centerLeft, end: Alignment.centerRight), borderRadius: BorderRadius.circular(7))), Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.raised, skin.raised2, skin.raised], begin: Alignment.centerLeft, end: Alignment.centerRight), borderRadius: BorderRadius.circular(7)))]);
   }
 }
