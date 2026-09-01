@@ -19,6 +19,7 @@ class PureSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context); // ערכת-האקצנט הפעילה — הזרקת-חיווט
+    final fonts = DsSeam.fontsOf(context); // חבילת-הפונט הפעילה — פרמטר הפיך
     return Container(
       padding: padding,
       decoration: BoxDecoration(
@@ -28,7 +29,7 @@ class PureSurface extends StatelessWidget {
         boxShadow: [BoxShadow(color: theme.gl, blurRadius: 24, offset: const Offset(0, 8))], // אקצנט מורף
       ),
       child: DefaultTextStyle(
-        style: const TextStyle(color: DsPure.ink, fontSize: 15, height: 1.45),
+        style: TextStyle(color: DsPure.ink, fontSize: 15, height: 1.45, fontFamily: fonts.he),
         child: child,
       ),
     );

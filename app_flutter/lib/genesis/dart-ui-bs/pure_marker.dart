@@ -16,6 +16,7 @@ class PureMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context); // ערכת-האקצנט הפעילה
+    final fonts = DsSeam.fontsOf(context); // חבילת-הפונט הפעילה — פרמטר הפיך
     if (state == PureMarkerState.cluster) {
       return Container(
         width: 34,
@@ -25,11 +26,12 @@ class PureMarker extends StatelessWidget {
         child: Text(
           '$count',
           textDirection: TextDirection.ltr,
-          style: const TextStyle(
+          style: TextStyle(
             color: DsPure.sunken,
+            fontFamily: fonts.grotesk,
             fontWeight: FontWeight.w700,
             fontSize: 13,
-            fontFeatures: [FontFeature.tabularFigures()],
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       );

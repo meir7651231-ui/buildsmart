@@ -34,6 +34,7 @@ class PureTableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context); // ערכת-האקצנט הפעילה
+    final fonts = DsSeam.fontsOf(context); // חבילת-הפונט הפעילה — פרמטר הפיך
     final Color bg = selected
         ? theme.a.withValues(alpha: 0.12)
         : zebra
@@ -52,7 +53,7 @@ class PureTableRow extends StatelessWidget {
         children: [
           Expanded(
             flex: 3,
-            child: Text(label, style: const TextStyle(color: DsPure.ink, fontSize: 13)),
+            child: Text(label, style: TextStyle(color: DsPure.ink, fontSize: 13, fontFamily: fonts.he)),
           ),
           Expanded(
             flex: 2,
@@ -60,17 +61,18 @@ class PureTableRow extends StatelessWidget {
               value,
               textDirection: TextDirection.ltr,
               textAlign: TextAlign.left,
-              style: const TextStyle(
+              style: TextStyle(
                 color: DsPure.ink,
+                fontFamily: fonts.grotesk,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                fontFeatures: [FontFeature.tabularFigures()],
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text(meta, style: const TextStyle(color: DsPure.mut, fontSize: 12)),
+            child: Text(meta, style: TextStyle(color: DsPure.mut, fontSize: 12, fontFamily: fonts.he)),
           ),
           Expanded(
             flex: 2,
@@ -83,7 +85,7 @@ class PureTableRow extends StatelessWidget {
                   decoration: BoxDecoration(color: _statusColor, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 7),
-                Text(label, style: const TextStyle(color: DsPure.mut, fontSize: 11)),
+                Text(label, style: TextStyle(color: DsPure.mut, fontSize: 11, fontFamily: fonts.he)),
               ],
             ),
           ),
