@@ -11,9 +11,29 @@ import '../dart-ui-bs/ds/ds_bars.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/alert_banner.dart';
 
-void main() => runApp(
-      const MaterialApp(debugShowCheckedModeBanner: false, home: GenMonitorScreen()),
-    );
+// שורש-האפליקציה — אותה ערכת-נושא של המחולל-האמיתי (renderMain): גוף=Heebo · כותרות=Pure
+// (DsTokens.fontHead) · רקע+אקצנט Pure · RTL. הספַּייק הקודם היה MaterialApp ריק ⇒ בלי פונט/עיצוב.
+void main() => runApp(const _MonitorApp());
+
+class _MonitorApp extends StatelessWidget {
+  const _MonitorApp();
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'מוניטור מערכת',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          fontFamily: 'Heebo',
+          scaffoldBackgroundColor: DsTokens.bg,
+          colorScheme: ColorScheme.fromSeed(seedColor: DsTokens.accent),
+        ),
+        builder: (context, child) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: child ?? const SizedBox.shrink(),
+        ),
+        home: const GenMonitorScreen(),
+      );
+}
 
 class GenMonitorScreen extends StatefulWidget {
   const GenMonitorScreen({super.key});
