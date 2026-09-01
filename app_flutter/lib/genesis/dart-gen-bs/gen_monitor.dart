@@ -1,18 +1,15 @@
-// ✨ ניסוי-הרכבה (L29 מלא) — "מוניטור-מערכת" מ-3 אטומים, שאף אחד מהם אינו מוניטור לבדו.
-// הצורך: "לנטר מערכת ולקבל התראה כשחורגת מהסף". פירוק (§20-ב/L29):
-//   פעולת-יסוד: השוואה (value > threshold) — קיימת · חיווט: מצב+setState+תנאי.
-//   3 אטומי-תצוגה (כולם בעלי תפר-דאטה אמיתי — §20-ג): DsStat (קריאה+סטטוס) · DsBars (ערך מול
-//   סף) · AlertBanner (התראה-מותנית). ההשוואה האחת מזינה את שלושתם ⇒ נולד מוניטור.
-// הערה (§20-ג · פסילה מתועדת): RadialGauge נשקל ונפסל — אין לו פרמטר-ערך (אפס-דאטה, מנפיש
-// ערך-מחזורי פנימי) ⇒ להראות בו את הערך = זיוף. לכן הוחלף באטום בעל-תפר.
+// ✨ ניסוי-הרכבה (L29 · עיצוב-Pure) — "מוניטור-מערכת" מ-אטומי-Pure שכבר קיימים במדף.
+// תיקון-אמת: קודם בחרתי ביד אטומים שטוחים (DsStat/DsBars); §20-א דורש הכי-טוב-למטרה. אטומי-
+// הפרימיום כבר פורקו וקיימים ⇒ הרכבתי אותם: GaugeMeter (מד עם value אמיתי) · PremiumStat
+// (קריאה+דלתא) · NeonBars (ערך מול סף) · AlertBanner (התראה-מותנית). פעולת-יסוד אחת: השוואה.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
-import '../dart-ui-bs/ds/ds_bars.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
+import '../dart-ui-bs/premium/dataviz/gauge_meter.dart';
+import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
+import '../dart-ui-bs/premium/showcase/premium_stat.dart';
 import '../dart-ui-bs/alert_banner.dart';
 
-// שורש-האפליקציה — אותה ערכת-נושא של המחולל-האמיתי (renderMain): גוף=Heebo · כותרות=Pure
-// (DsTokens.fontHead) · רקע+אקצנט Pure · RTL. הספַּייק הקודם היה MaterialApp ריק ⇒ בלי פונט/עיצוב.
 void main() => runApp(const _MonitorApp());
 
 class _MonitorApp extends StatelessWidget {
@@ -42,58 +39,57 @@ class GenMonitorScreen extends StatefulWidget {
 }
 
 class _GenMonitorScreenState extends State<GenMonitorScreen> {
-  double _value = 42;
+  double _value = 82;
   final double _threshold = 70;
 
   @override
   Widget build(BuildContext context) {
-    // ← פעולת-היסוד היחידה: השוואה. זו הליבה שמחווטת את שלושת האטומים יחד.
-    final bool over = _value > _threshold;
-    final String t = _threshold.toStringAsFixed(0);
+    final bool over = _value > _threshold; // ← פעולת-היסוד היחידה שמחווטת את הכל
     return DsScaffold(
       title: 'מוניטור מערכת',
-      subtitle: 'ניטור עם התראה · הרכבת 3 אטומים',
+      subtitle: 'ניטור עם התראה · הרכבת אטומי-Pure',
       icon: '📟',
       children: [
-        DsSection(title: 'מצב', children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: DsStat(
-              label: 'ערך נוכחי',
-              value: _value.toStringAsFixed(0),
-              sub: over ? 'חריגה מהסף ($t)' : 'תקין · סף $t',
-              glyph: over ? '⚠️' : '✅',
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Center(child: GaugeMeter(value: _value / 100, size: 180)),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: PremiumStat(
+            label: over ? 'חריגה מהסף' : 'תקין · תחת הסף',
+            value: _value,
+            unit: '/100',
+            delta: _value - _threshold,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: NeonBars(
+            labels: const ['ערך', 'סף'],
+            values: [_value, _threshold],
+          ),
+        ),
+        if (over)
+          const Padding(
+            padding: EdgeInsets.all(12),
+            child: AlertBanner(
+              label: 'המערכת חורגת מהסף — נדרש טיפול',
+              height: 46,
+              radius: 14,
+              accentColor: DsPure.err,
+              baseColor: DsPure.raised,
+              fillColor: DsPure.surface,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: DsBars(
-              title: 'ערך מול סף',
-              labels: const ['ערך', 'סף'],
-              values: [_value, _threshold],
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Slider(
+            value: _value,
+            max: 100,
+            onChanged: (v) => setState(() => _value = v),
           ),
-          if (over)
-            const Padding(
-              padding: EdgeInsets.all(12),
-              child: AlertBanner(
-                label: 'המערכת חורגת מהסף — נדרש טיפול',
-                height: 46,
-                radius: 14,
-                accentColor: DsPure.err,
-                baseColor: DsPure.raised,
-                fillColor: DsPure.surface,
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            child: Slider(
-              value: _value,
-              max: 100,
-              onChanged: (v) => setState(() => _value = v),
-            ),
-          ),
-        ]),
+        ),
       ],
     );
   }
