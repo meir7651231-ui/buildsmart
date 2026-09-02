@@ -84,6 +84,8 @@ class _Home extends StatelessWidget {
           DsNavTile(glyph: '🗓️', title: 'לוח שנה', sub: 'לראות מה קרֵב בזמן לפעול', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Calendar()))),
           DsNavTile(glyph: '🎓', title: 'תלמידים בסיכון', sub: 'לתפוס מי מתחיל ליפול, בזמן להתערב', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Students()))),
           DsNavTile(glyph: '💰', title: 'גבייה', sub: 'מי חייב וכמה — לגבות בזמן, בלי לרדוף', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Finance()))),
+          DsNavTile(glyph: '💬', title: 'תקשורת', sub: 'מי לא-קרא הודעה חשובה — לתזכר', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Comm()))),
+          DsNavTile(glyph: '🚨', title: 'בטיחות', sub: 'איזה פרוטוקול פג — לטפל לפני שיישמט', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Safety()))),
         ]),
       ],
     );
@@ -311,5 +313,92 @@ class _Finance extends StatelessWidget {
       b.write(s[i]);
     }
     return b.toString();
+  }
+}
+
+// ═══════════ תקשורת · מטרה: "שלא תיפול הודעה חשובה — מי לא-קרא, לתזכר בערוץ אחר" ═══════════
+// פעולות-יסוד: הודעות שנשלחו · אחוז-קריאה פר-הודעה · דירוג (חשוב+נמוך-קריאה ראשון) · פעולה=תזכורת.
+class _Comm extends StatelessWidget {
+  const _Comm();
+  static const _msgs = <Map<String, dynamic>>[
+    {'title': 'הודעת חירום · תרגיל פינוי', 'chan': 'WhatsApp+SMS', 'read': 71, 'urgent': true},
+    {'title': 'אישור טיול · שכבת ט\'', 'chan': 'WhatsApp', 'read': 48, 'urgent': true},
+    {'title': 'תזכורת תשלום', 'chan': 'SMS', 'read': 60, 'urgent': false},
+    {'title': 'אסיפת הורים · י\'-3', 'chan': 'WhatsApp', 'read': 85, 'urgent': false},
+    {'title': 'סקר שביעות-רצון', 'chan': 'מייל', 'read': 34, 'urgent': false},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    // דירוג: חשוב-ולא-נקרא ראשון = (urgent desc, ואז read asc) — מי שההודעה עלולה ליפול אצלו
+    final ranked = [..._msgs]..sort((a, b) {
+        final u = (b['urgent'] as bool ? 1 : 0).compareTo(a['urgent'] as bool ? 1 : 0);
+        return u != 0 ? u : (a['read'] as int).compareTo(b['read'] as int);
+      });
+    final atRisk = ranked.where((m) => (m['urgent'] as bool) && (m['read'] as int) < 75).length;
+    return DsScaffold(
+      title: 'תקשורת', subtitle: 'מי לא-קרא — מדורג, לתזכר לפני שההודעה נופלת', icon: '💬',
+      children: [
+        Wrap(spacing: 12, runSpacing: 12, children: [
+          SizedBox(width: 178, child: KpiTile(glyph: '📤', value: '${_msgs.length}', label: 'הודעות פעילות')),
+          SizedBox(width: 178, child: KpiTile(glyph: '🚨', value: '$atRisk', label: 'חשובות לא-נקראו')),
+        ]),
+        const SizedBox(height: 8),
+        DsSection(title: 'מדורג לפי חשיבות ואי-קריאה', trailing: DsChip(label: '$atRisk', tone: 2), children: [
+          for (final m in ranked) _msgRow(m['title'] as String, m['chan'] as String, m['read'] as int, m['urgent'] as bool),
+        ]),
+      ],
+    );
+  }
+
+  Widget _msgRow(String title, String chan, int read, bool urgent) {
+    final risk = urgent && read < 75;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MediaRow(title: risk ? '$title · 📱 תזכורת חוזרת' : title, subtitle: '$chan · נקרא $read%', glyph: risk ? '🔴' : read >= 75 ? '🟢' : '🟠', trailing: '$read%'),
+    );
+  }
+}
+
+// ═══════════ בטיחות · מטרה: "שאף פרוטוקול-בטיחות לא יפוג בלי טיפול" ═══════════
+// פעולות-יסוד: פריט-בטיחות עם מועד-הבא · ימים-עד/פג (dayDiff) · דירוג (הפג-ביותר ראשון) · פעולה.
+class _Safety extends StatelessWidget {
+  const _Safety();
+  static const _items = <Map<String, dynamic>>[
+    {'title': 'תרגיל פינוי', 'due': '2026-08-20', 'act': 'לתזמן מיידית'},
+    {'title': 'בדיקת מטפים', 'due': '2026-09-01', 'act': 'לזמן טכנאי'},
+    {'title': 'פרוטוקול אלרגיה · 3 תלמידים', 'due': '2026-09-05', 'act': 'לוודא ערכות'},
+    {'title': 'בדיקת חשמל תקופתית', 'due': '2026-10-01', 'act': 'מתוכנן'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final todayIso = isoToday(_isoOf);
+    // ימים-עד המועד: dayDiff(today, due) — שלילי=פג, חיובי=עוד-לא
+    int toDue(Map<String, dynamic> s) => dayDiff(todayIso, s['due'] as String).round();
+    final ranked = [..._items]..sort((a, b) => toDue(a).compareTo(toDue(b))); // הפג-ביותר ראשון
+    final lapsed = ranked.where((s) => toDue(s) < 0).length;
+    return DsScaffold(
+      title: 'בטיחות', subtitle: 'איזה פרוטוקול פג — מדורג, לטפל לפני שיישמט', icon: '🚨',
+      children: [
+        Wrap(spacing: 12, runSpacing: 12, children: [
+          SizedBox(width: 178, child: KpiTile(glyph: '⚠️', value: '$lapsed', label: 'פגו — דורש טיפול')),
+          SizedBox(width: 178, child: KpiTile(glyph: '🛡️', value: '${_items.length}', label: 'פרוטוקולים')),
+        ]),
+        const SizedBox(height: 8),
+        DsSection(title: 'מדורג לפי דחיפות', trailing: DsChip(label: '$lapsed', tone: 2), children: [
+          for (final s in ranked) _safeRow(s['title'] as String, toDue(s), s['act'] as String),
+        ]),
+      ],
+    );
+  }
+
+  Widget _safeRow(String title, int toDue, String act) {
+    final lapsed = toDue < 0;
+    final when = toDue < 0 ? 'פג לפני ${-toDue} ימים' : toDue == 0 ? 'פג היום' : 'בעוד $toDue ימים';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MediaRow(title: '$title · $act', subtitle: when, glyph: lapsed ? '🔴' : toDue <= 5 ? '🟠' : '🟢', trailing: lapsed ? 'פג' : 'תקין'),
+    );
   }
 }
