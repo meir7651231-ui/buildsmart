@@ -11,6 +11,6 @@ class ForgeLinkBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(6, 0, 6, 0), decoration: BoxDecoration(borderRadius: BorderRadius.circular(11)), child: Text("Action →", style: TextStyle(color: theme.aHi, fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700)));
+    return Container(alignment: Alignment.center, padding: const EdgeInsets.fromLTRB(6, 0, 6, 0), decoration: BoxDecoration(borderRadius: BorderRadius.circular(11)), child: Text("Action →", style: TextStyle(color: theme.aHi, fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700)));
   }
 }
