@@ -52,7 +52,7 @@ import '../dart-maor/iso-today.dart';
 import '../dart-maor/intel-day-diff.dart';
 import '../dart-maor/date-in-range.dart';
 import '../dart-maor/month-label.dart';
-import '../dart-maor/week-day-names.dart';
+import '../dart-maor/day-letters.dart';
 
 const _acc = DsTokens.accent, _card = DsTokens.card, _fill = DsTokens.bg2, _ink = DsTokens.ink, _mut = DsTokens.muted;
 
@@ -992,8 +992,11 @@ class _CalendarState extends State<_Calendar> {
           Expanded(child: DsPrimaryButton(label: 'הבא ›', onTap: () => setState(() => _off++))),
         ]),
         const SizedBox(height: 12),
-        // כותרת-ימים — week-day-names (אות ראשונה)
-        Row(children: [for (final n in dayNames) Expanded(child: Center(child: Text(n.substring(0, 1), style: const TextStyle(color: _mut, fontSize: 12, fontWeight: FontWeight.w700))))]),
+        // כותרת-ימים — day-letters (א-ו דרך שקע term) + שבת ⇒ א ב ג ד ה ו ש (לא substring שגוי)
+        Row(children: [
+          for (final ltr in [...dayLetters(term: (k) => const {'a': 'א', 'b': 'ב', 'g': 'ג', 'd': 'ד', 'h': 'ה', 'v': 'ו'}[k] ?? k), 'ש'])
+            Expanded(child: Center(child: Text(ltr, style: const TextStyle(color: _mut, fontSize: 12, fontWeight: FontWeight.w700)))),
+        ]),
         const SizedBox(height: 6),
         // רשת 6×7 — pure_date_cell, המצב נגזר (today/event/selected/disabled)
         for (var r = 0; r < 6; r++)
