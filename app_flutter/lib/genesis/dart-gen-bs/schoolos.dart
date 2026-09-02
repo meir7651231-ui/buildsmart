@@ -7,6 +7,7 @@ import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/ds/ds_seam.dart';
 import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
+import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 
@@ -88,20 +89,22 @@ class _Inventory extends StatelessWidget {
     );
   }
 
-  // המקסימום = ההחלטה השלמה מורכבת מ-3 נגזרות-אמת, כל אחת מגולמת באטום-מדף (אפס-ציור-ביד):
-  //  · ימים-עד-ריקון  → StatRow   (בר-דחיפות: קצר=דחוף) + ערך
-  //  · כמות-להזמנה    → StatusChip (יעד − נוכחי, tone=סכנה)
-  //  · מועד-אחרון     → StatusChip (ריקון − זמן-אספקה; tone=סכנה אם היום, אחרת אזהרה)
+  // המקסימום = ההחלטה השלמה, כל נגזרת מגולמת באטום-מדף שמצייר את-עצמו (אפס-ציור-ביד):
+  //  · ההשוואה עצמה  → NeonBars   (שני ברים מנורמלים-יחד: ימים-עד-ריקון מול זמן-אספקה —
+  //                                 הריצה קצרה מהאספקה ⇒ הבר קצר מבר-האספקה, נראה-בעין. זה ה"מול".)
+  //  · כמות-להזמנה   → StatusChip (יעד − נוכחי, tone=סכנה)
+  //  · מועד-אחרון    → StatusChip (ריקון − זמן-אספקה; tone=סכנה אם היום, אחרת אזהרה)
   Widget _row(String name, int cur, int target, double daysLeft, int lead) {
-    final d = daysLeft.round();
     final urgent = daysLeft < lead;
     final qty = (target - cur).clamp(0, target);
     final within = (daysLeft - lead).round();
-    final frac = (daysLeft / (lead * 2)).clamp(0.0, 1.0);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        StatRow(label: name, value: '$d ימים לריקון', fraction: frac),
+        NeonBars(
+          labels: ['$name · ימים-עד-ריקון', 'זמן-אספקה'],
+          values: [daysLeft, lead.toDouble()],
+        ),
         if (urgent)
           Padding(
             padding: const EdgeInsets.only(top: 6, right: 4),
