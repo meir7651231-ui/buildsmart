@@ -12,6 +12,6 @@ class ForgeGlassButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return ClipRRect(borderRadius: BorderRadius.circular(11), child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), child: Container(height: 44, alignment: Alignment.center, padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(color: const Color(0x12FFFFFF), border: Border.all(color: const Color(0x29FFFFFF)), borderRadius: BorderRadius.circular(11), boxShadow: [BoxShadow(color: const Color(0x66000000), offset: const Offset(0, 8), blurRadius: 24, spreadRadius: 0)]), child: Text("Action", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700)))));
+    return ClipRRect(borderRadius: BorderRadius.circular(11), child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), child: Container(height: 44, alignment: Alignment.center, padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(color: const Color(0x12FFFFFF), border: Border.all(color: const Color(0x29FFFFFF)), borderRadius: BorderRadius.circular(11), boxShadow: [BoxShadow(color: const Color(0x66000000), offset: const Offset(0, 8), blurRadius: 36, spreadRadius: 0)]), child: Text("Action", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700)))));
   }
 }

@@ -11,6 +11,6 @@ class ForgeParticleField extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Stack(clipBehavior: Clip.none, children: [Positioned(top: 10, left: 10, child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 6, children: [Container(width: 7, height: 7, decoration: BoxDecoration(color: skin.ok, borderRadius: BorderRadius.circular(50), boxShadow: [BoxShadow(color: skin.ok, offset: const Offset(0, 0), blurRadius: 9, spreadRadius: 0)])), Text("Particles", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 8.5, letterSpacing: 1.36))])), Positioned.fill(child: const SizedBox.shrink())]));
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Stack(clipBehavior: Clip.none, children: [Positioned(top: 10, left: 10, child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 6, children: [Container(width: 7, height: 7, decoration: BoxDecoration(color: skin.ok, borderRadius: BorderRadius.circular(50), boxShadow: [BoxShadow(color: skin.ok, offset: const Offset(0, 0), blurRadius: 13.5, spreadRadius: 0)])), Text("Particles", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 8.5, letterSpacing: 1.36))])), Positioned.fill(child: const SizedBox.shrink())]));
   }
 }
