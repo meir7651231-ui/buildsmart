@@ -10,6 +10,6 @@ class ForgeDotsLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [Container(width: 10, height: 10, decoration: BoxDecoration(color: theme.a, borderRadius: BorderRadius.circular(50))), Container(width: 10, height: 10, decoration: BoxDecoration(color: theme.a, borderRadius: BorderRadius.circular(50))), Container(width: 10, height: 10, decoration: BoxDecoration(color: theme.a, borderRadius: BorderRadius.circular(50)))])]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [Container(width: 10, height: 10, decoration: BoxDecoration(color: theme.a, borderRadius: BorderRadius.circular(999))), Container(width: 10, height: 10, decoration: BoxDecoration(color: theme.a, borderRadius: BorderRadius.circular(999))), Container(width: 10, height: 10, decoration: BoxDecoration(color: theme.a, borderRadius: BorderRadius.circular(999)))])]);
   }
 }

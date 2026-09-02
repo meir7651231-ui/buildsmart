@@ -10,6 +10,6 @@ class ForgeShutterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(width: 52, height: 52, alignment: Alignment.center, decoration: BoxDecoration(border: Border.all(color: theme.aHi, width: 3), borderRadius: BorderRadius.circular(50)), child: Container(width: 37, height: 37, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(50))));
+    return Container(width: 52, height: 52, alignment: Alignment.center, decoration: BoxDecoration(border: Border.all(color: theme.aHi, width: 3), borderRadius: BorderRadius.circular(999)), child: Container(width: 37, height: 37, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999))));
   }
 }
