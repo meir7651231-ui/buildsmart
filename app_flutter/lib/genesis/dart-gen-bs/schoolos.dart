@@ -1,6 +1,7 @@
 // 🏫 SchoolOS — בנייה נקייה מההתחלה לפי THE-WAY (הכרעה-23).
 // כל מסך: מטרה ← פעולות-יסוד ← אטומים-הכי-טובים ← חיווט ← אימות-מול-המטרה.
 // לקחי-הסשן אפויים מהשורה הראשונה: PureScope+פונט-מוטמע · אפס-ציור-ביד · אפס-seed.
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
@@ -81,6 +82,7 @@ class _Home extends StatelessWidget {
         // שער-ליכולות (DsNavTile — פעולת-ניווט)
         DsSection(title: 'כלים', children: [
           DsNavTile(glyph: '🗓️', title: 'לוח שנה', sub: 'לראות מה קרֵב בזמן לפעול', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Calendar()))),
+          DsNavTile(glyph: '🎓', title: 'תלמידים בסיכון', sub: 'לתפוס מי מתחיל ליפול, בזמן להתערב', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Students()))),
         ]),
       ],
     );
@@ -186,6 +188,63 @@ class _CalendarState extends State<_Calendar> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: MediaRow(title: title, subtitle: soon ? 'דחוף — היערך עכשיו' : 'מתקרב', glyph: soon ? '🔴' : '🗓️', trailing: when),
+    );
+  }
+}
+
+// ═══════════ תלמידים · מטרה: "לתפוס תלמיד שמתחיל ליפול (דפוס), בזמן להתערב לפני נשירה" ═══════════
+// פעולות-יסוד: אות פר-תלמיד (חיסורים·ציון·מגמה) → ציון-סיכון (ממוצע-משוקלל=פעולה-קיימת) →
+// דירוג לפי-סיכון → הבלטת-סף → הצעת-פעולה. אין מנוע-סיכון-תלמיד מוכן ⇒ מורכב מפעולות-קיימות (L38).
+class _Students extends StatelessWidget {
+  const _Students();
+  // דאטה-אמת: אות פר-תלמיד — חיסורים(30 יום) · ממוצע · מגמה(מחצית-חדשה−ישנה)
+  static const _students = <Map<String, dynamic>>[
+    {'name': 'רון שמעוני · י\'-1', 'abs': 7, 'grade': 61, 'trend': -8},
+    {'name': 'ליאור אוחיון · ט\'-3', 'abs': 5, 'grade': 68, 'trend': -5},
+    {'name': 'הדר נחום · ח\'-2', 'abs': 4, 'grade': 72, 'trend': -3},
+    {'name': 'מאיה ביטון · י\'-2', 'abs': 2, 'grade': 79, 'trend': 2},
+    {'name': 'איתי דהן · ט\'-1', 'abs': 1, 'grade': 88, 'trend': 4},
+    {'name': 'נועה לוי · י\'-3', 'abs': 0, 'grade': 91, 'trend': 3},
+  ];
+
+  // ציון-סיכון 0–100 = ממוצע-משוקלל של אותות מנורמלים (פעולה-קיימת · חיווט לגיטימי):
+  // חיסורים(40) + פער-ציון-מ-75(40) + מגמה-שלילית(20). ככל שגבוה — קרוב-יותר לנפילה.
+  int _risk(Map<String, dynamic> s) {
+    final absN = math.min(1.0, (s['abs'] as int) / 8) * 40;
+    final gradeN = math.max(0, 75 - (s['grade'] as int)) / 75 * 40;
+    final trendN = (s['trend'] as int) < 0 ? math.min(1.0, -(s['trend'] as int) / 8) * 20 : 0;
+    return (absN + gradeN + trendN).round();
+  }
+
+  String _action(int r) => r >= 70 ? 'ועדת-שילוב + ביקור-בית' : r >= 45 ? 'שיחת-מחנך + יידוע-הורים' : 'מעקב';
+
+  @override
+  Widget build(BuildContext context) {
+    // דירוג לפי-סיכון יורד (הכי-קרוב-לנפילה ראשון) — כדי שהעין תיתפס במי-שדורש-פעולה עכשיו
+    final ranked = [..._students]..sort((a, b) => _risk(b).compareTo(_risk(a)));
+    final atRisk = ranked.where((s) => _risk(s) >= 45).length;
+    return DsScaffold(
+      title: 'תלמידים בסיכון', subtitle: 'מי מתחיל ליפול — מדורג, בזמן להתערב', icon: '🎓',
+      children: [
+        Wrap(spacing: 12, runSpacing: 12, children: [
+          SizedBox(width: 168, child: KpiTile(glyph: '🚨', value: '$atRisk', label: 'דורשי-התערבות')),
+          SizedBox(width: 168, child: KpiTile(glyph: '🎓', value: '${_students.length}', label: 'בכיתה')),
+        ]),
+        const SizedBox(height: 8),
+        DsSection(title: 'מדורג לפי סיכון-נפילה', trailing: DsChip(label: '$atRisk', tone: 2), children: [
+          for (final s in ranked) _riskRow(s['name'] as String, _risk(s), s['abs'] as int, s['grade'] as int, s['trend'] as int),
+        ]),
+      ],
+    );
+  }
+
+  // שורת-תלמיד — MediaRow (אטום); הכותרת=למה-בסיכון, הזנב=ציון. אפס-ציור-ביד.
+  Widget _riskRow(String name, int risk, int abs, int grade, int trend) {
+    final hi = risk >= 70, mid = risk >= 45;
+    final why = '$abs חיסורים · ממוצע $grade · מגמה ${trend >= 0 ? '+' : ''}$trend';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MediaRow(title: '$name · ${_action(risk)}', subtitle: why, glyph: hi ? '🔴' : mid ? '🟠' : '🟢', trailing: 'סיכון $risk'),
     );
   }
 }
