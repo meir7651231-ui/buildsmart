@@ -6,7 +6,8 @@ import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/ds/ds_seam.dart';
 import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
-import '../dart-ui-bs/premium/lists/stat_row.dart';
+import '../dart-ui-bs/premium/dataviz/trend_stat.dart';
+import '../dart-ui-bs/premium/dataviz/sparkline.dart';
 
 const _acc = DsTokens.accent;
 
@@ -78,22 +79,28 @@ class _Inventory extends StatelessWidget {
           SizedBox(width: 190, child: KpiTile(glyph: '📦', value: '${_items.length}', label: 'פריטים')),
         ]),
         const SizedBox(height: 8),
-        DsSection(title: 'ימים-עד-ריקון · הכי-דחוף ראשון', children: [
-          for (final s in ranked) _row(s['name'] as String, _daysLeft(s), s['lead'] as int),
+        DsSection(title: 'מסלול-ריקון · הכי-דחוף ראשון', children: [
+          for (final s in ranked) _row(s['name'] as String, s['cur'] as int, s['rate'] as double, _daysLeft(s), s['lead'] as int),
         ]),
       ],
     );
   }
 
-  Widget _row(String name, double daysLeft, int lead) {
+  // הרכבה מקסימלית (2 אטומי-אמת, כל אחד פעולה שונה):
+  //  · Sparkline(values) → עקומת-הריקון האמיתית עד-אפס (רואים "לאן זה הולך ומתי")
+  //  · TrendStat(value+delta) → ימים-עד-ריקון + מגמת-ירידה (delta=−קצב, חץ אדום↓)
+  Widget _row(String name, int cur, double rate, double daysLeft, int lead) {
     final urgent = daysLeft < lead;
     final d = daysLeft.round();
-    // runway מול-אספקה: בקו-האספקה הבר=0.5; מתחת=לא-יספיק (בר קצר, נראה בעין)
-    final frac = (daysLeft / (lead * 2)).clamp(0.0, 1.0);
-    final label = urgent ? '$name · 🛒 הזמן עכשיו · אספקה ${lead}י' : '$name · אספקה ${lead}י';
+    // תחזית-אמת: מלאי יורד בקצב עד-אפס (לא seed — חישוב מהנתון)
+    final proj = <double>[for (var t = 0; t <= 8; t++) (cur - rate * t).clamp(0.0, cur.toDouble())];
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: StatRow(label: label, value: '$d ימים', fraction: frac),
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+        Expanded(child: TrendStat(value: '$d ימים', delta: -rate, label: urgent ? '$name · 🛒 הזמן · אספקה ${lead}י' : '$name · אספקה ${lead}י')),
+        const SizedBox(width: 12),
+        SizedBox(width: 120, child: Sparkline(values: proj, height: 44)),
+      ]),
     );
   }
 }
