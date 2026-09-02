@@ -45,6 +45,13 @@ import '../dart-ui-bs/live_status_dot.dart';
 import '../dart-ui-bs/count_up.dart';
 import '../dart-ui-bs/waveform_bars.dart';
 import '../dart-ui-bs/chip_cloud.dart';
+import '../dart-ui-bs/pure_date_cell.dart';
+import '../dart-maor/build-month-grid.dart';
+import '../dart-maor/iso-today.dart';
+import '../dart-maor/intel-day-diff.dart';
+import '../dart-maor/date-in-range.dart';
+import '../dart-maor/month-label.dart';
+import '../dart-maor/week-day-names.dart';
 
 const _acc = DsTokens.accent, _card = DsTokens.card, _fill = DsTokens.bg2, _ink = DsTokens.ink, _mut = DsTokens.muted;
 
@@ -102,6 +109,7 @@ class _Home extends StatelessWidget {
               _mod(context, '🚪', 'פורטלים', 'הורה · תלמיד · מורה · מנהל', const _Portals()),
               _mod(context, '🤖', 'אוטומציה', 'workflows · triggers · SLA', const _Automation()),
               _mod(context, '🧠', 'AI ואנליטיקה', 'סיכון · תחזית · שפה-טבעית', const _Analytics()),
+              _mod(context, '🗓️', 'לוח שנה', 'מה קרֵב · בזמן לפעול', const _Calendar()),
             ]),
           ]),
           DsSection(title: 'מבט-על · אנליטיקה', trailing: const DsChip(label: 'חי', tone: 1), children: [
@@ -897,4 +905,126 @@ class _Search extends StatelessWidget {
           ]),
         ],
       );
+}
+
+// ═══════════════════════ 🗓️ לוח-שנה · חיווט פעולות-יסוד (הכרעה-23) ═══════════════════════
+// המטרה: לראות את העתיד בזמן לפעול (לנצח הפתעה). מחווט מפעולות-יסוד אטומיות:
+// iso-today(עוגן) · build-month-grid(מקם) · intel-day-diff/dayDiff(קרבה) · date-in-range(סנן) ·
+// month-label(תווית) · week-day-names(כותרת) · pure_date_cell(תא+מצב). אפס-באנדל, אפס-ציור-ביד.
+class _Calendar extends StatefulWidget {
+  const _Calendar();
+  @override
+  State<_Calendar> createState() => _CalendarState();
+}
+
+class _CalendarState extends State<_Calendar> {
+  int _off = 0;      // הזזת-חלון: חודשים מהיום (פעולת-יסוד "הזז")
+  String? _sel;      // יום נבחר (פעולת-יסוד "בחר")
+
+  // דאטה-אמת (צורת-רשומה עם שדה date) — הזרקת-לוח; הלוגיקה נגזרת ממנה, לא מזויפת
+  static const _events = <Map<String, dynamic>>[
+    {'date': '2026-09-02', 'title': 'אסיפת הורים · י\'-3'},
+    {'date': '2026-09-03', 'title': 'מבחן מיפוי · מתמטיקה'},
+    {'date': '2026-09-05', 'title': 'טיול שכבתי · שכבת ט\''},
+    {'date': '2026-09-10', 'title': 'תרגיל פינוי'},
+    {'date': '2026-09-14', 'title': 'בחינת בגרות · אנגלית'},
+    {'date': '2026-09-18', 'title': 'יום הורים'},
+    {'date': '2026-09-22', 'title': 'טקס פתיחת שנה'},
+    {'date': '2026-09-28', 'title': 'אספת מורים'},
+  ];
+
+  // שקע isoLocal — DateTime→ISO (primitive-שפה = חיווט)
+  String _isoOf(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context) {
+    // #1 עוגן-עכשיו — iso-today (שקע isoLocal=_isoOf)
+    final todayIso = isoToday(_isoOf);
+    final now = DateTime.parse('${todayIso}T12:00:00');
+    final anchorIso = _isoOf(DateTime(now.year, now.month + _off, 15)); // הזזת-חלון
+
+    // #3 מקם-בזמן — build-month-grid (cellOf = שקע שאני מגדיר; hebMode=false)
+    final grid = buildMonthGrid(
+      _events, anchorIso, false,
+      (d, inMonth, heb, byDate) => {
+        'iso': _isoOf(d), 'day': d.day, 'inMonth': inMonth, 'events': byDate[_isoOf(d)] ?? const [],
+      },
+      _isoOf,
+      (iso, d) => const {}, // hpOf — לא-נקרא ב-Gregorian
+      (y) => y,             // gemYear — stub
+      (d) => '${monthLabel('${d.year}-${d.month.toString().padLeft(2, '0')}')}', // fmtMonthYear
+      (d) => '', (d) => '', // fmtHebMonth/Year — stub
+    );
+    final cells = (grid['cells'] as List).cast<Map<String, dynamic>>();
+    final label = '${grid['label']}';
+
+    // ⭐ #2+#4 סנן-לעתיד (date-in-range) + קרבה (dayDiff) = הלב שמנצח הפתעה
+    // dayDiff(today, date) = ימים-עד (חיובי לעתיד); dayDiff(date, today) היה ימים-אחורה (שגוי)
+    final upcoming = _events
+        .where((e) => dateInRange(e['date'] as String, todayIso, null))
+        .toList()
+      ..sort((a, b) => dayDiff(todayIso, a['date'] as String)
+          .compareTo(dayDiff(todayIso, b['date'] as String)));
+
+    return DsScaffold(
+      title: 'לוח שנה', subtitle: 'לראות מה קרֵב — בזמן לפעול', icon: '🗓️',
+      children: [
+        // ⭐ פאנל אנטי-הפתעה: מה קרֵב, מדורג לפי קרבה (dayDiff)
+        DsSection(title: 'מה קרֵב · מדורג לפי קִרבה', trailing: DsChip(label: '${upcoming.length}', tone: 1), children: [
+          if (upcoming.isEmpty) const AlertBanner(message: 'אין אירועים קרובים · השבועיים הבאים פנויים', tone: 1, glyph: '✅'),
+          for (final e in upcoming.take(6))
+            _soon(e['title'] as String, dayDiff(todayIso, e['date'] as String).round()),
+        ]),
+        // ניווט-חודש — DsPrimaryButton (onTap אמיתי; number_stepper נפסל: אין callback)
+        Row(children: [
+          Expanded(child: DsPrimaryButton(label: '‹ קודם', onTap: () => setState(() => _off--))),
+          const SizedBox(width: 10),
+          Expanded(flex: 2, child: Center(child: Text(label, style: const TextStyle(color: _ink, fontSize: 15, fontWeight: FontWeight.w800)))),
+          const SizedBox(width: 10),
+          Expanded(child: DsPrimaryButton(label: 'הבא ›', onTap: () => setState(() => _off++))),
+        ]),
+        const SizedBox(height: 12),
+        // כותרת-ימים — week-day-names (אות ראשונה)
+        Row(children: [for (final n in dayNames) Expanded(child: Center(child: Text(n.substring(0, 1), style: const TextStyle(color: _mut, fontSize: 12, fontWeight: FontWeight.w700))))]),
+        const SizedBox(height: 6),
+        // רשת 6×7 — pure_date_cell, המצב נגזר (today/event/selected/disabled)
+        for (var r = 0; r < 6; r++)
+          Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
+            for (var c = 0; c < 7; c++) _dayCell(cells[r * 7 + c], todayIso),
+          ])),
+      ],
+    );
+  }
+
+  // #5/6 תא-יום — pure_date_cell; #8 בחירה — onTap; המצב נגזר מ-today/events/inMonth/selected
+  Widget _dayCell(Map<String, dynamic> cell, String todayIso) {
+    final iso = cell['iso'] as String;
+    final inMonth = cell['inMonth'] as bool;
+    final hasEv = (cell['events'] as List).isNotEmpty;
+    final state = !inMonth
+        ? PureDateState.disabled
+        : iso == _sel
+            ? PureDateState.selected
+            : iso == todayIso
+                ? PureDateState.today
+                : hasEv
+                    ? PureDateState.event
+                    : PureDateState.normal;
+    return Expanded(child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => setState(() => _sel = iso),
+      child: Center(child: PureDateCell(day: cell['day'] as int, state: state, size: 40)),
+    ));
+  }
+
+  // שורת "מה קרֵב" — MediaRow (אטום), עם "בעוד N ימים" מ-dayDiff. אפס-ציור-ביד.
+  Widget _soon(String title, int days) {
+    final soon = days <= 2;
+    final when = days <= 0 ? 'היום' : days == 1 ? 'מחר' : 'בעוד $days ימים';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MediaRow(title: title, subtitle: soon ? 'דחוף — היערך עכשיו' : 'מתקרב', glyph: soon ? '🔴' : '🗓️', trailing: when),
+    );
+  }
 }
