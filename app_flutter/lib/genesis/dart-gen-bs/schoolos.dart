@@ -6,8 +6,7 @@ import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/ds/ds_seam.dart';
 import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
-import '../dart-ui-bs/premium/dataviz/trend_stat.dart';
-import '../dart-ui-bs/premium/dataviz/sparkline.dart';
+import '../dart-ui-bs/premium/lists/stat_row.dart';
 
 const _acc = DsTokens.accent;
 
@@ -56,13 +55,13 @@ class _Home extends StatelessWidget {
 //  5. דגל-הזמנה                          → פעולה
 class _Inventory extends StatelessWidget {
   const _Inventory();
-  // דאטה-אמת: מלאי · קצב-צריכה-יומי · זמן-אספקה (ימים)
+  // דאטה-אמת: מלאי · יעד-בריא · קצב-צריכה-יומי · זמן-אספקה (ימים)
   static const _items = <Map<String, dynamic>>[
-    {'name': 'טונר מדפסת', 'cur': 3, 'rate': 1.0, 'lead': 4},
-    {'name': 'נייר A4 (חבילות)', 'cur': 8, 'rate': 2.0, 'lead': 5},
-    {'name': 'חומרי ניקוי', 'cur': 40, 'rate': 3.0, 'lead': 7},
-    {'name': 'ערכות מעבדה', 'cur': 6, 'rate': 0.5, 'lead': 10},
-    {'name': 'מקרנים (חלופיים)', 'cur': 22, 'rate': 0.2, 'lead': 14},
+    {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4},
+    {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5},
+    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7},
+    {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10},
+    {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14},
   ];
   static double _daysLeft(Map<String, dynamic> s) => (s['cur'] as int) / (s['rate'] as double);
   static int get urgent => _items.where((s) => _daysLeft(s) < (s['lead'] as int)).length;
@@ -79,27 +78,33 @@ class _Inventory extends StatelessWidget {
           SizedBox(width: 190, child: KpiTile(glyph: '📦', value: '${_items.length}', label: 'פריטים')),
         ]),
         const SizedBox(height: 8),
-        DsSection(title: 'מסלול-ריקון · הכי-דחוף ראשון', children: [
-          for (final s in ranked) _row(s['name'] as String, s['cur'] as int, s['rate'] as double, _daysLeft(s), s['lead'] as int),
+        DsSection(title: 'החלטת-הזמנה · הכי-דחוף ראשון', children: [
+          for (final s in ranked) _row(s['name'] as String, s['cur'] as int, s['target'] as int, _daysLeft(s), s['lead'] as int),
         ]),
       ],
     );
   }
 
-  // הרכבה מקסימלית (2 אטומי-אמת, כל אחד פעולה שונה):
-  //  · Sparkline(values) → עקומת-הריקון האמיתית עד-אפס (רואים "לאן זה הולך ומתי")
-  //  · TrendStat(value+delta) → ימים-עד-ריקון + מגמת-ירידה (delta=−קצב, חץ אדום↓)
-  Widget _row(String name, int cur, double rate, double daysLeft, int lead) {
-    final urgent = daysLeft < lead;
+  // המקסימום = ההחלטה השלמה (3 נגזרות-אמת, אפס-זיוף):
+  //  · ימים-עד-ריקון  → StatRow (בר-דחיפות: קצר=דחוף) + ערך
+  //  · כמות-להזמנה    → יעד − נוכחי
+  //  · מועד-אחרון     → ריקון − זמן-אספקה (הזמן עד אז או תאזל בזמן-האספקה)
+  Widget _row(String name, int cur, int target, double daysLeft, int lead) {
     final d = daysLeft.round();
-    // תחזית-אמת: מלאי יורד בקצב עד-אפס (לא seed — חישוב מהנתון)
-    final proj = <double>[for (var t = 0; t <= 8; t++) (cur - rate * t).clamp(0.0, cur.toDouble())];
+    final urgent = daysLeft < lead;
+    final qty = (target - cur).clamp(0, target);
+    final within = (daysLeft - lead).round();
+    final frac = (daysLeft / (lead * 2)).clamp(0.0, 1.0);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Expanded(child: TrendStat(value: '$d ימים', delta: -rate, label: urgent ? '$name · 🛒 הזמן · אספקה ${lead}י' : '$name · אספקה ${lead}י')),
-        const SizedBox(width: 12),
-        SizedBox(width: 120, child: Sparkline(values: proj, height: 44)),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        StatRow(label: urgent ? '$name · 🔴' : name, value: '$d ימים לריקון', fraction: frac),
+        if (urgent)
+          Padding(
+            padding: const EdgeInsets.only(top: 3, right: 4),
+            child: Text('🛒 הזמן $qty יח׳ · ${within <= 0 ? 'הזמן היום' : 'תוך $within ימים'}',
+                style: const TextStyle(color: _acc, fontSize: 12.5, fontWeight: FontWeight.w700)),
+          ),
       ]),
     );
   }
