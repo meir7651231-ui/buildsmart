@@ -86,6 +86,8 @@ class _Home extends StatelessWidget {
           DsNavTile(glyph: '💰', title: 'גבייה', sub: 'מי חייב וכמה — לגבות בזמן, בלי לרדוף', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Finance()))),
           DsNavTile(glyph: '💬', title: 'תקשורת', sub: 'מי לא-קרא הודעה חשובה — לתזכר', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Comm()))),
           DsNavTile(glyph: '🚨', title: 'בטיחות', sub: 'איזה פרוטוקול פג — לטפל לפני שיישמט', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Safety()))),
+          DsNavTile(glyph: '✔️', title: 'אישורים', sub: 'מה ממתין-לי — כמה זמן, מה השלב', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Approvals()))),
+          DsNavTile(glyph: '📦', title: 'מלאי', sub: 'מה אזל/קרוב-לאזול — להזמין בזמן', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Inventory()))),
         ]),
       ],
     );
@@ -399,6 +401,93 @@ class _Safety extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: MediaRow(title: '$title · $act', subtitle: when, glyph: lapsed ? '🔴' : toDue <= 5 ? '🟠' : '🟢', trailing: lapsed ? 'פג' : 'תקין'),
+    );
+  }
+}
+
+// ═══════════ אישורים · מטרה: "שאף בקשה לא תיתקע — מה ממתין-לי, כמה זמן, מה השלב הבא" ═══════════
+// פעולות-יסוד: בקשות פתוחות · זמן-המתנה (dayDiff מיום-ההגשה) · דירוג (חורג-SLA/ותיק ראשון) · פעולה=אשר/דחה.
+class _Approvals extends StatelessWidget {
+  const _Approvals();
+  static const _reqs = <Map<String, dynamic>>[
+    {'title': 'בקשת חופשה · רונית ג.', 'stage': 'ממתין למנהל', 'since': '2026-08-26', 'sla': 3},
+    {'title': 'החלפת שיעור · דוד מ.', 'stage': 'ממתין לרכז', 'since': '2026-08-31', 'sla': 2},
+    {'title': 'אישור טיול · ח\'-2', 'stage': 'ממתין למנהל', 'since': '2026-08-29', 'sla': 5},
+    {'title': 'הנחת שכ"ל · משפ\' ביטון', 'stage': 'ממתין לחשב', 'since': '2026-09-01', 'sla': 4},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final todayIso = isoToday(_isoOf);
+    int waited(Map<String, dynamic> r) => dayDiff(r['since'] as String, todayIso).round(); // ימים-ממתין
+    // דירוג: חורג-SLA ראשון, ואז הוותיק-ביותר — שלא ייתקע
+    final ranked = [..._reqs]..sort((a, b) {
+        final ba = (waited(b) > (b['sla'] as int) ? 1 : 0).compareTo(waited(a) > (a['sla'] as int) ? 1 : 0);
+        return ba != 0 ? ba : waited(b).compareTo(waited(a));
+      });
+    final breached = ranked.where((r) => waited(r) > (r['sla'] as int)).length;
+    return DsScaffold(
+      title: 'אישורים', subtitle: 'מה ממתין-לי — מדורג, שלא ייתקע', icon: '✔️',
+      children: [
+        Wrap(spacing: 12, runSpacing: 12, children: [
+          SizedBox(width: 178, child: KpiTile(glyph: '⏳', value: '${_reqs.length}', label: 'ממתינות')),
+          SizedBox(width: 178, child: KpiTile(glyph: '🚨', value: '$breached', label: 'חורגות SLA')),
+        ]),
+        const SizedBox(height: 8),
+        DsSection(title: 'מדורג לפי המתנה · אשר/דחה', trailing: DsChip(label: '$breached', tone: 2), children: [
+          for (final r in ranked) _reqRow(r['title'] as String, r['stage'] as String, waited(r), r['sla'] as int),
+        ]),
+      ],
+    );
+  }
+
+  Widget _reqRow(String title, String stage, int waited, int sla) {
+    final breach = waited > sla;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MediaRow(title: '$title · ✔️ אשר', subtitle: '$stage · ממתין $waited ימים (SLA $sla)', glyph: breach ? '🔴' : '🟠', trailing: breach ? 'חורג' : 'בזמן'),
+    );
+  }
+}
+
+// ═══════════ מלאי · מטרה: "שאף פריט קריטי לא ייגמר/יישבר בלי שנדע — מה אזל, להזמין בזמן" ═══════════
+// פעולות-יסוד: פריט עם מלאי-נוכחי מול סף-מינימום · חוסר=min−cur · דירוג (הכי-חסר ראשון) · פעולה=הזמנה.
+class _Inventory extends StatelessWidget {
+  const _Inventory();
+  static const _items = <Map<String, dynamic>>[
+    {'name': 'ערכות מעבדה', 'cur': 6, 'min': 40},
+    {'name': 'מחשבים ניידים', 'cur': 86, 'min': 100},
+    {'name': 'מקרנים', 'cur': 22, 'min': 30},
+    {'name': 'ציוד ספורט', 'cur': 58, 'min': 60},
+    {'name': 'נייר A4 (חבילות)', 'cur': 4, 'min': 25},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    // חוסר = min − cur (חיובי=חסר); דירוג לפי-חוסר-יורד (הכי-חסר ראשון)
+    int gap(Map<String, dynamic> s) => (s['min'] as int) - (s['cur'] as int);
+    final ranked = [..._items]..sort((a, b) => gap(b).compareTo(gap(a)));
+    final low = ranked.where((s) => gap(s) > 0).length;
+    return DsScaffold(
+      title: 'מלאי', subtitle: 'מה אזל/קרוב — מדורג, להזמין בזמן', icon: '📦',
+      children: [
+        Wrap(spacing: 12, runSpacing: 12, children: [
+          SizedBox(width: 178, child: KpiTile(glyph: '📦', value: '${_items.length}', label: 'פריטים')),
+          SizedBox(width: 178, child: KpiTile(glyph: '⚠️', value: '$low', label: 'מתחת לסף')),
+        ]),
+        const SizedBox(height: 8),
+        DsSection(title: 'מדורג לפי חוסר · הזמנה', trailing: DsChip(label: '$low', tone: 2), children: [
+          for (final s in ranked) _itemRow(s['name'] as String, s['cur'] as int, s['min'] as int, gap(s)),
+        ]),
+      ],
+    );
+  }
+
+  Widget _itemRow(String name, int cur, int min, int gap) {
+    final low = gap > 0;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MediaRow(title: low ? '$name · 🛒 הזמנה' : name, subtitle: 'במלאי $cur · סף $min${low ? ' · חסר $gap' : ''}', glyph: gap > 15 ? '🔴' : low ? '🟠' : '🟢', trailing: '$cur/$min'),
     );
   }
 }
