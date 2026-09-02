@@ -11,6 +11,6 @@ class ForgeMiniQtyBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("−", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Container(constraints: const BoxConstraints(minWidth: 40), child: Text("3", textAlign: TextAlign.center, style: TextStyle(color: skin.ink, fontFamily: fonts.grotesk, fontSize: 12, fontWeight: FontWeight.w600))), Text("+", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]));
+    return Container(decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [Container(width: 38, height: 44, child: Text("−", style: TextStyle(color: skin.ink, fontSize: 17, fontFamily: fonts.he))), Container(constraints: const BoxConstraints(minWidth: 40), child: Text("3", textAlign: TextAlign.center, style: TextStyle(color: skin.ink, fontFamily: fonts.grotesk, fontSize: 12, fontWeight: FontWeight.w600))), Container(width: 38, height: 44, child: Text("+", style: TextStyle(color: skin.ink, fontSize: 17, fontFamily: fonts.he)))]));
   }
 }

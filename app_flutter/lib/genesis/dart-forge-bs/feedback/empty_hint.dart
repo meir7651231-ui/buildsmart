@@ -4,24 +4,58 @@
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
-class _SvgPaint extends CustomPainter {
-  final String d; final Color color; final double sw; final bool filled; final double vb;
-  const _SvgPaint(this.d, this.color, this.sw, this.filled, this.vb);
-  @override
-  void paint(Canvas canvas, Size size) {
-    Path raw;
-    try { raw = _parse(d); } catch (_) { return; }   // path פגום ⇒ ריקון-רך, לא זריקה
-    final m = Matrix4.identity()..scale(size.width / vb, size.height / vb);
-    final p = raw.transform(m.storage);
-    canvas.drawPath(p, Paint()
-      ..color = color
-      ..style = filled ? PaintingStyle.fill : PaintingStyle.stroke
-      ..strokeWidth = sw
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round);
+// ignore_for_file: unused_element
+class _Op {
+  final int k;            // 0 rect · 1 circle · 2 line · 3 path · 4 text · 5 arc
+  final List<double> a; final Color c; final bool f; final double sw; final String d;
+  final List<Color>? g; final List<double>? gs; final List<double>? gv;  // גרדיאנט: צבעים · עצירות · וקטור-שבר
+  final int anchor;       // עוגן-טקסט: 0 start · 1 middle · 2 end
+  _Op(this.k, this.a, this.c, this.f, this.sw, this.d, {this.g, this.gs, this.gv, this.anchor = 0, this.font = ''});
+  static _Op rect(double x, double y, double w, double h, double r, Color c, bool f, double sw, {List<Color>? g, List<double>? gs, List<double>? gv}) => _Op(0, [x, y, w, h, r], c, f, sw, '', g: g, gs: gs, gv: gv);
+  static _Op circle(double x, double y, double r, Color c, bool f, double sw) => _Op(1, [x, y, r], c, f, sw, '');
+  static _Op line(double x1, double y1, double x2, double y2, Color c, double sw) => _Op(2, [x1, y1, x2, y2], c, false, sw, '');
+  static _Op path(String d, Color c, bool f, double sw, {List<Color>? g, List<double>? gs, List<double>? gv}) => _Op(3, const [], c, f, sw, d, g: g, gs: gs, gv: gv);
+  final String font;
+  static _Op text(String s, double x, double y, double size, Color c, int anchor, String font) => _Op(4, [x, y, size], c, true, 0, s, anchor: anchor, font: font);
+  static _Op arc(double cx, double cy, double r, double start, double sweep, Color c, double sw, {List<Color>? g, List<double>? gs, List<double>? gv}) => _Op(5, [cx, cy, r, start, sweep], c, false, sw, '', g: g, gs: gs, gv: gv);
+}
+class _SvgScene extends CustomPainter {
+  final List<_Op> ops; final double vbw, vbh;
+  const _SvgScene(this.ops, this.vbw, this.vbh);
+  Alignment _al(double fx, double fy) => Alignment(fx * 2 - 1, fy * 2 - 1);
+  Path? _safe(String d) { try { return _parse(d); } catch (_) { return null; } }
+  void _paintText(Canvas cv, _Op o) {
+    final tp = TextPainter(text: TextSpan(text: o.d, style: TextStyle(color: o.c, fontSize: o.a[2], fontFamily: o.font.isEmpty ? null : o.font, fontWeight: FontWeight.w600, fontFeatures: const [FontFeature.tabularFigures()])), textDirection: TextDirection.ltr)..layout();
+    double dx = o.a[0]; if (o.anchor == 1) dx -= tp.width / 2; else if (o.anchor == 2) dx -= tp.width;
+    tp.paint(cv, Offset(dx, o.a[1] - tp.height * 0.82));
   }
   @override
-  bool shouldRepaint(_SvgPaint o) => o.d != d || o.color != color || o.sw != sw || o.filled != filled;
+  void paint(Canvas cv, Size s) {
+    if (vbw <= 0 || vbh <= 0) return;
+    cv.save(); cv.scale(s.width / vbw, s.height / vbh);
+    for (final o in ops) {
+      if (o.k == 4) { _paintText(cv, o); continue; }
+      final p = Paint()..style = o.f ? PaintingStyle.fill : PaintingStyle.stroke..strokeWidth = o.sw..strokeCap = StrokeCap.round..strokeJoin = StrokeJoin.round;
+      Rect b = Rect.zero; Path? pa;
+      switch (o.k) {
+        case 0: b = Rect.fromLTWH(o.a[0], o.a[1], o.a[2], o.a[3]); break;
+        case 5: b = Rect.fromCircle(center: Offset(o.a[0], o.a[1]), radius: o.a[2]); break;
+        case 3: pa = _safe(o.d); if (pa != null) b = pa.getBounds(); break;
+      }
+      if (o.g != null && o.g!.isNotEmpty) { final v = o.gv ?? const [0, 0, 0, 1]; p.shader = LinearGradient(begin: _al(v[0], v[1]), end: _al(v[2], v[3]), colors: o.g!, stops: o.gs).createShader(b.isEmpty ? const Rect.fromLTWH(0, 0, 1, 1) : b); }
+      else { p.color = o.c; }
+      switch (o.k) {
+        case 0: cv.drawRRect(RRect.fromRectAndRadius(b, Radius.circular(o.a[4])), p); break;
+        case 1: cv.drawCircle(Offset(o.a[0], o.a[1]), o.a[2], p); break;
+        case 2: cv.drawLine(Offset(o.a[0], o.a[1]), Offset(o.a[2], o.a[3]), p); break;
+        case 3: if (pa != null) cv.drawPath(pa, p); break;
+        case 5: cv.drawArc(Rect.fromCircle(center: Offset(o.a[0], o.a[1]), radius: o.a[2]), o.a[3], o.a[4], false, p); break;
+      }
+    }
+    cv.restore();
+  }
+  @override
+  bool shouldRepaint(_SvgScene o) => true;
 }
 Path _parse(String d) {
   final path = Path();
@@ -53,8 +87,7 @@ class ForgeEmptyHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [CustomPaint(size: const Size(15, 15), painter: _SvgPaint("M 3 12 a 9 9 0 1 0 18 0 a 9 9 0 1 0 -18 0 M12 8v.01M11 12h1v4h1", theme.aHi, 1.8, false, 24)), Text("Label · hint", style: TextStyle(color: skin.mut, fontFamily: fonts.he))]), Container(margin: const EdgeInsets.fromLTRB(0, 2, 0, 0), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("EmptyHint", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Container(padding: const EdgeInsets.fromLTRB(5, 1, 5, 1), decoration: BoxDecoration(border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text("FIELDS", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 7.5, fontWeight: FontWeight.w600, letterSpacing: 1)))]))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [SizedBox(width: 15, height: 15, child: CustomPaint(painter: _SvgScene([_Op.circle(12, 12, 9, skin.mut, false, 1.8), _Op.path("M12 8v.01M11 12h1v4h1", skin.mut, false, 1.8)], 24, 24))), Text("Label · hint", style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he))]), Container(margin: const EdgeInsets.fromLTRB(0, 2, 0, 0), child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("EmptyHint", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Container(padding: const EdgeInsets.fromLTRB(5, 1, 5, 1), decoration: BoxDecoration(border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text("FIELDS", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 7.5, fontWeight: FontWeight.w600, letterSpacing: 1)))]))]);
   }
 }
