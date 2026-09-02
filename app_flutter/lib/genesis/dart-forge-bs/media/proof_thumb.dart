@@ -88,6 +88,6 @@ class ForgeProofThumb extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.a.withValues(alpha: 0.12), skin.sunken], stops: [0.0, 1.0]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: AspectRatio(aspectRatio: 1.0000, child: CustomPaint(painter: _SvgScene([_Op.path("M12 3l7 4v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7z", skin.ink, false, 1.8), _Op.path("M9.5 12l1.8 1.8L15 10", skin.ink, false, 1.8)], 24, 24))));
+    return Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.a.withValues(alpha: 0.12), skin.sunken], stops: [0.0, 1.0]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: AspectRatio(aspectRatio: 1.0000, child: CustomPaint(painter: _SvgScene([_Op.path("M12 3l7 4v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7z", skin.ink, false, 1.8), _Op.path("M9.5 12l1.8 1.8L15 10", skin.ink, false, 1.8)], 24, 24)))));
   }
 }
