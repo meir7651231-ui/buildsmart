@@ -11,6 +11,6 @@ class ForgeSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(24, 22, 24, 22), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Text("SECTION · LABEL", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 2)));
+    return Container(padding: const EdgeInsets.fromLTRB(24, 22, 24, 22), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Directionality(textDirection: TextDirection.ltr, child: Text("SECTION · LABEL", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 2))));
   }
 }
