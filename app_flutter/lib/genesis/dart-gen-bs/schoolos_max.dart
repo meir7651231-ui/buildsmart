@@ -34,13 +34,23 @@ import '../dart-ui-bs/premium/dataviz/trend_stat.dart';
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
 import '../dart-ui-bs/premium/feedback/rating_stars.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
+import '../dart-ui-bs/premium/surfaces/hero_header.dart';
+import '../dart-ui-bs/premium/surfaces/feature_panel.dart';
+import '../dart-ui-bs/premium/lists/media_row.dart';
+import '../dart-ui-bs/icon_grid.dart';
+import '../dart-ui-bs/accordion_panel.dart';
+import '../dart-ui-bs/breadcrumb_trail.dart';
+import '../dart-ui-bs/live_status_dot.dart';
+import '../dart-ui-bs/count_up.dart';
+import '../dart-ui-bs/waveform_bars.dart';
+import '../dart-ui-bs/chip_cloud.dart';
 
 const _acc = DsTokens.accent, _card = DsTokens.card, _fill = DsTokens.bg2, _ink = DsTokens.ink, _mut = DsTokens.muted;
 
-void main() => runApp(const SchoolOsMaxApp());
+void main() => runApp(const SchoolOsOmniApp());
 
-class SchoolOsMaxApp extends StatelessWidget {
-  const SchoolOsMaxApp({super.key});
+class SchoolOsOmniApp extends StatelessWidget {
+  const SchoolOsOmniApp({super.key});
   @override
   Widget build(BuildContext context) => MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -51,27 +61,48 @@ class SchoolOsMaxApp extends StatelessWidget {
 }
 
 void _go(BuildContext c, Widget s) => Navigator.push(c, MaterialPageRoute(builder: (_) => s));
+Widget _tap(BuildContext c, Widget screen, Widget child) => GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(c, screen), child: AbsorbPointer(child: child));
 Widget _bar(String v) => BarChart(height: 120, bars: 7, radius: 14, accentColor: _acc, baseColor: _card, fillColor: _fill, seed: v.hashCode);
 Widget _wrap(List<Widget> kids, {double gap = 12}) => Wrap(spacing: gap, runSpacing: gap, children: kids);
 Widget _kpi(String glyph, String value, String label) => SizedBox(width: 168, child: KpiTile(glyph: glyph, value: value, label: label));
 
-// ═══════════════════════ בית · דשבורד-על ═══════════════════════
+// ═══════════════════════ בית · המוח הדיגיטלי (SchoolOS Omni) ═══════════════════════
 class _Home extends StatelessWidget {
   const _Home();
   @override
   Widget build(BuildContext context) => DsScaffold(
-        title: 'SchoolOS Max', subtitle: 'תיכון עתיד · שנה"ל תשפ"ו', icon: '🏫',
+        title: 'SchoolOS Omni', subtitle: 'המוח הדיגיטלי של בית-הספר · תיכון עתיד · תשפ"ו', icon: '🧠',
         children: [
-          // רצועת-KPI ראשית
+          const HeroHeader(title: 'SchoolOS Omni', subtitle: 'SIS · LMS · ERP · HR · Safety · Ops · Analytics · Automation · AI — מוסד אחד, מוח אחד', glyph: '🧠'),
+          const SizedBox(height: 14),
+          // חיפוש-אוניברסלי + פקודות-טבעיות
+          _tap(context, const _Search(), SearchField(hint: 'חיפוש אוניברסלי · או פקודה טבעית — "הראה לי את כל תלמידי ז\' בסיכון"', height: 52, radius: 16, accentColor: _acc, baseColor: _card, fillColor: _fill)),
+          const SizedBox(height: 8),
+          ChipCloud(labels: const ['תלמידי ז\' בסיכון', 'מורים עמוסים', 'הורים שלא פתחו', 'חובות פתוחים', 'אירועי היום'], height: 48, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          const SizedBox(height: 14),
+          // רצועת-KPI מגה
           _wrap([
             _kpi('🎓', '1,248', 'תלמידים'),
             _kpi('✅', '96.4%', 'נוכחות היום'),
             _kpi('💰', '₪2.41M', 'גבייה שנתית'),
-            _kpi('👩‍🏫', '84', 'סגל הוראה'),
-            _kpi('🚨', '7', 'התראות פתוחות'),
-            _kpi('📚', '312', 'שיעורים השבוע'),
+            _kpi('👩‍🏫', '84', 'סגל'),
+            _kpi('🧩', '22', 'ישויות'),
+            _kpi('⚙️', '5', 'מנועים חיים'),
+            _kpi('🚨', '7', 'התראות'),
+            _kpi('📚', '312', 'שיעורים'),
           ]),
           const SizedBox(height: 8),
+          // שכבות מערכת-ההפעלה
+          DsSection(title: 'שכבות מערכת-ההפעלה', trailing: const DsChip(label: 'OS', tone: 1), children: [
+            _wrap([
+              _mod(context, '🛰️', 'מרכז פיקוד', 'מפה חיה · חירום · what-if', const _CommandCenter()),
+              _mod(context, '🧩', 'מרשם ישויות', '22 סוגי-ישות · תיק 360°', const _Registry()),
+              _mod(context, '⚙️', 'מנועי-הליבה', 'Rules · Workflow · Event', const _Engines()),
+              _mod(context, '🚪', 'פורטלים', 'הורה · תלמיד · מורה · מנהל', const _Portals()),
+              _mod(context, '🤖', 'אוטומציה', 'workflows · triggers · SLA', const _Automation()),
+              _mod(context, '🧠', 'AI ואנליטיקה', 'סיכון · תחזית · שפה-טבעית', const _Analytics()),
+            ]),
+          ]),
           DsSection(title: 'מבט-על · אנליטיקה', trailing: const DsChip(label: 'חי', tone: 1), children: [
             _wrap([
               _panel('נוכחות שבועית', _bar('att'), 320),
@@ -660,6 +691,204 @@ class _Integrations extends StatelessWidget {
           DsSection(title: 'סטטוס מערכת', children: const [
             StatRow(label: 'זמינות (uptime)', value: '99.97%', fraction: 0.9997),
             StatRow(label: 'סנכרון אופליין', value: 'תקין', fraction: 1.0),
+          ]),
+        ],
+      );
+}
+
+// ═══════════════════════ 🛰️ מרכז פיקוד ובקרה · Command Center ═══════════════════════
+class _CommandCenter extends StatelessWidget {
+  const _CommandCenter();
+  @override
+  Widget build(BuildContext context) => DsScaffold(
+        title: 'מרכז פיקוד ובקרה', subtitle: 'תמונת-מוסד חיה · חירום · סימולציות what-if', icon: '🛰️',
+        children: [
+          const AlertBanner(message: 'מצב תקין · אין אירועי חירום פעילים · 1,248 נוכחים במתחם', tone: 1, glyph: '🟢'),
+          const SizedBox(height: 12),
+          _wrap([
+            const SizedBox(width: 200, child: CountUp(label: 'במתחם עכשיו', height: 96, target: 1332, radius: 16, accentColor: _acc, baseColor: _card, fillColor: _fill)),
+            const SizedBox(width: 200, child: CountUp(label: 'כיתות פעילות', height: 96, target: 42, radius: 16, accentColor: _acc, baseColor: _card, fillColor: _fill)),
+            const SizedBox(width: 200, child: CountUp(label: 'אירועים פתוחים', height: 96, target: 7, radius: 16, accentColor: _acc, baseColor: _card, fillColor: _fill)),
+          ]),
+          const SizedBox(height: 8),
+          _panel('מפת-מוסד חיה · אגפים וחדרים', IconGrid(height: 220, cells: 48, radius: 16, accentColor: _acc, baseColor: _card, fillColor: _fill), double.infinity),
+          const SizedBox(height: 12),
+          _panel('דופק-אירועים · זרם בזמן-אמת', WaveformBars(height: 90, bars: 40, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill), double.infinity),
+          const SizedBox(height: 12),
+          DsSection(title: 'סימולציית What-If', children: [
+            SegPicker(labels: const ['מורה נעדר', 'כיתה נסגרת', 'מחסור תקציבי', 'שינוי מסלול'], height: 46, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+            const SizedBox(height: 12),
+            const StatRow(label: 'השפעה על מערכת-שעות', value: '6 שיעורים', fraction: 0.28),
+            const StatRow(label: 'תלמידים מושפעים', value: '184', fraction: 0.15),
+            const StatRow(label: 'עלות כיסוי חלופי', value: '₪4,200', fraction: 0.42),
+            const SizedBox(height: 8),
+            const DsPrimaryButton(label: 'הרץ סימולציה ותכנן-מחדש'),
+          ]),
+          DsSection(title: 'אירועים גדולים · תכנון', children: const [
+            MediaRow(title: 'טקס פתיחת שנה', subtitle: 'מחר · אולם ראשי · 1,200 משתתפים', glyph: '🎤', trailing: 'מוכן'),
+            SizedBox(height: 8),
+            MediaRow(title: 'בחינות בגרות', subtitle: '18/09 · 6 חדרים · 240 נבחנים', glyph: '📝', trailing: 'בהכנה'),
+            SizedBox(height: 8),
+            MediaRow(title: 'תרגיל פינוי', subtitle: 'ה\' 10:00 · כל המתחם', glyph: '🚨', trailing: 'מתוזמן'),
+          ]),
+        ],
+      );
+}
+
+// ═══════════════════════ 🧩 מרשם-ישויות · Identity Registry ═══════════════════════
+class _Registry extends StatelessWidget {
+  const _Registry();
+  static const _entities = [
+    ['🎓', 'תלמידים', '1,248'], ['👨‍👩‍👧', 'הורים', '1,910'], ['🧑‍⚖️', 'אפוטרופסים', '86'],
+    ['👶', 'אחים', '742'], ['👩‍🏫', 'מורים', '71'], ['🧑‍🏫', 'מחנכים', '42'],
+    ['🎯', 'רכזים', '9'], ['💬', 'יועצות', '4'], ['🧑‍💼', 'מנהלה', '13'],
+    ['🧮', 'חשב', '2'], ['🔧', 'אב-בית', '3'], ['🛡️', 'שומרים', '5'],
+    ['🚌', 'נהגים', '9'], ['📖', 'ספרנים', '2'], ['🏥', 'אחיות', '2'],
+    ['🧠', 'יועצים חיצוניים', '6'], ['📦', 'ספקים', '31'], ['🙌', 'מתנדבים', '48'],
+    ['🎓', 'בוגרים', '2,180'], ['🏫', 'סניפים', '3'], ['🧑‍🎓', 'מועמדים', '48'], ['👥', 'משתמשים', '142'],
+  ];
+  @override
+  Widget build(BuildContext context) => DsScaffold(
+        title: 'מרשם-ישויות', subtitle: '22 סוגי-ישות · לכל אחת תיק · יחסים · אירועים · הרשאות · חתימות', icon: '🧩',
+        children: [
+          SearchField(hint: 'חיפוש ישות · שם · ת"ז · תפקיד', height: 48, radius: 14, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          const SizedBox(height: 12),
+          DsSection(title: 'סוגי-ישות במערכת', children: [
+            _wrap([
+              for (final e in _entities)
+                SizedBox(width: 250, child: DsNavTile(glyph: e[0], title: e[1], sub: '${e[2]} רשומות · תיק 360°', onTap: () => _go(context, _Entity360(e[1], e[0])))),
+            ]),
+          ]),
+        ],
+      );
+}
+
+// ═══════════════════════ תיק-ישות 360° · Entity File ═══════════════════════
+class _Entity360 extends StatelessWidget {
+  final String kind, glyph;
+  const _Entity360(this.kind, this.glyph);
+  @override
+  Widget build(BuildContext context) => DsScaffold(
+        title: 'תיק 360° · $kind', subtitle: 'רשומה מאוחדת · כל היחסים וההיסטוריה', icon: glyph,
+        children: [
+          BreadcrumbTrail(labels: const ['מרשם', 'ישות', 'תיק 360°'], height: 40, radius: 10, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          const SizedBox(height: 10),
+          const AvatarTile(initials: 'נל', title: 'נועה לוי · כיתה י\'-3', subtitle: 'ת"ז 328845112 · פעיל · נכנס 2019'),
+          const SizedBox(height: 12),
+          AnimatedTabs(labels: const ['תיק', 'יחסים', 'אירועים', 'מסמכים', 'הרשאות', 'לוגים'], height: 44, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          const SizedBox(height: 12),
+          DsSection(title: 'יחסים', children: [
+            ChipCloud(labels: const ['אב · דוד לוי', 'אם · רותי לוי', 'אח · איתי (ח\'-2)', 'מחנך · דוד מ.', 'יועצת · שרה מ.', 'הסעה · קו 2'], height: 88, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          ]),
+          DsSection(title: 'היסטוריית אירועים', children: const [
+            TimelineItem(title: 'ציון מבחן · מתמטיקה · 92', time: 'היום 10:14', body: 'הוזן ע"י רונית כהן'),
+            TimelineItem(title: 'תשלום שכ"ל · ₪1,250', time: 'אתמול', body: 'קבלה R-4821'),
+            TimelineItem(title: 'שיחת מחנך · חיובית', time: '28/08', body: 'מעורבות עולה'),
+            TimelineItem(title: 'שובצה לחוג רובוטיקה', time: '01/09'),
+          ]),
+          DsSection(title: 'מסמכים וחתימות', children: const [
+            MediaRow(title: 'טופס בריאות תשפ"ו', subtitle: 'חתום · 01/09', glyph: '📄', trailing: 'חתום'),
+            SizedBox(height: 8),
+            MediaRow(title: 'הסכמת מדיה', subtitle: 'ממתין לחתימת הורה', glyph: '✍️', trailing: 'ממתין'),
+          ]),
+        ],
+      );
+}
+
+// ═══════════════════════ ⚙️ מנועי-הליבה · Core Engines ═══════════════════════
+class _Engines extends StatelessWidget {
+  const _Engines();
+  @override
+  Widget build(BuildContext context) => DsScaffold(
+        title: 'מנועי-הליבה', subtitle: 'Registry · Workflow · Rules · Event · Notification', icon: '⚙️',
+        children: [
+          DsSection(title: 'סטטוס מנועים · בזמן-אמת', children: [
+            LiveStatusDot(label: 'Registry Engine · 1,332 ישויות', height: 52, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+            LiveStatusDot(label: 'Workflow Engine · 38 תהליכים פעילים', height: 52, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+            LiveStatusDot(label: 'Rules Engine · 214 חוקים', height: 52, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+            LiveStatusDot(label: 'Event Engine · 4,120 אירועים/יום', height: 52, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+            LiveStatusDot(label: 'Notification Engine · 5 ערוצים', height: 52, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          ]),
+          const SizedBox(height: 4),
+          const FeaturePanel(title: 'Rules Engine', body: 'חוקי מוסד · מדינה · מגזר · שבת · כשרות · בגרויות · משמעת · תקציב · הרשאות — נאכפים על כל פעולה', glyph: '📜'),
+          const SizedBox(height: 10),
+          const FeaturePanel(title: 'Event Engine', body: 'כל אירוע בזמן-אמת: נוכחות · תשלום · שינוי-כיתה · שיחה · משימה · חריגה · חירום', glyph: '⚡'),
+          const SizedBox(height: 12),
+          DsSection(title: 'ערוצי-התראה', children: [
+            ChipCloud(labels: const ['SMS', 'WhatsApp', 'אימייל', 'Push', 'קול', 'In-App'], height: 48, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          ]),
+        ],
+      );
+}
+
+// ═══════════════════════ 🚪 פורטלים · Role Portals ═══════════════════════
+class _Portals extends StatelessWidget {
+  const _Portals();
+  static const _p = [
+    ['👨‍👩‍👧', 'פורטל הורה', 'נוכחות · ציונים · תשלומים · אישורים · שיחות'],
+    ['🧑‍🎓', 'פורטל תלמיד', 'משימות · שיעורים · ציונים · לוח · יעדים'],
+    ['👩‍🏫', 'פורטל מורה', 'כיתה · תוכן · נוכחות · ציונים · המלצות-AI'],
+    ['🧑‍💼', 'פורטל מנהל', 'תמונת-מצב · חריגות · KPI · תקציב · סיכונים'],
+    ['🏥', 'פורטל אחות', 'ביקורים · חיסונים · רגישויות · תרופות'],
+    ['🔧', 'פורטל תחזוקה', 'קריאות-שירות · בדיקות · מלאי · ציוד'],
+    ['🛡️', 'פורטל אבטחה', 'בקרת-כניסה · אורחים · מצלמות · חירום'],
+  ];
+  @override
+  Widget build(BuildContext context) => DsScaffold(
+        title: 'פורטלים ייעודיים', subtitle: 'ממשק מותאם לכל תפקיד · פחות קליקים, יותר פעולה', icon: '🚪',
+        children: [
+          DsSection(title: 'פורטלים פעילים', children: [
+            for (final p in _p) FeaturePanel(title: p[1], body: p[2], glyph: p[0]),
+          ].expand((w) => [w, const SizedBox(height: 10)]).toList()),
+        ],
+      );
+}
+
+// ═══════════════════════ 🤖 אוטומציה · Automation OS ═══════════════════════
+class _Automation extends StatelessWidget {
+  const _Automation();
+  @override
+  Widget build(BuildContext context) => DsScaffold(
+        title: 'אוטומציה · Automation OS', subtitle: 'workflows · triggers · תנאים · הסלמות · SLA · rollback', icon: '🤖',
+        children: [
+          _wrap([_kpi('🔄', '38', 'workflows'), _kpi('⚡', '112', 'triggers'), _kpi('⏱️', '96%', 'עומד ב-SLA'), _kpi('↩️', '4', 'rollbacks')]),
+          const SizedBox(height: 8),
+          _panel('זרימת-אישור לדוגמה · בקשת חופשה', StepFlow(height: 90, steps: 5, radius: 14, accentColor: _acc, baseColor: _card, fillColor: _fill), double.infinity),
+          const SizedBox(height: 12),
+          DsSection(title: 'תהליכים פעילים', children: [
+            NavRow(glyph: '📥', title: 'קליטת-מועמד → שיבוץ', sub: '6 שלבים · SLA 72ש\' · 4 פעילים', onTap: () {}),
+            NavRow(glyph: '💰', title: 'חוב → תזכורת → הסלמה', sub: 'תנאי: 30 יום · 23 פעילים', onTap: () {}),
+            NavRow(glyph: '🚨', title: 'היעדרות-חריגה → שיחת-הורה', sub: 'trigger: 3 ימים · אוטומטי', onTap: () {}),
+            NavRow(glyph: '📝', title: 'סיום-מבחן → פרסום-ציון', sub: 'אוטומטי · אישור-מורה', onTap: () {}),
+          ]),
+          DsSection(title: 'כללי-הפעלה (triggers)', children: [
+            AccordionPanel(labels: const ['אירוע-מערכת', 'תנאי-נתונים', 'לוח-זמנים', 'webhook חיצוני'], height: 200, radius: 14, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          ]),
+        ],
+      );
+}
+
+// ═══════════════════════ 🔎 חיפוש-אוניברסלי + פקודות-טבעיות ═══════════════════════
+class _Search extends StatelessWidget {
+  const _Search();
+  @override
+  Widget build(BuildContext context) => DsScaffold(
+        title: 'חיפוש אוניברסלי', subtitle: 'מנוע-אחד לכל המערכת · פקודות בשפה טבעית', icon: '🔎',
+        children: [
+          SearchField(hint: 'שאל בשפה טבעית · "למה ירדה הנוכחות בז\'-3?"', height: 52, radius: 16, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          const SizedBox(height: 12),
+          DsSection(title: 'פקודות-שכיחות', children: [
+            ChipCloud(labels: const ['תלמידי סיכון', 'מורים עמוסים', 'חובות פתוחים', 'הודעות שלא-נקראו', 'אירועי-היום', 'ביקורי-אחות'], height: 88, radius: 12, accentColor: _acc, baseColor: _card, fillColor: _fill),
+          ]),
+          const SizedBox(height: 4),
+          const FeaturePanel(title: 'תשובת-AI · "למה ירדה הנוכחות בז\'-3?"', body: 'הנוכחות ירדה 8% בשבועיים האחרונים. הגורם המרכזי: 5 תלמידים עם היעדרות-רצף לאחר מבחן-המיפוי. המלצה: שיחת-מחנך + יידוע-הורים.', glyph: '🧠'),
+          const SizedBox(height: 12),
+          DsSection(title: 'תוצאות · חוצה-ישויות', children: const [
+            MediaRow(title: 'רון שמעוני · תלמיד', subtitle: 'י\'-1 · ציון-סיכון 84', glyph: '🎓', trailing: 'ישות'),
+            SizedBox(height: 8),
+            MediaRow(title: 'בקשת חופשה · רונית ג.', subtitle: 'workflow · שלב רכז', glyph: '✔️', trailing: 'תהליך'),
+            SizedBox(height: 8),
+            MediaRow(title: 'קבלה R-4821 · משפחת לוי', subtitle: 'תשלום · ₪1,250', glyph: '💰', trailing: 'מסמך'),
           ]),
         ],
       );
