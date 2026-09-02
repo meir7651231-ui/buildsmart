@@ -67,8 +67,20 @@ class _Inventory extends StatelessWidget {
     {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10},
     {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14},
   ];
+  static const int _horizon = 4; // חלון-תכנון: כמה ימים מראש מזהירים לפני שחייבים להזמין
   static double _daysLeft(Map<String, dynamic> s) => (s['cur'] as int) / (s['rate'] as double);
-  static int get urgent => _items.where((s) => _daysLeft(s) < (s['lead'] as int)).length;
+  // כמה ימים עד שחייבים להזמין = ימים-עד-ריקון − זמן-אספקה (שלילי ⇒ כבר עברת)
+  static double _mustOrderIn(Map<String, dynamic> s) => _daysLeft(s) - (s['lead'] as int);
+  // שלושת-הפסים (הגוי-האמת של "בזמן להזמין"): 2=הזמן-היום · 1=הזמן-בקרוב · 0=בטוח
+  static int _band(Map<String, dynamic> s) {
+    final m = _mustOrderIn(s);
+    if (m <= 0) return 2;
+    if (m <= _horizon) return 1;
+    return 0;
+  }
+
+  static int get urgent => _items.where((s) => _band(s) == 2).length; // לא-יספיק (ל-_Home)
+  static int get needOrder => _items.where((s) => _band(s) >= 1).length; // דורשי-הזמנה
 
   @override
   Widget build(BuildContext context) {
@@ -78,41 +90,53 @@ class _Inventory extends StatelessWidget {
       title: 'מלאי', subtitle: 'ימים-עד-ריקון מול זמן-אספקה — שלא ייגמר', icon: '📦',
       children: [
         Wrap(spacing: 12, runSpacing: 12, children: [
-          SizedBox(width: 190, child: KpiTile(glyph: '⏳', value: '$urgent', label: 'לא יספיק עד אספקה')),
+          SizedBox(width: 190, child: KpiTile(glyph: '🛒', value: '$needOrder', label: 'דורשי-הזמנה')),
           SizedBox(width: 190, child: KpiTile(glyph: '📦', value: '${_items.length}', label: 'פריטים')),
         ]),
         const SizedBox(height: 8),
         DsSection(title: 'החלטת-הזמנה · הכי-דחוף ראשון', children: [
-          for (final s in ranked) _row(s['name'] as String, s['cur'] as int, s['target'] as int, _daysLeft(s), s['lead'] as int),
+          for (final s in ranked) _row(s),
         ]),
       ],
     );
   }
 
-  // המקסימום = ההחלטה השלמה, כל נגזרת מגולמת באטום-מדף שמצייר את-עצמו (אפס-ציור-ביד):
-  //  · ההשוואה עצמה  → NeonBars   (שני ברים מנורמלים-יחד: ימים-עד-ריקון מול זמן-אספקה —
-  //                                 הריצה קצרה מהאספקה ⇒ הבר קצר מבר-האספקה, נראה-בעין. זה ה"מול".)
-  //  · כמות-להזמנה   → StatusChip (יעד − נוכחי, tone=סכנה)
-  //  · מועד-אחרון    → StatusChip (ריקון − זמן-אספקה; tone=סכנה אם היום, אחרת אזהרה)
-  Widget _row(String name, int cur, int target, double daysLeft, int lead) {
-    final urgent = daysLeft < lead;
-    final qty = (target - cur).clamp(0, target);
-    final within = (daysLeft - lead).round();
+  // ההחלטה השלמה, כל נגזרת מגולמת באטום-מדף שמצייר את-עצמו (אפס-ציור-ביד). לפי-פס:
+  //  · בטוח       → StatRow שקט (מבט-ריצה יחיד; מלא=מכסה-אספקה+חלון) — לא מציף את הדחופים.
+  //  · דחוף/מתקרב → NeonBars (ההשוואה ריצה-מול-אספקה, נראית-בעין) + StatusChip×2:
+  //       כמות-להזמנה (יעד−נוכחי) · מועד (היום=tone-סכנה / תוך-N-ימים=tone-אזהרה).
+  Widget _row(Map<String, dynamic> s) {
+    final name = s['name'] as String;
+    final left = _daysLeft(s);
+    final lead = s['lead'] as int;
+    final band = _band(s);
+    if (band == 0) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: StatRow(
+          label: name,
+          value: '${left.round()} ימים ריצה',
+          fraction: (left / (lead + _horizon)).clamp(0.0, 1.0),
+        ),
+      );
+    }
+    final qty = ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
+    final mustIn = _mustOrderIn(s).ceil();
+    final tone = band == 2 ? 2 : 3;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         NeonBars(
           labels: ['$name · ימים-עד-ריקון', 'זמן-אספקה'],
-          values: [daysLeft, lead.toDouble()],
+          values: [left, lead.toDouble()],
         ),
-        if (urgent)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, right: 4),
-            child: Wrap(spacing: 8, runSpacing: 6, children: [
-              StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: 2),
-              StatusChip(label: within <= 0 ? 'הזמן היום' : 'תוך $within ימים', tone: within <= 0 ? 2 : 3),
-            ]),
-          ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6, right: 4),
+          child: Wrap(spacing: 8, runSpacing: 6, children: [
+            StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: tone),
+            StatusChip(label: band == 2 ? 'הזמן היום' : 'הזמן תוך $mustIn ימים', tone: tone),
+          ]),
+        ),
       ]),
     );
   }
