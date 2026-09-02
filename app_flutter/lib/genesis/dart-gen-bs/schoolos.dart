@@ -8,6 +8,7 @@ import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/ds/ds_seam.dart';
 import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
+import '../dart-ui-bs/premium/surfaces/gradient_card.dart';
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
@@ -134,48 +135,45 @@ class _InventoryState extends State<_Inventory> {
         child: Wrap(spacing: 8, runSpacing: 6, children: kids),
       );
 
-  // ההחלטה השלמה, כל נגזרת מגולמת באטום-מדף שמצייר את-עצמו (אפס-ציור-ביד):
+  // הצגה מקסימלית: כל פריט = כרטיס-משטח אחד (GradientCard) שעוטף את אטומי-התוכן ליחידה-בודדת —
+  // לא ערימה משוחררת. בפנים, כל נגזרת מגולמת באטום-מדף שמצייר את-עצמו (אפס-ציור-ביד):
   //  · הוזמן (d2)  → StatusChip הצלחה "✓ הוזמן" + SoftButton "בטל" (הלולאה סגורה, לא מנדנד)
   //  · בטוח        → StatRow שקט + facts (מלאי/קצב/ספק/מחיר)
   //  · דחוף/מתקרב  → NeonBars (ההשוואה) + facts + StatusChip×2 (כמות/מועד) + SoftButton "סמן: הוזמן"
+  Widget _card(Widget inner) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: GradientCard(child: inner),
+      );
+
   Widget _row(Map<String, dynamic> s) {
     final name = s['name'] as String;
     if (_ordered.contains(name)) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: _wrap([
-          StatusChip(label: '✓ $name · הוזמן', tone: 1),
-          SoftButton(label: 'בטל', tone: 0, onTap: () => setState(() => _ordered.remove(name))),
-        ], top: 0),
-      );
+      return _card(_wrap([
+        StatusChip(label: '✓ $name · הוזמן', tone: 1),
+        SoftButton(label: 'בטל', tone: 0, onTap: () => setState(() => _ordered.remove(name))),
+      ], top: 0));
     }
     final left = _InvData.daysLeft(s);
     final lead = s['lead'] as int;
     final band = _InvData.band(s);
     if (band == 0) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          StatRow(label: name, value: '${left.round()} ימים ריצה', fraction: (left / (lead + _InvData.horizon)).clamp(0.0, 1.0)),
-          _wrap(_facts(s)),
-        ]),
-      );
+      return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        StatRow(label: name, value: '${left.round()} ימים ריצה', fraction: (left / (lead + _InvData.horizon)).clamp(0.0, 1.0)),
+        _wrap(_facts(s)),
+      ]));
     }
     final qty = ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
     final mustIn = _InvData.mustOrderIn(s).ceil();
     final tone = band == 2 ? 2 : 3;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        NeonBars(labels: ['$name · ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()]),
-        _wrap(_facts(s)),
-        _wrap([
-          StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: tone),
-          StatusChip(label: band == 2 ? 'הזמן היום' : 'הזמן תוך $mustIn ימים', tone: tone),
-        ]),
-        _wrap([SoftButton(label: 'סמן: הוזמן', tone: 1, onTap: () => setState(() => _ordered.add(name)))], top: 8),
+    return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      NeonBars(labels: ['$name · ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()]),
+      _wrap(_facts(s)),
+      _wrap([
+        StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: tone),
+        StatusChip(label: band == 2 ? 'הזמן היום' : 'הזמן תוך $mustIn ימים', tone: tone),
       ]),
-    );
+      _wrap([SoftButton(label: 'סמן: הוזמן', tone: 1, onTap: () => setState(() => _ordered.add(name)))], top: 8),
+    ]));
   }
 }
 
