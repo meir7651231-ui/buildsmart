@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "feedback" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/feedback-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -55,6 +55,6 @@ class ForgeEmptyHint extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [CustomPaint(size: const Size(15, 15), painter: _SvgPaint("M 3 12 a 9 9 0 1 0 18 0 a 9 9 0 1 0 -18 0 M12 8v.01M11 12h1v4h1", theme.aHi, 1.8, false, 24)), Text("Label · hint", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]), Container(margin: const EdgeInsets.fromLTRB(0, 2, 0, 0), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("EmptyHint", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Container(padding: const EdgeInsets.fromLTRB(5, 1, 5, 1), decoration: BoxDecoration(border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text("fields", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 7.5, fontWeight: FontWeight.w600)))]))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [CustomPaint(size: const Size(15, 15), painter: _SvgPaint("M 3 12 a 9 9 0 1 0 18 0 a 9 9 0 1 0 -18 0 M12 8v.01M11 12h1v4h1", theme.aHi, 1.8, false, 24)), Text("Label · hint", style: TextStyle(color: skin.mut, fontFamily: fonts.he))]), Container(margin: const EdgeInsets.fromLTRB(0, 2, 0, 0), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("EmptyHint", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Container(padding: const EdgeInsets.fromLTRB(5, 1, 5, 1), decoration: BoxDecoration(border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text("FIELDS", style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontSize: 7.5, fontWeight: FontWeight.w600)))]))]);
   }
 }

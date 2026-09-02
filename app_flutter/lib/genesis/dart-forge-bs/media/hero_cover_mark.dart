@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "media" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/media-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -54,6 +54,6 @@ class ForgeHeroCoverMark extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(constraints: const BoxConstraints(minHeight: 132), padding: const EdgeInsets.fromLTRB(18, 18, 18, 18), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.a800, theme.a, theme.c3], begin: Alignment.topLeft, end: Alignment.bottomRight), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, spacing: 2, children: [Container(width: 44, height: 44, decoration: BoxDecoration(color: const Color(0x24FFFFFF), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 4h7v7H4z M13 4h7v7h-7z M4 13h7v7H4z M 13 16.5 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0", skin.mut, 1.8, false, 24)))]));
+    return Container(constraints: const BoxConstraints(minHeight: 132), padding: const EdgeInsets.fromLTRB(18, 18, 18, 18), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.a800, theme.a, theme.c3], begin: Alignment.topLeft, end: Alignment.bottomRight), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, spacing: 2, children: [Container(width: 44, height: 44, decoration: BoxDecoration(color: const Color(0x24FFFFFF), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M4 4h7v7H4z M13 4h7v7h-7z M4 13h7v7H4z M 13 16.5 a 3.5 3.5 0 1 0 7 0 a 3.5 3.5 0 1 0 -7 0", const Color(0xFFFFFFFF), 1.8, false, 24)))]));
   }
 }

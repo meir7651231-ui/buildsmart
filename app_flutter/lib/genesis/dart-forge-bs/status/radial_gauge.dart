@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "status" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/status-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -54,6 +54,6 @@ class ForgeRadialGauge extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(0, 4, 0, 4), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, spacing: 20, children: [Container(width: 112, height: 112, child: Stack(clipBehavior: Clip.none, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 10 56 a 46 46 0 1 0 92 0 a 46 46 0 1 0 -92 0 M 10 56 a 46 46 0 1 0 92 0 a 46 46 0 1 0 -92 0", skin.mut, 1.8, false, 112)), Positioned.fill(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("72", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]))]))]));
+    return Container(padding: const EdgeInsets.fromLTRB(0, 4, 0, 4), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, spacing: 20, children: [Container(width: 112, height: 112, child: Stack(clipBehavior: Clip.none, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 10 56 a 46 46 0 1 0 92 0 a 46 46 0 1 0 -92 0 M 10 56 a 46 46 0 1 0 92 0 a 46 46 0 1 0 -92 0", skin.ink, 1.8, false, 112)), Positioned.fill(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("72", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]))]))]));
   }
 }

@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "card" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/card-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -54,6 +54,6 @@ class ForgeMetricTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(16, 15, 16, 15), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 11, fontWeight: FontWeight.w600)), Text("1,024", style: TextStyle(color: skin.ink, fontFamily: fonts.grotesk, fontSize: 30, fontWeight: FontWeight.w700)), Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 4, children: [CustomPaint(size: const Size(12, 12), painter: _SvgPaint("M7 7l10 10M17 17H9M17 17V9", skin.mut, 1.8, false, 24)), Text("4%", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])]));
+    return Container(padding: const EdgeInsets.fromLTRB(16, 15, 16, 15), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 11, fontWeight: FontWeight.w600)), Text("1,024", style: TextStyle(color: skin.ink, fontFamily: fonts.grotesk, fontSize: 30, fontWeight: FontWeight.w700)), Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 4, children: [CustomPaint(size: const Size(12, 12), painter: _SvgPaint("M7 7l10 10M17 17H9M17 17V9", skin.err, 1.8, false, 24)), Text("4%", style: TextStyle(color: skin.err, fontFamily: fonts.he))])]));
   }
 }

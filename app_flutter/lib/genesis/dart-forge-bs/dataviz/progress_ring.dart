@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "dataviz" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/dataviz-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -54,6 +54,6 @@ class ForgeProgressRing extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(constraints: const BoxConstraints(minHeight: 170), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, spacing: 10, children: [Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600))]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 20 60 a 40 40 0 1 0 80 0 a 40 40 0 1 0 -80 0 M 20 60 a 40 40 0 1 0 80 0 a 40 40 0 1 0 -80 0 M 32 60 a 28 28 0 1 0 56 0 a 28 28 0 1 0 -56 0 M 32 60 a 28 28 0 1 0 56 0 a 28 28 0 1 0 -56 0", skin.mut, 1.8, false, 120))]));
+    return Container(constraints: const BoxConstraints(minHeight: 170), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, spacing: 10, children: [Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600))]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 20 60 a 40 40 0 1 0 80 0 a 40 40 0 1 0 -80 0 M 20 60 a 40 40 0 1 0 80 0 a 40 40 0 1 0 -80 0 M 32 60 a 28 28 0 1 0 56 0 a 28 28 0 1 0 -56 0 M 32 60 a 28 28 0 1 0 56 0 a 28 28 0 1 0 -56 0", skin.ink, 1.8, false, 120))]));
   }
 }

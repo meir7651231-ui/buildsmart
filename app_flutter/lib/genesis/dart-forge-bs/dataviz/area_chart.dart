@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "dataviz" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/dataviz-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -53,7 +53,8 @@ class ForgeAreaChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(constraints: const BoxConstraints(minHeight: 150), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 11, children: [Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, spacing: 10, children: [Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600)), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("7.4", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("k", style: TextStyle(color: skin.mut, fontSize: 13, fontFamily: fonts.he))])]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 0 28 L 240 28 M 0 58 L 240 58 M2,72 C30,66 44,40 70,44 C96,48 108,22 134,26 C160,30 176,54 200,46 C222,39 232,30 238,26 L238,88 L2,88 Z M2,72 C30,66 44,40 70,44 C96,48 108,22 134,26 C160,30 176,54 200,46 C222,39 232,30 238,26 M 130.6 26 a 3.4 3.4 0 1 0 6.8 0 a 3.4 3.4 0 1 0 -6.8 0 M 0 88 L 240 88", skin.mut, 1.8, false, 240))]));
+    return Container(constraints: const BoxConstraints(minHeight: 150), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 11, children: [Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, spacing: 10, children: [Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600)), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("7.4", style: TextStyle(color: theme.aHi, fontFamily: fonts.he)), Text("k", style: TextStyle(color: skin.mut, fontSize: 13, fontFamily: fonts.he))])]), CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 0 28 L 240 28 M 0 58 L 240 58 M2,72 C30,66 44,40 70,44 C96,48 108,22 134,26 C160,30 176,54 200,46 C222,39 232,30 238,26 L238,88 L2,88 Z M2,72 C30,66 44,40 70,44 C96,48 108,22 134,26 C160,30 176,54 200,46 C222,39 232,30 238,26 M 130.6 26 a 3.4 3.4 0 1 0 6.8 0 a 3.4 3.4 0 1 0 -6.8 0 M 0 88 L 240 88", skin.ink, 1.8, false, 240))]));
   }
 }

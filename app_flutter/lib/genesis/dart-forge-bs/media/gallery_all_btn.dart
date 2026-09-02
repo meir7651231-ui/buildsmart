@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "media" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/media-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -54,6 +54,6 @@ class ForgeGalleryAllBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [Container(decoration: BoxDecoration(color: theme.a, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(8)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 4 h 18 v 16 h -18 Z M 6.9 9 a 1.6 1.6 0 1 0 3.2 0 a 1.6 1.6 0 1 0 -3.2 0 M4 18l5-5 3.5 3.5L16 13l4 4", skin.mut, 1.8, false, 24))), Container(decoration: BoxDecoration(color: theme.a, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(8)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 4 h 18 v 16 h -18 Z M 6.9 9 a 1.6 1.6 0 1 0 3.2 0 a 1.6 1.6 0 1 0 -3.2 0 M4 18l5-5 3.5 3.5L16 13l4 4", skin.mut, 1.8, false, 24))), Container(decoration: BoxDecoration(color: theme.a, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(8)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 4 h 18 v 16 h -18 Z M 6.9 9 a 1.6 1.6 0 1 0 3.2 0 a 1.6 1.6 0 1 0 -3.2 0 M4 18l5-5 3.5 3.5L16 13l4 4", skin.mut, 1.8, false, 24)))]);
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [Container(decoration: BoxDecoration(color: theme.a, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(8)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 4 h 18 v 16 h -18 Z M 6.9 9 a 1.6 1.6 0 1 0 3.2 0 a 1.6 1.6 0 1 0 -3.2 0 M4 18l5-5 3.5 3.5L16 13l4 4", skin.ink, 1.8, false, 24))), Container(decoration: BoxDecoration(color: theme.a, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(8)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 4 h 18 v 16 h -18 Z M 6.9 9 a 1.6 1.6 0 1 0 3.2 0 a 1.6 1.6 0 1 0 -3.2 0 M4 18l5-5 3.5 3.5L16 13l4 4", skin.ink, 1.8, false, 24))), Container(decoration: BoxDecoration(color: theme.a, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(8)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 4 h 18 v 16 h -18 Z M 6.9 9 a 1.6 1.6 0 1 0 3.2 0 a 1.6 1.6 0 1 0 -3.2 0 M4 18l5-5 3.5 3.5L16 13l4 4", skin.ink, 1.8, false, 24)))]);
   }
 }

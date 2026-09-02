@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "status" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/status-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -54,6 +54,6 @@ class ForgeTrendIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(2, 8, 2, 8), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 16, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 5, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M7 17L17 7M17 7H9M17 7v8", skin.mut, 1.8, false, 24)), Text("12%", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]), Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 5, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M7 7l10 10M17 17H9M17 17V9", skin.mut, 1.8, false, 24)), Text("4%", style: TextStyle(color: skin.ink, fontFamily: fonts.he))]), Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 5, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M5 12h14", skin.mut, 1.8, false, 24)), Text("0%", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])]));
+    return Container(padding: const EdgeInsets.fromLTRB(2, 8, 2, 8), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 16, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 5, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M7 17L17 7M17 7H9M17 7v8", skin.ok, 1.8, false, 24)), Text("12%", style: TextStyle(color: skin.ok, fontFamily: fonts.he))]), Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 5, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M7 7l10 10M17 17H9M17 17V9", skin.err, 1.8, false, 24)), Text("4%", style: TextStyle(color: skin.err, fontFamily: fonts.he))]), Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 5, children: [CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M5 12h14", skin.mut, 1.8, false, 24)), Text("0%", style: TextStyle(color: skin.mut, fontFamily: fonts.he))])]));
   }
 }

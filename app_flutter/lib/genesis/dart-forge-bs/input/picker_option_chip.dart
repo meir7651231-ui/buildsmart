@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "input" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/input-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -54,6 +54,6 @@ class ForgePickerOptionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Container(padding: const EdgeInsets.fromLTRB(14, 8, 14, 8), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [CustomPaint(size: const Size(13, 13), painter: _SvgPaint("M5 13l4 4L19 7", skin.mut, 1.8, false, 24)), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he))])), Container(padding: const EdgeInsets.fromLTRB(14, 8, 14, 8), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12.5, fontWeight: FontWeight.w600)))]);
+    return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Container(padding: const EdgeInsets.fromLTRB(14, 8, 14, 8), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [CustomPaint(size: const Size(13, 13), painter: _SvgPaint("M5 13l4 4L19 7", skin.mut, 1.8, false, 24)), Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he))])), Container(padding: const EdgeInsets.fromLTRB(14, 8, 14, 8), decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12.5, fontWeight: FontWeight.w600)))]);
   }
 }

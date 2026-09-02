@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "action" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/action-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -11,6 +11,6 @@ class ForgeFabAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(12, 12, 12, 12), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: const Color(0x73E6B84F)), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("FabAction", style: TextStyle(color: skin.ink, fontFamily: fonts.he)), Text("ZERO · no seam", style: TextStyle(color: skin.warn, fontFamily: fonts.grotesk, fontSize: 9))]));
+    return Container(padding: const EdgeInsets.fromLTRB(12, 12, 12, 12), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: const Color(0x73E6B84F)), borderRadius: BorderRadius.circular(11)), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Text("FabAction", style: TextStyle(color: skin.faint, fontFamily: fonts.he)), Text("ZERO · no seam", style: TextStyle(color: skin.warn, fontFamily: fonts.grotesk, fontSize: 9))]));
   }
 }

@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "media" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/media-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -54,6 +54,6 @@ class ForgeProofThumb extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(decoration: BoxDecoration(color: theme.a, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 3l7 4v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7z M9.5 12l1.8 1.8L15 10", skin.mut, 1.8, false, 24)));
+    return Container(decoration: BoxDecoration(color: theme.a, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 3l7 4v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7z M9.5 12l1.8 1.8L15 10", skin.ink, 1.8, false, 24)));
   }
 }

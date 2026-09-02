@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "media" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/media-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -52,8 +52,7 @@ class ForgeBrandMark extends StatelessWidget {
   const ForgeBrandMark({super.key});
   @override
   Widget build(BuildContext context) {
-    final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(constraints: const BoxConstraints(minHeight: 88), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(width: 44, height: 44, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 8 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 M 12 16 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 M 12 8 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0", skin.mut, 1.8, false, 24))), Container(width: 44, height: 44, decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 2l2.6 6.6L21 9.5l-5 4.3 1.6 6.7L12 16.9 6.4 20.5 8 13.8 3 9.5l6.4-.9z", skin.mut, 1.8, false, 24)))]));
+    return Container(constraints: const BoxConstraints(minHeight: 88), child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 14, children: [Container(width: 44, height: 44, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 4 8 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 M 12 16 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0 M 12 8 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0", const Color(0xFF0B0B0D), 1.8, false, 24))), Container(width: 44, height: 44, decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M12 2l2.6 6.6L21 9.5l-5 4.3 1.6 6.7L12 16.9 6.4 20.5 8 13.8 3 9.5l6.4-.9z", theme.aHi, 1.8, false, 24)))]));
   }
 }

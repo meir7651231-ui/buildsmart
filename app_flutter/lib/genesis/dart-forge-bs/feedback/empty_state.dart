@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "feedback" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/feedback-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -55,6 +55,6 @@ class ForgeEmptyState extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Container(width: 56, height: 56, decoration: BoxDecoration(color: theme.gl, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 5 h 18 v 14 h -18 Z M3 10h18M8 15h5", skin.mut, 1.8, false, 24))), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700)), Text("Meta", style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he)), Container(height: 44, margin: const EdgeInsets.fromLTRB(0, 4, 0, 0), padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 6), blurRadius: 16, spreadRadius: 0)]), child: Text("Action", style: TextStyle(color: const Color(0xFF0B0B0D), fontSize: 12.5, fontWeight: FontWeight.w700, fontFamily: fonts.he)))]));
+    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Container(width: 56, height: 56, decoration: BoxDecoration(color: theme.gl, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 3 5 h 18 v 14 h -18 Z M3 10h18M8 15h5", theme.aHi, 1.8, false, 24))), Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700)), Text("Meta", style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he)), Container(height: 44, margin: const EdgeInsets.fromLTRB(0, 4, 0, 0), padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 6), blurRadius: 16, spreadRadius: 0)]), child: Text("Action", style: TextStyle(color: const Color(0xFF0B0B0D), fontSize: 12.5, fontWeight: FontWeight.w700, fontFamily: fonts.he)))]));
   }
 }

@@ -1,6 +1,6 @@
 // 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "spatial" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
 // machtzev/pure/spatial-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
-// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta. material בלבד.
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
@@ -53,6 +53,6 @@ class ForgeMapSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 0 58 L 440 58 M 0 117 L 440 117 M 0 176 L 440 176 M 88 0 L 88 234 M 176 0 L 176 234 M 264 0 L 264 234 M 352 0 L 352 234 M40 150 C70 96 120 84 168 104 C210 121 214 70 268 74 C332 79 356 118 402 108 L420 150 C388 196 300 210 236 196 C168 181 92 210 52 182 Z M 66 178 L 150 120 L 232 150 L 322 92 L 398 120 M 63 178 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 M 229 150 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 M 395 120 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z M -3.6 -16 a 3.6 3.6 0 1 0 7.2 0 a 3.6 3.6 0 1 0 -7.2 0 M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z M -3.6 -16 a 3.6 3.6 0 1 0 7.2 0 a 3.6 3.6 0 1 0 -7.2 0 M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z M -3.6 -16 a 3.6 3.6 0 1 0 7.2 0 a 3.6 3.6 0 1 0 -7.2 0 M NaN NaN a 15 15 0 1 0 30 0 a 15 15 0 1 0 -30 0", skin.mut, 1.8, false, 440))));
+    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: CustomPaint(size: const Size(16, 16), painter: _SvgPaint("M 0 58 L 440 58 M 0 117 L 440 117 M 0 176 L 440 176 M 88 0 L 88 234 M 176 0 L 176 234 M 264 0 L 264 234 M 352 0 L 352 234 M40 150 C70 96 120 84 168 104 C210 121 214 70 268 74 C332 79 356 118 402 108 L420 150 C388 196 300 210 236 196 C168 181 92 210 52 182 Z M 66 178 L 150 120 L 232 150 L 322 92 L 398 120 M 63 178 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 M 229 150 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 M 395 120 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z M -3.6 -16 a 3.6 3.6 0 1 0 7.2 0 a 3.6 3.6 0 1 0 -7.2 0 M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z M -3.6 -16 a 3.6 3.6 0 1 0 7.2 0 a 3.6 3.6 0 1 0 -7.2 0 M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z M -3.6 -16 a 3.6 3.6 0 1 0 7.2 0 a 3.6 3.6 0 1 0 -7.2 0 M NaN NaN a 15 15 0 1 0 30 0 a 15 15 0 1 0 -30 0", skin.ink, 1.8, false, 440))));
   }
 }
