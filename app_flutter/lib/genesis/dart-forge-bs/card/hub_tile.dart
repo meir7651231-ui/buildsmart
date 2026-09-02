@@ -62,6 +62,9 @@ Path _parse(String d) {
   final t = RegExp(r'[a-zA-Z]|-?\d*\.?\d+(?:e-?\d+)?').allMatches(d).map((x) => x.group(0)!).toList();
   double cx = 0, cy = 0, sx = 0, sy = 0; String cmd = ''; int i = 0;
   double n() => double.parse(t[i++]);
+  // דגל-קשת (largeArc/sweep) = ספרה-בודדת 0/1 · ה-SVG מתיר צמידות ("00-3-3") ⇒ הטוקנייזר מיזג ל"00";
+  // קולפים תו-אחד ומשאירים את השארית לטוקן הבא (בלי זה קשת-מעוגלת בעיפרון/אייקון נשברת ⇒ אייקון-ריק).
+  double fl() { final tok = t[i]; if (tok.length <= 1) { i++; return double.parse(tok); } t[i] = tok.substring(1); return double.parse(tok[0]); }
   while (i < t.length) {
     if (RegExp(r'[a-zA-Z]').hasMatch(t[i])) { cmd = t[i]; i++; }
     if (i > t.length) break;
@@ -73,7 +76,7 @@ Path _parse(String d) {
       case 'V': { double y = n(); if (rel) y += cy; path.lineTo(cx, y); cy = y; break; }
       case 'C': { double x1 = n(), y1 = n(), x2 = n(), y2 = n(), x = n(), y = n(); if (rel) { x1 += cx; y1 += cy; x2 += cx; y2 += cy; x += cx; y += cy; } path.cubicTo(x1, y1, x2, y2, x, y); cx = x; cy = y; break; }
       case 'Q': { double x1 = n(), y1 = n(), x = n(), y = n(); if (rel) { x1 += cx; y1 += cy; x += cx; y += cy; } path.quadraticBezierTo(x1, y1, x, y); cx = x; cy = y; break; }
-      case 'A': { double rx = n(), ry = n(), rot = n(), laf = n(), sf = n(), x = n(), y = n(); if (rel) { x += cx; y += cy; } path.arcToPoint(Offset(x, y), radius: Radius.elliptical(rx, ry), rotation: rot, largeArc: laf != 0, clockwise: sf != 0); cx = x; cy = y; break; }
+      case 'A': { double rx = n(), ry = n(), rot = n(), laf = fl(), sf = fl(), x = n(), y = n(); if (rel) { x += cx; y += cy; } path.arcToPoint(Offset(x, y), radius: Radius.elliptical(rx, ry), rotation: rot, largeArc: laf != 0, clockwise: sf != 0); cx = x; cy = y; break; }
       case 'Z': path.close(); cx = sx; cy = sy; break;
       default: if (i < t.length) i++;
     }
@@ -89,6 +92,6 @@ class ForgeHubTile extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment.center, radius: 1.20, colors: [theme.gl, skin.surface], stops: [0.0, 0.55]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(15)), child: Stack(clipBehavior: Clip.none, children: [Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 11, children: [Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.gl, skin.sunken], stops: [0.0, 0.60]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 20, height: 20, child: CustomPaint(painter: _SvgScene([_Op.path("M3 12l9-8 9 8M5 10v10h14V10", theme.aHi, false, 1.8)], 24, 24)))), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label", style: TextStyle(color: skin.ink, fontSize: 13.5, fontWeight: FontWeight.w600, fontFamily: fonts.he)), Text("Meta", style: TextStyle(color: skin.mut, fontSize: 11, fontFamily: fonts.he))])])), Positioned(top: 14, bottom: 14, child: Container(width: 3, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999))))]));
+    return Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment.center, radius: 1.20, colors: [theme.gl, skin.surface], stops: [0.0, 0.55]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(15)), child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 11, children: [Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.gl, skin.sunken], stops: [0.0, 0.60]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 20, height: 20, child: CustomPaint(painter: _SvgScene([_Op.path("M3 12l9-8 9 8M5 10v10h14V10", theme.aHi, false, 1.8)], 24, 24)))), Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label", style: TextStyle(color: skin.ink, fontSize: 13.5, fontWeight: FontWeight.w600, fontFamily: fonts.he)), Text("Meta", style: TextStyle(color: skin.mut, fontSize: 11, fontFamily: fonts.he))])])), Positioned(top: 14, bottom: 14, right: 0, child: Container(width: 3, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999))))])));
   }
 }

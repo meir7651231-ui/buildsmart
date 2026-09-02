@@ -62,6 +62,9 @@ Path _parse(String d) {
   final t = RegExp(r'[a-zA-Z]|-?\d*\.?\d+(?:e-?\d+)?').allMatches(d).map((x) => x.group(0)!).toList();
   double cx = 0, cy = 0, sx = 0, sy = 0; String cmd = ''; int i = 0;
   double n() => double.parse(t[i++]);
+  // דגל-קשת (largeArc/sweep) = ספרה-בודדת 0/1 · ה-SVG מתיר צמידות ("00-3-3") ⇒ הטוקנייזר מיזג ל"00";
+  // קולפים תו-אחד ומשאירים את השארית לטוקן הבא (בלי זה קשת-מעוגלת בעיפרון/אייקון נשברת ⇒ אייקון-ריק).
+  double fl() { final tok = t[i]; if (tok.length <= 1) { i++; return double.parse(tok); } t[i] = tok.substring(1); return double.parse(tok[0]); }
   while (i < t.length) {
     if (RegExp(r'[a-zA-Z]').hasMatch(t[i])) { cmd = t[i]; i++; }
     if (i > t.length) break;
@@ -73,7 +76,7 @@ Path _parse(String d) {
       case 'V': { double y = n(); if (rel) y += cy; path.lineTo(cx, y); cy = y; break; }
       case 'C': { double x1 = n(), y1 = n(), x2 = n(), y2 = n(), x = n(), y = n(); if (rel) { x1 += cx; y1 += cy; x2 += cx; y2 += cy; x += cx; y += cy; } path.cubicTo(x1, y1, x2, y2, x, y); cx = x; cy = y; break; }
       case 'Q': { double x1 = n(), y1 = n(), x = n(), y = n(); if (rel) { x1 += cx; y1 += cy; x += cx; y += cy; } path.quadraticBezierTo(x1, y1, x, y); cx = x; cy = y; break; }
-      case 'A': { double rx = n(), ry = n(), rot = n(), laf = n(), sf = n(), x = n(), y = n(); if (rel) { x += cx; y += cy; } path.arcToPoint(Offset(x, y), radius: Radius.elliptical(rx, ry), rotation: rot, largeArc: laf != 0, clockwise: sf != 0); cx = x; cy = y; break; }
+      case 'A': { double rx = n(), ry = n(), rot = n(), laf = fl(), sf = fl(), x = n(), y = n(); if (rel) { x += cx; y += cy; } path.arcToPoint(Offset(x, y), radius: Radius.elliptical(rx, ry), rotation: rot, largeArc: laf != 0, clockwise: sf != 0); cx = x; cy = y; break; }
       case 'Z': path.close(); cx = sx; cy = sy; break;
       default: if (i < t.length) i++;
     }
@@ -89,6 +92,6 @@ class ForgeLogoMark extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(constraints: const BoxConstraints(minHeight: 88), child: Wrap(spacing: 14, runSpacing: 14, crossAxisAlignment: WrapCrossAlignment.center, children: [Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.path("M4 4h7v7H4z", const Color(0xFF0B0B0D), false, 1.8), _Op.path("M13 4h7v7h-7z", const Color(0xFF0B0B0D), false, 1.8), _Op.path("M4 13h7v7H4z", const Color(0xFF0B0B0D), false, 1.8), _Op.circle(16.5, 16.5, 3.5, const Color(0xFF0B0B0D), false, 1.8)], 24, 24)))), Directionality(textDirection: TextDirection.ltr, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serif, fontSize: 19, fontWeight: FontWeight.w700, letterSpacing: -0.19)), Text("META", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontSize: 8.5, fontWeight: FontWeight.w600, letterSpacing: 2.5))]))])]));
+    return Container(constraints: const BoxConstraints(minHeight: 88), child: Wrap(spacing: 14, runSpacing: 14, crossAxisAlignment: WrapCrossAlignment.center, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.path("M4 4h7v7H4z", const Color(0xFF0B0B0D), false, 1.8), _Op.path("M13 4h7v7h-7z", const Color(0xFF0B0B0D), false, 1.8), _Op.path("M4 13h7v7H4z", const Color(0xFF0B0B0D), false, 1.8), _Op.circle(16.5, 16.5, 3.5, const Color(0xFF0B0B0D), false, 1.8)], 24, 24)))), Directionality(textDirection: TextDirection.ltr, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serif, fontSize: 19, fontWeight: FontWeight.w700, letterSpacing: -0.19)), Text("META", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontSize: 8.5, fontWeight: FontWeight.w600, letterSpacing: 2.5))]))])]));
   }
 }
