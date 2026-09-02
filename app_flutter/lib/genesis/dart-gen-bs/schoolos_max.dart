@@ -24,6 +24,7 @@ import '../dart-ui-bs/step_flow.dart';
 import '../dart-ui-bs/stat_tile.dart';
 import '../dart-ui-bs/search_field.dart';
 import '../dart-ui-bs/seg_picker.dart';
+import '../dart-ui-bs/badge_pill.dart';
 import '../dart-ui-bs/product_card.dart';
 import '../dart-ui-bs/order_card.dart';
 import '../dart-ui-bs/premium/lists/timeline_item.dart';
@@ -227,27 +228,31 @@ class _Gradebook extends StatelessWidget {
       );
 }
 
-// ═══════════════════════ מערכת-שעות · לוח שבועי ═══════════════════════
+// ═══════════════════════ מערכת-שעות · לוח שבועי (פירוק-L38: SegPicker+BadgePill, אפס-ציור-ביד) ═══════════════════════
+// לוח-שעות אין-לו-אטום-יחיד ⇒ מתפרק לפעולות-יסוד: כותרת-ימים=SegPicker · תא-שיעור=BadgePill ·
+// המטריצה שעה×יום = חיווט-לולאה (Row/Column/Expanded). זהו החיווט-הלגיטימי של L38.
 class _Timetable extends StatelessWidget {
   const _Timetable();
   static const _days = ['א', 'ב', 'ג', 'ד', 'ה'];
   static const _subj = ['מתמטיקה', 'אנגלית', 'לשון', 'פיזיקה', 'היסטוריה', 'חנ"ג', 'אמנות', 'מדעים'];
   @override
   Widget build(BuildContext context) => DsScaffold(
-        title: 'מערכת שעות · כיתה י\'-3', subtitle: '5 ימים · 8 שיעורים ביום', icon: '🗓️',
+        title: 'מערכת שעות · כיתה י\'-3', subtitle: '5 ימים · 6 שיעורים ביום', icon: '🗓️',
         children: [
-          _panel('לוח שבועי', Column(children: [
-            Row(children: [const SizedBox(width: 34), for (final d in _days) Expanded(child: Center(child: Text(d, style: const TextStyle(color: _mut, fontSize: 12, fontWeight: FontWeight.w700))))]),
-            const SizedBox(height: 8),
-            for (var h = 0; h < 6; h++)
-              Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
-                SizedBox(width: 34, child: Text('${h + 1}', style: const TextStyle(color: _mut, fontSize: 11))),
-                for (var d = 0; d < 5; d++)
-                  Expanded(child: Container(height: 34, margin: const EdgeInsets.symmetric(horizontal: 2), alignment: Alignment.center,
-                      decoration: BoxDecoration(color: _acc.withValues(alpha: 0.10 + ((h + d) % 3) * 0.06), borderRadius: BorderRadius.circular(8), border: Border.all(color: DsPure.hair)),
-                      child: Text(_subj[(h * 3 + d) % _subj.length], overflow: TextOverflow.ellipsis, style: const TextStyle(color: _ink, fontSize: 10)))),
-              ])),
-          ]), double.infinity),
+          // כותרת-ימים = אטום SegPicker
+          Row(children: [
+            const SizedBox(width: 34),
+            Expanded(child: SegPicker(labels: _days, height: 44, radius: 10, accentColor: _acc, baseColor: _card, fillColor: _fill)),
+          ]),
+          const SizedBox(height: 10),
+          // כל שיעור = שורת-אטומים BadgePill (תא-לכל-יום) + מספר-שיעור כ-BadgePill
+          for (var h = 0; h < 6; h++)
+            Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
+              SizedBox(width: 34, child: BadgePill(label: '${h + 1}', height: 42, radius: 10, accentColor: _acc, baseColor: _card, fillColor: _fill)),
+              for (var d = 0; d < 5; d++)
+                Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: BadgePill(label: _subj[(h * 3 + d) % _subj.length], height: 42, radius: 10, accentColor: _acc, baseColor: _card, fillColor: _fill))),
+            ])),
         ],
       );
 }
