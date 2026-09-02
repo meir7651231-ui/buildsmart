@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
+import '../dart-ui-bs/ds/ds_seam.dart';
 import '../dart-ui-bs/premium/showcase/premium_stat.dart';
 import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
 import '../dart-ui-bs/premium/dataviz/gauge_meter.dart';
@@ -63,7 +64,13 @@ class SchoolOsOmniApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(useMaterial3: true, fontFamily: 'Heebo', scaffoldBackgroundColor: DsTokens.bg, brightness: Brightness.dark, colorScheme: ColorScheme.fromSeed(seedColor: _acc, brightness: Brightness.dark)),
-        builder: (c, ch) => Directionality(textDirection: TextDirection.rtl, child: ch ?? const SizedBox.shrink()),
+        // חריץ-הפונט (חוק-6/7): מזריק grotesk=JetBrains Mono (מוטמע-מקומי) במקום Space Grotesk (CDN-חסום).
+        // pure_date_cell קורא fonts.grotesk מהחריץ ⇒ המספרים מרונדרים בסנדבוקס. האטום לא נגע.
+        builder: (c, ch) => PureScope(
+          theme: DsPure.themes[DsPure.defaultTheme]!,
+          fonts: const DsPureFonts(serif: 'Heebo', serifHe: 'FrankRuhlLibre', grotesk: 'JetBrains Mono', he: 'Heebo'),
+          child: Directionality(textDirection: TextDirection.rtl, child: ch ?? const SizedBox.shrink()),
+        ),
         home: const _Home(),
       );
 }
