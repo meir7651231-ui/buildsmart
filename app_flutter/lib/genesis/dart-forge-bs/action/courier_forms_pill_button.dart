@@ -11,6 +11,6 @@ class ForgeCourierFormsPillButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(height: 44, padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(border: Border.all(color: theme.a), borderRadius: BorderRadius.circular(999)), child: Text("Action", style: TextStyle(color: theme.aHi, fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700)));
+    return Container(height: 44, alignment: Alignment.center, padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(border: Border.all(color: theme.a), borderRadius: BorderRadius.circular(999)), child: Text("Action", style: TextStyle(color: theme.aHi, fontFamily: fonts.he, fontSize: 13, fontWeight: FontWeight.w700)));
   }
 }

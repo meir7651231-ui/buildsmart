@@ -87,6 +87,6 @@ class ForgeCircleCloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(width: 42, height: 42, decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(50)), child: SizedBox(width: 18, height: 18, child: CustomPaint(painter: _SvgScene([_Op.path("M6 6l12 12M18 6L6 18", skin.ink, false, 1.8)], 24, 24))));
+    return Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(color: skin.raised, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(50)), child: SizedBox(width: 18, height: 18, child: CustomPaint(painter: _SvgScene([_Op.path("M6 6l12 12M18 6L6 18", skin.ink, false, 1.8)], 24, 24))));
   }
 }
