@@ -10,6 +10,7 @@ import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
+import '../dart-ui-bs/premium/actions/soft_button.dart';
 
 const _acc = DsTokens.accent;
 
@@ -39,7 +40,7 @@ class _Home extends StatelessWidget {
         children: [
           Wrap(spacing: 12, runSpacing: 12, children: [
             const SizedBox(width: 168, child: KpiTile(glyph: '🎓', value: '1,248', label: 'תלמידים')),
-            SizedBox(width: 168, child: KpiTile(glyph: '📦', value: '${_Inventory.urgent}', label: 'מלאי לא-יספיק')),
+            SizedBox(width: 168, child: KpiTile(glyph: '📦', value: '${_InvData.urgent}', label: 'מלאי לא-יספיק')),
           ]),
           const SizedBox(height: 8),
           DsSection(title: 'כלים', children: [
@@ -57,41 +58,61 @@ class _Home extends StatelessWidget {
 //  3. דירוג לפי ימים-עד-ריקון            → הכי-דחוף ראשון
 //  4. ציור runway מול-אספקה (StatRow)    → רואים בעין אם הבר מתחת לקו-האספקה
 //  5. דגל-הזמנה                          → פעולה
-class _Inventory extends StatelessWidget {
-  const _Inventory();
-  // דאטה-אמת: מלאי · יעד-בריא · קצב-צריכה-יומי · זמן-אספקה (ימים)
-  static const _items = <Map<String, dynamic>>[
-    {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4},
+// דאטה+מנוע טהור (אפס-DOM): חוזה-הפריט + הפסים. חוזה: knowledge/INVENTORY-DATA-CONTRACT-2026-09-02.md
+//   שדות-חובה: name·cur·target·rate·lead · שדות-אופציה: supplier?·price? (מוצגים רק כשקיימים).
+class _InvData {
+  static const int horizon = 4; // חלון-תכנון: כמה ימים מראש מזהירים לפני שחייבים להזמין
+  static const items = <Map<String, dynamic>>[
+    {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4, 'supplier': 'אופיס-דיפו', 'price': 89},
     {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5},
     {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7},
-    {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10},
+    {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240},
     {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14},
   ];
-  static const int _horizon = 4; // חלון-תכנון: כמה ימים מראש מזהירים לפני שחייבים להזמין
-  static double _daysLeft(Map<String, dynamic> s) => (s['cur'] as int) / (s['rate'] as double);
+  // חוזה-תצוגה של שדות-מטא = דאטה (לא קוד-פר-שדה). המקום-השמור: הרינדור לולאה גנרית מעל זה.
+  // הוספת שורה כאן ⇒ השדה מופיע לכל רשומה שנושאת אותו, אפס-שינוי-קוד (מבחן-הקונכייה, חוק-7).
+  static const metaFields = <Map<String, String>>[
+    {'key': 'cur', 'prefix': '', 'suffix': ' ביד'},
+    {'key': 'rate', 'prefix': '', 'suffix': '/יום'},
+    {'key': 'supplier', 'prefix': '🏭 ', 'suffix': ''},
+    {'key': 'price', 'prefix': '₪ ', 'suffix': ' ליח׳'},
+  ];
+
+  static double daysLeft(Map<String, dynamic> s) => (s['cur'] as int) / (s['rate'] as double);
   // כמה ימים עד שחייבים להזמין = ימים-עד-ריקון − זמן-אספקה (שלילי ⇒ כבר עברת)
-  static double _mustOrderIn(Map<String, dynamic> s) => _daysLeft(s) - (s['lead'] as int);
+  static double mustOrderIn(Map<String, dynamic> s) => daysLeft(s) - (s['lead'] as int);
   // שלושת-הפסים (הגוי-האמת של "בזמן להזמין"): 2=הזמן-היום · 1=הזמן-בקרוב · 0=בטוח
-  static int _band(Map<String, dynamic> s) {
-    final m = _mustOrderIn(s);
+  static int band(Map<String, dynamic> s) {
+    final m = mustOrderIn(s);
     if (m <= 0) return 2;
-    if (m <= _horizon) return 1;
+    if (m <= horizon) return 1;
     return 0;
   }
 
-  static int get urgent => _items.where((s) => _band(s) == 2).length; // לא-יספיק (ל-_Home)
-  static int get needOrder => _items.where((s) => _band(s) >= 1).length; // דורשי-הזמנה
+  static int get urgent => items.where((s) => band(s) == 2).length; // לא-יספיק (ל-_Home)
+}
+
+class _Inventory extends StatefulWidget {
+  const _Inventory();
+  @override
+  State<_Inventory> createState() => _InventoryState();
+}
+
+class _InventoryState extends State<_Inventory> {
+  final Set<String> _ordered = {}; // זיכרון d2: פריטים שסומנו "הוזמן" (מצב=חיווט לגיטימי)
 
   @override
   Widget build(BuildContext context) {
     // דירוג לפי ימים-עד-ריקון עולה — הכי-קרוב-להיגמר ראשון
-    final ranked = [..._items]..sort((a, b) => _daysLeft(a).compareTo(_daysLeft(b)));
+    final ranked = [..._InvData.items]..sort((a, b) => _InvData.daysLeft(a).compareTo(_InvData.daysLeft(b)));
+    // דורשי-הזמנה = פעיל שעדיין לא-הוזמן (הלולאה נסגרת ⇒ המונה יורד)
+    final needOpen = ranked.where((s) => _InvData.band(s) >= 1 && !_ordered.contains(s['name'])).length;
     return DsScaffold(
       title: 'מלאי', subtitle: 'ימים-עד-ריקון מול זמן-אספקה — שלא ייגמר', icon: '📦',
       children: [
         Wrap(spacing: 12, runSpacing: 12, children: [
-          SizedBox(width: 190, child: KpiTile(glyph: '🛒', value: '$needOrder', label: 'דורשי-הזמנה')),
-          SizedBox(width: 190, child: KpiTile(glyph: '📦', value: '${_items.length}', label: 'פריטים')),
+          SizedBox(width: 190, child: KpiTile(glyph: '🛒', value: '$needOpen', label: 'דורשי-הזמנה')),
+          SizedBox(width: 190, child: KpiTile(glyph: '📦', value: '${_InvData.items.length}', label: 'פריטים')),
         ]),
         const SizedBox(height: 8),
         DsSection(title: 'החלטת-הזמנה · הכי-דחוף ראשון', children: [
@@ -101,42 +122,58 @@ class _Inventory extends StatelessWidget {
     );
   }
 
-  // ההחלטה השלמה, כל נגזרת מגולמת באטום-מדף שמצייר את-עצמו (אפס-ציור-ביד). לפי-פס:
-  //  · בטוח       → StatRow שקט (מבט-ריצה יחיד; מלא=מכסה-אספקה+חלון) — לא מציף את הדחופים.
-  //  · דחוף/מתקרב → NeonBars (ההשוואה ריצה-מול-אספקה, נראית-בעין) + StatusChip×2:
-  //       כמות-להזמנה (יעד−נוכחי) · מועד (היום=tone-סכנה / תוך-N-ימים=tone-אזהרה).
+  // המקום-השמור (חוק-7): לולאה גנרית מעל חוזה-התצוגה (_InvData.metaFields) — לא קוד-פר-שדה.
+  // כל שדה-מטא שהרשומה נושאת ⇒ שבב; חסר ⇒ שקט. שדה חדש בחוזה מופיע כאן לבד (אפס-רישום-ביד).
+  List<Widget> _facts(Map<String, dynamic> s) => [
+        for (final f in _InvData.metaFields)
+          if (s[f['key']] != null) StatusChip(label: '${f['prefix']}${s[f['key']]}${f['suffix']}', tone: 0),
+      ];
+
+  Widget _wrap(List<Widget> kids, {double top = 6}) => Padding(
+        padding: EdgeInsets.only(top: top, right: 4),
+        child: Wrap(spacing: 8, runSpacing: 6, children: kids),
+      );
+
+  // ההחלטה השלמה, כל נגזרת מגולמת באטום-מדף שמצייר את-עצמו (אפס-ציור-ביד):
+  //  · הוזמן (d2)  → StatusChip הצלחה "✓ הוזמן" + SoftButton "בטל" (הלולאה סגורה, לא מנדנד)
+  //  · בטוח        → StatRow שקט + facts (מלאי/קצב/ספק/מחיר)
+  //  · דחוף/מתקרב  → NeonBars (ההשוואה) + facts + StatusChip×2 (כמות/מועד) + SoftButton "סמן: הוזמן"
   Widget _row(Map<String, dynamic> s) {
     final name = s['name'] as String;
-    final left = _daysLeft(s);
+    if (_ordered.contains(name)) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: _wrap([
+          StatusChip(label: '✓ $name · הוזמן', tone: 1),
+          SoftButton(label: 'בטל', tone: 0, onTap: () => setState(() => _ordered.remove(name))),
+        ], top: 0),
+      );
+    }
+    final left = _InvData.daysLeft(s);
     final lead = s['lead'] as int;
-    final band = _band(s);
+    final band = _InvData.band(s);
     if (band == 0) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: StatRow(
-          label: name,
-          value: '${left.round()} ימים ריצה',
-          fraction: (left / (lead + _horizon)).clamp(0.0, 1.0),
-        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          StatRow(label: name, value: '${left.round()} ימים ריצה', fraction: (left / (lead + _InvData.horizon)).clamp(0.0, 1.0)),
+          _wrap(_facts(s)),
+        ]),
       );
     }
     final qty = ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
-    final mustIn = _mustOrderIn(s).ceil();
+    final mustIn = _InvData.mustOrderIn(s).ceil();
     final tone = band == 2 ? 2 : 3;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        NeonBars(
-          labels: ['$name · ימים-עד-ריקון', 'זמן-אספקה'],
-          values: [left, lead.toDouble()],
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 6, right: 4),
-          child: Wrap(spacing: 8, runSpacing: 6, children: [
-            StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: tone),
-            StatusChip(label: band == 2 ? 'הזמן היום' : 'הזמן תוך $mustIn ימים', tone: tone),
-          ]),
-        ),
+        NeonBars(labels: ['$name · ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()]),
+        _wrap(_facts(s)),
+        _wrap([
+          StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: tone),
+          StatusChip(label: band == 2 ? 'הזמן היום' : 'הזמן תוך $mustIn ימים', tone: tone),
+        ]),
+        _wrap([SoftButton(label: 'סמן: הוזמן', tone: 1, onTap: () => setState(() => _ordered.add(name)))], top: 8),
       ]),
     );
   }
