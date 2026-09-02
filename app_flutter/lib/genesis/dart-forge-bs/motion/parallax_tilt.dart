@@ -10,6 +10,6 @@ class ForgeParallaxTilt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: Container(width: 120, height: 78, decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.raised2, skin.surface], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: const Color(0xFF000000), offset: const Offset(0, 20), blurRadius: 60, spreadRadius: -18)])))]));
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: Container(width: 120, height: 78, decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.raised2, skin.surface], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: const Color(0xFF000000), offset: const Offset(0, 20), blurRadius: 40, spreadRadius: -18)])))]));
   }
 }
