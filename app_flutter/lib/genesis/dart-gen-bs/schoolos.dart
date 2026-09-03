@@ -18,6 +18,7 @@ import '../dart-ui-bs/premium/dataviz/gauge_meter.dart';
 import '../dart-maor/shekel.dart'; // אטומי-לוגיקה (§21 שכבת-הלוגיקה) — מחווטים מהמדף, לא inline:
 import '../dart-maor/grand-total.dart'; // Σ-לפי-מפתח (סכום)
 import '../dart-maor/clamp-scale.dart'; // נרמול/הצמדה לגבולות
+import '../dart-maor/warehouse-value.dart'; // ערך-מלאי Σ(qty×cost) — אטום-מלאי דומייני
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
@@ -135,9 +136,9 @@ class _InventoryState extends State<_Inventory> {
     final atRisk = [...buckets[2]!, ...buckets[1]!];
     final today = buckets[2]!.length;
     final soon = buckets[1]!.length;
-    // Σ מחווט מאטום-הלוגיקה grandTotal (במקום fold inline)
+    // Σ מחווט מהמדף: יחידות ⇒ grandTotal (גנרי) · ₪-בסיכון ⇒ warehouseValue (אטום-מלאי דומייני Σqty×cost)
     final unitsAtRisk = grandTotal(atRisk, (s) => _InvData.qty(s)).toInt();
-    final ilsAtRisk = grandTotal(atRisk, (s) => _InvData.qty(s) * ((s['price'] as int?) ?? 0)).toInt();
+    final ilsAtRisk = warehouseValue([for (final s in atRisk) {'qty': _InvData.qty(s), 'cost': (s['price'] as int?) ?? 0}]).toInt();
     // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
     const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
     const secTone = {2: 2, 1: 3, 0: 1, -1: 1}; // אקסנט-הסקשן צבוע לפי-מצב (שקע tone החדש ב-DsSection)
