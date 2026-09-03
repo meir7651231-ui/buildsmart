@@ -104,11 +104,11 @@ class _InvData {
   //   target·rate·lead = קלט-תכנון בית-ספרי (runway) — לא נגזרת-מזויפת. available = warehouseOverview.remaining (נגזר).
   //   ⛔ ללא-מקור ⇒ הושמטו (לא מזייפים): barcode · reorderQty · מיקום-מדף · מחסן-מרובה · reserved(=נגזר-מהקצאה).
   static const items = <Map<String, dynamic>>[
-    {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4, 'supplier': 'אופיס-דיפו', 'price': 89, 'sku': 'TNR-118', 'cat': 'משרד', 'unit': 'יח׳', 'minStock': 5},
-    {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5, 'supplier': 'פייפר-מיל', 'price': 45, 'sku': 'PPR-A4', 'cat': 'משרד', 'unit': 'חב׳', 'minStock': 10},
-    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7, 'supplier': 'קלין-קו', 'price': 32, 'sku': 'CLN-01', 'cat': 'אחזקה', 'unit': 'ליטר', 'minStock': 20, 'expiry': '2026-09-08'},
-    {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240, 'sku': 'LAB-KIT', 'cat': 'מעבדה', 'unit': 'ערכה', 'minStock': 8},
-    {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14, 'supplier': 'טק-ויז׳ן', 'price': 1200, 'sku': 'PRJ-X', 'cat': 'אלקטרוניקה', 'unit': 'יח׳', 'minStock': 3},
+    {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4, 'supplier': 'אופיס-דיפו', 'price': 89, 'sku': 'TNR-118', 'cat': 'משרד', 'unit': 'יח׳', 'minStock': 5, 'warehouse': 'מרכזי', 'barcode': '7290011118'},
+    {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5, 'supplier': 'פייפר-מיל', 'price': 45, 'sku': 'PPR-A4', 'cat': 'משרד', 'unit': 'חב׳', 'minStock': 10, 'warehouse': 'מרכזי', 'barcode': '7290011045'},
+    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7, 'supplier': 'קלין-קו', 'price': 32, 'sku': 'CLN-01', 'cat': 'אחזקה', 'unit': 'ליטר', 'minStock': 20, 'expiry': '2026-09-08', 'warehouse': 'אחזקה'},
+    {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240, 'sku': 'LAB-KIT', 'cat': 'מעבדה', 'unit': 'ערכה', 'minStock': 8, 'warehouse': 'מעבדה'},
+    {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14, 'supplier': 'טק-ויז׳ן', 'price': 1200, 'sku': 'PRJ-X', 'cat': 'אלקטרוניקה', 'unit': 'יח׳', 'minStock': 3, 'warehouse': 'מרכזי'},
     {'name': 'מדפסת-מטריצה (הופסק)', 'cur': 2, 'target': 0, 'rate': 0.1, 'lead': 30, 'supplier': 'ישן', 'price': 300, 'sku': 'DOT-OLD', 'cat': 'משרד', 'unit': 'יח׳', 'minStock': 0, 'active': false}, // פריט-לא-פעיל (מצב-מיוחד)
   ];
   // ─── פנקס-התאמות-מלאי (פעולות=state): מלאי-אפקטיבי = בסיס-const + Σהתאמות (חוק-1 · מצב=חיווט) ───
@@ -265,6 +265,36 @@ class _InvData {
   static String csvOf(List<Map<String, dynamic>> items) => toCsv(_csvRows(items), csvEscape) as String;
   static int get csvHeaderLen => _csvHeader.length;
   static bool exportOk(int role) => exportAllowed(false) && can(role, 'inv.export'); // שער-ייצוא ⊕ הרשאה
+
+  // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 18 עמודות-המפרט כשקעי-דאטה ═══
+  //   כמו metaFields (ספק/מחיר): נגזרת(get)=תמיד-מוצגת · שדה(key בלי get)=מוארת רק כשפריט נושא ערך,
+  //   חסר ⇒ שקט. הוספת שדה לדאטה (barcode/warehouse/...) ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
+  static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    {'key': 'sku', 'label': 'מק״ט'},
+    {'label': 'שם', 'get': (Map<String, dynamic> s) => '${s['name']}'},
+    {'key': 'type', 'label': 'סוג'},                 // מקום-שמור
+    {'key': 'cat', 'label': 'קטגוריה'},
+    {'key': 'warehouse', 'label': 'מחסן'},           // מקום-שמור
+    {'key': 'location', 'label': 'מיקום'},           // מקום-שמור
+    {'key': 'unit', 'label': 'יח׳'},
+    {'label': 'כמות', 'get': (Map<String, dynamic> s) => '${curOf(s)}'},
+    {'label': 'זמין', 'get': (Map<String, dynamic> s) => '${available(s)}'},
+    {'key': 'reserved', 'label': 'שמור'},            // מקום-שמור
+    {'key': 'reorderPoint', 'label': 'נק׳-הזמנה'},   // מקום-שמור
+    {'label': 'מינ׳', 'get': (Map<String, dynamic> s) => '${minStock(s)}'},
+    {'key': 'maxStock', 'label': 'מקס'},             // מקום-שמור
+    {'label': 'עלות', 'get': (Map<String, dynamic> s) => '${s['price'] ?? '—'}'},
+    {'key': 'avgCost', 'label': 'עלות-ממוצ׳'},       // מקום-שמור
+    {'key': 'salePrice', 'label': 'מחיר-מכירה'},     // מקום-שמור
+    {'label': 'ערך', 'get': (Map<String, dynamic> s) => shekel(curOf(s) * ((s['price'] as int?) ?? 0))},
+    {'key': 'supplier', 'label': 'ספק'},
+    {'key': 'barcode', 'label': 'ברקוד'},            // מקום-שמור
+    {'key': '__status', 'label': 'סטטוס'},           // נגזרת-מצב (מטופלת ברנדר עם _statusLabel)
+  ];
+  // עמודה מוצגת: נגזרת(get)/סטטוס = תמיד; שדה = רק אם פריט כלשהו נושא ערך (המקום-השמור מואר)
+  static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
+      c['get'] != null || c['key'] == '__status' ||
+      rows.any((s) => s[c['key']] != null && '${s[c['key']]}'.trim().isNotEmpty);
 
   // ═══ הרשאות-פר-תפקיד (הכרעה 23-ג · חוק-6 זהות=הזרקה) = roleOf ⊕ canGrantedAction ═══
   //   3 זהויות-דמו מוזרקות (לא אטום!) + בורר-תפקיד מדגים את הגידור. הפעולות מגודרות פר-מפתח.
@@ -488,24 +518,21 @@ class _InventoryState extends State<_Inventory> {
     ]);
   }
 
-  // 📋 מבט-טבלה: DsTable אמיתי (labels+rows, אטום-מדף) — עמודות-האמת בלבד. אפס-DataGrid (מזייף int rows).
-  //   עמודות = שדות עם מקור-אמת (סוכן-דאטה): מק״ט·שם·קטגוריה·יח׳·כמות·זמין·מינ׳·ערך·ספק·סטטוס.
+  // 📋 מבט-טבלה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid (מזייף int rows).
+  //   העמודות נגזרות מהחוזה: נגזרת=תמיד · שדה=מוארת-כשיש-נתון. שדה חדש בדאטה ⇒ עמודה חדשה, אפס-קוד.
   Widget _table(List<Map<String, dynamic>> rows) {
-    final shown = rows; // כבר עבר איתור⊕חריגה (visible) — לא מסננים שוב
-    const labels = ['מק״ט', 'שם', 'קטגוריה', 'יח׳', 'כמות', 'זמין', 'מינ׳', 'ערך', 'ספק', 'סטטוס'];
+    final cols = [for (final c in _InvData.columnDefs) if (_InvData.colShown(c, rows)) c];
+    final labels = [for (final c in cols) c['label'] as String];
     final data = <List<String>>[
-      for (final s in shown)
+      for (final s in rows)
         [
-          '${s['sku'] ?? '—'}',
-          '${s['name']}',
-          '${s['cat'] ?? '—'}',
-          '${s['unit'] ?? '—'}',
-          '${_InvData.curOf(s)}',
-          '${_InvData.available(s)}',
-          '${_InvData.minStock(s)}',
-          shekel(_InvData.curOf(s) * ((s['price'] as int?) ?? 0)),
-          '${s['supplier'] ?? '—'}',
-          _statusLabel(s),
+          for (final c in cols)
+            if (c['key'] == '__status')
+              _statusLabel(s)
+            else if (c['get'] != null)
+              (c['get'] as String Function(Map<String, dynamic>))(s)
+            else
+              '${s[c['key']] ?? '—'}',
         ],
     ];
     return DsTable(labels: labels, rows: data);
