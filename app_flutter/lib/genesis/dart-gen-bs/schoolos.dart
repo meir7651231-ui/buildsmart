@@ -10,6 +10,7 @@ import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
 import '../dart-ui-bs/bare_stat.dart';
 import '../dart-ui-bs/premium/surfaces/gradient_card.dart';
+import '../dart-ui-bs/premium/surfaces/glass_card.dart'; // מיכל-פאנל-הפריט (child שרירותי) — פאנל-צד
 import '../dart-ui-bs/premium/surfaces/stat_hero.dart';
 import '../dart-ui-bs/premium/lists/media_row.dart';
 import '../dart-ui-bs/premium/actions/segmented_switch.dart';
@@ -98,6 +99,36 @@ class _InvData {
     {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240, 'sku': 'LAB-KIT', 'cat': 'מעבדה', 'unit': 'ערכה', 'minStock': 8},
     {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14, 'supplier': 'טק-ויז׳ן', 'price': 1200, 'sku': 'PRJ-X', 'cat': 'אלקטרוניקה', 'unit': 'יח׳', 'minStock': 3},
   ];
+  // ─── פנקס-התאמות-מלאי (פעולות=state): מלאי-אפקטיבי = בסיס-const + Σהתאמות (חוק-1 · מצב=חיווט) ───
+  //   הבסיס נשאר const (מקור-האמת); הפעולות רושמות התאמה + תנועה — כמו פנקס-תנועות אמיתי.
+  static const today = '2026-09-03'; // תאריך-הזרקה דטרמיניסטי (VERIFY: אין Date.now במנוע)
+  static final Map<String, int> adj = {}; // התאמה מצטברת פר-פריט
+  static int curOf(Map<String, dynamic> s) => (s['cur'] as int) + (adj[s['name']] ?? 0); // מלאי-אפקטיבי
+  static final List<Map<String, dynamic>> extraMoves = []; // תנועות מפעולות (בצורת-ShopIntake)
+  static void receive(Map<String, dynamic> s, int n) { // 📥 קבלת-מלאי
+    if (n <= 0) return;
+    final name = s['name'] as String;
+    adj[name] = (adj[name] ?? 0) + n;
+    extraMoves.insert(0, {'itemId': name, 'date': today, 'qty': n, 'kind': 'buy', 'source': 'קליטה-ידנית', 'cost': n * ((s['price'] as int?) ?? 0)});
+    _ovCache = null; // הקצאה-מול-מלאי תלויה ב-cur ⇒ ריענון
+  }
+  static int issue(Map<String, dynamic> s, int n) { // 📤 הוצאת-מלאי (לא יותר מהקיים)
+    final take = n > curOf(s) ? curOf(s) : n;
+    if (take <= 0) return 0;
+    final name = s['name'] as String;
+    adj[name] = (adj[name] ?? 0) - take;
+    extraMoves.insert(0, {'itemId': name, 'date': today, 'qty': -take, 'kind': 'issue', 'source': 'הוצאה-ידנית', 'cost': 0});
+    _ovCache = null;
+    return take;
+  }
+  static void countTo(Map<String, dynamic> s, int value) { // 🔢 ספירה: קובע מלאי מדויק
+    final name = s['name'] as String;
+    final delta = value - curOf(s);
+    if (delta == 0) return;
+    adj[name] = (adj[name] ?? 0) + delta;
+    extraMoves.insert(0, {'itemId': name, 'date': today, 'qty': delta, 'kind': 'count', 'source': 'ספירת-מלאי', 'cost': 0});
+    _ovCache = null;
+  }
   // חוזה-תצוגה של שדות-מטא = דאטה (לא קוד-פר-שדה). המקום-השמור: הרינדור לולאה גנרית מעל זה.
   // הוספת שורה כאן ⇒ השדה מופיע לכל רשומה שנושאת אותו, אפס-שינוי-קוד (מבחן-הקונכייה, חוק-7).
   // (מלאי 'cur' שודרג מ-chip ל-StatRow נוגזרת נוכחי/יעד — לכן יצא מכאן; אלה נשארים facts אטומיים)
@@ -109,7 +140,7 @@ class _InvData {
     {'key': 'price', 'prefix': '₪ ', 'suffix': ' ליח׳'},
   ];
 
-  static double daysLeft(Map<String, dynamic> s) => (s['cur'] as int) / (s['rate'] as double);
+  static double daysLeft(Map<String, dynamic> s) => curOf(s) / (s['rate'] as double);
   // כמה ימים עד שחייבים להזמין = ימים-עד-ריקון − זמן-אספקה (שלילי ⇒ כבר עברת)
   static double mustOrderIn(Map<String, dynamic> s) => daysLeft(s) - (s['lead'] as int);
   // שלושת-הפסים (הגוי-האמת של "בזמן להזמין"): 2=הזמן-היום · 1=הזמן-בקרוב · 0=בטוח
@@ -120,7 +151,7 @@ class _InvData {
     return 0;
   }
 
-  static int qty(Map<String, dynamic> s) => ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
+  static int qty(Map<String, dynamic> s) => ((s['target'] as int) - curOf(s)).clamp(0, s['target'] as int);
   static int get urgent => items.where((s) => sev(s) == 2).length; // דחיפות-מאוחדת (ל-_Home)
 
   // ─── מודל שני (מפורק): צריכה-מוקצית-לצרכנים → מחסור. חוברים לקצב ל"מקסימום-מטרה". ───
@@ -142,14 +173,14 @@ class _InvData {
   ];
   // db בצורת-הקלט של intakeLog: shopItems id=name (הפריטים כאן מזוהים-בשם)
   static Map<String, Object?> get movDb => {
-        'shopIntakes': movements,
+        'shopIntakes': [...extraMoves, ...movements], // תנועות-הפעולות + הבסיס (intakeLog ממיין תאריך-יורד)
         'shopItems': [for (final s in items) {'id': s['name'], 'name': s['name']}],
       };
 
   static String norm(dynamic s) => (s as String).trim(); // שקע-נרמול (חוק-1) — מוזרק ל-warehouseOverview
   // המלאי בצורת-הקלט של האטום {name, qty, cost}
   static List<Map<String, dynamic>> get _wh =>
-      [for (final s in items) {'name': s['name'], 'qty': s['cur'], 'cost': s['price'] ?? 0}];
+      [for (final s in items) {'name': s['name'], 'qty': curOf(s), 'cost': s['price'] ?? 0}];
   // הסקירה המפורקת פר-שם: {item, allocated, remaining, short, byProject}
   static Map<String, Map<String, dynamic>>? _ovCache;
   static Map<String, Map<String, dynamic>> overview() =>
@@ -157,7 +188,7 @@ class _InvData {
 
   static bool isShort(Map<String, dynamic> s) => overview()[s['name']]?['short'] == true;
   static int allocated(Map<String, dynamic> s) => ((overview()[s['name']]?['allocated'] as num?) ?? 0).toInt();
-  static int deficit(Map<String, dynamic> s) => (allocated(s) - (s['cur'] as int)).clamp(0, 1 << 30); // חסר-לכיסוי-הקצאה
+  static int deficit(Map<String, dynamic> s) => (allocated(s) - curOf(s)).clamp(0, 1 << 30); // חסר-לכיסוי-הקצאה
 
   // 🎯 דחיפות מאוחדת (מקסום-מטרה): short OR band. גירעון-הקצאה ⇒ "חייבים" גם אם הריצה ארוכה.
   static int sev(Map<String, dynamic> s) {
@@ -173,12 +204,12 @@ class _InvData {
 
   // ─── KPI-8 · פעולת-יסוד "הערכת-מצב" (כולם מנועי-מדף/שדות-אמת, אפס-StatBlock) ───
   static int minStock(Map<String, dynamic> s) => (s['minStock'] as int?) ?? 0;
-  static bool belowMin(Map<String, dynamic> s) => (s['cur'] as int) < minStock(s); // מקור: ShopItem.minStock
-  static bool isOut(Map<String, dynamic> s) => (s['cur'] as int) <= 0;             // אזל
+  static bool belowMin(Map<String, dynamic> s) => curOf(s) < minStock(s); // מקור: ShopItem.minStock
+  static bool isOut(Map<String, dynamic> s) => curOf(s) <= 0;             // אזל
   static bool slow(Map<String, dynamic> s) => (s['rate'] as double) < 0.5;          // איטי-תנועה (קצב-תכנון נמוך)
   static bool expiring(Map<String, dynamic> s) => s['expiry'] != null;              // מקור: ShopIntake.expiry
   // available = מלאי − הוקצה-לצרכנים (warehouseOverview.remaining) — נגזר, לא stored 'reserved'
-  static int available(Map<String, dynamic> s) => ((overview()[s['name']]?['remaining'] as num?) ?? (s['cur'] as int)).toInt();
+  static int available(Map<String, dynamic> s) => ((overview()[s['name']]?['remaining'] as num?) ?? curOf(s)).toInt();
 
   // חיפוש-איתור: התאמת-מחרוזת על שם/מק״ט/קטגוריה (פעולת-יסוד "איתור")
   static bool matchesQ(Map<String, dynamic> s, String q) {
@@ -225,8 +256,8 @@ class _InventoryState extends State<_Inventory> {
     // קיבוץ לפי דחיפות-מאוחדת sev (short OR band) — האיחוד מניע את הטריאז', לא הקצב-בלבד.
     // KPI-8 (המפרט) על כל-המלאי — כולם מנועי-מדף/שדות-אמת (§20-ג · אפס StatBlock/math.sin):
     final all = _InvData.items;
-    final totalQty = grandTotal(all, (s) => (s['cur'] as int)).toInt(); // Σ כמות
-    final totalValue = warehouseValue([for (final s in all) {'qty': s['cur'], 'cost': s['price'] ?? 0}]).toInt(); // Σ qty×cost
+    final totalQty = grandTotal(all, (s) => _InvData.curOf(s)).toInt(); // Σ כמות (מלאי-אפקטיבי)
+    final totalValue = warehouseValue([for (final s in all) {'qty': _InvData.curOf(s), 'cost': s['price'] ?? 0}]).toInt(); // Σ qty×cost
     final belowMinN = all.where(_InvData.belowMin).length;
     final outN = all.where(_InvData.isOut).length;
     final slowN = all.where(_InvData.slow).length;
@@ -312,7 +343,8 @@ class _InventoryState extends State<_Inventory> {
         () {
           final intake = (r as Map)['intake'] as Map;
           final name = r['itemName'];
-          final kind = intake['kind'] == 'donation' ? '🎁 תרומה-בעין' : '🛒 קליטה';
+          final k = intake['kind'];
+          final kind = k == 'donation' ? '🎁 תרומה-בעין' : k == 'issue' ? '📤 הוצאה' : k == 'count' ? '🔢 ספירה' : '🛒 קליטה';
           final cost = (intake['cost'] as num).toInt();
           return TimelineItem(
             title: '$kind · $name',
@@ -335,10 +367,10 @@ class _InventoryState extends State<_Inventory> {
           '${s['name']}',
           '${s['cat'] ?? '—'}',
           '${s['unit'] ?? '—'}',
-          '${s['cur']}',
+          '${_InvData.curOf(s)}',
           '${_InvData.available(s)}',
           '${_InvData.minStock(s)}',
-          shekel((s['cur'] as int) * ((s['price'] as int?) ?? 0)),
+          shekel(_InvData.curOf(s) * ((s['price'] as int?) ?? 0)),
           '${s['supplier'] ?? '—'}',
           _statusLabel(s),
         ],
@@ -358,6 +390,79 @@ class _InventoryState extends State<_Inventory> {
                   : _InvData.sev(s) == 1
                       ? '🟠 בקרוב'
                       : '🟢 תקין';
+
+  // ═══ פאנל-פריט-נבחר (צד) · GlassCard(child) · פעולת-יסוד "ביצוע" — כל הפעולות על פריט-אחד ═══
+  //   זהות + מצב-אמת + פעולות (SoftButton: קבלה/הוצאה/מלא-ליעד/הזמן) + תנועות-הפריט (intakeLog מסונן).
+  //   הפעולות משנות את פנקס-ההתאמות (curOf) ורושמות תנועה — המסך והפאנל מתעדכנים יחד.
+  void _openPanel(Map<String, dynamic> s) {
+    final name = s['name'] as String;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) {
+          void act(void Function() f) {
+            f();
+            setSheet(() {});
+            setState(() {}); // רענון גם למסך שמאחור
+          }
+          final cur = _InvData.curOf(s), target = s['target'] as int;
+          final ordered = _ordered.contains(name);
+          final moves = (intakeLog(_InvData.movDb)['rows'] as List).where((r) => (r as Map)['itemName'] == name).toList();
+          return DraggableScrollableSheet(
+            initialChildSize: 0.72, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
+            builder: (ctx, scroll) => Padding(
+              padding: const EdgeInsets.all(12),
+              child: GlassCard(
+                child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                  MediaRow(glyph: '📦', title: name, subtitle: '${s['sku'] ?? ''} · ${s['cat'] ?? ''} · ${s['unit'] ?? ''}'),
+                  _gap(12),
+                  StatRow(label: 'מלאי מול יעד', value: '$cur מתוך $target', fraction: target == 0 ? 0 : (cur / target).clamp(0.0, 1.0)),
+                  _gap(10),
+                  Row(children: [
+                    BareStat(value: '$cur', label: 'ביד', inkColor: _ink, mutedColor: _muted),
+                    BareStat(value: '${_InvData.available(s)}', label: 'זמין', inkColor: _ink, mutedColor: _muted),
+                    BareStat(value: '${_InvData.minStock(s)}', label: 'מינ׳', inkColor: _muted, mutedColor: _muted),
+                    BareStat(value: shekel(cur * ((s['price'] as int?) ?? 0)), label: 'ערך', inkColor: _acc, mutedColor: _muted),
+                  ]),
+                  _wrap(_facts(s)),
+                  _gap(14),
+                  const Text('פעולות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
+                  _gap(8),
+                  Wrap(spacing: 8, runSpacing: 8, children: [
+                    SoftButton(label: '📥 קבלה +5', tone: 1, onTap: () => act(() => _InvData.receive(s, 5))),
+                    SoftButton(label: '📤 הוצאה −5', tone: 2, onTap: () => act(() => _InvData.issue(s, 5))),
+                    SoftButton(label: '📦 מלא-ליעד', tone: 0, onTap: () => act(() => _InvData.countTo(s, target))),
+                    SoftButton(label: ordered ? '↩ בטל הזמנה' : '🛒 סמן הוזמן', tone: 0, onTap: () => act(() => ordered ? _ordered.remove(name) : _ordered.add(name))),
+                  ]),
+                  _gap(16),
+                  Text('תנועות הפריט · ${moves.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
+                  _gap(8),
+                  if (moves.isEmpty)
+                    const EmptyState(glyph: '📭', message: 'אין תנועות רשומות לפריט')
+                  else
+                    for (final r in moves) _moveTile((r as Map)['intake'] as Map, s),
+                ]),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // שורת-תנועה יחידה (TimelineItem) — משותפת לפאנל וליומן; kind→תווית
+  Widget _moveTile(Map intake, Map<String, dynamic> s) {
+    final k = intake['kind'];
+    final kind = k == 'donation' ? '🎁 תרומה-בעין' : k == 'issue' ? '📤 הוצאה' : k == 'count' ? '🔢 ספירה' : '🛒 קליטה';
+    final cost = (intake['cost'] as num).toInt();
+    return TimelineItem(
+      title: kind,
+      time: '${intake['date']}',
+      body: '${intake['qty']} ${s['unit'] ?? 'יח׳'} · ${intake['source']}${cost > 0 ? ' · ${shekel(cost)}' : ''}',
+    );
+  }
 
   // המקום-השמור (חוק-7): לולאה גנרית מעל חוזה-התצוגה (_InvData.metaFields) — לא קוד-פר-שדה.
   // כל שדה-מטא שהרשומה נושאת ⇒ שבב; חסר ⇒ שקט. שדה חדש בחוזה מופיע כאן לבד (אפס-רישום-ביד).
@@ -388,7 +493,15 @@ class _InventoryState extends State<_Inventory> {
     final left = _InvData.daysLeft(s);
     final lead = s['lead'] as int;
     final band = _InvData.band(s);
-    final header = MediaRow(glyph: '📦', title: name, subtitle: '${left.round()} ימים ריצה · אספקה $lead י׳');
+    // MediaRow בולע את הקליק (InkWell פנימי no-op) ⇒ כפתור-שברון נפרד כשקע-הפתיחה (מחוץ ל-ink שלו).
+    final header = Row(children: [
+      Expanded(child: MediaRow(glyph: '📦', title: name, subtitle: '${left.round()} ימים ריצה · אספקה $lead י׳')),
+      IconButton(
+        onPressed: () => _openPanel(s),
+        icon: const Icon(Icons.chevron_left, color: _acc, size: 26),
+        tooltip: 'פרטים ופעולות',
+      ),
+    ]);
 
     if (_ordered.contains(name)) {
       return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -421,7 +534,7 @@ class _InventoryState extends State<_Inventory> {
 
   // 🎯 מבט-החלטה: מועד(AlertBanner 2-ערוצים) · כמות(BareStat×3 הפרש) · עלות(BareStat×3 מכפלה) · פעולה
   Widget _viewDecision(Map<String, dynamic> s) {
-    final cur = s['cur'] as int, sev = _InvData.sev(s);
+    final cur = _InvData.curOf(s), sev = _InvData.sev(s);
     final qty = _InvData.orderQty(s); // כמות מאוחדת (יעד+הקצאה)
     final mustIn = _InvData.mustOrderIn(s).ceil();
     final price = s['price'] as int?;
@@ -452,7 +565,7 @@ class _InventoryState extends State<_Inventory> {
 
   // 📊 מבט-ניתוח: השוואה(NeonBars+מרווח+כיסוי-StatRow) · מד-דחיפות(GaugeMeter) · ריצה(BareStat×3 חילוק)
   Widget _viewAnalysis(Map<String, dynamic> s) {
-    final left = _InvData.daysLeft(s), lead = s['lead'] as int, cur = s['cur'] as int;
+    final left = _InvData.daysLeft(s), lead = s['lead'] as int, cur = _InvData.curOf(s);
     final rate = s['rate'] as double;
     final margin = _InvData.mustOrderIn(s);
     final band = _InvData.band(s);
@@ -501,7 +614,7 @@ class _InventoryState extends State<_Inventory> {
 
   // מלאי מול יעד (StatRow יחס) + חוסר-עד-היעד (BareStat) — סוכן-A: יחס+חוסר, לא StatRow-יחיד.
   Widget _viewStock(Map<String, dynamic> s) {
-    final cur = s['cur'] as int, target = s['target'] as int;
+    final cur = _InvData.curOf(s), target = s['target'] as int;
     final deficit = (target - cur).clamp(0, target);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       StatRow(label: 'מלאי מול יעד בריא', value: '$cur מתוך $target', fraction: target == 0 ? 0 : cur / target),
