@@ -73,8 +73,8 @@ class _InvData {
   ];
   // חוזה-תצוגה של שדות-מטא = דאטה (לא קוד-פר-שדה). המקום-השמור: הרינדור לולאה גנרית מעל זה.
   // הוספת שורה כאן ⇒ השדה מופיע לכל רשומה שנושאת אותו, אפס-שינוי-קוד (מבחן-הקונכייה, חוק-7).
+  // (מלאי 'cur' שודרג מ-chip ל-StatRow נוגזרת נוכחי/יעד — לכן יצא מכאן; אלה נשארים facts אטומיים)
   static const metaFields = <Map<String, String>>[
-    {'key': 'cur', 'prefix': '', 'suffix': ' ביד'},
     {'key': 'rate', 'prefix': '', 'suffix': '/יום'},
     {'key': 'supplier', 'prefix': '🏭 ', 'suffix': ''},
     {'key': 'price', 'prefix': '₪ ', 'suffix': ' ליח׳'},
@@ -156,19 +156,20 @@ class _InventoryState extends State<_Inventory> {
         child: GradientCard(child: inner),
       );
 
-  // הצגה מקסימלית = הרכבת אטומי-הצגה (לא כרטיס-סביב-ערימה). כל פריט מרכיב, בתוך GradientCard:
-  //  · כותרת-זהות+מצב → MediaRow (glyph-מצב · שם · תמצית-ריצה · מילת-מצב) — השם כבר לא דחוס בתווית-בר
-  //  · ההשוואה        → NeonBars (labels נקיים: ימים-עד-ריקון מול זמן-אספקה) — פעיל בלבד
-  //  · עובדות-הגלם    → facts (מלאי/קצב/ספק/מחיר — לולאה גנרית על metaFields)
-  //  · ההחלטה         → StatusChip×2 (כמות/מועד) — פעיל בלבד
-  //  · הפעולה+הלולאה  → SoftButton "סמן: הוזמן" / "בטל" (זיכרון d2)
+  // הצגה מקסימלית = הרכבת אטומי-הצגה, כל חלקיק מפורק לפעולות-היסוד שלו (לא אטום-אחד עצל):
+  //  · זהות+מצב  → MediaRow (glyph · שם · תמצית-ריצה)
+  //  · ההשוואה   → NeonBars (גדלֵי ריצה/אספקה; הפער נראה-בעין + נאמר במועד — לא צריך אטום-מרווח נפרד)
+  //  · מלאי      → StatRow (נוכחי מתוך יעד + בר-מילוי — פעולות נוכחי·יעד·יחס, לא "N ביד" יחיד)
+  //  · facts     → קצב/ספק/מחיר (chip אטומי לגיטימי, לולאה גנרית על metaFields)
+  //  · ההחלטה    → StatusChip×2 (כמות/מועד) · הפעולה → SoftButton (זיכרון d2)
   Widget _row(Map<String, dynamic> s) {
     final name = s['name'] as String;
     final left = _InvData.daysLeft(s);
     final lead = s['lead'] as int;
+    final cur = s['cur'] as int;
+    final target = s['target'] as int;
     final ordered = _ordered.contains(name);
     final band = _InvData.band(s);
-    // המצב נישא בכותרת-הסקשן (הקיבוץ) ⇒ הכותרת-פנימית נקייה: אייקון-פריט + שם + תמצית-ריצה, בלי כפילות-מצב.
     final kids = <Widget>[
       MediaRow(glyph: '📦', title: name, subtitle: '${left.round()} ימים ריצה · אספקה $lead י׳'),
     ];
@@ -179,6 +180,8 @@ class _InventoryState extends State<_Inventory> {
     if (band >= 1) {
       kids.add(Padding(padding: const EdgeInsets.only(top: 8), child: NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()])));
     }
+    // מלאי מול יעד: פעולת נוכחי·יעד·יחס (בר-מילוי), לא "N ביד" יחיד. ניסוח RTL-בטוח ("מתוך").
+    kids.add(Padding(padding: const EdgeInsets.only(top: 8), child: StatRow(label: 'מלאי מול יעד', value: '$cur מתוך $target', fraction: target == 0 ? 0 : cur / target)));
     kids.add(_wrap(_facts(s)));
     if (band >= 1) {
       final qty = ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
