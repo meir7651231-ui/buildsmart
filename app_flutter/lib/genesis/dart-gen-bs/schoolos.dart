@@ -355,6 +355,8 @@ class _InventoryState extends State<_Inventory> {
   int _filter = 0; // 0=הכל · 1=מתחת-מינ׳ · 2=פקיעה · 3=אזלו (FilterChipPill→סינון-חריגה)
   int _mode = 0; // 0=🎯 חכם (טריאז') · 1=📋 טבלה (DsTable כל-העמודות) — SegmentedSwitch→תצוגה
   int _role = 0; // 0=מנהל · 1=מחסן · 2=צפייה (חוק-6 זהות-מוזרקת; בורר-תפקיד מדגים גידור-הרשאות)
+  bool _loading = false; // מצב-מסך שמור: טעינה (רענון-דאטה אמיתי מדגים; חיבור-אסינק עתידי מאיר אותו)
+  String? _error; // מצב-מסך שמור: שגיאה (מקום-שמור — מאיר כש-fetch נכשל; null בזרימה-התקינה)
 
   // צ׳יפ-סינון מבוקר: הזרקת-צבעים (חוק-6) + מיפוי selected/onTap ל-_filter
   Widget _fchip(int i, String label) => FilterChipPill(
@@ -407,6 +409,9 @@ class _InventoryState extends State<_Inventory> {
         // פס-עליון: חיפוש-מבוקר (DsSearch) + יצירה + ייצוא — מגודרים פר-הרשאה (canGrantedAction)
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          const SizedBox(width: 6),
+          // רענון — מדגים את מצב-הטעינה השמור (חיבור-אסינק אמיתי יאיר אותו זהה)
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
           if (_InvData.can(_role, 'inv.add')) ...[
             const SizedBox(width: 8),
             Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕', tone: 0, onTap: () {})),
@@ -461,7 +466,12 @@ class _InventoryState extends State<_Inventory> {
           child: SegmentedSwitch(items: const ['🎯 חכם', '📋 טבלה', '📜 תנועות'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
         ),
         const SizedBox(height: 10),
-        if (_mode == 2)
+        // מצבי-מסך שמורים (מקום-שמור): טעינה + שגיאה מאירים במצב-אמת; אחרת התוכן הרגיל.
+        if (_loading)
+          _loadingView()
+        else if (_error != null)
+          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
+        else if (_mode == 2)
           _movements() // אימות: יומן-תנועות (מנוע intakeLog + TimelineItem) — לא מסונן (ציר-אמת)
         else if (shown == 0)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין פריטים תואמים לחיפוש/סינון'))
@@ -494,6 +504,29 @@ class _InventoryState extends State<_Inventory> {
       ],
     );
   }
+
+  // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
+  void _refresh() {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (mounted) setState(() => _loading = false);
+    });
+  }
+
+  // מצב-טעינה שמור: מחוון + טקסט (אטום-מסגרת סטנדרטי; אפס ShimmerSkeleton מזייף)
+  Widget _loadingView() => Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            CircularProgressIndicator(color: _acc),
+            const SizedBox(height: 14),
+            const Text('טוען מלאי…', style: TextStyle(color: _muted, fontSize: 14)),
+          ]),
+        ),
+      );
 
   // 📜 מבט-תנועות (פעולת-יסוד "אימות"): מנוע-האמת intakeLog מחזיר {rows חדש-ראשון, totalCost},
   //   כל שורה מגולמת ב-TimelineItem (title/time/body). אפס-timeline_flow (מזייף int events).
