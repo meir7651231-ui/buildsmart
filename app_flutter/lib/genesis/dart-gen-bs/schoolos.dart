@@ -20,6 +20,7 @@ const _acc = DsTokens.accent;
 const _danger = Color(0xFFF43F5E);
 const _ok = Color(0xFF34D399);
 const _muted = Color(0xFF9AA0BE);
+const _ink = Color(0xFFF2F3FF);
 
 void main() => runApp(const SchoolOsApp());
 
@@ -218,12 +219,23 @@ class _InventoryState extends State<_Inventory> {
       final mustIn = _InvData.mustOrderIn(s).ceil();
       final tone = band == 2 ? 2 : 3;
       final price = s['price'] as int?;
-      // ההחלטה = הרכבת פעולות-יסוד: כמות(הפרש) · מועד · עלות(מכפלה כמות×מחיר, רק אם יש מחיר)
+      // ההחלטה: כמות(הפרש) · מועד
       kids.add(_wrap([
         StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: tone),
         StatusChip(label: band == 2 ? 'הזמן היום' : 'הזמן תוך $mustIn ימים', tone: tone),
-        if (price != null) StatusChip(label: '₪ ${_ils(qty * price)} עלות', tone: tone),
       ]));
+      // עלות = יכולת-מורכבת (הכרעה 23-ג): המכפלה המלאה כמות×מחיר=עלות, שלושה BareStat נושאי-ערך-אמת
+      //   (stat_block/linear_progress נפסלו — מזייפי-דאטה §20-ג). data-driven: רק אם price קיים.
+      if (price != null) {
+        kids.add(Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Row(children: [
+            BareStat(value: '$qty', label: 'כמות', inkColor: _ink, mutedColor: _muted),
+            BareStat(value: '₪${_ils(price)}', label: 'מחיר ליח׳', inkColor: _ink, mutedColor: _muted),
+            BareStat(value: '₪${_ils(qty * price)}', label: '= עלות הזמנה', inkColor: _acc, mutedColor: _muted),
+          ]),
+        ));
+      }
       kids.add(_wrap([SoftButton(label: 'סמן: הוזמן', tone: 1, onTap: () => setState(() => _ordered.add(name)))], top: 8));
     }
     return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: kids));
