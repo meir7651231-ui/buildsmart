@@ -28,6 +28,10 @@ import '../dart-ui-bs/screens__manager_dashboard_screen/filter_chip_pill.dart'; 
 import '../dart-ui-bs/premium/feedback/empty_state.dart'; // מצב "אין-תוצאות" (glyph+message)
 import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון-בלחיצה) — לא DataGrid המזייף
 import '../dart-maor/intake-log.dart'; // מנוע-אמת: יומן-קליטות (חדש-ראשון + Σעלות) — פעולת-יסוד "אימות"
+import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפי-ציון (מדף)
+import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
+import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (מדף)
+import '../dart-maor/finder-matches.dart'; // חריגה: סינון-רב-צירי AND (מדף)
 import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט-ציר-זמן (title/time/body) — לא timeline_flow המזייף
 
 const _acc = DsTokens.accent;
@@ -211,11 +215,32 @@ class _InvData {
   // available = מלאי − הוקצה-לצרכנים (warehouseOverview.remaining) — נגזר, לא stored 'reserved'
   static int available(Map<String, dynamic> s) => ((overview()[s['name']]?['remaining'] as num?) ?? curOf(s)).toInt();
 
-  // חיפוש-איתור: התאמת-מחרוזת על שם/מק״ט/קטגוריה (פעולת-יסוד "איתור")
-  static bool matchesQ(Map<String, dynamic> s, String q) {
-    final t = q.trim();
-    if (t.isEmpty) return true;
-    return '${s['name']} ${s['sku'] ?? ''} ${s['cat'] ?? ''}'.contains(t);
+  // ═══ איתור (הכרעה 23-ג · תובנה·3) = DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch ═══
+  //   לא `.contains` שטוח — הרכבת-מנועי-מדף: נרמול-עברי (סופיות/ניקוד) + ניקוד רב-מילתי AND
+  //   (כל מילה חייבת מונח-מתאים) + סינון-ציון-0 + מיון-יורד-לפי-רלוונטיות. השקעים מוזרקים (חוק-1).
+  static const Map<String, String> _finals = {'k1': 'כ', 'k2': 'מ', 'k3': 'נ', 'k4': 'פ', 'k5': 'צ'};
+  static String _norm(dynamic q) => normSearch(q, _finals);            // שקע-norm
+  static Iterable _expand(dynamic q, dynamic norm) => [norm(q)];        // שקע-expand (זהות; אין טבלת-תעתיק)
+  static num _score(dynamic exp, dynamic term) => _norm(term).contains('$exp') ? 100 : 0; // שקע-score (זוג יחיד)
+  static num _scoreOf(dynamic q, dynamic terms) => smartScore(q, terms, _norm, _expand, _score) as num;
+  static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty; // שקע-hasQuery
+  static List<String> _termsOf(Map<String, dynamic> s) => ['${s['name']}', '${s['sku'] ?? ''}', '${s['cat'] ?? ''}'];
+  static List<Map<String, dynamic>> searchItems(List<Map<String, dynamic>> items, String q) =>
+      (smartFilter(q, items, (it) => _termsOf(it as Map<String, dynamic>), _hasQuery, _scoreOf) as List).cast<Map<String, dynamic>>();
+
+  // ═══ חריגה (הכרעה 23-ג · תובנה·2) = FilterChipPill ⊕ finderMatches ═══
+  //   לא פרדיקט-בוליאני-ידני — מנוע-סינון-רב-צירי (AND על נעילות); הצ׳יפ בוחר ציר-נעילה פעיל.
+  static const Map<int, String> _axisOf = {1: 'below', 2: 'expiry', 3: 'out'};
+  static String _axisValue(Map<dynamic, dynamic> db, dynamic f, dynamic axis) { // שקע-finderAxisValue
+    final s = f as Map<String, dynamic>;
+    if (axis == 'below') return belowMin(s) ? '1' : '0';
+    if (axis == 'expiry') return expiring(s) ? '1' : '0';
+    if (axis == 'out') return isOut(s) ? '1' : '0';
+    return '';
+  }
+  static List<Map<String, dynamic>> filterItems(List<Map<String, dynamic>> items, int chip) {
+    final locks = chip == 0 ? <dynamic, dynamic>{} : <dynamic, dynamic>{_axisOf[chip]!: '1'};
+    return finderMatches({'families': items}, locks, _axisValue).cast<Map<String, dynamic>>();
   }
 }
 
@@ -242,11 +267,6 @@ class _InventoryState extends State<_Inventory> {
         outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
       );
 
-  // פרדיקט-חריגה פר-מצב-הסינון (פעולת-יסוד "זיהוי-חריגה")
-  bool _pass(Map<String, dynamic> s) =>
-      _InvData.matchesQ(s, _q) &&
-      (_filter == 1 ? _InvData.belowMin(s) : _filter == 2 ? _InvData.expiring(s) : _filter == 3 ? _InvData.isOut(s) : true);
-
   @override
   Widget build(BuildContext context) {
     // דירוג לפי ימים-עד-ריקון עולה — הכי-קרוב-להיגמר ראשון
@@ -263,10 +283,12 @@ class _InventoryState extends State<_Inventory> {
     final slowN = all.where(_InvData.slow).length;
     final expN = all.where(_InvData.expiring).length;
     final urgentAll = all.where((s) => !_ordered.contains(s['name']) && _InvData.sev(s) >= 1).length; // hero=המטרה
-    // טריאז' מסונן (חיפוש+צ׳יפ) — פעולת-יסוד "הכרעה" מקבצת פר-מצב
+    // איתור⊕חריגה (הכרעה 23-ג): searchItems=DsSearch⊕smartFilter⊕smartScore⊕normSearch ·
+    //   filterItems=finderMatches. הפייפליין רץ פעם-אחת ומזין גם טריאז' וגם טבלה (visible).
+    final visible = _InvData.filterItems(_InvData.searchItems(ranked, _q), _filter);
+    // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-מצב
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
-    for (final s in ranked) {
-      if (!_pass(s)) continue;
+    for (final s in visible) {
       buckets[_ordered.contains(s['name']) ? -1 : _InvData.sev(s)]!.add(s);
     }
     final shown = buckets.values.fold<int>(0, (n, b) => n + b.length);
@@ -321,7 +343,7 @@ class _InventoryState extends State<_Inventory> {
         else if (shown == 0)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין פריטים תואמים לחיפוש/סינון'))
         else if (_mode == 1)
-          _table(ranked)
+          _table(visible)
         else
           for (final st in const [2, 1, 0, -1])
             if (buckets[st]!.isNotEmpty)
@@ -358,7 +380,7 @@ class _InventoryState extends State<_Inventory> {
   // 📋 מבט-טבלה: DsTable אמיתי (labels+rows, אטום-מדף) — עמודות-האמת בלבד. אפס-DataGrid (מזייף int rows).
   //   עמודות = שדות עם מקור-אמת (סוכן-דאטה): מק״ט·שם·קטגוריה·יח׳·כמות·זמין·מינ׳·ערך·ספק·סטטוס.
   Widget _table(List<Map<String, dynamic>> rows) {
-    final shown = rows.where(_pass).toList();
+    final shown = rows; // כבר עבר איתור⊕חריגה (visible) — לא מסננים שוב
     const labels = ['מק״ט', 'שם', 'קטגוריה', 'יח׳', 'כמות', 'זמין', 'מינ׳', 'ערך', 'ספק', 'סטטוס'];
     final data = <List<String>>[
       for (final s in shown)
