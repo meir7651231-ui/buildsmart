@@ -26,6 +26,8 @@ import '../dart-ui-bs/ds/ds_search.dart'; // חיפוש-מבוקר (value+onChan
 import '../dart-ui-bs/screens__manager_dashboard_screen/filter_chip_pill.dart'; // צ׳יפ-סינון מבוקר
 import '../dart-ui-bs/premium/feedback/empty_state.dart'; // מצב "אין-תוצאות" (glyph+message)
 import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון-בלחיצה) — לא DataGrid המזייף
+import '../dart-maor/intake-log.dart'; // מנוע-אמת: יומן-קליטות (חדש-ראשון + Σעלות) — פעולת-יסוד "אימות"
+import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט-ציר-זמן (title/time/body) — לא timeline_flow המזייף
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat דורש הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -129,6 +131,21 @@ class _InvData {
     {'id': 'jan', 'name': 'אחזקה', 'ayin': {'mat': [{'name': 'חומרי ניקוי', 'qty': 20}]}},
     {'id': 'cls', 'name': 'כיתות א׳-ו׳', 'ayin': {'mat': [{'name': 'נייר A4 (חבילות)', 'qty': 25}, {'name': 'מקרנים (חלופיים)', 'qty': 5}]}},
   ];
+  // ─── יומן-תנועות בצורת-ShopIntake (מקור-אמת: domain.ts:955-968) — מוזן למנוע-האמת intakeLog ───
+  //   itemId·date·qty·kind·source·cost = השדות האמיתיים של ShopIntake. אפס-המצאה.
+  static const movements = <Map<String, dynamic>>[
+    {'itemId': 'טונר מדפסת', 'date': '2026-09-01', 'qty': 12, 'kind': 'buy', 'source': 'אופיס-דיפו', 'cost': 1068},
+    {'itemId': 'נייר A4 (חבילות)', 'date': '2026-08-28', 'qty': 40, 'kind': 'buy', 'source': 'פייפר-מיל', 'cost': 1800},
+    {'itemId': 'חומרי ניקוי', 'date': '2026-08-25', 'qty': 60, 'kind': 'donation', 'source': 'תרומת-הורים', 'cost': 0},
+    {'itemId': 'ערכות מעבדה', 'date': '2026-08-20', 'qty': 10, 'kind': 'buy', 'source': 'סיינס-לאב', 'cost': 2400},
+    {'itemId': 'טונר מדפסת', 'date': '2026-08-15', 'qty': 6, 'kind': 'buy', 'source': 'אופיס-דיפו', 'cost': 534},
+  ];
+  // db בצורת-הקלט של intakeLog: shopItems id=name (הפריטים כאן מזוהים-בשם)
+  static Map<String, Object?> get movDb => {
+        'shopIntakes': movements,
+        'shopItems': [for (final s in items) {'id': s['name'], 'name': s['name']}],
+      };
+
   static String norm(dynamic s) => (s as String).trim(); // שקע-נרמול (חוק-1) — מוזרק ל-warehouseOverview
   // המלאי בצורת-הקלט של האטום {name, qty, cost}
   static List<Map<String, dynamic>> get _wh =>
@@ -265,10 +282,12 @@ class _InventoryState extends State<_Inventory> {
         // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (כל-העמודות)
         Align(
           alignment: Alignment.centerRight,
-          child: SegmentedSwitch(items: const ['🎯 חכם', '📋 טבלה'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+          child: SegmentedSwitch(items: const ['🎯 חכם', '📋 טבלה', '📜 תנועות'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
         ),
         const SizedBox(height: 10),
-        if (shown == 0)
+        if (_mode == 2)
+          _movements() // אימות: יומן-תנועות (מנוע intakeLog + TimelineItem) — לא מסונן (ציר-אמת)
+        else if (shown == 0)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין פריטים תואמים לחיפוש/סינון'))
         else if (_mode == 1)
           _table(ranked)
@@ -280,6 +299,28 @@ class _InventoryState extends State<_Inventory> {
               ]),
       ],
     );
+  }
+
+  // 📜 מבט-תנועות (פעולת-יסוד "אימות"): מנוע-האמת intakeLog מחזיר {rows חדש-ראשון, totalCost},
+  //   כל שורה מגולמת ב-TimelineItem (title/time/body). אפס-timeline_flow (מזייף int events).
+  Widget _movements() {
+    final log = intakeLog(_InvData.movDb);
+    final rows = log['rows'] as List;
+    final totalCost = (log['totalCost'] as num).toInt();
+    return DsSection(title: '📜 יומן-תנועות · ${rows.length} · Σ ${shekel(totalCost)}', children: [
+      for (final r in rows)
+        () {
+          final intake = (r as Map)['intake'] as Map;
+          final name = r['itemName'];
+          final kind = intake['kind'] == 'donation' ? '🎁 תרומה-בעין' : '🛒 קליטה';
+          final cost = (intake['cost'] as num).toInt();
+          return TimelineItem(
+            title: '$kind · $name',
+            time: '${intake['date']}',
+            body: '${intake['qty']} ${_InvData.items.firstWhere((s) => s['name'] == name, orElse: () => const {'unit': 'יח׳'})['unit'] ?? 'יח׳'} · ${intake['source']}${cost > 0 ? ' · ${shekel(cost)}' : ''}',
+          );
+        }(),
+    ]);
   }
 
   // 📋 מבט-טבלה: DsTable אמיתי (labels+rows, אטום-מדף) — עמודות-האמת בלבד. אפס-DataGrid (מזייף int rows).
