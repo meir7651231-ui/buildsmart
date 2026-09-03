@@ -11,6 +11,6 @@ class ForgeRevealCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(height: 120, decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(15)), child: Center(widthFactor: 1.0, child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Text("Label", style: TextStyle(color: skin.ink, fontWeight: FontWeight.w600, fontFamily: fonts.he)), Positioned.fill(child: const SizedBox.shrink())]))));
+    return Container(height: 120, decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(15)), child: Center(widthFactor: 1.0, child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [Text("Label", style: TextStyle(color: skin.ink, fontWeight: FontWeight.w600, fontFamily: fonts.he)), Positioned.fill(child: const SizedBox.shrink())]))));
   }
 }
