@@ -11,6 +11,6 @@ class ForgeGradientSweep extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: Container(decoration: BoxDecoration(color: theme.gl)))])));
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [const Color(0x00000000), const Color(0x24FFFFFF), theme.gl, const Color(0x00000000)], begin: Alignment.topCenter, end: Alignment.bottomCenter))))])));
   }
 }
