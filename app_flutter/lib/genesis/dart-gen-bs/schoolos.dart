@@ -96,7 +96,19 @@ class _InvData {
     return 0;
   }
 
+  static int qty(Map<String, dynamic> s) => ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
   static int get urgent => items.where((s) => band(s) == 2).length; // לא-יספיק (ל-_Home)
+}
+
+// פורמט-אלפים לשקלים (פעולת-הצגה טהורה)
+String _ils(int n) {
+  final s = n.toString();
+  final b = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
+    b.write(s[i]);
+  }
+  return b.toString();
 }
 
 class _Inventory extends StatefulWidget {
@@ -118,11 +130,12 @@ class _InventoryState extends State<_Inventory> {
     for (final s in ranked) {
       buckets[_ordered.contains(s['name']) ? -1 : _InvData.band(s)]!.add(s);
     }
-    // ה-KPI המצבי = הרכבת 3 פעולות-יסוד (לא מספר-אחד): ספירת-היום · ספירת-בקרוב · סכום-יחידות-בסיכון.
-    int qtyOf(Map<String, dynamic> s) => ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
+    // ה-KPI המצבי = הרכבת 4 פעולות-יסוד: ספירת-היום · ספירת-בקרוב · סכום-יחידות · סכום-₪ (מכפלה+סכום).
+    final atRisk = [...buckets[2]!, ...buckets[1]!];
     final today = buckets[2]!.length;
     final soon = buckets[1]!.length;
-    final unitsAtRisk = [...buckets[2]!, ...buckets[1]!].fold<int>(0, (a, s) => a + qtyOf(s));
+    final unitsAtRisk = atRisk.fold<int>(0, (a, s) => a + _InvData.qty(s));
+    final ilsAtRisk = atRisk.fold<int>(0, (a, s) => a + _InvData.qty(s) * ((s['price'] as int?) ?? 0));
     // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
     const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
     const secTone = {2: 2, 1: 3, 0: 1, -1: 1}; // אקסנט-הסקשן צבוע לפי-מצב (שקע tone החדש ב-DsSection)
@@ -133,6 +146,7 @@ class _InventoryState extends State<_Inventory> {
           SizedBox(width: 168, child: KpiTile(glyph: '🔴', value: '$today', label: 'הזמן היום')),
           SizedBox(width: 168, child: KpiTile(glyph: '🟠', value: '$soon', label: 'הזמן בקרוב')),
           SizedBox(width: 168, child: KpiTile(glyph: '🛒', value: '$unitsAtRisk', label: 'יח׳ להזמנה')),
+          SizedBox(width: 168, child: KpiTile(glyph: '₪', value: _ils(ilsAtRisk), label: '₪ בסיכון')),
         ]),
         const SizedBox(height: 8),
         for (final st in const [2, 1, 0, -1])
@@ -200,12 +214,15 @@ class _InventoryState extends State<_Inventory> {
     kids.add(Padding(padding: const EdgeInsets.only(top: 8), child: StatRow(label: 'מלאי מול יעד', value: '$cur מתוך $target', fraction: target == 0 ? 0 : cur / target)));
     kids.add(_wrap(_facts(s)));
     if (band >= 1) {
-      final qty = ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
+      final qty = _InvData.qty(s);
       final mustIn = _InvData.mustOrderIn(s).ceil();
       final tone = band == 2 ? 2 : 3;
+      final price = s['price'] as int?;
+      // ההחלטה = הרכבת פעולות-יסוד: כמות(הפרש) · מועד · עלות(מכפלה כמות×מחיר, רק אם יש מחיר)
       kids.add(_wrap([
         StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: tone),
         StatusChip(label: band == 2 ? 'הזמן היום' : 'הזמן תוך $mustIn ימים', tone: tone),
+        if (price != null) StatusChip(label: '₪ ${_ils(qty * price)} עלות', tone: tone),
       ]));
       kids.add(_wrap([SoftButton(label: 'סמן: הוזמן', tone: 1, onTap: () => setState(() => _ordered.add(name)))], top: 8));
     }
