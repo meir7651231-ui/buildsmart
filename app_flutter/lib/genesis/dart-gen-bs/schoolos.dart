@@ -15,6 +15,7 @@ import '../dart-ui-bs/premium/lists/media_row.dart';
 import '../dart-ui-bs/premium/actions/segmented_switch.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
 import '../dart-ui-bs/premium/dataviz/gauge_meter.dart';
+import '../dart-maor/shekel.dart'; // אטום-לוגיקה (§21 שכבת-הלוגיקה): ₪+אלפים he-IL — לא inline
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
@@ -77,10 +78,10 @@ class _InvData {
   static const int horizon = 4; // חלון-תכנון: כמה ימים מראש מזהירים לפני שחייבים להזמין
   static const items = <Map<String, dynamic>>[
     {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4, 'supplier': 'אופיס-דיפו', 'price': 89},
-    {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5},
-    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7},
+    {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5, 'supplier': 'פייפר-מיל', 'price': 45},
+    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7, 'supplier': 'קלין-קו', 'price': 32},
     {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240},
-    {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14},
+    {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14, 'supplier': 'טק-ויז׳ן', 'price': 1200},
   ];
   // חוזה-תצוגה של שדות-מטא = דאטה (לא קוד-פר-שדה). המקום-השמור: הרינדור לולאה גנרית מעל זה.
   // הוספת שורה כאן ⇒ השדה מופיע לכל רשומה שנושאת אותו, אפס-שינוי-קוד (מבחן-הקונכייה, חוק-7).
@@ -106,16 +107,7 @@ class _InvData {
   static int get urgent => items.where((s) => band(s) == 2).length; // לא-יספיק (ל-_Home)
 }
 
-// פורמט-אלפים לשקלים (פעולת-הצגה טהורה)
-String _ils(int n) {
-  final s = n.toString();
-  final b = StringBuffer();
-  for (var i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
-    b.write(s[i]);
-  }
-  return b.toString();
-}
+// (פורמט-שקלים היה inline — הוחלף באטום-הלוגיקה `shekel` מ-dart-maor · §21 שכבת-הלוגיקה)
 
 class _Inventory extends StatefulWidget {
   const _Inventory();
@@ -159,7 +151,7 @@ class _InventoryState extends State<_Inventory> {
               BareStat(value: '$today', label: '🔴 הזמן היום', inkColor: _danger, mutedColor: _muted),
               BareStat(value: '$soon', label: '🟠 בקרוב', inkColor: _warning, mutedColor: _muted),
               BareStat(value: '$unitsAtRisk', label: '🛒 יח׳', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '₪${_ils(ilsAtRisk)}', label: '₪ בסיכון', inkColor: _acc, mutedColor: _muted),
+              BareStat(value: shekel(ilsAtRisk), label: '₪ בסיכון', inkColor: _acc, mutedColor: _muted),
             ]),
           ]),
         ),
@@ -255,8 +247,8 @@ class _InventoryState extends State<_Inventory> {
         _gap(),
         Row(children: [
           BareStat(value: '$qty', label: 'כמות', inkColor: _ink, mutedColor: _muted),
-          BareStat(value: '₪${_ils(price)}', label: 'מחיר ליח׳', inkColor: _ink, mutedColor: _muted),
-          BareStat(value: '₪${_ils(qty * price)}', label: '= עלות', inkColor: _acc, mutedColor: _muted),
+          BareStat(value: shekel(price), label: 'מחיר ליח׳', inkColor: _ink, mutedColor: _muted),
+          BareStat(value: shekel(qty * price), label: '= עלות', inkColor: _acc, mutedColor: _muted),
         ]),
       ],
       _wrap([SoftButton(label: 'סמן: הוזמן', tone: 1, onTap: () => setState(() => _ordered.add(s['name'] as String)))], top: 10),
