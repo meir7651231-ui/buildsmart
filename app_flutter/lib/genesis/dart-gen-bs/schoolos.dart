@@ -35,6 +35,8 @@ import '../dart-maor/finder-matches.dart'; // חריגה: סינון-רב-ציר
 import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
 import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
+import '../dart-maor/role-of.dart'; // הרשאות: תפקיד-לפי-מייל admin/teacher/staff (מדף)
+import '../dart-maor/can-granted-action.dart'; // הרשאות: גידור-פעולה פר-מפתח (מדף)
 import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט-ציר-זמן (title/time/body) — לא timeline_flow המזייף
 
 const _acc = DsTokens.accent;
@@ -259,7 +261,22 @@ class _InvData {
       ];
   static String csvOf(List<Map<String, dynamic>> items) => toCsv(_csvRows(items), csvEscape) as String;
   static int get csvHeaderLen => _csvHeader.length;
-  static bool get exportOk => exportAllowed(false); // שער-ייצוא (demo: לא-חסום)
+  static bool exportOk(int role) => exportAllowed(false) && can(role, 'inv.export'); // שער-ייצוא ⊕ הרשאה
+
+  // ═══ הרשאות-פר-תפקיד (הכרעה 23-ג · חוק-6 זהות=הזרקה) = roleOf ⊕ canGrantedAction ═══
+  //   3 זהויות-דמו מוזרקות (לא אטום!) + בורר-תפקיד מדגים את הגידור. הפעולות מגודרות פר-מפתח.
+  static const roleDefs = <Map<String, dynamic>>[
+    {'label': '👑 מנהל', 'email': 'mgr@school', 'config': {'adminEmails': ['mgr@school']}}, // admin ⇒ הכל
+    {'label': '📦 מחסן', 'email': 'wh@school', 'config': {'features': {'inv.receive': true, 'inv.issue': true, 'inv.count': true}}}, // staff מוגבל
+    {'label': '👁 צפייה', 'email': 'view@school', 'config': <String, dynamic>{}}, // staff ללא-הרשאות
+  ];
+  static bool _isAdmin(Map<String, dynamic> config, String email) => roleOf(config, email) == 'admin';
+  static bool can(int role, String key) {
+    final r = roleDefs[role];
+    return canGrantedAction((r['config'] as Map).cast<String, dynamic>(), r['email'] as String, false, key, _isAdmin);
+  }
+  static String roleName(int role) =>
+      roleOf((roleDefs[role]['config'] as Map).cast<String, dynamic>(), roleDefs[role]['email'] as String);
 }
 
 // (פורמט-שקלים היה inline — הוחלף באטום-הלוגיקה `shekel` מ-dart-maor · §21 שכבת-הלוגיקה)
@@ -276,6 +293,7 @@ class _InventoryState extends State<_Inventory> {
   String _q = ''; // חיפוש-איתור (DsSearch→סינון)
   int _filter = 0; // 0=הכל · 1=מתחת-מינ׳ · 2=פקיעה · 3=אזלו (FilterChipPill→סינון-חריגה)
   int _mode = 0; // 0=🎯 חכם (טריאז') · 1=📋 טבלה (DsTable כל-העמודות) — SegmentedSwitch→תצוגה
+  int _role = 0; // 0=מנהל · 1=מחסן · 2=צפייה (חוק-6 זהות-מוזרקת; בורר-תפקיד מדגים גידור-הרשאות)
 
   // צ׳יפ-סינון מבוקר: הזרקת-צבעים (חוק-6) + מיפוי selected/onTap ל-_filter
   Widget _fchip(int i, String label) => FilterChipPill(
@@ -315,14 +333,28 @@ class _InventoryState extends State<_Inventory> {
     return DsScaffold(
       title: 'מלאי', subtitle: '${all.length} פריטים · ${_InvData.consumers.length} מחלקות צורכות', icon: '📦',
       children: [
-        // פס-עליון: חיפוש-מבוקר (DsSearch) + יצירה + ייצוא — פעולות-יסוד "איתור" + "דיווח"
+        // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות פר-תפקיד (roleOf⊕canGrantedAction)
+        Align(
+          alignment: Alignment.centerRight,
+          child: SegmentedSwitch(
+            items: [for (final r in _InvData.roleDefs) r['label'] as String],
+            selected: _role,
+            onSelect: (i) => setState(() => _role = i),
+          ),
+        ),
+        _gap(10),
+        // פס-עליון: חיפוש-מבוקר (DsSearch) + יצירה + ייצוא — מגודרים פר-הרשאה (canGrantedAction)
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
-          const SizedBox(width: 8),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕', tone: 0, onTap: () {})),
-          const SizedBox(width: 6),
-          // ייצוא (23-ג): toCsv⊕csvEscape⊕exportAllowed — מייצא את הרשימה-הנראית (אחרי איתור+חריגה)
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport(visible))),
+          if (_InvData.can(_role, 'inv.add')) ...[
+            const SizedBox(width: 8),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕', tone: 0, onTap: () {})),
+          ],
+          if (_InvData.exportOk(_role)) ...[
+            const SizedBox(width: 6),
+            // ייצוא (23-ג): toCsv⊕csvEscape⊕exportAllowed — מייצא את הרשימה-הנראית (אחרי איתור+חריגה)
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport(visible))),
+          ],
         ]),
         // צ׳יפי-סינון-חריגה (FilterChipPill מבוקר) — פעולת-יסוד "זיהוי-חריגה"
         Wrap(spacing: 8, runSpacing: 6, children: [
@@ -473,12 +505,18 @@ class _InventoryState extends State<_Inventory> {
                   _gap(14),
                   const Text('פעולות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
                   _gap(8),
-                  Wrap(spacing: 8, runSpacing: 8, children: [
-                    SoftButton(label: '📥 קבלה +5', tone: 1, onTap: () => act(() => _InvData.receive(s, 5))),
-                    SoftButton(label: '📤 הוצאה −5', tone: 2, onTap: () => act(() => _InvData.issue(s, 5))),
-                    SoftButton(label: '📦 מלא-ליעד', tone: 0, onTap: () => act(() => _InvData.countTo(s, target))),
-                    SoftButton(label: ordered ? '↩ בטל הזמנה' : '🛒 סמן הוזמן', tone: 0, onTap: () => act(() => ordered ? _ordered.remove(name) : _ordered.add(name))),
-                  ]),
+                  // פעולות מגודרות פר-הרשאה (canGrantedAction); אין-הרשאה ⇒ מצב נעילת-הרשאות (AlertBanner)
+                  Builder(builder: (_) {
+                    final acts = <Widget>[
+                      if (_InvData.can(_role, 'inv.receive')) SoftButton(label: '📥 קבלה +5', tone: 1, onTap: () => act(() => _InvData.receive(s, 5))),
+                      if (_InvData.can(_role, 'inv.issue')) SoftButton(label: '📤 הוצאה −5', tone: 2, onTap: () => act(() => _InvData.issue(s, 5))),
+                      if (_InvData.can(_role, 'inv.count')) SoftButton(label: '📦 מלא-ליעד', tone: 0, onTap: () => act(() => _InvData.countTo(s, target))),
+                      if (_InvData.can(_role, 'inv.order')) SoftButton(label: ordered ? '↩ בטל הזמנה' : '🛒 סמן הוזמן', tone: 0, onTap: () => act(() => ordered ? _ordered.remove(name) : _ordered.add(name))),
+                    ];
+                    return acts.isEmpty
+                        ? const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה', glyph: '🔒', tone: 2)
+                        : Wrap(spacing: 8, runSpacing: 8, children: acts);
+                  }),
                   _gap(16),
                   Text('תנועות הפריט · ${moves.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
                   _gap(8),
@@ -498,7 +536,7 @@ class _InventoryState extends State<_Inventory> {
   // ═══ ייצוא (23-ג · תובנה) = SoftButton ⊕ toCsv ⊕ csvEscape ⊕ exportAllowed ⊕ GlassCard-preview ═══
   //   שער-הייצוא (exportAllowed) נבדק; בדפדפן-הסנדבוקס ההורדה חסומה ⇒ תצוגת-CSV לבדיקה+העתקה.
   void _openExport(List<Map<String, dynamic>> items) {
-    final allowed = _InvData.exportOk;
+    final allowed = _InvData.exportOk(_role);
     final csv = allowed ? _InvData.csvOf(items) : '';
     showModalBottomSheet<void>(
       context: context,
