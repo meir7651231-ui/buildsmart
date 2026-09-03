@@ -14,9 +14,7 @@ import '../dart-ui-bs/premium/surfaces/stat_hero.dart';
 import '../dart-ui-bs/premium/lists/media_row.dart';
 import '../dart-ui-bs/premium/actions/segmented_switch.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
-import '../dart-ui-bs/premium/dataviz/gauge_meter.dart';
 import '../dart-maor/shekel.dart'; // אטומי-לוגיקה (§21 שכבת-הלוגיקה) — מחווטים מהמדף, לא inline:
-import '../dart-maor/grand-total.dart'; // Σ-לפי-מפתח (סכום)
 import '../dart-maor/clamp-scale.dart'; // נרמול/הצמדה לגבולות
 import '../dart-maor/warehouse-value.dart'; // ערך-מלאי Σ(qty×cost) — אטום-מלאי דומייני
 import '../dart-maor/warehouse-overview.dart'; // מחסור-מול-צריכה: מלאי−הקצאה→remaining→short
@@ -108,7 +106,7 @@ class _InvData {
   }
 
   static int qty(Map<String, dynamic> s) => ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
-  static int get urgent => items.where((s) => band(s) == 2).length; // לא-יספיק (ל-_Home)
+  static int get urgent => items.where((s) => sev(s) == 2).length; // דחיפות-מאוחדת (ל-_Home)
 
   // ─── מודל שני (מפורק): צריכה-מוקצית-לצרכנים → מחסור. חוברים לקצב ל"מקסימום-מטרה". ───
   // צרכנים = כיתות/מחלקות שצורכות ציוד (ayin.mat = [{name, qty}] — צורת-הקלט של warehouseOverview).
@@ -123,9 +121,24 @@ class _InvData {
   static List<Map<String, dynamic>> get _wh =>
       [for (final s in items) {'name': s['name'], 'qty': s['cur'], 'cost': s['price'] ?? 0}];
   // הסקירה המפורקת פר-שם: {item, allocated, remaining, short, byProject}
-  static Map<String, Map<String, dynamic>> overview() {
-    final o = warehouseOverview(_wh, consumers, norm);
-    return {for (final r in o) (r['item'] as Map)['name'] as String: r};
+  static Map<String, Map<String, dynamic>>? _ovCache;
+  static Map<String, Map<String, dynamic>> overview() =>
+      _ovCache ??= {for (final r in warehouseOverview(_wh, consumers, norm)) (r['item'] as Map)['name'] as String: r};
+
+  static bool isShort(Map<String, dynamic> s) => overview()[s['name']]?['short'] == true;
+  static int allocated(Map<String, dynamic> s) => ((overview()[s['name']]?['allocated'] as num?) ?? 0).toInt();
+  static int deficit(Map<String, dynamic> s) => (allocated(s) - (s['cur'] as int)).clamp(0, 1 << 30); // חסר-לכיסוי-הקצאה
+
+  // 🎯 דחיפות מאוחדת (מקסום-מטרה): short OR band. גירעון-הקצאה ⇒ "חייבים" גם אם הריצה ארוכה.
+  static int sev(Map<String, dynamic> s) {
+    final b = band(s);
+    return isShort(s) && b < 2 ? 2 : b;
+  }
+
+  // כמות-הזמנה מאוחדת: מכסה גם יעד-בריא (target−cur) וגם גירעון-הקצאה (allocated−cur) — הגדול.
+  static int orderQty(Map<String, dynamic> s) {
+    final t = qty(s), d = deficit(s);
+    return t > d ? t : d;
   }
 }
 
@@ -147,20 +160,17 @@ class _InventoryState extends State<_Inventory> {
     final ranked = [..._InvData.items]..sort((a, b) => _InvData.daysLeft(a).compareTo(_InvData.daysLeft(b)));
     // Dp3+Dp8+Dp11: קיבוץ-לפי-מצב ⇒ הדחוף בראש כקבוצה, המצב דומיננטי-במבט, היררכיה.
     //   דלי לפי מצב (הוזמן=−1) — שומר על סדר-הדירוג בתוך כל דלי.
+    // קיבוץ לפי דחיפות-מאוחדת sev (short OR band) — האיחוד מניע את הטריאז', לא הקצב-בלבד.
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
     for (final s in ranked) {
-      buckets[_ordered.contains(s['name']) ? -1 : _InvData.band(s)]!.add(s);
+      buckets[_ordered.contains(s['name']) ? -1 : _InvData.sev(s)]!.add(s);
     }
-    // ה-KPI המצבי = הרכבת 4 פעולות-יסוד: ספירת-היום · ספירת-בקרוב · סכום-יחידות · סכום-₪ (מכפלה+סכום).
     final atRisk = [...buckets[2]!, ...buckets[1]!];
     final today = buckets[2]!.length;
     final soon = buckets[1]!.length;
-    // Σ מחווט מהמדף: יחידות ⇒ grandTotal (גנרי) · ₪-בסיכון ⇒ warehouseValue (אטום-מלאי דומייני Σqty×cost)
-    final unitsAtRisk = grandTotal(atRisk, (s) => _InvData.qty(s)).toInt();
-    final ilsAtRisk = warehouseValue([for (final s in atRisk) {'qty': _InvData.qty(s), 'cost': (s['price'] as int?) ?? 0}]).toInt();
-    // אות שני (מפורק): כמה פריטים בגירעון-הקצאה (מלאי < צריכה-מוקצית) — warehouseOverview.short
-    final _ov = _InvData.overview();
-    final shortCount = _ov.values.where((r) => r['short'] == true).length;
+    // ₪-בסיכון על כמות-ההזמנה-המאוחדת (יעד+הקצאה) ⇒ warehouseValue (אטום-מלאי דומייני Σqty×cost)
+    final ilsAtRisk = warehouseValue([for (final s in atRisk) {'qty': _InvData.orderQty(s), 'cost': (s['price'] as int?) ?? 0}]).toInt();
+    final shortCount = _InvData.overview().values.where((r) => r['short'] == true).length;
     // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
     const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
     const secTone = {2: 2, 1: 3, 0: 1, -1: 1}; // אקסנט-הסקשן צבוע לפי-מצב (שקע tone החדש ב-DsSection)
@@ -176,9 +186,8 @@ class _InventoryState extends State<_Inventory> {
             Row(children: [
               BareStat(value: '$today', label: '🔴 הזמן היום', inkColor: _danger, mutedColor: _muted),
               BareStat(value: '$soon', label: '🟠 בקרוב', inkColor: _warning, mutedColor: _muted),
-              BareStat(value: '$unitsAtRisk', label: '🛒 יח׳', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: shekel(ilsAtRisk), label: '₪ בסיכון', inkColor: _acc, mutedColor: _muted),
               BareStat(value: '$shortCount', label: '📉 גירעון-הקצאה', inkColor: shortCount > 0 ? _danger : _ok, mutedColor: _muted),
+              BareStat(value: shekel(ilsAtRisk), label: '₪ בסיכון', inkColor: _acc, mutedColor: _muted),
             ]),
           ]),
         ),
@@ -254,20 +263,21 @@ class _InventoryState extends State<_Inventory> {
 
   // 🎯 מבט-החלטה: מועד(AlertBanner 2-ערוצים) · כמות(BareStat×3 הפרש) · עלות(BareStat×3 מכפלה) · פעולה
   Widget _viewDecision(Map<String, dynamic> s) {
-    final cur = s['cur'] as int, target = s['target'] as int, band = _InvData.band(s);
-    final qty = _InvData.qty(s);
+    final cur = s['cur'] as int, sev = _InvData.sev(s);
+    final qty = _InvData.orderQty(s); // כמות מאוחדת (יעד+הקצאה)
     final mustIn = _InvData.mustOrderIn(s).ceil();
     final price = s['price'] as int?;
+    final why = _InvData.isShort(s) ? 'גירעון-הקצאה + ' : ''; // סיבת-הדחיפות המאוחדת
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       AlertBanner(
-        glyph: band == 2 ? '⏰' : '📅',
-        tone: band == 2 ? 2 : 3,
-        message: band == 2 ? 'חייבים להזמין היום' : 'הזמן תוך $mustIn ימים',
+        glyph: sev == 2 ? '⏰' : '📅',
+        tone: sev == 2 ? 2 : 3,
+        message: sev == 2 ? '$whyחייבים להזמין היום' : 'הזמן תוך $mustIn ימים',
       ),
       _gap(),
       Row(children: [
         BareStat(value: '$cur', label: 'במלאי', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: '$target', label: 'יעד', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: '${_InvData.allocated(s)}', label: 'נדרש', inkColor: _ink, mutedColor: _muted),
         BareStat(value: '$qty', label: '= להזמנה', inkColor: _acc, mutedColor: _muted),
       ]),
       if (price != null) ...[
@@ -291,7 +301,6 @@ class _InventoryState extends State<_Inventory> {
     final tone = band == 2 ? 2 : band == 1 ? 3 : 1; // הקווים והמד נצבעים לפי-המצב (שקע tone החדש)
     // נרמול מחווט מאטום-הלוגיקה clampScale (במקום .clamp inline)
     final suff = clampScale(left / lead, 0.0, 1.0).toDouble();
-    final urgency = clampScale(1 - margin / _InvData.horizon, 0.0, 1.0).toDouble();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()], tone: tone),
       _gap(),
@@ -300,13 +309,10 @@ class _InventoryState extends State<_Inventory> {
       ]),
       _gap(8),
       StatRow(label: 'כיסוי זמן-האספקה', value: '${(suff * 100).round()}%', fraction: suff),
-      _gap(12),
-      Center(child: GaugeMeter(value: urgency, size: 140, tone: tone)),
-      _gap(8),
+      _gap(10),
       Row(children: [
-        BareStat(value: '$cur', label: 'מלאי נוכחי', inkColor: _ink, mutedColor: _muted),
         BareStat(value: '${rate % 1 == 0 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(1)}/יום', label: 'קצב צריכה', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: '${left.round()} י׳', label: '= ריצה', inkColor: left <= lead ? _danger : _acc, mutedColor: _muted),
+        BareStat(value: '${left.round()} י׳', label: '= ריצה עד ריקון', inkColor: left <= lead ? _danger : _acc, mutedColor: _muted),
       ]),
       // ─── אות-מחסור שני (מפורק · warehouseOverview): מלאי מול צריכה-מוקצית-לכיתות → גירעון/עודף ───
       // "מקסום-מטרה" = שני האותות יחד (קצב-זמן + הקצאה-לצרכנים), לא בחירה באחד.
@@ -324,7 +330,7 @@ class _InventoryState extends State<_Inventory> {
             BareStat(value: '$allocated', label: 'מוקצה לכיתות', inkColor: _ink, mutedColor: _muted),
             BareStat(value: '$remaining', label: short ? '= גירעון' : '= עודף', inkColor: short ? _danger : _ok, mutedColor: _muted),
           ]),
-          _wrap([for (final p in byP) StatusChip(label: '${(p as Map)['name']}: ${p['qty']}', tone: short ? 2 : 0)]),
+          _wrap([for (final p in byP) StatusChip(label: '${(p as Map)['name']}: ${p['qty']}', tone: 0)]),
         ];
       })(),
     ]);
