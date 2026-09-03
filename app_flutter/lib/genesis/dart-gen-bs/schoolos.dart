@@ -37,6 +37,8 @@ import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CS
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
 import '../dart-maor/role-of.dart'; // הרשאות: תפקיד-לפי-מייל admin/teacher/staff (מדף)
 import '../dart-maor/can-granted-action.dart'; // הרשאות: גידור-פעולה פר-מפתח (מדף)
+import '../dart-maor/expiring-intakes.dart'; // אוטומציה: קליטות-פוקעות תוך חלון (מדף)
+import '../dart-maor/shop-expiry-warn-days.dart'; // אוטומציה: סף-אזהרת-פקיעה =7 (מדף)
 import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט-ציר-זמן (title/time/body) — לא timeline_flow המזייף
 
 const _acc = DsTokens.accent;
@@ -104,7 +106,7 @@ class _InvData {
   static const items = <Map<String, dynamic>>[
     {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4, 'supplier': 'אופיס-דיפו', 'price': 89, 'sku': 'TNR-118', 'cat': 'משרד', 'unit': 'יח׳', 'minStock': 5},
     {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5, 'supplier': 'פייפר-מיל', 'price': 45, 'sku': 'PPR-A4', 'cat': 'משרד', 'unit': 'חב׳', 'minStock': 10},
-    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7, 'supplier': 'קלין-קו', 'price': 32, 'sku': 'CLN-01', 'cat': 'אחזקה', 'unit': 'ליטר', 'minStock': 20, 'expiry': '2026-11-01'},
+    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7, 'supplier': 'קלין-קו', 'price': 32, 'sku': 'CLN-01', 'cat': 'אחזקה', 'unit': 'ליטר', 'minStock': 20, 'expiry': '2026-09-08'},
     {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240, 'sku': 'LAB-KIT', 'cat': 'מעבדה', 'unit': 'ערכה', 'minStock': 8},
     {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14, 'supplier': 'טק-ויז׳ן', 'price': 1200, 'sku': 'PRJ-X', 'cat': 'אלקטרוניקה', 'unit': 'יח׳', 'minStock': 3},
   ];
@@ -277,6 +279,23 @@ class _InvData {
   }
   static String roleName(int role) =>
       roleOf((roleDefs[role]['config'] as Map).cast<String, dynamic>(), roleDefs[role]['email'] as String);
+
+  // ═══ אוטומציות פרואקטיביות (הכרעה 23-ג · תובנה) = AlertBanner ⊕ expiringIntakes ⊕ warehouseValue ═══
+  //   המערכת מתריעה לפני שדבר נשמט — פקיעה-קרובה + מלאי-מת (הון-כלוא). מנועי-מדף, אפס-זיוף.
+  static String _iso(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  // פקיעה: expiringIntakes(מדף) על db-קליטות-פוקעות (itemId+expiry), חלון = shopExpiryWarnDays(מדף)
+  static Map<String, dynamic> get _expiryDb => {
+        'shopIntakes': [for (final s in items) if (s['expiry'] != null) {'itemId': s['name'], 'expiry': s['expiry']}],
+        'shopItems': [for (final s in items) {'id': s['name'], 'name': s['name']}],
+      };
+  static List<Map<String, dynamic>> get expiringList =>
+      expiringIntakes(_expiryDb, today, _iso, shopExpiryWarnDays);
+  // מלאי-מת: איטי (rate<0.5) עם מלאי-רב (ימים-עד-ריקון > 45) = הון-כלוא זמן-רב (slow⊕daysLeft מורכבים)
+  static bool dead(Map<String, dynamic> s) => slow(s) && daysLeft(s) > 45;
+  static List<Map<String, dynamic>> get deadItems => items.where(dead).toList();
+  static int get deadCapital =>
+      warehouseValue([for (final s in deadItems) {'qty': curOf(s), 'cost': s['price'] ?? 0}]).toInt();
 }
 
 // (פורמט-שקלים היה inline — הוחלף באטום-הלוגיקה `shekel` מ-dart-maor · §21 שכבת-הלוגיקה)
@@ -385,6 +404,15 @@ class _InventoryState extends State<_Inventory> {
           ]),
         ),
         const SizedBox(height: 8),
+        // מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — פקיעה + מלאי-מת
+        if (_InvData.expiringList.isNotEmpty) ...[
+          AlertBanner(glyph: '⏳', tone: 3, message: '${_InvData.expiringList.length} פוקעים תוך $shopExpiryWarnDays ימים: ${_InvData.expiringList.map((e) => e['itemName']).join(' · ')}'),
+          _gap(8),
+        ],
+        if (_InvData.deadItems.isNotEmpty) ...[
+          AlertBanner(glyph: '🐌', tone: 3, message: '${_InvData.deadItems.length} מלאי-מת (איטי + מלאי-רב) · ${shekel(_InvData.deadCapital)} הון-כלוא: ${_InvData.deadItems.map((s) => s['name']).join(' · ')}'),
+          _gap(8),
+        ],
         // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (כל-העמודות)
         Align(
           alignment: Alignment.centerRight,
