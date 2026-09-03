@@ -25,6 +25,7 @@ import '../dart-ui-bs/premium/actions/soft_button.dart';
 import '../dart-ui-bs/ds/ds_search.dart'; // חיפוש-מבוקר (value+onChanged) — פעולת-יסוד "איתור"
 import '../dart-ui-bs/screens__manager_dashboard_screen/filter_chip_pill.dart'; // צ׳יפ-סינון מבוקר
 import '../dart-ui-bs/premium/feedback/empty_state.dart'; // מצב "אין-תוצאות" (glyph+message)
+import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון-בלחיצה) — לא DataGrid המזייף
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat דורש הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -183,6 +184,7 @@ class _InventoryState extends State<_Inventory> {
   final Map<String, int> _seg = {}; // מבט-נבחר פר-פריט (חיווט SegmentedSwitch→תצוגה)
   String _q = ''; // חיפוש-איתור (DsSearch→סינון)
   int _filter = 0; // 0=הכל · 1=מתחת-מינ׳ · 2=פקיעה · 3=אזלו (FilterChipPill→סינון-חריגה)
+  int _mode = 0; // 0=🎯 חכם (טריאז') · 1=📋 טבלה (DsTable כל-העמודות) — SegmentedSwitch→תצוגה
 
   // צ׳יפ-סינון מבוקר: הזרקת-צבעים (חוק-6) + מיפוי selected/onTap ל-_filter
   Widget _fchip(int i, String label) => FilterChipPill(
@@ -260,8 +262,16 @@ class _InventoryState extends State<_Inventory> {
           ]),
         ),
         const SizedBox(height: 8),
+        // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (כל-העמודות)
+        Align(
+          alignment: Alignment.centerRight,
+          child: SegmentedSwitch(items: const ['🎯 חכם', '📋 טבלה'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+        ),
+        const SizedBox(height: 10),
         if (shown == 0)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין פריטים תואמים לחיפוש/סינון'))
+        else if (_mode == 1)
+          _table(ranked)
         else
           for (final st in const [2, 1, 0, -1])
             if (buckets[st]!.isNotEmpty)
@@ -271,6 +281,42 @@ class _InventoryState extends State<_Inventory> {
       ],
     );
   }
+
+  // 📋 מבט-טבלה: DsTable אמיתי (labels+rows, אטום-מדף) — עמודות-האמת בלבד. אפס-DataGrid (מזייף int rows).
+  //   עמודות = שדות עם מקור-אמת (סוכן-דאטה): מק״ט·שם·קטגוריה·יח׳·כמות·זמין·מינ׳·ערך·ספק·סטטוס.
+  Widget _table(List<Map<String, dynamic>> rows) {
+    final shown = rows.where(_pass).toList();
+    const labels = ['מק״ט', 'שם', 'קטגוריה', 'יח׳', 'כמות', 'זמין', 'מינ׳', 'ערך', 'ספק', 'סטטוס'];
+    final data = <List<String>>[
+      for (final s in shown)
+        [
+          '${s['sku'] ?? '—'}',
+          '${s['name']}',
+          '${s['cat'] ?? '—'}',
+          '${s['unit'] ?? '—'}',
+          '${s['cur']}',
+          '${_InvData.available(s)}',
+          '${_InvData.minStock(s)}',
+          shekel((s['cur'] as int) * ((s['price'] as int?) ?? 0)),
+          '${s['supplier'] ?? '—'}',
+          _statusLabel(s),
+        ],
+    ];
+    return DsTable(labels: labels, rows: data);
+  }
+
+  // תווית-סטטוס פר-פריט (הכרעה מאוחדת sev + מתחת-מינ׳/אזל) — נגזרת, אחת-לטבלה-ולסטטוס-שורה
+  String _statusLabel(Map<String, dynamic> s) => _ordered.contains(s['name'])
+      ? '✅ הוזמן'
+      : _InvData.isOut(s)
+          ? '⛔ אזל'
+          : _InvData.belowMin(s)
+              ? '📉 מתחת-מינ׳'
+              : _InvData.sev(s) == 2
+                  ? '🔴 הזמן היום'
+                  : _InvData.sev(s) == 1
+                      ? '🟠 בקרוב'
+                      : '🟢 תקין';
 
   // המקום-השמור (חוק-7): לולאה גנרית מעל חוזה-התצוגה (_InvData.metaFields) — לא קוד-פר-שדה.
   // כל שדה-מטא שהרשומה נושאת ⇒ שבב; חסר ⇒ שקט. שדה חדש בחוזה מופיע כאן לבד (אפס-רישום-ביד).
