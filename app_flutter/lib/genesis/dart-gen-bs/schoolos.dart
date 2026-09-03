@@ -109,6 +109,7 @@ class _InvData {
     {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7, 'supplier': 'קלין-קו', 'price': 32, 'sku': 'CLN-01', 'cat': 'אחזקה', 'unit': 'ליטר', 'minStock': 20, 'expiry': '2026-09-08'},
     {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240, 'sku': 'LAB-KIT', 'cat': 'מעבדה', 'unit': 'ערכה', 'minStock': 8},
     {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14, 'supplier': 'טק-ויז׳ן', 'price': 1200, 'sku': 'PRJ-X', 'cat': 'אלקטרוניקה', 'unit': 'יח׳', 'minStock': 3},
+    {'name': 'מדפסת-מטריצה (הופסק)', 'cur': 2, 'target': 0, 'rate': 0.1, 'lead': 30, 'supplier': 'ישן', 'price': 300, 'sku': 'DOT-OLD', 'cat': 'משרד', 'unit': 'יח׳', 'minStock': 0, 'active': false}, // פריט-לא-פעיל (מצב-מיוחד)
   ];
   // ─── פנקס-התאמות-מלאי (פעולות=state): מלאי-אפקטיבי = בסיס-const + Σהתאמות (חוק-1 · מצב=חיווט) ───
   //   הבסיס נשאר const (מקור-האמת); הפעולות רושמות התאמה + תנועה — כמו פנקס-תנועות אמיתי.
@@ -296,6 +297,17 @@ class _InvData {
   static List<Map<String, dynamic>> get deadItems => items.where(dead).toList();
   static int get deadCapital =>
       warehouseValue([for (final s in deadItems) {'qty': curOf(s), 'cost': s['price'] ?? 0}]).toInt();
+
+  // ═══ מחזור-חיים · מצב-מיוחד "פריט-לא-פעיל" (23-ב · דגל=עובדה) = StatusChip ⊕ SoftButton-toggle ═══
+  //   הדגל active מוזרק בדאטה; toggle=state. פריט-לא-פעיל יוצא מהתצוגות-התפעוליות (טריאז'/KPI).
+  static final Map<String, bool> _activeOverride = {};
+  static bool activeOf(Map<String, dynamic> s) => _activeOverride[s['name']] ?? (s['active'] as bool? ?? true);
+  static void toggleActive(Map<String, dynamic> s) {
+    _activeOverride[s['name'] as String] = !activeOf(s);
+    _ovCache = null;
+  }
+  static List<Map<String, dynamic>> get activeItems => items.where(activeOf).toList();
+  static List<Map<String, dynamic>> get inactiveItems => items.where((s) => !activeOf(s)).toList();
 }
 
 // (פורמט-שקלים היה inline — הוחלף באטום-הלוגיקה `shekel` מ-dart-maor · §21 שכבת-הלוגיקה)
@@ -325,12 +337,12 @@ class _InventoryState extends State<_Inventory> {
   @override
   Widget build(BuildContext context) {
     // דירוג לפי ימים-עד-ריקון עולה — הכי-קרוב-להיגמר ראשון
-    final ranked = [..._InvData.items]..sort((a, b) => _InvData.daysLeft(a).compareTo(_InvData.daysLeft(b)));
+    final ranked = [..._InvData.activeItems]..sort((a, b) => _InvData.daysLeft(a).compareTo(_InvData.daysLeft(b)));
     // Dp3+Dp8+Dp11: קיבוץ-לפי-מצב ⇒ הדחוף בראש כקבוצה, המצב דומיננטי-במבט, היררכיה.
     //   דלי לפי מצב (הוזמן=−1) — שומר על סדר-הדירוג בתוך כל דלי.
     // קיבוץ לפי דחיפות-מאוחדת sev (short OR band) — האיחוד מניע את הטריאז', לא הקצב-בלבד.
     // KPI-8 (המפרט) על כל-המלאי — כולם מנועי-מדף/שדות-אמת (§20-ג · אפס StatBlock/math.sin):
-    final all = _InvData.items;
+    final all = _InvData.activeItems; // KPI תפעולי על פעילים בלבד (לא-פעילים בסקשן נפרד)
     final totalQty = grandTotal(all, (s) => _InvData.curOf(s)).toInt(); // Σ כמות (מלאי-אפקטיבי)
     final totalValue = warehouseValue([for (final s in all) {'qty': _InvData.curOf(s), 'cost': s['price'] ?? 0}]).toInt(); // Σ qty×cost
     final belowMinN = all.where(_InvData.belowMin).length;
@@ -431,6 +443,24 @@ class _InventoryState extends State<_Inventory> {
               DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
                 for (final s in buckets[st]!) _row(s),
               ]),
+        // מצב-מיוחד: פריטים לא-פעילים (StatusChip תג + ▶ הפעל מגודר-הרשאה) — מחוץ לתפעול
+        if (_InvData.inactiveItems.isNotEmpty && _mode != 2) ...[
+          _gap(10),
+          DsSection(title: '🚫 לא-פעילים · ${_InvData.inactiveItems.length}', tone: 0, children: [
+            for (final s in _InvData.inactiveItems)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(children: [
+                  Expanded(child: MediaRow(glyph: '🚫', title: '${s['name']}', subtitle: '${s['sku'] ?? ''} · הופסק')),
+                  const StatusChip(label: 'לא-פעיל', tone: 0),
+                  if (_InvData.can(_role, 'inv.toggle')) ...[
+                    const SizedBox(width: 8),
+                    SoftButton(label: '▶ הפעל', tone: 1, onTap: () => setState(() => _InvData.toggleActive(s))),
+                  ],
+                ]),
+              ),
+          ]),
+        ],
       ],
     );
   }
@@ -540,6 +570,7 @@ class _InventoryState extends State<_Inventory> {
                       if (_InvData.can(_role, 'inv.issue')) SoftButton(label: '📤 הוצאה −5', tone: 2, onTap: () => act(() => _InvData.issue(s, 5))),
                       if (_InvData.can(_role, 'inv.count')) SoftButton(label: '📦 מלא-ליעד', tone: 0, onTap: () => act(() => _InvData.countTo(s, target))),
                       if (_InvData.can(_role, 'inv.order')) SoftButton(label: ordered ? '↩ בטל הזמנה' : '🛒 סמן הוזמן', tone: 0, onTap: () => act(() => ordered ? _ordered.remove(name) : _ordered.add(name))),
+                      if (_InvData.can(_role, 'inv.toggle')) SoftButton(label: '⏸ השבת', tone: 0, onTap: () => act(() => _InvData.toggleActive(s))),
                     ];
                     return acts.isEmpty
                         ? const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה', glyph: '🔒', tone: 2)
