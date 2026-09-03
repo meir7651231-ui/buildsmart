@@ -8,6 +8,7 @@ import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/ds/ds_seam.dart';
 import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
+import '../dart-ui-bs/bare_stat.dart';
 import '../dart-ui-bs/premium/surfaces/gradient_card.dart';
 import '../dart-ui-bs/premium/lists/media_row.dart';
 import '../dart-ui-bs/premium/lists/stat_row.dart';
@@ -15,6 +16,10 @@ import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
 
 const _acc = DsTokens.accent;
+// פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat דורש הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
+const _danger = Color(0xFFF43F5E);
+const _ok = Color(0xFF34D399);
+const _muted = Color(0xFF9AA0BE);
 
 void main() => runApp(const SchoolOsApp());
 
@@ -178,7 +183,18 @@ class _InventoryState extends State<_Inventory> {
       return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: kids));
     }
     if (band >= 1) {
+      // ההשוואה = חלקיק מרובה-אטומים: NeonBars (גדלים) + BareStat×2 (הפרש-בימים · יחס-כיסוי%) —
+      //   שלוש פעולות-יסוד של שלושה אטומים לחלקיק-אחד (הכרעה 23-ב, בתצוגה).
+      final margin = _InvData.mustOrderIn(s); // ריצה − אספקה
+      final coverage = (left / lead * 100).round(); // כמה מזמן-האספקה הריצה מכסה; <100=לא-יספיק
       kids.add(Padding(padding: const EdgeInsets.only(top: 8), child: NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()])));
+      kids.add(Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Row(children: [
+          BareStat(value: '${margin.round()} י׳', label: 'מרווח מול הקו', inkColor: margin < 0 ? _danger : _ok, mutedColor: _muted),
+          BareStat(value: '$coverage%', label: 'כיסוי-אספקה', inkColor: coverage < 100 ? _danger : _ok, mutedColor: _muted),
+        ]),
+      ));
     }
     // מלאי מול יעד: פעולת נוכחי·יעד·יחס (בר-מילוי), לא "N ביד" יחיד. ניסוח RTL-בטוח ("מתוך").
     kids.add(Padding(padding: const EdgeInsets.only(top: 8), child: StatRow(label: 'מלאי מול יעד', value: '$cur מתוך $target', fraction: target == 0 ? 0 : cur / target)));
