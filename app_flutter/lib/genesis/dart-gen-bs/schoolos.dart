@@ -10,7 +10,11 @@ import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
 import '../dart-ui-bs/bare_stat.dart';
 import '../dart-ui-bs/premium/surfaces/gradient_card.dart';
+import '../dart-ui-bs/premium/surfaces/stat_hero.dart';
 import '../dart-ui-bs/premium/lists/media_row.dart';
+import '../dart-ui-bs/premium/actions/segmented_switch.dart';
+import '../dart-ui-bs/premium/feedback/alert_banner.dart';
+import '../dart-ui-bs/premium/dataviz/gauge_meter.dart';
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
@@ -21,6 +25,7 @@ const _danger = Color(0xFFF43F5E);
 const _ok = Color(0xFF34D399);
 const _muted = Color(0xFF9AA0BE);
 const _ink = Color(0xFFF2F3FF);
+const _warning = Color(0xFFF59E0B);
 
 void main() => runApp(const SchoolOsApp());
 
@@ -120,6 +125,7 @@ class _Inventory extends StatefulWidget {
 
 class _InventoryState extends State<_Inventory> {
   final Set<String> _ordered = {}; // זיכרון d2: פריטים שסומנו "הוזמן" (מצב=חיווט לגיטימי)
+  final Map<String, int> _seg = {}; // מבט-נבחר פר-פריט (חיווט SegmentedSwitch→תצוגה)
 
   @override
   Widget build(BuildContext context) {
@@ -143,12 +149,20 @@ class _InventoryState extends State<_Inventory> {
     return DsScaffold(
       title: 'מלאי', subtitle: 'ימים-עד-ריקון מול זמן-אספקה — שלא ייגמר', icon: '📦',
       children: [
-        Wrap(spacing: 12, runSpacing: 12, children: [
-          SizedBox(width: 168, child: KpiTile(glyph: '🔴', value: '$today', label: 'הזמן היום')),
-          SizedBox(width: 168, child: KpiTile(glyph: '🟠', value: '$soon', label: 'הזמן בקרוב')),
-          SizedBox(width: 168, child: KpiTile(glyph: '🛒', value: '$unitsAtRisk', label: 'יח׳ להזמנה')),
-          SizedBox(width: 168, child: KpiTile(glyph: '₪', value: _ils(ilsAtRisk), label: '₪ בסיכון')),
-        ]),
+        // KPI-מצבי = תובנה-אחת מורכבת (סוכן-C): מספר-על StatHero + פירוק-דחיפות/חשיפה BareStat×4.
+        //   לא 4 אריחים-שטוחים — hero דומיננטי ("כמה דורש-פעולה") ותחתיו הפירוק שמסביר.
+        GradientCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            StatHero(value: '${today + soon}', label: 'פריטים דורשי-הזמנה'),
+            const SizedBox(height: 14),
+            Row(children: [
+              BareStat(value: '$today', label: '🔴 הזמן היום', inkColor: _danger, mutedColor: _muted),
+              BareStat(value: '$soon', label: '🟠 בקרוב', inkColor: _warning, mutedColor: _muted),
+              BareStat(value: '$unitsAtRisk', label: '🛒 יח׳', inkColor: _ink, mutedColor: _muted),
+              BareStat(value: '₪${_ils(ilsAtRisk)}', label: '₪ בסיכון', inkColor: _acc, mutedColor: _muted),
+            ]),
+          ]),
+        ),
         const SizedBox(height: 8),
         for (final st in const [2, 1, 0, -1])
           if (buckets[st]!.isNotEmpty)
@@ -176,69 +190,121 @@ class _InventoryState extends State<_Inventory> {
         child: GradientCard(child: inner),
       );
 
-  // הצגה מקסימלית = הרכבת אטומי-הצגה, כל חלקיק מפורק לפעולות-היסוד שלו (לא אטום-אחד עצל):
-  //  · זהות+מצב  → MediaRow (glyph · שם · תמצית-ריצה)
-  //  · ההשוואה   → NeonBars (גדלֵי ריצה/אספקה; הפער נראה-בעין + נאמר במועד — לא צריך אטום-מרווח נפרד)
-  //  · מלאי      → StatRow (נוכחי מתוך יעד + בר-מילוי — פעולות נוכחי·יעד·יחס, לא "N ביד" יחיד)
-  //  · facts     → קצב/ספק/מחיר (chip אטומי לגיטימי, לולאה גנרית על metaFields)
-  //  · ההחלטה    → StatusChip×2 (כמות/מועד) · הפעולה → SoftButton (זיכרון d2)
+  Widget _gap([double h = 10]) => SizedBox(height: h);
+
+  // הצגה מקסימלית **מאורגנת**: כל אטומי-החלקיקים קיימים, אך אטום-הארגון SegmentedSwitch (הכרעה 23-ג —
+  // ארגון הוא פעולת-יסוד עם אטום משלה) מחלק אותם ל-3 מבטים ⇒ המבט-הראשון נקי, העומק בהישג-טאפ.
+  //  · הוזמן  → כותרת + בטל (לולאה סגורה)
+  //  · בטוח   → כותרת + מלאי + facts (אין החלטה ⇒ אין מבטים)
+  //  · פעיל   → כותרת + SegmentedSwitch[🎯 החלטה · 📊 ניתוח · 📦 מלאי] + המבט-הנבחר
   Widget _row(Map<String, dynamic> s) {
     final name = s['name'] as String;
     final left = _InvData.daysLeft(s);
     final lead = s['lead'] as int;
-    final cur = s['cur'] as int;
-    final target = s['target'] as int;
-    final ordered = _ordered.contains(name);
     final band = _InvData.band(s);
-    final kids = <Widget>[
-      MediaRow(glyph: '📦', title: name, subtitle: '${left.round()} ימים ריצה · אספקה $lead י׳'),
-    ];
-    if (ordered) {
-      kids.add(_wrap([SoftButton(label: 'בטל', tone: 0, onTap: () => setState(() => _ordered.remove(name)))], top: 8));
-      return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: kids));
-    }
-    if (band >= 1) {
-      // ההשוואה = חלקיק מרובה-אטומים: NeonBars (גדלים) + BareStat×2 (הפרש-בימים · יחס-כיסוי%) —
-      //   שלוש פעולות-יסוד של שלושה אטומים לחלקיק-אחד (הכרעה 23-ב, בתצוגה).
-      final margin = _InvData.mustOrderIn(s); // ריצה − אספקה
-      final coverage = (left / lead * 100).round(); // כמה מזמן-האספקה הריצה מכסה; <100=לא-יספיק
-      kids.add(Padding(padding: const EdgeInsets.only(top: 8), child: NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()])));
-      kids.add(Padding(
-        padding: const EdgeInsets.only(top: 10),
-        child: Row(children: [
-          BareStat(value: '${margin.round()} י׳', label: 'מרווח מול הקו', inkColor: margin < 0 ? _danger : _ok, mutedColor: _muted),
-          BareStat(value: '$coverage%', label: 'כיסוי-אספקה', inkColor: coverage < 100 ? _danger : _ok, mutedColor: _muted),
-        ]),
-      ));
-    }
-    // מלאי מול יעד: פעולת נוכחי·יעד·יחס (בר-מילוי), לא "N ביד" יחיד. ניסוח RTL-בטוח ("מתוך").
-    kids.add(Padding(padding: const EdgeInsets.only(top: 8), child: StatRow(label: 'מלאי מול יעד', value: '$cur מתוך $target', fraction: target == 0 ? 0 : cur / target)));
-    kids.add(_wrap(_facts(s)));
-    if (band >= 1) {
-      final qty = _InvData.qty(s);
-      final mustIn = _InvData.mustOrderIn(s).ceil();
-      final tone = band == 2 ? 2 : 3;
-      final price = s['price'] as int?;
-      // ההחלטה: כמות(הפרש) · מועד
-      kids.add(_wrap([
-        StatusChip(label: '🛒 $qty יח׳ להזמנה', tone: tone),
-        StatusChip(label: band == 2 ? 'הזמן היום' : 'הזמן תוך $mustIn ימים', tone: tone),
+    final header = MediaRow(glyph: '📦', title: name, subtitle: '${left.round()} ימים ריצה · אספקה $lead י׳');
+
+    if (_ordered.contains(name)) {
+      return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        header,
+        _wrap([SoftButton(label: 'בטל', tone: 0, onTap: () => setState(() => _ordered.remove(name)))], top: 8),
       ]));
-      // עלות = יכולת-מורכבת (הכרעה 23-ג): המכפלה המלאה כמות×מחיר=עלות, שלושה BareStat נושאי-ערך-אמת
-      //   (stat_block/linear_progress נפסלו — מזייפי-דאטה §20-ג). data-driven: רק אם price קיים.
-      if (price != null) {
-        kids.add(Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Row(children: [
-            BareStat(value: '$qty', label: 'כמות', inkColor: _ink, mutedColor: _muted),
-            BareStat(value: '₪${_ils(price)}', label: 'מחיר ליח׳', inkColor: _ink, mutedColor: _muted),
-            BareStat(value: '₪${_ils(qty * price)}', label: '= עלות הזמנה', inkColor: _acc, mutedColor: _muted),
-          ]),
-        ));
-      }
-      kids.add(_wrap([SoftButton(label: 'סמן: הוזמן', tone: 1, onTap: () => setState(() => _ordered.add(name)))], top: 8));
     }
-    return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: kids));
+    if (band == 0) {
+      return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        header, _gap(8), _viewStock(s), _wrap(_facts(s)),
+      ]));
+    }
+    final sel = _seg[name] ?? 0;
+    final view = sel == 1 ? _viewAnalysis(s) : sel == 2 ? _viewStockTab(s) : _viewDecision(s);
+    return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      header,
+      _gap(10),
+      Align(
+        alignment: Alignment.centerRight,
+        child: SegmentedSwitch(
+          items: const ['🎯 החלטה', '📊 ניתוח', '📦 מלאי'],
+          selected: sel,
+          onSelect: (i) => setState(() => _seg[name] = i),
+        ),
+      ),
+      _gap(12),
+      view,
+    ]));
+  }
+
+  // 🎯 מבט-החלטה: מועד(AlertBanner 2-ערוצים) · כמות(BareStat×3 הפרש) · עלות(BareStat×3 מכפלה) · פעולה
+  Widget _viewDecision(Map<String, dynamic> s) {
+    final cur = s['cur'] as int, target = s['target'] as int, band = _InvData.band(s);
+    final qty = _InvData.qty(s);
+    final mustIn = _InvData.mustOrderIn(s).ceil();
+    final price = s['price'] as int?;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      AlertBanner(
+        glyph: band == 2 ? '⏰' : '📅',
+        tone: band == 2 ? 2 : 3,
+        message: band == 2 ? 'חייבים להזמין היום' : 'הזמן תוך $mustIn ימים',
+      ),
+      _gap(),
+      Row(children: [
+        BareStat(value: '$cur', label: 'במלאי', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: '$target', label: 'יעד', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: '$qty', label: '= להזמנה', inkColor: _acc, mutedColor: _muted),
+      ]),
+      if (price != null) ...[
+        _gap(),
+        Row(children: [
+          BareStat(value: '$qty', label: 'כמות', inkColor: _ink, mutedColor: _muted),
+          BareStat(value: '₪${_ils(price)}', label: 'מחיר ליח׳', inkColor: _ink, mutedColor: _muted),
+          BareStat(value: '₪${_ils(qty * price)}', label: '= עלות', inkColor: _acc, mutedColor: _muted),
+        ]),
+      ],
+      _wrap([SoftButton(label: 'סמן: הוזמן', tone: 1, onTap: () => setState(() => _ordered.add(s['name'] as String)))], top: 10),
+    ]);
+  }
+
+  // 📊 מבט-ניתוח: השוואה(NeonBars+מרווח+כיסוי-StatRow) · מד-דחיפות(GaugeMeter) · ריצה(BareStat×3 חילוק)
+  Widget _viewAnalysis(Map<String, dynamic> s) {
+    final left = _InvData.daysLeft(s), lead = s['lead'] as int, cur = s['cur'] as int;
+    final rate = s['rate'] as double;
+    final margin = _InvData.mustOrderIn(s);
+    final suff = (left / lead).clamp(0.0, 1.0);
+    final urgency = (1 - margin / _InvData.horizon).clamp(0.0, 1.0);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()]),
+      _gap(),
+      Row(children: [
+        BareStat(value: '${margin.round()} י׳', label: 'מרווח מול הקו', inkColor: margin < 0 ? _danger : _ok, mutedColor: _muted),
+      ]),
+      _gap(8),
+      StatRow(label: 'כיסוי זמן-האספקה', value: '${(suff * 100).round()}%', fraction: suff),
+      _gap(12),
+      Center(child: GaugeMeter(value: urgency, size: 140)),
+      _gap(8),
+      Row(children: [
+        BareStat(value: '$cur', label: 'מלאי נוכחי', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: '${rate % 1 == 0 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(1)}/יום', label: 'קצב צריכה', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: '${left.round()} י׳', label: '= ריצה', inkColor: left <= lead ? _danger : _acc, mutedColor: _muted),
+      ]),
+    ]);
+  }
+
+  // 📦 מבט-מלאי בטאב-הפעיל: מלאי מול יעד + חוסר + facts
+  Widget _viewStockTab(Map<String, dynamic> s) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        _viewStock(s), _wrap(_facts(s)),
+      ]);
+
+  // מלאי מול יעד (StatRow יחס) + חוסר-עד-היעד (BareStat) — סוכן-A: יחס+חוסר, לא StatRow-יחיד.
+  Widget _viewStock(Map<String, dynamic> s) {
+    final cur = s['cur'] as int, target = s['target'] as int;
+    final deficit = (target - cur).clamp(0, target);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      StatRow(label: 'מלאי מול יעד בריא', value: '$cur מתוך $target', fraction: target == 0 ? 0 : cur / target),
+      _gap(8),
+      Row(children: [
+        BareStat(value: '$deficit', label: 'חסר עד היעד', inkColor: deficit > 0 ? _acc : _ok, mutedColor: _muted),
+      ]),
+    ]);
   }
 }
 
