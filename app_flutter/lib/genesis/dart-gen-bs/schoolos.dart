@@ -18,9 +18,13 @@ import '../dart-maor/shekel.dart'; // אטומי-לוגיקה (§21 שכבת-ה�
 import '../dart-maor/clamp-scale.dart'; // נרמול/הצמדה לגבולות
 import '../dart-maor/warehouse-value.dart'; // ערך-מלאי Σ(qty×cost) — אטום-מלאי דומייני
 import '../dart-maor/warehouse-overview.dart'; // מחסור-מול-צריכה: מלאי−הקצאה→remaining→short
+import '../dart-maor/grand-total.dart'; // Σ-לפי-מפתח (kpi כמות-כוללת)
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
+import '../dart-ui-bs/ds/ds_search.dart'; // חיפוש-מבוקר (value+onChanged) — פעולת-יסוד "איתור"
+import '../dart-ui-bs/screens__manager_dashboard_screen/filter_chip_pill.dart'; // צ׳יפ-סינון מבוקר
+import '../dart-ui-bs/premium/feedback/empty_state.dart'; // מצב "אין-תוצאות" (glyph+message)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat דורש הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -78,17 +82,25 @@ class _Home extends StatelessWidget {
 //   שדות-חובה: name·cur·target·rate·lead · שדות-אופציה: supplier?·price? (מוצגים רק כשקיימים).
 class _InvData {
   static const int horizon = 4; // חלון-תכנון: כמה ימים מראש מזהירים לפני שחייבים להזמין
+  // 🔴 סכמת-פריט = רק שדות עם מקור-אמת באימפריה (סוכן-דאטה 3.9 · §20-ג אפס-זיוף):
+  //   name·cur(qty)·price(cost)·unit → maor WarehouseItem (domain.ts:464-473)
+  //   minStock → maor ShopItem (domain.ts:921) · expiry·supplier(source) → maor ShopIntake (domain.ts:962-967)
+  //   sku → buildsmart InventoryItem (store_inventory.dart:99) · cat → buildsmart CatalogProduct (catalog.ts)
+  //   target·rate·lead = קלט-תכנון בית-ספרי (runway) — לא נגזרת-מזויפת. available = warehouseOverview.remaining (נגזר).
+  //   ⛔ ללא-מקור ⇒ הושמטו (לא מזייפים): barcode · reorderQty · מיקום-מדף · מחסן-מרובה · reserved(=נגזר-מהקצאה).
   static const items = <Map<String, dynamic>>[
-    {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4, 'supplier': 'אופיס-דיפו', 'price': 89},
-    {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5, 'supplier': 'פייפר-מיל', 'price': 45},
-    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7, 'supplier': 'קלין-קו', 'price': 32},
-    {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240},
-    {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14, 'supplier': 'טק-ויז׳ן', 'price': 1200},
+    {'name': 'טונר מדפסת', 'cur': 3, 'target': 20, 'rate': 1.0, 'lead': 4, 'supplier': 'אופיס-דיפו', 'price': 89, 'sku': 'TNR-118', 'cat': 'משרד', 'unit': 'יח׳', 'minStock': 5},
+    {'name': 'נייר A4 (חבילות)', 'cur': 8, 'target': 30, 'rate': 2.0, 'lead': 5, 'supplier': 'פייפר-מיל', 'price': 45, 'sku': 'PPR-A4', 'cat': 'משרד', 'unit': 'חב׳', 'minStock': 10},
+    {'name': 'חומרי ניקוי', 'cur': 40, 'target': 80, 'rate': 3.0, 'lead': 7, 'supplier': 'קלין-קו', 'price': 32, 'sku': 'CLN-01', 'cat': 'אחזקה', 'unit': 'ליטר', 'minStock': 20, 'expiry': '2026-11-01'},
+    {'name': 'ערכות מעבדה', 'cur': 6, 'target': 40, 'rate': 0.5, 'lead': 10, 'supplier': 'סיינס-לאב', 'price': 240, 'sku': 'LAB-KIT', 'cat': 'מעבדה', 'unit': 'ערכה', 'minStock': 8},
+    {'name': 'מקרנים (חלופיים)', 'cur': 22, 'target': 30, 'rate': 0.2, 'lead': 14, 'supplier': 'טק-ויז׳ן', 'price': 1200, 'sku': 'PRJ-X', 'cat': 'אלקטרוניקה', 'unit': 'יח׳', 'minStock': 3},
   ];
   // חוזה-תצוגה של שדות-מטא = דאטה (לא קוד-פר-שדה). המקום-השמור: הרינדור לולאה גנרית מעל זה.
   // הוספת שורה כאן ⇒ השדה מופיע לכל רשומה שנושאת אותו, אפס-שינוי-קוד (מבחן-הקונכייה, חוק-7).
   // (מלאי 'cur' שודרג מ-chip ל-StatRow נוגזרת נוכחי/יעד — לכן יצא מכאן; אלה נשארים facts אטומיים)
   static const metaFields = <Map<String, String>>[
+    {'key': 'sku', 'prefix': '🔖 ', 'suffix': ''},
+    {'key': 'cat', 'prefix': '🗂 ', 'suffix': ''},
     {'key': 'rate', 'prefix': '', 'suffix': '/יום'},
     {'key': 'supplier', 'prefix': '🏭 ', 'suffix': ''},
     {'key': 'price', 'prefix': '₪ ', 'suffix': ' ליח׳'},
@@ -140,6 +152,22 @@ class _InvData {
     final t = qty(s), d = deficit(s);
     return t > d ? t : d;
   }
+
+  // ─── KPI-8 · פעולת-יסוד "הערכת-מצב" (כולם מנועי-מדף/שדות-אמת, אפס-StatBlock) ───
+  static int minStock(Map<String, dynamic> s) => (s['minStock'] as int?) ?? 0;
+  static bool belowMin(Map<String, dynamic> s) => (s['cur'] as int) < minStock(s); // מקור: ShopItem.minStock
+  static bool isOut(Map<String, dynamic> s) => (s['cur'] as int) <= 0;             // אזל
+  static bool slow(Map<String, dynamic> s) => (s['rate'] as double) < 0.5;          // איטי-תנועה (קצב-תכנון נמוך)
+  static bool expiring(Map<String, dynamic> s) => s['expiry'] != null;              // מקור: ShopIntake.expiry
+  // available = מלאי − הוקצה-לצרכנים (warehouseOverview.remaining) — נגזר, לא stored 'reserved'
+  static int available(Map<String, dynamic> s) => ((overview()[s['name']]?['remaining'] as num?) ?? (s['cur'] as int)).toInt();
+
+  // חיפוש-איתור: התאמת-מחרוזת על שם/מק״ט/קטגוריה (פעולת-יסוד "איתור")
+  static bool matchesQ(Map<String, dynamic> s, String q) {
+    final t = q.trim();
+    if (t.isEmpty) return true;
+    return '${s['name']} ${s['sku'] ?? ''} ${s['cat'] ?? ''}'.contains(t);
+  }
 }
 
 // (פורמט-שקלים היה inline — הוחלף באטום-הלוגיקה `shekel` מ-dart-maor · §21 שכבת-הלוגיקה)
@@ -153,6 +181,21 @@ class _Inventory extends StatefulWidget {
 class _InventoryState extends State<_Inventory> {
   final Set<String> _ordered = {}; // זיכרון d2: פריטים שסומנו "הוזמן" (מצב=חיווט לגיטימי)
   final Map<String, int> _seg = {}; // מבט-נבחר פר-פריט (חיווט SegmentedSwitch→תצוגה)
+  String _q = ''; // חיפוש-איתור (DsSearch→סינון)
+  int _filter = 0; // 0=הכל · 1=מתחת-מינ׳ · 2=פקיעה · 3=אזלו (FilterChipPill→סינון-חריגה)
+
+  // צ׳יפ-סינון מבוקר: הזרקת-צבעים (חוק-6) + מיפוי selected/onTap ל-_filter
+  Widget _fchip(int i, String label) => FilterChipPill(
+        label: label, selected: _filter == i, onTap: () => setState(() => _filter = i),
+        activeFillColor: _acc, surfaceColor: const Color(0xFF14162E),
+        activeTextColor: const Color(0xFF0B0B15), inkColor: _ink,
+        outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
+      );
+
+  // פרדיקט-חריגה פר-מצב-הסינון (פעולת-יסוד "זיהוי-חריגה")
+  bool _pass(Map<String, dynamic> s) =>
+      _InvData.matchesQ(s, _q) &&
+      (_filter == 1 ? _InvData.belowMin(s) : _filter == 2 ? _InvData.expiring(s) : _filter == 3 ? _InvData.isOut(s) : true);
 
   @override
   Widget build(BuildContext context) {
@@ -161,42 +204,70 @@ class _InventoryState extends State<_Inventory> {
     // Dp3+Dp8+Dp11: קיבוץ-לפי-מצב ⇒ הדחוף בראש כקבוצה, המצב דומיננטי-במבט, היררכיה.
     //   דלי לפי מצב (הוזמן=−1) — שומר על סדר-הדירוג בתוך כל דלי.
     // קיבוץ לפי דחיפות-מאוחדת sev (short OR band) — האיחוד מניע את הטריאז', לא הקצב-בלבד.
+    // KPI-8 (המפרט) על כל-המלאי — כולם מנועי-מדף/שדות-אמת (§20-ג · אפס StatBlock/math.sin):
+    final all = _InvData.items;
+    final totalQty = grandTotal(all, (s) => (s['cur'] as int)).toInt(); // Σ כמות
+    final totalValue = warehouseValue([for (final s in all) {'qty': s['cur'], 'cost': s['price'] ?? 0}]).toInt(); // Σ qty×cost
+    final belowMinN = all.where(_InvData.belowMin).length;
+    final outN = all.where(_InvData.isOut).length;
+    final slowN = all.where(_InvData.slow).length;
+    final expN = all.where(_InvData.expiring).length;
+    final urgentAll = all.where((s) => !_ordered.contains(s['name']) && _InvData.sev(s) >= 1).length; // hero=המטרה
+    // טריאז' מסונן (חיפוש+צ׳יפ) — פעולת-יסוד "הכרעה" מקבצת פר-מצב
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
     for (final s in ranked) {
+      if (!_pass(s)) continue;
       buckets[_ordered.contains(s['name']) ? -1 : _InvData.sev(s)]!.add(s);
     }
-    final atRisk = [...buckets[2]!, ...buckets[1]!];
-    final today = buckets[2]!.length;
-    final soon = buckets[1]!.length;
-    // ₪-בסיכון על כמות-ההזמנה-המאוחדת (יעד+הקצאה) ⇒ warehouseValue (אטום-מלאי דומייני Σqty×cost)
-    final ilsAtRisk = warehouseValue([for (final s in atRisk) {'qty': _InvData.orderQty(s), 'cost': (s['price'] as int?) ?? 0}]).toInt();
-    final shortCount = _InvData.overview().values.where((r) => r['short'] == true).length;
-    // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
+    final shown = buckets.values.fold<int>(0, (n, b) => n + b.length);
     const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
-    const secTone = {2: 2, 1: 3, 0: 1, -1: 1}; // אקסנט-הסקשן צבוע לפי-מצב (שקע tone החדש ב-DsSection)
+    const secTone = {2: 2, 1: 3, 0: 1, -1: 1};
     return DsScaffold(
-      title: 'מלאי', subtitle: 'ימים-עד-ריקון מול זמן-אספקה — שלא ייגמר', icon: '📦',
+      title: 'מלאי', subtitle: '${all.length} פריטים · ${_InvData.consumers.length} מחלקות צורכות', icon: '📦',
       children: [
-        // KPI-מצבי = תובנה-אחת מורכבת (סוכן-C): מספר-על StatHero + פירוק-דחיפות/חשיפה BareStat×4.
-        //   לא 4 אריחים-שטוחים — hero דומיננטי ("כמה דורש-פעולה") ותחתיו הפירוק שמסביר.
+        // פס-עליון: חיפוש-מבוקר (DsSearch) + פעולת-יצירה (SoftButton) — פעולת-יסוד "איתור"
+        Row(children: [
+          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          const SizedBox(width: 8),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ הוסף', tone: 0, onTap: () {})),
+        ]),
+        // צ׳יפי-סינון-חריגה (FilterChipPill מבוקר) — פעולת-יסוד "זיהוי-חריגה"
+        Wrap(spacing: 8, runSpacing: 6, children: [
+          _fchip(0, 'הכל'),
+          _fchip(1, '📉 מתחת-מינ׳ · $belowMinN'),
+          _fchip(2, '⏳ פקיעה · $expN'),
+          _fchip(3, '⛔ אזלו · $outN'),
+        ]),
+        const SizedBox(height: 12),
+        // KPI-8: hero=דורשי-פעולה (המטרה) + 8 מדדי-מצב (BareStat, נושאי-ערך-אמת)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            StatHero(value: '${today + soon}', label: 'פריטים דורשי-הזמנה'),
+            StatHero(value: '$urgentAll', label: 'פריטים דורשי-הזמנה'),
             const SizedBox(height: 14),
             Row(children: [
-              BareStat(value: '$today', label: '🔴 הזמן היום', inkColor: _danger, mutedColor: _muted),
-              BareStat(value: '$soon', label: '🟠 בקרוב', inkColor: _warning, mutedColor: _muted),
-              BareStat(value: '$shortCount', label: '📉 גירעון-הקצאה', inkColor: shortCount > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: shekel(ilsAtRisk), label: '₪ בסיכון', inkColor: _acc, mutedColor: _muted),
+              BareStat(value: '${all.length}', label: '📦 פריטים', inkColor: _ink, mutedColor: _muted),
+              BareStat(value: '$totalQty', label: '🔢 כמות', inkColor: _ink, mutedColor: _muted),
+              BareStat(value: shekel(totalValue), label: '💰 ערך', inkColor: _acc, mutedColor: _muted),
+              BareStat(value: '$belowMinN', label: '📉 מתחת-מינ׳', inkColor: belowMinN > 0 ? _danger : _ok, mutedColor: _muted),
+            ]),
+            const SizedBox(height: 12),
+            Row(children: [
+              BareStat(value: '$outN', label: '⛔ אזלו', inkColor: outN > 0 ? _danger : _ok, mutedColor: _muted),
+              BareStat(value: '${_ordered.length}', label: '🚚 בהזמנה', inkColor: _ink, mutedColor: _muted),
+              BareStat(value: '$slowN', label: '🐌 איטיים', inkColor: _warning, mutedColor: _muted),
+              BareStat(value: '$expN', label: '⏳ פקיעה', inkColor: expN > 0 ? _warning : _ok, mutedColor: _muted),
             ]),
           ]),
         ),
         const SizedBox(height: 8),
-        for (final st in const [2, 1, 0, -1])
-          if (buckets[st]!.isNotEmpty)
-            DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
-              for (final s in buckets[st]!) _row(s),
-            ]),
+        if (shown == 0)
+          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין פריטים תואמים לחיפוש/סינון'))
+        else
+          for (final st in const [2, 1, 0, -1])
+            if (buckets[st]!.isNotEmpty)
+              DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
+                for (final s in buckets[st]!) _row(s),
+              ]),
       ],
     );
   }

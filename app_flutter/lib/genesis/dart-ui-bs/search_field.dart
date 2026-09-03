@@ -11,12 +11,14 @@ class SearchField extends StatefulWidget {
     required this.accentColor,
     required this.baseColor,
     required this.fillColor,
+    this.onChanged,
     super.key,
   });
 
   final String hint;
   final double height, radius;
   final Color accentColor, baseColor, fillColor;
+  final ValueChanged<String>? onChanged; // שקע-דאטה: זורק את השאילתה (backward-compatible)
 
   @override
   State<SearchField> createState() => _SearchFieldState();
@@ -30,7 +32,10 @@ class _SearchFieldState extends State<SearchField> {
   @override
   void initState() {
     super.initState();
-    _ctrl.addListener(() => setState(() {}));
+    _ctrl.addListener(() {
+      setState(() {});
+      widget.onChanged?.call(_ctrl.text);
+    });
     _node.addListener(() => setState(() => _focused = _node.hasFocus));
   }
 
