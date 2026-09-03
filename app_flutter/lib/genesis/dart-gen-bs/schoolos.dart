@@ -113,7 +113,11 @@ class _InventoryState extends State<_Inventory> {
     for (final s in ranked) {
       buckets[_ordered.contains(s['name']) ? -1 : _InvData.band(s)]!.add(s);
     }
-    final needOpen = buckets[2]!.length + buckets[1]!.length; // דורשי-הזמנה = היום+בקרוב, לא-הוזמן
+    // ה-KPI המצבי = הרכבת 3 פעולות-יסוד (לא מספר-אחד): ספירת-היום · ספירת-בקרוב · סכום-יחידות-בסיכון.
+    int qtyOf(Map<String, dynamic> s) => ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
+    final today = buckets[2]!.length;
+    final soon = buckets[1]!.length;
+    final unitsAtRisk = [...buckets[2]!, ...buckets[1]!].fold<int>(0, (a, s) => a + qtyOf(s));
     // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
     const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
     const secTone = {2: 2, 1: 3, 0: 1, -1: 1}; // אקסנט-הסקשן צבוע לפי-מצב (שקע tone החדש ב-DsSection)
@@ -121,8 +125,9 @@ class _InventoryState extends State<_Inventory> {
       title: 'מלאי', subtitle: 'ימים-עד-ריקון מול זמן-אספקה — שלא ייגמר', icon: '📦',
       children: [
         Wrap(spacing: 12, runSpacing: 12, children: [
-          SizedBox(width: 190, child: KpiTile(glyph: '🛒', value: '$needOpen', label: 'דורשי-הזמנה')),
-          SizedBox(width: 190, child: KpiTile(glyph: '📦', value: '${_InvData.items.length}', label: 'פריטים')),
+          SizedBox(width: 168, child: KpiTile(glyph: '🔴', value: '$today', label: 'הזמן היום')),
+          SizedBox(width: 168, child: KpiTile(glyph: '🟠', value: '$soon', label: 'הזמן בקרוב')),
+          SizedBox(width: 168, child: KpiTile(glyph: '🛒', value: '$unitsAtRisk', label: 'יח׳ להזמנה')),
         ]),
         const SizedBox(height: 8),
         for (final st in const [2, 1, 0, -1])
