@@ -268,10 +268,12 @@ class _InventoryState extends State<_Inventory> {
     final left = _InvData.daysLeft(s), lead = s['lead'] as int, cur = s['cur'] as int;
     final rate = s['rate'] as double;
     final margin = _InvData.mustOrderIn(s);
+    final band = _InvData.band(s);
+    final tone = band == 2 ? 2 : band == 1 ? 3 : 1; // הקווים והמד נצבעים לפי-המצב (שקע tone החדש)
     final suff = (left / lead).clamp(0.0, 1.0);
     final urgency = (1 - margin / _InvData.horizon).clamp(0.0, 1.0);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()]),
+      NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()], tone: tone),
       _gap(),
       Row(children: [
         BareStat(value: '${margin.round()} י׳', label: 'מרווח מול הקו', inkColor: margin < 0 ? _danger : _ok, mutedColor: _muted),
@@ -279,7 +281,7 @@ class _InventoryState extends State<_Inventory> {
       _gap(8),
       StatRow(label: 'כיסוי זמן-האספקה', value: '${(suff * 100).round()}%', fraction: suff),
       _gap(12),
-      Center(child: GaugeMeter(value: urgency, size: 140)),
+      Center(child: GaugeMeter(value: urgency, size: 140, tone: tone)),
       _gap(8),
       Row(children: [
         BareStat(value: '$cur', label: 'מלאי נוכחי', inkColor: _ink, mutedColor: _muted),

@@ -2,10 +2,11 @@
 import 'package:flutter/material.dart';
 
 class NeonBars extends StatelessWidget {
-  const NeonBars({super.key, required this.labels, required this.values});
+  const NeonBars({super.key, required this.labels, required this.values, this.tone = 0});
 
   final List<String> labels;
   final List<double> values;
+  final int tone; // 0=ניאון(ברירת-מחדל, ביט-זהה) · 1=success · 2=danger · 3=warning — פיגמנט מוזרק (חוק-6)
 
   static const Color _bg = Color(0xFF0E0F1E);
   static const Color _track = Color(0xFF1A1B33);
@@ -14,6 +15,14 @@ class NeonBars extends StatelessWidget {
   static const Color _magenta = Color(0xFFFF3DCB);
   static const Color _ink = Color(0xFFEAEBFF);
   static const Color _mute = Color(0xFF8A8CB8);
+
+  // גרדיאנטי-tone לפס-המילוי — הצבע מגיב-למצב במקום קשיח.
+  static const List<List<Color>> tones = [
+    [_cyan, _violet, _magenta],                                       // 0 ניאון
+    [Color(0xFF6EE7B7), Color(0xFF34D399), Color(0xFF059669)],        // 1 success
+    [Color(0xFFFB7185), Color(0xFFF43F5E), Color(0xFFBE123C)],        // 2 danger
+    [Color(0xFFFCD34D), Color(0xFFF59E0B), Color(0xFFD97706)],        // 3 warning
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +53,7 @@ class NeonBars extends StatelessWidget {
                   label: labels[i],
                   value: values[i],
                   fraction: (values[i] / maxV).clamp(0.0, 1.0),
+                  tone: tone,
                 ),
               ),
           ],
@@ -54,11 +64,12 @@ class NeonBars extends StatelessWidget {
 }
 
 class _Row extends StatelessWidget {
-  const _Row({required this.label, required this.value, required this.fraction});
+  const _Row({required this.label, required this.value, required this.fraction, this.tone = 0});
 
   final String label;
   final double value;
   final double fraction;
+  final int tone;
 
   @override
   Widget build(BuildContext context) {
@@ -112,17 +123,17 @@ class _Row extends StatelessWidget {
                   width: w < 12 ? 12 : w,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    gradient: const LinearGradient(
-                      colors: [NeonBars._cyan, NeonBars._violet, NeonBars._magenta],
+                    gradient: LinearGradient(
+                      colors: NeonBars.tones[tone % NeonBars.tones.length],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: NeonBars._violet.withValues(alpha: 0.55),
+                        color: NeonBars.tones[tone % NeonBars.tones.length][1].withValues(alpha: 0.55),
                         blurRadius: 14,
                         spreadRadius: -2,
                       ),
                       BoxShadow(
-                        color: NeonBars._cyan.withValues(alpha: 0.35),
+                        color: NeonBars.tones[tone % NeonBars.tones.length][0].withValues(alpha: 0.35),
                         blurRadius: 8,
                         offset: const Offset(0, 0),
                       ),

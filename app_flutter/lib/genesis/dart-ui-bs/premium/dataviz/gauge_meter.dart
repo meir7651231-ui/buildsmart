@@ -1,17 +1,26 @@
 // ✨ GaugeMeter — מד-קשת 0..1 גרדיאנט-ניאון עם מחוג זוהר (CustomPainter)
 import 'dart:math' as math;
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class GaugeMeter extends StatelessWidget {
-  const GaugeMeter({super.key, required this.value, this.size = 200});
+  const GaugeMeter({super.key, required this.value, this.size = 200, this.tone = 0});
 
   final double value;
   final double size;
+  final int tone; // 0=ניאון(ברירת-מחדל, ביט-זהה) · 1=success · 2=danger · 3=warning — פיגמנט מוזרק (חוק-6)
+
+  // גרדיאנטי-tone: כל שורה [בהיר, אמצע, כהה] — הצבע מגיב-למצב במקום קשיח.
+  static const List<List<Color>> tones = [
+    [Color(0xFF22E1FF), Color(0xFF7A5CFF), Color(0xFFFF3DCB)], // 0 ניאון
+    [Color(0xFF6EE7B7), Color(0xFF34D399), Color(0xFF059669)], // 1 success
+    [Color(0xFFFB7185), Color(0xFFF43F5E), Color(0xFFBE123C)], // 2 danger
+    [Color(0xFFFCD34D), Color(0xFFF59E0B), Color(0xFFD97706)], // 3 warning
+  ];
 
   @override
   Widget build(BuildContext context) {
     final double v = value.clamp(0.0, 1.0);
+    final g = tones[tone % tones.length];
     return SizedBox(
       width: size,
       height: size * 0.62,
@@ -20,13 +29,13 @@ class GaugeMeter extends StatelessWidget {
         children: [
           CustomPaint(
             size: Size(size, size * 0.62),
-            painter: _GaugePainter(v),
+            painter: _GaugePainter(v, g),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: size * 0.02),
             child: ShaderMask(
-              shaderCallback: (r) => const LinearGradient(
-                colors: [Color(0xFF22E1FF), Color(0xFFFF3DCB)],
+              shaderCallback: (r) => LinearGradient(
+                colors: [g.first, g.last],
               ).createShader(r),
               child: Text(
                 '${(v * 100).round()}',
@@ -48,9 +57,10 @@ class GaugeMeter extends StatelessWidget {
 }
 
 class _GaugePainter extends CustomPainter {
-  _GaugePainter(this.value);
+  _GaugePainter(this.value, this.grad);
 
   final double value;
+  final List<Color> grad; // 3 גווני-tone מוזרקים
 
   static const Color _track = Color(0xFF1A1B33);
   static const double _start = math.pi;
@@ -75,10 +85,10 @@ class _GaugePainter extends CustomPainter {
         ..color = _track,
     );
 
-    const SweepGradient grad = SweepGradient(
+    final SweepGradient sweepGrad = SweepGradient(
       startAngle: math.pi,
       endAngle: 2 * math.pi,
-      colors: [Color(0xFF22E1FF), Color(0xFF7A5CFF), Color(0xFFFF3DCB)],
+      colors: grad,
     );
 
     final double sweep = _extent * value;
@@ -92,7 +102,7 @@ class _GaugePainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = stroke
           ..strokeCap = StrokeCap.round
-          ..shader = grad.createShader(box)
+          ..shader = sweepGrad.createShader(box)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7),
       );
       canvas.drawArc(
@@ -104,7 +114,7 @@ class _GaugePainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = stroke
           ..strokeCap = StrokeCap.round
-          ..shader = grad.createShader(box),
+          ..shader = sweepGrad.createShader(box),
       );
     }
 
@@ -117,17 +127,17 @@ class _GaugePainter extends CustomPainter {
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(c, Offset(nx, ny), needle);
-    canvas.drawCircle(c, stroke * 0.55, Paint()..color = const Color(0xFF7A5CFF));
+    canvas.drawCircle(c, stroke * 0.55, Paint()..color = grad[1]);
     canvas.drawCircle(c, stroke * 0.28, Paint()..color = Colors.white);
     canvas.drawCircle(
       Offset(nx, ny),
       5,
       Paint()
-        ..color = const Color(0xFFFF3DCB)
+        ..color = grad.last
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
     );
   }
 
   @override
-  bool shouldRepaint(covariant _GaugePainter old) => old.value != value;
+  bool shouldRepaint(covariant _GaugePainter old) => old.value != value || old.grad != grad;
 }
