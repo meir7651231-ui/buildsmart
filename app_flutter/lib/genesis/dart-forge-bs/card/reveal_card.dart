@@ -10,8 +10,7 @@ class ForgeRevealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(height: 120, decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(15)), child: Center(widthFactor: 1.0, child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Text("Label", style: TextStyle(color: skin.ink, fontWeight: FontWeight.w600, fontFamily: fonts.he)), Positioned.fill(child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topLeft, end: Alignment.bottomRight)), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Text("Action", style: TextStyle(color: const Color(0xFF0B0B0D), fontWeight: FontWeight.w600, fontFamily: fonts.he)))))]))));
+    return Container(height: 120, decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(15)), child: Center(widthFactor: 1.0, child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Text("Label", style: TextStyle(color: skin.ink, fontWeight: FontWeight.w600, fontFamily: fonts.he)), Positioned.fill(child: const SizedBox.shrink())]))));
   }
 }
