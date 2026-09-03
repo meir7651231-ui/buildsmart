@@ -516,15 +516,18 @@ class _InventoryState extends State<_Inventory> {
     });
   }
 
-  // מצב-טעינה שמור: מחוון + טקסט (אטום-מסגרת סטנדרטי; אפס ShimmerSkeleton מזייף)
+  // מצב-טעינה שמור: מחוון + טקסט (אטום-מסגרת סטנדרטי; אפס ShimmerSkeleton מזייף).
+  //   מרוכז דרך ה-Column עצמו (crossAxis.center) — לא Center (שדורש גובה-חסום ⇒ קורס ברשימה-נגללת).
   Widget _loadingView() => Padding(
-        padding: const EdgeInsets.only(top: 40),
-        child: Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
+        padding: const EdgeInsets.symmetric(vertical: 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
             CircularProgressIndicator(color: _acc),
             const SizedBox(height: 14),
             const Text('טוען מלאי…', style: TextStyle(color: _muted, fontSize: 14)),
-          ]),
+          ],
         ),
       );
 
