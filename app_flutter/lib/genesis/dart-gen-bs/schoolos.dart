@@ -32,6 +32,9 @@ import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפ
 import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
 import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (מדף)
 import '../dart-maor/finder-matches.dart'; // חריגה: סינון-רב-צירי AND (מדף)
+import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
+import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
+import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
 import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט-ציר-זמן (title/time/body) — לא timeline_flow המזייף
 
 const _acc = DsTokens.accent;
@@ -242,6 +245,21 @@ class _InvData {
     final locks = chip == 0 ? <dynamic, dynamic>{} : <dynamic, dynamic>{_axisOf[chip]!: '1'};
     return finderMatches({'families': items}, locks, _axisValue).cast<Map<String, dynamic>>();
   }
+
+  // ═══ ייצוא (הכרעה 23-ג · תובנה) = SoftButton ⊕ toCsv ⊕ csvEscape ⊕ exportAllowed ═══
+  //   שורות = כותרת + תא-פר-שדה-אמת (מלאי-אפקטיבי). toCsv+csvEscape מהמדף (BOM + חסימת-הזרקה).
+  static String statusText(Map<String, dynamic> s) =>
+      isOut(s) ? 'אזל' : belowMin(s) ? 'מתחת-מינ׳' : sev(s) == 2 ? 'הזמן היום' : sev(s) == 1 ? 'הזמן בקרוב' : 'תקין';
+  static const _csvHeader = ['מק״ט', 'שם', 'קטגוריה', 'יח׳', 'כמות', 'זמין', 'מינ׳', 'ערך', 'ספק', 'סטטוס'];
+  static List<List<Object?>> _csvRows(List<Map<String, dynamic>> items) => [
+        _csvHeader,
+        for (final s in items)
+          [s['sku'] ?? '', s['name'], s['cat'] ?? '', s['unit'] ?? '', curOf(s), available(s),
+            minStock(s), curOf(s) * ((s['price'] as int?) ?? 0), s['supplier'] ?? '', statusText(s)],
+      ];
+  static String csvOf(List<Map<String, dynamic>> items) => toCsv(_csvRows(items), csvEscape) as String;
+  static int get csvHeaderLen => _csvHeader.length;
+  static bool get exportOk => exportAllowed(false); // שער-ייצוא (demo: לא-חסום)
 }
 
 // (פורמט-שקלים היה inline — הוחלף באטום-הלוגיקה `shekel` מ-dart-maor · §21 שכבת-הלוגיקה)
@@ -297,11 +315,14 @@ class _InventoryState extends State<_Inventory> {
     return DsScaffold(
       title: 'מלאי', subtitle: '${all.length} פריטים · ${_InvData.consumers.length} מחלקות צורכות', icon: '📦',
       children: [
-        // פס-עליון: חיפוש-מבוקר (DsSearch) + פעולת-יצירה (SoftButton) — פעולת-יסוד "איתור"
+        // פס-עליון: חיפוש-מבוקר (DsSearch) + יצירה + ייצוא — פעולות-יסוד "איתור" + "דיווח"
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
           const SizedBox(width: 8),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ הוסף', tone: 0, onTap: () {})),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕', tone: 0, onTap: () {})),
+          const SizedBox(width: 6),
+          // ייצוא (23-ג): toCsv⊕csvEscape⊕exportAllowed — מייצא את הרשימה-הנראית (אחרי איתור+חריגה)
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport(visible))),
         ]),
         // צ׳יפי-סינון-חריגה (FilterChipPill מבוקר) — פעולת-יסוד "זיהוי-חריגה"
         Wrap(spacing: 8, runSpacing: 6, children: [
@@ -470,6 +491,41 @@ class _InventoryState extends State<_Inventory> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  // ═══ ייצוא (23-ג · תובנה) = SoftButton ⊕ toCsv ⊕ csvEscape ⊕ exportAllowed ⊕ GlassCard-preview ═══
+  //   שער-הייצוא (exportAllowed) נבדק; בדפדפן-הסנדבוקס ההורדה חסומה ⇒ תצוגת-CSV לבדיקה+העתקה.
+  void _openExport(List<Map<String, dynamic>> items) {
+    final allowed = _InvData.exportOk;
+    final csv = allowed ? _InvData.csvOf(items) : '';
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
+        builder: (ctx, scroll) => Padding(
+          padding: const EdgeInsets.all(12),
+          child: GlassCard(
+            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+              MediaRow(glyph: '⬇', title: 'ייצוא CSV', subtitle: '${items.length} פריטים · ${_InvData.csvHeaderLen} עמודות'),
+              _gap(10),
+              if (!allowed)
+                const AlertBanner(message: 'ייצוא חסום (שער-הרשאות)', tone: 2)
+              else ...[
+                const Text('תצוגה מקדימה (BOM + חסימת-הזרקה):', style: TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
+                _gap(8),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
+                  child: SelectableText(csv, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
+                ),
+              ],
+            ]),
+          ),
+        ),
       ),
     );
   }
