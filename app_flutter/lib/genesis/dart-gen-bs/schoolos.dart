@@ -107,8 +107,15 @@ class _InventoryState extends State<_Inventory> {
   Widget build(BuildContext context) {
     // דירוג לפי ימים-עד-ריקון עולה — הכי-קרוב-להיגמר ראשון
     final ranked = [..._InvData.items]..sort((a, b) => _InvData.daysLeft(a).compareTo(_InvData.daysLeft(b)));
-    // דורשי-הזמנה = פעיל שעדיין לא-הוזמן (הלולאה נסגרת ⇒ המונה יורד)
-    final needOpen = ranked.where((s) => _InvData.band(s) >= 1 && !_ordered.contains(s['name'])).length;
+    // Dp3+Dp8+Dp11: קיבוץ-לפי-מצב ⇒ הדחוף בראש כקבוצה, המצב דומיננטי-במבט, היררכיה.
+    //   דלי לפי מצב (הוזמן=−1) — שומר על סדר-הדירוג בתוך כל דלי.
+    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
+    for (final s in ranked) {
+      buckets[_ordered.contains(s['name']) ? -1 : _InvData.band(s)]!.add(s);
+    }
+    final needOpen = buckets[2]!.length + buckets[1]!.length; // דורשי-הזמנה = היום+בקרוב, לא-הוזמן
+    // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
+    const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
     return DsScaffold(
       title: 'מלאי', subtitle: 'ימים-עד-ריקון מול זמן-אספקה — שלא ייגמר', icon: '📦',
       children: [
@@ -117,9 +124,11 @@ class _InventoryState extends State<_Inventory> {
           SizedBox(width: 190, child: KpiTile(glyph: '📦', value: '${_InvData.items.length}', label: 'פריטים')),
         ]),
         const SizedBox(height: 8),
-        DsSection(title: 'החלטת-הזמנה · הכי-דחוף ראשון', children: [
-          for (final s in ranked) _row(s),
-        ]),
+        for (final st in const [2, 1, 0, -1])
+          if (buckets[st]!.isNotEmpty)
+            DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', children: [
+              for (final s in buckets[st]!) _row(s),
+            ]),
       ],
     );
   }
@@ -153,12 +162,9 @@ class _InventoryState extends State<_Inventory> {
     final lead = s['lead'] as int;
     final ordered = _ordered.contains(name);
     final band = _InvData.band(s);
-    final st = ordered ? -1 : band; // -1=הוזמן · 2=היום · 1=בקרוב · 0=בטוח
-    final glyph = st == -1 ? '✅' : st == 2 ? '🔴' : st == 1 ? '🟠' : '🟢';
-    final stWord = st == -1 ? 'הוזמן' : st == 2 ? 'הזמן היום' : st == 1 ? 'הזמן בקרוב' : 'בטוח';
-
+    // המצב נישא בכותרת-הסקשן (הקיבוץ) ⇒ הכותרת-פנימית נקייה: אייקון-פריט + שם + תמצית-ריצה, בלי כפילות-מצב.
     final kids = <Widget>[
-      MediaRow(glyph: glyph, title: name, subtitle: '${left.round()} ימים ריצה · אספקה $lead י׳', trailing: stWord),
+      MediaRow(glyph: '📦', title: name, subtitle: '${left.round()} ימים ריצה · אספקה $lead י׳'),
     ];
     if (ordered) {
       kids.add(_wrap([SoftButton(label: 'בטל', tone: 0, onTap: () => setState(() => _ordered.remove(name)))], top: 8));
