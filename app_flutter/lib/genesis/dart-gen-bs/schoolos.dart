@@ -116,6 +116,7 @@ class _InventoryState extends State<_Inventory> {
     final needOpen = buckets[2]!.length + buckets[1]!.length; // דורשי-הזמנה = היום+בקרוב, לא-הוזמן
     // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
     const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
+    const secTone = {2: 2, 1: 3, 0: 1, -1: 1}; // אקסנט-הסקשן צבוע לפי-מצב (שקע tone החדש ב-DsSection)
     return DsScaffold(
       title: 'מלאי', subtitle: 'ימים-עד-ריקון מול זמן-אספקה — שלא ייגמר', icon: '📦',
       children: [
@@ -126,7 +127,7 @@ class _InventoryState extends State<_Inventory> {
         const SizedBox(height: 8),
         for (final st in const [2, 1, 0, -1])
           if (buckets[st]!.isNotEmpty)
-            DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', children: [
+            DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
               for (final s in buckets[st]!) _row(s),
             ]),
       ],

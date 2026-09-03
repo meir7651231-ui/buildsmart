@@ -152,10 +152,12 @@ class DsScaffold extends StatelessWidget {
 
 // ── כרטיס-סקשן: כותרת + ילדים במרווח אחיד (זכוכית-כהה) ──
 class DsSection extends StatelessWidget {
-  const DsSection({required this.title, required this.children, this.trailing, super.key});
+  const DsSection({required this.title, required this.children, this.trailing, this.tone = 0, super.key});
   final String title;
   final List<Widget> children;
   final Widget? trailing;
+  final int tone; // פס-האקסנט: 0=accent(ברירת-מחדל, ביט-זהה) · 1=success · 2=danger · 3=warning
+  static const List<Color> _toneC = [Color(0xFF7C3AED), Color(0xFF34D399), Color(0xFFF43F5E), Color(0xFFF59E0B)];
 
   @override
   Widget build(BuildContext context) => Container(
@@ -173,7 +175,7 @@ class DsSection extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(DsTokens.pad, 16, DsTokens.pad, 12),
               child: Row(
                 children: [
-                  Container(width: 3, height: 16, margin: const EdgeInsets.only(left: 9), decoration: BoxDecoration(gradient: DsTokens.accentGrad, borderRadius: BorderRadius.circular(2))),
+                  Container(width: 3, height: 16, margin: const EdgeInsets.only(left: 9), decoration: BoxDecoration(gradient: tone == 0 ? DsTokens.accentGrad : LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [_toneC[tone % 4], _toneC[tone % 4].withValues(alpha: 0.55)]), borderRadius: BorderRadius.circular(2))),
                   Expanded(child: Text(title, style: const TextStyle(color: DsTokens.ink, fontSize: 15.5, fontWeight: FontWeight.w800, letterSpacing: -0.2, fontFamily: DsTokens.fontHead))),
                   if (trailing != null) trailing!,
                 ],
