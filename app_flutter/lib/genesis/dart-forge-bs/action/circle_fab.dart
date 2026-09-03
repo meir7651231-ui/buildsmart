@@ -11,6 +11,6 @@ class ForgeCircleFab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(width: 52, height: 52, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 12), blurRadius: 26, spreadRadius: 0)]), child: Text("＋", style: TextStyle(color: const Color(0xFF0B0B0D), fontSize: 23, fontFamily: fonts.he)));
+    return Container(width: 52, height: 52, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 12), blurRadius: 26, spreadRadius: 0)]), foregroundDecoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.60, -1.20), radius: 1.20, colors: [theme.aHi, const Color(0x00000000)], stops: [0.0, 0.55]), borderRadius: BorderRadius.circular(999)), child: Text("＋", style: TextStyle(color: const Color(0xFF0B0B0D), fontSize: 23, fontFamily: fonts.he)));
   }
 }
