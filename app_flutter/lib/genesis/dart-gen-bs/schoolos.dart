@@ -15,7 +15,9 @@ import '../dart-ui-bs/premium/lists/media_row.dart';
 import '../dart-ui-bs/premium/actions/segmented_switch.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
 import '../dart-ui-bs/premium/dataviz/gauge_meter.dart';
-import '../dart-maor/shekel.dart'; // אטום-לוגיקה (§21 שכבת-הלוגיקה): ₪+אלפים he-IL — לא inline
+import '../dart-maor/shekel.dart'; // אטומי-לוגיקה (§21 שכבת-הלוגיקה) — מחווטים מהמדף, לא inline:
+import '../dart-maor/grand-total.dart'; // Σ-לפי-מפתח (סכום)
+import '../dart-maor/clamp-scale.dart'; // נרמול/הצמדה לגבולות
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
@@ -133,8 +135,9 @@ class _InventoryState extends State<_Inventory> {
     final atRisk = [...buckets[2]!, ...buckets[1]!];
     final today = buckets[2]!.length;
     final soon = buckets[1]!.length;
-    final unitsAtRisk = atRisk.fold<int>(0, (a, s) => a + _InvData.qty(s));
-    final ilsAtRisk = atRisk.fold<int>(0, (a, s) => a + _InvData.qty(s) * ((s['price'] as int?) ?? 0));
+    // Σ מחווט מאטום-הלוגיקה grandTotal (במקום fold inline)
+    final unitsAtRisk = grandTotal(atRisk, (s) => _InvData.qty(s)).toInt();
+    final ilsAtRisk = grandTotal(atRisk, (s) => _InvData.qty(s) * ((s['price'] as int?) ?? 0)).toInt();
     // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
     const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
     const secTone = {2: 2, 1: 3, 0: 1, -1: 1}; // אקסנט-הסקשן צבוע לפי-מצב (שקע tone החדש ב-DsSection)
@@ -262,8 +265,9 @@ class _InventoryState extends State<_Inventory> {
     final margin = _InvData.mustOrderIn(s);
     final band = _InvData.band(s);
     final tone = band == 2 ? 2 : band == 1 ? 3 : 1; // הקווים והמד נצבעים לפי-המצב (שקע tone החדש)
-    final suff = (left / lead).clamp(0.0, 1.0);
-    final urgency = (1 - margin / _InvData.horizon).clamp(0.0, 1.0);
+    // נרמול מחווט מאטום-הלוגיקה clampScale (במקום .clamp inline)
+    final suff = clampScale(left / lead, 0.0, 1.0).toDouble();
+    final urgency = clampScale(1 - margin / _InvData.horizon, 0.0, 1.0).toDouble();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()], tone: tone),
       _gap(),
