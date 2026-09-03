@@ -19,6 +19,7 @@ import '../dart-maor/shekel.dart'; // אטומי-לוגיקה (§21 שכבת-ה�
 import '../dart-maor/grand-total.dart'; // Σ-לפי-מפתח (סכום)
 import '../dart-maor/clamp-scale.dart'; // נרמול/הצמדה לגבולות
 import '../dart-maor/warehouse-value.dart'; // ערך-מלאי Σ(qty×cost) — אטום-מלאי דומייני
+import '../dart-maor/warehouse-overview.dart'; // מחסור-מול-צריכה: מלאי−הקצאה→remaining→short
 import '../dart-ui-bs/premium/lists/stat_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
@@ -108,6 +109,24 @@ class _InvData {
 
   static int qty(Map<String, dynamic> s) => ((s['target'] as int) - (s['cur'] as int)).clamp(0, s['target'] as int);
   static int get urgent => items.where((s) => band(s) == 2).length; // לא-יספיק (ל-_Home)
+
+  // ─── מודל שני (מפורק): צריכה-מוקצית-לצרכנים → מחסור. חוברים לקצב ל"מקסימום-מטרה". ───
+  // צרכנים = כיתות/מחלקות שצורכות ציוד (ayin.mat = [{name, qty}] — צורת-הקלט של warehouseOverview).
+  static const consumers = <Map<String, dynamic>>[
+    {'id': 'sci', 'name': 'מעבדת מדעים', 'ayin': {'mat': [{'name': 'ערכות מעבדה', 'qty': 30}, {'name': 'טונר מדפסת', 'qty': 2}]}},
+    {'id': 'adm', 'name': 'מזכירות', 'ayin': {'mat': [{'name': 'טונר מדפסת', 'qty': 4}, {'name': 'נייר A4 (חבילות)', 'qty': 12}]}},
+    {'id': 'jan', 'name': 'אחזקה', 'ayin': {'mat': [{'name': 'חומרי ניקוי', 'qty': 20}]}},
+    {'id': 'cls', 'name': 'כיתות א׳-ו׳', 'ayin': {'mat': [{'name': 'נייר A4 (חבילות)', 'qty': 25}, {'name': 'מקרנים (חלופיים)', 'qty': 5}]}},
+  ];
+  static String norm(dynamic s) => (s as String).trim(); // שקע-נרמול (חוק-1) — מוזרק ל-warehouseOverview
+  // המלאי בצורת-הקלט של האטום {name, qty, cost}
+  static List<Map<String, dynamic>> get _wh =>
+      [for (final s in items) {'name': s['name'], 'qty': s['cur'], 'cost': s['price'] ?? 0}];
+  // הסקירה המפורקת פר-שם: {item, allocated, remaining, short, byProject}
+  static Map<String, Map<String, dynamic>> overview() {
+    final o = warehouseOverview(_wh, consumers, norm);
+    return {for (final r in o) (r['item'] as Map)['name'] as String: r};
+  }
 }
 
 // (פורמט-שקלים היה inline — הוחלף באטום-הלוגיקה `shekel` מ-dart-maor · §21 שכבת-הלוגיקה)
@@ -139,6 +158,9 @@ class _InventoryState extends State<_Inventory> {
     // Σ מחווט מהמדף: יחידות ⇒ grandTotal (גנרי) · ₪-בסיכון ⇒ warehouseValue (אטום-מלאי דומייני Σqty×cost)
     final unitsAtRisk = grandTotal(atRisk, (s) => _InvData.qty(s)).toInt();
     final ilsAtRisk = warehouseValue([for (final s in atRisk) {'qty': _InvData.qty(s), 'cost': (s['price'] as int?) ?? 0}]).toInt();
+    // אות שני (מפורק): כמה פריטים בגירעון-הקצאה (מלאי < צריכה-מוקצית) — warehouseOverview.short
+    final _ov = _InvData.overview();
+    final shortCount = _ov.values.where((r) => r['short'] == true).length;
     // כותרות-הסקשן = מצב + מונה (glyph-מצב נושא את הדומיננטיות)
     const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
     const secTone = {2: 2, 1: 3, 0: 1, -1: 1}; // אקסנט-הסקשן צבוע לפי-מצב (שקע tone החדש ב-DsSection)
@@ -156,6 +178,7 @@ class _InventoryState extends State<_Inventory> {
               BareStat(value: '$soon', label: '🟠 בקרוב', inkColor: _warning, mutedColor: _muted),
               BareStat(value: '$unitsAtRisk', label: '🛒 יח׳', inkColor: _ink, mutedColor: _muted),
               BareStat(value: shekel(ilsAtRisk), label: '₪ בסיכון', inkColor: _acc, mutedColor: _muted),
+              BareStat(value: '$shortCount', label: '📉 גירעון-הקצאה', inkColor: shortCount > 0 ? _danger : _ok, mutedColor: _muted),
             ]),
           ]),
         ),
@@ -285,6 +308,25 @@ class _InventoryState extends State<_Inventory> {
         BareStat(value: '${rate % 1 == 0 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(1)}/יום', label: 'קצב צריכה', inkColor: _ink, mutedColor: _muted),
         BareStat(value: '${left.round()} י׳', label: '= ריצה', inkColor: left <= lead ? _danger : _acc, mutedColor: _muted),
       ]),
+      // ─── אות-מחסור שני (מפורק · warehouseOverview): מלאי מול צריכה-מוקצית-לכיתות → גירעון/עודף ───
+      // "מקסום-מטרה" = שני האותות יחד (קצב-זמן + הקצאה-לצרכנים), לא בחירה באחד.
+      ...(() {
+        final ov = _InvData.overview()[s['name'] as String];
+        if (ov == null) return <Widget>[];
+        final allocated = (ov['allocated'] as num).toInt();
+        final remaining = (ov['remaining'] as num).toInt();
+        final short = ov['short'] == true;
+        final byP = ov['byProject'] as List;
+        return <Widget>[
+          _gap(14),
+          Row(children: [
+            BareStat(value: '$cur', label: 'ביד', inkColor: _ink, mutedColor: _muted),
+            BareStat(value: '$allocated', label: 'מוקצה לכיתות', inkColor: _ink, mutedColor: _muted),
+            BareStat(value: '$remaining', label: short ? '= גירעון' : '= עודף', inkColor: short ? _danger : _ok, mutedColor: _muted),
+          ]),
+          _wrap([for (final p in byP) StatusChip(label: '${(p as Map)['name']}: ${p['qty']}', tone: short ? 2 : 0)]),
+        ];
+      })(),
     ]);
   }
 
