@@ -26,6 +26,14 @@ import '../dart-maor/task-overdue.dart'; // משימה באיחור (WorkTask.du
 import '../dart-maor/cockpit-days-since.dart'; // ימים-מאז (iso→today)
 import '../dart-maor/format-israeli-phone.dart'; // טלפון-הורה מעוצב
 import '../dart-maor/fmt-date.dart'; // תאריך dd/mm/yyyy
+import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון-בלחיצה) — לא DataGrid המזייף
+import '../dart-ui-bs/premium/actions/segmented_switch.dart'; // בורר-מבט/מיון מבוקר
+import '../dart-ui-bs/premium/lists/media_row.dart'; // שורת-תלמיד: glyph+title+subtitle
+import '../dart-ui-bs/premium/lists/stat_row.dart'; // בר-סיכון: label+value+fraction
+import '../dart-ui-bs/premium/feedback/status_chip.dart'; // שבב: אות-מוביל · פעולה · דגל · סטטוס
+import '../dart-ui-bs/premium/feedback/empty_state.dart'; // מצב "אין-תלמידים/אין-תוצאות"
+import '../dart-maor/name-sort-key.dart'; // מיון-לפי-שם (מנורמל, בלי תארים)
+import '../dart-maor/norm-search.dart'; // נרמול-עברי (סופיות/ניקוד) — שקע ל-nameSortKey ולחיפוש
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -236,6 +244,7 @@ class _StuData {
     final st = e['status'];
     if (st == 'paused') return 'הוקפא';
     if (st == 'ended') return s['grade'] == 'יב' ? 'בוגר' : 'עזב';
+    if (st == 'wait') return 'ממתין/ה'; // רשימת-המתנה (Enrollment.status=wait) — עדיין לא תלמיד/ה פעיל/ה
     return 'פעיל';
   }
   static bool isActive(Map<String, dynamic> s) => status(s) == 'פעיל';
@@ -298,9 +307,10 @@ class _StuData {
   //   אותות עם מקור-אמת: נוכחות (presents/absences) · מגמה (trendFromScan) · משפחתי (Family+WorkTask).
   //   מקום-שמור (אפס-זיוף): ציונים (s['grades'] מפה מקצוע⇒ציון) · התנהגות (s['behavior'] אירועים/חודש) · חברתי-רגשי (s['social'] 0..1).
   //   כשיגיע נתון לרשומה — האות מאיר לבד, אפס-שינוי-קוד (מבחן-הקונכייה).
+  static const minSample = 5; // אות-נוכחות דורש ≥5 מפגשים (נתפס ברנדר: תלמידה חדשה עם 3 מפגשים קיבלה 40 נק׳ מחיסור-אחד)
   static double? _attN(Map<String, dynamic> s) {
     final r = attendance(s);
-    if (r == null) return null;
+    if (r == null || presents(s) + absences(s) < minSample) return null;
     final base = clampScale((0.92 - r) / 0.25, 0.0, 1.0).toDouble(); // <92% מתחיל לעלות · 67% = מלא
     final ns = noshow(s) >= 2 ? 0.6 : 0.0; // אי-הופעות חוזרות = אות עצמאי
     return base > ns ? base : ns;
@@ -394,6 +404,71 @@ class _StuData {
   static List<List<Object>> byClass() => countBy(active, (s) => className(s as Map<String, dynamic>));
   static int daysSince(String iso) => cockpitDaysSince(iso, today).toInt();
   static String fmt(String? iso) => fmtDate(iso);
+
+  // ─── מיון (איתור·דירוג): סיכון-יורד · כיתה (gradeIndex⊕שם-כיתה) · שם (nameSortKey⊕normSearch) ───
+  static const Map<String, String> _finals = {'k1': 'כ', 'k2': 'מ', 'k3': 'נ', 'k4': 'פ', 'k5': 'צ'};
+  static String norm(dynamic q) => normSearch(q, _finals);
+  static String sortKey(Map<String, dynamic> s) => nameSortKey(s['name'], norm, const <String>{});
+  static List<Map<String, dynamic>> sorted(List<Map<String, dynamic>> xs, int mode) {
+    final out = [...xs];
+    if (mode == 1) {
+      out.sort((a, b) { final c = gradeIdx(a).compareTo(gradeIdx(b)); return c != 0 ? c : className(a).compareTo(className(b)) != 0 ? className(a).compareTo(className(b)) : sortKey(a).compareTo(sortKey(b)); });
+    } else if (mode == 2) {
+      out.sort((a, b) => sortKey(a).compareTo(sortKey(b)));
+    } else {
+      out.sort((a, b) => risk(b).compareTo(risk(a)));
+    }
+    return out;
+  }
+
+  // ─── דגלים (מפרט: צרכים/רגישות/רפואי): רפואי ⇐ Member.health (מקור-אמת) · צרכים/רגישות ⇐ פנקס-דגלים (פעולה "הוסף-דגל") ───
+  static final Map<String, List<String>> flagLedger = {};
+  static List<String> flags(Map<String, dynamic> s) => [
+        if ('${s['health'] ?? ''}'.isNotEmpty) '🩺 רפואי',
+        ...(flagLedger[s['id']] ?? const []),
+        if (s['needs'] != null) '♿ צרכים', // מקום-שמור: שדה-צרכים ברשומה
+      ];
+  // עדכון-אחרון (נגזר מטבעת-האודיט: הרשומה האחרונה שמזכירה את התלמיד; אין updatedAt בסכמה)
+  static List<Map<String, dynamic>> audit() => (db['audit'] as List).cast<Map<String, dynamic>>();
+  static String lastUpdate(Map<String, dynamic> s) {
+    String best = '';
+    for (final a in audit()) { if ('${a['what']}'.startsWith('${s['id']} ') && '${a['at']}'.compareTo(best) > 0) best = '${a['at']}'; }
+    return best.isEmpty ? '—' : fmt(best.substring(0, 10));
+  }
+  static String trendArrow(Map<String, dynamic> s) { final t = trend90(s); return t['dir'] == 'down' ? '↓ ${t['pct']}%' : t['dir'] == 'up' ? '↑ +${t['pct']}%' : '→'; }
+  static String maskId(String? id) => (id == null || id.isEmpty) ? '—' : '•••••${id.substring(id.length - 4)}'; // ת״ז מוסתרת (ברירת-מחדל; חשיפה = הרשאה)
+
+  // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 18 עמודות-המפרט כשקעי-דאטה ═══
+  //   נגזרת(get) = תמיד-מוצגת · שדה(key) = מוארת רק כשרשומה כלשהי נושאת ערך (חסר ⇒ שקט). fmt = עיצוב-ערך אופציונלי.
+  //   הוספת שדה לרשומה (photo/grades/…) ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
+  static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    {'key': 'photo', 'label': 'תמונה'},                                                   // מקום-שמור (ImageProvider/URL)
+    {'label': 'שם-מלא', 'get': (Map<String, dynamic> s) => '${s['name']}'},
+    {'label': 'מס׳', 'get': (Map<String, dynamic> s) => '${s['id']}'},
+    {'label': 'ת״ז', 'get': (Map<String, dynamic> s) => maskId(s['idNum'] as String?)}, // מוסתר-פר-הרשאה
+    {'label': 'כיתה', 'get': (Map<String, dynamic> s) => className(s)},
+    {'label': 'מחנך/ת', 'get': (Map<String, dynamic> s) => teacherName(s)},
+    {'label': 'לידה/גיל', 'get': (Map<String, dynamic> s) => '${fmt(s['birth'] as String?)} · ${age(s) ?? '—'}'},
+    {'label': 'מין', 'get': (Map<String, dynamic> s) => s['gender'] == 'f' ? 'נ' : s['gender'] == 'm' ? 'ז' : '—'},
+    {'label': 'סטטוס', 'get': (Map<String, dynamic> s) => status(s)},
+    {'label': 'סיכון', 'get': (Map<String, dynamic> s) => '${risk(s)}'},
+    {'label': 'נוכחות%', 'get': (Map<String, dynamic> s) => attendance(s) == null ? '—' : '${attendancePct(s)}'},
+    {'key': 'grades', 'label': 'ממוצע-ציונים', 'fmt': (Object? g) => g is Map && g.isNotEmpty ? '${(grandTotal(g.values.toList(), (v) => v as num) / g.length).round()}' : '—'}, // מקום-שמור
+    {'label': 'מגמה', 'get': (Map<String, dynamic> s) => trendArrow(s)},
+    {'label': 'דגלים', 'get': (Map<String, dynamic> s) => flags(s).isEmpty ? '—' : flags(s).join(' ')},
+    {'label': 'הורה+טלפון', 'get': (Map<String, dynamic> s) => parentMissing(s) ? '${parentName(s)} · ⛔ אין טלפון' : '${parentName(s)} · ${parentPhone(s)}'},
+    {'label': 'הצטרפות', 'get': (Map<String, dynamic> s) => fmt(mainEnrollment(s)?['enrolledAt'] as String?)},
+    {'label': 'פנייה-פתוחה', 'get': (Map<String, dynamic> s) => hasOpenTicket(s) ? '📨 ${openTasksOf(s).length}' : '—'},
+    {'label': 'עדכון-אחרון', 'get': (Map<String, dynamic> s) => lastUpdate(s)},
+  ];
+  static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
+      c['get'] != null || rows.any((s) => s[c['key']] != null && '${s[c['key']]}'.trim().isNotEmpty);
+  static String cell(Map<String, Object?> c, Map<String, dynamic> s) {
+    if (c['get'] != null) return (c['get'] as String Function(Map<String, dynamic>))(s);
+    final v = s[c['key']];
+    if (c['fmt'] != null) return (c['fmt'] as String Function(Object?))(v);
+    return v == null ? '—' : '$v';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════
@@ -406,6 +481,8 @@ class StudentsScreen extends StatefulWidget {
 
 class _StudentsScreenState extends State<StudentsScreen> {
   String _q = ''; // איתור (DsSearch)
+  int _mode = 0; // 0=🎯 טריאז' (קיבוץ-פר-סיכון) · 1=📋 טבלה (columnDefs) — SegmentedSwitch→תצוגה
+  int _sort = 0; // 0=סיכון · 1=כיתה · 2=שם — SegmentedSwitch→דירוג
   bool _loading = false; // מצב-מסך שמור: טעינה
   String? _error; // מצב-מסך שמור: שגיאה (מקום-שמור — מאיר כש-fetch נכשל)
 
@@ -421,6 +498,11 @@ class _StudentsScreenState extends State<StudentsScreen> {
   Widget build(BuildContext context) {
     final all = _StuData.active;
     final avgAtt = _StuData.avgAttendance, avgGr = _StuData.avgGrades;
+    // דירוג (מיון-נבחר) ⇒ הנראים (פעילים); לא-פעילים בסקשן-ארכיון נפרד
+    final visible = _StuData.sorted(all, _sort);
+    final inactiveVisible = _StuData.sorted(_StuData.inactive, _sort);
+    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: []};
+    for (final s in visible) { buckets[_StuData.band(s)]!.add(s); }
     return DsScaffold(
       title: 'תלמידים', subtitle: '${_StuData.students.length} תלמידים · ${_StuData.byClass().length} כיתות · ${_StuData.highN} בסיכון-גבוה', icon: '🎓',
       children: [
@@ -457,13 +539,83 @@ class _StudentsScreenState extends State<StudentsScreen> {
           ]),
         ),
         _gap(8),
+        // בורר-מבט (🎯 טריאז' · 📋 טבלה) + בורר-דירוג (סיכון · כיתה · שם) — ארגון = פעולת-יסוד עם אטום משלה
+        Row(children: [
+          SegmentedSwitch(items: const ['🎯 טריאז׳', '📋 טבלה'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+          const Spacer(),
+          SegmentedSwitch(items: const ['⚠ סיכון', '🏫 כיתה', '🔤 שם'], selected: _sort, onSelect: (i) => setState(() => _sort = i)),
+        ]),
+        _gap(10),
+        // מצבי-מסך שמורים (טעינה/שגיאה) ⇒ אחרת התוכן: ריק · טבלה · טריאז'
         if (_loading)
           _loadingView()
         else if (_error != null)
-          AlertBanner(glyph: '⚠️', tone: 2, message: _error!),
+          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
+        else if (_StuData.students.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🎓', message: 'אין תלמידים עדיין — רשום תלמיד ראשון או ייבא'))
+        else if (visible.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין תלמידים תואמים לחיפוש/סינון'))
+        else if (_mode == 1)
+          _table(visible)
+        else ...[
+          // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-band (הדחוף בראש כקבוצה); בתוך כל דלי — סדר-הדירוג הנבחר
+          for (final b in const [2, 1, 0])
+            if (buckets[b]!.isNotEmpty)
+              DsSection(title: '${_secTitle[b]} · ${buckets[b]!.length}', tone: _secTone[b]!, children: [for (final s in buckets[b]!) _row(s)]),
+        ],
+        // מצב-מיוחד: לא-פעילים (הוקפא/עזב/בוגר) — מחוץ לתפעול, גלויים כארכיון
+        if (_mode == 0 && inactiveVisible.isNotEmpty) ...[
+          _gap(10),
+          DsSection(title: '🗂 לא-פעילים · ${inactiveVisible.length}', tone: 0, children: [for (final s in inactiveVisible) _row(s)]),
+        ],
       ],
     );
   }
+
+  static const _secTitle = {2: '🔴 סיכון גבוה — לפעול היום', 1: '🟠 סיכון בינוני — לעקוב השבוע', 0: '🟢 יציבים'};
+  static const _secTone = {2: 2, 1: 3, 0: 1};
+
+  // שורת-תלמיד (טריאז'): זהות (MediaRow) + בר-סיכון (StatRow) + האות-המוביל ⊕ הפעולה-הנכונה-עכשיו (StatusChip×2) + דגלים/סטטוס
+  //   MediaRow בולע קליק (InkWell פנימי) ⇒ כפתור-שברון נפרד כשקע-הפתיחה (לקח-המלאי).
+  Widget _row(Map<String, dynamic> s) {
+    final r = _StuData.risk(s), b = _StuData.band(s), active = _StuData.isActive(s);
+    final tone = b == 2 ? 2 : b == 1 ? 3 : 1;
+    final lead = _StuData.leading(s);
+    final glyph = !active ? '🗂' : b == 2 ? '🔴' : b == 1 ? '🟠' : '🟢';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GradientCard(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Row(children: [
+            Expanded(child: MediaRow(glyph: glyph, title: '${s['name']}', subtitle: '${_StuData.className(s)} · ${_StuData.teacherName(s)} · גיל ${_StuData.age(s) ?? '—'}')),
+            IconButton(onPressed: () => _openPanel(s), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-תלמיד'),
+          ]),
+          _gap(8),
+          StatRow(label: active ? 'ציון-סיכון מאוחד' : 'ציון-סיכון (ארכיון)', value: 'סיכון $r · ${_StuData.bandLabel(b)}', fraction: (r / 100).clamp(0.0, 1.0)),
+          Padding(
+            padding: const EdgeInsets.only(top: 8, right: 4),
+            child: Wrap(spacing: 8, runSpacing: 6, children: [
+              if (!active) StatusChip(label: _StuData.status(s), tone: 0),
+              if (active && b > 0 && lead != null) StatusChip(label: 'האות: ${lead['label']} (${(lead['contribution'] as double).round()} נק׳)', tone: tone),
+              StatusChip(label: '👉 ${_StuData.action(s)}', tone: active && b > 0 ? tone : 0),
+              for (final f in _StuData.flags(s)) StatusChip(label: f, tone: 0),
+              if (_StuData.hasOpenTicket(s)) StatusChip(label: '📨 פנייה פתוחה', tone: 3),
+              if (_StuData.parentMissing(s)) const StatusChip(label: '📵 ללא-הורה-מעודכן', tone: 2),
+              if (_StuData.isNew(s)) const StatusChip(label: '🆕 חדש/ה השנה', tone: 0),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  // 📋 מבט-טבלה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid (מזייף int rows).
+  Widget _table(List<Map<String, dynamic>> rows) {
+    final cols = [for (final c in _StuData.columnDefs) if (_StuData.colShown(c, rows)) c];
+    return DsTable(labels: [for (final c in cols) c['label'] as String], rows: [for (final s in rows) [for (final c in cols) _StuData.cell(c, s)]]);
+  }
+
+  void _openPanel(Map<String, dynamic> s) {} // גל 3: כרטיס-תלמיד-נבחר
 
   // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
   void _refresh() {
