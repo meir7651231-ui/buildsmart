@@ -178,4 +178,42 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('סגירת-תקלה'), findsOneWidget, reason: 'log() רשם את הפעולה');
   });
+
+  testWidgets('גל 6 · תקלה ⇒ העברת-שיעורים-אוטו: 12 תפיסות ⇒ 4 נשארות (5 שיעורים עברו לאולם-ספורט) · אודיט + הודעה מרונדרים', (tester) async {
+    await _pump(tester);
+    // כיתה 204 תקולה (מקרן שרוף · חמור) — 12 תפיסות-שבוע מושפעות; רכז/ת מחזיק rooms.move
+    expect(find.textContaining('חדר תקול (תקלה חמורה): כיתה 204 — 12 תפיסות'), findsOneWidget);
+    await tester.tap(find.text('🚚 העבר-אוטו').first); // הפריט הראשון = כיתה 204 (סדר liveRooms)
+    await tester.pump(const Duration(milliseconds: 200));
+    // autoRelocate: altRooms (קיבולת≥maxStudents ⊕ ציוד ⊕ פנוי בכל מפגשי-השבוע ⊕ קרבה). השבוע = ג׳–ה׳ בלבד (השיעורים
+    //   מתחילים 2026-09-01 ⇒ _onDate מוציא א׳–ב׳; 12 תפיסות). גיאוגרפיה·היסטוריה יא׳·ספרות·תנ״ך·חשבון ⇒ אולם-ספורט (cap 120);
+    //   נשארים: היסטוריה י׳-2 (34>32 + צריך מקרן) · אנגלית י׳-2 (ג׳ 08 תפוס בכיתה 101, ה׳ 08 תפוס באולם) ⇒ 2+2 = 4
+    expect(find.textContaining('כיתה 204 — 12 תפיסות'), findsNothing, reason: 'המנוע העביר תפיסות');
+    expect(find.textContaining('כיתה 204 — 4 תפיסות'), findsOneWidget, reason: 'היסטוריה י׳-2 (2) + אנגלית י׳-2 (2) בלי חדר-חלופי תקף');
+    // השיבוץ החדש מרונדר: בפאנל אולם-ספורט טאב "תפיסות" מציג את השיעורים שהועברו, וטאב "אודיט" את 4 רשומות ההעברה
+    await tester.tap(find.textContaining('אולם ספורט ›').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.text('תפיסות'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('תנ״ך י׳-2'), findsWidgets, reason: 'תנ״ך י׳-2 משובץ עכשיו באולם-ספורט');
+    expect(find.textContaining('גיאוגרפיה י׳-2'), findsWidgets);
+    await tester.ensureVisible(find.text('אודיט'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('אודיט'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('העברת-שיעור'), findsNWidgets(5), reason: 'log(roomId=יעד): 5 העברות נרשמו לאולם-ספורט');
+    await tester.tapAt(const Offset(400, 20)); // סגירת-הגיליון
+    await tester.pump(const Duration(milliseconds: 600));
+    // ההודעה למשתמשי-החדר נרשמה באודיט של כיתה 204 (המקור)
+    await tester.tap(find.textContaining('כיתה 204 ›').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.ensureVisible(find.text('אודיט'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('אודיט'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('לא-זמין (תקלה) —'), findsOneWidget, reason: 'notifyUsers אחרי העברה — גוף-ההודעה באודיט');
+    expect(find.textContaining('5 תפיסות הועברו לחדרים חלופיים'), findsOneWidget);
+  });
 }
