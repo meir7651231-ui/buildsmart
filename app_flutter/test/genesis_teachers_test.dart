@@ -44,6 +44,31 @@ void main() {
     expect(find.text('דוד כהן'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('גל 5 · הרשאות: תפקיד "מורה" (teacherIdOf) רואה רק את הכרטיס-שלו · "צפייה" בלי פעולות', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_wrap(const TeachersScreen(initialMode: 1)));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.textContaining('מורה').first); // בורר-תפקיד: 👩‍🏫 מורה
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('דוד כהן'), findsOneWidget, reason: 'המורה-המחובר (p:t2 ⇒ t2) רואה את עצמו');
+    expect(find.text('יעל ברק'), findsNothing, reason: 'לא-של-אחרים');
+    expect(find.textContaining('המערכת שלך להיום'), findsOneWidget, reason: 'תזכורת-מערכת-יומית למורה');
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('גל 5 · מצב-טעינה שמור מרונדר אחרי רענון ומתנקה', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_wrap(const TeachersScreen()));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    await tester.tap(find.text('🔄'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text('טוען צוות…'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
   for (var tab = 0; tab < 9; tab++) {
     testWidgets('כרטיס-מורה טאב $tab מרונדר', (tester) async {
       _surface(tester);

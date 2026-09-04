@@ -397,6 +397,42 @@ class _TeamData {
   static String cell(Map<String, Object?> c, Map<String, dynamic> t) =>
       c['get'] != null ? (c['get'] as String Function(Map<String, dynamic>))(t) : '${t[c['key']] ?? '—'}';
 
+  // ═══ אוטומציות-חכמות (המפרט · 9) — כל אחת = מנוע-מדף ⊕ AlertBanner; מחושבות מהדאטה, אפס-זיוף ═══
+  //   1 שיעור-ללא-מורה ברגע-היעדרות (syncUncovered) · 2 הצעת-מחליף (candidates) · 3 עומס-יתר/תת-עומס (volunteerLoadHint/clampScale)
+  //   4 תוקף-הכשרה פג-בקרוב (certExpiryStatus) · 5 חוזה-מסתיים (dayDiff/presentsInMonth) · 6 דפוס-היעדרות (trendFromScan)
+  //   7 השוואת-ביצועי-כיתות (מקום-שמור classPerf — לא-פומבי, למנהל) · 8 איזון-עומס (balanceFor) · 9 תזכורת-מערכת-יומית (sessionsOf · יום-היום)
+  static List<Map<String, dynamic>> alerts(int role) {
+    final out = <Map<String, dynamic>>[];
+    final unc = uncoveredToday;
+    if (unc.isNotEmpty) out.add({'g': '🚨', 'tone': 2, 'm': '${unc.length} שיעורים ללא מורה היום: ${unc.map((s) => '${s['time']} ${courseById(s['courseId'] as String)?['cls']}').join(' · ')} — ${unc.where((s) => candidates(s).isNotEmpty).length} עם מחליף-מוצע'});
+    final over = active.where(overLoad).toList();
+    if (over.isNotEmpty) out.add({'g': '🔥', 'tone': 3, 'm': 'עומס-יתר: ${over.map((t) => '${t['name']} ${loadPct(t)}%').join(' · ')}'});
+    final under = active.where(underLoad).toList();
+    if (under.isNotEmpty) out.add({'g': '🪫', 'tone': 3, 'm': 'תת-עומס: ${under.map((t) => '${t['name']} ${loadPct(t)}%').join(' · ')}'});
+    for (final t in active) {
+      final b = balanceFor(t);
+      if (b != null) out.add({'g': '⚖️', 'tone': 0, 'm': 'הצעת-איזון: להעביר ${b['course']['name']} מ-${b['from']['name']} ל-${t['name']} (ללא התנגשות-שבועית)'});
+    }
+    final soon = active.where((t) => certSoon(t) || certExpired(t)).toList();
+    if (soon.isNotEmpty) out.add({'g': '🎓', 'tone': 3, 'm': 'הכשרות: ${soon.map((t) => '${t['name']} (${certExpired(t) ? 'פגה' : 'פגה בקרוב'})').join(' · ')}'});
+    final ending = staff.where((t) => contractEndsMonth(t) || contractExpired(t)).toList();
+    if (ending.isNotEmpty && (role == 0 || can(role, 'team.contract') || can(role, 'team.assign'))) out.add({'g': '📄', 'tone': 3, 'm': 'חוזים מסתיימים: ${ending.map((t) => '${t['name']} בעוד ${contractDays(t)} י׳').join(' · ')}'});
+    final freq = active.where(frequentAbsentee).toList();
+    if (freq.isNotEmpty && roleName(role) != 'teacher') out.add({'g': '🤒', 'tone': 3, 'm': 'דפוס-היעדרויות (לשיחת-תמיכה, לא פומבי): ${freq.map((t) => '${t['name']} · מגמה ${absenceTrend(t)['dir']}').join(' · ')}'});
+    if (roleName(role) == 'admin') {
+      final perf = active.where((t) => t['classPerf'] != null).toList();
+      out.add(perf.isEmpty
+          ? {'g': '📊', 'tone': 0, 'm': 'השוואת-ביצועי-כיתות (מי-צריך-תמיכה): מקום-שמור — יאיר כשיוזרמו נוכחות/ציונים ממודולי נוכחות/תלמידים'}
+          : {'g': '📊', 'tone': 3, 'm': 'ביצועי-כיתות: ${perf.map((t) => '${t['name']} ${trendFromScan({'monthly': t['classPerf']['monthly']})['dir']}').join(' · ')}'});
+    }
+    final own = ownId(role) == null ? null : byId(ownId(role)!);
+    if (own != null) { // תזכורת-מערכת-יומית למורה-המחובר
+      final todayLessons = [for (final c in coursesOf(own)) for (final x in sessionsOf(c) as List) if (x['day'] == todayWd) '${x['time']} ${c['cls']} (${c['roomId']})']..sort();
+      out.add({'g': '🗓', 'tone': 1, 'm': todayLessons.isEmpty ? 'אין לך שיעורים היום' : 'המערכת שלך להיום (${dayNames[todayWd]}): ${todayLessons.join(' · ')}'});
+    }
+    return out;
+  }
+
   // ═══ הרשאות-פר-תפקיד (הכרעה 23-ג · חוק-6 זהות=הזרקה) = roleOf ⊕ teacherIdOf ⊕ canGrantedAction ═══
   //   6 תפקידי-המפרט כעקרונות-דמו אטומים ('p:...' — לא מיילים, לא זהות-אמת; בהצבה מוזרקת זהות-ההתחברות).
   //   roleOf ⇒ admin/teacher/staff · teacherIdOf ⇒ המורה-המחובר (כרטיס-שלו בלבד) · features ⇒ פעולות-מגודרות.
@@ -613,7 +649,10 @@ class _TeachersScreenState extends State<TeachersScreen> {
             ]),
           ]),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
+        // מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — 9 אוטומציות-המפרט
+        for (final a in _TeamData.alerts(_role)) ...[AlertBanner(glyph: a['g'] as String, tone: a['tone'] as int, message: a['m'] as String), _gap(6)],
+        const SizedBox(height: 4),
         // פס-עליון: חיפוש-מבוקר (DsSearch) · מורה-חדש · לוח-החלפות-היום · ייצוא (רשימה-נראית)
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
