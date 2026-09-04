@@ -123,6 +123,34 @@ void main() {
     expect(find.text('צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה'), findsOneWidget);
   });
 
+  testWidgets('גל 7 · מקום-שמור (10 שדות-מתקדמים בחוזה) · ייצוא CSV (toCsv⊕csvEscape) ו-iCal (buildIcs) לרכז/ת', (tester) async {
+    await _pump(tester);
+    // ייצוא CSV: תצוגת-הקובץ עם כותרות-העמודות המוצגות (BOM + חסימת-הזרקה)
+    await tester.tap(find.text('⬇ CSV'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('ייצוא CSV'), findsOneWidget);
+    expect(find.textContaining('שם/מספר,בניין/קומה,קיבולת'), findsOneWidget, reason: 'עמודות-החוזה המוצגות; סוג/אחראי (מקום-שמור) לא מיוצאים בלי נתון');
+    expect(find.textContaining('כיתה 101'), findsWidgets);
+    await tester.tapAt(const Offset(400, 20)); // סגירת-הגיליון
+    await tester.pump(const Duration(milliseconds: 600));
+    // ייצוא iCal: VCALENDAR עם VEVENT לכל תפיסת-שבוע (buildIcs מאור · RFC5545)
+    await tester.tap(find.text('📆 iCal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.textContaining('BEGIN:VCALENDAR'), findsOneWidget);
+    expect(find.textContaining('SUMMARY:מתמטיקה י׳-1'), findsOneWidget, reason: 'תפיסת-שיעור ⇒ VEVENT');
+    expect(find.textContaining('LOCATION:כיתה 101'), findsOneWidget);
+    await tester.tapAt(const Offset(400, 20));
+    await tester.pump(const Duration(milliseconds: 600));
+    // מקום-שמור בפאנל: 10 שדות-מתקדמים חסרי-נתון נרשמים בחוזה (לא מזויפים, לא מושמטים)
+    await tester.tap(find.textContaining('כיתה 101 ›').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.textContaining('מקום-שמור (10):'), findsOneWidget);
+    expect(find.textContaining('נעילה-חכמה'), findsOneWidget);
+  });
+
   testWidgets('גל 3 · פאנל חדר-נבחר: זהות(roomInfoLabel) · 8 טאבים · פעולה משנה מצב (סגירת-תקלה ⇒ KPI יורד)', (tester) async {
     await _pump(tester);
     // תפקיד אחזקה — היחיד עם rooms.faultClose (canGrantedAction); רכז/ת לא רואה '✔ סגור'

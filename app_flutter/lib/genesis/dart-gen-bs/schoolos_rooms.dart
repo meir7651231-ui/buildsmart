@@ -67,6 +67,13 @@ import '../dart-maor/can-granted-action.dart'; // הרשאות: גידור-פע�
 import '../dart-maor/upcoming-holidays.dart'; // אוטומציה: חגים קרובים ⇒ חסימות-אוטו (מדף)
 import '../dart-maor/intel-day-diff.dart'; // אוטומציה: ימים-מאז (בדיקה-תקופתית) (מדף)
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart'; // ניצולת-להנהלה: עמודות-ערך אמיתיות (values מוזרקים)
+import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
+import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
+import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
+import '../dart-maor/guard-export.dart'; // ייצוא: שער חוסם+מודיע (מדף)
+import '../dart-maor/build-ics.dart'; // ייצוא iCal: VCALENDAR מ-occurrences (מדף מאור)
+import '../dart-maor/ics-escape.dart'; // ייצוא iCal: escaping לפי RFC5545 (מדף)
+import '../dart-maor/fold-ics-line.dart'; // ייצוא iCal: קיפול-שורות 75 בייט (מדף)
 import '../dart-maor/day-letters.dart'; // אותיות-הימים (א׳…ו׳) — בורר-יום קומפקטי
 import '../dart-data-maor/day-letters-terms.dart' as day_letters_terms; // שקע-המונחים של dayLetters (אטום-דאטה)
 
@@ -580,6 +587,43 @@ class _RoomsData {
   // מרכז-דורש-פעולה: ספירת פריטים פתוחים (התנגשויות · אישורים · ציוד-חסר · שיעור-בלי-חדר · תקולים · לא-מנוצלים)
   static int get actionItems => weekConflicts.length + pendingApprovals.length + coursesMissingEq.length + orphanCourses.length + liveRooms.where(faulty).length;
 
+  // ═══ מקום-שמור (חוק-7 · מבחן-הקונכייה) · חוזה-שדות-מתקדמים — שקע לכל שדה חסר-נתון, מאיר לבד כשיגיע ═══
+  //   כמו columnDefs: שדה שהחדר נושא ⇒ שבב; חסר ⇒ נרשם בחוזה כ"מקום-שמור" (לא מזויף, לא מושמט).
+  static const reservedFields = <Map<String, String>>[
+    {'key': 'type', 'label': 'סוג', 'glyph': '🏷'},                 // כיתה/מעבדה/אולם/ספורט/מחשבים/חדר-מורים
+    {'key': 'owner', 'label': 'אחראי', 'glyph': '👤'},
+    {'key': 'lastCheck', 'label': 'בדיקה אחרונה', 'glyph': '🗓'},   // מזגן/כיבוי-אש
+    {'key': 'updatedAt', 'label': 'עדכון', 'glyph': '🕒'},
+    {'key': 'features', 'label': 'תכונות (חלונות/הצללה)', 'glyph': '🪟'},
+    {'key': 'eqStock', 'label': 'ציוד-מפורט (כמות ממלאי)', 'glyph': '📦'}, // ⇐ מודול-מלאי
+    {'key': 'photo', 'label': 'תמונת-חדר', 'glyph': '🖼'},
+    {'key': 'floorMap', 'label': 'מפת-קומה', 'glyph': '🗺'},
+    {'key': 'sensor', 'label': 'חיישן-תפוסה', 'glyph': '📡'},
+    {'key': 'smartLock', 'label': 'נעילה-חכמה', 'glyph': '🔐'},
+  ];
+  static List<Map<String, String>> presentFields(Map<String, dynamic> r) => [for (final f in reservedFields) if (r[f['key']] != null && '${r[f['key']]}'.isNotEmpty) f];
+  static List<Map<String, String>> missingFields(Map<String, dynamic> r) => [for (final f in reservedFields) if (r[f['key']] == null || '${r[f['key']]}'.isEmpty) f];
+
+  // ═══ ייצוא (23-ג) = SoftButton ⊕ toCsv ⊕ csvEscape ⊕ exportAllowed ⊕ guardExport — רשימת-החדרים הנראית ═══
+  static bool exportOk(int role) => exportAllowed(false) && can(role, 'rooms.export');
+  static List<List<Object?>> csvRows(List<Map<String, dynamic>> rs) {
+    final cols = [for (final c in columnDefs) if (colShown(c, rs)) c];
+    return [
+      [for (final c in cols) c['label']],
+      for (final r in rs) [for (final c in cols) c['get'] != null ? (c['get'] as String Function(Map<String, dynamic>))(r) : (r[c['key']] ?? '')],
+    ];
+  }
+  static String csvOf(List<Map<String, dynamic>> rs) => toCsv(csvRows(rs), csvEscape) as String;
+  // ═══ ייצוא iCal = buildIcs(מאור) ⊕ icsEscape ⊕ foldIcsLine — כל תפיסות-השבוע של החדרים-הנראים (uid=תפיסה·תאריך) ═══
+  static String icsOf(List<Map<String, dynamic>> rs) {
+    final occ = <Map<String, String?>>[
+      for (final r in rs)
+        for (final o in weekOccupancies(r))
+          {'uid': '${o['id']}@${o['iso']}@rooms', 'title': '${o['name']} · ${o['who']}', 'date': '${o['iso']}', 'time': _m2hm(o['start']), 'location': '${r['name']} · ${r['location']}', 'notes': o['kind'] == 'event' ? 'הזמנה · ${o['status']}' : 'שיעור שבועי'},
+    ];
+    return buildIcs(occ, 'SchoolOS · יומן-חדרים · שבוע ${weekIsos.first}', DateTime.parse('${today}T12:00:00'), icsEscape, foldIcsLine);
+  }
+
   static String eqLabel(Map<String, dynamic> r) => [for (final e in eqOf(r).entries) if (e.value) e.key].join(' · ');
 
   // ═══ חוזה-עמודות · מקום-שמור (חוק-7) — 16 עמודות-המפרט כשקעי-דאטה ═══
@@ -713,6 +757,10 @@ class _RoomsScreenState extends State<RoomsScreen> {
           const SizedBox(width: 6),
           if (_can('rooms.book')) Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '📌 הזמן-חדר', tone: 1, onTap: () => _pickRoom(visible, (r) => _openBook(context, r, (f) { f(); setState(() {}); })))),
           if (_can('rooms.fault')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔧 דווח-תקלה', tone: 2, onTap: () => _pickRoom(visible, (r) => _openFault(context, r, (f) { f(); setState(() {}); }))))],
+          if (_RoomsData.exportOk(_role)) ...[
+            const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport(visible, ical: false))),
+            const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '📆 iCal', tone: 0, onTap: () => _openExport(visible, ical: true))),
+          ],
         ]),
         // צ׳יפי-סינון (FilterChipPill ⊕ finderMatches) — 11 צירי-המפרט; סוג = מקום-שמור (מואר כשיגיע נתון)
         Wrap(spacing: 8, runSpacing: 6, children: [
@@ -882,6 +930,13 @@ class _RoomsScreenState extends State<RoomsScreen> {
                 ]),
                 _gap(10),
                 StatRow(label: 'תפיסות-שבוע מול קיבולת-משבצות', value: '$used מתוך $cap', fraction: cap == 0 ? 0 : used / cap),
+                // שדות-מתקדמים · מקום-שמור (חוק-7): נוכח ⇒ שבב · חסר ⇒ נרשם בחוזה (מאיר כשיגיע נתון, אפס-שינוי-קוד)
+                _gap(8),
+                _wrap([for (final f in _RoomsData.presentFields(r)) StatusChip(label: '${f['glyph']} ${f['label']}: ${r[f['key']]}', tone: 1)]),
+                if (_RoomsData.missingFields(r).isNotEmpty) ...[
+                  _gap(6),
+                  Text('מקום-שמור (${_RoomsData.missingFields(r).length}): ${_RoomsData.missingFields(r).map((f) => '${f['glyph']} ${f['label']}').join(' · ')}', style: const TextStyle(color: _muted, fontSize: 11.5)),
+                ],
                 // התנגשויות (אדום) — חוסם: כפל-תפיסה בחדר זה
                 for (final c in conf) ...[
                   _gap(8),
@@ -1189,6 +1244,38 @@ class _RoomsScreenState extends State<RoomsScreen> {
         ]),
       ],
     ];
+  }
+
+  // ═══ ייצוא (23-ג) = SoftButton ⊕ toCsv/buildIcs ⊕ csvEscape/icsEscape ⊕ exportAllowed ⊕ guardExport ⊕ GlassCard-preview ═══
+  //   guardExport(מדף) חוסם+מודיע; בסנדבוקס ההורדה חסומה ⇒ תצוגת-הקובץ לבדיקה+העתקה (SelectableText).
+  void _openExport(List<Map<String, dynamic>> rs, {required bool ical}) {
+    var blockedMsg = '';
+    final ok = guardExport(!_RoomsData.exportOk(_role), () => blockedMsg = 'ייצוא חסום (שער-הרשאות)');
+    final body = !ok ? '' : ical ? _RoomsData.icsOf(rs) : _RoomsData.csvOf(rs);
+    final occN = ical ? [for (final r in rs) ..._RoomsData.weekOccupancies(r)].length : 0;
+    showModalBottomSheet<void>(
+      context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
+        builder: (ctx, scroll) => Padding(
+          padding: const EdgeInsets.all(12),
+          child: GlassCard(
+            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+              MediaRow(glyph: ical ? '📆' : '⬇', title: ical ? 'ייצוא iCal (VCALENDAR)' : 'ייצוא CSV', subtitle: ical ? '${rs.length} חדרים · $occN תפיסות השבוע · RFC5545 (buildIcs)' : '${rs.length} חדרים · ${_RoomsData.csvRows(rs).first.length} עמודות · BOM + חסימת-הזרקה'),
+              _gap(10),
+              if (!ok)
+                AlertBanner(message: blockedMsg, glyph: '🔒', tone: 2)
+              else
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
+                  child: SelectableText(body, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 11.5, height: 1.6)),
+                ),
+            ]),
+          ),
+        ),
+      ),
+    );
   }
 
   // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
