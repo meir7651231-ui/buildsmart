@@ -69,6 +69,7 @@ import '../dart-maor/sup-score-bins.dart'; // השוואת-שכבה: התפלג�
 import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
 import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
+import 'gen_core_family.dart'; // G6c · הגרעין-מהסכמה של Family (מצבים · מעבר · חוקים · ערוצים)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -895,6 +896,11 @@ class _FamilyScreenState extends State<FamilyScreen> {
     return DsScaffold(
       title: 'תלמידים', subtitle: '${_StuData.students.length} תלמידים · ${_StuData.byClass().length} כיתות · ${_StuData.highN} בסיכון-גבוה', icon: '🎓',
       children: [
+        // ═══ הגרעין-מהסכמה (G6c): FamilyCore — מצבים חצובים ⊕ מעבר מאטום-המדף ⊕ חוקים/ערוצים — לא מומצא, לא מצויר-ביד ═══
+        DsSection(title: '🧠 מחזור-חיים · ${FamilyCore.term} (גרעין)', children: [
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in FamilyCore.states) StatusChip(label: s, tone: s == FamilyCore.states.first ? 1 : 0)]),
+          AlertBanner(message: 'הבא אחרי ${FamilyCore.states.first}: ${FamilyCore.next(FamilyCore.states.first) ?? 'סופי'} · ${FamilyCore.rules.length} חוקים · ${FamilyCore.channels.length} ערוצים · ${FamilyCore.relations.length} יחסים', tone: 0, glyph: '🧠'),
+        ]),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות+נראות פר-תפקיד (roleOf⊕canGrantedAction⊕scope)
         Row(children: [
           Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: [for (final r in _StuData.roleDefs) r['label'] as String], selected: _role, onSelect: (i) => setState(() => _role = i)))),

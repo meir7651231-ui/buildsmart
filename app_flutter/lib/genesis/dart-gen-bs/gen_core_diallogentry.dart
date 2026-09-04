@@ -7,8 +7,8 @@ import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
 
-/// דאטה-הגרעין של DialLogEntry — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts
-class _DialLogEntryCore {
+/// דאטה-הגרעין של DialLogEntry — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts · ציבורי: מסכי-הישות (retarget) מייבאים ומשתמשים (G6c)
+class DialLogEntryCore {
   static const term = 'DialLogEntry';
   static const states = <String>['donated', 'noanswer', 'refused', 'callback', 'done', 'skip'];
   static String? next(String s) { final i = states.indexOf(s); return i < 0 || i + 1 >= states.length ? null : states[i + 1]; } // הצבה: סדר-ההצהרה (אין אטום-מעבר לישות זו) — חוק-7
@@ -21,26 +21,26 @@ class _DialLogEntryCore {
 class DialLogEntryCoreScreen extends StatefulWidget {
   const DialLogEntryCoreScreen({super.key});
   @override
-  State<DialLogEntryCoreScreen> createState() => _DialLogEntryCoreScreenState();
+  State<DialLogEntryCoreScreen> createState() => DialLogEntryCoreScreenState();
 }
 
-class _DialLogEntryCoreScreenState extends State<DialLogEntryCoreScreen> {
-  String _state = _DialLogEntryCore.states.first;
+class DialLogEntryCoreScreenState extends State<DialLogEntryCoreScreen> {
+  String _state = DialLogEntryCore.states.first;
   @override
   Widget build(BuildContext context) {
-    final next = _DialLogEntryCore.next(_state);
+    final next = DialLogEntryCore.next(_state);
     return DsScaffold(
-      title: '🧠 ${_DialLogEntryCore.term} · גרעין',
-      subtitle: '${_DialLogEntryCore.states.length} מצבים · ${_DialLogEntryCore.relations.length} יחסים · ${_DialLogEntryCore.rules.length} חוקים · ${_DialLogEntryCore.channels.length} ערוצים',
+      title: '🧠 ${DialLogEntryCore.term} · גרעין',
+      subtitle: '${DialLogEntryCore.states.length} מצבים · ${DialLogEntryCore.relations.length} יחסים · ${DialLogEntryCore.rules.length} חוקים · ${DialLogEntryCore.channels.length} ערוצים',
       icon: '🧠',
       children: [
         DsSection(title: 'מחזור-חיים · outcome', children: [
-          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in _DialLogEntryCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in DialLogEntryCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
           AlertBanner(message: next == null ? 'מצב-סופי: $_state' : 'הבא אחרי $_state: $next', tone: next == null ? 2 : 0, glyph: '➡️'),
           SoftButton(label: 'קדם מצב', onTap: next == null ? null : () => setState(() => _state = next)),
         ]),
         DsSection(title: 'יחסים', children: [const AlertBanner(message: 'אין שדות-יחס בסכמה', tone: 0)]),
-        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: _DialLogEntryCore.rules)]),
+        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: DialLogEntryCore.rules)]),
         DsSection(title: 'אירועי-מחזור-חיים', children: [const AlertBanner(message: 'אין שדות-תאריך של מחזור-חיים', tone: 0)]),
         DsSection(title: 'ערוצים', children: [const AlertBanner(message: 'אין שדות-ערוץ', tone: 0)]),
         const AlertBanner(message: 'policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק', tone: 3, glyph: '🔒'),

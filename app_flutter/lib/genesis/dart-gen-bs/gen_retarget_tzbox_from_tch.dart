@@ -57,6 +57,7 @@ import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע
 import '../dart-maor/absence-reason-chips.dart'; // סיבות-היעדרות (term-מוזרק)
 import '../dart-data-maor/absence-reason-chips-terms.dart'; // kTerms — שמות-הסיבות (אטום-דאטה)
+import 'gen_core_tzbox.dart'; // G6c · הגרעין-מהסכמה של TzBox (מצבים · מעבר · חוקים · ערוצים)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat/FilterChipPill דורשים הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -645,6 +646,11 @@ class _TzBoxScreenState extends State<TzBoxScreen> {
       subtitle: '${_TeamData.staff.length} אנשי-צוות · ${_TeamData.byRole.map((r) => '${r[0]} ${r[1]}').join(' · ')}',
       icon: '👩‍🏫',
       children: [
+        // ═══ הגרעין-מהסכמה (G6c): TzBoxCore — מצבים חצובים ⊕ מעבר מאטום-המדף ⊕ חוקים/ערוצים — לא מומצא, לא מצויר-ביד ═══
+        DsSection(title: '🧠 מחזור-חיים · ${TzBoxCore.term} (גרעין)', children: [
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in TzBoxCore.states) StatusChip(label: s, tone: s == TzBoxCore.states.first ? 1 : 0)]),
+          AlertBanner(message: 'הבא אחרי ${TzBoxCore.states.first}: ${TzBoxCore.next(TzBoxCore.states.first) ?? 'סופי'} · ${TzBoxCore.rules.length} חוקים · ${TzBoxCore.channels.length} ערוצים · ${TzBoxCore.relations.length} יחסים', tone: 0, glyph: '🧠'),
+        ]),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — roleOf⊕teacherIdOf⊕canGrantedAction מגדרים פעולות/עמודות/רשומות
         //   6 תפקידים ב-2 שורות של SegmentedSwitch (Row-מבוקר; 6 פריטים גולשים ברוחב-המסך — נתפס בבדיקת-widget)
         for (var r = 0; r < 2; r++) ...[

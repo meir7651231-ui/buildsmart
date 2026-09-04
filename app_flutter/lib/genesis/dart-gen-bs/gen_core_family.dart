@@ -7,8 +7,8 @@ import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
 
-/// דאטה-הגרעין של Family — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts
-class _FamilyCore {
+/// דאטה-הגרעין של Family — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts · ציבורי: מסכי-הישות (retarget) מייבאים ומשתמשים (G6c)
+class FamilyCore {
   static const term = 'משפחה';
   static const states = <String>['active', 'pending', 'inactive'];
   static String? next(String s) { final i = states.indexOf(s); return i < 0 || i + 1 >= states.length ? null : states[i + 1]; } // הצבה: סדר-ההצהרה (אין אטום-מעבר לישות זו) — חוק-7
@@ -21,28 +21,28 @@ class _FamilyCore {
 class FamilyCoreScreen extends StatefulWidget {
   const FamilyCoreScreen({super.key});
   @override
-  State<FamilyCoreScreen> createState() => _FamilyCoreScreenState();
+  State<FamilyCoreScreen> createState() => FamilyCoreScreenState();
 }
 
-class _FamilyCoreScreenState extends State<FamilyCoreScreen> {
-  String _state = _FamilyCore.states.first;
+class FamilyCoreScreenState extends State<FamilyCoreScreen> {
+  String _state = FamilyCore.states.first;
   @override
   Widget build(BuildContext context) {
-    final next = _FamilyCore.next(_state);
+    final next = FamilyCore.next(_state);
     return DsScaffold(
-      title: '🧠 ${_FamilyCore.term} · גרעין',
-      subtitle: '${_FamilyCore.states.length} מצבים · ${_FamilyCore.relations.length} יחסים · ${_FamilyCore.rules.length} חוקים · ${_FamilyCore.channels.length} ערוצים',
+      title: '🧠 ${FamilyCore.term} · גרעין',
+      subtitle: '${FamilyCore.states.length} מצבים · ${FamilyCore.relations.length} יחסים · ${FamilyCore.rules.length} חוקים · ${FamilyCore.channels.length} ערוצים',
       icon: '🧠',
       children: [
         DsSection(title: 'מחזור-חיים · status', children: [
-          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in _FamilyCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in FamilyCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
           AlertBanner(message: next == null ? 'מצב-סופי: $_state' : 'הבא אחרי $_state: $next', tone: next == null ? 2 : 0, glyph: '➡️'),
           SoftButton(label: 'קדם מצב', onTap: next == null ? null : () => setState(() => _state = next)),
         ]),
         DsSection(title: 'יחסים', children: [const AlertBanner(message: 'אין שדות-יחס בסכמה', tone: 0)]),
-        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: _FamilyCore.rules)]),
-        DsSection(title: 'אירועי-מחזור-חיים', children: [DsTable(labels: const ['שדה', 'אירוע'], rows: _FamilyCore.events)]),
-        DsSection(title: 'ערוצים', children: [Wrap(spacing: 6, children: [for (final c in _FamilyCore.channels) StatusChip(label: '${c[0]} · ${c[1]}', tone: 1)])]),
+        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: FamilyCore.rules)]),
+        DsSection(title: 'אירועי-מחזור-חיים', children: [DsTable(labels: const ['שדה', 'אירוע'], rows: FamilyCore.events)]),
+        DsSection(title: 'ערוצים', children: [Wrap(spacing: 6, children: [for (final c in FamilyCore.channels) StatusChip(label: '${c[0]} · ${c[1]}', tone: 1)])]),
         const AlertBanner(message: 'policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק', tone: 3, glyph: '🔒'),
       ],
     );

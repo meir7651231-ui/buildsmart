@@ -7,8 +7,8 @@ import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
 
-/// דאטה-הגרעין של Enrollment — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts
-class _EnrollmentCore {
+/// דאטה-הגרעין של Enrollment — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts · ציבורי: מסכי-הישות (retarget) מייבאים ומשתמשים (G6c)
+class EnrollmentCore {
   static const term = 'שיבוץ';
   static const states = <String>['active', 'paused', 'ended', 'wait'];
   static String? next(String s) { final i = states.indexOf(s); return i < 0 || i + 1 >= states.length ? null : states[i + 1]; } // הצבה: סדר-ההצהרה (אין אטום-מעבר לישות זו) — חוק-7
@@ -21,27 +21,27 @@ class _EnrollmentCore {
 class EnrollmentCoreScreen extends StatefulWidget {
   const EnrollmentCoreScreen({super.key});
   @override
-  State<EnrollmentCoreScreen> createState() => _EnrollmentCoreScreenState();
+  State<EnrollmentCoreScreen> createState() => EnrollmentCoreScreenState();
 }
 
-class _EnrollmentCoreScreenState extends State<EnrollmentCoreScreen> {
-  String _state = _EnrollmentCore.states.first;
+class EnrollmentCoreScreenState extends State<EnrollmentCoreScreen> {
+  String _state = EnrollmentCore.states.first;
   @override
   Widget build(BuildContext context) {
-    final next = _EnrollmentCore.next(_state);
+    final next = EnrollmentCore.next(_state);
     return DsScaffold(
-      title: '🧠 ${_EnrollmentCore.term} · גרעין',
-      subtitle: '${_EnrollmentCore.states.length} מצבים · ${_EnrollmentCore.relations.length} יחסים · ${_EnrollmentCore.rules.length} חוקים · ${_EnrollmentCore.channels.length} ערוצים',
+      title: '🧠 ${EnrollmentCore.term} · גרעין',
+      subtitle: '${EnrollmentCore.states.length} מצבים · ${EnrollmentCore.relations.length} יחסים · ${EnrollmentCore.rules.length} חוקים · ${EnrollmentCore.channels.length} ערוצים',
       icon: '🧠',
       children: [
         DsSection(title: 'מחזור-חיים · status', children: [
-          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in _EnrollmentCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in EnrollmentCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
           AlertBanner(message: next == null ? 'מצב-סופי: $_state' : 'הבא אחרי $_state: $next', tone: next == null ? 2 : 0, glyph: '➡️'),
           SoftButton(label: 'קדם מצב', onTap: next == null ? null : () => setState(() => _state = next)),
         ]),
-        DsSection(title: 'יחסים', children: [DsTable(labels: const ['שדה', 'יעד', 'איך'], rows: _EnrollmentCore.relations)]),
-        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: _EnrollmentCore.rules)]),
-        DsSection(title: 'אירועי-מחזור-חיים', children: [DsTable(labels: const ['שדה', 'אירוע'], rows: _EnrollmentCore.events)]),
+        DsSection(title: 'יחסים', children: [DsTable(labels: const ['שדה', 'יעד', 'איך'], rows: EnrollmentCore.relations)]),
+        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: EnrollmentCore.rules)]),
+        DsSection(title: 'אירועי-מחזור-חיים', children: [DsTable(labels: const ['שדה', 'אירוע'], rows: EnrollmentCore.events)]),
         DsSection(title: 'ערוצים', children: [const AlertBanner(message: 'אין שדות-ערוץ', tone: 0)]),
         const AlertBanner(message: 'policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק', tone: 3, glyph: '🔒'),
       ],

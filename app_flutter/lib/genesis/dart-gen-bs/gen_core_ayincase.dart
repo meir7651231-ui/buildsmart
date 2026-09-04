@@ -10,8 +10,8 @@ import '../dart-maor/next-stage.dart'; // מנוע-מדף: השלב הבא
 import '../dart-maor/stage-index.dart'; // שקע: אינדקס-שלב
 import '../dart-maor/ayin-stages.dart'; // דאטה-מדף: סדר-השלבים
 
-/// דאטה-הגרעין של AyinCase — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts
-class _AyinCaseCore {
+/// דאטה-הגרעין של AyinCase — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts · ציבורי: מסכי-הישות (retarget) מייבאים ומשתמשים (G6c)
+class AyinCaseCore {
   static const term = 'AyinCase';
   static const states = <String>['new', 'lead', 'eyes', 'answer', 'done'];
   static String? next(String s) => nextStage(s, stageIndex, ayinStages);
@@ -24,26 +24,26 @@ class _AyinCaseCore {
 class AyinCaseCoreScreen extends StatefulWidget {
   const AyinCaseCoreScreen({super.key});
   @override
-  State<AyinCaseCoreScreen> createState() => _AyinCaseCoreScreenState();
+  State<AyinCaseCoreScreen> createState() => AyinCaseCoreScreenState();
 }
 
-class _AyinCaseCoreScreenState extends State<AyinCaseCoreScreen> {
-  String _state = _AyinCaseCore.states.first;
+class AyinCaseCoreScreenState extends State<AyinCaseCoreScreen> {
+  String _state = AyinCaseCore.states.first;
   @override
   Widget build(BuildContext context) {
-    final next = _AyinCaseCore.next(_state);
+    final next = AyinCaseCore.next(_state);
     return DsScaffold(
-      title: '🧠 ${_AyinCaseCore.term} · גרעין',
-      subtitle: '${_AyinCaseCore.states.length} מצבים · ${_AyinCaseCore.relations.length} יחסים · ${_AyinCaseCore.rules.length} חוקים · ${_AyinCaseCore.channels.length} ערוצים',
+      title: '🧠 ${AyinCaseCore.term} · גרעין',
+      subtitle: '${AyinCaseCore.states.length} מצבים · ${AyinCaseCore.relations.length} יחסים · ${AyinCaseCore.rules.length} חוקים · ${AyinCaseCore.channels.length} ערוצים',
       icon: '🧠',
       children: [
         DsSection(title: 'מחזור-חיים · stage', children: [
-          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in _AyinCaseCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in AyinCaseCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
           AlertBanner(message: next == null ? 'מצב-סופי: $_state' : 'הבא אחרי $_state: $next', tone: next == null ? 2 : 0, glyph: '➡️'),
           SoftButton(label: 'קדם מצב', onTap: next == null ? null : () => setState(() => _state = next)),
         ]),
         DsSection(title: 'יחסים', children: [const AlertBanner(message: 'אין שדות-יחס בסכמה', tone: 0)]),
-        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: _AyinCaseCore.rules)]),
+        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: AyinCaseCore.rules)]),
         DsSection(title: 'אירועי-מחזור-חיים', children: [const AlertBanner(message: 'אין שדות-תאריך של מחזור-חיים', tone: 0)]),
         DsSection(title: 'ערוצים', children: [const AlertBanner(message: 'אין שדות-ערוץ', tone: 0)]),
         const AlertBanner(message: 'policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק', tone: 3, glyph: '🔒'),

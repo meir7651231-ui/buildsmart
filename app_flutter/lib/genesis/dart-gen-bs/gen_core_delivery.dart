@@ -8,8 +8,8 @@ import '../dart-ui-bs/premium/feedback/alert_banner.dart';
 import '../dart-ui-bs/premium/actions/soft_button.dart';
 import '../dart-maor/advance-status.dart'; // מנוע-מדף: המצב הבא (קדימה בלבד)
 
-/// דאטה-הגרעין של Delivery — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts
-class _DeliveryCore {
+/// דאטה-הגרעין של Delivery — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts · ציבורי: מסכי-הישות (retarget) מייבאים ומשתמשים (G6c)
+class DeliveryCore {
   static const term = 'Delivery';
   static const states = <String>['pickup', 'enroute', 'delivered'];
   static String? next(String s) { final n = advanceStatus(s); return n == s ? null : n; }
@@ -22,27 +22,27 @@ class _DeliveryCore {
 class DeliveryCoreScreen extends StatefulWidget {
   const DeliveryCoreScreen({super.key});
   @override
-  State<DeliveryCoreScreen> createState() => _DeliveryCoreScreenState();
+  State<DeliveryCoreScreen> createState() => DeliveryCoreScreenState();
 }
 
-class _DeliveryCoreScreenState extends State<DeliveryCoreScreen> {
-  String _state = _DeliveryCore.states.first;
+class DeliveryCoreScreenState extends State<DeliveryCoreScreen> {
+  String _state = DeliveryCore.states.first;
   @override
   Widget build(BuildContext context) {
-    final next = _DeliveryCore.next(_state);
+    final next = DeliveryCore.next(_state);
     return DsScaffold(
-      title: '🧠 ${_DeliveryCore.term} · גרעין',
-      subtitle: '${_DeliveryCore.states.length} מצבים · ${_DeliveryCore.relations.length} יחסים · ${_DeliveryCore.rules.length} חוקים · ${_DeliveryCore.channels.length} ערוצים',
+      title: '🧠 ${DeliveryCore.term} · גרעין',
+      subtitle: '${DeliveryCore.states.length} מצבים · ${DeliveryCore.relations.length} יחסים · ${DeliveryCore.rules.length} חוקים · ${DeliveryCore.channels.length} ערוצים',
       icon: '🧠',
       children: [
         DsSection(title: 'מחזור-חיים · status', children: [
-          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in _DeliveryCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in DeliveryCore.states) StatusChip(label: s, tone: s == _state ? 1 : 0)]),
           AlertBanner(message: next == null ? 'מצב-סופי: $_state' : 'הבא אחרי $_state: $next', tone: next == null ? 2 : 0, glyph: '➡️'),
           SoftButton(label: 'קדם מצב', onTap: next == null ? null : () => setState(() => _state = next)),
         ]),
-        DsSection(title: 'יחסים', children: [DsTable(labels: const ['שדה', 'יעד', 'איך'], rows: _DeliveryCore.relations)]),
-        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: _DeliveryCore.rules)]),
-        DsSection(title: 'אירועי-מחזור-חיים', children: [DsTable(labels: const ['שדה', 'אירוע'], rows: _DeliveryCore.events)]),
+        DsSection(title: 'יחסים', children: [DsTable(labels: const ['שדה', 'יעד', 'איך'], rows: DeliveryCore.relations)]),
+        DsSection(title: 'חוקים', children: [DsTable(labels: const ['סוג', 'שדה', 'פרטים'], rows: DeliveryCore.rules)]),
+        DsSection(title: 'אירועי-מחזור-חיים', children: [DsTable(labels: const ['שדה', 'אירוע'], rows: DeliveryCore.events)]),
         DsSection(title: 'ערוצים', children: [const AlertBanner(message: 'אין שדות-ערוץ', tone: 0)]),
         const AlertBanner(message: 'policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק', tone: 3, glyph: '🔒'),
       ],
