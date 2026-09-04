@@ -268,7 +268,9 @@ class _TeamData {
     final c = courseById(sub['courseId'] as String)!;
     final absent = byId(sub['absentId'] as String)!;
     final time = '${sub['time'] ?? slotOf(c, todayWd)}';
-    final list = roster.where((t) => isActive(t) && t['id'] != absent['id'] && !absentToday(t) && subjects(t).contains(c['subject']) && availableAt(t, todayWd, time) && clashOf(t, c) == null).toList();
+    // החלפה-ליום-אחד ⇒ ההתנגשות נבדקת מול הסלוט-של-היום בלבד (מבט-חוג מצומצם מוזרק למנוע); ההקצאה-הקבועה בודקת את כל השבוע.
+    final slot = <String, dynamic>{...c, 'sessions': [{'day': todayWd, 'time': time}]};
+    final list = roster.where((t) => isActive(t) && t['id'] != absent['id'] && !absentToday(t) && subjects(t).contains(c['subject']) && availableAt(t, todayWd, time) && clashOf(t, slot) == null).toList();
     list.sort((a, b) { // מועדף ראשון, אחר-כך עומס עולה
       final pa = absent['preferredSub'] == a['id'] ? 0 : 1, pb = absent['preferredSub'] == b['id'] ? 0 : 1;
       return pa != pb ? pa - pb : loadPct(a).compareTo(loadPct(b));
@@ -306,6 +308,32 @@ class _TeamData {
   static int get certsN => active.where(certMissing).length;
   static List<List<Object>> get byRole => countBy(staff, (t) => roleLabel[(t as Map)['role']] ?? '${t['role']}'); // מדף
 
+  // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 16 עמודות-המפרט כשקעי-דאטה ═══
+  //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשרשומה נושאת ערך, חסר ⇒ שקט. photo/contact/classAttendance/updatedAt
+  //   אין להם מקור-אמת/מוזרקים-בהצבה (חוק-6) ⇒ מקום-שמור: הזרקת-שדה ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
+  static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    {'key': 'photo', 'label': 'תמונה'},                                                                  // מקום-שמור (WorkerCert.photo)
+    {'label': 'שם', 'get': (Map<String, dynamic> t) => '${t['name']}'},
+    {'label': 'תפקיד', 'get': (Map<String, dynamic> t) => roleLabel[t['role']] ?? '${t['role']}'},
+    {'label': 'מקצועות', 'get': (Map<String, dynamic> t) => subjects(t).join('·')},
+    {'label': 'כיתות-מחנך', 'get': (Map<String, dynamic> t) => (t['homeroom'] as List).isEmpty ? '—' : (t['homeroom'] as List).join('·')},
+    {'label': 'ש׳/שבוע', 'get': (Map<String, dynamic> t) => '${hoursWeek(t).round()}/${contractHours(t)}'},
+    {'label': 'עומס%', 'get': (Map<String, dynamic> t) => '${loadPct(t)}%'},
+    {'label': 'חוגים', 'get': (Map<String, dynamic> t) => '${coursesOf(t).length}'},
+    {'label': 'נוכח-היום', 'get': (Map<String, dynamic> t) => absentToday(t) ? '✗ נעדר' : presentToday(t) ? '✓' : '—'},
+    {'label': 'היעדרויות-החודש', 'get': (Map<String, dynamic> t) => '${absencesMonth(t)}'},
+    {'label': 'החלפות-שביצע', 'get': (Map<String, dynamic> t) => '${subsDone(t)}'},
+    {'key': 'classAttendance', 'label': 'דירוג-נוכחות-כיתותיו'},                                       // מקום-שמור (מודול-נוכחות)
+    {'label': 'ותק', 'get': (Map<String, dynamic> t) => '${tenure(t) ?? '—'} ש׳'},
+    {'label': 'סטטוס', 'get': (Map<String, dynamic> t) => statusLabel[statusOf(t)] ?? statusOf(t)},
+    {'key': 'contact', 'label': 'קשר'},                                                                 // מקום-שמור · חוק-6 (מוזרק · מוסתר-פר-הרשאה)
+    {'key': 'updatedAt', 'label': 'עדכון'},                                                             // מקום-שמור
+  ];
+  static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
+      c['get'] != null || rows.any((t) => t[c['key']] != null && '${t[c['key']]}'.trim().isNotEmpty);
+  static String cell(Map<String, Object?> c, Map<String, dynamic> t) =>
+      c['get'] != null ? (c['get'] as String Function(Map<String, dynamic>))(t) : '${t[c['key']] ?? '—'}';
+
   // ─── פנקס-פעולות (מצב=חיווט · הבסיס const נשאר מקור-האמת) ───
   static final Map<String, String> statusOverride = {};
   static String statusOf(Map<String, dynamic> t) => statusOverride[t['id']] ?? (t['status'] as String);
@@ -340,17 +368,21 @@ class _TeamData {
 
 // ═══════════ המסך · מחלקה ציבורית יחידה (const · ללא main) ═══════════
 class TeachersScreen extends StatefulWidget {
-  const TeachersScreen({super.key});
+  const TeachersScreen({super.key, this.initialMode = 0}); // initialMode = שקע-הזרקה (תצוגה-מקדימה/בדיקה): 0 חכם · 1 טבלה · 2 החלפות
+  final int initialMode;
   @override
   State<TeachersScreen> createState() => _TeachersScreenState();
 }
 
 class _TeachersScreenState extends State<TeachersScreen> {
   int _sort = 0; // 0=⚖️ עומס · 1=🤒 חיסורים · 2=🏫 כיתות
+  int _mode = 0; // 0=🎯 חכם (טריאז') · 1=📋 טבלה (DsTable כל-העמודות) · 2=🔁 לוח-החלפות-היום (DsBoard)
+  static const _who = 'הנהלה'; // זהות-הפועל (חוק-6 — מוזרק בגל 5 מהתפקיד)
 
   @override
   void initState() {
     super.initState();
+    _mode = widget.initialMode;
     _TeamData.syncUncovered(); // אוטומציה: היעדרויות-של-היום ⇒ שיעורים-ללא-מורה
   }
 
@@ -410,16 +442,86 @@ class _TeachersScreenState extends State<TeachersScreen> {
           child: SegmentedSwitch(items: const ['⚖️ עומס', '🤒 חיסורים', '🏫 כיתות'], selected: _sort, onSelect: (i) => setState(() => _sort = i)),
         ),
         const SizedBox(height: 10),
-        for (final st in const [3, 2, 1, 0, -1])
-          if (buckets[st]!.isNotEmpty)
-            DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
-              for (final t in buckets[st]!) _row(t),
-            ]),
+        // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (חוזה-עמודות) · 🔁 לוח-החלפות-היום
+        Align(
+          alignment: Alignment.centerRight,
+          child: SegmentedSwitch(items: const ['🎯 חכם', '📋 טבלה', '🔁 החלפות היום'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+        ),
+        const SizedBox(height: 10),
+        if (_mode == 2)
+          _subsBoard()
+        else if (_mode == 1)
+          _table(ranked)
+        else
+          for (final st in const [3, 2, 1, 0, -1])
+            if (buckets[st]!.isNotEmpty)
+              DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
+                for (final t in buckets[st]!) _row(t),
+              ]),
       ],
     );
   }
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
+
+  // 📋 מבט-טבלה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid (מזייף int rows).
+  Widget _table(List<Map<String, dynamic>> rows) {
+    final cols = [for (final c in _TeamData.columnDefs) if (_TeamData.colShown(c, rows)) c];
+    return DsTable(labels: [for (final c in cols) c['label'] as String], rows: [for (final t in rows) [for (final c in cols) _TeamData.cell(c, t)]]);
+  }
+
+  // 🔁 לוח-החלפות-היום (זיהוי-חריגה ⇒ הכרעה ⇒ ביצוע): DsBoard (תפר-דאטה: stages+records+onMove) ⊕ candidates
+  //   (זמין ∧ מקצוע ∧ פנוי-בסלוט[scheduleClashText] ∧ עומס-נמוך ∧ מועדף) ⊕ taskOverdue (החלפה שעבר מועדה).
+  Widget _subsBoard() {
+    final today = _TeamData.todaySubs;
+    final open = _TeamData.uncoveredToday;
+    final overdue = _TeamData.subs.where((s) => _TeamData.subOverdue(s)).length;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      if (today.isEmpty)
+        const EmptyState(glyph: '🎉', message: 'אין החלפות להיום — כל השיעורים מכוסים')
+      else ...[
+        DsBoard(
+          stages: const ['🔴 ללא-מחליף', '🟠 הוצע', '✅ אושר'],
+          records: [for (final s in today) {'id': '${s['id']}', 'title': '${s['time'] ?? ''} ${_TeamData.courseById(s['courseId'] as String)?['name']} · במקום ${_TeamData.nameOf(s['absentId'] as String)}${s['subId'] != null ? ' ⇐ ${_TeamData.nameOf(s['subId'] as String)}' : ''}', 'stage': '${s['stage']}'}],
+          stageOf: (r) => int.parse(r['stage']!),
+          titleOf: (r) => r['title']!,
+          onMove: (id, to) => setState(() => _TeamData.moveSub(id, to, _who)),
+        ),
+        if (overdue > 0) ...[_gap(8), AlertBanner(glyph: '⏰', tone: 2, message: '$overdue החלפות פתוחות שעבר מועדן')],
+        _gap(10),
+        // הצעת-מחליף אוטומטית פר-שיעור-פתוח: המועמד-הראשון = מועדף/עומס-נמוך; אין ⇒ אמת (לא מזייפים מחליף)
+        DsSection(title: '🧭 מחליף מוצע · ${open.length} שיעורים פתוחים', tone: open.isEmpty ? 1 : 2, children: [
+          if (open.isEmpty) const EmptyState(glyph: '✅', message: 'כל שיעורי-היום מכוסים')
+          else for (final s in open) _subRow(s),
+        ]),
+      ],
+    ]);
+  }
+
+  Widget _subRow(Map<String, dynamic> s) {
+    final c = _TeamData.courseById(s['courseId'] as String)!;
+    final cands = _TeamData.candidates(s);
+    final chosen = s['subId'] == null ? null : _TeamData.byId(s['subId'] as String);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        MediaRow(glyph: '🚨', title: '${s['time'] ?? ''} · ${c['name']} · ${c['roomId']}', subtitle: 'במקום ${_TeamData.nameOf(s['absentId'] as String)} · ${s['stage'] == 1 ? 'הוצע: ${chosen?['name']}' : 'ללא-מחליף'}'),
+        _gap(6),
+        if (cands.isEmpty)
+          const AlertBanner(glyph: '⚠️', tone: 3, message: 'אין מחליף זמין (מקצוע+חלון-זמינות+פנוי-בסלוט) — נדרשת הכרעה ידנית')
+        else
+          Wrap(spacing: 8, runSpacing: 6, children: [
+            for (final t in cands.take(3))
+              SoftButton(
+                label: '${t == cands.first ? '⭐ ' : ''}${t['name']} · ${_TeamData.loadPct(t)}%${(_TeamData.byId(s['absentId'] as String)?['preferredSub']) == t['id'] ? ' · מועדף' : ''}',
+                tone: t == cands.first ? 1 : 0,
+                onTap: () => setState(() => _TeamData.propose(s, t, _who)),
+              ),
+            if (s['stage'] == 1) SoftButton(label: '✅ אשר-החלפה', tone: 1, onTap: () => setState(() => _TeamData.moveSub(s['id'] as String, 2, _who))),
+          ]),
+      ]),
+    );
+  }
 
   // שורת-מורה: זהות (PremiumAvatar ראשי-תיבות + נקודת-מצב) · תפקיד+כיתות · עומס מול חוזה (StatRow יחס) · סיבת-הדחיפות
   Widget _row(Map<String, dynamic> t) {
