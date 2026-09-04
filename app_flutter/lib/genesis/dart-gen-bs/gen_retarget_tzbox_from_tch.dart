@@ -359,6 +359,10 @@ class _TeamData {
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשרשומה נושאת ערך, חסר ⇒ שקט. photo/contact/classAttendance/updatedAt
   //   אין להם מקור-אמת/מוזרקים-בהצבה (חוק-6) ⇒ מקום-שמור: הזרקת-שדה ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של TzBox (G5h · חוק-7): 3 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'coordinatorId', 'label': 'coordinatorId'}, // G5h · מקום-שמור: שדה-TzBox מהסכמה (Id) — מאיר כשהנתון מוזרם
+    {'key': 'famId', 'label': 'famId'}, // G5h · מקום-שמור: שדה-TzBox מהסכמה (Id | '') — מאיר כשהנתון מוזרם
+    {'key': 'holderKind', 'label': 'holderKind'}, // G5h · מקום-שמור: שדה-TzBox מהסכמה ('donor' | 'supported' | '') — מאיר כשהנתון מוזרם
     {'key': 'photo', 'label': 'תמונה'},                                                                  // מקום-שמור (WorkerCert.photo)
     {'label': 'שם', 'get': (Map<String, dynamic> t) => '${t['num']}'},
     {'label': 'תפקיד', 'get': (Map<String, dynamic> t) => roleLabel[roleOf_(t)] ?? roleOf_(t)},

@@ -358,6 +358,24 @@ class _TeamData {
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשרשומה נושאת ערך, חסר ⇒ שקט. photo/contact/classAttendance/updatedAt
   //   אין להם מקור-אמת/מוזרקים-בהצבה (חוק-6) ⇒ מקום-שמור: הזרקת-שדה ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של Supporter (G5h · חוק-7): 17 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'phone', 'label': 'phone'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'email', 'label': 'email'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'address', 'label': 'address'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'city', 'label': 'city'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'idNum', 'label': 'idNum'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'extId', 'label': 'extId'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'cat', 'label': 'cat'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'forWho', 'label': 'forWho'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'count', 'label': 'count'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'ils', 'label': 'ils'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'usd', 'label': 'usd'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'first', 'label': 'first'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (IsoDate | '') — מאיר כשהנתון מוזרם
+    {'key': 'last', 'label': 'last'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (IsoDate | '') — מאיר כשהנתון מוזרם
+    {'key': 'nextDate', 'label': 'nextDate'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (IsoDate | '') — מאיר כשהנתון מוזרם
+    {'key': 'nextNote', 'label': 'nextNote'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'hok', 'label': 'hok'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (Hok) — מאיר כשהנתון מוזרם
+    {'key': 'ayin', 'label': 'ayin'}, // G5h · מקום-שמור: שדה-Supporter מהסכמה (AyinCase) — מאיר כשהנתון מוזרם
     {'key': 'photo', 'label': 'תמונה'},                                                                  // מקום-שמור (WorkerCert.photo)
     {'label': 'שם', 'get': (Map<String, dynamic> t) => '${t['name']}'},
     {'label': 'תפקיד', 'get': (Map<String, dynamic> t) => roleLabel[roleOf_(t)] ?? roleOf_(t)},

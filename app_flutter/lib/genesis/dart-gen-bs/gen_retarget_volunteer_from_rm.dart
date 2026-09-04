@@ -633,6 +633,11 @@ class _VolunteerData {
   // ═══ חוזה-עמודות · מקום-שמור (חוק-7) — 16 עמודות-המפרט כשקעי-דאטה ═══
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשחדר נושא ערך; חסר ⇒ שקט (type/owner/lastCheck/updatedAt = מקום-שמור).
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של Volunteer (G5h · חוק-7): 4 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'phone', 'label': 'phone'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'area', 'label': 'area'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'note', 'label': 'note'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'createdAt', 'label': 'createdAt'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (IsoDate) — מאיר כשהנתון מוזרם
     {'label': 'שם/מספר', 'get': (Map<String, dynamic> r) => '${r['name']}'},
     {'key': 'location', 'label': 'בניין/קומה'},
     {'key': 'type', 'label': 'סוג'},                           // מקום-שמור (כיתה/מעבדה/אולם/ספורט/מחשבים/חדר-מורים)

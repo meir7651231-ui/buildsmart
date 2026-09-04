@@ -431,6 +431,13 @@ class _ShopItemData {
   //   נגזרת(get)=תמיד-מוצגת · שדה(key בלי get)=מוארת רק כשחוג נושא ערך, חסר ⇒ שקט (אפס-זיוף).
   //   'code' אין במאור ⇒ מקום-שמור: הוספת {'code': …} לחוג ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של ShopItem (G5h · חוק-7): 6 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'value', 'label': 'value'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'basePrice', 'label': 'basePrice'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'stock', 'label': 'stock'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'minStock', 'label': 'minStock'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'validDays', 'label': 'validDays'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'waits', 'label': 'waits'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה ({ famId: Id) — מאיר כשהנתון מוזרם
     {'label': 'שם-פריט', 'get': (Map<String, dynamic> c) => '${c['name']}'},
     {'key': 'code', 'label': 'קוד'},                                                   // מקום-שמור
     {'label': 'תחום', 'get': (Map<String, dynamic> c) => '${c['holidays'] ?? '—'}'},

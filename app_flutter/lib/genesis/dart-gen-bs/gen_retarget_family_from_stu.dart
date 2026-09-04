@@ -478,6 +478,12 @@ class _StuData {
   //   הוספת שדה לרשומה (photo/grades/…) ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static int roleCtx = 0; // התפקיד-הפעיל (מוזרק מהמסך לפני רינדור-טבלה)
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של Family (G5h · חוק-7): 5 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'fatherId', 'label': 'fatherId'}, // G5h · מקום-שמור: שדה-Family מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'motherId', 'label': 'motherId'}, // G5h · מקום-שמור: שדה-Family מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'community', 'label': 'community'}, // G5h · מקום-שמור: שדה-Family מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'kidsHome', 'label': 'kidsHome'}, // G5h · מקום-שמור: שדה-Family מהסכמה (number) — מאיר כשהנתון מוזרם
+    {'key': 'kidsMarried', 'label': 'kidsMarried'}, // G5h · מקום-שמור: שדה-Family מהסכמה (number) — מאיר כשהנתון מוזרם
     {'key': 'photo', 'label': 'תמונה'},                                                   // מקום-שמור (ImageProvider/URL)
     {'label': 'שם-מלא', 'get': (Map<String, dynamic> s) => '${s['name']}'},
     {'label': 'מס׳', 'get': (Map<String, dynamic> s) => '${s['id']}'},

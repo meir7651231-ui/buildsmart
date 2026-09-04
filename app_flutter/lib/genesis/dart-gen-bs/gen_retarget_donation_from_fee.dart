@@ -679,6 +679,9 @@ class _DonationData {
   // ═══ חוזה-עמודות (חוק-7 · מקום-שמור): 16 עמודות-הליבה + שדות-השער-החיצוני כשקעים ═══
   //   נגזרת(get)=תמיד · שדה(key)=מוארת רק כשמשפחה נושאת ערך (receiptNo/clearingRef/invoiceNo — יאירו כשהשער יחובר)
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של Donation (G5h · חוק-7): 2 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'designation', 'label': 'designation'}, // G5h · מקום-שמור: שדה-Donation מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'purpose', 'label': 'purpose'}, // G5h · מקום-שמור: שדה-Donation מהסכמה (string) — מאיר כשהנתון מוזרם
     {'label': 'משפחה', 'get': (Map<String, dynamic> f) => '${f['name']}'},
     {'label': 'תלמידים', 'get': (Map<String, dynamic> f) => '${studentsN(f)}'},
     {'label': 'כיתות', 'get': (Map<String, dynamic> f) => gradesOf(f)},
