@@ -442,6 +442,8 @@ class _TeamData {
         if (roleName(role) != 'admin') 'notes',
         if (!can(role, 'team.contract') && !can(role, 'team.assign')) 'contractEnd',
       };
+  static bool canSee(int role, Map<String, dynamic> t) => ownId(role) == null || ownId(role) == t['id']; // מורה: לא-של-אחרים
+
   // ─── פנקס-פעולות (מצב=חיווט · הבסיס const נשאר מקור-האמת) ───
   static final Map<String, String> statusOverride = {};
   static String statusOf(Map<String, dynamic> t) => statusOverride[t['id']] ?? (t['status'] as String);
@@ -546,8 +548,11 @@ class TeachersScreen extends StatefulWidget {
 }
 
 class _TeachersScreenState extends State<TeachersScreen> {
+  int _sort = 0; // 0=⚖️ עומס · 1=🤒 חיסורים · 2=🏫 כיתות
   final Map<String, int> _tab = {}; // טאב-נבחר פר-מורה (חיווט SegmentedSwitch→תצוגה)
   static const _tabNames = ['סקירה', 'מערכת', 'כיתות', 'היעדרויות', 'החלפות', 'ביצועים', 'הכשרות', 'מסמכים', 'אודיט'];
+  String _q = ''; // חיפוש-איתור (DsSearch→smartFilter)
+  final Map<String, String> _locks = {}; // נעילות-סינון (FilterChipPill→finderMatches)
   int _mode = 0; // 0=🎯 חכם (טריאז') · 1=📋 טבלה (DsTable כל-העמודות) · 2=🔁 לוח-החלפות-היום (DsBoard)
   int _role = 0; // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור פר-תפקיד
   String get _who => _TeamData.roleDefs[_role]['label'] as String; // זהות-הפועל לאודיט (מהתפקיד המוזרק)
@@ -948,7 +953,35 @@ class _TeachersScreenState extends State<TeachersScreen> {
     );
   }
   @override
-  Widget build(BuildContext context) => DsScaffold(title: 'TeachersScreen', subtitle: 'TeachersScreen · מודול-משנה מחולל', icon: '🧬', children: [
-    _subsBoard(),
-  ]);
+  Widget build(BuildContext context) {
+    final all = _TeamData.active;
+    final uncovered = _TeamData.uncoveredToday.length; // hero = המטרה: אף שיעור בלי מורה
+    final ranked = [..._TeamData.everyone.where((t) => !_TeamData.isGone(t) && _TeamData.canSee(_role, t))]; // מורה ⇒ הכרטיס-שלו בלבד
+    ranked.sort((a, b) {
+      switch (_sort) {
+        case 1:
+          return _TeamData.absencesMonth(b).compareTo(_TeamData.absencesMonth(a));
+        case 2:
+          return _TeamData.coursesOf(b).length.compareTo(_TeamData.coursesOf(a).length);
+        default:
+          return _TeamData.loadPct(b).compareTo(_TeamData.loadPct(a));
+      }
+    });
+    // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches — פייפליין אחד לטריאז'/טבלה/ייצוא
+    final visible = _TeamData.filter(_TeamData.search(ranked, _q), _locks);
+    // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-דחיפות-מאוחדת (sev)
+    final buckets = <int, List<Map<String, dynamic>>>{3: [], 2: [], 1: [], 0: [], -1: []};
+    for (final t in visible) {
+      buckets[_TeamData.sev(t)]!.add(t);
+    }
+    const secTitle = {3: '🔴 שיעור-ללא-מורה היום', 2: '🟠 דורש-טיפול', 1: '🟡 לתשומת-לב', 0: '🟢 תקין', -1: '⏸ לא-פעיל/חופשה'};
+    const secTone = {3: 2, 2: 3, 1: 3, 0: 1, -1: 0};
+    return DsScaffold(title: 'TeachersScreen', subtitle: 'TeachersScreen · מודול-משנה מחולל · 3 בונים מחווטים-לשקעי-הזהב', icon: '🧬', children: [
+      _gap(6),
+      _table(visible),
+      _subsBoard(),
+      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _tabView, _overview, _timetable, _classes, _absences, _subsOf, _performance, _certs, _docs, _audit, _actions, _subRow
+      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _row
+    ]);
+  }
 }

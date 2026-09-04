@@ -263,6 +263,8 @@ class _StuData {
   }
   static String teacherName(Map<String, dynamic> s) => (teacherOf(courseOf(mainEnrollment(s)?['courseId'] as String?)?['teacherId'] as String?)?['name'] as String?) ?? '—';
   static int? age(Map<String, dynamic> s) => ageOf(s['birth'] as String?, todayDt);
+  static int gradeIdx(Map<String, dynamic> s) => gradeIndex(s['grade'] as String?, gradeOrder);
+
   // ─── סטטוס-תלמיד (4 ערכי-המפרט) נגזר מ-Enrollment.status + כיתה: active⇒פעיל · paused⇒הוקפא · ended+יב⇒בוגר · ended⇒עזב ───
   static final Map<String, String> _statusOverride = {}; // פעולות (הקפא/החזר/סמן-עזב/בוגר) = state
   static String status(Map<String, dynamic> s) {
@@ -435,6 +437,19 @@ class _StuData {
   // ─── מיון (איתור·דירוג): סיכון-יורד · כיתה (gradeIndex⊕שם-כיתה) · שם (nameSortKey⊕normSearch) ───
   static const Map<String, String> _finals = {'k1': 'כ', 'k2': 'מ', 'k3': 'נ', 'k4': 'פ', 'k5': 'צ'};
   static String norm(dynamic q) => normSearch(q, _finals);
+  static String sortKey(Map<String, dynamic> s) => nameSortKey(s['name'], norm, const <String>{});
+  static List<Map<String, dynamic>> sorted(List<Map<String, dynamic>> xs, int mode) {
+    final out = [...xs];
+    if (mode == 1) {
+      out.sort((a, b) { final c = gradeIdx(a).compareTo(gradeIdx(b)); return c != 0 ? c : className(a).compareTo(className(b)) != 0 ? className(a).compareTo(className(b)) : sortKey(a).compareTo(sortKey(b)); });
+    } else if (mode == 2) {
+      out.sort((a, b) => sortKey(a).compareTo(sortKey(b)));
+    } else {
+      out.sort((a, b) => risk(b).compareTo(risk(a)));
+    }
+    return out;
+  }
+
   // ─── דגלים (מפרט: צרכים/רגישות/רפואי): רפואי ⇐ Member.health (מקור-אמת) · צרכים/רגישות ⇐ פנקס-דגלים (פעולה "הוסף-דגל") ───
   static final Map<String, List<String>> flagLedger = {};
   static List<String> flags(Map<String, dynamic> s) => [
@@ -683,6 +698,14 @@ class _StuData {
   static String roleName(int role) => roleOf((roleDefs[role]['config'] as Map).cast<String, dynamic>(), roleDefs[role]['email'] as String);
   static String who(int role) => roleDefs[role]['email'] as String;
   static bool isParent(int role) => (roleDefs[role]['scope'] as Map?)?['famId'] != null;
+  static List<Map<String, dynamic>> scoped(int role, List<Map<String, dynamic>> xs) {
+    final sc = roleDefs[role]['scope'] as Map?;
+    if (sc == null) return xs;
+    if (sc['teacherId'] != null) return xs.where((s) => courseOf(mainEnrollment(s)?['courseId'] as String?)?['teacherId'] == sc['teacherId']).toList();
+    if (sc['famId'] != null) return xs.where((s) => s['famId'] == sc['famId']).toList();
+    return xs;
+  }
+  // חשיפת שדה-מוגן: מותרת ⇒ נרשמת בלוג-חשיפה (אודיט act=expose); אסורה ⇒ '🔒' (מצב פרטיות-נעולה)
   static final Set<String> _exposed = {}; // מניעת-כפילות ברינדור-חוזר (רשומה אחת פר תלמיד·שדה·תפקיד)
   static String protectedField(int role, Map<String, dynamic> s, String key, String value) {
     if (!can(role, 'stu.protected')) return '🔒';
@@ -757,7 +780,9 @@ class StudentsScreen extends StatefulWidget {
 
 class _StudentsScreenState extends State<StudentsScreen> {
   String _q = ''; // איתור (DsSearch)
+  int _sort = 0; // 0=סיכון · 1=כיתה · 2=שם — SegmentedSwitch→דירוג
   final Map<String, String> _locks = {}; // צירי-סינון פעילים (finderMatches) — AND
+  bool _filtersOpen = false; // פאנל-פילטרים (כיתה/שכבה/מחנך/סטטוס)
   int _role = 0; // 0=מנהל · 1=יועץ · 2=מחנך · 3=מזכירות · 4=הורה · 5=צפייה (חוק-6 זהות-מוזרקת; בורר מדגים גידור)
   bool _importing = false; // מצב-מיוחד: ייבוא-בתהליך
   Map<String, int>? _importResult; // תוצאת-ייבוא אחרונה
@@ -1132,6 +1157,23 @@ class _StudentsScreenState extends State<StudentsScreen> {
 
   // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
   @override
-  Widget build(BuildContext context) => DsScaffold(title: 'StudentsScreen', subtitle: 'StudentsScreen · מודול-משנה מחולל', icon: '🧬', children: [
-  ]);
+  Widget build(BuildContext context) {
+    _StuData.roleCtx = _role;
+    final all = _StuData.scoped(_role, _StuData.active); // גידור-נראות: מחנך/ת=כיתתו · הורה=ילדו · אחרת הכל
+    final avgAtt = _StuData.avgAttendance, avgGr = _StuData.avgGrades;
+    // דירוג (מיון-נבחר) ⇒ הנראים (פעילים); לא-פעילים בסקשן-ארכיון נפרד
+    // איתור⊕חריגה (23-ג): search=smartFilter⊕smartScore⊕normSearch · filter=finderMatches. הפייפליין מזין טריאז' וטבלה וארכיון.
+    final visible = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
+    final inactiveVisible = _StuData.filter(_StuData.search(_StuData.sorted(_StuData.scoped(_role, _StuData.inactive), _sort), _q), _locks);
+    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: []};
+    for (final s in visible) { buckets[_StuData.band(s)]!.add(s); }
+    return DsScaffold(title: 'StudentsScreen', subtitle: 'StudentsScreen · מודול-משנה מחולל · 4 בונים מחווטים-לשקעי-הזהב', icon: '🧬', children: [
+      _gap(10),
+      _fchip(_filtersOpen ? '⚙ פילטרים ▴' : '⚙ פילטרים ▾', _filtersOpen, () => setState(() => _filtersOpen = !_filtersOpen)),
+      for (final s in inactiveVisible) _row(s),
+      _table(visible),
+      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _h, _slot, _actions
+      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _kv, _tabBody
+    ]);
+  }
 }

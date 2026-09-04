@@ -183,6 +183,7 @@ class _AttData {
   static final Map<String, List<String>> notes = {}; // הערות פר-תלמיד
   static int _seq = 0; // מונה-אירועים (סדר-אודיט דטרמיניסטי; השעון מוזרק)
   static String keyOf(String date, int lesson, String sid) => '$date|$lesson|$sid';
+  static bool isRecorded(String date, String cls, int lesson) => _recorded.contains('$date|$cls|$lesson');
   static void _log(String action, String key) {
     _seq++;
     audit.insert(0, {'at': '${_Placement.today}T${_Placement.nowHm}', 'seq': _seq, 'by': _AttData.recorder, 'action': action, 'key': key});
@@ -358,6 +359,8 @@ class _AttData {
     return {'id': 'e-$sid', 'memberId': sid, 'courseId': s['cls'], 'status': activeOf(s) ? 'active' : 'ended', 'presents': presents, 'absences': absences};
   }
   static List<Map<String, dynamic>> get enrollments => [for (final s in students) enrollmentOf(s)];
+  static List<Map<String, dynamic>> rosterOf(String cls) => sheetRoster(enrollments, cls).cast<Map<String, dynamic>>();
+
   // ─── הערכת-מצב (פעולה-3): מנועי-מדף ───
   static int presentsThisMonth(Map<String, dynamic> s) => presentsInMonth((enrollmentOf(s)['presents'] as List).cast<Object?>(), _Placement.today);
   static int absencesThisMonth(String sid) => marks.where((m) => m['sid'] == sid && m['status'] == 'absent' && monthKey(m['date'] as String) == monthKey(_Placement.today)).length;
@@ -499,6 +502,11 @@ class _AttData {
     return cs == null ? classes : classes.where((c) => cs.contains(c['id'])).toList();
   }
   // תלמידים-בהיקף: הורה רואה רק את ילדו
+  static List<Map<String, dynamic>> visibleStudents(String cls) {
+    final child = roleDef['child'] as String?;
+    return child == null ? studentsOf(cls) : studentsOf(cls).where((s) => s['id'] == child).toList();
+  }
+  // חלון-עריכה: |date−today| ≤ window (dayDiff מהמדף) — מורה היום±1, מחליף היום, רכז אחורה
   static bool inWindow(String date) => dayDiff(date, _Placement.today).abs() <= (roleDef['window'] as int? ?? 0);
   static bool canMarkOn(String date) => can('att.mark') && inWindow(date) && !isLocked(date);
   static String? whyCannot(String date) => !can('att.mark') ? 'אין הרשאת-רישום לתפקיד $roleName' : isLocked(date) ? 'יום-נעול — רק רכז/ת פותח/ת' : !inWindow(date) ? 'מחוץ לחלון-העריכה (היום±${roleDef['window']}) — אין עריכה-לאחור' : null;
@@ -610,11 +618,29 @@ class _AttData {
     {'key': 'loader', 'label': 'חיבור-אסינק (fetch/Firestore)', 'where': 'AttendanceScreen(loader:) ⇒ טעינה/שגיאה אמיתיות; null ⇒ הדגמה'},
   ];
 
+  // ─── KPI-10 (פעולה-3 · כל אחד = ספירה/יחס על אמת) ───
+  static List<Map<String, dynamic>> get activeStudents => students.where(activeOf).toList();
+  static int countToday(String status) => activeStudents.where((s) => dayStatus(_Placement.today, s['id'] as String) == status).length;
+  static int get releasedToday => countToday('released');
+  static double get monthPct {
+    final n = schoolDaysSoFar() * activeStudents.length;
+    if (n == 0) return 1.0;
+    var p = 0;
+    for (final s in activeStudents) {
+      p += presentsThisMonth(s);
+    }
+    return p / n;
+  }
   static List<Map<String, dynamic>> lessonsStarted(String date) {
     final now = timeToMin(_Placement.nowHm);
     if (date != _Placement.today) return lessonsOf(date);
     return lessonsOf(date).where((l) => (timeToMin(l['time']) as num) <= (now as num)).toList();
   }
+  static List<String> get classesNotRecordedToday => [
+        for (final c in classes)
+          if (lessonsStarted(_Placement.today).any((l) => !isRecorded(_Placement.today, c['id'] as String, l['n'] as int)))
+            c['id'] as String,
+      ];
 }
 
 // ═══════════ המסך הציבורי ═══════════
@@ -629,8 +655,11 @@ class AttendanceScreen extends StatefulWidget {
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
   String _date = _Placement.today; // תאריך-נבחר (בורר-תאריך)
+  int _cls = 0; // כיתה-נבחרת (SegmentedSwitch, בהיקף-התפקיד)
   int? _lesson; // שיעור-נבחר (null ⇒ השיעור-הנוכחי)
   int _mode = 0; // 0=📋 גיליון (טאפ-מחזורי) · 1=🗂 טבלה (DsTable כל-העמודות)
+  String _q = ''; // חיפוש-איתור (DsSearch→smartFilter)
+  int _filter = 0; // צ׳יפ-חריגה (FilterChipPill→finderMatches)
   int _range = 1; // טווח-היסטוריה: 0=7 · 1=30 · 2=90 ימים (dateInRange)
   String? _notice; // הודעת-מערכת אחרונה (רישום-כפול · כולם-נוכחים · שקעים)
   int get _lessonN => _lesson ?? _AttData.currentLesson(_date);
@@ -966,8 +995,33 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
   @override
-  Widget build(BuildContext context) => DsScaffold(title: 'AttendanceScreen', subtitle: 'AttendanceScreen · מודול-משנה מחולל', icon: '🧬', children: [
-    _loadingView(),
-    _auditTab(),
-  ]);
+  Widget build(BuildContext context) {
+    final vClasses = _AttData.visibleClasses;
+    if (_cls >= vClasses.length) _cls = 0;
+    final cls = vClasses[_cls]['id'] as String;
+    final roster = _AttData.visibleStudents(cls);
+    final holiday = _AttData.holidayName(_date);
+    final lessons = _AttData.lessonsOf(_date);
+    final sum = sheetSummary(_AttData.rosterOf(cls), _date) as Map; // {present,total} מהמדף
+    final monthPct = _AttData.monthPct;
+    final notRec = _AttData.classesNotRecordedToday;
+    final lessonIdx = lessons.indexWhere((l) => l['n'] == _lessonN);
+    final recorded = lessons.isNotEmpty && _AttData.isRecorded(_date, cls, _lessonN);
+    // איתור⊕חריגה (23-ג): search=smartFilter⊕smartScore⊕normSearch · filter=finderMatches — פייפליין אחד לכל הטאבים
+    final visible = _AttData.filter(_AttData.search(roster, _q), _date, _filter);
+    final locked = _AttData.isLocked(_date);
+    final why = _AttData.whyCannot(_date);
+    return DsScaffold(title: 'AttendanceScreen', subtitle: 'AttendanceScreen · מודול-משנה מחולל · 10 בונים מחווטים-לשקעי-הזהב', icon: '🧬', children: [
+      _loadingView(),
+      for (final s in visible) _row(s),
+      _table(visible),
+      _monthTab(cls),
+      _historyTab(cls),
+      _makeupsTab(cls),
+      _parentsTab(cls),
+      _riskTab(visible),
+      _auditTab(),
+      _gap(10),
+    ]);
+  }
 }

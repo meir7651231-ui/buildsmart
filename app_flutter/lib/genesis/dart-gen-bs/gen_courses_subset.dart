@@ -362,6 +362,10 @@ class _CoursesData {
   static List<Map<String, dynamic>> coursesOf(Map<String, dynamic> t) => (coursesOfTeacher(liveCourses, t['id']) as List).cast<Map<String, dynamic>>();
   static int weeklyOf(List<Map<String, dynamic>> cs) => grandTotal(cs, (c) => hasSessions(c as Map<String, dynamic>) ? (sessionsOf(c) as List).length : 0).toInt();
 
+  // ─── סינון-סמסטר (פס-עליון): 0=הכל · i>0 ⇒ semesterOptions[i-1] (אטום-דאטה ממאור) ───
+  static List<Map<String, dynamic>> bySemester(List<Map<String, dynamic>> cs, int sem) =>
+      sem == 0 ? cs : cs.where((c) => c['semester'] == semesterOptions[sem - 1]).toList();
+
   static String sessionsLabel(Map<String, dynamic> c) =>
       hasSessions(c) ? (sessionsOf(c) as List).where((s) => s['day'] is int).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ') : 'ללא-מפגשים';
   static String statusLabel(Map<String, dynamic> c) {
@@ -669,6 +673,24 @@ class _CoursesData {
   static Map<String, dynamic> _cfg(int role) => (roleDefs[role]['config'] as Map).cast<String, dynamic>();
   static bool _isAdmin(Map<String, dynamic> config, String email) => roleOf(config, email) == 'admin';
   static bool can(int role, String key) => canGrantedAction(_cfg(role), roleDefs[role]['email'] as String, false, key, _isAdmin);
+  static dynamic myTeacherId(int role) => teacherIdOf(_cfg(role), roleDefs[role]['email']);
+  static String? myFamilyId(int role) => roleDefs[role]['familyId'] as String?;
+  // המערכת-שלי (הורה): חוגים שבהם חבר-משפחה רשום/ממתין
+  static List<Map<String, dynamic>> familyCourses(List<Map<String, dynamic>> cs, String famId) {
+    final fam = families.where((f) => f['id'] == famId).firstOrNull;
+    if (fam == null) return const [];
+    final ids = {for (final m in (fam['members'] as List)) m['id']};
+    return cs.where((c) => enrollmentsOf(c).any((e) => ids.contains(e['memberId']) && e['status'] != 'ended')).toList();
+  }
+  // גידור-תצוגה לפי תפקיד: מורה ⇒ coursesOfTeacher(החוגים-שלו) · הורה ⇒ familyCourses · אחרת הכל
+  static List<Map<String, dynamic>> scopeFor(int role, List<Map<String, dynamic>> cs) {
+    final tid = myTeacherId(role);
+    if (tid != null) return (coursesOfTeacher(cs, tid) as List).cast<Map<String, dynamic>>();
+    final fid = myFamilyId(role);
+    if (fid != null) return familyCourses(cs, fid);
+    return cs;
+  }
+  // הרשמה-עצמית (הורה ⇒ סטטוס wait = "רכז מאשר"; כל בדיקות-הקדם/התנגשות חלות)
   static void cancelCourse(Map<String, dynamic> c, String who) {
     courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'cancelled': true};
     for (final e in liveEnrollmentsOf(c)) {
@@ -781,6 +803,19 @@ class _CoursesData {
     {'key': 'note', 'prefix': '📝 ', 'suffix': ''},
   ];
 
+  static int get kpiWaiting => grandTotal(liveCourses, (c) => waitlist(c as Map<String, dynamic>).length).toInt();
+  // התנגשויות ייחודיות (זוג-חוגים×סוג, תלמיד×זוג) — לא כפל-ספירה משני צידי-הזוג
+  static Set<String> get uniqueClashes {
+    final out = <String>{};
+    for (final c in liveCourses) {
+      for (final k in clashesOf(c)) {
+        final ids = ['${c['name']}', k['with']!]..sort();
+        out.add('${k['kind']}|${ids.join('~')}|${k['who'] ?? ''}');
+      }
+    }
+    return out;
+  }
+  static int get kpiClashes => uniqueClashes.length;
 }
 
 // ═══════════ המסך · CoursesScreen (const · ללא main · המנהל מחבר ניווט) ═══════════
@@ -791,7 +826,10 @@ class CoursesScreen extends StatefulWidget {
 }
 
 class _CoursesScreenState extends State<CoursesScreen> {
+  int _sem = 0; // 0=הכל · 1..=semesterOptions (בורר-סמסטר · פס-עליון)
   int _role = 0; // 0 רכז · 1 מורה · 2 מזכירות · 3 הנהלה · 4 הורה · 5 צפייה (חוק-6 זהות-מוזרקת; בורר מדגים גידור)
+  String _q = ''; // חיפוש-איתור (DsSearch → smartFilter)
+  final Map<String, String> _locks = {}; // נעילות-סינון פר-ציר (FilterChipPill → finderMatches)
   int _tab = 0; // טאב-פאנל: 0 סקירה · 1 נרשמים · 2 המתנה · 3 מערכת · 4 נוכחות · 5 גבייה · 6 חומרים · 7 היסטוריה · 8 אודיט
   String? _pick; // בורר פתוח בפאנל: enroll · invite · teacher · sub · room · move:<eid> · message · null
   String? _msg; // תוצאת-פעולה אחרונה (AlertBanner)
@@ -1320,6 +1358,32 @@ class _CoursesScreenState extends State<CoursesScreen> {
   // 🖨 הדפס-מערכת: תצוגת-הדפסה טקסטואלית של השבוע (SelectableText) — ההורדה/הדפסה חסומות בסנדבוקס
   Widget _gap([double h = 10]) => SizedBox(height: h);
   @override
-  Widget build(BuildContext context) => DsScaffold(title: 'CoursesScreen', subtitle: 'CoursesScreen · מודול-משנה מחולל', icon: '🧬', children: [
-  ]);
+  Widget build(BuildContext context) {
+    // גידור-תצוגה לפי תפקיד (roleOf⊕teacherIdOf): מורה רואה את החוגים-שלו · הורה את המערכת-שלי · אחרים הכל
+    final live = _CoursesData.scopeFor(_role, _CoursesData.bySemester(_CoursesData.liveCourses, _sem));
+    final clashes = _CoursesData.kpiClashes;
+    final semEmpty = _sem > 0 && _CoursesData.bySemester(_CoursesData.liveCourses, _sem).isEmpty; // מצב: סמסטר לא-מוגדר/ריק
+    // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches (AND על נעילות).
+    //   'ended' מסנן מכל-החוגים (גם הסתיימו); אחרת מהחיים. הפייפליין רץ פעם-אחת ומזין גריד/רשימה/פר-מורה/פר-חדר.
+    final base = _locks['state'] == 'ended' ? _CoursesData.scopeFor(_role, _CoursesData.bySemester(_CoursesData.allCourses, _sem)) : live;
+    final visible = _CoursesData.filter(_CoursesData.search(base, _q), _locks);
+    // דירוג לפי דחיפות-מאוחדת (התנגשות ראשונה), ואז לפי תפוסה-יורדת
+    final ranked = [...visible]..sort((a, b) {
+        final s = _CoursesData.sev(b).compareTo(_CoursesData.sev(a));
+        return s != 0 ? s : _CoursesData.occupancy(b).compareTo(_CoursesData.occupancy(a));
+      });
+    // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-דחיפות (3 התנגשות · 2 ללא-מורה/חדר · 1 מתחת-מינ׳ · 0 תקין · -1 הסתיים)
+    final buckets = <int, List<Map<String, dynamic>>>{3: [], 2: [], 1: [], 0: [], -1: []};
+    for (final c in ranked) {
+      buckets[_CoursesData.sev(c)]!.add(c);
+    }
+    const secTitle = {3: '⚠️ התנגשות — חוסם', 2: '🚫 ללא-מורה / ללא-חדר', 1: '📉 מתחת-למינימום', 0: '🟢 תקין', -1: '🏁 הסתיימו / בוטלו'};
+    const secTone = {3: 2, 2: 2, 1: 3, 0: 1, -1: 0};
+    return DsScaffold(title: 'CoursesScreen', subtitle: 'CoursesScreen · מודול-משנה מחולל · 2 בונים מחווטים-לשקעי-הזהב', icon: '🧬', children: [
+      _table(ranked),
+      _gap(8),
+      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _row, _h, _tabOverview, _lessonTile, _tabEnrolled, _tabWaitlist, _tabSchedule, _tabAttendance, _tabFees, _tabMaterials, _tabHistory, _chip
+      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _automations, _cell, _byTeacher, _byRoom, _picker, _facts
+    ]);
+  }
 }

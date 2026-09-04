@@ -437,6 +437,8 @@ class _FeesData {
     return [for (var i = 0; i < plan.length; i++) {'grade': gradeNames[i], 'date': (plan[i] as Map)['date'], 'final': (plan[i] as Map)['final']}];
   }
   static List<Map<String, dynamic>> remindersSent(Map<String, dynamic> f) => callsOf(f).where((c) => c['outcome'] == 'reminder').toList();
+  static int remindersThisMonth(Map<String, dynamic> f) => remindersSent(f).where((c) => monthKey(c['at'] as String) == monthKey(today)).length;
+  // הדרגה-הבאה: הראשונה בלוח שמועדה הגיע ועדיין לא נשלחה (מספר-שנשלחו < אינדקס+1)
   static Map<String, dynamic>? nextReminder(Map<String, dynamic> f) {
     if (balance(f) <= 0 || fullScholarship(f) || (hokFlag(f) && hokActive(f) && hokRecorded(f))) return null;
     final plan = reminderPlan(f), sent = remindersSent(f).length;
@@ -457,6 +459,11 @@ class _FeesData {
   };
   static String reminderText(Map<String, dynamic> f, String grade) => waPaymentText(orgName, 'שכר-לימוד ${year}', balance(f),
       {'templates': {'wa.payment': _templates[grade] ?? _templates['רגילה']!}}, _tpl, (o) => '$o') as String;
+
+  // ─── משימות-מעקב (overdueContactTaskDrafts): מי שעבר-מועד-מעקב (nextDate ≤ today) ⇒ טיוטת-משימה ───
+  static List<Map<String, dynamic>> followUps(List<Map<String, dynamic>> fs) => overdueContactTaskDrafts(
+      [for (final f in fs) {'id': f['id'], 'name': f['name'], 'nextDate': f['nextDate'] ?? ''}],
+      const [], 'treasury', today, (a) => '$a', skOverdue.overdueContactTaskDrafts_T);
 
   // ─── הפעולה-הנכונה (23-ד · הכרעה מאוחדת): מלגה? הסדר? תזכורת? — נגזרת מהסיכון+הותק+הו״ק ───
   static Map<String, dynamic> rightAction(Map<String, dynamic> f) {
@@ -631,7 +638,26 @@ class _FeesData {
   static List<String> years(List<Map<String, dynamic>> fs) =>
       donationYears([for (final f in fs) for (final p in paymentsOf(f)) {'date': p['date']}, for (final f in fs) for (final c in liveCharges(f)) {'date': c['date']}]);
 
+  // ═══ KPI-10 (המפרט) — כולם מנועי-מדף/שדות-אמת ═══
+  static int kCharged(List<Map<String, dynamic>> fs) => grandTotal(fs, (f) => charged(f as Map<String, dynamic>)).toInt();
+  static int kPaid(List<Map<String, dynamic>> fs) => grandTotal(fs, (f) => paid(f as Map<String, dynamic>)).toInt();
   static int kOpen(List<Map<String, dynamic>> fs) => grandTotal(fs, (f) => balance(f as Map<String, dynamic>)).toInt();
+  static int kPct(List<Map<String, dynamic>> fs) => kCharged(fs) == 0 ? 0 : ((kPaid(fs) - grandTotal(fs, (f) => credit(f as Map<String, dynamic>))) * 100 / kCharged(fs)).round().clamp(0, 100);
+  static int kInDebt(List<Map<String, dynamic>> fs) => fs.where((f) => balance(f) > 0).length;
+  static int kOld(List<Map<String, dynamic>> fs) => grandTotal(fs.where(oldDebt).toList(), (f) => balance(f as Map<String, dynamic>)).toInt();
+  static int kExpected(List<Map<String, dynamic>> fs) { // צפוי-החודש = הו״ק-שטרם-נרשמו ⊕ תשלומי-הסדר-שמועדם-החודש
+    final ym = monthKey(today);
+    final arr = grandTotal([for (final f in fs) for (final c in installments(f)) if (monthKey(c['date'] as String) == ym && balance(f) > 0) netOf(f, c)], (x) => x as num).toInt();
+    return hokExpected(fs) + arr;
+  }
+  static int kHokActive(List<Map<String, dynamic>> fs) => fs.where((f) => hokFlag(f) && hokActive(f)).length;
+  static int kScholar(List<Map<String, dynamic>> fs) => grandTotal(fs, (f) => scholarshipOf(f as Map<String, dynamic>)).toInt();
+  static int kReminders(List<Map<String, dynamic>> fs) => grandTotal(fs, (f) => remindersThisMonth(f as Map<String, dynamic>)).toInt();
+  static int collectedInMonth(List<Map<String, dynamic>> fs, String ym) => grandTotal(fs, (f) => paidInMonth(f as Map<String, dynamic>, ym)).toInt();
+  static Map<String, dynamic> collectionTrend(List<Map<String, dynamic>> fs) {
+    final t = DateTime.parse('${today}T12:00:00');
+    return trendFromScan({'monthly': [for (var i = 5; i >= 0; i--) collectedInMonth(fs, _ym(DateTime(t.year, t.month - i, 1)))]});
+  }
   static List<List<Object>> statusCounts(List<Map<String, dynamic>> fs) => countBy(fs, (f) => statusOf(f as Map<String, dynamic>));
 
   // ═══ ייצוא (23-ג) = toCsv ⊕ csvEscape ⊕ exportAllowed ═══
@@ -664,8 +690,11 @@ class _FeesData {
     return canGrantedAction((r['config'] as Map).cast<String, dynamic>(), r['email'] as String, false, key, _isAdmin);
   }
   static bool amounts(int role) => can(role, 'fees.amounts');
+  static bool isParent(int role) => can(role, 'fees.self') && !can(role, 'fees.charge');
   static String roleName(int role) => roleDefs[role]['label'] as String;
   // הורה רואה רק את משפחתו (זהות-מוזרקת: המייל של התפקיד = המייל של המשפחה)
+  static List<Map<String, dynamic>> visibleFor(int role) =>
+      isParent(role) ? families.where((f) => f['email'] == roleDefs[role]['email']).toList() : families;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════════════
@@ -681,10 +710,25 @@ class FeesScreen extends StatefulWidget {
 
 class _FeesScreenState extends State<FeesScreen> {
   int _role = 0; // 0=גזבר · 1=מזכירות · 2=הנהלה · 3=מחנך · 4=הורה · 5=צפייה
+  String _q = '';
+  int _chip = 0; // 0=הכל · 1=יתרה>0 · 2=ותק>90 · 3=הו״ק · 4=מלגה · 5=ללא-תזכורת · 6=תזכורת>2 · 7=הסדר · 8=בסיכון
+  String _grade = '', _type = '', _course = '', _method = '', _year = '', _status = '';
   bool _hokArmed = false; // אישור-דו-שלבי לרישום-הו״ק-מרוכז
   String get _roleName => _FeesData.roleName(_role);
   bool get _amounts => _FeesData.amounts(_role);
   String _m(num v) => _amounts ? shekel(v) : '🔒'; // נעילת-הרשאה-כספית: סכום ⇒ מנעול
+
+  static const _chipAxis = {1: 'debt', 2: 'old', 3: 'hok', 4: 'scholar', 5: 'noremind', 6: 'remind2', 7: 'arr', 8: 'risk'};
+
+  Map<dynamic, dynamic> get _locks => {
+        if (_chip != 0) _chipAxis[_chip]!: '1',
+        if (_grade.isNotEmpty) 'grade': '1',
+        if (_type.isNotEmpty) 'type': '1',
+        if (_course.isNotEmpty) 'course': '1',
+        if (_method.isNotEmpty) 'method': '1',
+        if (_year.isNotEmpty) 'year': '1',
+        if (_status.isNotEmpty) 'status': _status,
+      };
 
   Widget _enum(String label, List<String> options, String value, void Function(String) on) => SizedBox(
         width: 170,
@@ -1240,6 +1284,44 @@ class _FeesScreenState extends State<FeesScreen> {
       );
   Widget _gap([double h = 10]) => SizedBox(height: h);
   @override
-  Widget build(BuildContext context) => DsScaffold(title: 'FeesScreen', subtitle: 'FeesScreen · מודול-משנה מחולל', icon: '🧬', children: [
-  ]);
+  Widget build(BuildContext context) {
+    final all = _FeesData.visibleFor(_role);
+    // דירוג: סיכון-יורד ⇒ ותק-יורד ⇒ יתרה-יורדת (המפרט: חוב · ותק-חוב · סיכון)
+    final ranked = [...all]..sort((a, b) {
+        final r = _FeesData.risk(b).compareTo(_FeesData.risk(a));
+        if (r != 0) return r;
+        final ag = _FeesData.agingDays(b).compareTo(_FeesData.agingDays(a));
+        return ag != 0 ? ag : _FeesData.balance(b).compareTo(_FeesData.balance(a));
+      });
+    final visible = _FeesData.filter(_FeesData.search(ranked, _q), _locks,
+        {'grade': _grade, 'type': _type, 'course': _course, 'method': _method, 'year': _year});
+    // KPI-10 על כל-המשפחות-הנראות-לתפקיד (הורה ⇒ משפחתו בלבד)
+    final kCharged = _FeesData.kCharged(all), kPaid = _FeesData.kPaid(all), kOpen = _FeesData.kOpen(all), kPct = _FeesData.kPct(all);
+    final inDebt = _FeesData.kInDebt(all), oldN = all.where(_FeesData.oldDebt).length, kOld = _FeesData.kOld(all);
+    final kExp = _FeesData.kExpected(all), kHok = _FeesData.kHokActive(all), kSch = _FeesData.kScholar(all), kRem = _FeesData.kReminders(all);
+    final failed = all.where(_FeesData.hokFailed).toList();
+    final late = all.where(_FeesData.arrangementLate).toList();
+    final dups = [for (final f in all) if (_FeesData.duplicateCharges(f).isNotEmpty) f];
+    final hokDue = _FeesData.hokDueList(all);
+    final follow = _FeesData.followUps(all);
+    final tripDebt = all.where((f) => _FeesData.balance(f) > 0 && _FeesData.liveCharges(f).any((c) => c['cat'] == 'טיול')).toList();
+    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
+    for (final f in visible) {
+      // דגל-בלבד (מחנך): שני דליים — דגל/תקין; אין דירוג-סיכון גלוי
+      buckets[_FeesData.balance(f) <= 0 ? -1 : _amounts ? _FeesData.risk(f) : 0]!.add(f);
+    }
+    final secTitle = {2: '🔴 סיכון-גבוה / חוב-ותיק', 1: '🟠 בפיגור / בינוני', 0: _amounts ? '🟢 חוב-טרי' : '🚩 דגל-חוב', -1: '✅ ללא-חוב'};
+    const secTone = {2: 2, 1: 3, 0: 0, -1: 1};
+    final trend = _FeesData.collectionTrend(all);
+    final thisMonth = _FeesData.collectedInMonth(all, monthKey(_FeesData.today));
+
+    return DsScaffold(title: 'FeesScreen', subtitle: 'FeesScreen · מודול-משנה מחולל · 4 בונים מחווטים-לשקעי-הזהב', icon: '🧬', children: [
+      _enum('כיתה', ['', ..._FeesData.grades(all)], _grade, (v) => setState(() => _grade = v)),
+      _hokView(all, hokDue),
+      _reportsView(all, trend, thisMonth),
+      _gap(10),
+      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _facts, _tabOverview, _tabCharges, _tabPayments, _tabHok, _tabReminders, _tabDiscounts, _tabArrangement, _tabStatement, _tabAudit, _wrap
+      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _row, _reminderCard
+    ]);
+  }
 }

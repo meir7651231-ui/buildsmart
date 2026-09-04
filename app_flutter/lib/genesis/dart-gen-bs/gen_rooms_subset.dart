@@ -288,6 +288,7 @@ class _RoomsData {
   // תקלות
   static List<Map<String, dynamic>> faultsOf(Map<String, dynamic> r, {bool openOnly = true}) =>
       liveFaults.where((f) => f['roomId'] == r['id'] && (!openOnly || f['status'] != 'done')).toList();
+  static List<Map<String, dynamic>> get openFaults => liveFaults.where((f) => f['status'] != 'done').toList();
   static bool faulty(Map<String, dynamic> r) => faultsOf(r).any((f) => f['severity'] == 'חמור');
   // חדר-לא-זמין = לא-פעיל (שיפוץ/סגור) או תקלה-חמורה-פתוחה
   static List<Map<String, dynamic>> get pendingApprovals => liveEvents.where((e) => e['status'] == 'proposed').toList();
@@ -480,6 +481,42 @@ class _RoomsData {
   static Map<String, dynamic>? courseById(dynamic id) { for (final c in liveCourses) { if (c['id'] == id) return c; } return null; }
   static String roomInfo(Map<String, dynamic> r) => roomInfoLabel({...r, 'eq': eqOf(r)}, ROOM_INFO_LABEL_T);
 
+  // ═══ איתור (23-ג · תובנה) = DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch — לא `.contains` שטוח ═══
+  //   נרמול-עברי (סופיות/ניקוד) + ניקוד רב-מילתי AND + סינון-ציון-0 + מיון-לפי-רלוונטיות. מונחי-חדר: שם·מיקום·ציוד·שיעורים-בחדר.
+  static String _norm(dynamic q) => normSearch(q, NORM_SEARCH_T);
+  static Iterable _expand(dynamic q, dynamic norm) => [norm(q)];
+  static num _score(dynamic exp, dynamic term) => _norm(term).contains('$exp') ? 100 : 0;
+  static num _scoreOf(dynamic q, dynamic terms) => smartScore(q, terms, _norm, _expand, _score) as num;
+  static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty;
+  static List<String> termsOf(Map<String, dynamic> r) => [
+        '${r['name']}', '${r['location']}', ...eqOf(r).keys,
+        for (final c in liveCourses) if (c['roomId'] == r['id']) '${c['name']}',
+        for (final e in liveEvents) if (e['roomId'] == r['id'] && e['done'] != true) '${e['title']}',
+      ];
+  static List<Map<String, dynamic>> searchRooms(List<Map<String, dynamic>> rs, String q) =>
+      (smartFilter(q, rs, (it) => termsOf(it as Map<String, dynamic>), _hasQuery, _scoreOf) as List).cast<Map<String, dynamic>>();
+
+  // ═══ חריגה/סינון (23-ג) = FilterChipPill ⊕ finderMatches — 11 צירי-המפרט כנעילות AND ═══
+  //   בניין · קומה · סוג(מקום-שמור) · קיבולת≥N · ציוד · פנוי-במשבצת · תפוס · תקלה-פתוחה · ניצולת<סף · נגיש · (טקסט=searchRooms)
+  static String floorOf(Map<String, dynamic> r) { final parts = '${r['location']}'.split(' · '); return parts.length > 1 ? parts[1] : ''; }
+  static String axisValue(Map<dynamic, dynamic> db, dynamic f, dynamic axis) { // שקע-finderAxisValue
+    final r = f as Map<String, dynamic>;
+    final a = '$axis';
+    if (a == 'building') return buildingOf(r);
+    if (a == 'floor') return floorOf(r);
+    if (a == 'type') return '${r['type'] ?? ''}';
+    if (a.startsWith('cap')) return ((r['cap'] as num?) ?? 0) >= int.parse(a.substring(3)) ? '1' : '0';
+    if (a.startsWith('eq:')) return eqOf(r)[a.substring(3)] == true ? '1' : '0';
+    if (a.startsWith('freeAt:')) { final p = a.substring(7).split('@'); return activeOf(r) && !faulty(r) && freeAt(r, p[0], _t2m(p[1])) ? '1' : '0'; }
+    if (a == 'busy') return busyNow(r) != null ? '1' : '0';
+    if (a == 'fault') return faultsOf(r).isNotEmpty ? '1' : '0';
+    if (a == 'under') return underused(r) ? '1' : '0';
+    if (a == 'access') return r['access'] == true ? '1' : '0';
+    return '';
+  }
+  static List<Map<String, dynamic>> filterRooms(List<Map<String, dynamic>> rs, Map<String, String> locks) =>
+      finderMatches({'families': rs}, locks, axisValue).cast<Map<String, dynamic>>();
+
   // ═══ הרשאות-פר-תפקיד (חוק-6 זהות=הזרקה) = roleOf ⊕ canGrantedAction — 6 תפקידי-המפרט ═══
   //   admin(roleOf)=הנהלה ⇒ הכל · teacher(roles.teachers)=מורה · staff+features=רכז/אחזקה/מזכירות · staff ריק=צפייה-בלבד
   static const roleDefs = <Map<String, dynamic>>[
@@ -611,9 +648,16 @@ class RoomsScreen extends StatefulWidget {
 class _RoomsScreenState extends State<RoomsScreen> {
   int _view = 0; // 0=📅 יום (גריד חדרים×שעות) · 1=🗓 שבוע (חדרים×ימים) · 2=📋 רשימה (DsTable) — SegmentedSwitch
   int _dayIdx = _RoomsData.dow(_RoomsData.today); // היום-הנבחר בשבוע (0=ראשון) — בורר-יום
+  String _q = ''; // חיפוש-איתור (DsSearch → searchRooms)
+  final Map<String, String> _locks = {}; // נעילות-סינון (FilterChipPill → finderMatches, AND)
+  String _slotHour = '10:00'; // המשבצת לצ׳יפ "פנוי-במשבצת" (ביום-הנבחר)
+
   String get _iso => _RoomsData.weekIsos[_dayIdx];
 
   // צ׳יפ-סינון מבוקר (חוק-6 הזרקת-פיגמנטים) — נעילה=ציר→ערך; לחיצה-חוזרת משחררת
+  bool get _freeAtOn => _locks.keys.any((k) => k.startsWith('freeAt:'));
+
+  // תא-יומן: TintedTag בפיגמנט-לפי-מצב (חוק-6 צבע=הצבה) · רוחב-קבוע ⇒ עמודות מיושרות · FittedBox מצמצם תווית-ארוכה
   static const double _cellW = 112;
   Widget _cell(String label, Color c, {double alpha = 0.16, FontWeight w = FontWeight.w700}) => SizedBox(
         width: _cellW,
@@ -1075,6 +1119,26 @@ class _RoomsScreenState extends State<RoomsScreen> {
 
   // מצב-טעינה שמור (מחוון-מסגרת סטנדרטי; אפס ShimmerSkeleton מזייף) — Column ולא Center (גובה-חסום ברשימה)
   @override
-  Widget build(BuildContext context) => DsScaffold(title: 'RoomsScreen', subtitle: 'RoomsScreen · מודול-משנה מחולל', icon: '🧬', children: [
-  ]);
+  Widget build(BuildContext context) {
+    final rooms = _RoomsData.liveRooms;
+    final active = _RoomsData.activeRooms;
+    final conflicts = _RoomsData.weekConflicts;
+    final openFaults = _RoomsData.openFaults;
+    final underN = active.where(_RoomsData.underused).length;
+    final names = dayNames();
+    final letters = dayLetters(term: (k) => day_letters_terms.kTerms[k]!); // א׳…ו׳ (dayLetters ⊕ אטום-דאטה)
+    final blocked = _RoomsData.blockOf(_iso);
+    // איתור⊕חריגה: searchRooms=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filterRooms=finderMatches (AND על נעילות)
+    if (_freeAtOn) { _locks.removeWhere((k, v) => k.startsWith('freeAt:')); _locks['freeAt:$_iso@$_slotHour'] = '1'; } // הציר עוקב אחרי היום-הנבחר
+    final visible = _RoomsData.filterRooms(_RoomsData.searchRooms(rooms, _q), _locks);
+    final hoursAll = _RoomsData.gridHours(rooms, _iso);
+    return DsScaffold(title: 'RoomsScreen', subtitle: 'RoomsScreen · מודול-משנה מחולל · 4 בונים מחווטים-לשקעי-הזהב', icon: '🧬', children: [
+      _weekGrid(visible, names),
+      _table(visible),
+      _gap(8),
+      ..._automationCenter(),
+      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _cell, _h, _wrap, _occRow, _actions
+      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _tabBody
+    ]);
+  }
 }

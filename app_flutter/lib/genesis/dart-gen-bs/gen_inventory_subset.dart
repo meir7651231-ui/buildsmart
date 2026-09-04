@@ -353,6 +353,7 @@ class _InvData {
     _activeOverride[s['name'] as String] = !activeOf(s);
     _ovCache = null;
   }
+  static List<Map<String, dynamic>> get activeItems => items.where(activeOf).toList();
 }
 
 // (פורמט-שקלים היה inline — הוחלף באטום-הלוגיקה `shekel` מ-dart-maor · §21 שכבת-הלוגיקה)
@@ -722,8 +723,40 @@ class _InventoryState extends State<_Inventory> {
     ]);
   }
   @override
-  Widget build(BuildContext context) => DsScaffold(title: 'Inventory', subtitle: 'Inventory · מודול-משנה מחולל', icon: '🧬', children: [
-    _loadingView(),
-    _movements(),
-  ]);
+  Widget build(BuildContext context) {
+    // דירוג לפי ימים-עד-ריקון עולה — הכי-קרוב-להיגמר ראשון
+    final ranked = [..._InvData.activeItems]..sort((a, b) => _InvData.daysLeft(a).compareTo(_InvData.daysLeft(b)));
+    // Dp3+Dp8+Dp11: קיבוץ-לפי-מצב ⇒ הדחוף בראש כקבוצה, המצב דומיננטי-במבט, היררכיה.
+    //   דלי לפי מצב (הוזמן=−1) — שומר על סדר-הדירוג בתוך כל דלי.
+    // קיבוץ לפי דחיפות-מאוחדת sev (short OR band) — האיחוד מניע את הטריאז', לא הקצב-בלבד.
+    // KPI-8 (המפרט) על כל-המלאי — כולם מנועי-מדף/שדות-אמת (§20-ג · אפס StatBlock/math.sin):
+    final all = _InvData.activeItems; // KPI תפעולי על פעילים בלבד (לא-פעילים בסקשן נפרד)
+    final totalQty = grandTotal(all, (s) => _InvData.curOf(s)).toInt(); // Σ כמות (מלאי-אפקטיבי)
+    final totalValue = warehouseValue([for (final s in all) {'qty': _InvData.curOf(s), 'cost': s['price'] ?? 0}]).toInt(); // Σ qty×cost
+    final belowMinN = all.where(_InvData.belowMin).length;
+    final outN = all.where(_InvData.isOut).length;
+    final slowN = all.where(_InvData.slow).length;
+    final expN = all.where(_InvData.expiring).length;
+    final urgentAll = all.where((s) => !_ordered.contains(s['name']) && _InvData.sev(s) >= 1).length; // hero=המטרה
+    // איתור⊕חריגה (הכרעה 23-ג): searchItems=DsSearch⊕smartFilter⊕smartScore⊕normSearch ·
+    //   filterItems=finderMatches. הפייפליין רץ פעם-אחת ומזין גם טריאז' וגם טבלה (visible).
+    final visible = _InvData.filterItems(_InvData.searchItems(ranked, _q), _filter);
+    // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-מצב
+    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
+    for (final s in visible) {
+      buckets[_ordered.contains(s['name']) ? -1 : _InvData.sev(s)]!.add(s);
+    }
+    final shown = buckets.values.fold<int>(0, (n, b) => n + b.length);
+    const secTitle = {2: '🔴 הזמן היום', 1: '🟠 הזמן בקרוב', 0: '🟢 מרווח בטוח', -1: '✅ הוזמן'};
+    const secTone = {2: 2, 1: 3, 0: 1, -1: 1};
+    return DsScaffold(title: 'Inventory', subtitle: 'Inventory · מודול-משנה מחולל · 5 בונים מחווטים-לשקעי-הזהב', icon: '🧬', children: [
+      _fchip(0, 'הכל'),
+      _loadingView(),
+      _movements(),
+      _table(visible),
+      _gap(10),
+      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _moveTile, _facts, _wrap, _card, _viewDecision, _viewAnalysis, _viewStockTab, _viewStock
+      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _row
+    ]);
+  }
 }

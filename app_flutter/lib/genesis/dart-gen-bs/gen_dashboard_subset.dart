@@ -408,6 +408,11 @@ class _DashData {
     return s.last + slope * months;
   }
   // קפיצת-מגמה שבועית: ירידה ≥ 3 נק׳ בשבוע האחרון מול הקודם (אוטומציה)
+  num? weeklyJump() {
+    final w = series('attendance', 'weeklyPct');
+    return (w == null || w.length < 2) ? null : w.last - w[w.length - 2];
+  }
+  // השוואת-שכבות: חריגה-סטטיסטית = |x−ממוצע| > 1.5σ (ממוצע/σ מורכבים מ-grandTotal + dart:math)
   // ═══ פעולה-7 · אימות+תדרוך = cockpitWorkListText · cockpitCsvRows⊕toCsv⊕csvEscape⊕exportAllowed · holidayOf ═══
   static const _kindT = {'k1': '🔴', 'k2': '🟠', 'k3': '🟢', 'k4': 'ללא שם'};
   Map<String, dynamic> _queueFor(List<Map<String, dynamic>> ts) => {
@@ -468,6 +473,11 @@ class _DashData {
   List<Map<String, dynamic>> forRole(List<Map<String, dynamic>> ts, int role) =>
       summaryOnly(role) ? ts : ts.where((t) => seesModule(role, t['module'] as String)).toList();
   // KPI פר-מבט · מוצמדים-ראשונים (הצמד-KPI = state; מיון יציב לפי סדר-החוזה)
+  List<Map<String, dynamic>> kpisForRole(int role) {
+    final ks = summaryOnly(role) ? kpiDefs : kpiDefs.where((d) => seesModule(role, d['mod'] as String)).toList();
+    return [...ks.where((k) => pinned.contains(k['key'])), ...ks.where((k) => !pinned.contains(k['key']))];
+  }
+
   // ═══ חוזה-עמודות · 12 עמודות-המפרט (חוק-7 · מקום-שמור): נגזרת=תמיד · שדה=מוארת רק כשיש-ערך ═══
   late final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
     {'label': 'דחיפות', 'get': (Map<String, dynamic> t) => const {2: '🔴', 1: '🟠', 0: '🟢'}[sev(t)]!},
@@ -521,7 +531,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
   int _role = 0; // 0 מנהל · 1 רכז · 2 ועד · 3 כספים
   int _range = 0; // 0 היום · 1 שבוע · 2 חודש · 3 שנה
+  int _tab = 0; // 9 טאבים
   int _mode = 0; // 0 🎯 טריאז' · 1 📋 טבלה (12 עמודות)
+  String _q = '';
+  final Map<String, String> _locks = {}; // צירי-חריגה פעילים (finderMatches)
   String? _error;
   // ─── שקעי-עזר ───
   Widget _gap([double h = 10]) => SizedBox(height: h);
@@ -874,6 +887,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // רענון ⇒ מצב-טעינה שמור (חיבור-אסינק אמיתי יאיר אותו זהה); שגיאה-כללית = מקום-שמור (_error)
   @override
-  Widget build(BuildContext context) => DsScaffold(title: 'DashboardScreen', subtitle: 'DashboardScreen · מודול-משנה מחולל', icon: '🧬', children: [
-  ]);
+  Widget build(BuildContext context) {
+    final summary = _DashData.summaryOnly(_role);
+    // ── הצינור: איסוף⇒הרשאה⇒טווח⇒איתור⇒חריגה (רץ פעם-אחת; מזין טריאז' + טבלה + KPI + תדרוך) ──
+    final all = d.forRole(d.tasks, _role);
+    final ranged = d.inRange(all, _range);
+    final visible = d.filter(d.search(ranged, _q), _locks);
+    final open = visible.where((t) => !d.isDone(t)).toList();
+    final red = open.where((t) => d.sev(t) == 2).length;
+    final prog = d.progress();
+    final kpis = d.kpisForRole(_role);
+    final holiday = d.holidayToday;
+    final jump = d.weeklyJump();
+    final breached = open.where(d.slaBreached).length;
+    // דלי-טריאז' (הכרעה): 🔴 ⇒ 🟠 ⇒ 🟢 ⇒ ✅ — מדורג בתוך-הדלי לפי ציון-דחיפות יורד
+    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
+    for (final t in visible) {
+      buckets[d.isDone(t) ? -1 : d.sev(t)]!.add(t);
+    }
+    for (final b in buckets.values) {
+      b.sort((a, b) => d.score(b).compareTo(d.score(a)));
+    }
+    const secTitle = {2: '🔴 דורש-החלטה היום', 1: '🟠 בסיכון · השבוע', 0: '🟢 במעקב', -1: '✅ טופל'};
+    const secTone = {2: 2, 1: 3, 0: 1, -1: 1};
+    final firstAction = buckets[2]!.isNotEmpty ? buckets[2]!.first : buckets[1]!.isNotEmpty ? buckets[1]!.first : null;
+
+    return DsScaffold(title: 'DashboardScreen', subtitle: 'DashboardScreen · מודול-משנה מחולל · 4 בונים מחווטים-לשקעי-הזהב', icon: '🧬', children: [
+      _gap(8),
+      _seg([for (final r in _DashData.roleDefs) r['label'] as String], _role, (i) => setState(() { _role = i; if (_DashData.summaryOnly(i)) _tab = 7; })),
+      ..._trendsTab(),
+      ..._goalsTab(),
+      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _wrap, _title, _row, _table
+      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _briefTab, _kpiTab, _reportsTab
+    ]);
+  }
 }
