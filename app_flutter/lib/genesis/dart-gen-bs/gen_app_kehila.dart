@@ -5,6 +5,7 @@
 //   "מסך משפחות עם כתובת" ⇒ Family ⇐ schoolos_students.dart (strong · שמות 19/25)
 //   "פריטי קטלוג במלאי" ⇒ ShopItem ⇐ schoolos_courses.dart (strong · שמות 4/13)
 //   ⚪ "רשימת ספקים עם מחירים" ⇒ אין מונח-ישות במשפט — מקום-שמור (אין המצאה)
+//   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: Volunteer:initialPanelId · Donation:initialPanelId · Room:initialPanelId · Family:initialPanelId · ShopItem:initialPanelId
 //   G9b · KPI-רכזת נגזר: כל אריח = <E>Facts של המודול (count חי של הזרע · hero = המדד שהזהב הכריז/צבע-סכנה) — אפס ערך מומצא: VolunteerFacts.count · DonationFacts.count · RoomFacts.unavailableN · FamilyFacts.highN · ShopItemFacts.kpiNoTeacher
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
@@ -60,11 +61,11 @@ class _KehilaHubScreenState extends State<KehilaHubScreen> {
       const SizedBox(height: 8),
       Wrap(spacing: 12, runSpacing: 12, children: [ // KPI-רכזת (G9b): עובדות-אמת בלבד — כמו _Home של הזהב (מסכים-מחוברים + הדחוף של כל מודול)
         SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: '${vis.length}/${modules.length}', label: 'מסכים מחוברים')),
-        if (vis.contains(0)) SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: VolunteerFacts.hero, label: VolunteerFacts.heroLabel)), // Volunteer · אין מדדים ⇒ count
-        if (vis.contains(1)) SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: DonationFacts.hero, label: DonationFacts.heroLabel)), // Donation · אין מדדים ⇒ count
-        if (vis.contains(2)) SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: RoomFacts.hero, label: RoomFacts.heroLabel)), // Room · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
-        if (vis.contains(3)) SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: FamilyFacts.hero, label: FamilyFacts.heroLabel)), // Family · ה-StatHero של הזהב (המטרה המוצהרת)
-        if (vis.contains(4)) SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: ShopItemFacts.hero, label: ShopItemFacts.heroLabel)), // ShopItem · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
+        if (vis.contains(0)) GestureDetector(key: const ValueKey('hero-Volunteer'), onTap: () { final id = VolunteerFacts.heroFirstId; _go(context, id == null ? const VolunteerScreen() : VolunteerScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: VolunteerFacts.hero, label: VolunteerFacts.heroLabel))), // Volunteer · אין מדדים ⇒ count · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(1)) GestureDetector(key: const ValueKey('hero-Donation'), onTap: () { final id = DonationFacts.heroFirstId; _go(context, id == null ? const DonationScreen() : DonationScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: DonationFacts.hero, label: DonationFacts.heroLabel))), // Donation · אין מדדים ⇒ count · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(2)) GestureDetector(key: const ValueKey('hero-Room'), onTap: () { final id = RoomFacts.heroFirstId; _go(context, id == null ? const RoomScreen() : RoomScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: RoomFacts.hero, label: RoomFacts.heroLabel))), // Room · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(3)) GestureDetector(key: const ValueKey('hero-Family'), onTap: () { final id = FamilyFacts.heroFirstId; _go(context, id == null ? const FamilyScreen() : FamilyScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: FamilyFacts.hero, label: FamilyFacts.heroLabel))), // Family · ה-StatHero של הזהב (המטרה המוצהרת) · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(4)) GestureDetector(key: const ValueKey('hero-ShopItem'), onTap: () { final id = ShopItemFacts.heroFirstId; _go(context, id == null ? const ShopItemScreen() : ShopItemScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: ShopItemFacts.hero, label: ShopItemFacts.heroLabel))), // ShopItem · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
       ]),
       const SizedBox(height: 8),
       if (vis.isEmpty) const EmptyState(glyph: '🔍', message: 'אין מודול שתואם לחיפוש') else DsSection(title: 'כלים · ${vis.length}', children: [

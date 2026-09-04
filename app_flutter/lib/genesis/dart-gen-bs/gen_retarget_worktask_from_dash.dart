@@ -1,7 +1,7 @@
 // 🎯 WorkTaskScreen — retarget של schoolos_dashboard.dart לישות WorkTask (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_dashboard.dart --entity WorkTask
 //   זרע-ראשי: tasks (מועמדים: tasks(18/18) tasks(16/16) tasks(16/16) tasks(16/16) tasks(16/16) tasks(16/16) tasks(16/16) tasks(16/16)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 13 · חוזה-מנוע (לא משתנה) 1
 //   id⇒id(name) · title⇒title(name) · due⇒due(name) · note⇒note(name) · kind⇒∅(engine-contract) · grade⇒∅(reserved(4 מועמדים)) · owner⇒∅(reserved(4 מועמדים)) · opened⇒∅(reserved) · students⇒∅(reserved) · ils⇒∅(reserved) · sev⇒∅(reserved(4 מועמדים)) · action⇒∅(reserved(4 מועמדים)) · link⇒∅(reserved(4 מועמדים)) · status⇒∅(reserved(4 מועמדים)) · history⇒∅(reserved) · what⇒∅(reserved(4 מועמדים)) · iso⇒∅(reserved) · context⇒∅(reserved)
-//   תפר-עובדות (G9b): WorkTaskFacts · count=tasks.length (nested-arg) · מדדים 0 · hero=count
+//   תפר-עובדות (G9b): WorkTaskFacts · count=tasks.length (nested-arg) · מדדים 0 · hero=count · שורות-מדד (G10a) ∅ · תפר-כניסה initialPanelId
 //   שדות-WorkTask בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): assignee, by, ref, pri, createdAt, doneAt · תוויות: אין מונח ל-WorkTask ב-TERM_DEFS — תוויות של המקור (הצבה) · הזרע = זרע-הצבה של המקור, לא ערך-אמת של WorkTask
 // 📊 SchoolOS · לוח-הנהלה (DASHBOARD) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-DASHBOARD-FULL-2026-09-04.
 // 🎯 המטרה: שהמנהל/ת יפתח את הבוקר ותוך 30 שניות יידע: מה דורש-החלטה היום · מה בסיכון · מה מגמתי · מה הפעולה-הראשונה.
@@ -530,7 +530,8 @@ class _DashData {
 
 // ═══════════════════════ המסך · WorkTaskScreen (חיווט-בשקעים · אפס-ציור-ביד) ═══════════════════════
 class WorkTaskScreen extends StatefulWidget {
-  const WorkTaskScreen({this.input, this.onOpenModule, super.key});
+  const WorkTaskScreen({this.initialPanelId, this.input, this.onOpenModule, super.key});
+  final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   final DashInput? input; // שקע-הקלט (null ⇒ דמו-אמת)
   final void Function(String route)? onOpenModule; // שקע-drill-down: הפעולה מבוצעת במודול-המקור (המנהל מחבר ניווט)
   @override
@@ -538,6 +539,12 @@ class WorkTaskScreen extends StatefulWidget {
 }
 
 class _WorkTaskScreenState extends State<WorkTaskScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final p0 = widget.initialPanelId == null ? null : WorkTaskFacts.byId(widget.initialPanelId!); // G10a
+    if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
+  }
   late _DashData d = _DashData(widget.input ?? DashInput.demo);
   // שקע-הקלט התחלף (מודולים רועננו / today חדש) ⇒ מנוע חדש — ה-State לא נשאר על קלט ישן (נתפס בבדיקת-widget)
   @override
@@ -1138,4 +1145,9 @@ class WorkTaskFacts {
   static const String heroKey = 'count'; // אין מדדים ⇒ count
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => label;
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => DashInput.demo.modules.expand((m) => ((m['tasks'] as List?) ?? const []).cast<Map<String, dynamic>>()).toList(); // כל רשומות הזרע-הראשי (nested-arg)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>[]) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) {  default: return const []; } } // G10a · 0 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

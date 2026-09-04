@@ -1,7 +1,7 @@
 // 🎯 VolunteerScreen — retarget של schoolos_rooms.dart לישות Volunteer (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Volunteer
 //   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0 · חוזה-מנוע (לא משתנה) 8
 //   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒∅(engine-contract) · cap⇒∅(engine-contract) · location⇒∅(engine-contract) · from⇒∅(engine-contract) · to⇒∅(engine-contract) · access⇒∅(engine-contract) · notes⇒∅(engine-contract) · eq⇒∅(engine-contract)
-//   תפר-עובדות (G9b): VolunteerFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN
+//   תפר-עובדות (G9b): VolunteerFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN · שורות-מדד (G10a) busyNowN/unavailableN · תפר-כניסה initialPanelId
 //   שדות-Volunteer בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, area, maxDeliveries, note, createdAt · תוויות: מונחי room (חדר/חדרים) ⇒ Volunteer (מתנדב/מתנדבים) · 43 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Volunteer
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: VolunteerScreen.
@@ -268,6 +268,7 @@ class _VolunteerData {
     return null;
   }
   static int get busyNowN => nowRows.where((x) => x['busyWith'] != null).length;
+  static List<Map<String, dynamic>> get rowsOf_busyNowN => nowRows.where((x) => x['busyWith'] != null).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד busyNowN (מהצורה של ה-getter, לא מילון)
   static int get freeNowN => nowRows.length - busyNowN;
 
   // ניצולת-שבועית% = weeklyRoomSessions(מאור) ÷ קיבולת-משבצות-שבועית ((to−from)/slot × ימים) — יחס מפורק
@@ -298,6 +299,7 @@ class _VolunteerData {
   // חדר-לא-זמין = לא-פעיל (שיפוץ/סגור) או תקלה-חמורה-פתוחה
   static bool unavailable(Map<String, dynamic> r) => !activeOf(r) || faulty(r);
   static int get unavailableN => liveRooms.where(unavailable).length;
+  static List<Map<String, dynamic>> get rowsOf_unavailableN => liveRooms.where(unavailable).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד unavailableN (מהצורה של ה-getter, לא מילון)
 
   // הזמנות-ממתינות-אישור = סטטוס proposed (אוצר-מילים של TaskItem)
   static List<Map<String, dynamic>> get pendingApprovals => liveEvents.where((e) => e['status'] == 'proposed').toList();
@@ -663,12 +665,19 @@ class _VolunteerData {
 
 // ═══════════ המסך · VolunteerScreen (const · ללא main) ═══════════
 class VolunteerScreen extends StatefulWidget {
-  const VolunteerScreen({super.key});
+  const VolunteerScreen({this.initialPanelId, super.key});
+  final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   @override
   State<VolunteerScreen> createState() => _VolunteerScreenState();
 }
 
 class _VolunteerScreenState extends State<VolunteerScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final p0 = widget.initialPanelId == null ? null : VolunteerFacts.byId(widget.initialPanelId!); // G10a
+    if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
+  }
   int _view = 0; // 0=📅 יום (גריד חדרים×שעות) · 1=🗓 שבוע (חדרים×ימים) · 2=📋 רשימה (DsTable) — SegmentedSwitch
   int _dayIdx = _VolunteerData.dow(_VolunteerData.today); // היום-הנבחר בשבוע (0=ראשון) — בורר-יום
   bool _loading = false; // מצב-מסך שמור: טעינה
@@ -1335,4 +1344,9 @@ class VolunteerFacts {
   static const String heroKey = 'unavailableN'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => '⛔ לא-זמינים';
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => _VolunteerData.rooms; // כל רשומות הזרע-הראשי (static-const)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['busyNowN', 'unavailableN']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'busyNowN': return _VolunteerData.rowsOf_busyNowN; case 'unavailableN': return _VolunteerData.rowsOf_unavailableN; default: return const []; } } // G10a · 2 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

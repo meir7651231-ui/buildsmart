@@ -42,6 +42,56 @@ void main() {
     await tester.enterText(find.byType(TextField).first, ''); await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(DsNavTile), findsNWidgets(5)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
   });
+  testWidgets('KehilaApp · אריח-hero ⇒ מתנדבים (Volunteer) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-Volunteer'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(VolunteerScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = VolunteerFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump Volunteer: id=$id rows=${VolunteerFacts.heroRows(VolunteerFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('KehilaApp · אריח-hero ⇒ תרומות (Donation) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-Donation'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(DonationScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = DonationFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump Donation: id=$id rows=${DonationFacts.heroRows(DonationFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('KehilaApp · אריח-hero ⇒ חדרים (Room) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-Room'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(RoomScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = RoomFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump Room: id=$id rows=${RoomFacts.heroRows(RoomFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('KehilaApp · אריח-hero ⇒ משפחה (Family) נפתח על רשומת-ה-hero + מקטע-הגרעין על הרשומה', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-Family'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(FamilyScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = FamilyFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); expect(find.textContaining('מחזור-חיים · רשומה'), findsWidgets); }
+    // ignore: avoid_print
+    print('hero-jump Family: id=$id rows=${FamilyFacts.heroRows(FamilyFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('KehilaApp · אריח-hero ⇒ פריט (ShopItem) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-ShopItem'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(ShopItemScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = ShopItemFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump ShopItem: id=$id rows=${ShopItemFacts.heroRows(ShopItemFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
   testWidgets('KehilaApp · בית ⇒ מתנדבים (Volunteer) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));

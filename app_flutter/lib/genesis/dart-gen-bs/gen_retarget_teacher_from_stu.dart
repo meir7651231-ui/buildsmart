@@ -1,7 +1,7 @@
 // 🎯 TeacherScreen — retarget של schoolos_students.dart לישות Teacher (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Teacher
 //   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 8 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 19 · חוזה-מנוע (לא משתנה) 4
 //   id⇒id(name) · name⇒name(name) · phone⇒phone(name) · phone2⇒phone2(name) · email⇒email(name) · address⇒address(name) · notes⇒notes(name) · idNum⇒idNum(name) · status⇒∅(engine-contract) · createdAt⇒∅(engine-contract) · docs⇒∅(engine-contract) · members⇒∅(engine-contract) · father⇒∅(reserved(6 מועמדים)) · mother⇒∅(reserved(6 מועמדים)) · city⇒∅(reserved(6 מועמדים)) · language⇒∅(reserved(6 מועמדים)) · maritalStatus⇒∅(reserved(6 מועמדים)) · tzedaka⇒∅(reserved(6 מועמדים)) · discount⇒∅(reserved(6 מועמדים)) · addedAt⇒startDate(unique) · cred⇒∅(reserved) · log⇒∅(reserved) · first⇒∅(reserved(6 מועמדים)) · gender⇒∅(reserved(6 מועמדים)) · birth⇒∅(reserved) · school⇒∅(reserved(6 מועמדים)) · grade⇒∅(reserved(6 מועמדים)) · health⇒∅(reserved(6 מועמדים)) · mSefach⇒payToOther(unique) · mInvite⇒∅(reserved) · mRecommend⇒∅(reserved) · mPhotos⇒∅(reserved) · mVideos⇒∅(reserved)
-//   תפר-עובדות (G9b): TeacherFacts · count=families.length (seed-db) · מדדים 6 · hero=highN
+//   תפר-עובדות (G9b): TeacherFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId
 //   שדות-Teacher בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): specialty, payRate, payMethod, payeeName, payeePhone, payeeIdNum, bankName, bankBranch, bankAccount · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Teacher (מורה/—) · 2 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Teacher
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
@@ -419,7 +419,9 @@ class _StuData {
     return b == 2 ? 'ועדת-שילוב + ביקור-בית' : 'שיחת-מחנך/ת + יידוע-הורים';
   }
   static int get highN => active.where((s) => band(s) == 2).length;
+  static List<Map<String, dynamic>> get rowsOf_highN => active.where((s) => band(s) == 2).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד highN (מהצורה של ה-getter, לא מילון)
   static int get midN => active.where((s) => band(s) == 1).length;
+  static List<Map<String, dynamic>> get rowsOf_midN => active.where((s) => band(s) == 1).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד midN (מהצורה של ה-getter, לא מילון)
 
   // ─── KPI (הערכת-מצב · הכל מנועי-מדף/שדות-אמת) ───
   static int? get avgAttendance {
@@ -434,9 +436,13 @@ class _StuData {
     return (grandTotal(withData, (s) { final g = (s as Map)['grades'] as Map; return grandTotal(g.values.toList(), (v) => v as num) / g.length; }) / withData.length).round();
   }
   static int get medicalN => active.where((s) => '${s['health'] ?? ''}'.isNotEmpty).length;
+  static List<Map<String, dynamic>> get rowsOf_medicalN => active.where((s) => '${s['health'] ?? ''}'.isNotEmpty).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד medicalN (מהצורה של ה-getter, לא מילון)
   static int get noParentN => active.where(parentMissing).length;
+  static List<Map<String, dynamic>> get rowsOf_noParentN => active.where(parentMissing).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד noParentN (מהצורה של ה-getter, לא מילון)
   static int get openTicketsN => tasks().where((t) => '${t['doneAt'] ?? ''}'.isEmpty && (t['ref'] as Map?)?['kind'] == 'family').length;
+  static List<Map<String, dynamic>> get rowsOf_openTicketsN => tasks().where((t) => '${t['doneAt'] ?? ''}'.isEmpty && (t['ref'] as Map?)?['kind'] == 'family').cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד openTicketsN (מהצורה של ה-getter, לא מילון)
   static int get newN => active.where(isNew).length;
+  static List<Map<String, dynamic>> get rowsOf_newN => active.where(isNew).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד newN (מהצורה של ה-getter, לא מילון)
   static List<List<Object>> byClass() => countBy(active, (s) => className(s as Map<String, dynamic>));
   static String fmt(String? iso) => fmtDate(iso);
 
@@ -850,7 +856,8 @@ class _StuData {
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 class TeacherScreen extends StatefulWidget {
-  const TeacherScreen({super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+  const TeacherScreen({this.initialPanelId, super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+  final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   final Map<String, dynamic>? db;
   /// אינטגרציה לוח-הנהלה⇒מונים: המונים של המודול (המנהל מחווט; אין ייבוא-בין-מודולים)
   static Map<String, int> get counters => {
@@ -877,6 +884,8 @@ class _TeacherScreenState extends State<TeacherScreen> {
   @override
   void initState() {
     super.initState();
+    final p0 = widget.initialPanelId == null ? null : TeacherFacts.byId(widget.initialPanelId!); // G10a
+    if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
     if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset();
   }
   @override
@@ -1389,4 +1398,9 @@ class TeacherFacts {
   static const String heroKey = 'highN'; // ה-StatHero של הזהב (המטרה המוצהרת)
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => '🔴 סיכון-גבוה';
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => ((_StuData.db['families'] as List?) ?? const []).cast<Map<String, dynamic>>(); // כל רשומות הזרע-הראשי (seed-db)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['highN', 'newN', 'midN', 'medicalN', 'noParentN', 'openTicketsN']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'highN': return _StuData.rowsOf_highN; case 'newN': return _StuData.rowsOf_newN; case 'midN': return _StuData.rowsOf_midN; case 'medicalN': return _StuData.rowsOf_medicalN; case 'noParentN': return _StuData.rowsOf_noParentN; case 'openTicketsN': return _StuData.rowsOf_openTicketsN; default: return const []; } } // G10a · 6 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

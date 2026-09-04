@@ -50,6 +50,76 @@ void main() {
     await tester.enterText(find.byType(TextField).first, ''); await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(DsNavTile), findsNWidgets(7)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
   });
+  testWidgets('TzedakaApp · אריח-hero ⇒ רכז (TzCoordinator) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-TzCoordinator'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(TzCoordinatorScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = TzCoordinatorFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump TzCoordinator: id=$id rows=${TzCoordinatorFacts.heroRows(TzCoordinatorFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('TzedakaApp · אריח-hero ⇒ מבצע (TzCampaign) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-TzCampaign'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(TzCampaignScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = TzCampaignFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump TzCampaign: id=$id rows=${TzCampaignFacts.heroRows(TzCampaignFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('TzedakaApp · אריח-hero ⇒ מוצר (ShopProduct) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-ShopProduct'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(ShopProductScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = ShopProductFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump ShopProduct: id=$id rows=${ShopProductFacts.heroRows(ShopProductFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('TzedakaApp · אריח-hero ⇒ חנות (ShopStore) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-ShopStore'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(ShopStoreScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = ShopStoreFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump ShopStore: id=$id rows=${ShopStoreFacts.heroRows(ShopStoreFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('TzedakaApp · אריח-hero ⇒ מורה (Teacher) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-Teacher'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(TeacherScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = TeacherFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump Teacher: id=$id rows=${TeacherFacts.heroRows(TeacherFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('TzedakaApp · אריח-hero ⇒ שיבוצים (Enrollment) נפתח על רשומת-ה-hero + מקטע-הגרעין על הרשומה', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-Enrollment'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(EnrollmentScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = EnrollmentFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); expect(find.textContaining('מחזור-חיים · רשומה'), findsWidgets); }
+    // ignore: avoid_print
+    print('hero-jump Enrollment: id=$id rows=${EnrollmentFacts.heroRows(EnrollmentFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
+  testWidgets('TzedakaApp · אריח-hero ⇒ תורם (Supporter) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-Supporter'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(SupporterScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = SupporterFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump Supporter: id=$id rows=${SupporterFacts.heroRows(SupporterFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
   testWidgets('TzedakaApp · בית ⇒ רכז (TzCoordinator) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));

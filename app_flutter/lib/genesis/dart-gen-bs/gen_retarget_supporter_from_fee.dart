@@ -1,7 +1,7 @@
 // 🎯 SupporterScreen — retarget של schoolos_fees.dart לישות Supporter (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_fees.dart --entity Supporter
 //   זרע-ראשי: families (מועמדים: families(36/38) charges(9/10) charges(7/8) charges(7/8) charges(7/8) charges(7/8) charges(7/8) incoming(7/8) charges(6/7) hist(5/5) criteria(3/3) calls(3/3) payments(3/4) payments(3/4) payments(3/4) payments(3/4) calls(3/3) payments(3/4)) · מיפוי שם 11 · ערוץ 0 · טיפוס-יחיד 3 · מקום-שמור 12 · חוזה-מנוע (לא משתנה) 12
 //   id⇒id(name) · name⇒name(name) · phone⇒phone(name) · email⇒email(name) · idNum⇒idNum(name) · first⇒first(name) · cat⇒cat(name) · hok⇒hok(name) · calls⇒calls(name) · nextDate⇒nextDate(name) · nextNote⇒nextNote(name) · date⇒∅(engine-contract) · amount⇒∅(engine-contract) · cur⇒∅(engine-contract) · day⇒∅(engine-contract) · active⇒∅(engine-contract) · carryBalance⇒∅(engine-contract) · kevaId⇒∅(engine-contract) · hist⇒∅(engine-contract) · d⇒∅(engine-contract) · a⇒∅(engine-contract) · c⇒∅(engine-contract) · clearer⇒∅(engine-contract) · payer⇒∅(reserved(6 מועמדים)) · members⇒donations(unique) · grade⇒∅(reserved(6 מועמדים)) · charges⇒∅(reserved) · method⇒∅(reserved(6 מועמדים)) · memberId⇒∅(reserved(6 מועמדים)) · note⇒∅(reserved(6 מועמדים)) · payments⇒∅(reserved) · rid⇒nextEventId(unique) · startedAt⇒last(unique) · criteria⇒∅(reserved) · at⇒∅(reserved) · outcome⇒∅(reserved(6 מועמדים)) · installmentOf⇒∅(reserved(6 מועמדים)) · cancelledAt⇒∅(reserved)
-//   תפר-עובדות (G9b): SupporterFacts · count=families.length (static-const) · מדדים 0 · hero=count
+//   תפר-עובדות (G9b): SupporterFacts · count=families.length (static-const) · מדדים 0 · hero=count · שורות-מדד (G10a) ∅ · תפר-כניסה initialPanelId
 //   שדות-Supporter בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): address, city, extId, forWho, notes, count, ils, usd, photos, ayin · תוויות: מונחי Supporter (תורם/—) ⇒ Supporter (תורם/—) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Supporter
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
@@ -747,7 +747,8 @@ class _SupporterData {
 // 💰 SupporterScreen — המסך (const · ללא main). המנהל מחבר לניווט-הבית.
 // ═══════════════════════════════════════════════════════════════════════════════════════
 class SupporterScreen extends StatefulWidget {
-  const SupporterScreen({super.key});
+  const SupporterScreen({this.initialPanelId, super.key});
+  final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   /// איפוס פנקס-הפעולות לבסיס-האמת (לרתמות-בדיקה/דמו; חיבור-אסינק אמיתי יטען מחדש מהמקור)
   static void resetLedger() => _SupporterData.reset();
   @override
@@ -755,6 +756,12 @@ class SupporterScreen extends StatefulWidget {
 }
 
 class _SupporterScreenState extends State<SupporterScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final p0 = widget.initialPanelId == null ? null : SupporterFacts.byId(widget.initialPanelId!); // G10a
+    if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
+  }
   int _role = 0; // 0=גזבר · 1=מזכירות · 2=הנהלה · 3=מחנך · 4=הורה · 5=צפייה
   String _q = '';
   int _chip = 0; // 0=הכל · 1=יתרה>0 · 2=ותק>90 · 3=הו״ק · 4=מלגה · 5=ללא-תזכורת · 6=תזכורת>2 · 7=הסדר · 8=בסיכון
@@ -1608,4 +1615,9 @@ class SupporterFacts {
   static const String heroKey = 'count'; // אין מדדים ⇒ count
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => label;
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => _SupporterData.families; // כל רשומות הזרע-הראשי (static-const)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>[]) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) {  default: return const []; } } // G10a · 0 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

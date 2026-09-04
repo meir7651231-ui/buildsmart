@@ -1,7 +1,7 @@
 // 🎯 TzCoordinatorScreen — retarget של schoolos_fees.dart לישות TzCoordinator (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_fees.dart --entity TzCoordinator
 //   זרע-ראשי: families (מועמדים: families(36/38) charges(9/10) charges(7/8) charges(7/8) charges(7/8) charges(7/8) charges(7/8) incoming(7/8) charges(6/7) hist(5/5) criteria(3/3) calls(3/3) payments(3/4) payments(3/4) payments(3/4) payments(3/4) calls(3/3) payments(3/4)) · מיפוי שם 5 · ערוץ 0 · טיפוס-יחיד 4 · מקום-שמור 13 · חוזה-מנוע (לא משתנה) 16
 //   id⇒id(name) · name⇒name(name) · phone⇒phone(name) · memberId⇒memberId(name) · active⇒active(name) · email⇒∅(engine-contract) · idNum⇒∅(engine-contract) · date⇒∅(engine-contract) · amount⇒∅(engine-contract) · cur⇒∅(engine-contract) · cat⇒∅(engine-contract) · hok⇒∅(engine-contract) · day⇒∅(engine-contract) · carryBalance⇒∅(engine-contract) · kevaId⇒∅(engine-contract) · hist⇒∅(engine-contract) · d⇒∅(engine-contract) · a⇒∅(engine-contract) · c⇒∅(engine-contract) · clearer⇒∅(engine-contract) · nextDate⇒∅(engine-contract) · payer⇒notes(unique) · members⇒scoreLog(unique) · grade⇒∅(reserved) · first⇒∅(reserved) · charges⇒∅(reserved) · method⇒∅(reserved) · note⇒∅(reserved) · payments⇒∅(reserved) · rid⇒famId(unique) · startedAt⇒startDate(unique) · criteria⇒∅(reserved) · calls⇒∅(reserved) · at⇒∅(reserved) · outcome⇒∅(reserved) · nextNote⇒∅(reserved) · installmentOf⇒∅(reserved) · cancelledAt⇒∅(reserved)
-//   תפר-עובדות (G9b): TzCoordinatorFacts · count=families.length (static-const) · מדדים 0 · hero=count
+//   תפר-עובדות (G9b): TzCoordinatorFacts · count=families.length (static-const) · מדדים 0 · hero=count · שורות-מדד (G10a) ∅ · תפר-כניסה initialPanelId
 //   שדות-TzCoordinator בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): score · תוויות: מונחי Supporter (תורם/—) ⇒ TzCoordinator (רכז/—) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של TzCoordinator
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
@@ -739,7 +739,8 @@ class _TzCoordinatorData {
 // 💰 TzCoordinatorScreen — המסך (const · ללא main). המנהל מחבר לניווט-הבית.
 // ═══════════════════════════════════════════════════════════════════════════════════════
 class TzCoordinatorScreen extends StatefulWidget {
-  const TzCoordinatorScreen({super.key});
+  const TzCoordinatorScreen({this.initialPanelId, super.key});
+  final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   /// איפוס פנקס-הפעולות לבסיס-האמת (לרתמות-בדיקה/דמו; חיבור-אסינק אמיתי יטען מחדש מהמקור)
   static void resetLedger() => _TzCoordinatorData.reset();
   @override
@@ -747,6 +748,12 @@ class TzCoordinatorScreen extends StatefulWidget {
 }
 
 class _TzCoordinatorScreenState extends State<TzCoordinatorScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final p0 = widget.initialPanelId == null ? null : TzCoordinatorFacts.byId(widget.initialPanelId!); // G10a
+    if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
+  }
   int _role = 0; // 0=גזבר · 1=מזכירות · 2=הנהלה · 3=מחנך · 4=הורה · 5=צפייה
   String _q = '';
   int _chip = 0; // 0=הכל · 1=יתרה>0 · 2=ותק>90 · 3=הו״ק · 4=מלגה · 5=ללא-תזכורת · 6=תזכורת>2 · 7=הסדר · 8=בסיכון
@@ -1600,4 +1607,9 @@ class TzCoordinatorFacts {
   static const String heroKey = 'count'; // אין מדדים ⇒ count
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => label;
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => _TzCoordinatorData.families; // כל רשומות הזרע-הראשי (static-const)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>[]) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) {  default: return const []; } } // G10a · 0 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

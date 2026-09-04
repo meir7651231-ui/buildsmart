@@ -1,7 +1,7 @@
 // 🎯 ShopItemScreen — retarget של schoolos_courses.dart לישות ShopItem (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity ShopItem
 //   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 9 · חוזה-מנוע (לא משתנה) 12
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · kind⇒kind(name) · teacherId⇒∅(engine-contract) · roomId⇒∅(engine-contract) · start⇒∅(engine-contract) · end⇒∅(engine-contract) · sessions⇒∅(engine-contract) · time⇒∅(engine-contract) · gender⇒∅(engine-contract) · ageMin⇒∅(engine-contract) · ageMax⇒∅(engine-contract) · gradeMin⇒∅(engine-contract) · gradeMax⇒∅(engine-contract) · day⇒∅(engine-contract) · cat⇒holidays(unique) · semester⇒∅(reserved) · sector⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒∅(reserved(5 מועמדים)) · price⇒∅(reserved(5 מועמדים)) · description⇒∅(reserved) · files⇒∅(reserved) · data⇒∅(reserved) · perLesson⇒active(unique) · lessonPrice⇒∅(reserved(5 מועמדים))
-//   תפר-עובדות (G9b): ShopItemFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher
+//   תפר-עובדות (G9b): ShopItemFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher · שורות-מדד (G10a) kpiActive/kpiFull/kpiNoTeacher · תפר-כניסה initialPanelId
 //   שדות-ShopItem בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): storeId, value, basePrice, stock, minStock, validDays, waits · תוויות: מונחי course (חוג/—) ⇒ ShopItem (פריט/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopItem
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT · "מה"): knowledge/SPEC-COURSES-FULL-2026-09-04.md · הסטנדרט: מסך-המלאי (schoolos.dart).
@@ -918,6 +918,7 @@ class _ShopItemData {
 
   // ─── KPI-10 (המפרט) — כולם מנועי-מדף/נגזרות-אמת, אפס-StatBlock ───
   static int get kpiActive => allCourses.where((c) => lifecycle(c) == 'פעיל').length;
+  static List<Map<String, dynamic>> get rowsOf_kpiActive => allCourses.where((c) => lifecycle(c) == 'פעיל').cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד kpiActive (מהצורה של ה-getter, לא מילון)
   static int get kpiLessonsWeek => lessonsThisWeek();
   static int get kpiEnrolled => grandTotal(liveCourses, (c) => enrolled(c as Map<String, dynamic>)).toInt();
   static int get kpiOccupancyPct {
@@ -926,6 +927,7 @@ class _ShopItemData {
     return (grandTotal(withCap, (c) => occupancy(c as Map<String, dynamic>)) / withCap.length * 100).round();
   }
   static int get kpiFull => liveCourses.where(isFull).length;
+  static List<Map<String, dynamic>> get rowsOf_kpiFull => liveCourses.where(isFull).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד kpiFull (מהצורה של ה-getter, לא מילון)
   static int get kpiWaiting => grandTotal(liveCourses, (c) => waitlist(c as Map<String, dynamic>).length).toInt();
   // התנגשויות ייחודיות (זוג-חוגים×סוג, תלמיד×זוג) — לא כפל-ספירה משני צידי-הזוג
   static Set<String> get uniqueClashes {
@@ -940,6 +942,7 @@ class _ShopItemData {
   }
   static int get kpiClashes => uniqueClashes.length;
   static int get kpiNoTeacher => liveCourses.where(noTeacher).length;
+  static List<Map<String, dynamic>> get rowsOf_kpiNoTeacher => liveCourses.where(noTeacher).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד kpiNoTeacher (מהצורה של ה-getter, לא מילון)
   static int get kpiBelowMin => liveCourses.where(belowMin).length;
   static bool get kpiBelowMinKnown => liveCourses.any((c) => minToOpen(c) != null); // מקום-שמור: אין מינימום לאף חוג ⇒ '—'
   static num get kpiDebt => grandTotal(liveCourses, (c) => courseDebt(c as Map<String, dynamic>));
@@ -947,12 +950,19 @@ class _ShopItemData {
 
 // ═══════════ המסך · ShopItemScreen (const · ללא main · המנהל מחבר ניווט) ═══════════
 class ShopItemScreen extends StatefulWidget {
-  const ShopItemScreen({super.key});
+  const ShopItemScreen({this.initialPanelId, super.key});
+  final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   @override
   State<ShopItemScreen> createState() => _ShopItemScreenState();
 }
 
 class _ShopItemScreenState extends State<ShopItemScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final p0 = widget.initialPanelId == null ? null : ShopItemFacts.byId(widget.initialPanelId!); // G10a
+    if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
+  }
   int _view = 0; // 0=📅 גריד-שבועי · 1=📋 רשימה · 2=👩‍🏫 פר-מורה · 3=🚪 פר-חדר (SegmentedSwitch→תצוגה)
   int _week = 0; // 0=השבוע · 1=שבוע-הבא (בורר-שבוע · פס-עליון)
   int _sem = 0; // 0=הכל · 1..=semesterOptions (בורר-סמסטר · פס-עליון)
@@ -1752,4 +1762,9 @@ class ShopItemFacts {
   static const String heroKey = 'kpiNoTeacher'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => '🚫 ללא-מורה';
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => _ShopItemData.courses; // כל רשומות הזרע-הראשי (static-const)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['kpiActive', 'kpiFull', 'kpiNoTeacher']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'kpiActive': return _ShopItemData.rowsOf_kpiActive; case 'kpiFull': return _ShopItemData.rowsOf_kpiFull; case 'kpiNoTeacher': return _ShopItemData.rowsOf_kpiNoTeacher; default: return const []; } } // G10a · 3 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

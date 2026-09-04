@@ -1,7 +1,7 @@
 // 🎯 EnrollmentScreen — retarget של schoolos_fees.dart לישות Enrollment (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_fees.dart --entity Enrollment
 //   זרע-ראשי: families (מועמדים: families(36/38) charges(9/10) charges(7/8) charges(7/8) charges(7/8) charges(7/8) charges(7/8) incoming(7/8) charges(6/7) hist(5/5) criteria(3/3) calls(3/3) payments(3/4) payments(3/4) payments(3/4) payments(3/4) calls(3/3) payments(3/4)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 14 · חוזה-מנוע (לא משתנה) 19
 //   id⇒id(name) · memberId⇒memberId(name) · note⇒note(name) · payments⇒payments(name) · name⇒∅(engine-contract) · phone⇒∅(engine-contract) · email⇒∅(engine-contract) · idNum⇒∅(engine-contract) · date⇒∅(engine-contract) · amount⇒∅(engine-contract) · cur⇒∅(engine-contract) · cat⇒∅(engine-contract) · hok⇒∅(engine-contract) · day⇒∅(engine-contract) · active⇒∅(engine-contract) · carryBalance⇒∅(engine-contract) · kevaId⇒∅(engine-contract) · hist⇒∅(engine-contract) · d⇒∅(engine-contract) · a⇒∅(engine-contract) · c⇒∅(engine-contract) · clearer⇒∅(engine-contract) · nextDate⇒∅(engine-contract) · payer⇒∅(reserved(2 מועמדים)) · members⇒absences(unique) · grade⇒∅(reserved(2 מועמדים)) · first⇒∅(reserved(2 מועמדים)) · charges⇒∅(reserved) · method⇒∅(reserved(2 מועמדים)) · rid⇒∅(reserved(3 מועמדים)) · startedAt⇒∅(reserved(4 מועמדים)) · criteria⇒∅(reserved) · calls⇒∅(reserved) · at⇒∅(reserved(4 מועמדים)) · outcome⇒∅(reserved(2 מועמדים)) · nextNote⇒∅(reserved(2 מועמדים)) · installmentOf⇒∅(reserved(2 מועמדים)) · cancelledAt⇒∅(reserved(4 מועמדים))
-//   תפר-עובדות (G9b): EnrollmentFacts · count=families.length (static-const) · מדדים 0 · hero=count
+//   תפר-עובדות (G9b): EnrollmentFacts · count=families.length (static-const) · מדדים 0 · hero=count · שורות-מדד (G10a) ∅ · תפר-כניסה initialPanelId
 //   שדות-Enrollment בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): courseId, plan, purchased, used, group, presents, totalDue, dueDate, dueEventId, status, enrolledAt, endedAt, paidFull, freq, freqUnit, term, termMonths, tier, renew, renewNote, renewedToId · תוויות: מונחי Supporter (תורם/—) ⇒ Enrollment (שיבוץ/שיבוצים) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Enrollment
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
@@ -759,7 +759,8 @@ class _EnrollmentData {
 // 💰 EnrollmentScreen — המסך (const · ללא main). המנהל מחבר לניווט-הבית.
 // ═══════════════════════════════════════════════════════════════════════════════════════
 class EnrollmentScreen extends StatefulWidget {
-  const EnrollmentScreen({super.key});
+  const EnrollmentScreen({this.initialPanelId, super.key});
+  final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   /// איפוס פנקס-הפעולות לבסיס-האמת (לרתמות-בדיקה/דמו; חיבור-אסינק אמיתי יטען מחדש מהמקור)
   static void resetLedger() => _EnrollmentData.reset();
   @override
@@ -767,6 +768,12 @@ class EnrollmentScreen extends StatefulWidget {
 }
 
 class _EnrollmentScreenState extends State<EnrollmentScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final p0 = widget.initialPanelId == null ? null : EnrollmentFacts.byId(widget.initialPanelId!); // G10a
+    if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
+  }
   final Map<String, String> _coreState = {}; // G6d · פנקס-מצבי-הגרעין לפי id — overlay על הזרע (הזרע const; אין כתיבה אליו)
   int _role = 0; // 0=גזבר · 1=מזכירות · 2=הנהלה · 3=מחנך · 4=הורה · 5=צפייה
   String _q = '';
@@ -1637,4 +1644,9 @@ class EnrollmentFacts {
   static const String heroKey = 'count'; // אין מדדים ⇒ count
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => label;
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => _EnrollmentData.families; // כל רשומות הזרע-הראשי (static-const)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>[]) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) {  default: return const []; } } // G10a · 0 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

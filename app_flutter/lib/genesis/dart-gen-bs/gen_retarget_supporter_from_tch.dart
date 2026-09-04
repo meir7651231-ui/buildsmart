@@ -1,7 +1,7 @@
 // 🎯 SupporterScreen — retarget של schoolos_teachers.dart לישות Supporter (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity Supporter
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 18 · חוזה-מנוע (לא משתנה) 1
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · status⇒∅(engine-contract) · role⇒∅(reserved(8 מועמדים)) · subjects⇒∅(reserved(2 מועמדים)) · homeroom⇒∅(reserved(2 מועמדים)) · contractHours⇒∅(reserved(3 מועמדים)) · contractType⇒∅(reserved(8 מועמדים)) · startDate⇒∅(reserved(3 מועמדים)) · availability⇒∅(reserved) · constraints⇒∅(reserved(2 מועמדים)) · preferredSub⇒nextEventId(unique) · extraRoles⇒∅(reserved(2 מועמדים)) · certs⇒∅(reserved(2 מועמדים)) · issuer⇒∅(reserved(8 מועמדים)) · expiry⇒∅(reserved(3 מועמדים)) · attendance⇒∅(reserved) · absences⇒∅(reserved(2 מועמדים)) · reason⇒∅(reserved(8 מועמדים)) · date⇒∅(reserved(3 מועמדים)) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved(3 מועמדים))
-//   תפר-עובדות (G9b): SupporterFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN
+//   תפר-עובדות (G9b): SupporterFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel
 //   שדות-Supporter בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, email, address, city, idNum, extId, cat, forWho, count, ils, usd, first, last, nextDate, nextNote, photos, donations, hok, ayin, calls · תוויות: מונחי teacher (מורה/—) ⇒ Supporter (תורם/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Supporter
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
@@ -254,6 +254,7 @@ class _TeamData {
   static List<Map<String, dynamic>> get todaySubs => subs.where((s) => s['date'] == today).toList()..sort((a, b) => '${a['time'] ?? ''}'.compareTo('${b['time'] ?? ''}'));
   static List<Map<String, dynamic>> get uncoveredToday => todaySubs.where((s) => (s['stage'] as int) < 2).toList();
   static int get openSubs => subs.where((s) => (s['stage'] as int) < 2).length;
+  static List<Map<String, dynamic>> get rowsOf_openSubs => subs.where((s) => (s['stage'] as int) < 2).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד openSubs (מהצורה של ה-getter, לא מילון)
   static bool subOverdue(Map<String, dynamic> s) => taskOverdue({'due': s['date'], 'doneAt': (s['stage'] as int) == 2 ? s['date'] : null}, today); // מדף
   static int subsDone(Map<String, dynamic> t) => subs.where((s) => s['subId'] == t['id'] && s['stage'] == 2).length;
   static int subsReceived(Map<String, dynamic> t) => subs.where((s) => s['absentId'] == t['id'] && s['stage'] == 2).length;
@@ -311,9 +312,13 @@ class _TeamData {
   static int get absentN => active.where(absentToday).length + everyone.where((t) => statusOf(t) == 'leave' || statusOf(t) == 'unpaid').length;
   static double get avgHours => active.isEmpty ? 0 : grandTotal(active, (t) => hoursWeek(t as Map<String, dynamic>)) / active.length;
   static int get overN => active.where(overLoad).length;
+  static List<Map<String, dynamic>> get rowsOf_overN => active.where(overLoad).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד overN (מהצורה של ה-getter, לא מילון)
   static int get underN => active.where(underLoad).length;
+  static List<Map<String, dynamic>> get rowsOf_underN => active.where(underLoad).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד underN (מהצורה של ה-getter, לא מילון)
   static int get contractsN => staff.where(contractEndsMonth).length;
+  static List<Map<String, dynamic>> get rowsOf_contractsN => staff.where(contractEndsMonth).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד contractsN (מהצורה של ה-getter, לא מילון)
   static int get certsN => active.where(certMissing).length;
+  static List<Map<String, dynamic>> get rowsOf_certsN => active.where(certMissing).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד certsN (מהצורה של ה-getter, לא מילון)
   static List<List<Object>> get byRole => countBy(staff, (t) => roleLabel[roleOf_(t as Map<String, dynamic>)] ?? roleOf_(t)); // מדף
 
   // ═══ איתור (הכרעה 23-ג) = DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch — לא `.contains` שטוח ═══
@@ -1183,4 +1188,9 @@ class SupporterFacts {
   static const String heroKey = 'absentN'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => '🤒 נעדרים היום';
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => _TeamData.roster; // כל רשומות הזרע-הראשי (static-const)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['openSubs', 'overN', 'underN', 'contractsN', 'certsN']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'openSubs': return _TeamData.rowsOf_openSubs; case 'overN': return _TeamData.rowsOf_overN; case 'underN': return _TeamData.rowsOf_underN; case 'contractsN': return _TeamData.rowsOf_contractsN; case 'certsN': return _TeamData.rowsOf_certsN; default: return const []; } } // G10a · 5 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }
