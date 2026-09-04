@@ -64,6 +64,16 @@ import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילת�
 import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (סופיות/ניקוד) — מנוע-אמת ממאור
 import '../dart-maor/finder-matches.dart'; // חריגה/סינון: סינון-רב-צירי AND על נעילות — מנוע-אמת ממאור
 import '../dart-maor/count-by.dart'; // קיבוץ-ומניה (צ׳יפי-תחום עם מונה) — מנוע-אמת ממאור
+import '../dart-maor/role-of.dart'; // הרשאות: תפקיד-לפי-מייל admin/teacher/staff — מנוע-אמת ממאור
+import '../dart-maor/can-granted-action.dart'; // הרשאות: גידור-פעולה פר-מפתח — מנוע-אמת ממאור
+import '../dart-maor/teacher-id-of.dart'; // הרשאות: מזהה-המורה של המשתמש (החוגים-שלו) — מנוע-אמת ממאור
+import '../dart-maor/heb-parts.dart'; // לוח-עברי: תאריך ⇒ {day, month(EN), year} — מנוע-אמת ממאור
+import '../dart-maor/holidays.dart'; // מפת-חגים 'Tishri 1' ⇒ שם — אטום-דאטה ממאור
+import '../dart-maor/upcoming-holidays.dart'; // חגים קרובים בחלון-ימים (holidayOf מוזרק) — מנוע-אמת ממאור
+import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM — מנוע-אמת ממאור
+import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) — מנוע-אמת ממאור
+import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע — מנוע-אמת ממאור
+import '../dart-maor/ics-escape.dart'; // ייצוא iCal: הגנת-טקסט-ICS — מנוע-אמת ממאור
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -409,7 +419,7 @@ class _CoursesData {
     final lc = lifecycle(c);
     if (lc != 'פעיל') return lc == 'מתוכנן' ? '🗓 מתוכנן' : lc == 'בוטל' ? '⛔ בוטל' : '🏁 הסתיים';
     final sv = sev(c);
-    return sv == 3 ? '⚠️ התנגשות' : noTeacher(c) ? '🚫 ללא-מורה' : noRoom(c) ? '🚪 ללא-חדר' : sv == 1 ? '📉 מתחת-מינ׳' : isFull(c) ? '🈵 מלא' : '🟢 פעיל';
+    return sv == 3 ? '⚠️ התנגשות' : noTeacher(c) ? '🚫 ללא-מורה' : noRoom(c) ? '🚪 ללא-חדר' : sv == 1 ? '📉 מתחת-מינ׳' : semesterUndefined(c) ? '📆 סמסטר לא-מוגדר' : isFull(c) ? '🈵 מלא' : '🟢 פעיל';
   }
 
   // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 18 עמודות-הליבה של המפרט + סטטוס ═══
@@ -600,7 +610,7 @@ class _CoursesData {
   static Map<String, dynamic> newCourse(String who) {
     final dates = defaultCourseDates(today);
     final c = <String, dynamic>{
-      'id': nextId('c-new-'), 'name': 'חוג חדש', 'teacherId': '', 'roomId': '', 'cat': '', 'semester': semesterOptions.first, 'sector': 'כללי',
+      'id': nextId('c-new-'), 'name': 'חוג חדש', 'teacherId': '', 'roomId': '', 'cat': '', 'semester': '', 'sector': 'כללי', // semester ריק = "סמסטר לא-מוגדר" עד שנבחר
       'start': dates['start'], 'end': dates['end'], 'sessions': <Map<String, dynamic>>[], 'maxStudents': 0, 'price': 0, 'gender': 'all',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[],
     };
@@ -727,6 +737,164 @@ class _CoursesData {
     ['open', '🟢 פנוי'], ['belowMin', '📉 מתחת-מינ׳'], ['waiting', '⏳ המתנה>0'], ['ended', '🏁 הסתיימו'],
   ];
 
+  // ═══ הרשאות-פר-תפקיד (הכרעה 23-ג · חוק-6 זהות=הזרקה) = roleOf ⊕ canGrantedAction ⊕ teacherIdOf ═══
+  //   6 זהויות-דמו מוזרקות (לא אטום!). מפתחות-פעולה: crs.new·duplicate·enroll·remove·move·waitlist·assignTeacher·
+  //   assignRoom·cancel·end·message·export·print·edit·attendance·fees·util·self. מורה = roles.teachers{email⇒id} ⇒ "החוגים-שלי".
+  static const roleDefs = <Map<String, dynamic>>[
+    {'label': '👑 רכז/ת', 'email': 'coord@school', 'config': {'adminEmails': ['coord@school']}}, // admin ⇒ הכל
+    {'label': '👩‍🏫 מורה', 'email': 'rut@school', 'config': {'roles': {'teachers': {'rut@school': 't1'}}, 'features': {'crs.attendance': true, 'crs.message': true, 'crs.cancel': true}}},
+    {'label': '🗂 מזכירות', 'email': 'office@school', 'config': {'features': {'crs.enroll': true, 'crs.remove': true, 'crs.move': true, 'crs.waitlist': true, 'crs.fees': true, 'crs.message': true, 'crs.export': true, 'crs.print': true}}},
+    {'label': '📊 הנהלה', 'email': 'mgmt@school', 'config': {'features': {'crs.util': true, 'crs.fees': true, 'crs.end': true, 'crs.export': true, 'crs.print': true, 'crs.duplicate': true}}},
+    {'label': '👨‍👩‍👧 הורה', 'email': 'parent@school', 'familyId': 'f1', 'config': {'features': {'crs.self': true}}}, // המערכת-שלי + הרשמה-עצמית (מופעל)
+    {'label': '👁 צפייה', 'email': 'view@school', 'config': <String, dynamic>{}}, // staff ללא-הרשאות
+  ];
+  static Map<String, dynamic> _cfg(int role) => (roleDefs[role]['config'] as Map).cast<String, dynamic>();
+  static bool _isAdmin(Map<String, dynamic> config, String email) => roleOf(config, email) == 'admin';
+  static bool can(int role, String key) => canGrantedAction(_cfg(role), roleDefs[role]['email'] as String, false, key, _isAdmin);
+  static String roleName(int role) => roleOf(_cfg(role), roleDefs[role]['email'] as String);
+  static dynamic myTeacherId(int role) => teacherIdOf(_cfg(role), roleDefs[role]['email']);
+  static String? myFamilyId(int role) => roleDefs[role]['familyId'] as String?;
+  // המערכת-שלי (הורה): חוגים שבהם חבר-משפחה רשום/ממתין
+  static List<Map<String, dynamic>> familyCourses(List<Map<String, dynamic>> cs, String famId) {
+    final fam = families.where((f) => f['id'] == famId).firstOrNull;
+    if (fam == null) return const [];
+    final ids = {for (final m in (fam['members'] as List)) m['id']};
+    return cs.where((c) => enrollmentsOf(c).any((e) => ids.contains(e['memberId']) && e['status'] != 'ended')).toList();
+  }
+  // גידור-תצוגה לפי תפקיד: מורה ⇒ coursesOfTeacher(החוגים-שלו) · הורה ⇒ familyCourses · אחרת הכל
+  static List<Map<String, dynamic>> scopeFor(int role, List<Map<String, dynamic>> cs) {
+    final tid = myTeacherId(role);
+    if (tid != null) return (coursesOfTeacher(cs, tid) as List).cast<Map<String, dynamic>>();
+    final fid = myFamilyId(role);
+    if (fid != null) return familyCourses(cs, fid);
+    return cs;
+  }
+  // הרשמה-עצמית (הורה ⇒ סטטוס wait = "רכז מאשר"; כל בדיקות-הקדם/התנגשות חלות)
+  static String selfEnroll(Map<String, dynamic> c, dynamic memberId, String who) {
+    final m = memberOf(memberId);
+    if (m == null) return 'blocked:תלמיד לא נמצא';
+    final fit = fitReason(c, m);
+    if (fit != null) return 'blocked:דרישות-קדם — $fit';
+    final clash = clashReason(c, memberId);
+    if (clash != null) return 'blocked:התנגשות — ${memberName(memberId)} $clash';
+    extraEnrollments.add(_newEnrollment(c, memberId, 'wait'));
+    log(who, 'הרשמה-עצמית', '${memberName(memberId)} ⇐ ${c['name']} (ממתין לאישור-רכז)', c['id'] as String);
+    return 'pending';
+  }
+  // ⛔ בטל-חוג (מצב "בוטל" — נבדל מ"הסתיים")
+  static void cancelCourse(Map<String, dynamic> c, String who) {
+    courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'cancelled': true};
+    for (final e in liveEnrollmentsOf(c)) {
+      statusOverride[e['id'] as String] = 'ended';
+    }
+    log(who, 'ביטול-חוג', '${c['name']}', c['id'] as String);
+  }
+  // סמסטר-לא-מוגדר: חוג בלי semester תקין (מצב-מיוחד)
+  static bool semesterUndefined(Map<String, dynamic> c) => !semesterOptions.contains(c['semester']);
+
+  // ═══ אוטומציות-חכמות (23-ג · פרואקטיבי) — המערכת מזהירה ומציעה לפני שהשיעור נפגע ═══
+  // 📅 סנכרון-לוח: חג ⇒ ביטול-אוטו + הודעה — hebParts ⊕ HOLIDAYS ⊕ upcomingHolidays (מנועי-מאור, אפס-תאריכים-קשיחים)
+  static String? holidayName(DateTime d) {
+    final p = hebParts(d);
+    return HOLIDAYS['${p['month']} ${p['day']}'];
+  }
+  static List<Map<String, dynamic>> get upcomingHolidayList => upcomingHolidays(today, holidayName, _iso, 45);
+  // שיעורים שנופלים על חג (45 ימים קדימה) ועדיין לא בוטלו: [{course, iso, name}]
+  static List<Map<String, dynamic>> holidayLessons() {
+    final out = <Map<String, dynamic>>[];
+    for (final c in liveCourses) {
+      for (final dt in upcoming(c, 14)) {
+        if (dayDiff(today, _iso(dt)) > 45) break;
+        final h = holidayName(dt);
+        if (h != null && !isCancelled(c, _iso(dt))) out.add({'course': c, 'iso': _iso(dt), 'name': h});
+      }
+    }
+    return out;
+  }
+  static int autoCancelHolidays(String who) {
+    final hl = holidayLessons();
+    for (final h in hl) {
+      cancelSession(h['course'] as Map<String, dynamic>, h['iso'] as String, who, 'חג: ${h['name']}');
+    }
+    return hl.length;
+  }
+  // 🚪 הצעת-חדר-חלופי: חדר פעיל, פנוי בכל ה-slots של החוג, בקיבולת מספקת
+  static List<Map<String, dynamic>> freeRooms(Map<String, dynamic> c) => [
+        for (final r in rooms)
+          if (r['active'] == true && r['id'] != c['roomId'] && (capacity(c) == 0 || (r['cap'] as int) >= capacity(c)) &&
+              !liveCourses.any((o) => o['id'] != c['id'] && o['roomId'] == r['id'] && _sameSlot(c, o)))
+            r,
+      ];
+  // 👩‍🏫 הצעת-מורה-מחליף/חלופי: פנוי ב-slots של החוג; התמחות=תחום קודם
+  static List<Map<String, dynamic>> freeTeachers(Map<String, dynamic> c) {
+    final out = [
+      for (final t in teachers)
+        if (t['id'] != c['teacherId'] && !liveCourses.any((o) => o['id'] != c['id'] && o['teacherId'] == t['id'] && _sameSlot(c, o))) t,
+    ];
+    out.sort((a, b) => (b['specialty'] == c['cat'] ? 1 : 0).compareTo(a['specialty'] == c['cat'] ? 1 : 0));
+    return out;
+  }
+  // 📉 התרעת-מתחת-מינימום X ימים לפני: ימים-עד-התחלה (שלילי = כבר התחיל) — dayDiff ממאור
+  static int daysToStart(Map<String, dynamic> c) => -dayDiff('${c['start']}', today).toInt();
+  static const belowMinWarnDays = 14; // חלון-התרעה (קלט-תכנון)
+  static List<Map<String, dynamic>> get belowMinAlerts => liveCourses.where((c) => belowMin(c) && daysToStart(c) <= belowMinWarnDays).toList();
+  // ⏳ המתנה-עם-מקום: ממתינים בחוג שאינו מלא (למשל אחרי הגדלת-קיבולת) ⇒ העלאה מוצעת
+  static List<Map<String, dynamic>> get promotable => liveCourses.where((c) => !isFull(c) && waitlist(c).isNotEmpty).toList();
+  // 🔔 תזכורת-לתלמידים: שיעורים ב-48 השעות הקרובות (nextSessionDate) ⇒ הודעה למשפחות (waLink)
+  static List<Map<String, dynamic>> reminders() => [
+        for (final c in liveCourses)
+          for (final dt in upcoming(c, 1))
+            if (dt.difference(nowAt).inHours <= 48 && !isCancelled(c, _iso(dt))) {'course': c, 'dt': dt},
+      ];
+  // 📈 אות-ביקוש (תחזית לסמסטר-הבא): מלא ∨ ממתינים ∨ מגמה-עולה ⇒ "פתח קבוצה נוספת". היסטוריה-רב-סמסטרית = מקום-שמור.
+  static List<Map<String, dynamic>> get demandSignals => liveCourses.where((c) => isFull(c) || waitlist(c).isNotEmpty || trend(c)['dir'] == 'up').toList();
+  // 📊 דוח-ניצולת: ממוצע-ניצולת-חדרים-פעילים · עומס-מורים ממוצע (מפגשים/שבוע)
+  static int get avgRoomUtilPct {
+    final act = rooms.where((r) => r['active'] == true).toList();
+    return act.isEmpty ? 0 : (grandTotal(act, (r) => roomUtil(r as Map<String, dynamic>)) / act.length * 100).round();
+  }
+  static double get avgTeacherLoad => teachers.isEmpty ? 0 : grandTotal(teachers, (t) => weeklyOf(coursesOf(t as Map<String, dynamic>))) / teachers.length;
+
+  // ═══ ייצוא (הכרעה 23-ג) = SoftButton ⊕ toCsv ⊕ csvEscape ⊕ exportAllowed · iCal = icsEscape ═══
+  //   CSV = עמודות-החוזה המוארות (columnDefs) על הרשימה-הנראית · iCal = 6 השיעורים-הבאים פר-חוג (מבוטל ⇒ STATUS:CANCELLED)
+  static List<List<Object?>> csvRows(List<Map<String, dynamic>> cs) {
+    final cols = [for (final c in columnDefs) if (colShown(c, cs)) c];
+    return [
+      [for (final c in cols) c['label']],
+      for (final r in cs)
+        [for (final c in cols) c['key'] == '__status' ? statusLabel(r) : c['get'] != null ? (c['get'] as String Function(Map<String, dynamic>))(r) : '${r[c['key']] ?? ''}'],
+    ];
+  }
+  static String csvOf(List<Map<String, dynamic>> cs) => toCsv(csvRows(cs), csvEscape) as String;
+  static bool exportOk(int role) => exportAllowed(false) && can(role, 'crs.export'); // שער-ייצוא ⊕ הרשאה
+  static String _icsStamp(DateTime d) => '${_iso(d).replaceAll('-', '')}T${_pad2(d.hour)}${_pad2(d.minute)}00';
+  static String icsOf(List<Map<String, dynamic>> cs) {
+    final L = <String>['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SchoolOS//courses//HE'];
+    for (final c in cs) {
+      for (final dt in upcoming(c, 6)) {
+        final iso = _iso(dt);
+        L.addAll([
+          'BEGIN:VEVENT', 'UID:${c['id']}-$iso@schoolos', 'DTSTART:${_icsStamp(dt)}',
+          'DTEND:${_icsStamp(dt.add(Duration(minutes: (roomOf(c)?['slot'] as int?) ?? 60)))}',
+          'SUMMARY:${icsEscape('${c['name']}')}', 'LOCATION:${icsEscape(roomOf(c)?['name'] as String?)}',
+          'DESCRIPTION:${icsEscape('${teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${enrolled(c)}/${capacity(c)}')}',
+          if (isCancelled(c, iso)) 'STATUS:CANCELLED',
+          'END:VEVENT',
+        ]);
+      }
+    }
+    L.add('END:VCALENDAR');
+    return L.join('\r\n');
+  }
+  // חוזה-שדות-מטא של הרשמה (חוק-7): tier=שדה-אמת (Enrollment.tier) · scholarship (מלגה) = מקום-שמור
+  static const enrollMetaFields = <Map<String, String>>[
+    {'key': 'tier', 'prefix': '🏷 מסלול ', 'suffix': ''},
+    {'key': 'group', 'prefix': '👥 ', 'suffix': ''},
+    {'key': 'renew', 'prefix': '🔁 חידוש: ', 'suffix': ''},
+    {'key': 'scholarship', 'prefix': '🎗 מלגה: ', 'suffix': ''}, // מקום-שמור (תלמידים-ללא-תשלום)
+    {'key': 'note', 'prefix': '📝 ', 'suffix': ''},
+  ];
+
   // ─── KPI-10 (המפרט) — כולם מנועי-מדף/נגזרות-אמת, אפס-StatBlock ───
   static int get kpiActive => allCourses.where((c) => lifecycle(c) == 'פעיל').length;
   static int get kpiLessonsWeek => lessonsThisWeek();
@@ -767,6 +935,9 @@ class _CoursesScreenState extends State<CoursesScreen> {
   int _view = 0; // 0=📅 גריד-שבועי · 1=📋 רשימה · 2=👩‍🏫 פר-מורה · 3=🚪 פר-חדר (SegmentedSwitch→תצוגה)
   int _week = 0; // 0=השבוע · 1=שבוע-הבא (בורר-שבוע · פס-עליון)
   int _sem = 0; // 0=הכל · 1..=semesterOptions (בורר-סמסטר · פס-עליון)
+  int _role = 0; // 0 רכז · 1 מורה · 2 מזכירות · 3 הנהלה · 4 הורה · 5 צפייה (חוק-6 זהות-מוזרקת; בורר מדגים גידור)
+  bool _loading = false; // מצב-מסך שמור: טעינה (רענון מדגים; חיבור-אסינק עתידי מאיר אותו)
+  String? _error; // מצב-מסך שמור: שגיאה (מקום-שמור — מאיר כש-fetch נכשל; null בזרימה-התקינה)
   String _q = ''; // חיפוש-איתור (DsSearch → smartFilter)
   final Map<String, String> _locks = {}; // נעילות-סינון פר-ציר (FilterChipPill → finderMatches)
   bool _adv = false; // סינון-מתקדם (צירי-ממד) פתוח
@@ -775,15 +946,18 @@ class _CoursesScreenState extends State<CoursesScreen> {
   String? _msg; // תוצאת-פעולה אחרונה (AlertBanner)
   int _msgTone = 1;
   bool _edit = false; // מצב-עריכה (DsField/DsNumberField)
-  static const _who = 'רכזת'; // זהות-הפועל (חוק-6: מוזרקת; גל 5 מחליף בבורר-תפקיד)
+  String get _who => _CoursesData.roleDefs[_role]['label'] as String; // זהות-הפועל = התפקיד-הנבחר (חוק-6: מוזרקת)
+  bool _can(String key) => _CoursesData.can(_role, key);
 
   @override
   Widget build(BuildContext context) {
-    final live = _CoursesData.bySemester(_CoursesData.liveCourses, _sem);
+    // גידור-תצוגה לפי תפקיד (roleOf⊕teacherIdOf): מורה רואה את החוגים-שלו · הורה את המערכת-שלי · אחרים הכל
+    final live = _CoursesData.scopeFor(_role, _CoursesData.bySemester(_CoursesData.liveCourses, _sem));
     final clashes = _CoursesData.kpiClashes;
+    final semEmpty = _sem > 0 && _CoursesData.bySemester(_CoursesData.liveCourses, _sem).isEmpty; // מצב: סמסטר לא-מוגדר/ריק
     // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches (AND על נעילות).
     //   'ended' מסנן מכל-החוגים (גם הסתיימו); אחרת מהחיים. הפייפליין רץ פעם-אחת ומזין גריד/רשימה/פר-מורה/פר-חדר.
-    final base = _locks['state'] == 'ended' ? _CoursesData.bySemester(_CoursesData.allCourses, _sem) : live;
+    final base = _locks['state'] == 'ended' ? _CoursesData.scopeFor(_role, _CoursesData.bySemester(_CoursesData.allCourses, _sem)) : live;
     final visible = _CoursesData.filter(_CoursesData.search(base, _q), _locks);
     // דירוג לפי דחיפות-מאוחדת (התנגשות ראשונה), ואז לפי תפוסה-יורדת
     final ranked = [...visible]..sort((a, b) {
@@ -800,6 +974,12 @@ class _CoursesScreenState extends State<CoursesScreen> {
     return DsScaffold(
       title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_CoursesData.teachers.length} מורים · ${_CoursesData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚',
       children: [
+        // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות ותצוגה פר-תפקיד (roleOf⊕canGrantedAction⊕teacherIdOf)
+        Align(
+          alignment: Alignment.centerRight,
+          child: FittedBox(fit: BoxFit.scaleDown, child: SegmentedSwitch(items: [for (final r in _CoursesData.roleDefs) r['label'] as String], selected: _role, onSelect: (i) => setState(() { _role = i; _locks.clear(); }))),
+        ),
+        _gap(8),
         // פס-עליון: בורר-שבוע/סמסטר + בורר-תצוגה (SegmentedSwitch מבוקר ×3) — ארגון = פעולת-יסוד עם אטום משלה
         Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.end, children: [
           SegmentedSwitch(items: const ['📅 השבוע', '⏭ שבוע הבא'], selected: _week, onSelect: (i) => setState(() => _week = i)),
@@ -813,12 +993,16 @@ class _CoursesScreenState extends State<CoursesScreen> {
         _gap(8),
         // פס-עליון · פעולות-גלובליות: חוג-חדש (defaultCourseDates) · שכפל-סמסטר (nextYearCourseDraft) · הדפס-מערכת
         Wrap(spacing: 8, runSpacing: 6, children: [
-          SoftButton(label: '➕ חוג-חדש', tone: 1, onTap: () => _act(() => _CoursesData.newCourse(_who), 'נוצר חוג-חדש (ללא-מורה/ללא-חדר — שבץ בפאנל)')),
-          SoftButton(label: '📑 שכפל-סמסטר', tone: 0, onTap: () {
+          // רענון — מדגים את מצב-הטעינה השמור (חיבור-אסינק אמיתי יאיר אותו זהה)
+          SoftButton(label: '🔄', tone: 0, onTap: _refresh),
+          if (_can('crs.new')) SoftButton(label: '➕ חוג-חדש', tone: 1, onTap: () => _act(() => _CoursesData.newCourse(_who), 'נוצר חוג-חדש (ללא-מורה/ללא-חדר — שבץ בפאנל)')),
+          if (_can('crs.duplicate')) SoftButton(label: '📑 שכפל-סמסטר', tone: 0, onTap: () {
             final r = _CoursesData.duplicateSemester(_sem, _who);
             _flash('שכפול-סמסטר: ${r['created']} טיוטות לשנה-הבאה · ${r['flagged']} דורשות מורה/חדר', r['flagged']! > 0 ? 3 : 1);
           }),
-          SoftButton(label: '🖨 הדפס-מערכת', tone: 0, onTap: () => _openPrint(live)),
+          if (_can('crs.print')) SoftButton(label: '🖨 הדפס-מערכת', tone: 0, onTap: () => _openPrint(live)),
+          if (_CoursesData.exportOk(_role)) SoftButton(label: '⬇ ייצוא', tone: 0, onTap: () => _openExport(visible)),
+          StatusChip(label: 'תפקיד: ${_CoursesData.roleName(_role)}${_CoursesData.myTeacherId(_role) != null ? ' · החוגים-שלי' : _CoursesData.myFamilyId(_role) != null ? ' · המערכת-שלי' : ''}', tone: 0),
         ]),
         _gap(6),
         // איתור: חיפוש-מבוקר (DsSearch → smartFilter⊕smartScore⊕normSearch) + סינון-מתקדם
@@ -874,8 +1058,17 @@ class _CoursesScreenState extends State<CoursesScreen> {
           ]),
         ),
         _gap(10),
-        if (live.isEmpty)
-          const EmptyState(glyph: '📚', message: 'אין חוגים — צור חוג-חדש או שכפל סמסטר')
+        // 🤖 מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה ומציעה לפני שדבר נשמט — כל התראה = מנוע ⊕ AlertBanner ⊕ פעולה
+        if (!_loading && _CoursesData.myFamilyId(_role) == null) ..._automations(live),
+        // מצבי-מסך שמורים (מקום-שמור): טעינה + שגיאה מאירים במצב-אמת; סמסטר-ריק; אין-חוגים; אחרת התוכן הרגיל.
+        if (_loading)
+          _loadingView()
+        else if (_error != null)
+          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
+        else if (semEmpty)
+          EmptyState(glyph: '📆', message: 'סמסטר "${semesterOptions[_sem - 1]}" לא מוגדר — אין חוגים משובצים בו')
+        else if (live.isEmpty)
+          EmptyState(glyph: '📚', message: _CoursesData.myTeacherId(_role) != null ? 'אין חוגים משובצים למורה זה' : _CoursesData.myFamilyId(_role) != null ? 'אין חוגים למשפחה — הירשמו מהקטלוג' : 'אין חוגים — צור חוג-חדש או שכפל סמסטר')
         else if (visible.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין חוגים תואמים לחיפוש/סינון'))
         else if (_view == 1)
@@ -890,8 +1083,91 @@ class _CoursesScreenState extends State<CoursesScreen> {
             if (buckets[st]!.isNotEmpty)
               DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [for (final c in buckets[st]!) _row(c)]),
         ],
+        // הורה + הרשמה-עצמית מופעלת: קטלוג-חוגים פתוחים להרשמה (wait ⇒ רכז מאשר). כל בדיקות-הקדם/התנגשות חלות.
+        if (_can('crs.self') && _CoursesData.myFamilyId(_role) != null && !_loading) ..._selfCatalog(),
       ],
     );
+  }
+
+  // מרכז-אוטומציות: חג⇒ביטול · מתחת-מינ׳ · חדר/מורה-חלופי · המתנה-עם-מקום · תזכורות · ביקוש · ניצולת
+  List<Widget> _automations(List<Map<String, dynamic>> live) {
+    final hl = _CoursesData.holidayLessons();
+    final rem = _CoursesData.reminders();
+    final bm = _CoursesData.belowMinAlerts;
+    final pr = _CoursesData.promotable;
+    final noRoomCs = live.where(_CoursesData.noRoom).toList(), noTeacherCs = live.where(_CoursesData.noTeacher).toList();
+    final clashRooms = live.where((c) => _CoursesData.clashesOf(c).any((k) => k['kind'] == 'room')).toList();
+    final demand = _CoursesData.demandSignals;
+    Widget withAction(Widget banner, Widget? action) => action == null ? banner : Row(children: [Expanded(child: banner), const SizedBox(width: 6), action]);
+    return [
+      DsSection(title: '🤖 אוטומציות · ${hl.length + rem.length + bm.length + pr.length + noRoomCs.length + noTeacherCs.length + clashRooms.length + demand.length} אותות', children: [
+        // דוח-ניצולת (BareStat×3 — עובדות): חדרים · עומס-מורים · חגים-קרובים
+        Row(children: [
+          BareStat(value: '${_CoursesData.avgRoomUtilPct}%', label: '🚪 ניצולת-חדרים', inkColor: _CoursesData.avgRoomUtilPct < 30 ? _warning : _ok, mutedColor: _muted),
+          BareStat(value: _CoursesData.avgTeacherLoad.toStringAsFixed(1), label: '👩‍🏫 מפגשים/מורה/שבוע', inkColor: _ink, mutedColor: _muted),
+          BareStat(value: '${_CoursesData.upcomingHolidayList.length}', label: '🕎 חגים ב-45 ימים', inkColor: _ink, mutedColor: _muted),
+        ]),
+        _gap(8),
+        // סנכרון-לוח: שיעורים על חג ⇒ ביטול-אוטו (+הודעה דרך שלח-הודעה)
+        if (hl.isNotEmpty) withAction(
+          AlertBanner(glyph: '🕎', tone: 3, message: '${hl.length} שיעורים נופלים בחג: ${hl.map((h) => '${(h['course'] as Map)['name']} ${h['iso']} (${h['name']})').join(' · ')}'),
+          _can('crs.cancel') ? SoftButton(label: '✖ בטל-אוטו', tone: 3, onTap: () => _act(() => _CoursesData.autoCancelHolidays('אוטומציה'), '${hl.length} שיעורי-חג בוטלו אוטומטית — שלח הודעה למשפחות מהפאנל')) : null),
+        // מתחת-מינימום X ימים לפני/אחרי פתיחה — התרעה כלכלית
+        for (final c in bm)
+          AlertBanner(glyph: '📉', tone: 2, message: '${c['name']}: ${_CoursesData.enrolled(c)} רשומים מול מינ׳ ${_CoursesData.minToOpen(c)} · ${_CoursesData.daysToStart(c) >= 0 ? 'מתחיל בעוד ${_CoursesData.daysToStart(c)} ימים' : 'התחיל לפני ${-_CoursesData.daysToStart(c)} ימים'} — לא-כלכלי'),
+        // הצעת-חדר-חלופי: ללא-חדר / התנגשות-חדר ⇒ חדרים פנויים ב-slot
+        for (final c in [...noRoomCs, ...clashRooms])
+          AlertBanner(glyph: '🚪', tone: 3, message: '${c['name']} — ${_CoursesData.noRoom(c) ? 'ללא-חדר' : 'התנגשות-חדר'} · חדר חלופי: ${_CoursesData.freeRooms(c).isEmpty ? 'אין חדר פנוי ב-slot' : _CoursesData.freeRooms(c).map((r) => '${r['name']} (${r['cap']})').join(' / ')}'),
+        // הצעת-מורה-מחליף: ללא-מורה ⇒ מורים פנויים ב-slot (התמחות תואמת קודם)
+        for (final c in noTeacherCs)
+          AlertBanner(glyph: '👩‍🏫', tone: 3, message: '${c['name']} — ללא-מורה · מורה חלופי: ${_CoursesData.freeTeachers(c).isEmpty ? 'אין מורה פנוי ב-slot' : _CoursesData.freeTeachers(c).map((t) => '${t['name']}${t['specialty'] == c['cat'] ? ' ✓' : ''}').join(' / ')}'),
+        // המתנה-עם-מקום ⇒ העלאה
+        for (final c in pr) withAction(
+          AlertBanner(glyph: '⏳', tone: 3, message: '${c['name']}: ${_CoursesData.waitlist(c).length} ממתינים ויש ${_CoursesData.capacity(c) - _CoursesData.enrolled(c)} מקומות פנויים'),
+          _can('crs.waitlist') ? SoftButton(label: '⬆ העלה', tone: 1, onTap: () => _act(() { while (_CoursesData.promoteNext(c, 'אוטומציה') != null) {} }, 'הממתינים הועלו')) : null),
+        // תזכורות 48h
+        if (rem.isNotEmpty) AlertBanner(glyph: '🔔', tone: 0, message: 'תזכורת ל-48 השעות הקרובות: ${rem.map((r) => '${(r['course'] as Map)['name']} ${_CoursesData._iso(r['dt'] as DateTime)} ${_CoursesData.hm((r['dt'] as DateTime).hour * 60 + (r['dt'] as DateTime).minute)} (${_CoursesData.liveEnrollmentsOf(r['course'] as Map<String, dynamic>).length} משפחות)').join(' · ')} — שלח-הודעה מהפאנל'),
+        // תחזית-ביקוש (אות-נוכחי; היסטוריה רב-סמסטרית = מקום-שמור)
+        if (demand.isNotEmpty) AlertBanner(glyph: '📈', tone: 1, message: 'ביקוש לסמסטר-הבא: ${demand.map((c) => '${c['name']} (${_CoursesData.isFull(c) ? 'מלא' : ''}${_CoursesData.waitlist(c).isNotEmpty ? ' +${_CoursesData.waitlist(c).length} ממתינים' : ''}${_CoursesData.trend(c)['dir'] == 'up' ? ' ↑' : ''})').join(' · ')} ⇒ שקול קבוצה נוספת'),
+        if (hl.isEmpty && bm.isEmpty && pr.isEmpty && noRoomCs.isEmpty && noTeacherCs.isEmpty && clashRooms.isEmpty && rem.isEmpty && demand.isEmpty)
+          const EmptyState(glyph: '🤖', message: 'אין אותות — המערכת מסודרת'),
+      ]),
+    ];
+  }
+
+  // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
+  void _refresh() {
+    setState(() { _loading = true; _error = null; });
+    Future.delayed(const Duration(milliseconds: 700), () { if (mounted) setState(() => _loading = false); });
+  }
+  // מצב-טעינה שמור: מחוון + טקסט (אטום-מסגרת סטנדרטי; אפס ShimmerSkeleton מזייף). Column-מרוכז, לא Center (גובה-לא-חסום ברשימה).
+  Widget _loadingView() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 48),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+          CircularProgressIndicator(color: _acc),
+          const SizedBox(height: 14),
+          const Text('טוען מערכת…', style: TextStyle(color: _muted, fontSize: 14)),
+        ]),
+      );
+
+  // קטלוג להרשמה-עצמית (הורה): חוגים-חיים שאין בהם חבר-משפחה · כפתור פר-תלמיד ⇒ selfEnroll (wait)
+  List<Widget> _selfCatalog() {
+    final fam = _CoursesData.families.where((f) => f['id'] == _CoursesData.myFamilyId(_role)).firstOrNull;
+    if (fam == null) return const [];
+    final mine = _CoursesData.familyCourses(_CoursesData.liveCourses, fam['id'] as String).map((c) => c['id']).toSet();
+    final open = _CoursesData.bySemester(_CoursesData.liveCourses, _sem).where((c) => !mine.contains(c['id'])).toList();
+    return [
+      DsSection(title: '🛒 הרשמה-עצמית · ${open.length} חוגים פתוחים (רכז/ת מאשר/ת)', children: [
+        if (open.isEmpty) const EmptyState(glyph: '🛒', message: 'אין חוגים נוספים להרשמה'),
+        for (final c in open)
+          Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [
+            Expanded(child: MediaRow(glyph: '📚', title: '${c['name']}', subtitle: '${_CoursesData.sessionsLabel(c)} · ${_CoursesData.enrolled(c)}/${_CoursesData.capacity(c)} · שכבות ${c['gradeMin']}–${c['gradeMax']}')),
+            for (final m in (fam['members'] as List))
+              Padding(padding: const EdgeInsets.only(left: 4), child: SoftButton(label: '➕ ${m['first']}', tone: _CoursesData.fitReason(c, _CoursesData.memberOf(m['id'])!) == null ? 1 : 3,
+                onTap: () => setState(() => _result(_CoursesData.selfEnroll(c, m['id'], _who), 'נרשם/ה — ממתין לאישור')))),
+          ])),
+      ]),
+    ];
   }
 
   // 📅 גריד-מערכת-שעות: Table (ימים×שעות) · תא = StatusChip-לחיץ פר-חוג (tone=דחיפות) · מבוטל=✖ · ריק=שקט
@@ -1033,6 +1309,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
   void _result(String r, String okMsg) {
     if (r.startsWith('blocked:')) return _flash('נחסם: ${r.substring(8)}', 2);
     if (r == 'waitlisted') return _flash('החוג מלא ⇒ נוסף לרשימת-ההמתנה', 3);
+    if (r == 'pending') return _flash('ההרשמה נרשמה כבקשה — ממתינה לאישור רכז/ת (המתנה)', 3);
     if (r.startsWith('removed+promoted:')) return _flash('הוסר · מקום התפנה ⇒ ${r.substring(17)} הועלה/תה מההמתנה אוטומטית', 1);
     _flash(okMsg, 1);
   }
@@ -1112,21 +1389,44 @@ class _CoursesScreenState extends State<CoursesScreen> {
         _h('⚠️ התנגשויות · ${clashes.length} (חוסמות-שיבוץ)'),
         for (final k in clashes) AlertBanner(glyph: k['kind'] == 'teacher' ? '👩‍🏫' : k['kind'] == 'room' ? '🚪' : '🎓', tone: 2, message: '${k['detail']} — ${k['with']}'),
       ],
+      if (_CoursesData.noRoom(c) || _CoursesData.clashesOf(c).any((k) => k['kind'] == 'room')) ...[
+        _h('🚪 חדרים פנויים ב-slot (הצעת-חדר-חלופי)'),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          if (_CoursesData.freeRooms(c).isEmpty) const StatusChip(label: 'אין חדר פנוי', tone: 2),
+          for (final r in _CoursesData.freeRooms(c))
+            if (_can('crs.assignRoom')) SoftButton(label: '🚪 ${r['name']} (${r['cap']})', tone: 1, onTap: () => both(() => _result(_CoursesData.assignRoom(c, r['id'], _who), '${r['name']} הוקצה'))) else _chip('🚪 ${r['name']}', 0),
+        ]),
+      ],
+      if (_CoursesData.noTeacher(c) || _CoursesData.clashesOf(c).any((k) => k['kind'] == 'teacher')) ...[
+        _h('👩‍🏫 מורים פנויים ב-slot (הצעת-מורה-חלופי · ✓ התמחות תואמת)'),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          if (_CoursesData.freeTeachers(c).isEmpty) const StatusChip(label: 'אין מורה פנוי', tone: 2),
+          for (final t in _CoursesData.freeTeachers(c))
+            if (_can('crs.assignTeacher')) SoftButton(label: '${t['name']}${t['specialty'] == c['cat'] ? ' ✓' : ''}', tone: t['specialty'] == c['cat'] ? 1 : 0, onTap: () => both(() => _result(_CoursesData.assignTeacher(c, t['id'], _who), '${t['name']} הוקצה/תה'))) else _chip('${t['name']}', 0),
+        ]),
+      ],
       if (_CoursesData.belowMin(c)) AlertBanner(glyph: '📉', tone: 3, message: 'מתחת-למינימום: ${_CoursesData.enrolled(c)} רשומים מול ${_CoursesData.minToOpen(c)} (${c['minStudents'] == null ? 'נקודת-איזון: שכר-מורה+חדר ÷ מחיר-לשיעור' : 'מינימום-מוגדר'}) — לא-כלכלי'),
       _h('📅 השיעורים הבאים'),
       if (next.isEmpty) const EmptyState(glyph: '📅', message: 'אין מפגשים משובצים') else for (final dt in next) _lessonTile(c, dt, both),
-      _h('פעולות'),
-      Wrap(spacing: 8, runSpacing: 8, children: [
-        SoftButton(label: '🎓 שבץ-תלמיד', tone: 1, onTap: () => both(() => _pick = _pick == 'enroll' ? null : 'enroll')),
-        SoftButton(label: '⏳ הזמן-להמתנה', tone: 0, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite')),
-        SoftButton(label: '👩‍🏫 הקצה-מורה', tone: _CoursesData.noTeacher(c) ? 2 : 0, onTap: () => both(() => _pick = _pick == 'teacher' ? null : 'teacher')),
-        SoftButton(label: '🔄 מורה-מחליף (חד-פעמי)', tone: 0, onTap: () => both(() => _pick = _pick == 'sub' ? null : 'sub')),
-        SoftButton(label: '🚪 הקצה-חדר', tone: _CoursesData.noRoom(c) ? 2 : 0, onTap: () => both(() => _pick = _pick == 'room' ? null : 'room')),
-        SoftButton(label: '✏️ ערוך', tone: 0, onTap: () => both(() => _edit = !_edit)),
-        SoftButton(label: '📄 שכפל-חוג', tone: 0, onTap: () => both(() { final cp = _CoursesData.duplicate(c, _who); _flash('נוצר ${cp['name']} — יורש slot ⇒ בדוק התנגשות והקצה מחדש', 3); })),
-        SoftButton(label: '💬 שלח-הודעה', tone: 0, onTap: () => both(() => _pick = _pick == 'message' ? null : 'message')),
-        SoftButton(label: '🏁 סיים-חוג', tone: 2, onTap: () => both(() { _CoursesData.endCourse(c, _who); _flash('${c['name']} הסתיים — ההרשמות נסגרו', 3); })),
-      ]),
+      _h('פעולות · ${_CoursesData.roleDefs[_role]['label']}'),
+      // פעולות מגודרות פר-הרשאה (canGrantedAction); אין-הרשאה ⇒ מצב נעילת-הרשאות (AlertBanner)
+      Builder(builder: (_) {
+        final acts = <Widget>[
+          if (_can('crs.enroll')) SoftButton(label: '🎓 שבץ-תלמיד', tone: 1, onTap: () => both(() => _pick = _pick == 'enroll' ? null : 'enroll')),
+          if (_can('crs.waitlist')) SoftButton(label: '⏳ הזמן-להמתנה', tone: 0, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite')),
+          if (_can('crs.assignTeacher')) SoftButton(label: '👩‍🏫 הקצה-מורה', tone: _CoursesData.noTeacher(c) ? 2 : 0, onTap: () => both(() => _pick = _pick == 'teacher' ? null : 'teacher')),
+          if (_can('crs.assignTeacher')) SoftButton(label: '🔄 מורה-מחליף (חד-פעמי)', tone: 0, onTap: () => both(() => _pick = _pick == 'sub' ? null : 'sub')),
+          if (_can('crs.assignRoom')) SoftButton(label: '🚪 הקצה-חדר', tone: _CoursesData.noRoom(c) ? 2 : 0, onTap: () => both(() => _pick = _pick == 'room' ? null : 'room')),
+          if (_can('crs.edit')) SoftButton(label: '✏️ ערוך', tone: 0, onTap: () => both(() => _edit = !_edit)),
+          if (_can('crs.duplicate')) SoftButton(label: '📄 שכפל-חוג', tone: 0, onTap: () => both(() { final cp = _CoursesData.duplicate(c, _who); _flash('נוצר ${cp['name']} — יורש slot ⇒ בדוק התנגשות והקצה מחדש', 3); })),
+          if (_can('crs.message')) SoftButton(label: '💬 שלח-הודעה', tone: 0, onTap: () => both(() => _pick = _pick == 'message' ? null : 'message')),
+          if (_can('crs.end')) SoftButton(label: '🏁 סיים-חוג', tone: 2, onTap: () => both(() { _CoursesData.endCourse(c, _who); _flash('${c['name']} הסתיים — ההרשמות נסגרו', 3); })),
+          if (_can('crs.end')) SoftButton(label: '⛔ בטל-חוג', tone: 2, onTap: () => both(() { _CoursesData.cancelCourse(c, _who); _flash('${c['name']} בוטל', 3); })),
+        ];
+        return acts.isEmpty
+            ? const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', glyph: '🔒', tone: 2)
+            : Wrap(spacing: 8, runSpacing: 8, children: acts);
+      }),
       _gap(8),
       ..._picker(c, both),
       if (_edit) ...[
@@ -1204,11 +1504,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
     final subName = sub == null ? null : _CoursesData.teachers.where((t) => t['id'] == sub).firstOrNull?['name'];
     return Row(children: [
       Expanded(child: TimelineItem(
-        title: '${cancelled ? '✖ מבוטל · ' : ''}${dayNames[dt.weekday % 7]} ${_CoursesData.hm(dt.hour * 60 + dt.minute)}',
+        title: '${cancelled ? '✖ מבוטל · ' : ''}${dayNames[dt.weekday % 7]} ${_CoursesData.hm(dt.hour * 60 + dt.minute)}${_CoursesData.holidayName(dt) != null ? ' · 🕎 ${_CoursesData.holidayName(dt)}' : ''}',
         time: iso,
         body: '${subName != null ? '🔄 $subName (מחליף/ה)' : _CoursesData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_CoursesData.roomOf(c)?['name'] ?? 'ללא-חדר'}',
       )),
-      SoftButton(label: cancelled ? '↩ שחזר' : '✖ בטל', tone: cancelled ? 1 : 2, onTap: () => both(() { _CoursesData.cancelSession(c, iso, _who); _flash(cancelled ? 'השיעור $iso שוחזר' : 'השיעור $iso בוטל', cancelled ? 1 : 3); })),
+      if (_can('crs.cancel')) SoftButton(label: cancelled ? '↩ שחזר' : '✖ בטל', tone: cancelled ? 1 : 2, onTap: () => both(() { _CoursesData.cancelSession(c, iso, _who); _flash(cancelled ? 'השיעור $iso שוחזר' : 'השיעור $iso בוטל', cancelled ? 1 : 3); })),
     ]);
   }
 
@@ -1221,9 +1521,14 @@ class _CoursesScreenState extends State<CoursesScreen> {
       for (final e in es) ...[
         Row(children: [
           Expanded(child: MediaRow(glyph: '🎓', title: _CoursesData.memberName(e['memberId']), subtitle: '${_CoursesData.enrollStatusLabel(e)} · ${_CoursesData.paidLabel(e)}${_CoursesData.debtOf(e) > 0 ? ' · חוב ${shekel(_CoursesData.debtOf(e).toInt())}' : ''} · נרשם/ה ${e['enrolledAt']}')),
-          SoftButton(label: '🔁', tone: 0, onTap: () => both(() => _pick = _pick == 'move:${e['id']}' ? null : 'move:${e['id']}')),
+          if (_can('crs.move')) SoftButton(label: '🔁', tone: 0, onTap: () => both(() => _pick = _pick == 'move:${e['id']}' ? null : 'move:${e['id']}')),
           const SizedBox(width: 4),
-          SoftButton(label: '➖ הסר', tone: 2, onTap: () => both(() => _result(_CoursesData.remove(e, _who), '${_CoursesData.memberName(e['memberId'])} הוסר/ה'))),
+          if (_can('crs.remove')) SoftButton(label: '➖ הסר', tone: 2, onTap: () => both(() => _result(_CoursesData.remove(e, _who), '${_CoursesData.memberName(e['memberId'])} הוסר/ה'))),
+        ]),
+        // המקום-השמור של ההרשמה (חוק-7): tier/group/renew (אמת) · scholarship (מקום-שמור) — לולאה גנרית מעל enrollMetaFields
+        Wrap(spacing: 6, runSpacing: 4, children: [
+          for (final f in _CoursesData.enrollMetaFields)
+            if (e[f['key']] != null && '${e[f['key']]}'.trim().isNotEmpty) _chip('${f['prefix']}${e[f['key']]}${f['suffix']}', 0),
         ]),
         if (_pick == 'move:${e['id']}') ..._picker(c, both),
       ],
@@ -1236,16 +1541,16 @@ class _CoursesScreenState extends State<CoursesScreen> {
     return [
       Row(children: [
         Expanded(child: _h('⏳ רשימת-המתנה · ${w.length} · ${_CoursesData.isFull(c) ? 'החוג מלא' : '${_CoursesData.capacity(c) - _CoursesData.enrolled(c)} מקומות פנויים'}')),
-        SoftButton(label: '⏳ הזמן-להמתנה', tone: 0, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite')),
+        if (_can('crs.waitlist')) SoftButton(label: '⏳ הזמן-להמתנה', tone: 0, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite')),
       ]),
       ..._picker(c, both),
       if (w.isEmpty) const EmptyState(glyph: '⏳', message: 'אין ממתינים'),
       for (var i = 0; i < w.length; i++)
         Row(children: [
           Expanded(child: MediaRow(glyph: '${i + 1}', title: _CoursesData.memberName(w[i]['memberId']), subtitle: 'ממתין/ה מ-${w[i]['enrolledAt']}${_CoursesData.clashReason(c, w[i]['memberId']) != null ? ' · ⚠️ התנגשות' : ''}')),
-          SoftButton(label: '⬆ העלה', tone: _CoursesData.isFull(c) ? 3 : 1, onTap: () => both(() => _result(_CoursesData.promote(w[i], _who), '${_CoursesData.memberName(w[i]['memberId'])} הועלה/תה מההמתנה'))),
+          if (_can('crs.waitlist')) SoftButton(label: '⬆ העלה', tone: _CoursesData.isFull(c) ? 3 : 1, onTap: () => both(() => _result(_CoursesData.promote(w[i], _who), '${_CoursesData.memberName(w[i]['memberId'])} הועלה/תה מההמתנה'))),
           const SizedBox(width: 4),
-          SoftButton(label: '➖', tone: 2, onTap: () => both(() => _result(_CoursesData.remove(w[i], _who), 'הוסר/ה מההמתנה'))),
+          if (_can('crs.waitlist')) SoftButton(label: '➖', tone: 2, onTap: () => both(() => _result(_CoursesData.remove(w[i], _who), 'הוסר/ה מההמתנה'))),
         ]),
       _gap(6),
       Row(children: [
@@ -1339,6 +1644,42 @@ class _CoursesScreenState extends State<CoursesScreen> {
       ];
   // שבב-עובדה בטוח-לרוחב: טקסט ארוך מתכווץ (FittedBox) במקום לגלוש — StatusChip לבדו אינו עוטף
   Widget _chip(String label, int tone) => FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: StatusChip(label: label, tone: tone));
+
+  // ⬇ ייצוא (23-ג): CSV (toCsv⊕csvEscape) · iCal (icsEscape) · PDF = מקום-שמור (שער-פלטפורמה) — תצוגה-מקדימה בסנדבוקס
+  void _openExport(List<Map<String, dynamic>> cs) {
+    var fmt = 0;
+    showModalBottomSheet<void>(
+      context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
+        final text = fmt == 0 ? _CoursesData.csvOf(cs) : fmt == 1 ? _CoursesData.icsOf(cs) : '';
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
+          builder: (ctx, scroll) => Padding(
+            padding: const EdgeInsets.all(12),
+            child: Directionality(textDirection: TextDirection.rtl, child: GlassCard(
+              child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                MediaRow(glyph: '⬇', title: 'ייצוא', subtitle: '${cs.length} חוגים · ${_CoursesData.csvRows(cs).first.length} עמודות · שער-ייצוא פתוח'),
+                _gap(8),
+                SegmentedSwitch(items: const ['CSV', 'iCal', 'PDF'], selected: fmt, onSelect: (i) => setSheet(() => fmt = i)),
+                _gap(10),
+                if (fmt == 2)
+                  const AlertBanner(glyph: '📄', tone: 3, message: 'PDF — מקום-שמור: דורש שער-פלטפורמה (מנוע-PDF/הדפסה). השורות מוכנות ב-🖨 הדפס-מערכת; ההורדה תואר כשהשער יחובר.')
+                else ...[
+                  Text(fmt == 0 ? 'תצוגה מקדימה (BOM + חסימת-הזרקה):' : 'תצוגה מקדימה (VCALENDAR · 6 שיעורים-הבאים פר-חוג · מבוטל=CANCELLED):', style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
+                  _gap(8),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
+                    child: SelectableText(text, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
+                  ),
+                ],
+              ]),
+            )),
+          ),
+        );
+      }),
+    );
+  }
 
   // 🖨 הדפס-מערכת: תצוגת-הדפסה טקסטואלית של השבוע (SelectableText) — ההורדה/הדפסה חסומות בסנדבוקס
   void _openPrint(List<Map<String, dynamic>> cs) {

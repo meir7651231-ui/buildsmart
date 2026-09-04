@@ -1,13 +1,13 @@
 // 🧪 SchoolOS · חוגים ומערכת — אימות-רנדר דטרמיניסטי (THE-WAY §6) של מסך-החוגים.
 //   הבדיקה מוכיחה שהמנגנון רץ (V6 · לא זהב-חלול): הערכים שמרונדרים = חישוב-ידני מחוזה-הדאטה
 //   (enrollCount · waitlistFor · scheduleClashText · payBal · trendFromScan), לא מחרוזות-קבועות.
-//   משטח 800×2400 · pump מפורש (אטומים מונפשים ⇒ לא pumpAndSettle).
+//   משטח 800×5200 (ListView עצלה — כל האזורים חייבים להיבנות) · pump מפורש (אטומים מונפשים ⇒ לא pumpAndSettle).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/schoolos_courses.dart';
 
 Future<void> _mount(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(800, 2400);
+  tester.view.physicalSize = const Size(800, 5200); // גובה מוגדל: ListView עצלה בונה רק את הנראה — כל האזורים (אוטומציות+גריד+טריאז׳) על-המסך
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -24,7 +24,7 @@ void main() {
     // רשומים = Σ enrollCount (לא wait/ended): 4+10+2+3+1+1+1 = 22
     expect(find.text('22'), findsOneWidget, reason: 'kpiEnrolled = 22');
     // שיעורים-השבוע = Σ sessions של 7 חוגים-חיים = 8 · תפוסה-ממוצ׳ = 28%
-    expect(find.text('8'), findsOneWidget, reason: 'kpiLessonsWeek = 8');
+    expect(find.text('8'), findsNWidgets(2), reason: 'kpiLessonsWeek = 8 · וגם 8 חגים ב-45 ימים (כולל ערב ר״ה) באוטומציות');
     expect(find.text('28%'), findsOneWidget, reason: 'kpiOccupancyPct = round(1.978/7×100)');
     // בהמתנה = e15+e16 = 2 · ללא-מורה = c6 · מתחת-מינ׳ = c4 (נקודת-איזון ⌈150/40⌉=4 > 3 רשומים)
     expect(find.text('⏳ בהמתנה'), findsOneWidget);
@@ -92,7 +92,7 @@ void main() {
     await tester.tap(find.text('המתנה'));
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('הילה סעדון'), findsOneWidget);
-    await tester.tap(find.text('⬆ העלה'));
+    await tester.tap(find.text('⬆ העלה').last); // .last = בגיליון (מאחור: באנר-אוטומציה של תיאטרון)
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.textContaining('נחסם: החוג מלא (10/10)'), findsWidgets, reason: 'promote נחסם על קיבולת');
     // טאב נרשמים: הסרת נרשם ⇒ מקום מתפנה ⇒ הילה מועלית אוטומטית (waitlistFor סדר-אמת)
@@ -179,5 +179,117 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('תיאטרון'), findsOneWidget);
     expect(find.text('ציור וקרמיקה'), findsNothing);
+  });
+
+  testWidgets('גל 5 · הרשאות פר-תפקיד (roleOf⊕canGrantedAction⊕teacherIdOf) · מצבים: טעינה · ריק-למורה · צפייה-בלבד · הרשמה-עצמית', (tester) async {
+    await _mount(tester);
+    // רכז: כל פעולות-הפס-העליון
+    expect(find.text('➕ חוג-חדש'), findsOneWidget);
+    // מורה (rut@school ⇒ t1): רק החוגים-שלי (גיטרה+מקהלה), בלי חוג-חדש
+    await tester.tap(find.text('👩‍🏫 מורה'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('תפקיד: teacher · החוגים-שלי'), findsOneWidget);
+    expect(find.text('גיטרה מתחילים'), findsOneWidget);
+    expect(find.text('מקהלה'), findsOneWidget);
+    expect(find.text('רובוטיקה'), findsNothing);
+    expect(find.text('➕ חוג-חדש'), findsNothing);
+    // מורה בפאנל: הודעה+ביטול-שיעור מותרים, שיבוץ לא
+    await tester.tap(find.byTooltip('פרטים ופעולות').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('💬 שלח-הודעה'), findsOneWidget);
+    expect(find.text('🎓 שבץ-תלמיד'), findsNothing);
+    Navigator.of(tester.element(find.text('💬 שלח-הודעה'))).pop();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    // מצב: סמסטר בלי חוגים למורה ⇒ ריק
+    await tester.tap(find.text('חצי שנתי'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('אין חוגים משובצים למורה זה'), findsOneWidget);
+    await tester.tap(find.text('הכל'));
+    await tester.pump(const Duration(milliseconds: 100));
+    // צפייה-בלבד ⇒ פאנל בלי פעולות
+    await tester.tap(find.text('👁 צפייה'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('תפקיד: staff'), findsOneWidget);
+    await tester.tap(find.byTooltip('פרטים ופעולות').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה'), findsOneWidget);
+    Navigator.of(tester.element(find.text('צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה'))).pop();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    // הורה (f1: נועה+איתי) ⇒ המערכת-שלי (גיטרה·רובוטיקה·כדורסל) + קטלוג הרשמה-עצמית (4 פתוחים)
+    await tester.tap(find.text('👨‍👩‍👧 הורה'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('תפקיד: staff · המערכת-שלי'), findsOneWidget);
+    expect(find.text('כדורסל'), findsOneWidget);
+    expect(find.text('שחמט'), findsOneWidget, reason: 'לא במערכת-שלי — רק בקטלוג ההרשמה-העצמית');
+    expect(find.text('🛒 הרשמה-עצמית · 4 חוגים פתוחים (רכז/ת מאשר/ת)'), findsOneWidget);
+    await tester.tap(find.text('➕ נועה').first); // ציור וקרמיקה (ב–ה · נועה ה) ⇒ בקשה (wait)
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('ההרשמה נרשמה כבקשה — ממתינה לאישור רכז/ת (המתנה)'), findsOneWidget);
+    expect(find.text('🛒 הרשמה-עצמית · 3 חוגים פתוחים (רכז/ת מאשר/ת)'), findsOneWidget, reason: 'ציור וקרמיקה עבר ל"המערכת-שלי"');
+    // מצב-טעינה שמור: רענון ⇒ מחוון ⇒ מתנקה
+    await tester.tap(find.text('👑 רכז/ת'));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('🔄'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text('טוען מערכת…'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('גל 6 · אוטומציות: חג⇒ביטול-אוטו (hebParts⊕HOLIDAYS) · חדר/מורה-חלופי · ביקוש', (tester) async {
+    await _mount(tester);
+    // 6 שיעורים על חגים ב-45 ימים: ראשון 13.9 (ר״ה ב׳) c1+c5 · שני 14.9 (צום גדליה) c2+c4 · שני 21.9 (יו״כ) c2+c4
+    expect(find.textContaining('6 שיעורים נופלים בחג'), findsOneWidget);
+    expect(find.textContaining('גיטרה מתחילים 2026-09-13 (ראש השנה ב׳)'), findsOneWidget);
+    expect(find.textContaining('רובוטיקה 2026-09-21 (יום כיפור)'), findsOneWidget);
+    // חדר-חלופי לכדורסל (שני 16:00 · 15 תלמידים): אולם מוזיקה (20) פנוי · מעבדה תפוסה (רובוטיקה) · אומנות (18) פנוי
+    expect(find.textContaining('כדורסל — ללא-חדר · חדר חלופי: אולם מוזיקה (20) / חדר אומנות (18)'), findsOneWidget);
+    // מורה-חלופי לשחמט (חמישי 15:00): כל 4 המורים פנויים
+    expect(find.textContaining('שחמט — ללא-מורה · מורה חלופי: רות כהן / יוסי לוי / מיכל ברק / דני אשכנזי'), findsOneWidget);
+    expect(find.textContaining('ביקוש לסמסטר-הבא: '), findsOneWidget);
+    expect(find.textContaining('רובוטיקה (מלא'), findsOneWidget, reason: 'אות-ביקוש: מלא (המתנה כבר הועלתה בבדיקת גל 3 — מצב-הדמו משותף בין הבדיקות)');
+    // ביטול-אוטו ⇒ 6 רשומות-אודיט · הבאנר נעלם · שיעורים-השבוע (8) לא משתנה (החגים בשבועות הבאים)
+    await tester.tap(find.text('✖ בטל-אוטו'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.textContaining('6 שיעורי-חג בוטלו אוטומטית'), findsOneWidget);
+    expect(find.textContaining('שיעורים נופלים בחג'), findsNothing);
+    expect(find.text('8'), findsNWidgets(2), reason: 'שיעורים-השבוע נשאר 8 (החגים בשבועות הבאים) + 8 חגים');
+    // בפאנל רובוטיקה: השיעור 14.9 מסומן מבוטל + שם-החג (nextSessionDate⊕holidayName)
+    await tester.tap(find.byTooltip('פרטים ופעולות').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.text('מערכת'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('✖ מבוטל · שני 16:00 · 🕎 צום גדליה'), findsOneWidget);
+    expect(find.text('✖ מבוטל · שני 16:00 · 🕎 יום כיפור'), findsOneWidget);
+  });
+
+  testWidgets('גל 7 · ייצוא CSV (toCsv⊕csvEscape) · iCal (icsEscape) · PDF מקום-שמור · עמודת-קוד שקטה', (tester) async {
+    await _mount(tester);
+    await tester.tap(find.text('⬇ ייצוא'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('ייצוא'), findsOneWidget);
+    final raw = tester.widget<SelectableText>(find.byType(SelectableText)).data!;
+    expect(raw.startsWith('\uFEFF'), isTrue, reason: 'BOM');
+    final csv = raw.substring(1);
+    expect(csv.split('\n').first, startsWith('שם-חוג,תחום,מורה,חדר,'), reason: 'עמודות-החוזה המוארות (קוד = מקום-שמור שקט)');
+    expect(csv.split('\n').length, 8, reason: 'כותרת + 7 חוגים-חיים');
+    expect(csv, contains('רובוטיקה,מדעים,יוסי לוי,מעבדת מדעים,'));
+    await tester.tap(find.text('iCal'));
+    await tester.pump(const Duration(milliseconds: 100));
+    final ics = tester.widget<SelectableText>(find.byType(SelectableText)).data!;
+    expect(ics, startsWith('BEGIN:VCALENDAR'));
+    expect(ics, contains('SUMMARY:רובוטיקה'));
+    expect(ics, contains('DTSTART:20260907T160000'), reason: 'רובוטיקה: שני הקרוב 7.9 16:00');
+    await tester.tap(find.text('PDF'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.textContaining('PDF — מקום-שמור'), findsOneWidget);
   });
 }
