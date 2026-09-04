@@ -856,10 +856,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           const EmptyState(glyph: '📭', message: 'אין-שיעורים ביום זה (שבת)')
         else ...[
           // ── בורר-שיעור (פר-שיעור, לא פר-יום) + מבט + רישום-מרוכז ──
-          Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SegmentedSwitch(items: [for (final l in lessons) '${l['n']} · ${l['time']}'], selected: lessonIdx < 0 ? 0 : lessonIdx, onSelect: (i) => setState(() => _lesson = lessons[i]['n'] as int)),
-            SegmentedSwitch(items: const ['📋 גיליון', '🗂 טבלה'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
-          ]),
+          // בורר-שיעור בגלילה-אופקית (תוקן ברנדר-בדיקה: 5 שיעורים גלשו ב-800px בפונט-רחב ⇒ במובייל ודאי)
+          SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: [for (final l in lessons) '${l['n']} · ${l['time']}'], selected: lessonIdx < 0 ? 0 : lessonIdx, onSelect: (i) => setState(() => _lesson = lessons[i]['n'] as int))),
+          _gap(8),
+          Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['📋 גיליון', '🗂 טבלה'], selected: _mode, onSelect: (i) => setState(() => _mode = i))),
           _gap(8),
           Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
             StatusChip(label: '${lessons[lessonIdx < 0 ? 0 : lessonIdx]['subject']} · ${recorded ? 'נרשם' : 'טרם-נרשם'}', tone: recorded ? 1 : 3),
