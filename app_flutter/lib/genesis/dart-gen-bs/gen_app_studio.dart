@@ -28,7 +28,7 @@ import 'gen_retarget_donation_from_fee.dart' show DonationScreen, DonationFacts;
 class StudioApp extends StatelessWidget {
   const StudioApp({super.key});
   @override
-  Widget build(BuildContext context) => MaterialApp(title: 'Studio', debugShowCheckedModeBanner: false, theme: ThemeData(brightness: Brightness.dark, useMaterial3: true), home: const StudioHubScreen());
+  Widget build(BuildContext context) => MaterialApp(title: 'Studio', debugShowCheckedModeBanner: false, theme: ThemeData(brightness: Brightness.dark, useMaterial3: true, fontFamily: DsTokens.fontBody), home: const StudioHubScreen()); // גופן-הגוף של ה-DS (מצורף לחבילה) — לא Roboto-מ-CDN: האתר-המחולל עצמאי גם בלי רשת (L69)
 }
 
 class StudioHubScreen extends StatefulWidget {

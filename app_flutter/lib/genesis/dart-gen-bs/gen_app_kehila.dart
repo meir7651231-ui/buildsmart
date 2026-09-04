@@ -27,7 +27,7 @@ import 'gen_retarget_shopitem_from_crs.dart' show ShopItemScreen, ShopItemFacts;
 class KehilaApp extends StatelessWidget {
   const KehilaApp({super.key});
   @override
-  Widget build(BuildContext context) => MaterialApp(title: 'Kehila', debugShowCheckedModeBanner: false, theme: ThemeData(brightness: Brightness.dark, useMaterial3: true), home: const KehilaHubScreen());
+  Widget build(BuildContext context) => MaterialApp(title: 'Kehila', debugShowCheckedModeBanner: false, theme: ThemeData(brightness: Brightness.dark, useMaterial3: true, fontFamily: DsTokens.fontBody), home: const KehilaHubScreen()); // גופן-הגוף של ה-DS (מצורף לחבילה) — לא Roboto-מ-CDN: האתר-המחולל עצמאי גם בלי רשת (L69)
 }
 
 class KehilaHubScreen extends StatefulWidget {

@@ -28,6 +28,7 @@ class DsTokens {
   static const successSoft = Color(0x1F43D08C);
   // ── טיפוגרפיה · Pure (הכרעת-בעלים 1.9): כותרות = Frank Ruhl Libre · גוף = Heebo (theme) ──
   static const fontHead = 'FrankRuhlLibre';
+  static const fontBody = 'Heebo';             // גופן-גוף עברי מצורף (pubspec של בנייה-חכמה: Heebo) — טקסט-ברירת-מחדל בלי CDN (L69: Roboto-מ-gstatic לא נטען באתר-מנותק ⇒ טקסט נעלם)
   // ── רדיוסים · דרגות ──
   static const r = 16.0;
   static const rSm = 11.0;

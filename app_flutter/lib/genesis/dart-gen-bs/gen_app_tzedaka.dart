@@ -30,7 +30,7 @@ import 'gen_retarget_supporter_from_fee.dart' show SupporterScreen, SupporterFac
 class TzedakaApp extends StatelessWidget {
   const TzedakaApp({super.key});
   @override
-  Widget build(BuildContext context) => MaterialApp(title: 'Tzedaka', debugShowCheckedModeBanner: false, theme: ThemeData(brightness: Brightness.dark, useMaterial3: true), home: const TzedakaHubScreen());
+  Widget build(BuildContext context) => MaterialApp(title: 'Tzedaka', debugShowCheckedModeBanner: false, theme: ThemeData(brightness: Brightness.dark, useMaterial3: true, fontFamily: DsTokens.fontBody), home: const TzedakaHubScreen()); // גופן-הגוף של ה-DS (מצורף לחבילה) — לא Roboto-מ-CDN: האתר-המחולל עצמאי גם בלי רשת (L69)
 }
 
 class TzedakaHubScreen extends StatefulWidget {
