@@ -669,6 +669,7 @@ class _AttData {
     {'key': 'pdfPrint', 'label': 'PDF/הדפסה', 'where': 'CSV זמין; PDF/מדפסת = שקע'},
     {'key': 'substituteTeacher', 'label': 'מורה-מחליף מוקצה (מודול-מורים)', 'where': 'roleDefs[מחליף].classes מוזרק בהצבה'},
     {'key': 'dashboardCounters', 'label': 'מוני-לוח-הנהלה', 'where': 'KPI getters — המנהל מחווט למסך-הבית'},
+    {'key': 'loader', 'label': 'חיבור-אסינק (fetch/Firestore)', 'where': 'AttendanceScreen(loader:) ⇒ טעינה/שגיאה אמיתיות; null ⇒ הדגמה'},
   ];
 
   // ─── KPI-10 (פעולה-3 · כל אחד = ספירה/יחס על אמת) ───
@@ -705,7 +706,10 @@ class _AttData {
 
 // ═══════════ המסך הציבורי ═══════════
 class AttendanceScreen extends StatefulWidget {
-  const AttendanceScreen({super.key});
+  const AttendanceScreen({super.key, this.loader});
+  /// שקע-טעינה (חוק-7 · מקום-שמור): חיבור-אסינק אמיתי (fetch/Firestore) מוזרק בהצבה; null ⇒ הדגמת-700ms.
+  /// זריקה ⇒ מצב-השגיאה השמור מאיר (AlertBanner); הצלחה ⇒ מתנקה. הבדיקה מזריקה loader-נכשל (§6).
+  final Future<void> Function()? loader;
   @override
   State<AttendanceScreen> createState() => _AttendanceScreenState();
 }
@@ -902,7 +906,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
   void _refresh() {
     setState(() { _loading = true; _error = null; });
-    Future.delayed(const Duration(milliseconds: 700), () { if (mounted) setState(() => _loading = false); });
+    final load = widget.loader ?? () => Future<void>.delayed(const Duration(milliseconds: 700));
+    load().then((_) { if (mounted) setState(() => _loading = false); }, onError: (Object e) {
+      if (mounted) setState(() { _loading = false; _error = 'שגיאת-טעינה: $e — הנתונים המוצגים הם האחרונים שנטענו; נסה/י רענון'; });
+    });
   }
   Widget _loadingView() => const Padding(
         padding: EdgeInsets.symmetric(vertical: 48),
@@ -1098,9 +1105,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   // ═══ מרכז-אוטומציות: 10 אוטומציות-המפרט — כל אחת מנוע-מדף ⊕ AlertBanner (מוצג רק כשפעיל) ═══
   List<Widget> _automations(String cls) {
-    final streaks = _AttData.streakAlerts, preds = _AttData.dropoutPredictions, exp = _AttData.expiredResponses;
-    final mk = _AttData.makeupSuggestions, below = _AttData.belowThreshold, near = _AttData.nearThreshold;
-    final groups = _AttData.groupAbsences, up = _AttData.upcoming;
+    // היקף-פרטיות (תוקן ברנדר-הורה): הורה רואה רק את ילדו — גם בהתרעות (אפס שמות של ילדים אחרים)
+    final child = _AttData.roleDef['child'] as String?;
+    bool inScope(Map<String, dynamic> x) => child == null || (x['id'] ?? x['sid']) == child;
+    final streaks = _AttData.streakAlerts.where(inScope).toList(), preds = _AttData.dropoutPredictions.where(inScope).toList(), exp = _AttData.expiredResponses.where(inScope).toList();
+    final mk = _AttData.makeupSuggestions.where(inScope).toList(), below = _AttData.belowThreshold.where(inScope).toList(), near = _AttData.nearThreshold.where(inScope).toList();
+    final groups = _AttData.groupAbsences.where((g) => child == null || g['cls'] == _AttData.studentById(child)['cls']).toList(), up = _AttData.upcoming;
     final autoLock = _AttData.autoLocked(_Placement.today);
     final out = <Widget>[
       if (streaks.isNotEmpty) AlertBanner(glyph: '🔗', tone: 2, message: 'התרעת-רצף (≥${_Placement.streakAlert}): ${streaks.map((s) => '${s['name']} (${_AttData.streak(s['id'] as String)})').join(' · ')}'),

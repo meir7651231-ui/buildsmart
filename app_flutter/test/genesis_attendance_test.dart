@@ -1,27 +1,28 @@
 // 🧪 גל 8 · אימות-רנדר דטרמיניסטי (THE-WAY §6) למודול-הנוכחות (SchoolOS · AttendanceScreen).
 //   מוכיח בבייטים: KPI-10 מהמודל-ההפוך · טאפ-מחזורי (נוכח→חסר→איחור→שחרור) · מצב-טעינה שמור ·
 //   גידור-הרשאות (צפייה-בלבד · חלון-עריכה של מחליף) · טאבים (בסיכון · אודיט מגודר) · פילטר-חריגה (finderMatches).
+//   + גל 8ב (הכוונת-מנהל): תפקיד-הורה (היקף · פעולות-מוגנות לא קיימות) · מצב-שגיאה (שקע loader נכשל ⇒ AlertBanner ⇒ מתנקה).
 //   משטח 800×4000 (כל התוכן נבנה — ListView עצל + פונט-בדיקה רחב) · pump מפורש (אטומים מונפשים ⇒ לא pumpAndSettle). today/now מוזרקים במסך (אפס Date.now).
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:buildsmart/genesis/dart-gen-bs/schoolos_attendance.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_pure.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_seam.dart';
-import 'package:buildsmart/genesis/dart-gen-bs/schoolos_attendance.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-Widget _shell() => MaterialApp(
+Widget _shell({Future<void> Function()? loader}) => MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true, scaffoldBackgroundColor: DsTokens.bg, brightness: Brightness.dark),
       builder: (c, ch) => PureScope(theme: DsPure.themes[DsPure.defaultTheme]!, child: Directionality(textDirection: TextDirection.rtl, child: ch ?? const SizedBox.shrink())),
-      home: const AttendanceScreen(),
+      home: AttendanceScreen(loader: loader),
     );
 
-Future<void> _pumpApp(WidgetTester tester) async {
+Future<void> _pumpApp(WidgetTester tester, {Future<void> Function()? loader}) async {
   tester.view.physicalSize = const Size(800, 4000);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
-  await tester.pumpWidget(_shell());
+  await tester.pumpWidget(_shell(loader: loader));
   await tester.pump(const Duration(milliseconds: 300));
 }
 
@@ -104,7 +105,7 @@ void main() {
     // רכז/ת: אודיט נפתח + שקעי-הצבה מוצהרים (מקום-שמור)
     await tester.tap(find.text('🧭 רכז/ת'));
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.textContaining('שקעי-הצבה · 13 מקומות-שמורים'), findsOneWidget);
+    expect(find.textContaining('שקעי-הצבה · 14 מקומות-שמורים'), findsOneWidget);
     // טאב בסיכון: טריאז' — רון בדלי-האדום
     await tester.ensureVisible(find.text('🚨 בסיכון').last);
     await tester.tap(find.text('🚨 בסיכון').last); // .last = הטאב (הצ׳יפ-סינון קודם בעץ)
@@ -119,5 +120,68 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('רון שמעוני'), findsOneWidget);
     expect(find.text('נועה לוי'), findsNothing, reason: 'finderMatches מסנן תלמידים ללא-סיכון');
+  });
+
+  testWidgets('גל 8ב · תפקיד-הורה (חוק-6 · המפרט: ילדו בלבד · צפייה + אישור-חיסור) — הפעולות-המוגנות לא קיימות', (tester) async {
+    await _pumpApp(tester);
+    await tester.ensureVisible(find.text('👪 הורה'));
+    await tester.tap(find.text('👪 הורה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    // היקף: רק כיתת-הילד ורק הילד
+    expect(find.text('י׳-1'), findsWidgets, reason: 'הורה רואה את כיתת-ילדו');
+    expect(find.text('י׳-2'), findsNothing);
+    expect(find.text('רון שמעוני'), findsOneWidget, reason: 'ילדו בלבד בגיליון');
+    // פרטיות (נתפס ברנדר): שום שם של ילד-אחר — גם לא בבאנרי-האוטומציות (סף · השלמות · רצף)
+    for (final other in ['ליאור אוחיון', 'הדר נחום', 'עידו כהן', 'טל מזרחי', 'נדב חדד', 'רוני גל']) {
+      expect(find.textContaining(other), findsNothing, reason: 'הורה: "$other" לא מרונדר בשום מקום');
+    }
+    // פעולות-מוגנות לא קיימות ב-finders: רישום-מרוכז · נעילה · ייצוא · דוח · הודעה-לכיתה · כפתור-מחזור
+    for (final l in ['✅ כולם-נוכחים', '🔒 נעל-יום', '🔓 פתח יום-נעול', '⬇ CSV', '📄 PDF', '🖨 הדפס-גיליון', '📈 דוח-שבועי', '📣 הודעה-לכיתה']) {
+      expect(find.text(l), findsNothing, reason: 'הורה: "$l" אסור');
+    }
+    expect(find.widgetWithText(InkWell, '✅ נוכח'), findsNothing, reason: 'הורה: אין טאפ-מחזורי (StatusChip בלבד)');
+    expect(find.textContaining('צפייה-בלבד: אין הרשאת-רישום'), findsOneWidget);
+    // אודיט מגודר · השלמות ללא כפתורי-תזמון
+    await tester.ensureVisible(find.text('🧾 אודיט'));
+    await tester.tap(find.text('🧾 אודיט'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('אודיט — רכז/ת והנהלה בלבד'), findsOneWidget);
+    // טאב-הורים: רק הודעות של ילדו + "אשר-חיסור" (att.parentOk) · אישור מוריד את ההודעה מהתור-האוטו
+    await tester.ensureVisible(find.text('👪 הורים'));
+    await tester.tap(find.text('👪 הורים'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('תקשורת-הורים · 7 הודעות'), findsOneWidget, reason: '7 חיסורים לא-מוצדקים של רון ללא-אישור');
+    expect(find.textContaining('עמית כהן'), findsNothing, reason: 'הודעות של הורה אחר לא מרונדרות');
+    expect(find.text('📨 שלח'), findsNothing, reason: 'הורה לא שולח הודעות');
+    expect(find.text('✔ אשר-חיסור'), findsNWidgets(7));
+    await tester.tap(find.text('✔ אשר-חיסור').first);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('תקשורת-הורים · 6 הודעות'), findsOneWidget, reason: 'אישור-הורה ⇒ parentOk ⇒ יוצא מהתור-האוטו');
+    expect(find.text('✔ אשר-חיסור'), findsNWidgets(6));
+    // חזרה למורה (מצב-סטטי משותף לבדיקות)
+    await tester.ensureVisible(find.text('👩‍🏫 מורה'));
+    await tester.tap(find.text('👩‍🏫 מורה'));
+    await tester.pump(const Duration(milliseconds: 200));
+  });
+
+  testWidgets('גל 8ב · מצב-שגיאה שמור: loader-נכשל ⇒ AlertBanner מרונדר · loader-מצליח ⇒ מתנקה', (tester) async {
+    var calls = 0;
+    await _pumpApp(tester, loader: () async {
+      calls++;
+      if (calls == 1) throw StateError('חיבור-אסינק נכשל (הדגמה)');
+    });
+    expect(find.textContaining('שגיאת-טעינה'), findsNothing);
+    await tester.tap(find.text('🔄'));
+    await tester.pump(); // ה-loader נכשל במיקרו-טאסק ⇒ onError לפני הפריים הבא (אין חלון-טעינה נצפה)
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.textContaining('שגיאת-טעינה: Bad state: חיבור-אסינק נכשל (הדגמה)'), findsOneWidget, reason: 'מצב-השגיאה השמור מאיר עם השגיאה האמיתית');
+    expect(find.text('רון שמעוני'), findsNothing, reason: 'בשגיאה — תוכן-הטאב מוחלף בבאנר (לא מציגים "אמת" שלא נטענה)');
+    await tester.tap(find.text('🔄'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.textContaining('שגיאת-טעינה'), findsNothing, reason: 'טעינה מוצלחת מנקה את השגיאה');
+    expect(find.text('רון שמעוני'), findsOneWidget);
+    expect(calls, 2);
   });
 }
