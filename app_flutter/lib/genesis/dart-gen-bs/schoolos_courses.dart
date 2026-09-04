@@ -15,6 +15,12 @@ import '../dart-ui-bs/premium/feedback/empty_state.dart';
 import '../dart-ui-bs/premium/actions/segmented_switch.dart';
 import '../dart-ui-bs/premium/lists/stat_row.dart'; // יחס (תפוסה/ניצולת) = בר-מילוי, לא linear_progress המזייף
 import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון-בלחיצה) — לא DataGrid המזייף
+import '../dart-ui-bs/ds/ds_field.dart'; // שדה-טקסט מבוקר (ערוך: שם-חוג)
+import '../dart-ui-bs/ds/ds_number_field.dart'; // שדה-מספר מבוקר (ערוך: קיבולת)
+import '../dart-ui-bs/premium/surfaces/glass_card.dart'; // מיכל-פאנל (child שרירותי) — פאנל-צד
+import '../dart-ui-bs/premium/actions/soft_button.dart'; // פעולה (label/onTap/tone)
+import '../dart-ui-bs/premium/feedback/alert_banner.dart'; // התראה/תוצאת-פעולה (message/tone/glyph)
+import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט-ציר-זמן (title/time/body) — לא timeline_flow המזייף
 import '../dart-maor/enroll-count.dart'; // נרשמים-חיים לחוג (לא wait/ended) — מנוע-אמת ממאור
 import '../dart-maor/waitlist-for.dart'; // רשימת-המתנה מסודרת לפי enrolledAt — מנוע-אמת ממאור
 import '../dart-maor/sessions-of.dart'; // מפגשי-חוג (sessions או weekday/time) — מנוע-אמת ממאור
@@ -33,6 +39,24 @@ import '../dart-maor/min-to-hm.dart'; // דקות ⇒ 'HH:MM' (תוויות-שע
 import '../dart-maor/courses-of-teacher.dart'; // חוגי-מורה (מבט פר-מורה) — מנוע-אמת ממאור
 import '../dart-maor/weekly-room-sessions.dart'; // מפגשים/שבוע פר-חדר (ניצולת) — מנוע-אמת ממאור
 import '../dart-maor/clamp-scale.dart'; // הצמדה לגבולות (יחס-ניצולת) — מנוע-אמת ממאור
+import '../dart-maor/course-fits-member.dart'; // דרישות-קדם: מגדר/גיל/שכבה — מנוע-אמת ממאור
+import '../dart-maor/grade-fits.dart'; // שכבת-יעד gradeMin..gradeMax — מנוע-אמת ממאור
+import '../dart-maor/grade-index.dart'; // אינדקס-שכבה בסדר-הכיתות — מנוע-אמת ממאור
+import '../dart-maor/grade-order.dart'; // סדר-הכיתות (גן..יב) — אטום-דאטה ממאור
+import '../dart-maor/age-of.dart'; // גיל מתאריך-לידה מול "עכשיו" מוזרק — מנוע-אמת ממאור
+import '../dart-maor/enroll-summary.dart'; // סיכום-הרשמה: נוכחויות/חיסורים/noshow/יתרה — מנוע-אמת ממאור
+import '../dart-maor/enrollment-paid-status.dart'; // paid/partial/unpaid — מנוע-אמת ממאור
+import '../dart-maor/enroll-status-meta.dart'; // תווית-סטטוס-הרשמה (term מוזרק) — מנוע-אמת ממאור
+import '../dart-maor/presents-in-month.dart'; // נוכחויות בחודש-הנוכחי — מנוע-אמת ממאור
+import '../dart-maor/next-session-date.dart'; // השיעור-הבא (now מוזרק) — מנוע-אמת ממאור
+import '../dart-maor/duplicate-course.dart'; // שכפל-חוג (id חדש + סיומת-עותק) — מנוע-אמת ממאור
+import '../dart-maor/next-year-course-draft.dart'; // שכפול-סמסטר/שנה: טיוטה לשנה-הבאה — מנוע-אמת ממאור
+import '../dart-maor/next-year-dates.dart'; // הזזת-תאריכים בשנה — מנוע-אמת ממאור
+import '../dart-maor/academic-year-label.dart'; // תווית שנת-לימודים (2027/28) — מנוע-אמת ממאור
+import '../dart-maor/default-course-dates.dart'; // תאריכי-ברירת-מחדל לחוג-חדש (1.9–31.7) — מנוע-אמת ממאור
+import '../dart-maor/wa-link.dart'; // קישור WhatsApp (שלח-הודעה-לחוג) — מנוע-אמת ממאור
+import '../dart-maor/wa-digits.dart'; // נרמול-ספרות-טלפון — מנוע-אמת ממאור
+import '../dart-maor/room-info-label.dart'; // תווית-חדר (משבצת/קיבולת/נגישות/ציוד) — מנוע-אמת ממאור
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -141,8 +165,13 @@ class _CoursesData {
   static final Map<String, Map<String, dynamic>> courseOverride = {}; // courseId ⇒ {teacherId?, roomId?, ended?}
   static final List<Map<String, dynamic>> extraCourses = []; // חוגים משכפול (duplicateCourse/nextYearCourseDraft)
   static final Set<String> cancelledSessions = {}; // 'courseId|iso' — ביטול-שיעור-יחיד (חג/חד-פעמי)
-  static final List<Map<String, dynamic>> history = []; // אודיט: {at, who, act, what} (בצורת AuditEntry)
-  static void log(String who, String act, String what) => history.insert(0, {'at': today, 'who': who, 'act': act, 'what': what});
+  static final Map<String, String> substitutes = {}; // 'courseId|iso' ⇒ teacherId (החלף-מורה חד-פעמי)
+  static final List<Map<String, dynamic>> history = []; // אודיט: {at, who, act, what, courseId} (בצורת AuditEntry + מפתח-חוג)
+  static void log(String who, String act, String what, [String courseId = '']) =>
+      history.insert(0, {'at': today, 'who': who, 'act': act, 'what': what, 'courseId': courseId});
+  static int _seq = 0;
+  static String nextId(String prefix) => '$prefix${++_seq}';
+  static bool autoPromote = true; // אוטומציה: העלאה-אוטומטית מהמתנה כשמתפנה-מקום (ניתן-לכיבוי)
 
   static List<Map<String, dynamic>> get allCourses => [
         for (final c in [...courses, ...extraCourses]) {...c, ...?courseOverride[c['id']]},
@@ -402,6 +431,242 @@ class _CoursesData {
   static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
       c['get'] != null || c['key'] == '__status' || rows.any((r) => r[c['key']] != null && '${r[c['key']]}'.trim().isNotEmpty);
 
+  // ═══ ביצוע (פעולת-יסוד) · כל פעולה = מנועי-מדף ⊕ פנקס-מצב ⊕ רשומת-אודיט ═══
+  static final DateTime nowAt = DateTime.parse('${today}T09:00:00'); // "עכשיו" מוזרק (חוק: אין DateTime.now במנוע)
+  static DateTime _atNoon(String iso) => DateTime.parse('${iso}T12:00:00');
+  static Map<String, dynamic>? courseById(dynamic id) => allCourses.where((c) => c['id'] == id).firstOrNull;
+  static Map<String, dynamic>? enrollmentById(dynamic id) => allEnrollments.where((e) => e['id'] == id).firstOrNull;
+  // תלמידים שאינם רשומים-חיים/ממתינים לחוג (מועמדים לשיבוץ/הזמנה)
+  static List<Map<String, dynamic>> candidates(Map<String, dynamic> c) {
+    final taken = {for (final e in enrollmentsOf(c)) if (e['status'] != 'ended') e['memberId']};
+    return [for (final f in families) for (final m in (f['members'] as List)) if (!taken.contains(m['id'])) memberOf(m['id'])!];
+  }
+  // דרישות-קדם (courseFitsMember ⊕ gradeFits ⊕ gradeIndex ⊕ gradeOrder ⊕ ageOf) ⇒ null=מתאים · אחרת סיבה
+  static bool _gradeFits(dynamic c, dynamic grade) =>
+      gradeFits({'gradeMin': '${c['gradeMin'] ?? ''}', 'gradeMax': '${c['gradeMax'] ?? ''}'}, grade as String?, (g) => gradeIndex(g, gradeOrder));
+  static String? fitReason(Map<String, dynamic> c, Map<String, dynamic> m) {
+    final age = ageOf(m['birth'] as String?, nowAt);
+    if (courseFitsMember(c, m['gender'], age, m['grade'], _gradeFits)) return null;
+    if (!_gradeFits(c, m['grade'])) return 'שכבה ${m['grade']} מחוץ ל-${c['gradeMin']}–${c['gradeMax']}';
+    if (age != null && ((c['ageMin'] is num && age < c['ageMin']) || (c['ageMax'] is num && age > c['ageMax']))) return 'גיל $age מחוץ ל-${c['ageMin']}–${c['ageMax']}';
+    return 'מגדר לא-תואם';
+  }
+  // התנגשות-תלמיד בזמן-אמת (scheduleClashText ממאור) — חוסמת-שיבוץ
+  static String? clashReason(Map<String, dynamic> c, dynamic memberId) {
+    final txt = scheduleClashText(db, memberId, c, sessionsOf, dayNames, const {'k1': 'ended', 'k2': 'מתנגש עם ', 'k3': ' · '});
+    return txt == null ? null : '$txt';
+  }
+  static Map<String, dynamic> _newEnrollment(Map<String, dynamic> c, dynamic memberId, String status) => {
+        'id': nextId('e-new-'), 'memberId': memberId, 'courseId': c['id'], 'status': status, 'enrolledAt': today, 'group': '',
+        'totalDue': c['perLesson'] == true ? 0 : ((c['price'] as num?) ?? 0) * 10, 'dueDate': '', 'note': '', 'payments': <Map<String, dynamic>>[],
+        'presents': <String>[], 'absences': <Map<String, dynamic>>[],
+      };
+  // 🎓 שבץ-תלמיד: קדם ⊕ התנגשות ⊕ קיבולת ⇒ enrolled / waitlisted / blocked
+  static String enroll(Map<String, dynamic> c, dynamic memberId, String who) {
+    final m = memberOf(memberId);
+    if (m == null) return 'blocked:תלמיד לא נמצא';
+    final fit = fitReason(c, m);
+    if (fit != null) return 'blocked:דרישות-קדם — $fit';
+    final clash = clashReason(c, memberId);
+    if (clash != null) return 'blocked:התנגשות — ${memberName(memberId)} $clash';
+    final status = isFull(c) ? 'wait' : 'active';
+    extraEnrollments.add(_newEnrollment(c, memberId, status));
+    log(who, status == 'wait' ? 'המתנה' : 'שיבוץ', '${memberName(memberId)} ⇐ ${c['name']}${status == 'wait' ? ' (מלא ⇒ המתנה)' : ''}', c['id'] as String);
+    return status == 'wait' ? 'waitlisted' : 'enrolled';
+  }
+  // ⏳ הזמן-להמתנה (ישירות, גם כשיש מקום — לפי בקשה)
+  static String invite(Map<String, dynamic> c, dynamic memberId, String who) {
+    final m = memberOf(memberId);
+    if (m == null) return 'blocked:תלמיד לא נמצא';
+    final fit = fitReason(c, m);
+    if (fit != null) return 'blocked:דרישות-קדם — $fit';
+    extraEnrollments.add(_newEnrollment(c, memberId, 'wait'));
+    log(who, 'המתנה', '${memberName(memberId)} הוזמן/ה להמתנה ⇐ ${c['name']}', c['id'] as String);
+    return 'waitlisted';
+  }
+  // ➖ הסר-תלמיד ⇒ מקום מתפנה ⇒ העלאה-אוטומטית של ראש-ההמתנה (waitlistFor = סדר-אמת)
+  static String remove(Map<String, dynamic> e, String who) {
+    statusOverride[e['id'] as String] = 'ended';
+    final c = courseById(e['courseId'])!;
+    log(who, 'הסרה', '${memberName(e['memberId'])} ⇐ ${c['name']}', c['id'] as String);
+    final promoted = autoPromote ? promoteNext(c, 'אוטומציה') : null;
+    return promoted == null ? 'removed' : 'removed+promoted:$promoted';
+  }
+  static String? promoteNext(Map<String, dynamic> c, String who) {
+    if (isFull(c)) return null;
+    final w = waitlist(c);
+    if (w.isEmpty) return null;
+    statusOverride[w.first['id'] as String] = 'active';
+    log(who, 'העלאה-מהמתנה', '${memberName(w.first['memberId'])} ⇐ ${c['name']}', c['id'] as String);
+    return memberName(w.first['memberId']);
+  }
+  // ⬆ העלה-מהמתנה (ידני): נחסם כשהחוג מלא
+  static String promote(Map<String, dynamic> e, String who) {
+    final c = courseById(e['courseId'])!;
+    if (isFull(c)) return 'blocked:החוג מלא (${enrolled(c)}/${capacity(c)}) — הסר תלמיד או הגדל קיבולת';
+    final clash = clashReason(c, e['memberId']);
+    if (clash != null) return 'blocked:התנגשות — ${memberName(e['memberId'])} $clash';
+    statusOverride[e['id'] as String] = 'active';
+    log(who, 'העלאה-מהמתנה', '${memberName(e['memberId'])} ⇐ ${c['name']}', c['id'] as String);
+    return 'promoted';
+  }
+  // 🔁 העבר-תלמיד-בין-חוגים = שיבוץ-ליעד (עם כל הבדיקות) ואז הסרה-מהמקור
+  static String move(Map<String, dynamic> e, Map<String, dynamic> target, String who) {
+    final r = enroll(target, e['memberId'], who);
+    if (r.startsWith('blocked')) return r;
+    remove(e, who);
+    return 'moved:$r';
+  }
+  // 👩‍🏫 הקצה-מורה / 🚪 הקצה-חדר — התנגשות חוסמת-שיבוץ (סימולציה לפני-ביצוע)
+  static bool _wouldClash(Map<String, dynamic> c, String key, dynamic id) {
+    final sim = {...c, key: id};
+    return liveCourses.any((o) => o['id'] != c['id'] && o[key] == id && '$id'.isNotEmpty && _sameSlot(sim, o));
+  }
+  static String assignTeacher(Map<String, dynamic> c, dynamic tid, String who) {
+    if (_wouldClash(c, 'teacherId', tid)) return 'blocked:התנגשות-מורה — ${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} מלמד/ת חוג-אחר באותו slot';
+    courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'teacherId': tid};
+    log(who, 'הקצאת-מורה', '${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} ⇐ ${c['name']}', c['id'] as String);
+    return 'assigned';
+  }
+  static String assignRoom(Map<String, dynamic> c, dynamic rid, String who) {
+    if (_wouldClash(c, 'roomId', rid)) return 'blocked:התנגשות-חדר — ${rooms.where((r) => r['id'] == rid).firstOrNull?['name']} תפוס באותו slot';
+    courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'roomId': rid};
+    log(who, 'הקצאת-חדר', '${rooms.where((r) => r['id'] == rid).firstOrNull?['name']} ⇐ ${c['name']}', c['id'] as String);
+    return 'assigned';
+  }
+  // 🔄 החלף-מורה חד-פעמי (לשיעור-הקרוב) — לא משנה את החוג
+  static void substitute(Map<String, dynamic> c, String iso, dynamic tid, String who) {
+    substitutes['${c['id']}|$iso'] = '$tid';
+    log(who, 'מורה-מחליף', '${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} ב-$iso ⇐ ${c['name']}', c['id'] as String);
+  }
+  // ✖ בטל-שיעור-יחיד (toggle)
+  static void cancelSession(Map<String, dynamic> c, String iso, String who, [String reason = 'חד-פעמי']) {
+    final k = '${c['id']}|$iso';
+    if (cancelledSessions.remove(k)) {
+      log(who, 'שחזור-שיעור', '$iso ⇐ ${c['name']}', c['id'] as String);
+    } else {
+      cancelledSessions.add(k);
+      log(who, 'ביטול-שיעור', '$iso · $reason ⇐ ${c['name']}', c['id'] as String);
+    }
+  }
+  // 🏁 סיים-חוג (מרוכז): החוג + כל ההרשמות-החיות ⇒ ended
+  static void endCourse(Map<String, dynamic> c, String who) {
+    courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'ended': true};
+    for (final e in liveEnrollmentsOf(c)) {
+      statusOverride[e['id'] as String] = 'ended';
+    }
+    log(who, 'סיום-חוג', '${c['name']} · ${liveEnrollmentsOf(c).length} הרשמות נסגרו', c['id'] as String);
+  }
+  // ✏️ ערוך: שם / קיבולת (הגדלת-קיבולת ⇒ העלאה-אוטומטית מהמתנה)
+  static void edit(Map<String, dynamic> c, String key, dynamic value, String who) {
+    courseOverride[c['id'] as String] = {...?courseOverride[c['id']], key: value};
+    log(who, 'עריכה', '$key=$value ⇐ ${c['name']}', c['id'] as String);
+    if (key == 'maxStudents' && autoPromote) {
+      while (promoteNext(courseById(c['id'])!, 'אוטומציה') != null) {}
+    }
+  }
+  // 📄 שכפל-חוג (duplicateCourse ממאור: id חדש + סיומת-עותק, אותם תאריכים) — העותק יורש slot ⇒ המנוע יסמן התנגשות עד שישובץ מחדש
+  static Map<String, dynamic> duplicate(Map<String, dynamic> c, String who) {
+    final copy = duplicateCourse(c, nextId('c-copy-'), {'start': c['start'], 'end': c['end']}, term: (k) => k == 'avtk' ? ' (עותק)' : k);
+    extraCourses.add(copy);
+    log(who, 'שכפול-חוג', '${copy['name']}', copy['id'] as String);
+    return copy;
+  }
+  // 📑 שכפל-סמסטר/שנה (nextYearCourseDraft⊕nextYearDates⊕academicYearLabel ממאור) — "חכם": מסמן טיוטות בלי-מורה/בלי-חדר-פעיל
+  static Map<String, int> duplicateSemester(int sem, String who) {
+    var created = 0, flagged = 0;
+    for (final c in bySemester(liveCourses, sem)) {
+      if (c['prevYearId'] != null) continue; // כבר טיוטת-שכפול
+      final draft = nextYearCourseDraft(
+        c, nextId('c-next-'),
+        (st, en) => nextYearDates('$st', '$en', _atNoon, _iso),
+        (st) => academicYearLabel('$st', _atNoon),
+      ).cast<String, dynamic>();
+      extraCourses.add(draft);
+      created++;
+      if (noTeacher(draft) || roomOf(draft) == null || roomOf(draft)!['active'] != true) flagged++;
+    }
+    log(who, 'שכפול-סמסטר', '$created טיוטות לשנה-הבאה · $flagged דורשות-טיפול (מורה/חדר)');
+    return {'created': created, 'flagged': flagged};
+  }
+  // ➕ חוג-חדש (defaultCourseDates ממאור) — נולד ללא-מורה/ללא-חדר ⇒ מצבי-החריגה מאירים מיד
+  static Map<String, dynamic> newCourse(String who) {
+    final dates = defaultCourseDates(today);
+    final c = <String, dynamic>{
+      'id': nextId('c-new-'), 'name': 'חוג חדש', 'teacherId': '', 'roomId': '', 'cat': '', 'semester': semesterOptions.first, 'sector': 'כללי',
+      'start': dates['start'], 'end': dates['end'], 'sessions': <Map<String, dynamic>>[], 'maxStudents': 0, 'price': 0, 'gender': 'all',
+      'description': '', 'notes': '', 'files': <Map<String, dynamic>>[],
+    };
+    extraCourses.add(c);
+    log(who, 'חוג-חדש', '${c['name']} · ${dates['start']}–${dates['end']}', c['id'] as String);
+    return c;
+  }
+  // 💬 שלח-הודעה-לחוג: קישור-WhatsApp פר-משפחה (waLink⊕waDigits ממאור) — הזהות (טלפון) מוזרקת מהדאטה, לא באטום
+  static List<Map<String, String>> waLinks(Map<String, dynamic> c, String text) => [
+        for (final e in liveEnrollmentsOf(c))
+          () {
+            final m = memberOf(e['memberId']);
+            final href = waLink(m?['famPhone'], text, waDigits);
+            return {'name': memberName(e['memberId']), 'href': href == null ? '—' : '$href'};
+          }(),
+      ];
+
+  // ─── אימות: נוכחות · גבייה · שיעורים-הבאים · מקום-שמור ───
+  static const _statusT = {'k1': 'פעיל', 'k2': 'מוקפא', 'k3': 'הסתיים', 'k4': 'רשימת-המתנה'};
+  static Map<String, dynamic> summary(Map<String, dynamic> e) => enrollSummary(e, (x) => payBal(x, _paid), (x) => paidOf(x), _statusT);
+  static String paidStatus(Map<String, dynamic> e) => enrollmentPaidStatus(e, (x) => payBal(x, _paid), (x) => paidOf(x));
+  static String paidLabel(Map<String, dynamic> e) => const {'paid': '✅ שולם', 'partial': '🟠 חלקי', 'unpaid': '🔴 לא-שולם'}[paidStatus(e)]!;
+  static String enrollStatusLabel(Map<String, dynamic> e) =>
+      enrollStatusMeta(e, term: (k) => const {'mvkpa': 'מוקפא', 'hstyym': 'הסתיים', 'rshymthmtnh': 'המתנה', 'payl': 'פעיל'}[k] ?? k)['label']!;
+  static int presentsThisMonth(Map<String, dynamic> e) => presentsInMonth((e['presents'] as List?)?.cast<Object?>(), today);
+  static double attendanceRate(Map<String, dynamic> c) {
+    var p = 0, a = 0;
+    for (final e in liveEnrollmentsOf(c)) {
+      final sm = summary(e);
+      p += sm['presents'] as int;
+      a += sm['absences'] as int;
+    }
+    return p + a == 0 ? 0 : p / (p + a);
+  }
+  static num courseExpected(Map<String, dynamic> c) => grandTotal(liveEnrollmentsOf(c), (e) => ((e as Map)['totalDue'] as num?) ?? 0);
+  // השיעורים-הבאים: nextSessionDate (מנוע) מופעל n פעמים מ-"עכשיו" המוזרק
+  static List<DateTime> upcoming(Map<String, dynamic> c, int n) {
+    final out = <DateTime>[];
+    var from = nowAt;
+    for (var i = 0; i < n; i++) {
+      final d = nextSessionDate(c, from, sessionsOf);
+      if (d == null) break;
+      out.add(d);
+      from = d.add(const Duration(minutes: 1));
+    }
+    return out;
+  }
+  static String roomLabel(Map<String, dynamic> c) {
+    final r = roomOf(c);
+    return r == null ? '—' : '${r['name']} · ${roomInfoLabel(r, const {'k1': 'משבצת ', 'k2': ' דק׳', 'k3': ' · עד ', 'k4': ' תלמידים', 'k5': ' · נגיש'})}';
+  }
+  // חוזה-שדות-מטא של הפאנל (חוק-7): שדה-אמת מוצג כשקיים · שדה חסר-מקור = מקום-שמור שמאיר כשיגיע
+  static const metaFields = <Map<String, String>>[
+    {'key': 'cat', 'prefix': '🗂 ', 'suffix': ''},
+    {'key': 'semester', 'prefix': '📆 ', 'suffix': ''},
+    {'key': 'gradeMin', 'prefix': '🎒 שכבות ', 'suffix': '–'},
+    {'key': 'gradeMax', 'prefix': '', 'suffix': ''},
+    {'key': 'ageMin', 'prefix': '🎂 גיל ', 'suffix': '+'},
+    {'key': 'description', 'prefix': '📝 ', 'suffix': ''},
+    {'key': 'notes', 'prefix': '📌 ', 'suffix': ''},
+    {'key': 'year', 'prefix': '🗓 שנה ', 'suffix': ''},
+    {'key': 'code', 'prefix': '🔖 ', 'suffix': ''},                 // מקום-שמור
+    {'key': 'prerequisites', 'prefix': '📚 קדם: ', 'suffix': ''},   // מקום-שמור
+    {'key': 'equipment', 'prefix': '🧰 ', 'suffix': ''},            // מקום-שמור
+    {'key': 'online', 'prefix': '💻 ', 'suffix': ''},               // מקום-שמור (מקוון/היברידי)
+    {'key': 'certificate', 'prefix': '🎓 תעודה: ', 'suffix': ''},  // מקום-שמור
+    {'key': 'cancelPolicy', 'prefix': '↩ ביטול: ', 'suffix': ''},   // מקום-שמור
+    {'key': 'actualStart', 'prefix': '▶ התחלה-בפועל ', 'suffix': ''}, // מקום-שמור
+    {'key': 'actualEnd', 'prefix': '⏹ סיום-בפועל ', 'suffix': ''},   // מקום-שמור
+    {'key': 'scholarship', 'prefix': '🎗 מלגה: ', 'suffix': ''},     // מקום-שמור (תלמידים-ללא-תשלום)
+    {'key': 'template', 'prefix': '🧩 תבנית: ', 'suffix': ''},      // מקום-שמור (תבנית-שיעור לשכפול)
+  ];
+
   // ─── KPI-10 (המפרט) — כולם מנועי-מדף/נגזרות-אמת, אפס-StatBlock ───
   static int get kpiActive => allCourses.where((c) => lifecycle(c) == 'פעיל').length;
   static int get kpiLessonsWeek => lessonsThisWeek();
@@ -442,7 +707,12 @@ class _CoursesScreenState extends State<CoursesScreen> {
   int _view = 0; // 0=📅 גריד-שבועי · 1=📋 רשימה · 2=👩‍🏫 פר-מורה · 3=🚪 פר-חדר (SegmentedSwitch→תצוגה)
   int _week = 0; // 0=השבוע · 1=שבוע-הבא (בורר-שבוע · פס-עליון)
   int _sem = 0; // 0=הכל · 1..=semesterOptions (בורר-סמסטר · פס-עליון)
-  String? _selected; // חוג-נבחר (גריד/רשימה ⇒ פאנל)
+  int _tab = 0; // טאב-פאנל: 0 סקירה · 1 נרשמים · 2 המתנה · 3 מערכת · 4 נוכחות · 5 גבייה · 6 חומרים · 7 היסטוריה · 8 אודיט
+  String? _pick; // בורר פתוח בפאנל: enroll · invite · teacher · sub · room · move:<eid> · message · null
+  String? _msg; // תוצאת-פעולה אחרונה (AlertBanner)
+  int _msgTone = 1;
+  bool _edit = false; // מצב-עריכה (DsField/DsNumberField)
+  static const _who = 'רכזת'; // זהות-הפועל (חוק-6: מוזרקת; גל 5 מחליף בבורר-תפקיד)
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +723,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
         final s = _CoursesData.sev(b).compareTo(_CoursesData.sev(a));
         return s != 0 ? s : _CoursesData.occupancy(b).compareTo(_CoursesData.occupancy(a));
       });
-    final sel = _selected == null ? null : live.where((c) => c['id'] == _selected).firstOrNull;
     return DsScaffold(
       title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_CoursesData.teachers.length} מורים · ${_CoursesData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚',
       children: [
@@ -467,6 +736,17 @@ class _CoursesScreenState extends State<CoursesScreen> {
           alignment: Alignment.centerRight,
           child: SegmentedSwitch(items: const ['📅 גריד', '📋 רשימה', '👩‍🏫 פר-מורה', '🚪 פר-חדר'], selected: _view, onSelect: (i) => setState(() => _view = i)),
         ),
+        _gap(8),
+        // פס-עליון · פעולות-גלובליות: חוג-חדש (defaultCourseDates) · שכפל-סמסטר (nextYearCourseDraft) · הדפס-מערכת
+        Wrap(spacing: 8, runSpacing: 6, children: [
+          SoftButton(label: '➕ חוג-חדש', tone: 1, onTap: () => _act(() => _CoursesData.newCourse(_who), 'נוצר חוג-חדש (ללא-מורה/ללא-חדר — שבץ בפאנל)')),
+          SoftButton(label: '📑 שכפל-סמסטר', tone: 0, onTap: () {
+            final r = _CoursesData.duplicateSemester(_sem, _who);
+            _flash('שכפול-סמסטר: ${r['created']} טיוטות לשנה-הבאה · ${r['flagged']} דורשות מורה/חדר', r['flagged']! > 0 ? 3 : 1);
+          }),
+          SoftButton(label: '🖨 הדפס-מערכת', tone: 0, onTap: () => _openPrint(live)),
+        ]),
+        if (_msg != null) ...[_gap(8), AlertBanner(message: _msg!, tone: _msgTone, glyph: _msgTone == 2 ? '⛔' : _msgTone == 3 ? '⚠️' : '✅')],
         _gap(12),
         // KPI-10: hero=התנגשויות (המטרה: "אף שיבוץ לא יתנגש") + 9 מדדי-מצב (BareStat נושאי-ערך-אמת)
         GradientCard(
@@ -500,7 +780,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
           ..._byRoom(live)
         else
           DsSection(title: '📅 מערכת-שעות · ${_week == 0 ? 'השבוע' : 'שבוע הבא'} (${_CoursesData.isoOfDay(0, _week)} – ${_CoursesData.isoOfDay(5, _week)})', children: [_grid(live)]),
-        if (sel != null) ...[_gap(4), _selectedCard(sel)],
         if (_view != 1 && _view != 2 && _view != 3) DsSection(title: 'חוגים · לפי דחיפות', children: [for (final c in ranked) _row(c)]),
       ],
     );
@@ -544,7 +823,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 3),
       child: InkWell(
-        onTap: () => setState(() => _selected = c['id'] as String),
+        onTap: () => _openPanel(c),
         // FittedBox(scaleDown): שם-חוג ארוך מתכווץ לרוחב-התא במקום לגלוש (הרנדר תפס גלישה ב-112px)
         child: FittedBox(
           fit: BoxFit.scaleDown,
@@ -612,17 +891,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
           }(),
       ];
 
-  // כרטיס חוג-נבחר (גל 2: זהות + תפוסה-מול-קיבולת; גל 3 מרחיב לפאנל+טאבים+פעולות)
-  Widget _selectedCard(Map<String, dynamic> c) => DsSection(
-        title: '🎯 נבחר · ${c['name']}',
-        trailing: StatusChip(label: _CoursesData.statusLabel(c), tone: _CoursesData.sev(c) >= 2 ? 2 : 1),
-        children: [
-          MediaRow(glyph: '📚', title: '${c['name']}', subtitle: '${_CoursesData.teacherOf(c)?['name'] ?? '—'} · ${_CoursesData.roomOf(c)?['name'] ?? '—'} · ${_CoursesData.sessionsLabel(c)}'),
-          _gap(8),
-          StatRow(label: 'תפוסה מול קיבולת', value: '${_CoursesData.enrolled(c)} מתוך ${_CoursesData.capacity(c)}', fraction: _CoursesData.occupancy(c)),
-        ],
-      );
-
   Widget _row(Map<String, dynamic> c) {
     final t = _CoursesData.teacherOf(c), r = _CoursesData.roomOf(c);
     final sev = _CoursesData.sev(c);
@@ -634,8 +902,357 @@ class _CoursesScreenState extends State<CoursesScreen> {
         StatusChip(label: _CoursesData.statusLabel(c), tone: tone),
         if (_CoursesData.waitlist(c).isNotEmpty) ...[const SizedBox(width: 6), StatusChip(label: '⏳ ${_CoursesData.waitlist(c).length}', tone: 0)],
         // MediaRow בולע את הקליק (InkWell פנימי no-op) ⇒ כפתור-שברון נפרד כשקע-הבחירה
-        IconButton(onPressed: () => setState(() => _selected = c['id'] as String), icon: const Icon(Icons.chevron_left, color: _acc, size: 24), tooltip: 'פרטים ופעולות'),
+        IconButton(onPressed: () => _openPanel(c), icon: const Icon(Icons.chevron_left, color: _acc, size: 24), tooltip: 'פרטים ופעולות'),
       ]),
+    );
+  }
+
+  void _flash(String m, int tone) => setState(() { _msg = m; _msgTone = tone; });
+  void _act(void Function() f, String ok) { f(); _flash(ok, 1); }
+  // תוצאת-מנוע ⇒ הודעה+tone (blocked=אדום · wait=כתום · אחרת ירוק)
+  void _result(String r, String okMsg) {
+    if (r.startsWith('blocked:')) return _flash('נחסם: ${r.substring(8)}', 2);
+    if (r == 'waitlisted') return _flash('החוג מלא ⇒ נוסף לרשימת-ההמתנה', 3);
+    if (r.startsWith('removed+promoted:')) return _flash('הוסר · מקום התפנה ⇒ ${r.substring(17)} הועלה/תה מההמתנה אוטומטית', 1);
+    _flash(okMsg, 1);
+  }
+
+  // ═══ פאנל חוג-נבחר · GlassCard(child) בגיליון-תחתון · 9 טאבים (SegmentedSwitch) · פעולות (SoftButton) ═══
+  void _openPanel(Map<String, dynamic> c0) {
+    _tab = 0; _pick = null; _edit = false;
+    showModalBottomSheet<void>(
+      context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
+        void both(void Function() f) { f(); setSheet(() {}); setState(() {}); }
+        final c = _CoursesData.courseById(c0['id']) ?? c0; // מצב-חי (אחרי overrides)
+        return DraggableScrollableSheet(
+          initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
+          builder: (ctx, scroll) => Padding(
+            padding: const EdgeInsets.all(12),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: GlassCard(
+                child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                  Row(children: [
+                    Expanded(child: MediaRow(glyph: '📚', title: '${c['name']}', subtitle: '${_CoursesData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_CoursesData.roomOf(c)?['name'] ?? 'ללא-חדר'} · ${_CoursesData.sessionsLabel(c)}')),
+                    StatusChip(label: _CoursesData.statusLabel(c), tone: _CoursesData.sev(c) >= 2 ? 2 : _CoursesData.sev(c) == 1 ? 3 : 1),
+                  ]),
+                  _gap(8),
+                  // 9 טאבים בשתי שורות-SegmentedSwitch (שורה-אחת גלשה מ-800px ⇒ טאב לא-נגיש · הרנדר תפס)
+                  Wrap(spacing: 8, runSpacing: 6, alignment: WrapAlignment.end, children: [
+                    FittedBox(fit: BoxFit.scaleDown, child: SegmentedSwitch(items: const ['סקירה', 'נרשמים', 'המתנה', 'מערכת', 'נוכחות'], selected: _tab < 5 ? _tab : -1, onSelect: (i) => both(() { _tab = i; _pick = null; }))),
+                    FittedBox(fit: BoxFit.scaleDown, child: SegmentedSwitch(items: const ['גבייה', 'חומרים', 'היסטוריה', 'אודיט'], selected: _tab >= 5 ? _tab - 5 : -1, onSelect: (i) => both(() { _tab = i + 5; _pick = null; }))),
+                  ]),
+                  _gap(10),
+                  if (_msg != null) ...[AlertBanner(message: _msg!, tone: _msgTone, glyph: _msgTone == 2 ? '⛔' : _msgTone == 3 ? '⚠️' : '✅'), _gap(8)],
+                  ...switch (_tab) {
+                    1 => _tabEnrolled(c, both),
+                    2 => _tabWaitlist(c, both),
+                    3 => _tabSchedule(c, both),
+                    4 => _tabAttendance(c),
+                    5 => _tabFees(c),
+                    6 => _tabMaterials(c),
+                    7 => _tabHistory(c, false),
+                    8 => _tabHistory(c, true),
+                    _ => _tabOverview(c, both),
+                  },
+                ]),
+              ),
+            ),
+          ),
+        );
+      }),
+    ).whenComplete(() => setState(() => _msg = null));
+  }
+
+  Widget _h(String t) => Padding(padding: const EdgeInsets.only(top: 6, bottom: 6), child: Text(t, style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)));
+
+  // ── סקירה: תפוסה-מול-קיבולת (StatRow) · עובדות (BareStat/StatusChip) · התנגשויות (AlertBanner אדום) · שיעורים-הבאים · פעולות ──
+  List<Widget> _tabOverview(Map<String, dynamic> c, void Function(void Function()) both) {
+    final clashes = _CoursesData.clashesOf(c);
+    final next = _CoursesData.upcoming(c, 3);
+    return [
+      StatRow(label: 'תפוסה מול קיבולת', value: '${_CoursesData.enrolled(c)} מתוך ${_CoursesData.capacity(c)}', fraction: _CoursesData.occupancy(c)),
+      _gap(8),
+      Row(children: [
+        BareStat(value: '${_CoursesData.enrolled(c)}', label: 'רשומים', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: '${_CoursesData.waitlist(c).length}', label: 'בהמתנה', inkColor: _CoursesData.waitlist(c).isEmpty ? _ink : _warning, mutedColor: _muted),
+        BareStat(value: _CoursesData.minToOpen(c) == null ? '—' : '${_CoursesData.minToOpen(c)}', label: 'מינ׳-לפתיחה', inkColor: _CoursesData.belowMin(c) ? _danger : _ink, mutedColor: _muted),
+        BareStat(value: c['perLesson'] == true ? '${shekel(c['lessonPrice'])}/ש׳' : shekel(c['price']), label: 'מחיר', inkColor: _acc, mutedColor: _muted),
+        BareStat(value: _CoursesData.trendLabel(c), label: 'מגמת-הרשמה', inkColor: _CoursesData.trend(c)['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
+      ]),
+      _gap(6),
+      MediaRow(glyph: '🚪', title: _CoursesData.roomOf(c)?['name'] ?? 'ללא-חדר', subtitle: _CoursesData.roomLabel(c)), // roomInfoLabel (מנוע) — טקסט-ארוך ⇒ שורה, לא שבב
+      Wrap(spacing: 8, runSpacing: 6, children: [
+        if (_CoursesData.roomlessReason(c) != null) _chip('⚠️ ${_CoursesData.roomlessReason(c)}', 2),
+        if (_CoursesData.noTeacher(c)) _chip('🚫 ללא-מורה — הקצה מורה', 2),
+        ..._facts(c),
+      ]),
+      if (clashes.isNotEmpty) ...[
+        _h('⚠️ התנגשויות · ${clashes.length} (חוסמות-שיבוץ)'),
+        for (final k in clashes) AlertBanner(glyph: k['kind'] == 'teacher' ? '👩‍🏫' : k['kind'] == 'room' ? '🚪' : '🎓', tone: 2, message: '${k['detail']} — ${k['with']}'),
+      ],
+      if (_CoursesData.belowMin(c)) AlertBanner(glyph: '📉', tone: 3, message: 'מתחת-למינימום: ${_CoursesData.enrolled(c)} רשומים מול ${_CoursesData.minToOpen(c)} (${c['minStudents'] == null ? 'נקודת-איזון: שכר-מורה+חדר ÷ מחיר-לשיעור' : 'מינימום-מוגדר'}) — לא-כלכלי'),
+      _h('📅 השיעורים הבאים'),
+      if (next.isEmpty) const EmptyState(glyph: '📅', message: 'אין מפגשים משובצים') else for (final dt in next) _lessonTile(c, dt, both),
+      _h('פעולות'),
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        SoftButton(label: '🎓 שבץ-תלמיד', tone: 1, onTap: () => both(() => _pick = _pick == 'enroll' ? null : 'enroll')),
+        SoftButton(label: '⏳ הזמן-להמתנה', tone: 0, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite')),
+        SoftButton(label: '👩‍🏫 הקצה-מורה', tone: _CoursesData.noTeacher(c) ? 2 : 0, onTap: () => both(() => _pick = _pick == 'teacher' ? null : 'teacher')),
+        SoftButton(label: '🔄 מורה-מחליף (חד-פעמי)', tone: 0, onTap: () => both(() => _pick = _pick == 'sub' ? null : 'sub')),
+        SoftButton(label: '🚪 הקצה-חדר', tone: _CoursesData.noRoom(c) ? 2 : 0, onTap: () => both(() => _pick = _pick == 'room' ? null : 'room')),
+        SoftButton(label: '✏️ ערוך', tone: 0, onTap: () => both(() => _edit = !_edit)),
+        SoftButton(label: '📄 שכפל-חוג', tone: 0, onTap: () => both(() { final cp = _CoursesData.duplicate(c, _who); _flash('נוצר ${cp['name']} — יורש slot ⇒ בדוק התנגשות והקצה מחדש', 3); })),
+        SoftButton(label: '💬 שלח-הודעה', tone: 0, onTap: () => both(() => _pick = _pick == 'message' ? null : 'message')),
+        SoftButton(label: '🏁 סיים-חוג', tone: 2, onTap: () => both(() { _CoursesData.endCourse(c, _who); _flash('${c['name']} הסתיים — ההרשמות נסגרו', 3); })),
+      ]),
+      _gap(8),
+      ..._picker(c, both),
+      if (_edit) ...[
+        _h('✏️ עריכה (שם · קיבולת — הגדלת-קיבולת מעלה מהמתנה אוטומטית)'),
+        DsField(label: 'שם-חוג', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _CoursesData.edit(c, 'name', v, _who))),
+        DsNumberField(label: 'קיבולת (maxStudents)', value: '${_CoursesData.capacity(c)}', onChanged: (v) { final n = int.tryParse(v); if (n != null) both(() => _CoursesData.edit(c, 'maxStudents', n, _who)); }),
+      ],
+    ];
+  }
+
+  // בוררים (Wrap של SoftButton פר-מועמד) — כל בחירה עוברת דרך מנועי-הבדיקה
+  List<Widget> _picker(Map<String, dynamic> c, void Function(void Function()) both) {
+    final p = _pick;
+    if (p == null) return const [];
+    if (p == 'enroll' || p == 'invite') {
+      final cands = _CoursesData.candidates(c);
+      return [
+        _h(p == 'enroll' ? '🎓 בחר תלמיד לשיבוץ (קדם ⊕ התנגשות ⊕ קיבולת נבדקים)' : '⏳ בחר תלמיד להזמנה-להמתנה'),
+        if (cands.isEmpty) const EmptyState(glyph: '🎓', message: 'כל התלמידים כבר רשומים/ממתינים')
+        else Wrap(spacing: 6, runSpacing: 6, children: [
+          for (final m in cands)
+            SoftButton(label: '${m['first']} ${m['famName']} · ${m['grade']}', tone: _CoursesData.fitReason(c, m) == null ? 0 : 3,
+              onTap: () => both(() { _pick = null; _result(p == 'enroll' ? _CoursesData.enroll(c, m['id'], _who) : _CoursesData.invite(c, m['id'], _who), '${m['first']} שובץ/ה ל-${c['name']}'); })),
+        ]),
+      ];
+    }
+    if (p == 'teacher' || p == 'sub') {
+      final iso = _CoursesData.upcoming(c, 1).isEmpty ? _CoursesData.today : _CoursesData._iso(_CoursesData.upcoming(c, 1).first);
+      return [
+        _h(p == 'teacher' ? '👩‍🏫 בחר מורה (התנגשות חוסמת)' : '🔄 מורה-מחליף לשיעור $iso'),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          for (final t in _CoursesData.teachers)
+            SoftButton(label: '${t['name']} · ${t['specialty']}', tone: t['id'] == c['teacherId'] ? 1 : 0,
+              onTap: () => both(() { _pick = null; if (p == 'teacher') { _result(_CoursesData.assignTeacher(c, t['id'], _who), '${t['name']} הוקצה/תה ל-${c['name']}'); } else { _CoursesData.substitute(c, iso, t['id'], _who); _flash('${t['name']} מחליף/ה ב-$iso', 1); } })),
+        ]),
+      ];
+    }
+    if (p == 'room') {
+      return [
+        _h('🚪 בחר חדר (תפוס באותו slot ⇒ נחסם)'),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          for (final r in _CoursesData.rooms.where((r) => r['active'] == true))
+            SoftButton(label: '${r['name']} · ${r['cap']} · ${r['slot']} דק׳', tone: r['id'] == c['roomId'] ? 1 : (r['cap'] as int) < _CoursesData.capacity(c) ? 3 : 0,
+              onTap: () => both(() { _pick = null; _result(_CoursesData.assignRoom(c, r['id'], _who), '${r['name']} הוקצה ל-${c['name']}'); })),
+        ]),
+      ];
+    }
+    if (p == 'message') {
+      final links = _CoursesData.waLinks(c, 'שלום, הודעה מחוג ${c['name']}: ');
+      return [
+        _h('💬 קישורי-WhatsApp למשפחות הנרשמים (waLink)'),
+        if (links.isEmpty) const EmptyState(glyph: '💬', message: 'אין נרשמים-חיים') else for (final l in links) MediaRow(glyph: '💬', title: l['name']!, subtitle: l['href']!),
+      ];
+    }
+    if (p.startsWith('move:')) {
+      final e = _CoursesData.enrollmentById(p.substring(5));
+      if (e == null) return const [];
+      return [
+        _h('🔁 העבר את ${_CoursesData.memberName(e['memberId'])} אל…'),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          for (final t in _CoursesData.liveCourses.where((t) => t['id'] != c['id']))
+            SoftButton(label: '${t['name']} ${_CoursesData.enrolled(t)}/${_CoursesData.capacity(t)}', tone: _CoursesData.isFull(t) ? 3 : 0,
+              onTap: () => both(() { _pick = null; _result(_CoursesData.move(e, t, _who), 'הועבר/ה ל-${t['name']}'); })),
+        ]),
+      ];
+    }
+    return const [];
+  }
+
+  // שיעור-בודד (TimelineItem): תאריך · מורה (מחליף?) · חדר · מבוטל? + בטל/שחזר
+  Widget _lessonTile(Map<String, dynamic> c, DateTime dt, void Function(void Function()) both) {
+    final iso = _CoursesData._iso(dt);
+    final cancelled = _CoursesData.isCancelled(c, iso);
+    final sub = _CoursesData.substitutes['${c['id']}|$iso'];
+    final subName = sub == null ? null : _CoursesData.teachers.where((t) => t['id'] == sub).firstOrNull?['name'];
+    return Row(children: [
+      Expanded(child: TimelineItem(
+        title: '${cancelled ? '✖ מבוטל · ' : ''}${dayNames[dt.weekday % 7]} ${_CoursesData.hm(dt.hour * 60 + dt.minute)}',
+        time: iso,
+        body: '${subName != null ? '🔄 $subName (מחליף/ה)' : _CoursesData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_CoursesData.roomOf(c)?['name'] ?? 'ללא-חדר'}',
+      )),
+      SoftButton(label: cancelled ? '↩ שחזר' : '✖ בטל', tone: cancelled ? 1 : 2, onTap: () => both(() { _CoursesData.cancelSession(c, iso, _who); _flash(cancelled ? 'השיעור $iso שוחזר' : 'השיעור $iso בוטל', cancelled ? 1 : 3); })),
+    ]);
+  }
+
+  // ── נרשמים: שם · סטטוס (enrollStatusMeta) · תשלום (enrollmentPaidStatus) · חוב (payBal) · הסר/העבר ──
+  List<Widget> _tabEnrolled(Map<String, dynamic> c, void Function(void Function()) both) {
+    final es = _CoursesData.liveEnrollmentsOf(c);
+    return [
+      _h('🎓 נרשמים · ${es.length} מתוך ${_CoursesData.capacity(c)}'),
+      if (es.isEmpty) const EmptyState(glyph: '🎓', message: 'אין נרשמים — שבץ תלמיד מהסקירה'),
+      for (final e in es) ...[
+        Row(children: [
+          Expanded(child: MediaRow(glyph: '🎓', title: _CoursesData.memberName(e['memberId']), subtitle: '${_CoursesData.enrollStatusLabel(e)} · ${_CoursesData.paidLabel(e)}${_CoursesData.debtOf(e) > 0 ? ' · חוב ${shekel(_CoursesData.debtOf(e).toInt())}' : ''} · נרשם/ה ${e['enrolledAt']}')),
+          SoftButton(label: '🔁', tone: 0, onTap: () => both(() => _pick = _pick == 'move:${e['id']}' ? null : 'move:${e['id']}')),
+          const SizedBox(width: 4),
+          SoftButton(label: '➖ הסר', tone: 2, onTap: () => both(() => _result(_CoursesData.remove(e, _who), '${_CoursesData.memberName(e['memberId'])} הוסר/ה'))),
+        ]),
+        if (_pick == 'move:${e['id']}') ..._picker(c, both),
+      ],
+    ];
+  }
+
+  // ── המתנה: סדר-אמת (waitlistFor לפי enrolledAt) · העלה (נחסם כשמלא) · הזמן-להמתנה ──
+  List<Widget> _tabWaitlist(Map<String, dynamic> c, void Function(void Function()) both) {
+    final w = _CoursesData.waitlist(c);
+    return [
+      Row(children: [
+        Expanded(child: _h('⏳ רשימת-המתנה · ${w.length} · ${_CoursesData.isFull(c) ? 'החוג מלא' : '${_CoursesData.capacity(c) - _CoursesData.enrolled(c)} מקומות פנויים'}')),
+        SoftButton(label: '⏳ הזמן-להמתנה', tone: 0, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite')),
+      ]),
+      ..._picker(c, both),
+      if (w.isEmpty) const EmptyState(glyph: '⏳', message: 'אין ממתינים'),
+      for (var i = 0; i < w.length; i++)
+        Row(children: [
+          Expanded(child: MediaRow(glyph: '${i + 1}', title: _CoursesData.memberName(w[i]['memberId']), subtitle: 'ממתין/ה מ-${w[i]['enrolledAt']}${_CoursesData.clashReason(c, w[i]['memberId']) != null ? ' · ⚠️ התנגשות' : ''}')),
+          SoftButton(label: '⬆ העלה', tone: _CoursesData.isFull(c) ? 3 : 1, onTap: () => both(() => _result(_CoursesData.promote(w[i], _who), '${_CoursesData.memberName(w[i]['memberId'])} הועלה/תה מההמתנה'))),
+          const SizedBox(width: 4),
+          SoftButton(label: '➖', tone: 2, onTap: () => both(() => _result(_CoursesData.remove(w[i], _who), 'הוסר/ה מההמתנה'))),
+        ]),
+      _gap(6),
+      Row(children: [
+        Expanded(child: Text('העלאה-אוטומטית כשמתפנה מקום', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700))),
+        SegmentedSwitch(items: const ['פועל', 'כבוי'], selected: _CoursesData.autoPromote ? 0 : 1, onSelect: (i) => both(() => _CoursesData.autoPromote = i == 0)),
+      ]),
+    ];
+  }
+
+  // ── מערכת: המפגשים-הקבועים (TimelineItem) + 6 השיעורים-הבאים עם בטל/שחזר ──
+  List<Widget> _tabSchedule(Map<String, dynamic> c, void Function(void Function()) both) {
+    final ss = sessionsOf(c) as List;
+    final next = _CoursesData.upcoming(c, 6);
+    return [
+      _h('🗓 מפגשים קבועים · ${ss.length}/שבוע · ${c['start']}–${c['end']}'),
+      for (final s in ss) TimelineItem(title: '${dayNames[s['day'] as int]} ${s['time']}', time: '${(s['label'] ?? '') == '' ? 'קבוצה יחידה' : s['label']}', body: _CoursesData.roomLabel(c)),
+      _h('📅 השיעורים הבאים · ${next.length}'),
+      if (next.isEmpty) const EmptyState(glyph: '📅', message: 'אין מפגשים משובצים') else for (final dt in next) _lessonTile(c, dt, both),
+    ];
+  }
+
+  // ── נוכחות: שיעור-נוכחות של החוג (StatRow) + פר-נרשם (enrollSummary: נוכחויות/חיסורים/noshow/אחרון · presentsInMonth) ──
+  List<Widget> _tabAttendance(Map<String, dynamic> c) {
+    final es = _CoursesData.liveEnrollmentsOf(c);
+    final rate = _CoursesData.attendanceRate(c);
+    return [
+      StatRow(label: 'נוכחות-החוג (נוכח ÷ (נוכח+נעדר))', value: '${(rate * 100).round()}%', fraction: rate),
+      _gap(8),
+      if (es.isEmpty) const EmptyState(glyph: '📋', message: 'אין נרשמים'),
+      for (final e in es)
+        () {
+          final sm = _CoursesData.summary(e);
+          final tot = (sm['presents'] as int) + (sm['absences'] as int);
+          return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            StatRow(label: _CoursesData.memberName(e['memberId']), value: '${sm['presents']}/$tot · החודש ${_CoursesData.presentsThisMonth(e)}', fraction: tot == 0 ? 0 : (sm['presents'] as int) / tot),
+            Padding(padding: const EdgeInsets.only(top: 4, bottom: 8), child: Wrap(spacing: 6, children: [
+              if ((sm['noshow'] as int) > 0) _chip('👻 noshow ${sm['noshow']}', 2),
+              if ('${sm['lastPresent']}'.isNotEmpty) _chip('🕐 אחרון ${sm['lastPresent']}', 0),
+              _chip('${sm['statusLabel']}', 0),
+            ])),
+          ]);
+        }(),
+    ];
+  }
+
+  // ── גבייה-פר-חוג: נגבה/צפוי/חוב (BareStat) · StatRow · פר-נרשם paid/partial/unpaid ──
+  List<Widget> _tabFees(Map<String, dynamic> c) {
+    final es = _CoursesData.liveEnrollmentsOf(c);
+    final exp = _CoursesData.courseExpected(c), col = _CoursesData.courseCollected(c), debt = _CoursesData.courseDebt(c);
+    return [
+      Row(children: [
+        BareStat(value: shekel(exp.toInt()), label: 'צפוי (Σ totalDue)', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: shekel(col.toInt()), label: 'נגבה (Σ payments)', inkColor: _ok, mutedColor: _muted),
+        BareStat(value: shekel(debt.toInt()), label: 'חוב-פתוח', inkColor: debt > 0 ? _danger : _ok, mutedColor: _muted),
+      ]),
+      _gap(8),
+      StatRow(label: 'גבייה מול צפוי', value: exp == 0 ? '—' : '${(col / exp * 100).clamp(0, 100).round()}%', fraction: exp == 0 ? 0 : (col / exp).clamp(0.0, 1.0)),
+      _gap(8),
+      for (final e in es)
+        MediaRow(glyph: _CoursesData.paidStatus(e) == 'paid' ? '✅' : _CoursesData.paidStatus(e) == 'partial' ? '🟠' : '🔴', title: _CoursesData.memberName(e['memberId']),
+          subtitle: '${_CoursesData.paidLabel(e)} · שולם ${shekel(paidOf(e).toInt())} מתוך ${shekel(((e['totalDue'] as num?) ?? 0).toInt())}${_CoursesData.debtOf(e) > 0 ? ' · חוב ${shekel(_CoursesData.debtOf(e).toInt())}' : ''}${'${e['dueDate'] ?? ''}'.isNotEmpty ? ' · לתשלום עד ${e['dueDate']}' : ''}'),
+    ];
+  }
+
+  // ── חומרים: CourseFile[] (שדה-אמת) · סילבוס/הקלטות/ציונים = מקום-שמור (מאירים כשיגיע נתון) ──
+  List<Widget> _tabMaterials(Map<String, dynamic> c) {
+    final files = (c['files'] as List?) ?? const [];
+    return [
+      _h('📎 חומרי-לימוד · ${files.length}'),
+      if (files.isEmpty) const EmptyState(glyph: '📎', message: 'אין חומרים מצורפים'),
+      for (final f in files) MediaRow(glyph: f['kind'] == 'image' ? '🖼' : f['kind'] == 'link' ? '🔗' : '📄', title: '${f['name']}', subtitle: '${f['kind']}${f['size'] != null ? ' · ${f['size']} B' : ''}'),
+      for (final ph in const [['syllabus', '📘 סילבוס'], ['recordings', '🎥 הקלטות'], ['grades', '🏅 ציונים-פר-חוג']])
+        if (c[ph[0]] != null) MediaRow(glyph: ph[1].substring(0, 2), title: ph[1], subtitle: '${c[ph[0]]}'),
+    ];
+  }
+
+  // ── היסטוריה (פר-חוג) / אודיט (כל המסך) — רשומות בצורת AuditEntry {at, who, act, what} ⇒ TimelineItem ──
+  List<Widget> _tabHistory(Map<String, dynamic> c, bool all) {
+    final rows = all ? _CoursesData.history : _CoursesData.history.where((h) => h['courseId'] == c['id']).toList();
+    return [
+      _h(all ? '🧾 אודיט · ${rows.length} פעולות במסך' : '🕓 היסטוריה · ${rows.length}'),
+      if (rows.isEmpty) EmptyState(glyph: all ? '🧾' : '🕓', message: all ? 'אין פעולות עדיין' : 'אין היסטוריה לחוג'),
+      for (final h in rows) TimelineItem(title: '${h['act']} · ${h['who']}', time: '${h['at']}', body: '${h['what']}'),
+    ];
+  }
+
+  // המקום-השמור (חוק-7): לולאה גנרית מעל metaFields — שדה קיים ⇒ שבב; חסר ⇒ שקט
+  List<Widget> _facts(Map<String, dynamic> c) => [
+        for (final f in _CoursesData.metaFields)
+          if (c[f['key']] != null && '${c[f['key']]}'.trim().isNotEmpty) _chip('${f['prefix']}${c[f['key']]}${f['suffix']}', 0),
+      ];
+  // שבב-עובדה בטוח-לרוחב: טקסט ארוך מתכווץ (FittedBox) במקום לגלוש — StatusChip לבדו אינו עוטף
+  Widget _chip(String label, int tone) => FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: StatusChip(label: label, tone: tone));
+
+  // 🖨 הדפס-מערכת: תצוגת-הדפסה טקסטואלית של השבוע (SelectableText) — ההורדה/הדפסה חסומות בסנדבוקס
+  void _openPrint(List<Map<String, dynamic>> cs) {
+    final lines = <String>['מערכת-שעות · שבוע ${_CoursesData.isoOfDay(0, _week)} – ${_CoursesData.isoOfDay(5, _week)}', ''];
+    for (var day = 0; day < 6; day++) {
+      final iso = _CoursesData.isoOfDay(day, _week);
+      final items = <String>[];
+      for (final h in _CoursesData.gridHours(cs)) {
+        for (final c in _CoursesData.inCell(cs, day, h)) {
+          items.add('  ${_CoursesData.hm(h)}  ${c['name']}${_CoursesData.isCancelled(c, iso) ? ' (מבוטל)' : ''} — ${_CoursesData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_CoursesData.roomOf(c)?['name'] ?? 'ללא-חדר'} · ${_CoursesData.enrolled(c)}/${_CoursesData.capacity(c)}');
+        }
+      }
+      lines.add('${dayNames[day]} $iso${items.isEmpty ? ' — אין שיעורים' : ''}');
+      lines.addAll(items);
+    }
+    showModalBottomSheet<void>(
+      context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
+        builder: (ctx, scroll) => Padding(
+          padding: const EdgeInsets.all(12),
+          child: Directionality(textDirection: TextDirection.rtl, child: GlassCard(
+            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+              MediaRow(glyph: '🖨', title: 'הדפסת-מערכת', subtitle: '${lines.length} שורות · תצוגה-מקדימה (הדפסה = מקום-שמור לשער-פלטפורמה)'),
+              _gap(10),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
+                child: SelectableText(lines.join('\n'), style: const TextStyle(color: _ink, fontSize: 12.5, height: 1.6)),
+              ),
+            ]),
+          )),
+        ),
+      ),
     );
   }
 

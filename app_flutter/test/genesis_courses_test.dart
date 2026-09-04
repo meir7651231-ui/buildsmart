@@ -49,11 +49,14 @@ void main() {
     }
     expect(find.text('14:00'), findsNothing, reason: 'אין מפגש ב-14:00 ⇒ אין שורה (אפס-זיוף)');
     expect(find.textContaining('רובוטיקה 10/10'), findsNWidgets(2), reason: 'רובוטיקה בשני תאים (שני+רביעי 16:00)');
-    // בחירה מהגריד (עמודת-ראשון, בתוך 800px ב-RTL) ⇒ כרטיס-נבחר עם תפוסה-מול-קיבולת (StatRow)
+    // בחירה מהגריד (עמודת-ראשון, בתוך 800px ב-RTL) ⇒ פאנל-החוג עם תפוסה-מול-קיבולת (StatRow)
     await tester.tap(find.textContaining('מקהלה 1/25').first);
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('🎯 נבחר · מקהלה'), findsOneWidget);
-    expect(find.text('1 מתוך 25'), findsOneWidget);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('1 מתוך 25'), findsOneWidget, reason: 'פאנל מקהלה נפתח מהגריד');
+    Navigator.of(tester.element(find.text('1 מתוך 25'))).pop(); // סגירת-הגיליון (pump ריק + אנימציה)
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     // רשימה: DsTable עם עמודות-החוזה (מקום-שמור 'קוד' לא מואר — אין נתון)
     await tester.tap(find.text('📋 רשימה'));
     await tester.pump(const Duration(milliseconds: 100));
@@ -75,5 +78,56 @@ void main() {
     expect(find.text('2 חוגים · 2 מפגשים/שבוע'), findsNWidgets(2), reason: 'רות כהן: c1+c5 · מיכל ברק: c3+c7');
     expect(find.text('1 חוגים · 2 מפגשים/שבוע'), findsOneWidget, reason: 'יוסי לוי: c2 (שני+רביעי)');
     expect(find.text('🚫 ללא-מורה · 1'), findsOneWidget);
+  });
+
+  testWidgets('גל 3 · פאנל: המתנה חסומה כשמלא · הסרה ⇒ העלאה-אוטומטית · שיבוץ נחסם בדרישות-קדם', (tester) async {
+    await _mount(tester);
+    // הפאנל של רובוטיקה (ראשון בדירוג — התנגשות + מלא 10/10)
+    await tester.tap(find.byTooltip('פרטים ופעולות').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('10 מתוך 10'), findsOneWidget, reason: 'StatRow תפוסה-מול-קיבולת בפאנל');
+    expect(find.text('⚠️ התנגשויות · 3 (חוסמות-שיבוץ)'), findsOneWidget, reason: 'm2,m8,m10 מתנגשים עם כדורסל');
+    // טאב המתנה: הילה סעדון (e15) · העלאה נחסמת כי מלא
+    await tester.tap(find.text('המתנה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('הילה סעדון'), findsOneWidget);
+    await tester.tap(find.text('⬆ העלה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('נחסם: החוג מלא (10/10)'), findsWidgets, reason: 'promote נחסם על קיבולת');
+    // טאב נרשמים: הסרת נרשם ⇒ מקום מתפנה ⇒ הילה מועלית אוטומטית (waitlistFor סדר-אמת)
+    await tester.tap(find.text('נרשמים'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('🎓 נרשמים · 10 מתוך 10'), findsOneWidget);
+    await tester.tap(find.text('➖ הסר').first);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('הילה סעדון הועלה/תה מההמתנה אוטומטית'), findsWidgets, reason: 'אוטומציה: העלאה-מהמתנה כשמתפנה-מקום');
+    expect(find.text('🎓 נרשמים · 10 מתוך 10'), findsOneWidget, reason: 'עדיין 10/10 — המקום התמלא מההמתנה');
+    // היסטוריה: שתי רשומות-אודיט (הסרה + העלאה-מהמתנה)
+    await tester.tap(find.text('היסטוריה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('🕓 היסטוריה · 2'), findsOneWidget);
+    expect(find.text('העלאה-מהמתנה · אוטומציה'), findsOneWidget);
+    // סגירת הגיליון
+    Navigator.of(tester.element(find.text('🕓 היסטוריה · 2'))).pop();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    // שיבוץ-תלמיד לגיטרה (שכבות ד–ו): ליה דהן (ג) נחסמת בדרישות-קדם — courseFitsMember⊕gradeFits
+    await tester.tap(find.byTooltip('פרטים ופעולות').at(1)); // גיטרה מתחילים (שני בדירוג)
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('4 מתוך 12'), findsOneWidget);
+    await tester.tap(find.text('🎓 שבץ-תלמיד'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('ליה דהן · ג'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('נחסם: דרישות-קדם — שכבה ג מחוץ ל-ד–ו'), findsWidgets);
+    expect(find.text('4 מתוך 12'), findsOneWidget, reason: 'לא שובץ');
+    // שיבוץ תקין: אורי ביטון (ה) ⇒ 5/12
+    await tester.tap(find.text('🎓 שבץ-תלמיד'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('אורי ביטון · ה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('5 מתוך 12'), findsOneWidget, reason: 'enroll ⇒ active');
   });
 }
