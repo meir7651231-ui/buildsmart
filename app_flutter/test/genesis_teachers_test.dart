@@ -22,6 +22,28 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+  testWidgets('גל 4 · חריגה: צ׳יפ עומס>סף (finderMatches) משאיר רק עמוס-מדי', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_wrap(const TeachersScreen(initialMode: 1)));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('נועה לוי'), findsOneWidget);
+    await tester.tap(find.textContaining('עומס>סף'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('דוד כהן'), findsOneWidget, reason: 'העמוס-מדי נשאר');
+    expect(find.text('נועה לוי'), findsNothing, reason: 'תת-עומס סונן');
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('גל 4 · איתור: חיפוש "אנגלית" (smartFilter⊕normSearch) מסנן לפי מקצוע', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_wrap(const TeachersScreen(initialMode: 1)));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.enterText(find.byType(TextField).first, 'אנגלית');
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('נועה לוי'), findsOneWidget);
+    expect(find.text('מיכל שרון'), findsOneWidget);
+    expect(find.text('דוד כהן'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
   for (var tab = 0; tab < 9; tab++) {
     testWidgets('כרטיס-מורה טאב $tab מרונדר', (tester) async {
       _surface(tester);

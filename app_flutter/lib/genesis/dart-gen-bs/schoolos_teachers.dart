@@ -146,8 +146,10 @@ class _TeamData {
   ];
 
   // ─── עובדות-נגזרות פר-מורה ───
+  static final List<Map<String, dynamic>> added = []; // מורה-חדש (פנקס)
+  static List<Map<String, dynamic>> get everyone => [...roster, ...added];
   static Map<String, dynamic>? byId(String id) {
-    for (final t in roster) {
+    for (final t in everyone) {
       if (t['id'] == id) return t;
     }
     return null;
@@ -230,7 +232,7 @@ class _TeamData {
   }
   // אוטומציה: ברגע-היעדרות כל מפגש-של-היום ⇒ רשומת-החלפה stage 0 (אם אין כבר)
   static void syncUncovered() {
-    for (final t in roster) {
+    for (final t in everyone) {
       if (!absentToday(t) || isGone(t)) continue;
       for (final c in coursesOf(t)) {
         for (final s in sessionsOf(c) as List) {
@@ -253,7 +255,7 @@ class _TeamData {
   // הצעת-מחליף (23-ד: זמין ∧ מקצוע ∧ פנוי-בסלוט ∧ עומס-נמוך ∧ מועדף — מחוברים בדירוג):
   //   פנוי-בסלוט = scheduleClashText מהמדף (enrollments = שיבוצי-המורים לחוגיהם; null ⇒ אין התנגשות)
   static Map<String, dynamic> get _clashDb => {
-        'enrollments': [for (final t in roster) for (final c in coursesOf(t)) {'memberId': t['id'], 'courseId': c['id'], 'status': 'active'}],
+        'enrollments': [for (final t in everyone) for (final c in coursesOf(t)) {'memberId': t['id'], 'courseId': c['id'], 'status': 'active'}],
         'courses': courses,
       };
   static const _clashT = <String, dynamic>{'k1': 'ended', 'k2': '', 'k3': ' · '};
@@ -270,7 +272,7 @@ class _TeamData {
     final time = '${sub['time'] ?? slotOf(c, todayWd)}';
     // החלפה-ליום-אחד ⇒ ההתנגשות נבדקת מול הסלוט-של-היום בלבד (מבט-חוג מצומצם מוזרק למנוע); ההקצאה-הקבועה בודקת את כל השבוע.
     final slot = <String, dynamic>{...c, 'sessions': [{'day': todayWd, 'time': time}]};
-    final list = roster.where((t) => isActive(t) && t['id'] != absent['id'] && !absentToday(t) && subjects(t).contains(c['subject']) && availableAt(t, todayWd, time) && clashOf(t, slot) == null).toList();
+    final list = everyone.where((t) => isActive(t) && t['id'] != absent['id'] && !absentToday(t) && subjects(t).contains(c['subject']) && availableAt(t, todayWd, time) && clashOf(t, slot) == null).toList();
     list.sort((a, b) { // מועדף ראשון, אחר-כך עומס עולה
       final pa = absent['preferredSub'] == a['id'] ? 0 : 1, pb = absent['preferredSub'] == b['id'] ? 0 : 1;
       return pa != pb ? pa - pb : loadPct(a).compareTo(loadPct(b));
@@ -298,15 +300,54 @@ class _TeamData {
       ].join(' · ');
 
   // ─── KPI-10 (המפרט) — ספירות/סכומים על מנועי-מדף ושדות-אמת (אפס StatBlock) ───
-  static List<Map<String, dynamic>> get active => roster.where(isActive).toList();
-  static List<Map<String, dynamic>> get staff => roster.where((t) => !isGone(t)).toList();
-  static int get absentN => active.where(absentToday).length + roster.where((t) => statusOf(t) == 'leave' || statusOf(t) == 'unpaid').length;
+  static List<Map<String, dynamic>> get active => everyone.where(isActive).toList();
+  static List<Map<String, dynamic>> get staff => everyone.where((t) => !isGone(t)).toList();
+  static int get absentN => active.where(absentToday).length + everyone.where((t) => statusOf(t) == 'leave' || statusOf(t) == 'unpaid').length;
   static double get avgHours => active.isEmpty ? 0 : grandTotal(active, (t) => hoursWeek(t as Map<String, dynamic>)) / active.length;
   static int get overN => active.where(overLoad).length;
   static int get underN => active.where(underLoad).length;
   static int get contractsN => staff.where(contractEndsMonth).length;
   static int get certsN => active.where(certMissing).length;
   static List<List<Object>> get byRole => countBy(staff, (t) => roleLabel[roleOf_(t as Map<String, dynamic>)] ?? roleOf_(t)); // מדף
+
+  // ═══ איתור (הכרעה 23-ג) = DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch — לא `.contains` שטוח ═══
+  static const Map<String, String> _finals = {'k1': 'כ', 'k2': 'מ', 'k3': 'נ', 'k4': 'פ', 'k5': 'צ'};
+  static String _norm(dynamic q) => normSearch(q, _finals);
+  static Iterable _expand(dynamic q, dynamic norm) => [norm(q)];
+  static num _score(dynamic exp, dynamic term) => _norm(term).contains('$exp') ? 100 : 0;
+  static num _scoreOf(dynamic q, dynamic terms) => smartScore(q, terms, _norm, _expand, _score) as num;
+  static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty;
+  static List<String> _termsOf(Map<String, dynamic> t) => ['${t['name']}', ...subjects(t), ...(t['homeroom'] as List).cast<String>(), roleLabel[roleOf_(t)] ?? '', for (final c in coursesOf(t)) '${c['cls']}', for (final r in (t['extraRoles'] as List)) '$r'];
+  static List<Map<String, dynamic>> search(List<Map<String, dynamic>> items, String q) =>
+      (smartFilter(q, items, (it) => _termsOf(it as Map<String, dynamic>), _hasQuery, _scoreOf) as List).cast<Map<String, dynamic>>();
+
+  // ═══ חריגה (הכרעה 23-ג) = FilterChipPill ⊕ finderMatches (AND רב-צירי על נעילות) ═══
+  //   צירים: absent · over · under · cert · contract · free(זמין-בסלוט-הפתוח-הקרוב) · role · status · subject · cls
+  static String get openSlot => uncoveredToday.isEmpty ? '08:00' : '${uncoveredToday.first['time']}';
+  static String _axisValue(Map<dynamic, dynamic> db, dynamic f, dynamic axis) {
+    final t = f as Map<String, dynamic>;
+    switch (axis) {
+      case 'absent': return absentToday(t) ? '1' : '0';
+      case 'over': return overLoad(t) ? '1' : '0';
+      case 'under': return underLoad(t) ? '1' : '0';
+      case 'cert': return certMissing(t) || certSoon(t) ? '1' : '0';
+      case 'contract': return contractEndsMonth(t) || contractExpired(t) ? '1' : '0';
+      case 'free': return isActive(t) && !absentToday(t) && availableAt(t, todayWd, openSlot) && clashOf(t, {'id': '__slot', 'sessions': [{'day': todayWd, 'time': openSlot}]}) == null ? '1' : '0';
+      case 'role': return roleOf_(t);
+      case 'status': return statusOf(t);
+      case 'subject': return subjects(t).join('|');
+      case 'cls': return [for (final c in coursesOf(t)) '${c['cls']}', ...(t['homeroom'] as List)].join('|');
+    }
+    return '';
+  }
+  static List<Map<String, dynamic>> filter(List<Map<String, dynamic>> items, Map<String, String> locks) {
+    // ערכי-רשימה (subject/cls) נבדקים בהכלה: נועלים על 'X' ובודקים דרך ציר-נגזר
+    final rows = items.where((t) => (locks['subject'] == null || subjects(t).contains(locks['subject'])) && (locks['cls'] == null || _axisValue({}, t, 'cls').split('|').contains(locks['cls']))).toList();
+    final simple = {for (final e in locks.entries) if (e.key != 'subject' && e.key != 'cls') e.key: e.value};
+    return finderMatches({'families': rows}, simple, _axisValue).cast<Map<String, dynamic>>();
+  }
+  static List<String> get allSubjects => [for (final r in countBy([for (final t in staff) for (final sj in subjects(t)) sj], (x) => '$x')) '${r[0]}'];
+  static List<String> get allClasses => [for (final r in countBy([for (final t in staff) for (final c in coursesOf(t)) '${c['cls']}'], (x) => '$x')) '${r[0]}'];
 
   // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 16 עמודות-המפרט כשקעי-דאטה ═══
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשרשומה נושאת ערך, חסר ⇒ שקט. photo/contact/classAttendance/updatedAt
@@ -422,6 +463,13 @@ class _TeamData {
   }
   static final List<Map<String, dynamic>> audit = []; // אודיט (מי·מה·מתי) — TimelineItem
   static void log(String who, String what, String target) => audit.insert(0, {'who': who, 'what': what, 'target': target, 'date': today});
+  static int _seq = 0;
+  static void addTeacher(String who) { // מורה-חדש: רשומה בצורת-החוזה; זהות = מקום-שמור להזרקה (חוק-6)
+    _seq++;
+    added.add({'id': 'n$_seq', 'name': 'מורה חדש/ה $_seq', 'role': 'subject', 'subjects': <String>[], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'זמני', 'startDate': today, 'status': 'active',
+      'availability': <int, List<String>>{}, 'constraints': <String>[], 'extraRoles': <String>[], 'certs': <Map<String, dynamic>>[], 'attendance': <Map<String, dynamic>>[], 'absences': <Map<String, dynamic>>[], 'notes': ''});
+    log(who, 'מורה-חדש (ממתין לפרטים)', 'n$_seq');
+  }
   static void markAbsent(Map<String, dynamic> t, String reason, String who) {
     if (absentOn(t, today)) return;
     (extraAbsences[t['id'] as String] ??= []).insert(0, {'date': today, 'reason': reason});
@@ -460,6 +508,8 @@ class _TeachersScreenState extends State<TeachersScreen> {
   int _sort = 0; // 0=⚖️ עומס · 1=🤒 חיסורים · 2=🏫 כיתות
   final Map<String, int> _tab = {}; // טאב-נבחר פר-מורה (חיווט SegmentedSwitch→תצוגה)
   static const _tabNames = ['סקירה', 'מערכת', 'כיתות', 'היעדרויות', 'החלפות', 'ביצועים', 'הכשרות', 'מסמכים', 'אודיט'];
+  String _q = ''; // חיפוש-איתור (DsSearch→smartFilter)
+  final Map<String, String> _locks = {}; // נעילות-סינון (FilterChipPill→finderMatches)
   int _mode = 0; // 0=🎯 חכם (טריאז') · 1=📋 טבלה (DsTable כל-העמודות) · 2=🔁 לוח-החלפות-היום (DsBoard)
   static const _who = 'הנהלה'; // זהות-הפועל (חוק-6 — מוזרק בגל 5 מהתפקיד)
 
@@ -479,7 +529,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
   Widget build(BuildContext context) {
     final all = _TeamData.active;
     final uncovered = _TeamData.uncoveredToday.length; // hero = המטרה: אף שיעור בלי מורה
-    final ranked = [..._TeamData.roster.where((t) => !_TeamData.isGone(t))];
+    final ranked = [..._TeamData.everyone.where((t) => !_TeamData.isGone(t))];
     ranked.sort((a, b) {
       switch (_sort) {
         case 1:
@@ -490,9 +540,11 @@ class _TeachersScreenState extends State<TeachersScreen> {
           return _TeamData.loadPct(b).compareTo(_TeamData.loadPct(a));
       }
     });
+    // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches — פייפליין אחד לטריאז'/טבלה/ייצוא
+    final visible = _TeamData.filter(_TeamData.search(ranked, _q), _locks);
     // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-דחיפות-מאוחדת (sev)
     final buckets = <int, List<Map<String, dynamic>>>{3: [], 2: [], 1: [], 0: [], -1: []};
-    for (final t in ranked) {
+    for (final t in visible) {
       buckets[_TeamData.sev(t)]!.add(t);
     }
     const secTitle = {3: '🔴 שיעור-ללא-מורה היום', 2: '🟠 דורש-טיפול', 1: '🟡 לתשומת-לב', 0: '🟢 תקין', -1: '⏸ לא-פעיל/חופשה'};
@@ -525,6 +577,34 @@ class _TeachersScreenState extends State<TeachersScreen> {
           ]),
         ),
         const SizedBox(height: 10),
+        // פס-עליון: חיפוש-מבוקר (DsSearch) · מורה-חדש · לוח-החלפות-היום · ייצוא (רשימה-נראית)
+        Row(children: [
+          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          const SizedBox(width: 6),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ מורה', tone: 0, onTap: () => setState(() => _TeamData.addTeacher(_who)))),
+          const SizedBox(width: 6),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔁 היום', tone: _TeamData.uncoveredToday.isEmpty ? 0 : 2, onTap: () => setState(() => _mode = 2))),
+          const SizedBox(width: 6),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport('רשימת-צוות · ${visible.length}', _TeamData.rosterCsv(visible)))),
+        ]),
+        // פילטרים (המפרט: 11) — צ׳יפי-חריגה (finderMatches) + תפקיד/סטטוס (SegmentedSwitch) + מקצוע/כיתה (FilterChipPill)
+        Wrap(spacing: 8, runSpacing: 6, children: [
+          _fchip('absent', '🤒 נעדר-היום · ${_TeamData.absentN}'),
+          _fchip('over', '🔥 עומס>סף · ${_TeamData.overN}'),
+          _fchip('under', '🪫 עומס<סף · ${_TeamData.underN}'),
+          _fchip('cert', '🎓 הכשרה-חסרה/פגה'),
+          _fchip('contract', '📄 חוזה-פג'),
+          _fchip('free', '🟢 זמין ב-${_TeamData.openSlot}'),
+        ]),
+        const SizedBox(height: 8),
+        Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['כל תפקיד', 'מחנך', 'מקצועי', 'סייע', 'הנהלה'], selected: _segIdx('role', const ['homeroom', 'subject', 'aide', 'mgmt']), onSelect: (i) => _segSet('role', const ['homeroom', 'subject', 'aide', 'mgmt'], i))),
+        const SizedBox(height: 6),
+        Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['כל סטטוס', 'פעיל', 'חופשה', 'חל״ת', 'עזב'], selected: _segIdx('status', const ['active', 'leave', 'unpaid', 'left']), onSelect: (i) => _segSet('status', const ['active', 'leave', 'unpaid', 'left'], i))),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 6, children: [for (final sj in _TeamData.allSubjects) _vchip('subject', sj, '📚 $sj')]),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 6, children: [for (final c in _TeamData.allClasses.take(10)) _vchip('cls', c, '🏫 $c')]),
+        const SizedBox(height: 10),
         // מיון (המפרט: עומס · חיסורים · כיתות) — SegmentedSwitch מבוקר
         Align(
           alignment: Alignment.centerRight,
@@ -539,8 +619,10 @@ class _TeachersScreenState extends State<TeachersScreen> {
         const SizedBox(height: 10),
         if (_mode == 2)
           _subsBoard()
+        else if (visible.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין אנשי-צוות תואמים לחיפוש/סינון'))
         else if (_mode == 1)
-          _table(ranked)
+          _table(visible)
         else
           for (final st in const [3, 2, 1, 0, -1])
             if (buckets[st]!.isNotEmpty)
@@ -552,6 +634,16 @@ class _TeachersScreenState extends State<TeachersScreen> {
   }
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
+
+  // צ׳יפ-סינון מבוקר: הזרקת-צבעים (חוק-6) + נעילת-ציר ב-_locks (finderMatches)
+  Widget _fchip(String axis, String label) => _vchip(axis, '1', label);
+  Widget _vchip(String axis, String value, String label) => FilterChipPill(
+        label: label, selected: _locks[axis] == value,
+        onTap: () => setState(() => _locks[axis] == value ? _locks.remove(axis) : _locks[axis] = value),
+        activeFillColor: _acc, surfaceColor: const Color(0xFF14162E), activeTextColor: const Color(0xFF0B0B15), inkColor: _ink, outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
+      );
+  int _segIdx(String axis, List<String> vals) => _locks[axis] == null ? 0 : vals.indexOf(_locks[axis]!) + 1;
+  void _segSet(String axis, List<String> vals, int i) => setState(() => i == 0 ? _locks.remove(axis) : _locks[axis] = vals[i - 1]);
 
   // ═══ כרטיס-מורה-נבחר (צד) · GlassCard(child) · 9 טאבים (SegmentedSwitch×2) · 14 פעולות (SoftButton) ═══
   void _openPanel(Map<String, dynamic> t) {
