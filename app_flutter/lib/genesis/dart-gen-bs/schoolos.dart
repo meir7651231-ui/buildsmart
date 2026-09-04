@@ -78,12 +78,13 @@ class SchoolOsApp extends StatelessWidget {
 class _Home extends StatelessWidget {
   const _Home();
   static void _go(BuildContext c, Widget screen) => Navigator.push(c, MaterialPageRoute(builder: (_) => screen));
+  static const modules = ['dashboard', 'students', 'attendance', 'courses', 'teachers', 'rooms', 'fees', 'parents', 'inventory']; // 9 מסכים מחווטים
   @override
   Widget build(BuildContext context) => DsScaffold(
         title: 'SchoolOS', subtitle: 'תיכון עתיד · מה דורש-פעולה עכשיו', icon: '🏫',
         children: [
           Wrap(spacing: 12, runSpacing: 12, children: [
-            const SizedBox(width: 168, child: KpiTile(glyph: '🎓', value: '1,248', label: 'תלמידים')),
+            SizedBox(width: 168, child: KpiTile(glyph: '🏫', value: '${_Home.modules.length}', label: 'מסכים מחוברים')), // עובדה-אמת (לא '1,248' מומצא — L-goal-proof-af3c91)
             SizedBox(width: 168, child: KpiTile(glyph: '📦', value: '${_InvData.urgent}', label: 'מלאי לא-יספיק')),
           ]),
           const SizedBox(height: 8),
