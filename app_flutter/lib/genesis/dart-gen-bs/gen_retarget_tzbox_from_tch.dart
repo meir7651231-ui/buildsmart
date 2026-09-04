@@ -594,6 +594,7 @@ class TzBoxScreen extends StatefulWidget {
 }
 
 class _TzBoxScreenState extends State<TzBoxScreen> {
+  final Map<String, String> _coreState = {}; // G6d · פנקס-מצבי-הגרעין לפי id — overlay על הזרע (הזרע const; אין כתיבה אליו)
   int _sort = 0; // 0=⚖️ עומס · 1=🤒 חיסורים · 2=🏫 כיתות
   final Map<String, int> _tab = {}; // טאב-נבחר פר-מורה (חיווט SegmentedSwitch→תצוגה)
   static const _tabNames = ['סקירה', 'מערכת', 'כיתות', 'היעדרויות', 'החלפות', 'ביצועים', 'הכשרות', 'מסמכים', 'אודיט'];
@@ -795,6 +796,17 @@ class _TzBoxScreenState extends State<TzBoxScreen> {
               padding: const EdgeInsets.all(12),
               child: GlassCard(
                 child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                  // ═══ הגרעין על הרשומה (G6d): מצב-הרשומה ⊕ TzBoxCore.next ⊕ פנקס-overlay — מצב שאינו במחזור-החיים החצוב מדווח כפער, לא מתוקן בשקט ═══
+                  Builder(builder: (_) {
+                    final cur = _coreState['${t['id']}'] ?? '${t['status'] ?? TzBoxCore.states.first}';
+                    if (!TzBoxCore.states.contains(cur)) return AlertBanner(message: 'מצב הרשומה "$cur" אינו במחזור-החיים החצוב (${TzBoxCore.states.join('→')}) — פער זרע/סכמה, מקום-שמור', tone: 3, glyph: '🧠');
+                    final nx = TzBoxCore.next(cur);
+                    return DsSection(title: '🧠 מחזור-חיים · רשומה (גרעין)', children: [
+                      Wrap(spacing: 6, runSpacing: 6, children: [for (final st in TzBoxCore.states) StatusChip(label: st, tone: st == cur ? 1 : 0)]),
+                      AlertBanner(message: nx == null ? 'מצב-סופי: $cur' : 'הבא אחרי $cur: $nx', tone: 0, glyph: '🧠'),
+                      SoftButton(label: nx == null ? 'אין מעבר' : 'קדם מצב ⇒ $nx', onTap: nx == null ? null : () => act(() => _coreState['${t['id']}'] = nx)),
+                    ]);
+                  }),
                   Row(children: [
                     PremiumAvatar(name: t['num'] as String, size: 56, status: _TeamData.absentToday(t) ? AvatarStatus.busy : _TeamData.presentToday(t) ? AvatarStatus.online : AvatarStatus.none),
                     const SizedBox(width: 10),

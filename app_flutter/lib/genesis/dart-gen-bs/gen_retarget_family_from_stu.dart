@@ -852,6 +852,7 @@ class FamilyScreen extends StatefulWidget {
 }
 
 class _FamilyScreenState extends State<FamilyScreen> {
+  final Map<String, String> _coreState = {}; // G6d · פנקס-מצבי-הגרעין לפי id — overlay על הזרע (הזרע const; אין כתיבה אליו)
   String _q = ''; // איתור (DsSearch)
   int _mode = 0; // 0=🎯 טריאז' (קיבוץ-פר-סיכון) · 1=📋 טבלה (columnDefs) — SegmentedSwitch→תצוגה
   int _sort = 0; // 0=סיכון · 1=כיתה · 2=שם — SegmentedSwitch→דירוג
@@ -1075,6 +1076,17 @@ class _FamilyScreenState extends State<FamilyScreen> {
             padding: const EdgeInsets.all(12),
             child: GlassCard(
               child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                // ═══ הגרעין על הרשומה (G6d): מצב-הרשומה ⊕ FamilyCore.next ⊕ פנקס-overlay — מצב שאינו במחזור-החיים החצוב מדווח כפער, לא מתוקן בשקט ═══
+                Builder(builder: (_) {
+                  final cur = _coreState['${s['id']}'] ?? '${s['status'] ?? FamilyCore.states.first}';
+                  if (!FamilyCore.states.contains(cur)) return AlertBanner(message: 'מצב הרשומה "$cur" אינו במחזור-החיים החצוב (${FamilyCore.states.join('→')}) — פער זרע/סכמה, מקום-שמור', tone: 3, glyph: '🧠');
+                  final nx = FamilyCore.next(cur);
+                  return DsSection(title: '🧠 מחזור-חיים · רשומה (גרעין)', children: [
+                    Wrap(spacing: 6, runSpacing: 6, children: [for (final st in FamilyCore.states) StatusChip(label: st, tone: st == cur ? 1 : 0)]),
+                    AlertBanner(message: nx == null ? 'מצב-סופי: $cur' : 'הבא אחרי $cur: $nx', tone: 0, glyph: '🧠'),
+                    SoftButton(label: nx == null ? 'אין מעבר' : 'קדם מצב ⇒ $nx', onTap: nx == null ? null : () => act(() => _coreState['${s['id']}'] = nx)),
+                  ]);
+                }),
                 // זהות: אווטאר (ראשי-תיבות; image = מקום-שמור לתמונה) + שם + כיתה·מחנך·גיל·מין + סטטוס
                 Row(children: [
                   PremiumAvatar(name: '${s['name']}', size: 56, image: s['photo'] is ImageProvider ? s['photo'] as ImageProvider : null),
