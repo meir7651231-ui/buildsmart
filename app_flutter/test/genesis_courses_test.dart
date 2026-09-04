@@ -77,7 +77,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('2 חוגים · 2 מפגשים/שבוע'), findsNWidgets(2), reason: 'רות כהן: c1+c5 · מיכל ברק: c3+c7');
     expect(find.text('1 חוגים · 2 מפגשים/שבוע'), findsOneWidget, reason: 'יוסי לוי: c2 (שני+רביעי)');
-    expect(find.text('🚫 ללא-מורה · 1'), findsOneWidget);
+    expect(find.text('🚫 ללא-מורה · 1'), findsNWidgets(2), reason: 'סקשן פר-מורה + צ׳יפ-סינון-מצב');
   });
 
   testWidgets('גל 3 · פאנל: המתנה חסומה כשמלא · הסרה ⇒ העלאה-אוטומטית · שיבוץ נחסם בדרישות-קדם', (tester) async {
@@ -129,5 +129,55 @@ void main() {
     await tester.tap(find.text('אורי ביטון · ה'));
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('5 מתוך 12'), findsOneWidget, reason: 'enroll ⇒ active');
+  });
+
+  testWidgets('גל 4 · איתור (smartFilter⊕normSearch) · חריגה (finderMatches צירים) · טריאז׳ פר-דחיפות', (tester) async {
+    await _mount(tester);
+    // טריאז׳: סקשנים פר-דחיפות עם מונים-אמת
+    expect(find.text('⚠️ התנגשות — חוסם · 4'), findsOneWidget);
+    expect(find.text('🚫 ללא-מורה / ללא-חדר · 1'), findsOneWidget);
+    expect(find.text('🟢 תקין · 2'), findsOneWidget);
+    // חיפוש: 'רובוט' ⇒ רק רובוטיקה (גם בגריד: 2 תאים)
+    await tester.enterText(find.byType(TextField), 'רובוט');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('רובוטיקה'), findsOneWidget);
+    expect(find.text('גיטרה מתחילים'), findsNothing);
+    expect(find.textContaining('רובוטיקה 10/10'), findsNWidgets(2));
+    // נרמול-עברי: 'קרמיקה' עם סופית ⇒ ציור וקרמיקה
+    await tester.enterText(find.byType(TextField), 'קרמיקה');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('ציור וקרמיקה'), findsOneWidget);
+    expect(find.text('רובוטיקה'), findsNothing);
+    // אין-תוצאות ⇒ EmptyState
+    await tester.enterText(find.byType(TextField), 'זומבה');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('אין חוגים תואמים לחיפוש/סינון'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pump(const Duration(milliseconds: 100));
+    // ציר-מצב: ללא-מורה ⇒ רק שחמט
+    await tester.tap(find.text('🚫 ללא-מורה · 1'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('שחמט'), findsOneWidget);
+    expect(find.text('רובוטיקה'), findsNothing);
+    // ציר-מצב: הסתיימו ⇒ החוג-שהסתיים מופיע (מכל-החוגים)
+    await tester.tap(find.text('🏁 הסתיימו · 1'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('אנגלית מדוברת (קיץ)'), findsOneWidget);
+    expect(find.text('🏁 הסתיימו / בוטלו · 1'), findsOneWidget);
+    // שחרור + ציר-ממד (סינון-מתקדם): תחום אומנות ⇒ 2 חוגים
+    await tester.tap(find.text('הכל · 7'));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('🔎 סינון'));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('🗂 אומנות · 2'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('ציור וקרמיקה'), findsOneWidget);
+    expect(find.text('תיאטרון'), findsOneWidget);
+    expect(find.text('גיטרה מתחילים'), findsNothing);
+    // AND בין צירים: אומנות + יום שלישי 17:00 ⇒ רק תיאטרון
+    await tester.tap(find.text('🕐 17:00'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('תיאטרון'), findsOneWidget);
+    expect(find.text('ציור וקרמיקה'), findsNothing);
   });
 }

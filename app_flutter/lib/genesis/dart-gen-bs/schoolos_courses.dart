@@ -15,6 +15,8 @@ import '../dart-ui-bs/premium/feedback/empty_state.dart';
 import '../dart-ui-bs/premium/actions/segmented_switch.dart';
 import '../dart-ui-bs/premium/lists/stat_row.dart'; // יחס (תפוסה/ניצולת) = בר-מילוי, לא linear_progress המזייף
 import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון-בלחיצה) — לא DataGrid המזייף
+import '../dart-ui-bs/ds/ds_search.dart'; // חיפוש-מבוקר (value+onChanged) — פעולת-יסוד "איתור"
+import '../dart-ui-bs/screens__manager_dashboard_screen/filter_chip_pill.dart'; // צ׳יפ-סינון מבוקר (selected/onTap, צבעים מוזרקים)
 import '../dart-ui-bs/ds/ds_field.dart'; // שדה-טקסט מבוקר (ערוך: שם-חוג)
 import '../dart-ui-bs/ds/ds_number_field.dart'; // שדה-מספר מבוקר (ערוך: קיבולת)
 import '../dart-ui-bs/premium/surfaces/glass_card.dart'; // מיכל-פאנל (child שרירותי) — פאנל-צד
@@ -57,6 +59,11 @@ import '../dart-maor/default-course-dates.dart'; // תאריכי-ברירת-מח
 import '../dart-maor/wa-link.dart'; // קישור WhatsApp (שלח-הודעה-לחוג) — מנוע-אמת ממאור
 import '../dart-maor/wa-digits.dart'; // נרמול-ספרות-טלפון — מנוע-אמת ממאור
 import '../dart-maor/room-info-label.dart'; // תווית-חדר (משבצת/קיבולת/נגישות/ציוד) — מנוע-אמת ממאור
+import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפי-ציון — מנוע-אמת ממאור
+import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND — מנוע-אמת ממאור
+import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (סופיות/ניקוד) — מנוע-אמת ממאור
+import '../dart-maor/finder-matches.dart'; // חריגה/סינון: סינון-רב-צירי AND על נעילות — מנוע-אמת ממאור
+import '../dart-maor/count-by.dart'; // קיבוץ-ומניה (צ׳יפי-תחום עם מונה) — מנוע-אמת ממאור
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -667,6 +674,59 @@ class _CoursesData {
     {'key': 'template', 'prefix': '🧩 תבנית: ', 'suffix': ''},      // מקום-שמור (תבנית-שיעור לשכפול)
   ];
 
+  // ═══ איתור (הכרעה 23-ג) = DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch — לא `.contains` שטוח ═══
+  //   נרמול-עברי (סופיות/ניקוד) + ניקוד רב-מילתי AND + סינון-ציון-0 + מיון-יורד-לפי-רלוונטיות. השקעים מוזרקים (חוק-1).
+  static const Map<String, String> _finals = {'k1': 'כ', 'k2': 'מ', 'k3': 'נ', 'k4': 'פ', 'k5': 'צ'};
+  static String _norm(dynamic q) => normSearch(q, _finals);
+  static Iterable _expand(dynamic q, dynamic norm) => [norm(q)];
+  static num _score(dynamic exp, dynamic term) => _norm(term).contains('$exp') ? 100 : 0;
+  static num _scoreOf(dynamic q, dynamic terms) => smartScore(q, terms, _norm, _expand, _score) as num;
+  static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty;
+  static List<String> _termsOf(Map<String, dynamic> c) => [
+        '${c['name']}', '${c['cat'] ?? ''}', '${c['semester'] ?? ''}', '${teacherOf(c)?['name'] ?? ''}', '${roomOf(c)?['name'] ?? ''}', '${c['description'] ?? ''}', '${c['code'] ?? ''}',
+      ];
+  static List<Map<String, dynamic>> search(List<Map<String, dynamic>> cs, String q) =>
+      (smartFilter(q, cs, (c) => _termsOf(c as Map<String, dynamic>), _hasQuery, _scoreOf) as List).cast<Map<String, dynamic>>();
+
+  // ═══ חריגה/סינון (הכרעה 23-ג) = FilterChipPill ⊕ finderMatches — 13 צירים · AND על נעילות ═══
+  //   ציר-מצב (state): clash · noTeacher · noRoom · full · open · belowMin · waiting · ended
+  //   צירי-ממד: cat · teacher · room · day · hour · grade (שכבה בתוך gradeMin..gradeMax) — סמסטר=SegmentedSwitch · טקסט=DsSearch
+  static String axisValue(Map<dynamic, dynamic> db, dynamic f, dynamic axis, Map<String, String> locks) {
+    final c = f as Map<String, dynamic>;
+    final want = locks['$axis'] ?? '';
+    switch ('$axis') {
+      case 'state':
+        switch (want) {
+          case 'clash': return hasClash(c) ? want : '';
+          case 'noTeacher': return noTeacher(c) ? want : '';
+          case 'noRoom': return noRoom(c) ? want : '';
+          case 'full': return isFull(c) ? want : '';
+          case 'open': return !isFull(c) && isLive(c) ? want : '';
+          case 'belowMin': return belowMin(c) ? want : '';
+          case 'waiting': return waitlist(c).isNotEmpty ? want : '';
+          case 'ended': return !isLive(c) ? want : '';
+        }
+        return '';
+      case 'cat': return '${c['cat'] ?? ''}';
+      case 'teacher': return '${c['teacherId'] ?? ''}';
+      case 'room': return '${c['roomId'] ?? ''}';
+      case 'day': return (sessionsOf(c) as List).any((s) => '${s['day']}' == want) ? want : '';
+      case 'hour':
+        return (sessionsOf(c) as List).any((s) { final t = timeToMin(s['time']); return t is num && !t.isNaN && '${(t ~/ 60)}' == want; }) ? want : '';
+      case 'grade': return _gradeFits(c, want) ? want : '';
+    }
+    return '';
+  }
+  static List<Map<String, dynamic>> filter(List<Map<String, dynamic>> cs, Map<String, String> locks) =>
+      finderMatches({'families': cs}, locks, (db, f, axis) => axisValue(db, f, axis, locks)).cast<Map<String, dynamic>>();
+  static int countState(List<Map<String, dynamic>> cs, String st) => filter(cs, {'state': st}).length;
+  // תחומים עם מונה (countBy ממאור) — צ׳יפי-תחום דינמיים מהדאטה, לא רשימה-קשיחה
+  static List<List<Object>> catCounts(List<Map<String, dynamic>> cs) => countBy(cs, (c) => '${(c as Map)['cat'] ?? ''}');
+  static const stateChips = <List<String>>[
+    ['clash', '⚠️ התנגשות'], ['noTeacher', '🚫 ללא-מורה'], ['noRoom', '🚪 ללא-חדר'], ['full', '🈵 מלא'],
+    ['open', '🟢 פנוי'], ['belowMin', '📉 מתחת-מינ׳'], ['waiting', '⏳ המתנה>0'], ['ended', '🏁 הסתיימו'],
+  ];
+
   // ─── KPI-10 (המפרט) — כולם מנועי-מדף/נגזרות-אמת, אפס-StatBlock ───
   static int get kpiActive => allCourses.where((c) => lifecycle(c) == 'פעיל').length;
   static int get kpiLessonsWeek => lessonsThisWeek();
@@ -707,6 +767,9 @@ class _CoursesScreenState extends State<CoursesScreen> {
   int _view = 0; // 0=📅 גריד-שבועי · 1=📋 רשימה · 2=👩‍🏫 פר-מורה · 3=🚪 פר-חדר (SegmentedSwitch→תצוגה)
   int _week = 0; // 0=השבוע · 1=שבוע-הבא (בורר-שבוע · פס-עליון)
   int _sem = 0; // 0=הכל · 1..=semesterOptions (בורר-סמסטר · פס-עליון)
+  String _q = ''; // חיפוש-איתור (DsSearch → smartFilter)
+  final Map<String, String> _locks = {}; // נעילות-סינון פר-ציר (FilterChipPill → finderMatches)
+  bool _adv = false; // סינון-מתקדם (צירי-ממד) פתוח
   int _tab = 0; // טאב-פאנל: 0 סקירה · 1 נרשמים · 2 המתנה · 3 מערכת · 4 נוכחות · 5 גבייה · 6 חומרים · 7 היסטוריה · 8 אודיט
   String? _pick; // בורר פתוח בפאנל: enroll · invite · teacher · sub · room · move:<eid> · message · null
   String? _msg; // תוצאת-פעולה אחרונה (AlertBanner)
@@ -718,11 +781,22 @@ class _CoursesScreenState extends State<CoursesScreen> {
   Widget build(BuildContext context) {
     final live = _CoursesData.bySemester(_CoursesData.liveCourses, _sem);
     final clashes = _CoursesData.kpiClashes;
+    // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches (AND על נעילות).
+    //   'ended' מסנן מכל-החוגים (גם הסתיימו); אחרת מהחיים. הפייפליין רץ פעם-אחת ומזין גריד/רשימה/פר-מורה/פר-חדר.
+    final base = _locks['state'] == 'ended' ? _CoursesData.bySemester(_CoursesData.allCourses, _sem) : live;
+    final visible = _CoursesData.filter(_CoursesData.search(base, _q), _locks);
     // דירוג לפי דחיפות-מאוחדת (התנגשות ראשונה), ואז לפי תפוסה-יורדת
-    final ranked = [...live]..sort((a, b) {
+    final ranked = [...visible]..sort((a, b) {
         final s = _CoursesData.sev(b).compareTo(_CoursesData.sev(a));
         return s != 0 ? s : _CoursesData.occupancy(b).compareTo(_CoursesData.occupancy(a));
       });
+    // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-דחיפות (3 התנגשות · 2 ללא-מורה/חדר · 1 מתחת-מינ׳ · 0 תקין · -1 הסתיים)
+    final buckets = <int, List<Map<String, dynamic>>>{3: [], 2: [], 1: [], 0: [], -1: []};
+    for (final c in ranked) {
+      buckets[_CoursesData.sev(c)]!.add(c);
+    }
+    const secTitle = {3: '⚠️ התנגשות — חוסם', 2: '🚫 ללא-מורה / ללא-חדר', 1: '📉 מתחת-למינימום', 0: '🟢 תקין', -1: '🏁 הסתיימו / בוטלו'};
+    const secTone = {3: 2, 2: 2, 1: 3, 0: 1, -1: 0};
     return DsScaffold(
       title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_CoursesData.teachers.length} מורים · ${_CoursesData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚',
       children: [
@@ -746,6 +820,36 @@ class _CoursesScreenState extends State<CoursesScreen> {
           }),
           SoftButton(label: '🖨 הדפס-מערכת', tone: 0, onTap: () => _openPrint(live)),
         ]),
+        _gap(6),
+        // איתור: חיפוש-מבוקר (DsSearch → smartFilter⊕smartScore⊕normSearch) + סינון-מתקדם
+        Row(children: [
+          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          const SizedBox(width: 6),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: _adv ? '🔎 פחות' : '🔎 סינון', tone: _locks.keys.any((k) => k != 'state') ? 1 : 0, onTap: () => setState(() => _adv = !_adv))),
+        ]),
+        // חריגה: צ׳יפי-מצב (FilterChipPill ⊕ finderMatches) עם מונים-אמת
+        Wrap(spacing: 8, runSpacing: 6, children: [
+          _fchip('state', '', 'הכל · ${live.length}'),
+          for (final st in _CoursesData.stateChips) _fchip('state', st[0], '${st[1]} · ${_CoursesData.countState(st[0] == 'ended' ? _CoursesData.bySemester(_CoursesData.allCourses, _sem) : live, st[0])}'),
+        ]),
+        if (_adv) ...[
+          _gap(8),
+          // צירי-ממד: תחום (countBy) · מורה · חדר · יום · שעה · שכבה — נעילה-אחת פר-ציר, AND בין צירים
+          Wrap(spacing: 8, runSpacing: 6, children: [
+            for (final cc in _CoursesData.catCounts(live)) if ('${cc[0]}'.isNotEmpty) _fchip('cat', '${cc[0]}', '🗂 ${cc[0]} · ${cc[1]}'),
+          ]),
+          _gap(6),
+          Wrap(spacing: 8, runSpacing: 6, children: [for (final t in _CoursesData.teachers) _fchip('teacher', '${t['id']}', '👩‍🏫 ${t['name']}')]),
+          _gap(6),
+          Wrap(spacing: 8, runSpacing: 6, children: [for (final r in _CoursesData.rooms) _fchip('room', '${r['id']}', '🚪 ${r['name']}')]),
+          _gap(6),
+          Wrap(spacing: 8, runSpacing: 6, children: [
+            for (var dd = 0; dd < 6; dd++) _fchip('day', '$dd', '📅 ${dayNames[dd]}'),
+            for (final h in _CoursesData.gridHours(_CoursesData.liveCourses)) _fchip('hour', '${h ~/ 60}', '🕐 ${_CoursesData.hm(h)}'),
+          ]),
+          _gap(6),
+          Wrap(spacing: 8, runSpacing: 6, children: [for (final g in gradeOrder.sublist(1, 9)) _fchip('grade', g, '🎒 $g')]),
+        ],
         if (_msg != null) ...[_gap(8), AlertBanner(message: _msg!, tone: _msgTone, glyph: _msgTone == 2 ? '⛔' : _msgTone == 3 ? '⚠️' : '✅')],
         _gap(12),
         // KPI-10: hero=התנגשויות (המטרה: "אף שיבוץ לא יתנגש") + 9 מדדי-מצב (BareStat נושאי-ערך-אמת)
@@ -772,15 +876,20 @@ class _CoursesScreenState extends State<CoursesScreen> {
         _gap(10),
         if (live.isEmpty)
           const EmptyState(glyph: '📚', message: 'אין חוגים — צור חוג-חדש או שכפל סמסטר')
+        else if (visible.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין חוגים תואמים לחיפוש/סינון'))
         else if (_view == 1)
-          DsSection(title: '📋 רשימת-חוגים · ${live.length} · ${_CoursesData.columnDefs.where((c) => _CoursesData.colShown(c, live)).length} עמודות', children: [_table(ranked)])
+          DsSection(title: '📋 רשימת-חוגים · ${visible.length} · ${_CoursesData.columnDefs.where((c) => _CoursesData.colShown(c, visible)).length} עמודות', children: [_table(ranked)])
         else if (_view == 2)
-          ..._byTeacher(live)
+          ..._byTeacher(visible)
         else if (_view == 3)
-          ..._byRoom(live)
-        else
-          DsSection(title: '📅 מערכת-שעות · ${_week == 0 ? 'השבוע' : 'שבוע הבא'} (${_CoursesData.isoOfDay(0, _week)} – ${_CoursesData.isoOfDay(5, _week)})', children: [_grid(live)]),
-        if (_view != 1 && _view != 2 && _view != 3) DsSection(title: 'חוגים · לפי דחיפות', children: [for (final c in ranked) _row(c)]),
+          ..._byRoom(visible)
+        else ...[
+          DsSection(title: '📅 מערכת-שעות · ${_week == 0 ? 'השבוע' : 'שבוע הבא'} (${_CoursesData.isoOfDay(0, _week)} – ${_CoursesData.isoOfDay(5, _week)})', children: [_grid(visible)]),
+          for (final st in const [3, 2, 1, 0, -1])
+            if (buckets[st]!.isNotEmpty)
+              DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [for (final c in buckets[st]!) _row(c)]),
+        ],
       ],
     );
   }
@@ -860,7 +969,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     return [
       for (final t in _CoursesData.teachers)
         () {
-          final cs = _CoursesData.bySemester(_CoursesData.coursesOf(t), _sem);
+          final cs = live.where((c) => c['teacherId'] == t['id']).toList(); // הרשימה-הנראית (אחרי איתור+חריגה); coursesOfTeacher = אותו מנוע על כל-החיים
           return DsSection(
             title: '👩‍🏫 ${t['name']} · ${t['specialty']}',
             trailing: StatusChip(label: '${cs.length} חוגים · ${_CoursesData.weeklyOf(cs)} מפגשים/שבוע', tone: cs.isEmpty ? 0 : 1),
@@ -875,7 +984,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
   List<Widget> _byRoom(List<Map<String, dynamic>> live) => [
         for (final r in _CoursesData.rooms)
           () {
-            final cs = _CoursesData.bySemester(_CoursesData.coursesInRoom(r), _sem);
+            final cs = live.where((c) => c['roomId'] == r['id']).toList(); // הרשימה-הנראית (אחרי איתור+חריגה)
             final active = r['active'] == true;
             final weekly = _CoursesData.roomWeekly(r), cap = _CoursesData.roomSlotsPerWeek(r);
             return DsSection(
@@ -890,6 +999,17 @@ class _CoursesScreenState extends State<CoursesScreen> {
             );
           }(),
       ];
+
+  // צ׳יפ-סינון מבוקר: הזרקת-צבעים (חוק-6) + נעילת-ציר (tap שוב = שחרור). value=''=ציר-ללא-נעילה ("הכל")
+  Widget _fchip(String axis, String value, String label) {
+    final sel = (_locks[axis] ?? '') == value;
+    return FilterChipPill(
+      label: label, selected: sel,
+      onTap: () => setState(() { if (value.isEmpty || sel) { _locks.remove(axis); } else { _locks[axis] = value; } }),
+      activeFillColor: _acc, surfaceColor: const Color(0xFF14162E), activeTextColor: const Color(0xFF0B0B15), inkColor: _ink,
+      outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
+    );
+  }
 
   Widget _row(Map<String, dynamic> c) {
     final t = _CoursesData.teacherOf(c), r = _CoursesData.roomOf(c);
