@@ -13,7 +13,8 @@ import '../dart-ui-bs/premium/surfaces/stat_hero.dart'; // hero = המטרה (ש
 import '../dart-ui-bs/bare_stat.dart'; // עובדה מספרית (פיגמנט מוזרק — חוק-6)
 import '../dart-ui-bs/premium/lists/stat_row.dart'; // יחס (עומס מול חוזה) = בר-מילוי
 import '../dart-ui-bs/premium/lists/media_row.dart';
-import '../dart-ui-bs/premium/lists/timeline_item.dart'; // ציר-זמן (היעדרויות · החלפות · אודיט) — לא timeline_flow המזייף
+import '../dart-ui-bs/premium/lists/timeline_item.dart';
+import '../dart-ui-bs/premium/lists/expandable_tile.dart'; // פנקס-המקומות-השמורים (מתקפל) // ציר-זמן (היעדרויות · החלפות · אודיט) — לא timeline_flow המזייף
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart'; // השוואת-גדלים (שעות מול חוזה · ביצועי-כיתות)
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
@@ -433,6 +434,24 @@ class _TeamData {
     return out;
   }
 
+  // ═══ פנקס-המקומות-השמורים (חוק-7 · מבחן-הקונכייה) — כל שקע חסר-נתון, מאיר לבד כשהנתון מוזרק (אפס-שינוי-קוד) ═══
+  //   שדות-רשומה: מפתח בדאטה ⇒ עמודה/שבב/טאב מאירים. יכולות-הצבה: מוזרקות בלוח-האם (חוק-6/7).
+  static const reservedSlots = <Map<String, String>>[
+    {'key': 'photo', 'what': 'תמונה (WorkerCert.photo)', 'lights': 'עמודת-תמונה · שבב'},
+    {'key': 'contact', 'what': 'קשר — טלפון/מייל (חוק-6, מוזרק)', 'lights': 'עמודת-קשר · שלח-הודעה'},
+    {'key': 'salary', 'what': 'שכר (payRate — מוגן-כספים)', 'lights': 'עמודת-שכר (כספים/מנהל)'},
+    {'key': 'classAttendance', 'what': 'דירוג-נוכחות-כיתותיו (מודול-נוכחות)', 'lights': 'עמודה'},
+    {'key': 'classPerf', 'what': 'ביצועי-כיתות {labels,values,monthly} (נוכחות/ציונים)', 'lights': 'טאב-ביצועים · השוואה-למנהל'},
+    {'key': 'updatedAt', 'what': 'עדכון-אחרון', 'lights': 'עמודה'},
+    {'key': 'peerReview', 'what': 'הערכות-עמיתים', 'lights': 'שבב-סקירה'},
+    {'key': 'studentFeedback', 'what': 'משוב-תלמידים', 'lights': 'שבב-סקירה'},
+    {'key': 'personnelFile', 'what': 'תיק-אישי', 'lights': 'שבב-סקירה'},
+    {'key': '__docs', 'what': 'אחסון-קבצים למסמכים', 'lights': 'טאב-מסמכים (הרשומה נרשמת כבר)'},
+    {'key': '__pdf', 'what': 'מנוע-PDF לייצוא/הדפסה', 'lights': 'ייצוא PDF (CSV חי)'},
+    {'key': '__fetch', 'what': 'חיבור-אסינק (טעינה/שגיאה)', 'lights': 'מצבי טעינה/שגיאה (השלד חי)'},
+  ];
+  static bool slotLit(Map<String, String> r) => !r['key']!.startsWith('__') && everyone.any((t) => t[r['key']] != null);
+
   // ═══ הרשאות-פר-תפקיד (הכרעה 23-ג · חוק-6 זהות=הזרקה) = roleOf ⊕ teacherIdOf ⊕ canGrantedAction ═══
   //   6 תפקידי-המפרט כעקרונות-דמו אטומים ('p:...' — לא מיילים, לא זהות-אמת; בהצבה מוזרקת זהות-ההתחברות).
   //   roleOf ⇒ admin/teacher/staff · teacherIdOf ⇒ המורה-המחובר (כרטיס-שלו בלבד) · features ⇒ פעולות-מגודרות.
@@ -712,6 +731,12 @@ class _TeachersScreenState extends State<TeachersScreen> {
               DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
                 for (final t in buckets[st]!) _row(t),
               ]),
+        // פנקס-המקומות-השמורים (חוק-7): שקוף לגבי מה עוד לא מואר — ExpandableTile (מתקפל)
+        _gap(6),
+        ExpandableTile(
+          title: '🔌 מקומות-שמורים · ${_TeamData.reservedSlots.where((r) => !_TeamData.slotLit(r)).length} ממתינים לנתון · ${_TeamData.reservedSlots.where(_TeamData.slotLit).length} מוארים',
+          body: [for (final r in _TeamData.reservedSlots) '${_TeamData.slotLit(r) ? '💡' : '⚫'} ${r['what']} ⇒ ${r['lights']}'].join('\n'),
+        ),
       ],
     );
   }
