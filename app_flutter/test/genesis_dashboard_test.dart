@@ -12,6 +12,24 @@ Widget _app(Widget child) => MaterialApp(
       home: Directionality(textDirection: TextDirection.rtl, child: child),
     );
 
+// ListView עצל: וידג׳ט מתחת-לקיפול אינו בנוי ⇒ גוללים את הרשימה-הראשית עד שהוא נראה (לא ensureVisible שדורש אלמנט קיים)
+Future<void> _show(WidgetTester tester, Finder f) async {
+  for (var i = 0; i < 6 && f.evaluate().isEmpty; i++) { // קודם חזרה-לראש (האלמנט עלול להיות מעל החלון)
+    await tester.drag(find.byType(ListView).first, const Offset(0, 2500));
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  for (var i = 0; i < 60; i++) {
+    if (f.evaluate().isNotEmpty) {
+      await tester.ensureVisible(f);
+      await tester.pump(const Duration(milliseconds: 200));
+      return;
+    }
+    await tester.drag(find.byType(ListView).first, const Offset(0, -250)); // גלילה ידנית: האלמנט עוד לא בנוי
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  throw StateError('לא נמצא אחרי גלילה: $f');
+}
+
 void _surface(WidgetTester tester) {
   tester.view.physicalSize = const Size(800, 2400);
   tester.view.devicePixelRatio = 1.0;
@@ -70,7 +88,7 @@ void main() {
     expect(find.text('1 / 16'), findsOneWidget, reason: 'cockpitProgress: done=1');
 
     // פתיחת-פאנל (שברון) ⇒ הקשר-מלא + השפעה-אם-לא + היסטוריה
-    await tester.ensureVisible(find.byIcon(Icons.chevron_left).first);
+    await _show(tester, find.byIcon(Icons.chevron_left).first);
     await tester.tap(find.byIcon(Icons.chevron_left).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
@@ -132,26 +150,107 @@ void main() {
     _surface(tester);
     await tester.pumpWidget(_app(const DashboardScreen()));
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.ensureVisible(find.text('מגמות'));
+    await _show(tester, find.text('מגמות'));
     await tester.tap(find.text('מגמות'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('נוכחות חודשית'), findsOneWidget);
     expect(find.text('93.1%'), findsWidgets, reason: 'TrendStat: הערך האחרון בסדרה');
-    await tester.ensureVisible(find.text('השוואות'));
+    await _show(tester, find.text('השוואות'));
     await tester.tap(find.text('השוואות'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('שכבה ט׳: 86.2%'), findsOneWidget, reason: 'חריגה-סטטיסטית |z|>1.5');
-    await tester.ensureVisible(find.text('יעדים'));
+    await _show(tester, find.text('יעדים'));
     await tester.tap(find.text('יעדים'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('מתחת ליעד'), findsWidgets, reason: 'נוכחות 93.2 < יעד 94 · גבייה 86 < 90');
-    await tester.ensureVisible(find.text('דוחות'));
+    await _show(tester, find.text('דוחות'));
     await tester.tap(find.text('דוחות'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('תדרוך-בוקר · 04/09/2026'), findsOneWidget, reason: 'cockpitWorkListText + כותרת');
-    await tester.ensureVisible(find.text('אודיט'));
+    await _show(tester, find.text('אודיט'));
     await tester.tap(find.text('אודיט'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('טרם בוצעו פעולות'), findsOneWidget);
+  });
+
+  testWidgets('גל 8 · פעולות: דחה(סיבה) · האצל · כללי-דחיפות · אודיט נרשם', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app(const DashboardScreen()));
+    await tester.pump(const Duration(milliseconds: 300));
+    // פאנל ⇒ דחה עם סיבה ⇒ המשימה יוצאת מ-🔴 ומקבלת שבב "נדחה"
+    await _show(tester, find.byIcon(Icons.chevron_left).first);
+    await tester.tap(find.byIcon(Icons.chevron_left).first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.textContaining('דחה · ממתין-למידע'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('נדחה'), findsWidgets, reason: 'סטטוס-הפאנל/השורה = נדחה');
+    // האצל ⇒ אחראי חדש
+    await tester.tap(find.textContaining('האצל ל-מזכירות').first);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('הואצל'), findsNothing, reason: 'נדחה קודם להואצל בסדר-הסטטוס');
+    // סגירת-הפאנל (דטרמיניסטי: pop של ה-Navigator, לא ניחוש-מיקום-barrier)
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    // אודיט: 2 פעולות נרשמו
+    await _show(tester, find.text('אודיט'));
+    await tester.tap(find.text('אודיט'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('אודיט · 2 פעולות-לוח'), findsOneWidget);
+    expect(find.textContaining('נדחה (ממתין-למידע)'), findsOneWidget);
+    expect(find.textContaining('הואצל ל-מזכירות'), findsOneWidget);
+  });
+
+  testWidgets('גל 8 · כללי-דחיפות עריכים משנים את הטריאז׳ · טבלה 12-עמודות · CSV', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app(const DashboardScreen()));
+    await tester.pump(const Duration(milliseconds: 300));
+    // טבלה: DsTable עם עמודות-החוזה (12 + שכבה מוארת כי משימה נושאת grade)
+    await _show(tester, find.text('📋 טבלה'));
+    await tester.tap(find.text('📋 טבלה'));
+    await tester.pump(const Duration(milliseconds: 300));
+    for (final c in ['דחיפות', 'מודול', 'תיאור', 'אחראי', 'מאז', 'השפעה', 'פעולה', 'סטטוס', 'יעד', 'SLA', 'קישור', 'הערה', 'שכבה']) {
+      expect(find.text(c), findsWidgets, reason: 'עמודת-חוזה $c מוצגת');
+    }
+    expect(find.text('הוקצה ע״י'), findsNothing, reason: 'מקום-שמור: עמודה ללא-נתון = שקטה');
+    // CSV: cockpitCsvRows⊕toCsv — כותרת + שורות
+    await _show(tester, find.text('⬇ CSV').first);
+    await tester.tap(find.text('⬇ CSV').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.textContaining('דחיפות,משימה,אחראי,פעולה·יעד'), findsOneWidget, reason: 'כותרת-CSV מהמנוע');
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    // כללים: העלאת סף 🟠 ⇒ פחות משימות 🟠 (band עריך)
+    await _show(tester, find.text('⚙️ כללים'));
+    await tester.tap(find.text('⚙️ כללים'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.textContaining('כללי-דחיפות'), findsOneWidget);
+    expect(find.text('12'), findsWidgets, reason: 'סף 🔴 ברירת-מחדל');
+    await tester.tap(find.text('🔴 +1'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('13'), findsWidgets, reason: 'סף 🔴 עודכן');
+  });
+
+  testWidgets('גל 8 · מבט-כספים: רק גבייה · שבוע מרחיב את התור · 🎉 אין-משימות', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app(const DashboardScreen()));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('💰 כספים'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('חוב-ותיק (>90 יום)'), findsWidgets);
+    expect(find.textContaining('שיעורים ללא-מורה היום'), findsNothing, reason: 'כספים רואה גבייה בלבד');
+    expect(find.textContaining('🎓 תלמידים-פעילים'), findsNothing, reason: 'KPI מסונן לפי-מודול');
+    await tester.tap(find.text('שבוע'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('הו״ק נכשלו'), findsOneWidget, reason: 'due 10.9 נכנס לטווח-שבוע');
+    // אין-משימות: קלט ריק ⇒ 🎉
+    const empty = DashInput(today: '2026-09-04', modules: []);
+    await tester.pumpWidget(_app(const DashboardScreen(input: empty)));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('בוקר ירוק'), findsOneWidget);
   });
 }

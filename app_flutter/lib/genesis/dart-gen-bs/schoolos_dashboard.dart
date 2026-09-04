@@ -533,7 +533,13 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  late final _DashData d = _DashData(widget.input ?? DashInput.demo);
+  late _DashData d = _DashData(widget.input ?? DashInput.demo);
+  // שקע-הקלט התחלף (מודולים רועננו / today חדש) ⇒ מנוע חדש — ה-State לא נשאר על קלט ישן (נתפס בבדיקת-widget)
+  @override
+  void didUpdateWidget(DashboardScreen old) {
+    super.didUpdateWidget(old);
+    if (!identical(old.input, widget.input)) d = _DashData(widget.input ?? DashInput.demo);
+  }
   int _role = 0; // 0 מנהל · 1 רכז · 2 ועד · 3 כספים
   int _range = 0; // 0 היום · 1 שבוע · 2 חודש · 3 שנה
   int _tab = 0; // 9 טאבים
