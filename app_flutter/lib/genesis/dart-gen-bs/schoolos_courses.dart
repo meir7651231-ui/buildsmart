@@ -13,6 +13,8 @@ import '../dart-ui-bs/premium/lists/media_row.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
 import '../dart-ui-bs/premium/feedback/empty_state.dart';
 import '../dart-ui-bs/premium/actions/segmented_switch.dart';
+import '../dart-ui-bs/premium/lists/stat_row.dart'; // יחס (תפוסה/ניצולת) = בר-מילוי, לא linear_progress המזייף
+import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון-בלחיצה) — לא DataGrid המזייף
 import '../dart-maor/enroll-count.dart'; // נרשמים-חיים לחוג (לא wait/ended) — מנוע-אמת ממאור
 import '../dart-maor/waitlist-for.dart'; // רשימת-המתנה מסודרת לפי enrolledAt — מנוע-אמת ממאור
 import '../dart-maor/sessions-of.dart'; // מפגשי-חוג (sessions או weekday/time) — מנוע-אמת ממאור
@@ -26,6 +28,11 @@ import '../dart-maor/inactive-room-courses.dart'; // חוגים שחדרם חס�
 import '../dart-maor/grand-total.dart'; // Σ-לפי-מפתח — מנוע-אמת ממאור
 import '../dart-maor/shekel.dart'; // פורמט ₪ — מנוע-אמת ממאור
 import '../dart-maor/week-day-names.dart'; // שמות-ימים (ראשון..שבת) — אטום-דאטה ממאור
+import '../dart-maor/semester-options.dart'; // אפשרויות-סמסטר (שנתי/חצי שנתי) — אטום-דאטה ממאור
+import '../dart-maor/min-to-hm.dart'; // דקות ⇒ 'HH:MM' (תוויות-שעה בגריד) — מנוע-אמת ממאור
+import '../dart-maor/courses-of-teacher.dart'; // חוגי-מורה (מבט פר-מורה) — מנוע-אמת ממאור
+import '../dart-maor/weekly-room-sessions.dart'; // מפגשים/שבוע פר-חדר (ניצולת) — מנוע-אמת ממאור
+import '../dart-maor/clamp-scale.dart'; // הצמדה לגבולות (יחס-ניצולת) — מנוע-אמת ממאור
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -307,6 +314,94 @@ class _CoursesData {
     return n;
   }
 
+  // ─── גריד-שבועי: שעות = טווח מפגשי-החוגים-החיים (timeToMin), צעד 60; תוויות = minToHM ───
+  static String _pad2(int n) => n.toString().padLeft(2, '0');
+  static String hm(int min) => minToHM(min, _pad2);
+  static List<int> gridHours(List<Map<String, dynamic>> cs) {
+    int lo = 24 * 60, hi = 0;
+    for (final c in cs) {
+      for (final s in (sessionsOf(c) as List)) {
+        final t = timeToMin(s['time']);
+        if (t is num && !t.isNaN) {
+          if (t < lo) lo = t.toInt();
+          if (t >= hi) hi = t.toInt() + 60;
+        }
+      }
+    }
+    if (lo >= hi) return const [];
+    lo -= lo % 60;
+    return [for (var h = lo; h < hi; h += 60) h];
+  }
+  // חוגים בתא (יום×שעה): מפגש שנופל בתוך [h, h+60)
+  static List<Map<String, dynamic>> inCell(List<Map<String, dynamic>> cs, int day, int h) => [
+        for (final c in cs)
+          if ((sessionsOf(c) as List).any((s) {
+            final t = timeToMin(s['time']);
+            return s['day'] == day && t is num && !t.isNaN && t >= h && t < h + 60;
+          }))
+            c,
+      ];
+  static bool isCancelled(Map<String, dynamic> c, String iso) => cancelledSessions.contains('${c['id']}|$iso');
+  static String isoOfDay(int day, int weekOffset) {
+    final ws = DateTime.parse('${weekStart()}T12:00:00');
+    return _iso(DateTime(ws.year, ws.month, ws.day + day + 7 * weekOffset));
+  }
+
+  // ─── ניצולת-חדר (מטרת-הנהלה): מפגשים/שבוע (מנוע weeklyRoomSessions) מול קיבולת-משבצות = 6 ימים × (to−from)/slot ───
+  static List<dynamic> _sessList(dynamic c) => sessionsOf(c) as List;
+  static int roomWeekly(Map<String, dynamic> r) => weeklyRoomSessions(db, r['id'], today, _sessList).toInt();
+  static int roomSlotsPerWeek(Map<String, dynamic> r) {
+    final from = timeToMin(r['from']), to = timeToMin(r['to']);
+    final slot = (r['slot'] as num?) ?? 60;
+    if (from is! num || to is! num || from.isNaN || to.isNaN || slot <= 0 || to <= from) return 0;
+    return ((to - from) / slot).floor() * 6;
+  }
+  static double roomUtil(Map<String, dynamic> r) {
+    final cap = roomSlotsPerWeek(r);
+    return cap == 0 ? 0 : clampScale(roomWeekly(r) / cap, 0.0, 1.0).toDouble();
+  }
+  static List<Map<String, dynamic>> coursesInRoom(Map<String, dynamic> r) => liveCourses.where((c) => c['roomId'] == r['id']).toList();
+  static List<Map<String, dynamic>> coursesOf(Map<String, dynamic> t) => (coursesOfTeacher(liveCourses, t['id']) as List).cast<Map<String, dynamic>>();
+  static int weeklyOf(List<Map<String, dynamic>> cs) => grandTotal(cs, (c) => (sessionsOf(c) as List).length).toInt();
+
+  // ─── סינון-סמסטר (פס-עליון): 0=הכל · i>0 ⇒ semesterOptions[i-1] (אטום-דאטה ממאור) ───
+  static List<Map<String, dynamic>> bySemester(List<Map<String, dynamic>> cs, int sem) =>
+      sem == 0 ? cs : cs.where((c) => c['semester'] == semesterOptions[sem - 1]).toList();
+
+  static String sessionsLabel(Map<String, dynamic> c) => (sessionsOf(c) as List).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ');
+  static String statusLabel(Map<String, dynamic> c) {
+    final lc = lifecycle(c);
+    if (lc != 'פעיל') return lc == 'מתוכנן' ? '🗓 מתוכנן' : lc == 'בוטל' ? '⛔ בוטל' : '🏁 הסתיים';
+    final sv = sev(c);
+    return sv == 3 ? '⚠️ התנגשות' : noTeacher(c) ? '🚫 ללא-מורה' : noRoom(c) ? '🚪 ללא-חדר' : sv == 1 ? '📉 מתחת-מינ׳' : isFull(c) ? '🈵 מלא' : '🟢 פעיל';
+  }
+
+  // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 18 עמודות-הליבה של המפרט + סטטוס ═══
+  //   נגזרת(get)=תמיד-מוצגת · שדה(key בלי get)=מוארת רק כשחוג נושא ערך, חסר ⇒ שקט (אפס-זיוף).
+  //   'code' אין במאור ⇒ מקום-שמור: הוספת {'code': …} לחוג ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
+  static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    {'label': 'שם-חוג', 'get': (Map<String, dynamic> c) => '${c['name']}'},
+    {'key': 'code', 'label': 'קוד'},                                                   // מקום-שמור
+    {'label': 'תחום', 'get': (Map<String, dynamic> c) => '${c['cat'] ?? '—'}'},
+    {'label': 'מורה', 'get': (Map<String, dynamic> c) => '${teacherOf(c)?['name'] ?? '—'}'},
+    {'label': 'חדר', 'get': (Map<String, dynamic> c) => '${roomOf(c)?['name'] ?? '—'}'},
+    {'label': 'יום+שעה', 'get': (Map<String, dynamic> c) => sessionsLabel(c)},
+    {'label': 'משך', 'get': (Map<String, dynamic> c) => roomOf(c) == null ? '—' : '${roomOf(c)!['slot']} דק׳'}, // מקור: Room.slot
+    {'label': 'תדירות', 'get': (Map<String, dynamic> c) => '×${(sessionsOf(c) as List).length}/שבוע'},
+    {'label': 'סמסטר', 'get': (Map<String, dynamic> c) => '${c['semester'] ?? '—'} · ${c['start']}–${c['end']}'},
+    {'label': 'קיבולת', 'get': (Map<String, dynamic> c) => '${capacity(c)}'},
+    {'label': 'רשומים', 'get': (Map<String, dynamic> c) => '${enrolled(c)}'},
+    {'label': 'תפוסה%', 'get': (Map<String, dynamic> c) => '${(occupancy(c) * 100).round()}%'},
+    {'label': 'המתנה', 'get': (Map<String, dynamic> c) => '${waitlist(c).length}'},
+    {'label': 'מינ׳-לפתיחה', 'get': (Map<String, dynamic> c) => minToOpen(c) == null ? '—' : '${minToOpen(c)}${c['minStudents'] == null ? ' (איזון)' : ''}'},
+    {'label': 'מחיר', 'get': (Map<String, dynamic> c) => c['perLesson'] == true ? '${shekel(c['lessonPrice'])}/שיעור' : shekel(c['price'])},
+    {'label': 'חוב-פתוח', 'get': (Map<String, dynamic> c) => shekel(courseDebt(c).toInt())},
+    {'key': '__status', 'label': 'סטטוס'},
+    {'label': 'מגמת-הרשמה', 'get': (Map<String, dynamic> c) => trendLabel(c)},
+  ];
+  static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
+      c['get'] != null || c['key'] == '__status' || rows.any((r) => r[c['key']] != null && '${r[c['key']]}'.trim().isNotEmpty);
+
   // ─── KPI-10 (המפרט) — כולם מנועי-מדף/נגזרות-אמת, אפס-StatBlock ───
   static int get kpiActive => allCourses.where((c) => lifecycle(c) == 'פעיל').length;
   static int get kpiLessonsWeek => lessonsThisWeek();
@@ -345,26 +440,35 @@ class CoursesScreen extends StatefulWidget {
 
 class _CoursesScreenState extends State<CoursesScreen> {
   int _view = 0; // 0=📅 גריד-שבועי · 1=📋 רשימה · 2=👩‍🏫 פר-מורה · 3=🚪 פר-חדר (SegmentedSwitch→תצוגה)
+  int _week = 0; // 0=השבוע · 1=שבוע-הבא (בורר-שבוע · פס-עליון)
+  int _sem = 0; // 0=הכל · 1..=semesterOptions (בורר-סמסטר · פס-עליון)
+  String? _selected; // חוג-נבחר (גריד/רשימה ⇒ פאנל)
 
   @override
   Widget build(BuildContext context) {
-    final live = _CoursesData.liveCourses;
+    final live = _CoursesData.bySemester(_CoursesData.liveCourses, _sem);
     final clashes = _CoursesData.kpiClashes;
     // דירוג לפי דחיפות-מאוחדת (התנגשות ראשונה), ואז לפי תפוסה-יורדת
     final ranked = [...live]..sort((a, b) {
         final s = _CoursesData.sev(b).compareTo(_CoursesData.sev(a));
         return s != 0 ? s : _CoursesData.occupancy(b).compareTo(_CoursesData.occupancy(a));
       });
+    final sel = _selected == null ? null : live.where((c) => c['id'] == _selected).firstOrNull;
     return DsScaffold(
       title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_CoursesData.teachers.length} מורים · ${_CoursesData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚',
       children: [
-        // בורר-תצוגה (SegmentedSwitch מבוקר) — ארגון = פעולת-יסוד עם אטום משלה
+        // פס-עליון: בורר-שבוע/סמסטר + בורר-תצוגה (SegmentedSwitch מבוקר ×3) — ארגון = פעולת-יסוד עם אטום משלה
+        Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.end, children: [
+          SegmentedSwitch(items: const ['📅 השבוע', '⏭ שבוע הבא'], selected: _week, onSelect: (i) => setState(() => _week = i)),
+          SegmentedSwitch(items: ['הכל', ...semesterOptions], selected: _sem, onSelect: (i) => setState(() => _sem = i)),
+        ]),
+        _gap(8),
         Align(
           alignment: Alignment.centerRight,
           child: SegmentedSwitch(items: const ['📅 גריד', '📋 רשימה', '👩‍🏫 פר-מורה', '🚪 פר-חדר'], selected: _view, onSelect: (i) => setState(() => _view = i)),
         ),
         _gap(12),
-        // KPI-10: hero=התנגשויות (המטרה: "אף שיבוץ לא יתנגש") + 10 מדדי-מצב (BareStat נושאי-ערך-אמת)
+        // KPI-10: hero=התנגשויות (המטרה: "אף שיבוץ לא יתנגש") + 9 מדדי-מצב (BareStat נושאי-ערך-אמת)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             StatHero(value: '$clashes', label: 'התנגשויות (מורה/חדר/תלמיד)'),
@@ -388,24 +492,149 @@ class _CoursesScreenState extends State<CoursesScreen> {
         _gap(10),
         if (live.isEmpty)
           const EmptyState(glyph: '📚', message: 'אין חוגים — צור חוג-חדש או שכפל סמסטר')
+        else if (_view == 1)
+          DsSection(title: '📋 רשימת-חוגים · ${live.length} · ${_CoursesData.columnDefs.where((c) => _CoursesData.colShown(c, live)).length} עמודות', children: [_table(ranked)])
+        else if (_view == 2)
+          ..._byTeacher(live)
+        else if (_view == 3)
+          ..._byRoom(live)
         else
-          DsSection(title: 'חוגים · לפי דחיפות', children: [for (final c in ranked) _row(c)]),
+          DsSection(title: '📅 מערכת-שעות · ${_week == 0 ? 'השבוע' : 'שבוע הבא'} (${_CoursesData.isoOfDay(0, _week)} – ${_CoursesData.isoOfDay(5, _week)})', children: [_grid(live)]),
+        if (sel != null) ...[_gap(4), _selectedCard(sel)],
+        if (_view != 1 && _view != 2 && _view != 3) DsSection(title: 'חוגים · לפי דחיפות', children: [for (final c in ranked) _row(c)]),
       ],
     );
   }
 
+  // 📅 גריד-מערכת-שעות: Table (ימים×שעות) · תא = StatusChip-לחיץ פר-חוג (tone=דחיפות) · מבוטל=✖ · ריק=שקט
+  Widget _grid(List<Map<String, dynamic>> cs) {
+    final hours = _CoursesData.gridHours(cs);
+    if (hours.isEmpty) return const EmptyState(glyph: '📅', message: 'אין מפגשים משובצים');
+    const days = [0, 1, 2, 3, 4, 5];
+    TableRow row(List<Widget> cells) => TableRow(children: [for (final w in cells) Padding(padding: const EdgeInsets.all(3), child: w)]);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Table(
+        defaultColumnWidth: const FixedColumnWidth(150),
+        columnWidths: const {0: FixedColumnWidth(56)},
+        border: TableBorder.all(color: DsTokens.line, width: 1),
+        defaultVerticalAlignment: TableCellVerticalAlignment.top,
+        children: [
+          row([
+            const SizedBox.shrink(),
+            for (final dd in days) Center(child: Text('${dayNames[dd]}\n${_CoursesData.isoOfDay(dd, _week).substring(5)}', textAlign: TextAlign.center, style: const TextStyle(color: _ink, fontSize: 12, fontWeight: FontWeight.w800))),
+          ]),
+          for (final h in hours)
+            row([
+              Center(child: Text(_CoursesData.hm(h), style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700))),
+              for (final dd in days)
+                Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  for (final c in _CoursesData.inCell(cs, dd, h)) _cell(c, _CoursesData.isoOfDay(dd, _week)),
+                ]),
+            ]),
+        ],
+      ),
+    );
+  }
+
+  Widget _cell(Map<String, dynamic> c, String iso) {
+    final cancelled = _CoursesData.isCancelled(c, iso);
+    final sev = _CoursesData.sev(c);
+    final tone = cancelled ? 0 : sev >= 2 ? 2 : sev == 1 || _CoursesData.isFull(c) ? 3 : 1;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 3),
+      child: InkWell(
+        onTap: () => setState(() => _selected = c['id'] as String),
+        // FittedBox(scaleDown): שם-חוג ארוך מתכווץ לרוחב-התא במקום לגלוש (הרנדר תפס גלישה ב-112px)
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: StatusChip(label: '${cancelled ? '✖ ' : ''}${c['name']} ${_CoursesData.enrolled(c)}/${_CoursesData.capacity(c)}', tone: tone),
+        ),
+      ),
+    );
+  }
+
+  // 📋 מבט-רשימה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid.
+  Widget _table(List<Map<String, dynamic>> rows) {
+    final cols = [for (final c in _CoursesData.columnDefs) if (_CoursesData.colShown(c, rows)) c];
+    return DsTable(
+      labels: [for (final c in cols) c['label'] as String],
+      rows: [
+        for (final r in rows)
+          [
+            for (final c in cols)
+              if (c['key'] == '__status')
+                _CoursesData.statusLabel(r)
+              else if (c['get'] != null)
+                (c['get'] as String Function(Map<String, dynamic>))(r)
+              else
+                '${r[c['key']] ?? '—'}',
+          ],
+      ],
+    );
+  }
+
+  // 👩‍🏫 פר-מורה: coursesOfTeacher (מנוע) ⊕ עומס = מפגשים/שבוע (BareStat) · סקשן "ללא-מורה" בנפרד (חריגה)
+  List<Widget> _byTeacher(List<Map<String, dynamic>> live) {
+    final orphan = live.where(_CoursesData.noTeacher).toList();
+    return [
+      for (final t in _CoursesData.teachers)
+        () {
+          final cs = _CoursesData.bySemester(_CoursesData.coursesOf(t), _sem);
+          return DsSection(
+            title: '👩‍🏫 ${t['name']} · ${t['specialty']}',
+            trailing: StatusChip(label: '${cs.length} חוגים · ${_CoursesData.weeklyOf(cs)} מפגשים/שבוע', tone: cs.isEmpty ? 0 : 1),
+            children: cs.isEmpty ? [const EmptyState(glyph: '🪑', message: 'אין חוגים למורה זה')] : [for (final c in cs) _row(c)],
+          );
+        }(),
+      if (orphan.isNotEmpty) DsSection(title: '🚫 ללא-מורה · ${orphan.length}', tone: 2, children: [for (final c in orphan) _row(c)]),
+    ];
+  }
+
+  // 🚪 פר-חדר: weeklyRoomSessions (מנוע) ⊕ קיבולת-משבצות ⇒ ניצולת (StatRow) · חדר-לא-פעיל = חריגה
+  List<Widget> _byRoom(List<Map<String, dynamic>> live) => [
+        for (final r in _CoursesData.rooms)
+          () {
+            final cs = _CoursesData.bySemester(_CoursesData.coursesInRoom(r), _sem);
+            final active = r['active'] == true;
+            final weekly = _CoursesData.roomWeekly(r), cap = _CoursesData.roomSlotsPerWeek(r);
+            return DsSection(
+              title: '🚪 ${r['name']} · ${r['location']} · קיבולת ${r['cap']}',
+              tone: active ? 0 : 2,
+              trailing: StatusChip(label: active ? '${r['from']}–${r['to']} · ${r['slot']} דק׳' : 'לא-פעיל', tone: active ? 0 : 2),
+              children: [
+                StatRow(label: 'ניצולת שבועית', value: '$weekly מתוך $cap משבצות', fraction: _CoursesData.roomUtil(r)),
+                _gap(6),
+                if (cs.isEmpty) const EmptyState(glyph: '🚪', message: 'אין חוגים בחדר') else for (final c in cs) _row(c),
+              ],
+            );
+          }(),
+      ];
+
+  // כרטיס חוג-נבחר (גל 2: זהות + תפוסה-מול-קיבולת; גל 3 מרחיב לפאנל+טאבים+פעולות)
+  Widget _selectedCard(Map<String, dynamic> c) => DsSection(
+        title: '🎯 נבחר · ${c['name']}',
+        trailing: StatusChip(label: _CoursesData.statusLabel(c), tone: _CoursesData.sev(c) >= 2 ? 2 : 1),
+        children: [
+          MediaRow(glyph: '📚', title: '${c['name']}', subtitle: '${_CoursesData.teacherOf(c)?['name'] ?? '—'} · ${_CoursesData.roomOf(c)?['name'] ?? '—'} · ${_CoursesData.sessionsLabel(c)}'),
+          _gap(8),
+          StatRow(label: 'תפוסה מול קיבולת', value: '${_CoursesData.enrolled(c)} מתוך ${_CoursesData.capacity(c)}', fraction: _CoursesData.occupancy(c)),
+        ],
+      );
+
   Widget _row(Map<String, dynamic> c) {
     final t = _CoursesData.teacherOf(c), r = _CoursesData.roomOf(c);
-    final sess = (sessionsOf(c) as List).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ');
     final sev = _CoursesData.sev(c);
     final tone = sev >= 2 ? 2 : sev == 1 ? 3 : _CoursesData.isFull(c) ? 3 : 1;
-    final label = sev == 3 ? '⚠️ התנגשות' : _CoursesData.noTeacher(c) ? '🚫 ללא-מורה' : _CoursesData.noRoom(c) ? '🚪 ללא-חדר' : sev == 1 ? '📉 מתחת-מינ׳' : _CoursesData.isFull(c) ? '🈵 מלא' : '🟢 תקין';
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(children: [
-        Expanded(child: MediaRow(glyph: '📚', title: '${c['name']}', subtitle: '${t?['name'] ?? '—'} · ${r?['name'] ?? '—'} · $sess · ${_CoursesData.enrolled(c)}/${_CoursesData.capacity(c)}')),
-        StatusChip(label: label, tone: tone),
+        Expanded(child: MediaRow(glyph: '📚', title: '${c['name']}', subtitle: '${t?['name'] ?? '—'} · ${r?['name'] ?? '—'} · ${_CoursesData.sessionsLabel(c)} · ${_CoursesData.enrolled(c)}/${_CoursesData.capacity(c)}')),
+        StatusChip(label: _CoursesData.statusLabel(c), tone: tone),
         if (_CoursesData.waitlist(c).isNotEmpty) ...[const SizedBox(width: 6), StatusChip(label: '⏳ ${_CoursesData.waitlist(c).length}', tone: 0)],
+        // MediaRow בולע את הקליק (InkWell פנימי no-op) ⇒ כפתור-שברון נפרד כשקע-הבחירה
+        IconButton(onPressed: () => setState(() => _selected = c['id'] as String), icon: const Icon(Icons.chevron_left, color: _acc, size: 24), tooltip: 'פרטים ופעולות'),
       ]),
     );
   }
