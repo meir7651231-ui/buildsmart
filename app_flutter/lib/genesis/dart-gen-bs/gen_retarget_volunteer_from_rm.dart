@@ -1,7 +1,7 @@
 // 🎯 VolunteerScreen — retarget של schoolos_rooms.dart לישות Volunteer (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Volunteer
-//   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 7
-//   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒maxDeliveries(unique) · cap⇒∅(reserved) · location⇒∅(reserved(2 מועמדים)) · from⇒∅(reserved) · to⇒∅(reserved) · access⇒∅(reserved) · notes⇒∅(reserved(2 מועמדים)) · eq⇒∅(reserved)
-//   שדות-Volunteer בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, area, note, createdAt · תוויות: מונחי room (חדר/חדרים) ⇒ Volunteer (מתנדב/מתנדבים) · 43 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Volunteer
+//   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0 · חוזה-מנוע (לא משתנה) 8
+//   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒∅(engine-contract) · cap⇒∅(engine-contract) · location⇒∅(engine-contract) · from⇒∅(engine-contract) · to⇒∅(engine-contract) · access⇒∅(engine-contract) · notes⇒∅(engine-contract) · eq⇒∅(engine-contract)
+//   שדות-Volunteer בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, area, maxDeliveries, note, createdAt · תוויות: מונחי room (חדר/חדרים) ⇒ Volunteer (מתנדב/מתנדבים) · 43 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Volunteer
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: VolunteerScreen.
 //
@@ -107,13 +107,13 @@ class _VolunteerData {
 
   // ── חדרים (מאור Room) ──
   static const rooms = <Map<String, dynamic>>[
-    {'id': 'r1', 'name': 'כיתה 101', 'active': true, 'maxDeliveries': 60, 'cap': 32, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '15:00', 'access': true, 'notes': '', 'eq': {'מקרן': true, 'לוח-חכם': true, 'מזגן': true}},
-    {'id': 'r2', 'name': 'מעבדת מדעים', 'active': true, 'maxDeliveries': 60, 'cap': 24, 'location': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': false, 'notes': 'כיור-חירום בכניסה', 'eq': {'מקרן': true, 'מזגן': true, 'כיורים': true}},
-    {'id': 'r3', 'name': 'מתנדב מחשבים', 'active': true, 'maxDeliveries': 60, 'cap': 28, 'location': 'בניין א׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מחשבים': true, 'מקרן': true, 'מזגן': false}},
-    {'id': 'r4', 'name': 'אולם ספורט', 'active': true, 'maxDeliveries': 60, 'cap': 120, 'location': 'בניין ג׳ · קרקע', 'from': '08:00', 'to': '17:00', 'access': true, 'notes': '', 'eq': {'מזרנים': true, 'מגבר': true}},
-    {'id': 'r5', 'name': 'כיתה 204', 'active': true, 'maxDeliveries': 60, 'cap': 30, 'location': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '15:00', 'access': true, 'notes': '', 'eq': {'מקרן': false, 'מזגן': true}},
-    {'id': 'r6', 'name': 'מתנדב מורים', 'active': true, 'maxDeliveries': 60, 'cap': 16, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מדפסת': true, 'מזגן': true}},
-    {'id': 'r7', 'name': 'אודיטוריום', 'active': false, 'maxDeliveries': 60, 'cap': 220, 'location': 'בניין ג׳ · קומה 1', 'from': '08:00', 'to': '20:00', 'access': true, 'notes': 'בשיפוץ עד סוף אוקטובר', 'eq': {'מקרן': true, 'מגבר': true}},
+    {'id': 'r1', 'name': 'כיתה 101', 'active': true, 'slot': 60, 'cap': 32, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '15:00', 'access': true, 'notes': '', 'eq': {'מקרן': true, 'לוח-חכם': true, 'מזגן': true}},
+    {'id': 'r2', 'name': 'מעבדת מדעים', 'active': true, 'slot': 60, 'cap': 24, 'location': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': false, 'notes': 'כיור-חירום בכניסה', 'eq': {'מקרן': true, 'מזגן': true, 'כיורים': true}},
+    {'id': 'r3', 'name': 'מתנדב מחשבים', 'active': true, 'slot': 60, 'cap': 28, 'location': 'בניין א׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מחשבים': true, 'מקרן': true, 'מזגן': false}},
+    {'id': 'r4', 'name': 'אולם ספורט', 'active': true, 'slot': 60, 'cap': 120, 'location': 'בניין ג׳ · קרקע', 'from': '08:00', 'to': '17:00', 'access': true, 'notes': '', 'eq': {'מזרנים': true, 'מגבר': true}},
+    {'id': 'r5', 'name': 'כיתה 204', 'active': true, 'slot': 60, 'cap': 30, 'location': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '15:00', 'access': true, 'notes': '', 'eq': {'מקרן': false, 'מזגן': true}},
+    {'id': 'r6', 'name': 'מתנדב מורים', 'active': true, 'slot': 60, 'cap': 16, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מדפסת': true, 'מזגן': true}},
+    {'id': 'r7', 'name': 'אודיטוריום', 'active': false, 'slot': 60, 'cap': 220, 'location': 'בניין ג׳ · קומה 1', 'from': '08:00', 'to': '20:00', 'access': true, 'notes': 'בשיפוץ עד סוף אוקטובר', 'eq': {'מקרן': true, 'מגבר': true}},
   ];
 
   // ── חוגים/שיעורים (מאור Course) — תפיסות-חוזרות (שבועיות) · sessions=[{day(0=ראשון),time}] ──
@@ -272,7 +272,7 @@ class _VolunteerData {
   // ניצולת-שבועית% = weeklyRoomSessions(מאור) ÷ קיבולת-משבצות-שבועית ((to−from)/slot × ימים) — יחס מפורק
   static int weeklyCap(Map<String, dynamic> r) {
     final from = _t2m(r['from']), to = _t2m(r['to']);
-    final slot = (r['maxDeliveries'] is num && (r['maxDeliveries'] as num) > 0) ? r['maxDeliveries'] as num : 60;
+    final slot = (r['slot'] is num && (r['slot'] as num) > 0) ? r['slot'] as num : 60;
     final f = from.isNaN ? 8 * 60 : from, t = to.isNaN ? 20 * 60 : to;
     return (((t - f) / slot).floor() * activeDays).clamp(1, 1 << 20);
   }
@@ -322,7 +322,7 @@ class _VolunteerData {
   // ═══ חריגה · כפל-תפיסה (התנגשות) = הרכבת פעולות-יסוד: לולאה(חדר×יום) ⊕ מרווח[t,t+slot) ⊕ השוואת-חפיפה ═══
   //   buildSlots מסתיר אירוע-מול-חוג (קדימות) ולכן ההתנגשות נגזרת מהמרווחים עצמם: חוג⊕חוג · חוג⊕אירוע · אירוע⊕אירוע.
   static List<Map<String, dynamic>> _intervals(Map<String, dynamic> r, String iso) {
-    final slot = (r['maxDeliveries'] is num && (r['maxDeliveries'] as num) > 0) ? (r['maxDeliveries'] as num) : 60;
+    final slot = (r['slot'] is num && (r['slot'] as num) > 0) ? (r['slot'] as num) : 60;
     final d = dow(iso);
     final out = <Map<String, dynamic>>[];
     for (final c in liveCourses) {
@@ -408,7 +408,7 @@ class _VolunteerData {
   }
   // ═══ הכרעה · חדר-חלופי = הרכבה: קיבולת≥נדרש ⊕ ציוד⊇נדרש ⊕ פנוי-במשבצת (אפס-חפיפה) ⊕ קרבה (אותו-בניין) ⇒ דירוג ═══
   static bool freeAt(Map<String, dynamic> r, String iso, num start, {String? exceptId}) {
-    final slot = (r['maxDeliveries'] is num && (r['maxDeliveries'] as num) > 0) ? (r['maxDeliveries'] as num) : 60;
+    final slot = (r['slot'] is num && (r['slot'] as num) > 0) ? (r['slot'] as num) : 60;
     final end = start + slot;
     if (blockOf(iso) != null || blockedDates.contains(iso)) return false;
     for (final iv in _intervals(r, iso)) {
@@ -633,9 +633,10 @@ class _VolunteerData {
   // ═══ חוזה-עמודות · מקום-שמור (חוק-7) — 16 עמודות-המפרט כשקעי-דאטה ═══
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשחדר נושא ערך; חסר ⇒ שקט (type/owner/lastCheck/updatedAt = מקום-שמור).
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
-    // ═══ חוזה-העמודות של Volunteer (G5h · חוק-7): 4 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    // ═══ חוזה-העמודות של Volunteer (G5h · חוק-7): 5 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
     {'key': 'phone', 'label': 'phone'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (string) — מאיר כשהנתון מוזרם
     {'key': 'area', 'label': 'area'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'maxDeliveries', 'label': 'maxDeliveries'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (number) — מאיר כשהנתון מוזרם
     {'key': 'note', 'label': 'note'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (string) — מאיר כשהנתון מוזרם
     {'key': 'createdAt', 'label': 'createdAt'}, // G5h · מקום-שמור: שדה-Volunteer מהסכמה (IsoDate) — מאיר כשהנתון מוזרם
     {'label': 'שם/מספר', 'get': (Map<String, dynamic> r) => '${r['name']}'},

@@ -1,7 +1,7 @@
 // 🎯 ShopItemScreen — retarget של schoolos_courses.dart לישות ShopItem (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity ShopItem
-//   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 3 · מקום-שמור 20
-//   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · kind⇒kind(name) · teacherId⇒storeId(unique) · roomId⇒∅(reserved) · cat⇒holidays(unique) · semester⇒∅(reserved) · sector⇒∅(reserved) · start⇒∅(reserved) · end⇒∅(reserved) · sessions⇒∅(reserved) · time⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒∅(reserved(5 מועמדים)) · price⇒∅(reserved(5 מועמדים)) · gender⇒∅(reserved) · ageMin⇒∅(reserved(5 מועמדים)) · ageMax⇒∅(reserved(5 מועמדים)) · gradeMin⇒∅(reserved) · gradeMax⇒∅(reserved) · description⇒∅(reserved) · files⇒∅(reserved) · data⇒∅(reserved) · day⇒∅(reserved(5 מועמדים)) · perLesson⇒active(unique) · lessonPrice⇒∅(reserved(5 מועמדים))
-//   שדות-ShopItem בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): value, basePrice, stock, minStock, validDays, waits · תוויות: מונחי course (חוג/—) ⇒ ShopItem (פריט/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopItem
+//   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 9 · חוזה-מנוע (לא משתנה) 12
+//   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · kind⇒kind(name) · teacherId⇒∅(engine-contract) · roomId⇒∅(engine-contract) · start⇒∅(engine-contract) · end⇒∅(engine-contract) · sessions⇒∅(engine-contract) · time⇒∅(engine-contract) · gender⇒∅(engine-contract) · ageMin⇒∅(engine-contract) · ageMax⇒∅(engine-contract) · gradeMin⇒∅(engine-contract) · gradeMax⇒∅(engine-contract) · day⇒∅(engine-contract) · cat⇒holidays(unique) · semester⇒∅(reserved) · sector⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒∅(reserved(5 מועמדים)) · price⇒∅(reserved(5 מועמדים)) · description⇒∅(reserved) · files⇒∅(reserved) · data⇒∅(reserved) · perLesson⇒active(unique) · lessonPrice⇒∅(reserved(5 מועמדים))
+//   שדות-ShopItem בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): storeId, value, basePrice, stock, minStock, validDays, waits · תוויות: מונחי course (חוג/—) ⇒ ShopItem (פריט/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopItem
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT · "מה"): knowledge/SPEC-COURSES-FULL-2026-09-04.md · הסטנדרט: מסך-המלאי (schoolos.dart).
 // 🎯 המטרה: "שכל שיעור יקרה — עם מורה, בחדר, לתלמידים הנכונים, בזמן — ושאף שיבוץ לא יתנגש ואף מקום לא יתבזבז."
@@ -114,28 +114,28 @@ class _ShopItemData {
   ];
   // חוגים — sessions בצורת CourseSession {day(0=ראשון..6),time,label}. תאריכים ISO. semester = semesterOptions ממאור.
   static const courses = <Map<String, dynamic>>[
-    {'id': 'c1', 'name': 'גיטרה מתחילים', 'storeId': 't1', 'roomId': 'r1', 'holidays': 'מוזיקה', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
+    {'id': 'c1', 'name': 'גיטרה מתחילים', 'teacherId': 't1', 'roomId': 'r1', 'holidays': 'מוזיקה', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
       'sessions': [{'day': 0, 'time': '16:00', 'label': ''}], 'maxStudents': 12, 'price': 220, 'gender': 'all', 'ageMin': 9, 'ageMax': 12, 'gradeMin': 'ד', 'gradeMax': 'ו',
       'description': 'יסודות הגיטרה הקלאסית', 'notes': '', 'files': [{'id': 'f1', 'name': 'ספר-אקורדים.pdf', 'kind': 'file', 'data': ''}]},
-    {'id': 'c2', 'name': 'רובוטיקה', 'storeId': 't2', 'roomId': 'r2', 'holidays': 'מדעים', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
+    {'id': 'c2', 'name': 'רובוטיקה', 'teacherId': 't2', 'roomId': 'r2', 'holidays': 'מדעים', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
       'sessions': [{'day': 1, 'time': '16:00', 'label': ''}, {'day': 3, 'time': '16:00', 'label': ''}], 'maxStudents': 10, 'price': 320, 'gender': 'all', 'ageMin': 10, 'ageMax': 14, 'gradeMin': 'ה', 'gradeMax': 'ח',
       'description': 'בניית רובוטים ותכנות', 'notes': 'דורש מחשב נייד', 'files': <Map<String, dynamic>>[]},
-    {'id': 'c3', 'name': 'ציור וקרמיקה', 'storeId': 't3', 'roomId': 'r3', 'holidays': 'אומנות', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-01-31',
+    {'id': 'c3', 'name': 'ציור וקרמיקה', 'teacherId': 't3', 'roomId': 'r3', 'holidays': 'אומנות', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-01-31',
       'sessions': [{'day': 2, 'time': '15:00', 'label': ''}], 'maxStudents': 8, 'price': 180, 'gender': 'all', 'ageMin': 7, 'ageMax': 11, 'gradeMin': 'ב', 'gradeMax': 'ה',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[]},
-    {'id': 'c4', 'name': 'כדורסל', 'storeId': 't4', 'roomId': 'r4', 'holidays': 'ספורט', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
+    {'id': 'c4', 'name': 'כדורסל', 'teacherId': 't4', 'roomId': 'r4', 'holidays': 'ספורט', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
       'sessions': [{'day': 1, 'time': '16:00', 'label': ''}], 'maxStudents': 15, 'price': 150, 'gender': 'all', 'ageMin': 9, 'ageMax': 13, 'gradeMin': 'ד', 'gradeMax': 'ז',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[], 'active': true, 'lessonPrice': 40},
-    {'id': 'c5', 'name': 'מקהלה', 'storeId': 't1', 'roomId': 'r1', 'holidays': 'מוזיקה', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
+    {'id': 'c5', 'name': 'מקהלה', 'teacherId': 't1', 'roomId': 'r1', 'holidays': 'מוזיקה', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
       'sessions': [{'day': 0, 'time': '16:00', 'label': ''}], 'maxStudents': 25, 'price': 120, 'gender': 'all', 'ageMin': 8, 'ageMax': 14, 'gradeMin': 'ג', 'gradeMax': 'ח',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[]}, // ⚠️ מתנגש עם c1: אותה מורה + אותו חדר + אותו slot
-    {'id': 'c6', 'name': 'שחמט', 'storeId': '', 'roomId': 'r3', 'holidays': 'חשיבה', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-01-31',
+    {'id': 'c6', 'name': 'שחמט', 'teacherId': '', 'roomId': 'r3', 'holidays': 'חשיבה', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-01-31',
       'sessions': [{'day': 4, 'time': '15:00', 'label': ''}], 'maxStudents': 12, 'price': 140, 'gender': 'all', 'ageMin': 7, 'ageMax': 13, 'gradeMin': 'ב', 'gradeMax': 'ז',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[], 'active': true, 'lessonPrice': 35}, // ללא-מורה · מתחת-מינ׳-כלכלי
-    {'id': 'c7', 'name': 'תיאטרון', 'storeId': 't3', 'roomId': 'r3', 'holidays': 'אומנות', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
+    {'id': 'c7', 'name': 'תיאטרון', 'teacherId': 't3', 'roomId': 'r3', 'holidays': 'אומנות', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
       'sessions': [{'day': 2, 'time': '17:00', 'label': ''}], 'maxStudents': 14, 'price': 190, 'gender': 'all', 'ageMin': 10, 'ageMax': 14, 'gradeMin': 'ה', 'gradeMax': 'ח',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[]},
-    {'id': 'c8', 'name': 'אנגלית מדוברת (קיץ)', 'storeId': 't2', 'roomId': 'r2', 'holidays': 'שפות', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-07-01', 'end': '2026-08-20',
+    {'id': 'c8', 'name': 'אנגלית מדוברת (קיץ)', 'teacherId': 't2', 'roomId': 'r2', 'holidays': 'שפות', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-07-01', 'end': '2026-08-20',
       'sessions': [{'day': 3, 'time': '10:00', 'label': ''}], 'maxStudents': 12, 'price': 200, 'gender': 'all', 'ageMin': 9, 'ageMax': 13, 'gradeMin': 'ד', 'gradeMax': 'ז',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[]}, // הסתיים (end < today)
   ];
@@ -208,7 +208,7 @@ class _ShopItemData {
   // ─── ישויות-קשורות (חיפוש-לפי-מזהה) ───
   static Map<String, dynamic>? teacherOf(Map<String, dynamic> c) {
     for (final t in teachers) {
-      if (t['id'] == c['storeId']) return t;
+      if (t['id'] == c['teacherId']) return t;
     }
     return null;
   }
@@ -287,7 +287,7 @@ class _ShopItemData {
     if (!isLive(c)) return out;
     for (final o in liveCourses) {
       if (o['id'] == c['id'] || !_sameSlot(c, o)) continue;
-      if ('${c['storeId']}'.isNotEmpty && c['storeId'] == o['storeId']) out.add({'kind': 'teacher', 'with': '${o['name']}', 'detail': 'מורה ${teacherOf(c)?['name'] ?? ''}'});
+      if ('${c['teacherId']}'.isNotEmpty && c['teacherId'] == o['teacherId']) out.add({'kind': 'teacher', 'with': '${o['name']}', 'detail': 'מורה ${teacherOf(c)?['name'] ?? ''}'});
       if ('${c['roomId']}'.isNotEmpty && c['roomId'] == o['roomId']) out.add({'kind': 'room', 'with': '${o['name']}', 'detail': 'חדר ${roomOf(c)?['name'] ?? ''}'});
     }
     // תלמיד: מנוע-מאור scheduleClashText לכל נרשם-חי (T: k1=סטטוס-שמוחרג · k2/k3=תבנית-הטקסט)
@@ -431,7 +431,8 @@ class _ShopItemData {
   //   נגזרת(get)=תמיד-מוצגת · שדה(key בלי get)=מוארת רק כשחוג נושא ערך, חסר ⇒ שקט (אפס-זיוף).
   //   'code' אין במאור ⇒ מקום-שמור: הוספת {'code': …} לחוג ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
-    // ═══ חוזה-העמודות של ShopItem (G5h · חוק-7): 6 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    // ═══ חוזה-העמודות של ShopItem (G5h · חוק-7): 7 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'storeId', 'label': 'storeId'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (Id | '') — מאיר כשהנתון מוזרם
     {'key': 'value', 'label': 'value'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (number) — מאיר כשהנתון מוזרם
     {'key': 'basePrice', 'label': 'basePrice'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (number) — מאיר כשהנתון מוזרם
     {'key': 'stock', 'label': 'stock'}, // G5h · מקום-שמור: שדה-ShopItem מהסכמה (number) — מאיר כשהנתון מוזרם
@@ -552,8 +553,8 @@ class _ShopItemData {
     return liveCourses.any((o) => o['id'] != c['id'] && o[key] == id && '$id'.isNotEmpty && _sameSlot(sim, o));
   }
   static String assignTeacher(Map<String, dynamic> c, dynamic tid, String who) {
-    if (_wouldClash(c, 'storeId', tid)) return 'blocked:התנגשות-מורה — ${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} מלמד/ת פריט-אחר באותו slot';
-    courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'storeId': tid};
+    if (_wouldClash(c, 'teacherId', tid)) return 'blocked:התנגשות-מורה — ${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} מלמד/ת פריט-אחר באותו slot';
+    courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'teacherId': tid};
     log(who, 'הקצאת-מורה', '${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} ⇐ ${c['name']}', c['id'] as String);
     return 'assigned';
   }
@@ -622,7 +623,7 @@ class _ShopItemData {
   static Map<String, dynamic> newCourse(String who) {
     final dates = defaultCourseDates(today);
     final c = <String, dynamic>{
-      'id': nextId('c-new-'), 'name': 'פריט חדש', 'storeId': '', 'roomId': '', 'holidays': '', 'semester': '', 'sector': 'כללי', // semester ריק = "סמסטר לא-מוגדר" עד שנבחר
+      'id': nextId('c-new-'), 'name': 'פריט חדש', 'teacherId': '', 'roomId': '', 'holidays': '', 'semester': '', 'sector': 'כללי', // semester ריק = "סמסטר לא-מוגדר" עד שנבחר
       'start': dates['start'], 'end': dates['end'], 'sessions': <Map<String, dynamic>>[], 'maxStudents': 0, 'price': 0, 'gender': 'all',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[],
     };
@@ -737,7 +738,7 @@ class _ShopItemData {
         }
         return '';
       case 'holidays': return '${c['holidays'] ?? ''}';
-      case 'teacher': return '${c['storeId'] ?? ''}';
+      case 'teacher': return '${c['teacherId'] ?? ''}';
       case 'room': return '${c['roomId'] ?? ''}';
       case 'day': return (sessionsOf(c) as List).any((s) => '${s['day']}' == want) ? want : '';
       case 'hour':
@@ -848,7 +849,7 @@ class _ShopItemData {
   static List<Map<String, dynamic>> freeTeachers(Map<String, dynamic> c) {
     final out = [
       for (final t in teachers)
-        if (t['id'] != c['storeId'] && !liveCourses.any((o) => o['id'] != c['id'] && o['storeId'] == t['id'] && _sameSlot(c, o))) t,
+        if (t['id'] != c['teacherId'] && !liveCourses.any((o) => o['id'] != c['id'] && o['teacherId'] == t['id'] && _sameSlot(c, o))) t,
     ];
     out.sort((a, b) => (b['specialty'] == c['holidays'] ? 1 : 0).compareTo(a['specialty'] == c['holidays'] ? 1 : 0));
     return out;
@@ -1264,7 +1265,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
     return [
       for (final t in _ShopItemData.teachers)
         () {
-          final cs = live.where((c) => c['storeId'] == t['id']).toList(); // הרשימה-הנראית (אחרי איתור+חריגה); coursesOfTeacher = אותו מנוע על כל-החיים
+          final cs = live.where((c) => c['teacherId'] == t['id']).toList(); // הרשימה-הנראית (אחרי איתור+חריגה); coursesOfTeacher = אותו מנוע על כל-החיים
           return DsSection(
             title: '👩‍🏫 ${t['name']} · ${t['specialty']}',
             trailing: StatusChip(label: '${cs.length} חוגים · ${_ShopItemData.weeklyOf(cs)} מפגשים/שבוע', tone: cs.isEmpty ? 0 : 1),
@@ -1478,7 +1479,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
         _h(p == 'teacher' ? '👩‍🏫 בחר מורה (התנגשות חוסמת)' : '🔄 מורה-מחליף לשיעור $iso'),
         Wrap(spacing: 6, runSpacing: 6, children: [
           for (final t in _ShopItemData.teachers)
-            SoftButton(label: '${t['name']} · ${t['specialty']}', tone: t['id'] == c['storeId'] ? 1 : 0,
+            SoftButton(label: '${t['name']} · ${t['specialty']}', tone: t['id'] == c['teacherId'] ? 1 : 0,
               onTap: () => both(() { _pick = null; if (p == 'teacher') { _result(_ShopItemData.assignTeacher(c, t['id'], _who), '${t['name']} הוקצה/תה ל-${c['name']}'); } else { _ShopItemData.substitute(c, iso, t['id'], _who); _flash('${t['name']} מחליף/ה ב-$iso', 1); } })),
         ]),
       ];
