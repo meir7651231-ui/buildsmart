@@ -1,6 +1,7 @@
 // 🎯 RoomScreen — retarget של schoolos_rooms.dart לישות Room (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Room
 //   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 11 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒slot(name) · cap⇒cap(name) · location⇒location(name) · from⇒from(name) · to⇒to(name) · access⇒access(name) · notes⇒notes(name) · eq⇒eq(name)
+//   תפר-עובדות (G9b): RoomFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN
 //   שדות-Room בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): rate · תוויות: מונחי room (חדר/חדרים) ⇒ Room (חדר/חדרים) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Room
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: RoomScreen.
@@ -1318,4 +1319,16 @@ class _RoomScreenState extends State<RoomScreen> {
           Text('טוען חדרים…', style: TextStyle(color: _muted, fontSize: 14)),
         ]),
       );
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): RoomFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class RoomFacts {
+  static const String entity = 'Room';
+  static const String label = 'חדרים'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _RoomData.rooms.length; // רשומות הזרע-הראשי "rooms" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'busyNowN', 'label': '🔴 תפוסים-עכשיו', 'tone': 'plain'}, {'key': 'freeNowN', 'label': '🟢 פנויים-עכשיו', 'tone': 'plain'}, {'key': 'utilAvgPct', 'label': '📊 ניצולת-שבוע', 'tone': 'plain'}, {'key': 'unavailableN', 'label': '⛔ לא-זמינים', 'tone': 'danger'}, {'key': 'brokenEqN', 'label': '🧰 ציוד-חסר/תקול', 'tone': 'plain'}]; // 5 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
+  static Map<String, String> get metrics => <String, String>{'busyNowN': '${_RoomData.busyNowN}', 'freeNowN': '${_RoomData.freeNowN}', 'utilAvgPct': '${_RoomData.utilAvgPct}%', 'unavailableN': '${_RoomData.unavailableN}', 'brokenEqN': '${_RoomData.brokenEqN}'};
+  static const String heroKey = 'unavailableN'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => '⛔ לא-זמינים';
 }

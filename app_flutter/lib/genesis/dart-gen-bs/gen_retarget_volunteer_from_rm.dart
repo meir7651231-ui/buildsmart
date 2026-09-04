@@ -1,6 +1,7 @@
 // 🎯 VolunteerScreen — retarget של schoolos_rooms.dart לישות Volunteer (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Volunteer
 //   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0 · חוזה-מנוע (לא משתנה) 8
 //   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒∅(engine-contract) · cap⇒∅(engine-contract) · location⇒∅(engine-contract) · from⇒∅(engine-contract) · to⇒∅(engine-contract) · access⇒∅(engine-contract) · notes⇒∅(engine-contract) · eq⇒∅(engine-contract)
+//   תפר-עובדות (G9b): VolunteerFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN
 //   שדות-Volunteer בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, area, maxDeliveries, note, createdAt · תוויות: מונחי room (חדר/חדרים) ⇒ Volunteer (מתנדב/מתנדבים) · 43 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Volunteer
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: VolunteerScreen.
@@ -1322,4 +1323,16 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
           Text('טוען מתנדבים…', style: TextStyle(color: _muted, fontSize: 14)),
         ]),
       );
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): VolunteerFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class VolunteerFacts {
+  static const String entity = 'Volunteer';
+  static const String label = 'מתנדבים'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _VolunteerData.rooms.length; // רשומות הזרע-הראשי "rooms" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'busyNowN', 'label': '🔴 תפוסים-עכשיו', 'tone': 'plain'}, {'key': 'freeNowN', 'label': '🟢 פנויים-עכשיו', 'tone': 'plain'}, {'key': 'utilAvgPct', 'label': '📊 ניצולת-שבוע', 'tone': 'plain'}, {'key': 'unavailableN', 'label': '⛔ לא-זמינים', 'tone': 'danger'}, {'key': 'brokenEqN', 'label': '🧰 ציוד-חסר/תקול', 'tone': 'plain'}]; // 5 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
+  static Map<String, String> get metrics => <String, String>{'busyNowN': '${_VolunteerData.busyNowN}', 'freeNowN': '${_VolunteerData.freeNowN}', 'utilAvgPct': '${_VolunteerData.utilAvgPct}%', 'unavailableN': '${_VolunteerData.unavailableN}', 'brokenEqN': '${_VolunteerData.brokenEqN}'};
+  static const String heroKey = 'unavailableN'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => '⛔ לא-זמינים';
 }

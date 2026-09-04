@@ -1,6 +1,7 @@
 // 🎯 FamilyScreen — retarget של schoolos_students.dart לישות Family (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Family
 //   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 19 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 13 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · name⇒name(name) · father⇒father(name) · mother⇒mother(name) · phone⇒phone(name) · phone2⇒phone2(name) · email⇒email(name) · city⇒city(name) · address⇒address(name) · language⇒language(name) · maritalStatus⇒maritalStatus(name) · status⇒status(name) · tzedaka⇒tzedaka(name) · discount⇒discount(name) · notes⇒notes(name) · createdAt⇒createdAt(name) · docs⇒docs(name) · cred⇒cred(name) · members⇒members(name) · addedAt⇒∅(reserved) · log⇒∅(reserved) · first⇒∅(reserved(3 מועמדים)) · gender⇒∅(reserved(3 מועמדים)) · birth⇒∅(reserved) · idNum⇒∅(reserved(3 מועמדים)) · school⇒∅(reserved(3 מועמדים)) · grade⇒∅(reserved(3 מועמדים)) · health⇒∅(reserved(3 מועמדים)) · mSefach⇒fullSefach(unique) · mInvite⇒∅(reserved) · mRecommend⇒∅(reserved) · mPhotos⇒∅(reserved) · mVideos⇒∅(reserved)
+//   תפר-עובדות (G9b): FamilyFacts · count=families.length (seed-db) · מדדים 6 · hero=highN
 //   שדות-Family בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): fatherId, motherId, community, kidsHome, kidsMarried · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Family (משפחה/—) · 2 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Family
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
@@ -1390,4 +1391,16 @@ class _FamilyScreenState extends State<FamilyScreen> {
           const Text('טוען תלמידים…', style: TextStyle(color: _muted, fontSize: 14)),
         ]),
       );
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): FamilyFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class FamilyFacts {
+  static const String entity = 'Family';
+  static const String label = 'משפחה'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => ((_StuData.db['families'] as List?)?.length ?? 0); // רשומות הזרע-הראשי "families" (seed-db)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'highN', 'label': '🔴 סיכון-גבוה', 'tone': 'danger'}, {'key': 'newN', 'label': '🆕 חדשים-השנה', 'tone': 'plain'}, {'key': 'midN', 'label': '🟠 סיכון-בינוני', 'tone': 'plain'}, {'key': 'medicalN', 'label': '🩺 רפואי/צרכים', 'tone': 'plain'}, {'key': 'noParentN', 'label': '📵 ללא-הורה-מעודכן', 'tone': 'danger'}, {'key': 'openTicketsN', 'label': '📨 פניות-פתוחות', 'tone': 'plain'}]; // 6 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
+  static Map<String, String> get metrics => <String, String>{'highN': '${_StuData.highN}', 'newN': '${_StuData.newN}', 'midN': '${_StuData.midN}', 'medicalN': '${_StuData.medicalN}', 'noParentN': '${_StuData.noParentN}', 'openTicketsN': '${_StuData.openTicketsN}'};
+  static const String heroKey = 'highN'; // ה-StatHero של הזהב (המטרה המוצהרת)
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => '🔴 סיכון-גבוה';
 }

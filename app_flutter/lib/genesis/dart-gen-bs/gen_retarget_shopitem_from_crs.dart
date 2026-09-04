@@ -1,6 +1,7 @@
 // 🎯 ShopItemScreen — retarget של schoolos_courses.dart לישות ShopItem (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity ShopItem
 //   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 9 · חוזה-מנוע (לא משתנה) 12
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · kind⇒kind(name) · teacherId⇒∅(engine-contract) · roomId⇒∅(engine-contract) · start⇒∅(engine-contract) · end⇒∅(engine-contract) · sessions⇒∅(engine-contract) · time⇒∅(engine-contract) · gender⇒∅(engine-contract) · ageMin⇒∅(engine-contract) · ageMax⇒∅(engine-contract) · gradeMin⇒∅(engine-contract) · gradeMax⇒∅(engine-contract) · day⇒∅(engine-contract) · cat⇒holidays(unique) · semester⇒∅(reserved) · sector⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒∅(reserved(5 מועמדים)) · price⇒∅(reserved(5 מועמדים)) · description⇒∅(reserved) · files⇒∅(reserved) · data⇒∅(reserved) · perLesson⇒active(unique) · lessonPrice⇒∅(reserved(5 מועמדים))
+//   תפר-עובדות (G9b): ShopItemFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher
 //   שדות-ShopItem בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): storeId, value, basePrice, stock, minStock, validDays, waits · תוויות: מונחי course (חוג/—) ⇒ ShopItem (פריט/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopItem
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT · "מה"): knowledge/SPEC-COURSES-FULL-2026-09-04.md · הסטנדרט: מסך-המלאי (schoolos.dart).
@@ -1739,4 +1740,16 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
   }
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): ShopItemFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class ShopItemFacts {
+  static const String entity = 'ShopItem';
+  static const String label = 'פריט'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _ShopItemData.courses.length; // רשומות הזרע-הראשי "courses" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'kpiActive', 'label': '📚 פעילים', 'tone': 'plain'}, {'key': 'kpiLessonsWeek', 'label': '🗓 שיעורים-השבוע', 'tone': 'plain'}, {'key': 'kpiEnrolled', 'label': '🎓 רשומים', 'tone': 'plain'}, {'key': 'kpiOccupancyPct', 'label': '📈 תפוסה-ממוצ׳', 'tone': 'plain'}, {'key': 'kpiFull', 'label': '🈵 מלאים', 'tone': 'plain'}, {'key': 'kpiWaiting', 'label': '⏳ בהמתנה', 'tone': 'plain'}, {'key': 'kpiNoTeacher', 'label': '🚫 ללא-מורה', 'tone': 'danger'}, {'key': 'avgRoomUtilPct', 'label': '🚪 ניצולת-חדרים', 'tone': 'plain'}]; // 8 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
+  static Map<String, String> get metrics => <String, String>{'kpiActive': '${_ShopItemData.kpiActive}', 'kpiLessonsWeek': '${_ShopItemData.kpiLessonsWeek}', 'kpiEnrolled': '${_ShopItemData.kpiEnrolled}', 'kpiOccupancyPct': '${_ShopItemData.kpiOccupancyPct}%', 'kpiFull': '${_ShopItemData.kpiFull}', 'kpiWaiting': '${_ShopItemData.kpiWaiting}', 'kpiNoTeacher': '${_ShopItemData.kpiNoTeacher}', 'avgRoomUtilPct': '${_ShopItemData.avgRoomUtilPct}%'};
+  static const String heroKey = 'kpiNoTeacher'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => '🚫 ללא-מורה';
 }

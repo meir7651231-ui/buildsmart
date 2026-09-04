@@ -1,6 +1,7 @@
 // 🎯 DonationScreen — retarget של schoolos_fees.dart לישות Donation (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_fees.dart --entity Donation
 //   זרע-ראשי: families (מועמדים: families(36/38) charges(9/10) charges(7/8) charges(7/8) charges(7/8) charges(7/8) charges(7/8) incoming(7/8) charges(6/7) hist(5/5) criteria(3/3) calls(3/3) payments(3/4) payments(3/4) payments(3/4) payments(3/4) calls(3/3) payments(3/4)) · מיפוי שם 5 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 17 · חוזה-מנוע (לא משתנה) 16
 //   date⇒date(name) · amount⇒amount(name) · cur⇒cur(name) · cat⇒cat(name) · rid⇒rid(name) · id⇒∅(engine-contract) · name⇒∅(engine-contract) · phone⇒∅(engine-contract) · email⇒∅(engine-contract) · idNum⇒∅(engine-contract) · hok⇒∅(engine-contract) · day⇒∅(engine-contract) · active⇒∅(engine-contract) · carryBalance⇒∅(engine-contract) · kevaId⇒∅(engine-contract) · hist⇒∅(engine-contract) · d⇒∅(engine-contract) · a⇒∅(engine-contract) · c⇒∅(engine-contract) · clearer⇒∅(engine-contract) · nextDate⇒∅(engine-contract) · payer⇒∅(reserved(2 מועמדים)) · members⇒∅(reserved) · grade⇒∅(reserved(2 מועמדים)) · first⇒∅(reserved(2 מועמדים)) · charges⇒∅(reserved) · method⇒∅(reserved(2 מועמדים)) · memberId⇒∅(reserved(2 מועמדים)) · note⇒∅(reserved(2 מועמדים)) · payments⇒∅(reserved) · startedAt⇒∅(reserved) · criteria⇒∅(reserved) · calls⇒∅(reserved) · at⇒∅(reserved) · outcome⇒∅(reserved(2 מועמדים)) · nextNote⇒∅(reserved(2 מועמדים)) · installmentOf⇒∅(reserved(2 מועמדים)) · cancelledAt⇒∅(reserved)
+//   תפר-עובדות (G9b): DonationFacts · count=families.length (static-const) · מדדים 0 · hero=count
 //   שדות-Donation בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): designation, purpose · תוויות: מונחי Supporter (תורם/—) ⇒ Donation (תרומה/תרומות) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Donation
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
@@ -1588,4 +1589,16 @@ class _DonationScreenState extends State<DonationScreen> {
         child: Wrap(spacing: 8, runSpacing: 6, children: kids),
       );
   Widget _gap([double h = 10]) => SizedBox(height: h);
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): DonationFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class DonationFacts {
+  static const String entity = 'Donation';
+  static const String label = 'תרומות'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _DonationData.families.length; // רשומות הזרע-הראשי "families" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[]; // 0 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי) — אין getter-סטטי בשורת-ה-KPI ⇒ ריק, לא מומצא
+  static Map<String, String> get metrics => <String, String>{};
+  static const String heroKey = 'count'; // אין מדדים ⇒ count
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => label;
 }

@@ -1,6 +1,7 @@
 // 🎯 SupporterScreen — retarget של schoolos_teachers.dart לישות Supporter (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity Supporter
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 18 · חוזה-מנוע (לא משתנה) 1
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · status⇒∅(engine-contract) · role⇒∅(reserved(8 מועמדים)) · subjects⇒∅(reserved(2 מועמדים)) · homeroom⇒∅(reserved(2 מועמדים)) · contractHours⇒∅(reserved(3 מועמדים)) · contractType⇒∅(reserved(8 מועמדים)) · startDate⇒∅(reserved(3 מועמדים)) · availability⇒∅(reserved) · constraints⇒∅(reserved(2 מועמדים)) · preferredSub⇒nextEventId(unique) · extraRoles⇒∅(reserved(2 מועמדים)) · certs⇒∅(reserved(2 מועמדים)) · issuer⇒∅(reserved(8 מועמדים)) · expiry⇒∅(reserved(3 מועמדים)) · attendance⇒∅(reserved) · absences⇒∅(reserved(2 מועמדים)) · reason⇒∅(reserved(8 מועמדים)) · date⇒∅(reserved(3 מועמדים)) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved(3 מועמדים))
+//   תפר-עובדות (G9b): SupporterFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN
 //   שדות-Supporter בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, email, address, city, idNum, extId, cat, forWho, count, ils, usd, first, last, nextDate, nextNote, photos, donations, hok, ayin, calls · תוויות: מונחי teacher (מורה/—) ⇒ Supporter (תורם/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Supporter
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
@@ -1170,4 +1171,16 @@ class _SupporterScreenState extends State<SupporterScreen> {
       ),
     );
   }
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): SupporterFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class SupporterFacts {
+  static const String entity = 'Supporter';
+  static const String label = 'תורם'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _TeamData.roster.length; // רשומות הזרע-הראשי "roster" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'absentN', 'label': '🤒 נעדרים היום', 'tone': 'danger'}, {'key': 'openSubs', 'label': '🔁 החלפות פתוחות', 'tone': 'plain'}, {'key': 'overN', 'label': '🔥 עמוסים-מדי', 'tone': 'danger'}, {'key': 'underN', 'label': '🪫 בתת-עומס', 'tone': 'plain'}, {'key': 'contractsN', 'label': '📄 חוזים פגים החודש', 'tone': 'plain'}, {'key': 'certsN', 'label': '🎓 הכשרות חסרות', 'tone': 'danger'}]; // 6 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
+  static Map<String, String> get metrics => <String, String>{'absentN': '${_TeamData.absentN}', 'openSubs': '${_TeamData.openSubs}', 'overN': '${_TeamData.overN}', 'underN': '${_TeamData.underN}', 'contractsN': '${_TeamData.contractsN}', 'certsN': '${_TeamData.certsN}'};
+  static const String heroKey = 'absentN'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => '🤒 נעדרים היום';
 }

@@ -1,6 +1,7 @@
 // 🎯 TzBoxScreen — retarget של schoolos_teachers.dart לישות TzBox (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity TzBox
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 3 · מקום-שמור 17 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · status⇒status(name) · notes⇒notes(name) · name⇒num(unique) · role⇒∅(reserved) · subjects⇒collections(unique) · homeroom⇒∅(reserved) · contractHours⇒∅(reserved) · contractType⇒∅(reserved) · startDate⇒since(unique) · availability⇒∅(reserved) · constraints⇒∅(reserved) · preferredSub⇒∅(reserved(2 מועמדים)) · extraRoles⇒∅(reserved) · certs⇒∅(reserved) · issuer⇒∅(reserved) · expiry⇒∅(reserved) · attendance⇒∅(reserved) · absences⇒∅(reserved) · reason⇒∅(reserved) · date⇒∅(reserved) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved)
+//   תפר-עובדות (G9b): TzBoxFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN
 //   שדות-TzBox בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): coordinatorId, famId, holderKind · תוויות: מונחי teacher (מורה/—) ⇒ TzBox (קופה/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של TzBox
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
@@ -1174,4 +1175,16 @@ class _TzBoxScreenState extends State<TzBoxScreen> {
       ),
     );
   }
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): TzBoxFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class TzBoxFacts {
+  static const String entity = 'TzBox';
+  static const String label = 'קופה'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _TeamData.roster.length; // רשומות הזרע-הראשי "roster" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'absentN', 'label': '🤒 נעדרים היום', 'tone': 'danger'}, {'key': 'openSubs', 'label': '🔁 החלפות פתוחות', 'tone': 'plain'}, {'key': 'overN', 'label': '🔥 עמוסים-מדי', 'tone': 'danger'}, {'key': 'underN', 'label': '🪫 בתת-עומס', 'tone': 'plain'}, {'key': 'contractsN', 'label': '📄 חוזים פגים החודש', 'tone': 'plain'}, {'key': 'certsN', 'label': '🎓 הכשרות חסרות', 'tone': 'danger'}]; // 6 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
+  static Map<String, String> get metrics => <String, String>{'absentN': '${_TeamData.absentN}', 'openSubs': '${_TeamData.openSubs}', 'overN': '${_TeamData.overN}', 'underN': '${_TeamData.underN}', 'contractsN': '${_TeamData.contractsN}', 'certsN': '${_TeamData.certsN}'};
+  static const String heroKey = 'absentN'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => '🤒 נעדרים היום';
 }

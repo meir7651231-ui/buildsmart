@@ -14,6 +14,22 @@ void main() {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(DsNavTile), findsNWidgets(5)); expect(tester.takeException(), isNull);
+    expect(find.text('5'), findsWidgets); // KPI מסכים-מחוברים = עובדה
+    expect(VolunteerFacts.metricDefs.length, VolunteerFacts.metrics.length); expect(VolunteerFacts.heroKey == 'count' || VolunteerFacts.metrics.containsKey(VolunteerFacts.heroKey), isTrue); // Volunteer: תפר-העובדות עקבי
+    expect(find.text(VolunteerFacts.hero), findsWidgets); expect(find.text(VolunteerFacts.heroLabel), findsWidgets); // ה-hero של Volunteer מרונדר ברכזת מהביטוי-החי, לא מליטרל
+    expect(find.textContaining('${VolunteerFacts.count} ${VolunteerFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (families · static-const)
+    expect(DonationFacts.metricDefs.length, DonationFacts.metrics.length); expect(DonationFacts.heroKey == 'count' || DonationFacts.metrics.containsKey(DonationFacts.heroKey), isTrue); // Donation: תפר-העובדות עקבי
+    expect(find.text(DonationFacts.hero), findsWidgets); expect(find.text(DonationFacts.heroLabel), findsWidgets); // ה-hero של Donation מרונדר ברכזת מהביטוי-החי, לא מליטרל
+    expect(find.textContaining('${DonationFacts.count} ${DonationFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (families · static-const)
+    expect(RoomFacts.metricDefs.length, RoomFacts.metrics.length); expect(RoomFacts.heroKey == 'count' || RoomFacts.metrics.containsKey(RoomFacts.heroKey), isTrue); // Room: תפר-העובדות עקבי
+    expect(find.text(RoomFacts.hero), findsWidgets); expect(find.text(RoomFacts.heroLabel), findsWidgets); // ה-hero של Room מרונדר ברכזת מהביטוי-החי, לא מליטרל
+    expect(find.textContaining('${RoomFacts.count} ${RoomFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (rooms · static-const)
+    expect(FamilyFacts.metricDefs.length, FamilyFacts.metrics.length); expect(FamilyFacts.heroKey == 'count' || FamilyFacts.metrics.containsKey(FamilyFacts.heroKey), isTrue); // Family: תפר-העובדות עקבי
+    expect(find.text(FamilyFacts.hero), findsWidgets); expect(find.text(FamilyFacts.heroLabel), findsWidgets); // ה-hero של Family מרונדר ברכזת מהביטוי-החי, לא מליטרל
+    expect(find.textContaining('${FamilyFacts.count} ${FamilyFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (families · seed-db)
+    expect(ShopItemFacts.metricDefs.length, ShopItemFacts.metrics.length); expect(ShopItemFacts.heroKey == 'count' || ShopItemFacts.metrics.containsKey(ShopItemFacts.heroKey), isTrue); // ShopItem: תפר-העובדות עקבי
+    expect(find.text(ShopItemFacts.hero), findsWidgets); expect(find.text(ShopItemFacts.heroLabel), findsWidgets); // ה-hero של ShopItem מרונדר ברכזת מהביטוי-החי, לא מליטרל
+    expect(find.textContaining('${ShopItemFacts.count} ${ShopItemFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (courses · static-const)
   });
   testWidgets('KehilaApp · בית ⇒ מתנדבים (Volunteer) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);

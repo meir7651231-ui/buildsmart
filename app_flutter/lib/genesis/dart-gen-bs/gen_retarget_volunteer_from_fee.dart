@@ -1,6 +1,7 @@
 // 🎯 VolunteerScreen — retarget של schoolos_fees.dart לישות Volunteer (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_fees.dart --entity Volunteer
 //   זרע-ראשי: families (מועמדים: families(36/38) charges(9/10) charges(7/8) charges(7/8) charges(7/8) charges(7/8) charges(7/8) incoming(7/8) charges(6/7) hist(5/5) criteria(3/3) calls(3/3) payments(3/4) payments(3/4) payments(3/4) payments(3/4) calls(3/3) payments(3/4)) · מיפוי שם 5 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 15 · חוזה-מנוע (לא משתנה) 16
 //   id⇒id(name) · name⇒name(name) · phone⇒phone(name) · note⇒note(name) · active⇒active(name) · email⇒∅(engine-contract) · idNum⇒∅(engine-contract) · date⇒∅(engine-contract) · amount⇒∅(engine-contract) · cur⇒∅(engine-contract) · cat⇒∅(engine-contract) · hok⇒∅(engine-contract) · day⇒∅(engine-contract) · carryBalance⇒∅(engine-contract) · kevaId⇒∅(engine-contract) · hist⇒∅(engine-contract) · d⇒∅(engine-contract) · a⇒∅(engine-contract) · c⇒∅(engine-contract) · clearer⇒∅(engine-contract) · nextDate⇒∅(engine-contract) · payer⇒area(unique) · members⇒∅(reserved) · grade⇒∅(reserved) · first⇒∅(reserved) · charges⇒∅(reserved) · method⇒∅(reserved) · memberId⇒∅(reserved) · payments⇒∅(reserved) · rid⇒∅(reserved) · startedAt⇒createdAt(unique) · criteria⇒∅(reserved) · calls⇒∅(reserved) · at⇒∅(reserved) · outcome⇒∅(reserved) · nextNote⇒∅(reserved) · installmentOf⇒∅(reserved) · cancelledAt⇒∅(reserved)
+//   תפר-עובדות (G9b): VolunteerFacts · count=families.length (static-const) · מדדים 0 · hero=count
 //   שדות-Volunteer בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): maxDeliveries · תוויות: מונחי Supporter (תורם/—) ⇒ Volunteer (מתנדב/מתנדבים) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Volunteer
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
@@ -1587,4 +1588,16 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
         child: Wrap(spacing: 8, runSpacing: 6, children: kids),
       );
   Widget _gap([double h = 10]) => SizedBox(height: h);
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): VolunteerFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class VolunteerFacts {
+  static const String entity = 'Volunteer';
+  static const String label = 'מתנדבים'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _VolunteerData.families.length; // רשומות הזרע-הראשי "families" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[]; // 0 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי) — אין getter-סטטי בשורת-ה-KPI ⇒ ריק, לא מומצא
+  static Map<String, String> get metrics => <String, String>{};
+  static const String heroKey = 'count'; // אין מדדים ⇒ count
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => label;
 }

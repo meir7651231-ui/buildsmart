@@ -1,6 +1,7 @@
 // 🎯 WorkTaskScreen — retarget של schoolos_dashboard.dart לישות WorkTask (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_dashboard.dart --entity WorkTask
 //   זרע-ראשי: tasks (מועמדים: tasks(18/18) tasks(16/16) tasks(16/16) tasks(16/16) tasks(16/16) tasks(16/16) tasks(16/16) tasks(16/16)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 13 · חוזה-מנוע (לא משתנה) 1
 //   id⇒id(name) · title⇒title(name) · due⇒due(name) · note⇒note(name) · kind⇒∅(engine-contract) · grade⇒∅(reserved(4 מועמדים)) · owner⇒∅(reserved(4 מועמדים)) · opened⇒∅(reserved) · students⇒∅(reserved) · ils⇒∅(reserved) · sev⇒∅(reserved(4 מועמדים)) · action⇒∅(reserved(4 מועמדים)) · link⇒∅(reserved(4 מועמדים)) · status⇒∅(reserved(4 מועמדים)) · history⇒∅(reserved) · what⇒∅(reserved(4 מועמדים)) · iso⇒∅(reserved) · context⇒∅(reserved)
+//   תפר-עובדות (G9b): WorkTaskFacts · count=tasks.length (nested-arg) · מדדים 0 · hero=count
 //   שדות-WorkTask בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): assignee, by, ref, pri, createdAt, doneAt · תוויות: אין מונח ל-WorkTask ב-TERM_DEFS — תוויות של המקור (הצבה) · הזרע = זרע-הצבה של המקור, לא ערך-אמת של WorkTask
 // 📊 SchoolOS · לוח-הנהלה (DASHBOARD) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-DASHBOARD-FULL-2026-09-04.
 // 🎯 המטרה: שהמנהל/ת יפתח את הבוקר ותוך 30 שניות יידע: מה דורש-החלטה היום · מה בסיכון · מה מגמתי · מה הפעולה-הראשונה.
@@ -1125,4 +1126,16 @@ class _WorkTaskScreenState extends State<WorkTaskScreen> {
           const Text('טוען לוח-הנהלה…', style: TextStyle(color: _muted, fontSize: 14)),
         ]),
       );
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): WorkTaskFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class WorkTaskFacts {
+  static const String entity = 'WorkTask';
+  static const String label = 'WorkTask'; // אין מונח ב-TERM_DEFS ⇒ שם-הישות (הצבה גלויה)
+  static int get count => DashInput.demo.modules.fold<int>(0, (n, m) => n + ((m['tasks'] as List?)?.length ?? 0)); // רשומות הזרע-הראשי "tasks" (nested-arg)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[]; // 0 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי) — אין getter-סטטי בשורת-ה-KPI ⇒ ריק, לא מומצא
+  static Map<String, String> get metrics => <String, String>{};
+  static const String heroKey = 'count'; // אין מדדים ⇒ count
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => label;
 }
