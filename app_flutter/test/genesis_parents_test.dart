@@ -1,11 +1,13 @@
 // 🧪 SchoolOS · הורים ותקשורת — אימות-מול-המטרה דטרמיניסטי (THE-WAY §6) ל-ParentsScreen.
 //   מוכיח בבייטים: זהות מוזרקת (חוק-6) ⇒ מצב-קשר נגזר (phoneIssue⊕waDigits) · לא-הוזרק ⇒ מקום-שמור ·
 //   חריגה (finderMatches) · שיחה עם receipt (PureBubble) · שליחה (sendHold: שעות-מנוחה ⇒ מוחזק) ·
-//   הרשאות+משמורת (הורה רואה נוכחות בלבד) · מצב-טעינה שמור.
+//   הרשאות+משמורת (הורה רואה נוכחות בלבד) · מצב-טעינה שמור · טאבי תבניות/מוסדי/לוג/אודיט · שידור-כיתה/מוסד ·
+//   חסימת-שבת (today=שבת מוזרק) + עקיפת-משבר · הדפסת-מכתב · ייצוא-לוג (חוב-§6 של דוח-הסגירה — נסגר).
 //   משטח 800×6000 (ListView-עצל ⇒ כל התוכן נבנה) · pump מפורש (אטומים מונפשים ⇒ לא pumpAndSettle).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/schoolos_parents.dart';
+import 'package:buildsmart/genesis/dart-ui-bs/premium/surfaces/gradient_card.dart';
 
 // זהות סינתטית מוזרקת (לא של אדם אמיתי · קידומות-בדיקה)
 const _identity = <String, Map<String, String>>{
@@ -130,5 +132,159 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 800));
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  // פותח את הפאנל של כרטיס-משפחה לפי כותרתו (הטריאז' ממיין דורש-פעולה ראשון ⇒ לא מסתמכים על סדר)
+  Future<void> _openPanelOf(WidgetTester tester, String famLabel) async {
+    final card = find.ancestor(of: find.text(famLabel).first, matching: find.byType(GradientCard)).first;
+    await tester.tap(find.descendant(of: card, matching: find.byTooltip('פרטים ופעולות')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+  }
+
+  Future<void> _tab(WidgetTester tester, String label) async {
+    await tester.ensureVisible(find.text(label).first);
+    await tester.pump();
+    await tester.tap(find.text(label).first);
+    await tester.pump(const Duration(milliseconds: 300));
+  }
+
+  testWidgets('טאבי-פאנל: תבניות (12=5 מדף+7 בית-ספר · renderTemplate) · מוסדי (bulkWaRecipients) · לוג · אודיט', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app());
+    await tester.pump(const Duration(milliseconds: 300));
+    await _openPanelOf(tester, 'משפחת נועה · איתי');
+    expect(find.text('שיחה · 3'), findsOneWidget, reason: 'הפאנל נפתח על f1 (3 הודעות)');
+    await _tab(tester, '🧩 תבניות');
+    expect(find.text('תבניות-הודעה · 12'), findsOneWidget, reason: 'templateDefs (5) + תבניות-בית-ספר (7) — נספר ב-grep, לא הוערך');
+    expect(find.textContaining('תצוגה-מקדימה:'), findsOneWidget, reason: 'renderTemplate מרנדר את התבנית הראשונה');
+    expect(find.text('💾 שמור עריכה'), findsOneWidget, reason: 'הנהלה רשאית לערוך (pr.org)');
+    await _tab(tester, '🏛 מוסדי');
+    expect(find.text('הודעות-כלל'), findsOneWidget);
+    expect(find.text('הורים מורשים'), findsOneWidget);
+    expect(find.text('ברי-השגה בוואטסאפ'), findsOneWidget, reason: 'bulkWaRecipients על הזהות המוזרקת');
+    await _tab(tester, '📜 לוג');
+    expect(find.text('לוג-שליחה · 0'), findsOneWidget, reason: 'טרם בוצעו פעולות על f1 בסשן');
+    await _tab(tester, '🔍 אודיט');
+    expect(find.text('אודיט · 0'), findsOneWidget, reason: 'הנהלה רואה אודיט (roleOf=admin)');
+  });
+
+  testWidgets('שידור: הודעה-לכיתה י׳-1 ⇒ נשלחו 2 · מוחזקים 1 · נכשלו 1 (bulkWaRecipients⊕sendHold⊕contactState)', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app());
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('🏫 הודעה-לכיתה').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    // בחירת-כיתה בבורר שבגיליון (DsEnumField ⇒ DropdownButton; האחרון בעץ = שבגיליון-המודאלי, לא פילטר-המסך)
+    await tester.tap(find.byType(DropdownButton<String>).last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('י׳-1').last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.enterText(find.byType(TextField).last, 'הודעה לכל הורי הכיתה');
+    await tester.pump();
+    await tester.tap(find.text('📤 שדר'));
+    await tester.pump(const Duration(milliseconds: 300));
+    // י׳-1 = f1 (אם wa 16-21 ⇒ נשלח · אב sms 18-22 בשעה 17 ⇒ מוחזק) · f2 (טלפון שגוי ⇒ נכשל) · f5 (wa 16-20 ⇒ נשלח)
+    expect(find.text('✅ נשלחו 2'), findsOneWidget);
+    expect(find.text('⏸ מוחזקים 1'), findsOneWidget, reason: 'מחוץ לשעות-הנוחות של האב (18:00-22:00)');
+    expect(find.text('⚠️ נכשלו 1'), findsOneWidget, reason: 'f2: קשר-לא-תקין');
+  });
+
+  testWidgets('שידור מוסדי: כל ההורים המורשים (ללא חסום) ⇒ נשלחו 4 · מוחזקים 5 · נכשלו 2', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app());
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('🏛 הודעה-מוסדית').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.enterText(find.byType(TextField).last, 'הודעה מוסדית לכולם');
+    await tester.pump();
+    await tester.tap(find.text('📤 שדר'));
+    await tester.pump(const Duration(milliseconds: 300));
+    // נשלחו: f1/אם · f3/אב · f5 · f7 (+1: היסט −8 ⇒ 9:00 מקומית, לא-מנוחה) · מוחזקים: f1/אב · f3/אם · f4/אם · f6/אם · f6/אב ·
+    // נכשלו: f2 (שגוי) · f8 (לא-הוזרק) · דילוג: f4/אב חסום
+    expect(find.text('✅ נשלחו 4'), findsOneWidget);
+    expect(find.text('⏸ מוחזקים 5'), findsOneWidget);
+    expect(find.text('⚠️ נכשלו 2'), findsOneWidget);
+  });
+
+  testWidgets('חסימת-שבת: today=2026-09-05 (שבת, מוזרק) ⇒ blockReason מחזיק · מצב-משבר (הנהלה) עוקף', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app(today: '2026-09-05', nowHour: 12));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('מנוחה: שבת'), findsOneWidget, reason: 'blockReason(שבת) מאיר באנר-מנוחה');
+    await tester.tap(find.text('✉️ הודעה-חדשה'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.textContaining('תוחזק: שבת'), findsOneWidget, reason: 'sendHold ⇒ שבת');
+    await tester.enterText(find.byType(TextField).last, 'הודעה בשבת');
+    await tester.pump();
+    await tester.tap(find.text('📤 שלח'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('⏸ מוחזק לחלון'), findsOneWidget, reason: 'queued — לא נשלח בשבת');
+    // סגירת-הגיליון ⇒ מצב-משבר ⇒ שליחה מיידית
+    await tester.tapAt(const Offset(400, 40));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.text('🚨 מצב-משבר'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('🚨 משבר: פעיל'), findsOneWidget);
+    await tester.tap(find.text('✉️ הודעה-חדשה'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.textContaining('תוחזק: שבת'), findsNothing, reason: 'משבר גובר על מנוחה (לא על חסימה)');
+    await tester.enterText(find.byType(TextField).last, 'הודעת חירום');
+    await tester.pump();
+    await tester.tap(find.text('📤 שלח'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('✅ נשלח'), findsOneWidget);
+  });
+
+  testWidgets('הדפסת-מכתב: renderTemplate(sc.letter) ⇒ מכתב עם פנייה, סיכום-שבועי וחתימת-המוסד', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app());
+    await tester.pump(const Duration(milliseconds: 300));
+    await _openPanelOf(tester, 'משפחת נועה · איתי');
+    await tester.ensureVisible(find.text('🖨 הדפס-מכתב'));
+    await tester.pump();
+    await tester.tap(find.text('🖨 הדפס-מכתב'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('מכתב להורים'), findsOneWidget);
+    expect(find.textContaining('לכבוד הורי נועה (י׳-1) · איתי (ז׳-2)'), findsOneWidget, reason: 'תבנית sc.letter מרונדרת עם kidsLabel');
+    expect(find.textContaining('בברכה, תיכון עתיד'), findsOneWidget);
+    expect(find.textContaining('סיכום שבועי לנועה'), findsOneWidget, reason: 'digestLines⊕sc.weekly בגוף המכתב');
+  });
+
+  testWidgets('ייצוא-לוג: הנהלה ⇒ CSV עם כותרת ורשומות (toCsv⊕csvEscape⊕exportAllowed) · מחנך/ת ⇒ אין כפתור', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_app());
+    await tester.pump(const Duration(milliseconds: 300));
+    // פעולה אחת שתירשם בלוג לפני הייצוא
+    await tester.tap(find.text('🏛 הודעה-מוסדית').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.enterText(find.byType(TextField).last, 'רשומה לייצוא');
+    await tester.pump();
+    await tester.tap(find.text('📤 שדר'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tapAt(const Offset(400, 40));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.text('⬇ ייצוא-לוג'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('ייצוא-לוג CSV'), findsOneWidget);
+    expect(find.textContaining('מועד,מבצע,פעולה,משפחה,נמען,ערוץ,סטטוס,הערה'), findsOneWidget, reason: 'כותרת-CSV מ-toCsv');
+    expect(find.textContaining('הודעה-מוסדית'), findsWidgets, reason: 'רשומת-השידור בלוג המיוצא');
+    await tester.tapAt(const Offset(400, 40));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.text('🧑‍🏫 מחנך/ת').first);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('⬇ ייצוא-לוג'), findsNothing, reason: 'pr.export לא מוענק למחנך ⇒ exportOk=false');
   });
 }
