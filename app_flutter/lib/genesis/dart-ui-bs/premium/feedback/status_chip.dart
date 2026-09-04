@@ -47,15 +47,16 @@ class StatusChip extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 7),
-            Text(
+            Flexible(child: Text(
               label,
+              overflow: TextOverflow.ellipsis, softWrap: false, // G7a: תווית ארוכה ברוחב-מוגבל — קיצוץ במקום גלישה (RenderFlex overflow 44px בפאנל)
               style: const TextStyle(
                 color: Color(0xFFF2F3FF),
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.2,
               ),
-            ),
+            )),
           ],
         ),
       ),
