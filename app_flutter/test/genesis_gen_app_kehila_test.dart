@@ -42,6 +42,19 @@ void main() {
     await tester.enterText(find.byType(TextField).first, ''); await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(DsNavTile), findsNWidgets(5)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
   });
+  testWidgets('KehilaApp · הזרקת-שורה ⇒ עמודת-מקום-שמור "fatherId" של Family מאירה (G5h)', (tester) async {
+    tester.view.physicalSize = const Size(1400, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    final key = FamilyFacts.reservedColumns.first;
+    await tester.pumpWidget(const MaterialApp(home: FamilyScreen())); await tester.pump(const Duration(milliseconds: 300));
+    Future<void> showTable() async { final v = FamilyFacts.tableView; if (v != null) { await tester.tap(find.text(v).first); await tester.pump(const Duration(milliseconds: 300)); } } // המבט שמגלה את הטבלה (מהזהב)
+    await showTable(); expect(find.text(key), findsNothing); // בלי נתון — העמודה כבויה (חוק-7)
+    final db = FamilyFacts.seed(); final seedRow = (db[FamilyFacts.seedList] as List).first as Map<String, dynamic>;
+    final row = FamilyFacts.rowList == null ? seedRow : (seedRow[FamilyFacts.rowList!] as List).first as Map<String, dynamic>;
+    row[key] = 'מוזרק-$key';
+    await tester.pumpWidget(MaterialApp(home: FamilyScreen(db: db))); await tester.pump(const Duration(milliseconds: 300)); await showTable();
+    expect(find.text(key), findsWidgets); // כותרת-העמודה = שם-השדה (G5h) — מאירה כשהנתון זרם
+    expect(find.text('מוזרק-$key'), findsWidgets); expect(tester.takeException(), isNull);
+  });
   testWidgets('KehilaApp · אריח-hero ⇒ מתנדבים (Volunteer) נפתח על רשומת-ה-hero', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));

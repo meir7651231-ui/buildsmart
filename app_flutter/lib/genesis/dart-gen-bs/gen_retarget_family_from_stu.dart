@@ -1,7 +1,7 @@
 // 🎯 FamilyScreen — retarget של schoolos_students.dart לישות Family (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Family
 //   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 19 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 13 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · name⇒name(name) · father⇒father(name) · mother⇒mother(name) · phone⇒phone(name) · phone2⇒phone2(name) · email⇒email(name) · city⇒city(name) · address⇒address(name) · language⇒language(name) · maritalStatus⇒maritalStatus(name) · status⇒status(name) · tzedaka⇒tzedaka(name) · discount⇒discount(name) · notes⇒notes(name) · createdAt⇒createdAt(name) · docs⇒docs(name) · cred⇒cred(name) · members⇒members(name) · addedAt⇒∅(reserved) · log⇒∅(reserved) · first⇒∅(reserved(3 מועמדים)) · gender⇒∅(reserved(3 מועמדים)) · birth⇒∅(reserved) · idNum⇒∅(reserved(3 מועמדים)) · school⇒∅(reserved(3 מועמדים)) · grade⇒∅(reserved(3 מועמדים)) · health⇒∅(reserved(3 מועמדים)) · mSefach⇒fullSefach(unique) · mInvite⇒∅(reserved) · mRecommend⇒∅(reserved) · mPhotos⇒∅(reserved) · mVideos⇒∅(reserved)
-//   תפר-עובדות (G9b): FamilyFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric
+//   תפר-עובדות (G9b): FamilyFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה db (families/members · 5 עמודות-שמורות)
 //   שדות-Family בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): fatherId, motherId, community, kidsHome, kidsMarried · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Family (משפחה/—) · 2 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Family
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
@@ -1424,4 +1424,10 @@ class FamilyFacts {
   static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['highN', 'newN', 'midN', 'medicalN', 'noParentN', 'openTicketsN']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
   static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'highN': return _StuData.rowsOf_highN; case 'newN': return _StuData.rowsOf_newN; case 'midN': return _StuData.rowsOf_midN; case 'medicalN': return _StuData.rowsOf_medicalN; case 'noParentN': return _StuData.rowsOf_noParentN; case 'openTicketsN': return _StuData.rowsOf_openTicketsN; default: return const []; } } // G10a · 6 מדדים עם שורות (צורת X.where(P).length)
   static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
+  // G10b-ב · תפר-הזרקה (חוק-6: הדאטה מוזרקת, לא מומצאת): seed() = זרע-ההצבה של הזהב · seedList/rowList = היכן רשומת-המסך חיה (מצורת _build()) · reservedColumns = עמודות-מקום-שמור של G5h
+  static Map<String, dynamic> seed() => _StuData.seed();
+  static const String seedList = 'families';
+  static const String? rowList = 'members'; // null ⇒ רשומת-המסך = רשומת-הזרע עצמה
+  static const List<String> reservedColumns = <String>['fatherId', 'motherId', 'community', 'kidsHome', 'kidsMarried'];
+  static const String? tableView = '📋 טבלה'; // תווית-המבט שמגלה את הטבלה (null ⇒ הטבלה תמיד גלויה)
 }

@@ -1,7 +1,7 @@
 // 🎯 ShopProductScreen — retarget של schoolos_rooms.dart לישות ShopProduct (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity ShopProduct
 //   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0 · חוזה-מנוע (לא משתנה) 7
 //   id⇒id(name) · name⇒name(name) · active⇒active(name) · notes⇒notes(name) · slot⇒∅(engine-contract) · cap⇒∅(engine-contract) · location⇒∅(engine-contract) · from⇒∅(engine-contract) · to⇒∅(engine-contract) · access⇒∅(engine-contract) · eq⇒∅(engine-contract)
-//   תפר-עובדות (G9b): ShopProductFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN · שורות-מדד (G10a) busyNowN/unavailableN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric
+//   תפר-עובדות (G9b): ShopProductFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN · שורות-מדד (G10a) busyNowN/unavailableN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
 //   שדות-ShopProduct בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): desc, img, components · תוויות: מונחי room (חדר/חדרים) ⇒ ShopProduct (מוצר/—) · 27 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopProduct
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: ShopProductScreen.

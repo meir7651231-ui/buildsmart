@@ -1,7 +1,7 @@
 // 🎯 TzBoxScreen — retarget של schoolos_teachers.dart לישות TzBox (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity TzBox
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 3 · מקום-שמור 17 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · status⇒status(name) · notes⇒notes(name) · name⇒num(unique) · role⇒∅(reserved) · subjects⇒collections(unique) · homeroom⇒∅(reserved) · contractHours⇒∅(reserved) · contractType⇒∅(reserved) · startDate⇒since(unique) · availability⇒∅(reserved) · constraints⇒∅(reserved) · preferredSub⇒∅(reserved(2 מועמדים)) · extraRoles⇒∅(reserved) · certs⇒∅(reserved) · issuer⇒∅(reserved) · expiry⇒∅(reserved) · attendance⇒∅(reserved) · absences⇒∅(reserved) · reason⇒∅(reserved) · date⇒∅(reserved) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved)
-//   תפר-עובדות (G9b): TzBoxFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel · תפר-סינון-מדד initialMetric
+//   תפר-עובדות (G9b): TzBoxFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
 //   שדות-TzBox בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): coordinatorId, famId, holderKind · תוויות: מונחי teacher (מורה/—) ⇒ TzBox (קופה/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של TzBox
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."

@@ -6,6 +6,7 @@
 //   "מורה עם שעות ושיעורים" ⇒ Teacher ⇐ schoolos_students.dart (strong · שמות 8/19)
 //   "שיבוצים של השנה" ⇒ Enrollment ⇐ schoolos_fees.dart (strong · שמות 4/26)
 //   "תורמים לפי סכום" ⇒ Supporter ⇐ schoolos_fees.dart (strong · שמות 11/24)
+//   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: TzCoordinator:∅ · TzCampaign:∅ · ShopProduct:∅ · ShopStore:0 עמודות · Teacher:9 עמודות · Enrollment:∅ · Supporter:∅
 //   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): TzCoordinator:∅ · TzCampaign:initialMetric · ShopProduct:initialMetric · ShopStore:initialMetric · Teacher:initialMetric · Enrollment:∅ · Supporter:∅
 //   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: TzCoordinator:initialPanelId · TzCampaign:initialPanelId · ShopProduct:initialPanelId · ShopStore:initialPanelId · Teacher:initialPanelId · Enrollment:initialPanelId · Supporter:initialPanelId
 //   G9b · KPI-רכזת נגזר: כל אריח = <E>Facts של המודול (count חי של הזרע · hero = המדד שהזהב הכריז/צבע-סכנה) — אפס ערך מומצא: TzCoordinatorFacts.count · TzCampaignFacts.kpiNoTeacher · ShopProductFacts.unavailableN · ShopStoreFacts.highN · TeacherFacts.highN · EnrollmentFacts.count · SupporterFacts.count

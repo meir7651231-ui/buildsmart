@@ -50,6 +50,19 @@ void main() {
     await tester.enterText(find.byType(TextField).first, ''); await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(DsNavTile), findsNWidgets(7)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
   });
+  testWidgets('TzedakaApp · הזרקת-שורה ⇒ עמודת-מקום-שמור "specialty" של Teacher מאירה (G5h)', (tester) async {
+    tester.view.physicalSize = const Size(1400, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    final key = TeacherFacts.reservedColumns.first;
+    await tester.pumpWidget(const MaterialApp(home: TeacherScreen())); await tester.pump(const Duration(milliseconds: 300));
+    Future<void> showTable() async { final v = TeacherFacts.tableView; if (v != null) { await tester.tap(find.text(v).first); await tester.pump(const Duration(milliseconds: 300)); } } // המבט שמגלה את הטבלה (מהזהב)
+    await showTable(); expect(find.text(key), findsNothing); // בלי נתון — העמודה כבויה (חוק-7)
+    final db = TeacherFacts.seed(); final seedRow = (db[TeacherFacts.seedList] as List).first as Map<String, dynamic>;
+    final row = TeacherFacts.rowList == null ? seedRow : (seedRow[TeacherFacts.rowList!] as List).first as Map<String, dynamic>;
+    row[key] = 'מוזרק-$key';
+    await tester.pumpWidget(MaterialApp(home: TeacherScreen(db: db))); await tester.pump(const Duration(milliseconds: 300)); await showTable();
+    expect(find.text(key), findsWidgets); // כותרת-העמודה = שם-השדה (G5h) — מאירה כשהנתון זרם
+    expect(find.text('מוזרק-$key'), findsWidgets); expect(tester.takeException(), isNull);
+  });
   testWidgets('TzedakaApp · אריח-hero ⇒ רכז (TzCoordinator) נפתח על רשומת-ה-hero', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
