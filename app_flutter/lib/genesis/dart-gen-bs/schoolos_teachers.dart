@@ -368,6 +368,7 @@ class _TeamData {
     {'label': 'ותק', 'get': (Map<String, dynamic> t) => '${tenure(t) ?? '—'} ש׳'},
     {'label': 'סטטוס', 'get': (Map<String, dynamic> t) => statusLabel[statusOf(t)] ?? statusOf(t)},
     {'key': 'contact', 'label': 'קשר'},                                                                 // מקום-שמור · חוק-6 (מוזרק · מוסתר-פר-הרשאה)
+    {'key': 'salary', 'label': 'שכר'},                                                                  // מקום-שמור · מוגן-כספים (payRate של מאור — לעולם לא בקובץ)
     {'key': 'updatedAt', 'label': 'עדכון'},                                                             // מקום-שמור
   ];
   // חוזה-עובדות (metaFields · חוק-7): שדה שהרשומה נושאת ⇒ שבב; חסר ⇒ שקט. שדה חדש בדאטה מופיע לבד.
@@ -387,14 +388,40 @@ class _TeamData {
         ['חוג', 'כיתה', 'חדר', 'יום', 'שעה'],
         for (final c in coursesOf(t)) for (final s in sessionsOf(c) as List) [c['name'], c['cls'], c['roomId'], dayNames[s['day'] as int], s['time']],
       ], csvEscape) as String;
-  static String rosterCsv(List<Map<String, dynamic>> rows) => toCsv([
-        [for (final c in columnDefs) if (colShown(c, rows)) c['label']],
-        for (final t in rows) [for (final c in columnDefs) if (colShown(c, rows)) cell(c, t)],
+  static String rosterCsv(List<Map<String, dynamic>> rows, [Set<String> hidden = const {}]) => toCsv([
+        [for (final c in columnDefs) if (colShown(c, rows, hidden)) c['label']],
+        for (final t in rows) [for (final c in columnDefs) if (colShown(c, rows, hidden)) cell(c, t)],
       ], csvEscape) as String;
-  static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
-      c['get'] != null || rows.any((t) => t[c['key']] != null && '${t[c['key']]}'.trim().isNotEmpty);
+  static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows, [Set<String> hidden = const {}]) =>
+      !hidden.contains(c['key']) && (c['get'] != null || rows.any((t) => t[c['key']] != null && '${t[c['key']]}'.trim().isNotEmpty));
   static String cell(Map<String, Object?> c, Map<String, dynamic> t) =>
       c['get'] != null ? (c['get'] as String Function(Map<String, dynamic>))(t) : '${t[c['key']] ?? '—'}';
+
+  // ═══ הרשאות-פר-תפקיד (הכרעה 23-ג · חוק-6 זהות=הזרקה) = roleOf ⊕ teacherIdOf ⊕ canGrantedAction ═══
+  //   6 תפקידי-המפרט כעקרונות-דמו אטומים ('p:...' — לא מיילים, לא זהות-אמת; בהצבה מוזרקת זהות-ההתחברות).
+  //   roleOf ⇒ admin/teacher/staff · teacherIdOf ⇒ המורה-המחובר (כרטיס-שלו בלבד) · features ⇒ פעולות-מגודרות.
+  static const roleDefs = <Map<String, dynamic>>[
+    {'label': '👑 מנהל/ת', 'principal': 'p:mgr', 'config': {'adminEmails': ['p:mgr']}},
+    {'label': '🧭 רכז/ת', 'principal': 'p:coord', 'config': {'features': {'team.assign': true, 'team.sub': true, 'team.avail': true, 'team.absence': true, 'team.export': true}}},
+    {'label': '🗂 מזכירות', 'principal': 'p:sec', 'config': {'features': {'team.add': true, 'team.docs': true, 'team.absence': true, 'team.export': true, 'team.contact': true}}},
+    {'label': '👩‍🏫 מורה', 'principal': 'p:t2', 'config': {'roles': {'teachers': {'p:t2': 't2'}}, 'features': {'team.absence': true, 'team.avail': true, 'team.cert': true}}},
+    {'label': '💰 כספים', 'principal': 'p:fin', 'config': {'features': {'team.salary': true, 'team.contract': true, 'team.export': true}}},
+    {'label': '👁 צפייה', 'principal': 'p:view', 'config': <String, dynamic>{}},
+  ];
+  static Map<String, dynamic> _cfg(int role) => (roleDefs[role]['config'] as Map).cast<String, dynamic>();
+  static String _principal(int role) => roleDefs[role]['principal'] as String;
+  static bool _isAdmin(Map<String, dynamic> config, String p) => roleOf(config, p) == 'admin';
+  static String roleName(int role) => roleOf(_cfg(role), _principal(role)); // admin · teacher · staff
+  static String? ownId(int role) => teacherIdOf(_cfg(role), _principal(role)) as String?; // מורה ⇒ הכרטיס-שלו
+  static bool can(int role, String key) => canGrantedAction(_cfg(role), _principal(role), false, key, _isAdmin);
+  // RLS-תצוגה: עמודות/שדות מוגנים — קשר (מזכירות/מנהל) · שכר (כספים/מנהל) · הערות-הנהלה (מנהל) · חוזה (כספים/רכז/מנהל)
+  static Set<String> hiddenKeys(int role) => {
+        if (!can(role, 'team.contact')) 'contact',
+        if (!can(role, 'team.salary')) 'salary',
+        if (roleName(role) != 'admin') 'notes',
+        if (!can(role, 'team.contract') && !can(role, 'team.assign')) 'contractEnd',
+      };
+  static bool canSee(int role, Map<String, dynamic> t) => ownId(role) == null || ownId(role) == t['id']; // מורה: לא-של-אחרים
 
   // ─── פנקס-פעולות (מצב=חיווט · הבסיס const נשאר מקור-האמת) ───
   static final Map<String, String> statusOverride = {};
@@ -511,7 +538,10 @@ class _TeachersScreenState extends State<TeachersScreen> {
   String _q = ''; // חיפוש-איתור (DsSearch→smartFilter)
   final Map<String, String> _locks = {}; // נעילות-סינון (FilterChipPill→finderMatches)
   int _mode = 0; // 0=🎯 חכם (טריאז') · 1=📋 טבלה (DsTable כל-העמודות) · 2=🔁 לוח-החלפות-היום (DsBoard)
-  static const _who = 'הנהלה'; // זהות-הפועל (חוק-6 — מוזרק בגל 5 מהתפקיד)
+  int _role = 0; // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור פר-תפקיד
+  String get _who => _TeamData.roleDefs[_role]['label'] as String; // זהות-הפועל לאודיט (מהתפקיד המוזרק)
+  bool _loading = false; // מצב-מסך שמור: טעינה
+  String? _error; // מצב-מסך שמור: שגיאה (מקום-שמור — מאיר כש-fetch נכשל)
 
   @override
   void initState() {
@@ -529,7 +559,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
   Widget build(BuildContext context) {
     final all = _TeamData.active;
     final uncovered = _TeamData.uncoveredToday.length; // hero = המטרה: אף שיעור בלי מורה
-    final ranked = [..._TeamData.everyone.where((t) => !_TeamData.isGone(t))];
+    final ranked = [..._TeamData.everyone.where((t) => !_TeamData.isGone(t) && _TeamData.canSee(_role, t))]; // מורה ⇒ הכרטיס-שלו בלבד
     ranked.sort((a, b) {
       switch (_sort) {
         case 1:
@@ -554,6 +584,13 @@ class _TeachersScreenState extends State<TeachersScreen> {
       subtitle: '${_TeamData.staff.length} אנשי-צוות · ${_TeamData.byRole.map((r) => '${r[0]} ${r[1]}').join(' · ')}',
       icon: '👩‍🏫',
       children: [
+        // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — roleOf⊕teacherIdOf⊕canGrantedAction מגדרים פעולות/עמודות/רשומות
+        //   6 תפקידים ב-2 שורות של SegmentedSwitch (Row-מבוקר; 6 פריטים גולשים ברוחב-המסך — נתפס בבדיקת-widget)
+        for (var r = 0; r < 2; r++) ...[
+          Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: [for (final d in _TeamData.roleDefs.sublist(r * 3, r * 3 + 3)) d['label'] as String], selected: _role ~/ 3 == r ? _role % 3 : -1, onSelect: (i) => setState(() => _role = r * 3 + i))),
+          _gap(6),
+        ],
+        _gap(4),
         // KPI-10: hero=שיעורים-ללא-מורה-היום (המטרה) + 10 מדדי-מצב (BareStat נושאי-ערך-אמת)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -581,11 +618,11 @@ class _TeachersScreenState extends State<TeachersScreen> {
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ מורה', tone: 0, onTap: () => setState(() => _TeamData.addTeacher(_who)))),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
+          if (_TeamData.can(_role, 'team.add')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ מורה', tone: 0, onTap: () => setState(() => _TeamData.addTeacher(_who))))],
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔁 היום', tone: _TeamData.uncoveredToday.isEmpty ? 0 : 2, onTap: () => setState(() => _mode = 2))),
-          const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport('רשימת-צוות · ${visible.length}', _TeamData.rosterCsv(visible)))),
+          if (_TeamData.can(_role, 'team.export') && exportAllowed(false)) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport('רשימת-צוות · ${visible.length}', _TeamData.rosterCsv(visible, _TeamData.hiddenKeys(_role)))))],
         ]),
         // פילטרים (המפרט: 11) — צ׳יפי-חריגה (finderMatches) + תפקיד/סטטוס (SegmentedSwitch) + מקצוע/כיתה (FilterChipPill)
         Wrap(spacing: 8, runSpacing: 6, children: [
@@ -617,7 +654,14 @@ class _TeachersScreenState extends State<TeachersScreen> {
           child: SegmentedSwitch(items: const ['🎯 חכם', '📋 טבלה', '🔁 החלפות היום'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
         ),
         const SizedBox(height: 10),
-        if (_mode == 2)
+        // מצבי-מסך שמורים: טעינה · שגיאה · אין-צוות · ללא-תוצאות — ואז התוכן
+        if (_loading)
+          _loadingView()
+        else if (_error != null)
+          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
+        else if (_TeamData.staff.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '👥', message: 'אין צוות — הוסף מורה ראשון/ה'))
+        else if (_mode == 2)
           _subsBoard()
         else if (visible.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין אנשי-צוות תואמים לחיפוש/סינון'))
@@ -634,6 +678,20 @@ class _TeachersScreenState extends State<TeachersScreen> {
   }
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
+
+  // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה; כשל ⇒ _error)
+  void _refresh() {
+    setState(() { _loading = true; _error = null; });
+    Future.delayed(const Duration(milliseconds: 700), () { if (mounted) setState(() => _loading = false); });
+  }
+  // מצב-טעינה: מחוון-מסגרת סטנדרטי (אפס ShimmerSkeleton מזייף); Column ולא Center (גובה-לא-חסום ברשימה)
+  Widget _loadingView() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 48),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+          CircularProgressIndicator(color: _acc), const SizedBox(height: 14),
+          const Text('טוען צוות…', style: TextStyle(color: _muted, fontSize: 14)),
+        ]),
+      );
 
   // צ׳יפ-סינון מבוקר: הזרקת-צבעים (חוק-6) + נעילת-ציר ב-_locks (finderMatches)
   Widget _fchip(String axis, String label) => _vchip(axis, '1', label);
@@ -728,7 +786,8 @@ class _TeachersScreenState extends State<TeachersScreen> {
         for (final d in days) DsChip(label: '${dayNames[d]} ${av[d]![0]}–${av[d]![1]}', tone: 0),
         if (days.isEmpty) const DsChip(label: 'אין חלונות-זמינות (חופשה/עזב)', tone: 2),
       ]),
-      if ('${t['notes']}'.isNotEmpty) ...[_gap(10), AlertBanner(glyph: '🔒', tone: 0, message: 'הערת-הנהלה: ${t['notes']}')],
+      if ('${t['notes']}'.isNotEmpty && !_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), AlertBanner(glyph: '🔒', tone: 0, message: 'הערת-הנהלה (מוגן): ${t['notes']}')],
+      if (_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), const AlertBanner(glyph: '🔒', tone: 0, message: 'הערות-הנהלה מוגנות — למנהל/ת בלבד')],
       if (_TeamData.balanceFor(t) != null) ...[
         _gap(10),
         AlertBanner(glyph: '⚖️', tone: 3, message: 'הצעת-איזון: להעביר ${_TeamData.balanceFor(t)!['course']['name']} מ-${_TeamData.balanceFor(t)!['from']['name']} (עמוס-מדי) לכאן'),
@@ -767,7 +826,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
       if (cs.isEmpty) const EmptyState(glyph: '🏫', message: 'לא הוקצו חוגים'),
       for (final c in cs)
         MediaRow(glyph: '📘', title: '${c['name']} · חדר ${c['roomId']}', subtitle: '${(sessionsOf(c) as List).length} מפגשים/שבוע · ${(sessionsOf(c) as List).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ')}'),
-      if (bal != null) ...[
+      if (bal != null && _TeamData.can(_role, 'team.assign')) ...[
         _gap(8),
         Wrap(children: [SoftButton(label: '🏫 הקצה-כיתה: ${bal['course']['name']} מ-${bal['from']['name']}', tone: 1, onTap: () => act(() => _TeamData.reassign(bal['course'] as Map<String, dynamic>, t, _who)))]),
       ],
@@ -861,24 +920,31 @@ class _TeachersScreenState extends State<TeachersScreen> {
   Widget _actions(Map<String, dynamic> t, void Function(void Function()) act, BuildContext sheetCtx) {
     final reasons = absenceReasonChips(term: (k) => kTerms[k] ?? k);
     final keys = kTerms.keys.toList();
+    final r = _role;
+    final acts = <Widget>[
+      if (_TeamData.can(r, 'team.assign')) SoftButton(label: '✏️ ערוך תפקיד', tone: 0, onTap: () => act(() => _TeamData.cycleRole(t, _who))),
+      if (_TeamData.can(r, 'team.assign')) SoftButton(label: '📚 הקצה-מקצוע', tone: 0, onTap: () => act(() => _TeamData.addSubject(t, _who))),
+      if (_TeamData.can(r, 'team.sub')) SoftButton(label: '🔎 מצא-מחליף', tone: 1, onTap: () { Navigator.of(sheetCtx).pop(); setState(() => _mode = 2); }),
+      if (_TeamData.can(r, 'team.avail')) SoftButton(label: '🗓 עדכן-זמינות (שישי)', tone: 0, onTap: () => act(() => _TeamData.toggleFriday(t, _who))),
+      if (_TeamData.can(r, 'team.cert') || _TeamData.can(r, 'team.docs')) SoftButton(label: '🎓 הוסף-הכשרה', tone: 0, onTap: () => act(() => _TeamData.addCert(t, _who))),
+      if (_TeamData.can(r, 'team.docs')) SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => act(() => _TeamData.addDoc(t, _who))),
+      SoftButton(label: '🖨 הדפס-מערכת', tone: 0, onTap: () => _openExport('מערכת אישית · ${t['name']}', _TeamData.timetableCsv(t))),
+      if (_TeamData.roleName(r) == 'admin') SoftButton(label: '⏸ ${_TeamData.statusOf(t) == 'active' ? 'סמן-חופשה' : 'שנה-סטטוס'}', tone: 2, onTap: () => act(() => _TeamData.cycleStatus(t, _who))),
+    ];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Wrap(spacing: 8, runSpacing: 8, children: [
-        SoftButton(label: '✏️ ערוך תפקיד', tone: 0, onTap: () => act(() => _TeamData.cycleRole(t, _who))),
-        SoftButton(label: '📚 הקצה-מקצוע', tone: 0, onTap: () => act(() => _TeamData.addSubject(t, _who))),
-        SoftButton(label: '🔎 מצא-מחליף', tone: 1, onTap: () { Navigator.of(sheetCtx).pop(); setState(() => _mode = 2); }),
-        SoftButton(label: '🗓 עדכן-זמינות (שישי)', tone: 0, onTap: () => act(() => _TeamData.toggleFriday(t, _who))),
-        SoftButton(label: '🎓 הוסף-הכשרה', tone: 0, onTap: () => act(() => _TeamData.addCert(t, _who))),
-        SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => act(() => _TeamData.addDoc(t, _who))),
-        SoftButton(label: '🖨 הדפס-מערכת', tone: 0, onTap: () => _openExport('מערכת אישית · ${t['name']}', _TeamData.timetableCsv(t))),
-        SoftButton(label: '⏸ ${_TeamData.statusOf(t) == 'active' ? 'סמן-חופשה' : 'שנה-סטטוס'}', tone: 2, onTap: () => act(() => _TeamData.cycleStatus(t, _who))),
-      ]),
+      Wrap(spacing: 8, runSpacing: 8, children: acts),
+      if (acts.length <= 1) ...[_gap(8), const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', glyph: '🔒', tone: 2)],
       _gap(8),
-      if (t['contact'] == null)
+      if (!_TeamData.can(r, 'team.contact'))
+        const AlertBanner(glyph: '🔒', tone: 0, message: 'שלח-הודעה: פרטי-קשר מוסתרים לתפקיד זה (הרשאה)')
+      else if (t['contact'] == null)
         const AlertBanner(glyph: '💬', tone: 0, message: 'שלח-הודעה: פרטי-קשר מוזרקים בהצבה (חוק-6) — מקום-שמור, מאיר כשיוזרק contact')
       else
         Wrap(children: [SoftButton(label: '💬 שלח-הודעה', tone: 1, onTap: () => act(() => _TeamData.log(_who, 'שליחת-הודעה', t['name'] as String)))]),
       _gap(8),
-      if (!_TeamData.absentOn(t, _TeamData.today)) ...[
+      if (!_TeamData.can(r, 'team.absence'))
+        const SizedBox.shrink()
+      else if (!_TeamData.absentOn(t, _TeamData.today)) ...[
         const Text('🤒 סמן-היעדרות היום — סיבה:', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
         _gap(6),
         Wrap(spacing: 8, runSpacing: 6, children: [
@@ -920,7 +986,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
 
   // 📋 מבט-טבלה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid (מזייף int rows).
   Widget _table(List<Map<String, dynamic>> rows) {
-    final cols = [for (final c in _TeamData.columnDefs) if (_TeamData.colShown(c, rows)) c];
+    final cols = [for (final c in _TeamData.columnDefs) if (_TeamData.colShown(c, rows, _TeamData.hiddenKeys(_role))) c];
     return DsTable(labels: [for (final c in cols) c['label'] as String], rows: [for (final t in rows) [for (final c in cols) _TeamData.cell(c, t)]]);
   }
 
@@ -939,7 +1005,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
           records: [for (final s in today) {'id': '${s['id']}', 'title': '${s['time'] ?? ''} ${_TeamData.courseById(s['courseId'] as String)?['name']} · במקום ${_TeamData.nameOf(s['absentId'] as String)}${s['subId'] != null ? ' ⇐ ${_TeamData.nameOf(s['subId'] as String)}' : ''}', 'stage': '${s['stage']}'}],
           stageOf: (r) => int.parse(r['stage']!),
           titleOf: (r) => r['title']!,
-          onMove: (id, to) => setState(() => _TeamData.moveSub(id, to, _who)),
+          onMove: (id, to) { if (_TeamData.can(_role, 'team.sub')) setState(() => _TeamData.moveSub(id, to, _who)); },
         ),
         if (overdue > 0) ...[_gap(8), AlertBanner(glyph: '⏰', tone: 2, message: '$overdue החלפות פתוחות שעבר מועדן')],
         _gap(10),
@@ -963,6 +1029,8 @@ class _TeachersScreenState extends State<TeachersScreen> {
         _gap(6),
         if (cands.isEmpty)
           const AlertBanner(glyph: '⚠️', tone: 3, message: 'אין מחליף זמין (מקצוע+חלון-זמינות+פנוי-בסלוט) — נדרשת הכרעה ידנית')
+        else if (!_TeamData.can(_role, 'team.sub'))
+          Wrap(spacing: 8, children: [for (final t in cands.take(3)) StatusChip(label: '${t['name']} · ${_TeamData.loadPct(t)}%', tone: 0)])
         else
           Wrap(spacing: 8, runSpacing: 6, children: [
             for (final t in cands.take(3))
