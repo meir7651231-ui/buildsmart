@@ -34,6 +34,20 @@ import '../dart-ui-bs/premium/feedback/status_chip.dart'; // שבב: אות-מו
 import '../dart-ui-bs/premium/feedback/empty_state.dart'; // מצב "אין-תלמידים/אין-תוצאות"
 import '../dart-maor/name-sort-key.dart'; // מיון-לפי-שם (מנורמל, בלי תארים)
 import '../dart-maor/norm-search.dart'; // נרמול-עברי (סופיות/ניקוד) — שקע ל-nameSortKey ולחיפוש
+import '../dart-ui-bs/premium/surfaces/glass_card.dart'; // מיכל כרטיס-תלמיד (child שרירותי) — פאנל-צד
+import '../dart-ui-bs/premium/showcase/premium_avatar.dart'; // זהות: ראשי-תיבות + שקע-תמונה (image) — מקום-שמור לתמונה
+import '../dart-ui-bs/premium/dataviz/gauge_meter.dart'; // מד-סיכון 0..1 (tone מוזרק לפי-band)
+import '../dart-ui-bs/premium/dataviz/neon_bars.dart'; // פירוק-האותות / נוכחות-חודשית (labels+values)
+import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט ציר-זמן/הערה/חיסור/מסמך (title/time/body)
+import '../dart-ui-bs/ds/ds_field.dart'; // קלט-טקסט מבוקר (הערה · פנייה · רישום)
+import '../dart-ui-bs/ds/ds_enum_field.dart'; // בחירה-מרשימה (העבר-כיתה · דגל)
+import '../dart-maor/presents-in-month.dart'; // נוכחות-בחודש-הנוכחי (presents ⊕ today)
+import '../dart-maor/student-history.dart'; // היסטוריית-רישומים/כיתות (enrollments⊕courses⊕renewedToId)
+import '../dart-maor/academic-year-label.dart'; // תווית שנה״ל מתאריך-התחלה
+import '../dart-maor/wa-link.dart'; // קישור-וואטסאפ להורה (phone+text)
+import '../dart-maor/wa-digits.dart'; // נרמול-ספרות בינ״ל לוואטסאפ — שקע ל-waLink
+import '../dart-maor/tel-href.dart'; // קישור-חיוג tel:
+import '../dart-maor/parse-csv.dart'; // ייבוא: טקסט-CSV ⇒ שורות (מפריד אוטו · מרכאות)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -461,6 +475,144 @@ class _StuData {
     {'label': 'פנייה-פתוחה', 'get': (Map<String, dynamic> s) => hasOpenTicket(s) ? '📨 ${openTasksOf(s).length}' : '—'},
     {'label': 'עדכון-אחרון', 'get': (Map<String, dynamic> s) => lastUpdate(s)},
   ];
+  // ═══ פנקס-פעולות (ביצוע = state · חוק-1 מצב=חיווט): כל פעולה כותבת לרשומות-האמת (db) + טבעת-אודיט ═══
+  //   הבסיס נשאר seed() (מקור-האמת); reset() משחזר. כל פעולה = רשומה בצורת-הסכמה (WorkTask/OrgEvent/FamilyDoc/AuditEntry).
+  static int _seq = 0;
+  static String _at() { _seq++; return '${today}T${(12 + _seq ~/ 60).toString().padLeft(2, '0')}:${(_seq % 60).toString().padLeft(2, '0')}'; }
+  static void log(String who, String act, String what) => (db['audit'] as List).add({'at': _at(), 'who': who, 'act': act, 'what': what});
+  static final Map<String, List<Map<String, dynamic>>> noteLedger = {}; // הערות-מחנך/ת (פר-תלמיד · תאריך · כותב · סוג)
+  static List<Map<String, dynamic>> notes(Map<String, dynamic> s) => [
+        ...(noteLedger[s['id']] ?? const []),
+        if ('${s['notes'] ?? ''}'.isNotEmpty) {'date': '', 'text': '${s['notes']}', 'by': 'רשומה', 'kind': 'note'}, // Member.notes (ללא-תאריך בסכמה)
+      ];
+  static String? lastNoteDate(Map<String, dynamic> s) { // התאריך-האחרון של הערה מתוארכת (הבסיס Member.notes אינו מתוארך)
+    String best = '';
+    for (final n in notes(s)) { if ('${n['date']}'.compareTo(best) > 0) best = '${n['date']}'; }
+    return best.isEmpty ? null : best;
+  }
+  static void addNote(Map<String, dynamic> s, String text, String who, {String kind = 'note'}) {
+    (noteLedger[s['id'] as String] ??= []).insert(0, {'date': today, 'text': text, 'by': who, 'kind': kind});
+    log(who, 'note', '${s['id']} · הערה: ${text.length > 30 ? text.substring(0, 30) : text}');
+  }
+  static void addFlag(Map<String, dynamic> s, String flag, String who) {
+    final l = flagLedger[s['id'] as String] ??= [];
+    if (!l.contains(flag)) l.add(flag);
+    log(who, 'flag', '${s['id']} · דגל: $flag');
+  }
+  static void openTicket(Map<String, dynamic> s, String title, String who, {String assignee = 'counselor@school', int pri = 1}) {
+    (db['tasks'] as List).add({'id': 'k-${_seq + 1}', 'assignee': assignee, 'by': who, 'title': title, 'ref': {'kind': 'family', 'id': s['famId'], 'memberId': s['id']}, 'pri': pri, 'due': today, 'createdAt': today, 'doneAt': '', 'note': ''});
+    log(who, 'ticket', '${s['id']} · פנייה: $title');
+  }
+  static void closeTicket(Map<String, dynamic> t, String who) { t['doneAt'] = today; log(who, 'ticket-close', '${(t['ref'] as Map)['memberId'] ?? ''} · נסגר: ${t['title']}'); }
+  static void inviteMeeting(Map<String, dynamic> s, String title, String date, String who) {
+    (db['events'] as List).add({'id': 'v-${_seq + 1}', 'title': title, 'date': date, 'time': '', 'type': 'meeting', 'famId': s['famId'], 'priority': 'normal', 'done': false});
+    log(who, 'meeting', '${s['id']} · הזמנה: $title ($date)');
+  }
+  static void attachDoc(Map<String, dynamic> s, String name, String who) {
+    (fam(s)['docs'] as List).add({'id': 'd-${_seq + 1}', 'name': name, 'addedAt': today});
+    log(who, 'doc', '${s['id']} · מסמך: $name');
+  }
+  static void setStatus(Map<String, dynamic> s, String st, String who) { // פעיל · הוקפא · עזב · בוגר — נכתב לרישום-הראשי (Enrollment.status)
+    final e = mainEnrollment(s);
+    if (e != null) {
+      if (st == 'פעיל') { e['status'] = 'active'; e.remove('endedAt'); }
+      else if (st == 'הוקפא') { e['status'] = 'paused'; }
+      else { e['status'] = 'ended'; e['endedAt'] = today; }
+    }
+    if (st == 'בוגר' && s['grade'] != 'יב') _statusOverride[s['id'] as String] = 'בוגר'; else _statusOverride.remove(s['id']);
+    log(who, 'status', '${s['id']} · סטטוס: $st');
+  }
+  static List<Map<String, dynamic>> homeroomCourses() => [for (final c in (db['courses'] as List).cast<Map<String, dynamic>>()) if (c['cat'] == 'חינוך' && '${c['end']}'.compareTo(today) >= 0) c];
+  static void moveClass(Map<String, dynamic> s, String courseName, String who) {
+    final c = homeroomCourses().where((c) => c['name'] == courseName).toList();
+    if (c.isEmpty) return;
+    final e = mainEnrollment(s);
+    if (e != null) { e['courseId'] = c.first['id']; } else { (db['enrollments'] as List).add({'id': 'e-${_seq + 1}', 'memberId': s['id'], 'courseId': c.first['id'], 'status': 'active', 'enrolledAt': today, 'group': '', 'note': '', 'presents': [], 'absences': []}); }
+    s['grade'] = c.first['gradeMin'] ?? s['grade'];
+    log(who, 'move', '${s['id']} · הועבר/ה ל-${className(s)}');
+  }
+  static void editField(Map<String, dynamic> s, String key, String value, String who) { // עריכה = כתיבה לשדה-האמת (Member/Family)
+    if (const {'phone', 'city', 'address', 'language', 'mother', 'father', 'email'}.contains(key)) { fam(s)[key] = value; } else { s[key] = value; }
+    if (key == 'first') { s['name'] = '$value ${s['last']}'; }
+    log(who, 'edit', '${s['id']} · $key');
+  }
+  // אישורי-הורים: מדיה (Member.mPhotos/mVideos/mInvite/mRecommend = מקור-אמת) · טיולים/תרופות = מקום-שמור (מוצגים דרך WorkTask.ref.consent)
+  static const consentDefs = [
+    {'key': 'mPhotos', 'label': 'צילום'}, {'key': 'mVideos', 'label': 'וידאו'}, {'key': 'mInvite', 'label': 'הזמנות'}, {'key': 'mRecommend', 'label': 'המלצות'},
+  ];
+  static void toggleConsent(Map<String, dynamic> s, String key, String who) { s[key] = !(s[key] == true); log(who, 'consent', '${s['id']} · $key=${s[key]}'); }
+  static Map<String, dynamic>? consentTask(Map<String, dynamic> s, String kind) {
+    for (final t in tasksOf(s)) { if ((t['ref'] as Map?)?['consent'] == kind) return t; }
+    return null;
+  }
+  static String consentSlot(Map<String, dynamic> s, String kind) { // 'trips' · 'meds' — מקום-שמור; מואר רק כשיש משימת-אישור
+    final t = consentTask(s, kind);
+    if (t == null) return '—';
+    if ('${t['doneAt'] ?? ''}'.isNotEmpty) return '✅ חודש';
+    return taskOverdue(t, today) ? '⛔ פג' : '⏳ ממתין';
+  }
+  static void requestConsent(Map<String, dynamic> s, String kind, String who) {
+    final label = kind == 'trips' ? 'אישור-טיולים' : 'אישור-תרופות';
+    (db['tasks'] as List).add({'id': 'k-${_seq + 1}', 'assignee': 'office@school', 'by': who, 'title': '$label — בקשה מההורים · ${s['name']}', 'ref': {'kind': 'family', 'id': s['famId'], 'memberId': s['id'], 'consent': kind}, 'pri': 2, 'due': today, 'createdAt': today, 'doneAt': '', 'note': ''});
+    log(who, 'consent-request', '${s['id']} · $label');
+  }
+  // רישום-תלמיד-חדש: Family+Member+Enrollment חדשים בצורת-הסכמה (מקור-אמת מרגע-היצירה)
+  static void addStudent({required String first, required String last, required String courseName, required String birth, required String parent, required String phone, required String who}) {
+    _seq++;
+    final c = homeroomCourses().where((c) => c['name'] == courseName).toList();
+    final fid = 'f-new-$_seq', mid = 'm-new-$_seq';
+    (db['families'] as List).add({'id': fid, 'name': last, 'father': '', 'mother': parent, 'phone': phone, 'phone2': '', 'email': '', 'city': '', 'address': '', 'language': '', 'maritalStatus': '', 'status': 'pending', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': today, 'docs': [], 'cred': {'score': 0, 'log': []},
+      'members': [{'id': mid, 'first': first, 'gender': '', 'birth': birth, 'idNum': '', 'phone': '', 'school': '', 'grade': c.isEmpty ? '' : (c.first['gradeMin'] ?? ''), 'health': '', 'mSefach': false, 'mInvite': false, 'mRecommend': false, 'mPhotos': false, 'mVideos': false, 'notes': ''}]});
+    if (c.isNotEmpty) (db['enrollments'] as List).add({'id': 'e-new-$_seq', 'memberId': mid, 'courseId': c.first['id'], 'status': 'active', 'enrolledAt': today, 'group': '', 'note': '', 'presents': [], 'absences': []});
+    _cache = null;
+    log(who, 'add', '$mid · רישום: $first $last');
+  }
+  // ייבוא-CSV (parseCsv מהמדף): עמודות שם-פרטי,משפחה,כיתה,לידה,הורה,טלפון ⇒ רישום פר-שורה; מחזיר {ok, skipped}
+  static Map<String, int> importCsv(String text, String who) {
+    final rows = parseCsv(text);
+    var ok = 0, skipped = 0;
+    for (var i = 0; i < rows.length; i++) {
+      final r = rows[i];
+      if (i == 0 && r.isNotEmpty && (r[0].contains('שם') || r[0].toLowerCase().contains('first'))) continue; // כותרת
+      if (r.length < 3 || r[0].trim().isEmpty) { skipped++; continue; }
+      addStudent(first: r[0].trim(), last: r[1].trim(), courseName: r[2].trim(), birth: r.length > 3 ? r[3].trim() : '', parent: r.length > 4 ? r[4].trim() : '', phone: r.length > 5 ? r[5].trim() : '', who: who);
+      ok++;
+    }
+    log(who, 'import', 'ייבוא-CSV: $ok נוספו · $skipped נדחו');
+    return {'ok': ok, 'skipped': skipped};
+  }
+
+  // ─── כרטיס-תלמיד: נגזרות לטאבים ───
+  static DateTime _atNoon(String iso) => DateTime.parse('${iso.length > 10 ? iso.substring(0, 10) : iso}T12:00:00');
+  static List<Map<String, Object?>> history(Map<String, dynamic> s) => studentHistory(
+        {'enrollments': db['enrollments'], 'courses': db['courses']}, s['id'], (start) => academicYearLabel('$start', _atNoon), (e) => summary(e.cast<String, dynamic>()));
+  static List<Map<String, dynamic>> coursesOf(Map<String, dynamic> s, {String? cat}) => [
+        for (final e in enrollmentsOf(s)) if (e['status'] != 'ended' && courseOf(e['courseId'] as String?) != null && (cat == null || courseOf(e['courseId'] as String?)!['cat'] == cat)) courseOf(e['courseId'] as String?)!,
+      ];
+  static int presentsThisMonth(Map<String, dynamic> s) => presentsInMonth(presentsOf(s), today);
+  static int absencesThisMonth(Map<String, dynamic> s) => absencesOf(s).where((a) => monthKey(a['date'] as String) == monthKey(today)).length;
+  static List<Map<String, dynamic>> eventsOf(Map<String, dynamic> s) => [for (final v in (db['events'] as List).cast<Map<String, dynamic>>()) if (v['famId'] == s['famId']) v];
+  static List<Map<String, dynamic>> auditOf(Map<String, dynamic> s) => [for (final a in audit()) if ('${a['what']}'.startsWith('${s['id']} ')) a]..sort((a, b) => '${b['at']}'.compareTo('${a['at']}'));
+  // ציר-זמן מאוחד: אירועים ⊕ פניות ⊕ הערות ⊕ חיסורים ⊕ מסמכים — ממוזג ומדורג-תאריך-יורד (הרכבה, לא מקור-יחיד)
+  static List<Map<String, String>> timeline(Map<String, dynamic> s) {
+    final out = <Map<String, String>>[
+      for (final v in eventsOf(s)) {'date': '${v['date']}', 'title': '📅 ${v['title']}${v['done'] == true ? ' ✓' : ''}', 'body': '${v['time'] ?? ''}'},
+      for (final t in tasksOf(s)) {'date': '${t['createdAt']}', 'title': '📨 ${t['title']}', 'body': '${t['doneAt'] ?? ''}'.isEmpty ? 'פתוח · יעד ${fmt(t['due'] as String?)}' : 'נסגר ${fmt(t['doneAt'] as String?)}'},
+      for (final n in notes(s)) if ('${n['date']}'.isNotEmpty) {'date': '${n['date']}', 'title': '📝 הערה · ${n['by']}', 'body': '${n['text']}'},
+      for (final a in absencesOf(s)) {'date': '${a['date']}', 'title': a['noshow'] == true ? '⛔ אי-הופעה' : '🚫 חיסור', 'body': '${a['reason']}${a['justified'] == true ? ' · מוצדק' : ''}'},
+      for (final d in (fam(s)['docs'] as List).cast<Map<String, dynamic>>()) {'date': '${d['addedAt']}', 'title': '📎 ${d['name']}', 'body': ''},
+    ];
+    out.sort((a, b) => b['date']!.compareTo(a['date']!));
+    return out;
+  }
+  static String? waOf(Map<String, dynamic> s, String text) => waLink(fam(s)['phone'], text, waDigits) as String?;
+  static String? telOf(Map<String, dynamic> s) => telHref(fam(s)['phone']) as String?;
+  static String card(Map<String, dynamic> s) => [ // כרטיס-להדפסה (טקסט): רק שדות-אמת, ת״ז מוסתרת
+        'כרטיס-תלמיד · ${s['name']}', 'כיתה: ${className(s)} · מחנך/ת: ${teacherName(s)}', 'לידה: ${fmt(s['birth'] as String?)} · גיל ${age(s) ?? '—'} · ת״ז ${maskId(s['idNum'] as String?)}',
+        'סטטוס: ${status(s)} · סיכון: ${risk(s)} (${bandLabel(band(s))})', 'נוכחות: ${attendance(s) == null ? '—' : '${attendancePct(s)}%'} · מגמה ${trendArrow(s)}',
+        'הורה: ${parentName(s)} · ${parentPhone(s)}', 'כתובת: ${fam(s)['address']} ${fam(s)['city']}', 'פעולה: ${action(s)}', 'הודפס: ${fmt(today)}',
+      ].join('\n');
+
   static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
       c['get'] != null || rows.any((s) => s[c['key']] != null && '${s[c['key']]}'.trim().isNotEmpty);
   static String cell(Map<String, Object?> c, Map<String, dynamic> s) {
@@ -483,6 +635,8 @@ class _StudentsScreenState extends State<StudentsScreen> {
   String _q = ''; // איתור (DsSearch)
   int _mode = 0; // 0=🎯 טריאז' (קיבוץ-פר-סיכון) · 1=📋 טבלה (columnDefs) — SegmentedSwitch→תצוגה
   int _sort = 0; // 0=סיכון · 1=כיתה · 2=שם — SegmentedSwitch→דירוג
+  bool _importing = false; // מצב-מיוחד: ייבוא-בתהליך
+  Map<String, int>? _importResult; // תוצאת-ייבוא אחרונה
   bool _loading = false; // מצב-מסך שמור: טעינה
   String? _error; // מצב-מסך שמור: שגיאה (מקום-שמור — מאיר כש-fetch נכשל)
 
@@ -512,10 +666,13 @@ class _StudentsScreenState extends State<StudentsScreen> {
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ תלמיד', tone: 1, onTap: () {})),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ תלמיד', tone: 1, onTap: () => _addForm(context))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '📥 ייבוא', tone: 0, onTap: () {})),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '📥 ייבוא', tone: 0, onTap: () => _importForm(context))),
         ]),
+        // מצב-מיוחד: ייבוא-בתהליך / תוצאת-ייבוא
+        if (_importing) ...[const AlertBanner(glyph: '📥', tone: 3, message: 'ייבוא בתהליך… מעבד שורות'), _gap(8)],
+        if (!_importing && _importResult != null) ...[AlertBanner(glyph: '📥', tone: 1, message: 'ייבוא הסתיים: ${_importResult!['ok']} נוספו · ${_importResult!['skipped']} נדחו'), _gap(8)],
         // KPI-10 (המפרט): hero = המטרה (מי-נופל) + 10 מדדי-מצב (BareStat נושאי-ערך; חסר-נתון ⇒ '—' מקום-שמור)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -615,7 +772,285 @@ class _StudentsScreenState extends State<StudentsScreen> {
     return DsTable(labels: [for (final c in cols) c['label'] as String], rows: [for (final s in rows) [for (final c in cols) _StuData.cell(c, s)]]);
   }
 
-  void _openPanel(Map<String, dynamic> s) {} // גל 3: כרטיס-תלמיד-נבחר
+  // ═══ כרטיס-תלמיד-נבחר · GlassCard(child) · פעולת-יסוד "ביצוע"+"הערכה": כל האמת על תלמיד-אחד + הפעולה-הנכונה-עכשיו ═══
+  //   זהות (PremiumAvatar + שקע-תמונה) · מד-סיכון (GaugeMeter) · הפעולה (AlertBanner) · 9 טאבים (SegmentedSwitch נגלל) ·
+  //   פעולות (SoftButton) — כותבות לרשומות-האמת + אודיט, המסך והכרטיס מתעדכנים יחד.
+  static const _tabs = ['סקירה', 'אקדמי', 'נוכחות', 'חברתי-רגשי', 'התנהגות', 'משפחה', 'מסמכים', 'ציר-זמן', 'אודיט'];
+  final Map<String, int> _tab = {};
+  String get _who => 'ruti@school'; // זהות-מוזרקת (חוק-6) — גל 5: מבורר-התפקיד
+
+  void _openPanel(Map<String, dynamic> s) {
+    showModalBottomSheet<void>(
+      context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
+        void act(void Function() f) { f(); setSheet(() {}); setState(() {}); }
+        final r = _StuData.risk(s), b = _StuData.band(s), tone = b == 2 ? 2 : b == 1 ? 3 : 1;
+        final tab = _tab[s['id']] ?? 0;
+        return DraggableScrollableSheet(
+          initialChildSize: 0.86, minChildSize: 0.4, maxChildSize: 0.97, expand: false,
+          builder: (ctx, scroll) => Padding(
+            padding: const EdgeInsets.all(12),
+            child: GlassCard(
+              child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                // זהות: אווטאר (ראשי-תיבות; image = מקום-שמור לתמונה) + שם + כיתה·מחנך·גיל·מין + סטטוס
+                Row(children: [
+                  PremiumAvatar(name: '${s['name']}', size: 56, image: s['photo'] is ImageProvider ? s['photo'] as ImageProvider : null),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('${s['name']}', style: const TextStyle(color: _ink, fontSize: 19, fontWeight: FontWeight.w800)),
+                    Text('${_StuData.className(s)} · ${_StuData.teacherName(s)} · גיל ${_StuData.age(s) ?? '—'} · ${s['gender'] == 'f' ? 'נ' : s['gender'] == 'm' ? 'ז' : '—'} · מס׳ ${s['id']}', style: const TextStyle(color: _muted, fontSize: 12.5)),
+                  ])),
+                  StatusChip(label: _StuData.status(s), tone: _StuData.isActive(s) ? 1 : 0),
+                ]),
+                _gap(12),
+                // ציון-סיכון מאוחד (GaugeMeter, tone=band) + הפעולה-הנכונה-עכשיו (AlertBanner) — ההכרעה, לא רק המספר
+                Row(children: [
+                  GaugeMeter(value: r / 100, size: 150, tone: tone),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    Row(children: [BareStat(value: '$r', label: _StuData.bandLabel(b), inkColor: b == 2 ? _danger : b == 1 ? _warning : _ok, mutedColor: _muted)]), // BareStat=Expanded ⇒ חייב Row (נתפס בבדיקת-widget)
+                    _gap(6),
+                    AlertBanner(glyph: b == 2 ? '⏰' : b == 1 ? '📅' : '✅', tone: b == 2 ? 2 : b == 1 ? 3 : 1, message: '👉 ${_StuData.action(s)}'),
+                  ])),
+                ]),
+                _gap(12),
+                SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: _tabs, selected: tab, onSelect: (i) => setSheet(() => _tab[s['id'] as String] = i))),
+                _gap(12),
+                ..._tabBody(ctx, s, tab, act),
+                _gap(16),
+                const Text('פעולות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
+                _gap(8),
+                Wrap(spacing: 8, runSpacing: 8, children: _actions(ctx, s, act)),
+                _gap(8),
+              ]),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  List<Widget> _kv(String k, String v) => [Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Row(children: [Text(k, style: const TextStyle(color: _muted, fontSize: 13)), const SizedBox(width: 8), Expanded(child: Text(v, style: const TextStyle(color: _ink, fontSize: 13.5, fontWeight: FontWeight.w600)))]))];
+  Widget _h(String t) => Padding(padding: const EdgeInsets.only(top: 6, bottom: 6), child: Text(t, style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)));
+  // מקום-שמור (חוק-7): תווית+שקע — מואר כשמגיע נתון, עד אז מוצהר ולא מזויף
+  Widget _slot(String label, String source) => AlertBanner(glyph: '▫', tone: 0, message: '$label — מקום-שמור · יאיר כשיגיע נתון ($source)');
+
+  List<Widget> _tabBody(BuildContext ctx, Map<String, dynamic> s, int tab, void Function(void Function()) act) {
+    switch (tab) {
+      case 0: // סקירה: פירוק-האותות (NeonBars) · אותות-ללא-נתון (מקום-שמור) · מגמה 30/90 · נוכחות-חודש · הערות-אחרונות · דגלים · משפחה · פניות
+        final sig = _StuData.signals(s), withData = sig.where((x) => x['value'] != null).toList(), noData = sig.where((x) => x['value'] == null).toList();
+        final t30 = _StuData.trend30(s), t90 = _StuData.trend90(s);
+        final ns = _StuData.notes(s);
+        return [
+          _h('פירוק-האותות · תרומה לציון-הסיכון (נק׳)'),
+          if (withData.isEmpty) const EmptyState(glyph: '📊', message: 'אין עדיין אותות עם נתון') else
+          NeonBars(labels: [for (final x in withData) '${x['label']}'], values: [for (final x in withData) (x['contribution'] as double)], tone: _StuData.band(s) == 2 ? 2 : _StuData.band(s) == 1 ? 3 : 1),
+          if (noData.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 6, runSpacing: 6, children: [for (final x in noData) StatusChip(label: '▫ ${x['label']}: אין נתון (מקום-שמור)', tone: 0)])),
+          _gap(10),
+          Row(children: [
+            BareStat(value: t30['dir'] == 'flat' ? '→' : '${t30['pct'] > 0 ? '+' : ''}${t30['pct']}%', label: 'מגמה-30 (נוכחות)', inkColor: t30['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
+            BareStat(value: t90['dir'] == 'flat' ? '→' : '${t90['pct'] > 0 ? '+' : ''}${t90['pct']}%', label: 'מגמה-90 (נוכחות)', inkColor: t90['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
+            BareStat(value: '${_StuData.presentsThisMonth(s)}/${_StuData.presentsThisMonth(s) + _StuData.absencesThisMonth(s)}', label: 'נוכחות-החודש', inkColor: _ink, mutedColor: _muted),
+          ]),
+          _gap(10),
+          _h('הערות אחרונות · ${ns.length}'),
+          if (ns.isEmpty) const EmptyState(glyph: '📝', message: 'אין הערות-מחנך/ת') else for (final n in ns.take(3)) TimelineItem(title: '📝 ${n['by']}', time: '${n['date']}'.isEmpty ? 'ללא-תאריך' : _StuData.fmt('${n['date']}'), body: '${n['text']}'),
+          _h('דגלים'),
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final f in _StuData.flags(s)) StatusChip(label: f, tone: 3), if (_StuData.flags(s).isEmpty) const StatusChip(label: 'אין דגלים', tone: 0)]),
+          _h('משפחה · פניות'),
+          MediaRow(glyph: '👪', title: '${_StuData.parentName(s)} · ${_StuData.parentMissing(s) ? '⛔ אין טלפון' : _StuData.parentPhone(s)}', subtitle: 'אחים במוסד: ${_StuData.siblings(s).isEmpty ? 'אין' : _StuData.siblings(s).map((x) => x['first']).join(' · ')} · פניות פתוחות: ${_StuData.openTasksOf(s).length}'),
+        ];
+      case 1: // אקדמי: ציונים-לפי-מקצוע (מקום-שמור) · מגמה-אקדמית (מקום-שמור) · חוגים · היסטוריית-כיתות (studentHistory) · תעודות/IEP/חונך/ציוני-חוץ (מקום-שמור)
+        final g = s['grades'];
+        final hist = _StuData.history(s);
+        return [
+          _h('ציונים לפי מקצוע'),
+          if (g is Map && g.isNotEmpty) ...[for (final e in g.entries) StatRow(label: '${e.key}', value: '${e.value}', fraction: ((e.value as num) / 100).clamp(0.0, 1.0))] else _slot('ציונים לפי מקצוע · ממוצע · מגמה-אקדמית', 'מודול-ציונים ⇒ s.grades'),
+          _h('היסטוריית-כיתות ורישומים · ${hist.length}'),
+          for (final h in hist) TimelineItem(title: '${h['courseName']}${h['fromRenewal'] == true ? ' · חידוש' : ''}', time: '${h['yearLabel']}', body: 'נוכחויות ${(h['summary'] as Map)['presents']} · חיסורים ${(h['summary'] as Map)['absences']} · ${(h['summary'] as Map)['statusLabel']}'),
+          _h('מקומות-שמורים'),
+          _slot('תעודות-קודמות', 'Family.docs מסוג תעודה'), _slot('תוכנית-אישית (IEP)', 's.iep'), _slot('חונך/ת', 's.mentor'), _slot('ציוני-חוץ (מבחנים ארציים)', 's.externalScores'),
+        ];
+      case 2: // נוכחות: מונים · חודשי (NeonBars) · חיסורים (TimelineItem)
+        final ms = _StuData.months(s);
+        final abs = _StuData.absencesOf(s)..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
+        return [
+          Row(children: [
+            BareStat(value: '${_StuData.presents(s)}', label: 'נוכחויות', inkColor: _ok, mutedColor: _muted),
+            BareStat(value: '${_StuData.absences(s)}', label: 'חיסורים', inkColor: _StuData.absences(s) > 0 ? _warning : _ink, mutedColor: _muted),
+            BareStat(value: '${_StuData.noshow(s)}', label: 'אי-הופעות', inkColor: _StuData.noshow(s) > 0 ? _danger : _ink, mutedColor: _muted),
+            BareStat(value: _StuData.attendance(s) == null ? '—' : '${_StuData.attendancePct(s)}%', label: 'נוכחות%', inkColor: _acc, mutedColor: _muted),
+          ]),
+          _gap(10),
+          _h('נוכחות חודשית (%)'),
+          if (ms.isEmpty) const EmptyState(glyph: '📅', message: 'אין נתוני-נוכחות עדיין') else NeonBars(labels: ms, values: [for (final m in ms) _StuData.monthRate(s, m) * 100], tone: 0),
+          _h('חיסורים · ${abs.length}'),
+          if (abs.isEmpty) const EmptyState(glyph: '✅', message: 'אין חיסורים רשומים') else for (final a in abs.take(12)) TimelineItem(title: a['noshow'] == true ? '⛔ אי-הופעה' : '🚫 חיסור', time: _StuData.fmt(a['date'] as String?), body: '${a['reason']}${a['justified'] == true ? ' · מוצדק' : ' · לא-מוצדק'}'),
+        ];
+      case 3: // חברתי-רגשי: מקום-שמור + חוגים/מועדונים (מקור: Enrollment⊕Course.cat=חוג) + תפקידים/הישגים (מקום-שמור)
+        final clubs = _StuData.coursesOf(s, cat: 'חוג');
+        return [
+          if (s['social'] is num) StatRow(label: 'מדד חברתי-רגשי (1=מצוקה)', value: '${s['social']}', fraction: (s['social'] as num).toDouble().clamp(0.0, 1.0)) else _slot('מדד חברתי-רגשי', 'שאלון/יועץ ⇒ s.social'),
+          _h('מועדונים וחוגים · ${clubs.length}'),
+          if (clubs.isEmpty) const EmptyState(glyph: '🎭', message: 'לא רשום/ה לחוגים') else for (final c in clubs) MediaRow(glyph: '🎭', title: '${c['name']}', subtitle: '${_StuData.teacherOf(c['teacherId'] as String?)?['name'] ?? ''}'),
+          _h('מקומות-שמורים'), _slot('תפקידים', 's.roles'), _slot('הישגים', 's.achievements'),
+        ];
+      case 4: // התנהגות: מקום-שמור + הערות-התנהגות מהפנקס
+        final bn = _StuData.notes(s).where((n) => n['kind'] == 'behavior').toList();
+        return [
+          if (s['behavior'] is num) Row(children: [BareStat(value: '${s['behavior']}', label: 'אירועי-התנהגות בחודש', inkColor: _warning, mutedColor: _muted)]) else _slot('אירועי-התנהגות', 'מודול-משמעת ⇒ s.behavior'),
+          _h('הערות-התנהגות · ${bn.length}'),
+          if (bn.isEmpty) const EmptyState(glyph: '📝', message: 'אין הערות-התנהגות') else for (final n in bn) TimelineItem(title: '📝 ${n['by']}', time: _StuData.fmt('${n['date']}'), body: '${n['text']}'),
+        ];
+      case 5: // משפחה: הורים+קשר · כתובת · שפה · אחים · סוציו-אקונומי (מוגן) · אישורי-הורים · הסעה (מקום-שמור)
+        final f = _StuData.fam(s);
+        return [
+          MediaRow(glyph: '👩', title: '${f['mother']}'.isEmpty ? 'אם: —' : 'אם: ${f['mother']}', subtitle: _StuData.parentMissing(s) ? '⛔ אין טלפון-קשר' : '${_StuData.parentPhone(s)} · ${_StuData.telOf(s) ?? ''}'),
+          MediaRow(glyph: '👨', title: '${f['father']}'.isEmpty ? 'אב: —' : 'אב: ${f['father']}', subtitle: '${f['phone2']}'.isEmpty ? '' : formatIsraeliPhone(f['phone2'])),
+          ..._kv('כתובת', '${f['address']} ${f['city']}'.trim().isEmpty ? '—' : '${f['address']} ${f['city']}'),
+          ..._kv('שפת-בית', '${f['language']}'.isEmpty ? '—' : '${f['language']}'),
+          ..._kv('מצב משפחתי', '${f['maritalStatus']}'.isEmpty ? '—' : '${f['maritalStatus']}'),
+          ..._kv('סטטוס-משפחה', '${f['status']}'),
+          _h('אחים במוסד · ${_StuData.siblings(s).length}'),
+          if (_StuData.siblings(s).isEmpty) const StatusChip(label: 'אין אחים במוסד', tone: 0) else Wrap(spacing: 6, children: [for (final o in _StuData.siblings(s)) SoftButton(label: '🔗 ${o['first']} · ${_StuData.className(o)}', tone: 0, onTap: () { Navigator.of(ctx).pop(); _openPanel(o); })]),
+          _h('מצב סוציו-אקונומי · 🔒 מוגן'),
+          const StatusChip(label: '🔒 מוגן · יועץ/ת בלבד', tone: 0),
+          _h('אישורי-הורים'),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            for (final c in _StuData.consentDefs) StatusChip(label: '${s[c['key']] == true ? '✅' : '✗'} ${c['label']}', tone: s[c['key']] == true ? 1 : 0),
+            StatusChip(label: 'טיולים: ${_StuData.consentSlot(s, 'trips')}', tone: _StuData.consentSlot(s, 'trips').startsWith('⛔') ? 2 : 0),
+            StatusChip(label: 'תרופות: ${_StuData.consentSlot(s, 'meds')}', tone: _StuData.consentSlot(s, 'meds').startsWith('⛔') ? 2 : 0),
+          ]),
+          _gap(6), _slot('הסעה', 's.transport'),
+        ];
+      case 6: // מסמכים: Family.docs · תיק-רפואי (Member.health מוגן) · תעודות (מקום-שמור)
+        final docs = (_StuData.fam(s)['docs'] as List).cast<Map<String, dynamic>>();
+        return [
+          _h('מסמכים · ${docs.length}'),
+          if (docs.isEmpty) const EmptyState(glyph: '📎', message: 'אין מסמכים') else for (final d in docs) TimelineItem(title: '📎 ${d['name']}', time: _StuData.fmt(d['addedAt'] as String?)),
+          _h('תיק-רפואי · 🔒 מוגן'),
+          StatusChip(label: '${s['health'] ?? ''}'.isEmpty ? 'אין רישום רפואי' : '🔒 קיים רישום רפואי (חשיפה פר-הרשאה)', tone: '${s['health'] ?? ''}'.isEmpty ? 0 : 3),
+          _gap(6), _slot('אבחונים', 's.diagnoses'), _slot('תרופות', 's.medications'),
+        ];
+      case 7: // ציר-זמן מאוחד
+        final tl = _StuData.timeline(s);
+        return [_h('ציר-זמן · ${tl.length}'), if (tl.isEmpty) const EmptyState(glyph: '🕒', message: 'אין אירועים') else for (final e in tl) TimelineItem(title: e['title']!, time: _StuData.fmt(e['date']), body: e['body']!.isEmpty ? null : e['body'])];
+      default: // אודיט: רשומות-אודיט של התלמיד (at·who·act·what)
+        final au = _StuData.auditOf(s);
+        return [_h('אודיט · ${au.length}'), if (au.isEmpty) const EmptyState(glyph: '🧾', message: 'אין רשומות-אודיט') else for (final a in au) TimelineItem(title: '${a['act']} · ${a['who']}', time: '${a['at']}', body: '${a['what']}')];
+    }
+  }
+
+  // 14+ פעולות (SoftButton) — כל פעולה כותבת לרשומת-האמת + אודיט. גל 5: גידור פר-תפקיד.
+  List<Widget> _actions(BuildContext ctx, Map<String, dynamic> s, void Function(void Function()) act) {
+    final active = _StuData.isActive(s), st = _StuData.status(s);
+    return [
+      SoftButton(label: '✏️ ערוך', tone: 0, onTap: () => _editForm(ctx, s, act)),
+      SoftButton(label: '🏫 העבר-כיתה', tone: 0, onTap: () => _pick(ctx, 'העבר-כיתה', [for (final c in _StuData.homeroomCourses()) c['name'] as String], (v) => act(() => _StuData.moveClass(s, v, _who)))),
+      if (active) SoftButton(label: '⏸ הקפא', tone: 3, onTap: () => act(() => _StuData.setStatus(s, 'הוקפא', _who))),
+      if (!active) SoftButton(label: '▶ החזר לפעיל', tone: 1, onTap: () => act(() => _StuData.setStatus(s, 'פעיל', _who))),
+      if (st != 'עזב') SoftButton(label: '🚪 סמן-עזב', tone: 2, onTap: () => act(() => _StuData.setStatus(s, 'עזב', _who))),
+      if (st != 'בוגר') SoftButton(label: '🎓 סמן-בוגר', tone: 0, onTap: () => act(() => _StuData.setStatus(s, 'בוגר', _who))),
+      SoftButton(label: '📝 הוסף-הערה', tone: 1, onTap: () => _prompt(ctx, 'הערת-מחנך/ת', 'מה קרה? מה סוכם?', (v) => act(() => _StuData.addNote(s, v, _who)))),
+      SoftButton(label: '⚠ הערת-התנהגות', tone: 3, onTap: () => _prompt(ctx, 'הערת-התנהגות', 'אירוע · תגובה', (v) => act(() => _StuData.addNote(s, v, _who, kind: 'behavior')))),
+      SoftButton(label: '🚩 הוסף-דגל', tone: 3, onTap: () => _pick(ctx, 'הוסף-דגל', const ['♿ צרכים-מיוחדים', '💛 רגישות', '🩺 רפואי', '🗣 שפה', '🚌 הסעה'], (v) => act(() => _StuData.addFlag(s, v, _who)))),
+      SoftButton(label: '📨 פתח-פנייה (יועץ/ת)', tone: 2, onTap: () => _prompt(ctx, 'פנייה ליועץ/ת', 'נושא הפנייה', (v) => act(() => _StuData.openTicket(s, 'פנייה ליועצת: ${s['name']} — $v', _who)))),
+      SoftButton(label: '💬 שלח-להורה', tone: 0, onTap: () => _showText(ctx, 'הודעה להורה · ${_StuData.parentName(s)}', _StuData.waOf(s, 'שלום ${_StuData.parentName(s)}, מדברים מבית-הספר בעניין ${s['first']}. נשמח לשוחח.') ?? '⛔ אין טלפון-הורה מעודכן — לא ניתן לשלוח')),
+      SoftButton(label: '📅 הזמן-לשיחה', tone: 0, onTap: () => _prompt(ctx, 'הזמנה לשיחה', 'תאריך (YYYY-MM-DD)', (v) => act(() => _StuData.inviteMeeting(s, 'שיחה עם הורי ${s['first']}', v, _who)))),
+      SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => _prompt(ctx, 'צרף-מסמך', 'שם המסמך', (v) => act(() => _StuData.attachDoc(s, v, _who)))),
+      SoftButton(label: '🖨 הדפס-כרטיס', tone: 0, onTap: () => _showText(ctx, 'כרטיס-תלמיד להדפסה', _StuData.card(s))),
+      SoftButton(label: '📷 בקש אישור-מדיה', tone: 0, onTap: () => act(() => _StuData.toggleConsent(s, 'mPhotos', _who))),
+      SoftButton(label: '🧳 בקש אישור-טיולים', tone: 0, onTap: () => act(() => _StuData.requestConsent(s, 'trips', _who))),
+      for (final t in _StuData.openTasksOf(s)) SoftButton(label: '✅ סגור פנייה ${t['id']}', tone: 1, onTap: () => act(() => _StuData.closeTicket(t, _who))), // תווית קצרה (גיליון ≤640px · נתפס בבדיקת-widget)
+    ];
+  }
+
+  // ─── גיליונות-קלט (DsField/DsEnumField מהמדף) — קלט-אמת מהמשתמש, לא ערכים מומצאים ───
+  void _prompt(BuildContext ctx, String title, String hint, void Function(String) onSave) {
+    var v = '';
+    showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => Padding(
+      padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(c2).viewInsets.bottom + 12),
+      child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        DsField(label: title, hint: hint, value: v, onChanged: (x) => v = x),
+        Row(children: [SoftButton(label: '💾 שמור', tone: 1, onTap: () { if (v.trim().isNotEmpty) { onSave(v.trim()); Navigator.of(c2).pop(); } })]),
+      ])),
+    ));
+  }
+  void _pick(BuildContext ctx, String title, List<String> options, void Function(String) onSave) {
+    var v = options.isEmpty ? '' : options.first;
+    showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, builder: (c2) => StatefulBuilder(builder: (c2, setS) => Padding(
+      padding: const EdgeInsets.all(12),
+      child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        DsEnumField(label: title, options: options, value: v, onChanged: (x) => setS(() => v = x)),
+        Row(children: [SoftButton(label: '💾 שמור', tone: 1, onTap: () { if (v.isNotEmpty) { onSave(v); Navigator.of(c2).pop(); } })]),
+      ])),
+    )));
+  }
+  void _showText(BuildContext ctx, String title, String text) {
+    showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => Padding(
+      padding: const EdgeInsets.all(12),
+      child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        _gap(8),
+        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)), child: SelectableText(text, style: const TextStyle(color: _ink, fontSize: 13, height: 1.6))),
+      ])),
+    ));
+  }
+  // עריכה: שדות-אמת (Member.first/phone/school · Family.mother/father/phone/city/address/language)
+  void _editForm(BuildContext ctx, Map<String, dynamic> s, void Function(void Function()) act) {
+    final f = _StuData.fam(s);
+    final vals = <String, String>{'first': '${s['first']}', 'school': '${s['school'] ?? ''}', 'mother': '${f['mother']}', 'father': '${f['father']}', 'phone': '${f['phone']}', 'city': '${f['city']}', 'address': '${f['address']}', 'language': '${f['language']}'};
+    const labels = {'first': 'שם פרטי', 'school': 'בית-ספר', 'mother': 'אם', 'father': 'אב', 'phone': 'טלפון-הורה', 'city': 'ישוב', 'address': 'כתובת', 'language': 'שפת-בית'};
+    showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => DraggableScrollableSheet(
+      initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
+      builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+        Text('עריכה · ${s['name']}', style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
+        _gap(8),
+        Row(children: [SoftButton(label: '💾 שמור', tone: 1, onTap: () { act(() { for (final k in vals.keys) { if (vals[k] != '${k == 'first' || k == 'school' ? s[k] ?? '' : f[k]}') _StuData.editField(s, k, vals[k]!, _who); } }); Navigator.of(c2).pop(); })]),
+      ]))),
+    ));
+  }
+  // רישום-תלמיד-חדש (Family+Member+Enrollment)
+  void _addForm(BuildContext ctx) {
+    final vals = <String, String>{'first': '', 'last': '', 'birth': '', 'parent': '', 'phone': ''};
+    final classes = [for (final c in _StuData.homeroomCourses()) c['name'] as String];
+    var cls = classes.isEmpty ? '' : classes.first;
+    const labels = {'first': 'שם פרטי', 'last': 'שם משפחה', 'birth': 'תאריך-לידה (YYYY-MM-DD)', 'parent': 'הורה ראשי', 'phone': 'טלפון-הורה'};
+    showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => StatefulBuilder(builder: (c2, setS) => DraggableScrollableSheet(
+      initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
+      builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+        const Text('רישום תלמיד/ה חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
+        DsEnumField(label: 'כיתה', options: classes, value: cls, onChanged: (x) => setS(() => cls = x)),
+        _gap(8),
+        Row(children: [SoftButton(label: '💾 רשום', tone: 1, onTap: () {
+          if (vals['first']!.trim().isEmpty || vals['last']!.trim().isEmpty) return;
+          setState(() => _StuData.addStudent(first: vals['first']!.trim(), last: vals['last']!.trim(), courseName: cls, birth: vals['birth']!.trim(), parent: vals['parent']!.trim(), phone: vals['phone']!.trim(), who: _who));
+          Navigator.of(c2).pop();
+        })]),
+      ]))),
+    )));
+  }
+  // ייבוא-CSV: הדבקת-טקסט ⇒ parseCsv ⇒ רישומים; מצב "ייבוא-בתהליך" שמור (מאיר בזמן העיבוד)
+  void _importForm(BuildContext ctx) {
+    var text = '';
+    showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => Padding(
+      padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(c2).viewInsets.bottom + 12),
+      child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const Text('ייבוא תלמידים (CSV)', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל תלמיד/ה', style: TextStyle(color: _muted, fontSize: 12)),
+        DsField(label: 'CSV', hint: 'דנה,כהן,י׳-1 · כיתת-חינוך,2010-05-05,רונית,0501234567', value: text, onChanged: (x) => text = x),
+        Row(children: [SoftButton(label: '📥 ייבא', tone: 1, onTap: () {
+          Navigator.of(c2).pop();
+          setState(() { _importing = true; });
+          Future.delayed(const Duration(milliseconds: 600), () { if (!mounted) return; setState(() { _importResult = _StuData.importCsv(text, _who); _importing = false; }); });
+        })]),
+      ])),
+    ));
+  }
 
   // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
   void _refresh() {
