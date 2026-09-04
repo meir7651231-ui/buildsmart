@@ -1,7 +1,7 @@
 // 🎯 FamilyScreen — retarget של schoolos_students.dart לישות Family (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Family
 //   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 19 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 13
 //   id⇒id(name) · name⇒name(name) · father⇒father(name) · mother⇒mother(name) · phone⇒phone(name) · phone2⇒phone2(name) · email⇒email(name) · city⇒city(name) · address⇒address(name) · language⇒language(name) · maritalStatus⇒maritalStatus(name) · status⇒status(name) · tzedaka⇒tzedaka(name) · discount⇒discount(name) · notes⇒notes(name) · createdAt⇒createdAt(name) · docs⇒docs(name) · cred⇒cred(name) · members⇒members(name) · addedAt⇒∅(reserved) · log⇒∅(reserved) · first⇒∅(reserved(3 מועמדים)) · gender⇒∅(reserved(3 מועמדים)) · birth⇒∅(reserved) · idNum⇒∅(reserved(3 מועמדים)) · school⇒∅(reserved(3 מועמדים)) · grade⇒∅(reserved(3 מועמדים)) · health⇒∅(reserved(3 מועמדים)) · mSefach⇒fullSefach(unique) · mInvite⇒∅(reserved) · mRecommend⇒∅(reserved) · mPhotos⇒∅(reserved) · mVideos⇒∅(reserved)
-//   שדות-Family בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): fatherId, motherId, community, kidsHome, kidsMarried · תוויות-UI = של מודול-המקור (הצבה) · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Family
+//   שדות-Family בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): fatherId, motherId, community, kidsHome, kidsMarried · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Family (משפחה/—) · 2 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Family
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-מצב · חיבור-אותות-להכרעה · זיהוי-חריגה · הכרעה · ביצוע · אימות.
@@ -1321,7 +1321,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => StatefulBuilder(builder: (c2, setS) => DraggableScrollableSheet(
       initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
       builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-        const Text('רישום תלמיד/ה חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        const Text('רישום משפחה חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
         DsEnumField(label: 'כיתה', options: classes, value: cls, onChanged: (x) => setS(() => cls = x)),
         _gap(8),
@@ -1340,7 +1340,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
       padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(c2).viewInsets.bottom + 12),
       child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Text('ייבוא תלמידים (CSV)', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
-        const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל תלמיד/ה', style: TextStyle(color: _muted, fontSize: 12)),
+        const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל משפחה', style: TextStyle(color: _muted, fontSize: 12)),
         DsField(label: 'CSV', hint: 'דנה,כהן,י׳-1 · כיתת-חינוך,2010-05-05,רונית,0501234567', value: text, onChanged: (x) => text = x),
         Row(children: [SoftButton(label: '📥 ייבא', tone: 1, onTap: () {
           Navigator.of(c2).pop();

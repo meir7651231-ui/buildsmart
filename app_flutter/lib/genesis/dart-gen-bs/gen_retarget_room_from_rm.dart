@@ -1,7 +1,7 @@
 // 🎯 RoomScreen — retarget של schoolos_rooms.dart לישות Room (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Room
 //   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 11 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0
 //   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒slot(name) · cap⇒cap(name) · location⇒location(name) · from⇒from(name) · to⇒to(name) · access⇒access(name) · notes⇒notes(name) · eq⇒eq(name)
-//   שדות-Room בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): rate · תוויות-UI = של מודול-המקור (הצבה) · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Room
+//   שדות-Room בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): rate · תוויות: מונחי room (חדר/חדרים) ⇒ Room (חדר/חדרים) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Room
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: RoomScreen.
 //
@@ -187,7 +187,7 @@ class _RoomData {
 
   // db בצורת-הקלט של מנועי-מאור (rooms·courses·events)
   static Map<String, dynamic> get db => {'rooms': rooms, 'courses': courses, 'events': events};
-  static const config = <String, dynamic>{'terms': {'entity.course': 'שיעור', 'entity.room': 'Room'}}; // termOf
+  static const config = <String, dynamic>{'terms': {'entity.course': 'שיעור', 'entity.room': 'חדר'}}; // termOf
 
   // ── שקעים (חוק-1: השכנים מוזרקים, לא מיובאים ע"י האטומים) ──
   static num _t2m(dynamic t) => timeToMin(t) as num;

@@ -1,7 +1,7 @@
 // 🎯 ShopItemScreen — retarget של schoolos_courses.dart לישות ShopItem (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity ShopItem
 //   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 3 · מקום-שמור 20
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · kind⇒kind(name) · teacherId⇒storeId(unique) · roomId⇒∅(reserved) · cat⇒holidays(unique) · semester⇒∅(reserved) · sector⇒∅(reserved) · start⇒∅(reserved) · end⇒∅(reserved) · sessions⇒∅(reserved) · time⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒∅(reserved(5 מועמדים)) · price⇒∅(reserved(5 מועמדים)) · gender⇒∅(reserved) · ageMin⇒∅(reserved(5 מועמדים)) · ageMax⇒∅(reserved(5 מועמדים)) · gradeMin⇒∅(reserved) · gradeMax⇒∅(reserved) · description⇒∅(reserved) · files⇒∅(reserved) · data⇒∅(reserved) · day⇒∅(reserved(5 מועמדים)) · perLesson⇒active(unique) · lessonPrice⇒∅(reserved(5 מועמדים))
-//   שדות-ShopItem בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): value, basePrice, stock, minStock, validDays, waits · תוויות-UI = של מודול-המקור (הצבה) · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopItem
+//   שדות-ShopItem בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): value, basePrice, stock, minStock, validDays, waits · תוויות: מונחי course (חוג/—) ⇒ ShopItem (פריט/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopItem
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT · "מה"): knowledge/SPEC-COURSES-FULL-2026-09-04.md · הסטנדרט: מסך-המלאי (schoolos.dart).
 // 🎯 המטרה: "שכל שיעור יקרה — עם מורה, בחדר, לתלמידים הנכונים, בזמן — ושאף שיבוץ לא יתנגש ואף מקום לא יתבזבז."
@@ -431,7 +431,7 @@ class _ShopItemData {
   //   נגזרת(get)=תמיד-מוצגת · שדה(key בלי get)=מוארת רק כשחוג נושא ערך, חסר ⇒ שקט (אפס-זיוף).
   //   'code' אין במאור ⇒ מקום-שמור: הוספת {'code': …} לחוג ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
-    {'label': 'שם-חוג', 'get': (Map<String, dynamic> c) => '${c['name']}'},
+    {'label': 'שם-פריט', 'get': (Map<String, dynamic> c) => '${c['name']}'},
     {'key': 'code', 'label': 'קוד'},                                                   // מקום-שמור
     {'label': 'תחום', 'get': (Map<String, dynamic> c) => '${c['holidays'] ?? '—'}'},
     {'label': 'מורה', 'get': (Map<String, dynamic> c) => '${teacherOf(c)?['name'] ?? '—'}'},
@@ -525,7 +525,7 @@ class _ShopItemData {
   // ⬆ העלה-מהמתנה (ידני): נחסם כשהחוג מלא
   static String promote(Map<String, dynamic> e, String who) {
     final c = courseById(e['courseId'])!;
-    if (isFull(c)) return 'blocked:החוג מלא (${enrolled(c)}/${capacity(c)}) — הסר תלמיד או הגדל קיבולת';
+    if (isFull(c)) return 'blocked:הפריט מלא (${enrolled(c)}/${capacity(c)}) — הסר תלמיד או הגדל קיבולת';
     final clash = clashReason(c, e['memberId']);
     if (clash != null) return 'blocked:התנגשות — ${memberName(e['memberId'])} $clash';
     statusOverride[e['id'] as String] = 'active';
@@ -545,7 +545,7 @@ class _ShopItemData {
     return liveCourses.any((o) => o['id'] != c['id'] && o[key] == id && '$id'.isNotEmpty && _sameSlot(sim, o));
   }
   static String assignTeacher(Map<String, dynamic> c, dynamic tid, String who) {
-    if (_wouldClash(c, 'storeId', tid)) return 'blocked:התנגשות-מורה — ${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} מלמד/ת חוג-אחר באותו slot';
+    if (_wouldClash(c, 'storeId', tid)) return 'blocked:התנגשות-מורה — ${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} מלמד/ת פריט-אחר באותו slot';
     courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'storeId': tid};
     log(who, 'הקצאת-מורה', '${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} ⇐ ${c['name']}', c['id'] as String);
     return 'assigned';
@@ -577,7 +577,7 @@ class _ShopItemData {
     for (final e in liveEnrollmentsOf(c)) {
       statusOverride[e['id'] as String] = 'ended';
     }
-    log(who, 'סיום-חוג', '${c['name']} · ${liveEnrollmentsOf(c).length} הרשמות נסגרו', c['id'] as String);
+    log(who, 'סיום-פריט', '${c['name']} · ${liveEnrollmentsOf(c).length} הרשמות נסגרו', c['id'] as String);
   }
   // ✏️ ערוך: שם / קיבולת (הגדלת-קיבולת ⇒ העלאה-אוטומטית מהמתנה)
   static void edit(Map<String, dynamic> c, String key, dynamic value, String who) {
@@ -591,7 +591,7 @@ class _ShopItemData {
   static Map<String, dynamic> duplicate(Map<String, dynamic> c, String who) {
     final copy = duplicateCourse(c, nextId('c-copy-'), {'start': c['start'], 'end': c['end']}, term: (k) => k == 'avtk' ? ' (עותק)' : k);
     extraCourses.add(copy);
-    log(who, 'שכפול-חוג', '${copy['name']}', copy['id'] as String);
+    log(who, 'שכפול-פריט', '${copy['name']}', copy['id'] as String);
     return copy;
   }
   // 📑 שכפל-סמסטר/שנה (nextYearCourseDraft⊕nextYearDates⊕academicYearLabel ממאור) — "חכם": מסמן טיוטות בלי-מורה/בלי-חדר-פעיל
@@ -615,12 +615,12 @@ class _ShopItemData {
   static Map<String, dynamic> newCourse(String who) {
     final dates = defaultCourseDates(today);
     final c = <String, dynamic>{
-      'id': nextId('c-new-'), 'name': 'חוג חדש', 'storeId': '', 'roomId': '', 'holidays': '', 'semester': '', 'sector': 'כללי', // semester ריק = "סמסטר לא-מוגדר" עד שנבחר
+      'id': nextId('c-new-'), 'name': 'פריט חדש', 'storeId': '', 'roomId': '', 'holidays': '', 'semester': '', 'sector': 'כללי', // semester ריק = "סמסטר לא-מוגדר" עד שנבחר
       'start': dates['start'], 'end': dates['end'], 'sessions': <Map<String, dynamic>>[], 'maxStudents': 0, 'price': 0, 'gender': 'all',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[],
     };
     extraCourses.add(c);
-    log(who, 'חוג-חדש', '${c['name']} · ${dates['start']}–${dates['end']}', c['id'] as String);
+    log(who, 'פריט-חדש', '${c['name']} · ${dates['start']}–${dates['end']}', c['id'] as String);
     return c;
   }
   // 💬 שלח-הודעה-לחוג: קישור-WhatsApp פר-משפחה (waLink⊕waDigits ממאור) — הזהות (טלפון) מוזרקת מהדאטה, לא באטום
@@ -799,7 +799,7 @@ class _ShopItemData {
     for (final e in liveEnrollmentsOf(c)) {
       statusOverride[e['id'] as String] = 'ended';
     }
-    log(who, 'ביטול-חוג', '${c['name']}', c['id'] as String);
+    log(who, 'ביטול-פריט', '${c['name']}', c['id'] as String);
   }
   // סמסטר-לא-מוגדר: חוג בלי semester תקין (מצב-מיוחד)
   static bool semesterUndefined(Map<String, dynamic> c) => !semesterOptions.contains(c['semester']);
@@ -1007,7 +1007,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
         Wrap(spacing: 8, runSpacing: 6, children: [
           // רענון — מדגים את מצב-הטעינה השמור (חיבור-אסינק אמיתי יאיר אותו זהה)
           SoftButton(label: '🔄', tone: 0, onTap: _refresh),
-          if (_can('crs.new')) SoftButton(label: '➕ חוג-חדש', tone: 1, onTap: () => _act(() => _ShopItemData.newCourse(_who), 'נוצר חוג-חדש (ללא-מורה/ללא-חדר — שבץ בפאנל)')),
+          if (_can('crs.new')) SoftButton(label: '➕ פריט-חדש', tone: 1, onTap: () => _act(() => _ShopItemData.newCourse(_who), 'נוצר פריט-חדש (ללא-מורה/ללא-חדר — שבץ בפאנל)')),
           if (_can('crs.duplicate')) SoftButton(label: '📑 שכפל-סמסטר', tone: 0, onTap: () {
             final r = _ShopItemData.duplicateSemester(_sem, _who);
             _flash('שכפול-סמסטר: ${r['created']} טיוטות לשנה-הבאה · ${r['flagged']} דורשות מורה/חדר', r['flagged']! > 0 ? 3 : 1);
@@ -1080,7 +1080,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
         else if (semEmpty)
           EmptyState(glyph: '📆', message: 'סמסטר "${semesterOptions[_sem - 1]}" לא מוגדר — אין חוגים משובצים בו')
         else if (live.isEmpty)
-          EmptyState(glyph: '📚', message: _ShopItemData.myTeacherId(_role) != null ? 'אין חוגים משובצים למורה זה' : _ShopItemData.myFamilyId(_role) != null ? 'אין חוגים למשפחה — הירשמו מהקטלוג' : 'אין חוגים — צור חוג-חדש או שכפל סמסטר')
+          EmptyState(glyph: '📚', message: _ShopItemData.myTeacherId(_role) != null ? 'אין חוגים משובצים למורה זה' : _ShopItemData.myFamilyId(_role) != null ? 'אין חוגים למשפחה — הירשמו מהקטלוג' : 'אין חוגים — צור פריט-חדש או שכפל סמסטר')
         else if (visible.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין חוגים תואמים לחיפוש/סינון'))
         else if (_view == 1)
@@ -1320,7 +1320,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
   // תוצאת-מנוע ⇒ הודעה+tone (blocked=אדום · wait=כתום · אחרת ירוק)
   void _result(String r, String okMsg) {
     if (r.startsWith('blocked:')) return _flash('נחסם: ${r.substring(8)}', 2);
-    if (r == 'waitlisted') return _flash('החוג מלא ⇒ נוסף לרשימת-ההמתנה', 3);
+    if (r == 'waitlisted') return _flash('הפריט מלא ⇒ נוסף לרשימת-ההמתנה', 3);
     if (r == 'pending') return _flash('ההרשמה נרשמה כבקשה — ממתינה לאישור רכז/ת (המתנה)', 3);
     if (r.startsWith('removed+promoted:')) return _flash('הוסר · מקום התפנה ⇒ ${r.substring(17)} הועלה/תה מההמתנה אוטומטית', 1);
     _flash(okMsg, 1);
@@ -1430,10 +1430,10 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
           if (_can('crs.assignTeacher')) SoftButton(label: '🔄 מורה-מחליף (חד-פעמי)', tone: 0, onTap: () => both(() => _pick = _pick == 'sub' ? null : 'sub')),
           if (_can('crs.assignRoom')) SoftButton(label: '🚪 הקצה-חדר', tone: _ShopItemData.noRoom(c) ? 2 : 0, onTap: () => both(() => _pick = _pick == 'room' ? null : 'room')),
           if (_can('crs.edit')) SoftButton(label: '✏️ ערוך', tone: 0, onTap: () => both(() => _edit = !_edit)),
-          if (_can('crs.duplicate')) SoftButton(label: '📄 שכפל-חוג', tone: 0, onTap: () => both(() { final cp = _ShopItemData.duplicate(c, _who); _flash('נוצר ${cp['name']} — יורש slot ⇒ בדוק התנגשות והקצה מחדש', 3); })),
+          if (_can('crs.duplicate')) SoftButton(label: '📄 שכפל-פריט', tone: 0, onTap: () => both(() { final cp = _ShopItemData.duplicate(c, _who); _flash('נוצר ${cp['name']} — יורש slot ⇒ בדוק התנגשות והקצה מחדש', 3); })),
           if (_can('crs.message')) SoftButton(label: '💬 שלח-הודעה', tone: 0, onTap: () => both(() => _pick = _pick == 'message' ? null : 'message')),
-          if (_can('crs.end')) SoftButton(label: '🏁 סיים-חוג', tone: 2, onTap: () => both(() { _ShopItemData.endCourse(c, _who); _flash('${c['name']} הסתיים — ההרשמות נסגרו', 3); })),
-          if (_can('crs.end')) SoftButton(label: '⛔ בטל-חוג', tone: 2, onTap: () => both(() { _ShopItemData.cancelCourse(c, _who); _flash('${c['name']} בוטל', 3); })),
+          if (_can('crs.end')) SoftButton(label: '🏁 סיים-פריט', tone: 2, onTap: () => both(() { _ShopItemData.endCourse(c, _who); _flash('${c['name']} הסתיים — ההרשמות נסגרו', 3); })),
+          if (_can('crs.end')) SoftButton(label: '⛔ בטל-פריט', tone: 2, onTap: () => both(() { _ShopItemData.cancelCourse(c, _who); _flash('${c['name']} בוטל', 3); })),
         ];
         return acts.isEmpty
             ? const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', glyph: '🔒', tone: 2)
@@ -1443,7 +1443,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
       ..._picker(c, both),
       if (_edit) ...[
         _h('✏️ עריכה (שם · קיבולת — הגדלת-קיבולת מעלה מהמתנה אוטומטית)'),
-        DsField(label: 'שם-חוג', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _ShopItemData.edit(c, 'name', v, _who))),
+        DsField(label: 'שם-פריט', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _ShopItemData.edit(c, 'name', v, _who))),
         DsNumberField(label: 'קיבולת (maxStudents)', value: '${_ShopItemData.capacity(c)}', onChanged: (v) { final n = int.tryParse(v); if (n != null) both(() => _ShopItemData.edit(c, 'maxStudents', n, _who)); }),
       ],
     ];
@@ -1487,7 +1487,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
       ];
     }
     if (p == 'message') {
-      final links = _ShopItemData.waLinks(c, 'שלום, הודעה מחוג ${c['name']}: ');
+      final links = _ShopItemData.waLinks(c, 'שלום, הודעה מפריט ${c['name']}: ');
       return [
         _h('💬 קישורי-WhatsApp למשפחות הנרשמים (waLink)'),
         if (links.isEmpty) const EmptyState(glyph: '💬', message: 'אין נרשמים-חיים') else for (final l in links) MediaRow(glyph: '💬', title: l['name']!, subtitle: l['href']!),
@@ -1590,7 +1590,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
     final es = _ShopItemData.liveEnrollmentsOf(c);
     final rate = _ShopItemData.attendanceRate(c);
     return [
-      StatRow(label: 'נוכחות-החוג (נוכח ÷ (נוכח+נעדר))', value: '${(rate * 100).round()}%', fraction: rate),
+      StatRow(label: 'נוכחות-הפריט (נוכח ÷ (נוכח+נעדר))', value: '${(rate * 100).round()}%', fraction: rate),
       _gap(8),
       if (es.isEmpty) const EmptyState(glyph: '📋', message: 'אין נרשמים'),
       for (final e in es)
@@ -1635,7 +1635,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
       _h('📎 חומרי-לימוד · ${files.length}'),
       if (files.isEmpty) const EmptyState(glyph: '📎', message: 'אין חומרים מצורפים'),
       for (final f in files) MediaRow(glyph: f['kind'] == 'image' ? '🖼' : f['kind'] == 'link' ? '🔗' : '📄', title: '${f['name']}', subtitle: '${f['kind']}${f['size'] != null ? ' · ${f['size']} B' : ''}'),
-      for (final ph in const [['syllabus', '📘 סילבוס'], ['recordings', '🎥 הקלטות'], ['grades', '🏅 ציונים-פר-חוג']])
+      for (final ph in const [['syllabus', '📘 סילבוס'], ['recordings', '🎥 הקלטות'], ['grades', '🏅 ציונים-פר-פריט']])
         if (c[ph[0]] != null) MediaRow(glyph: ph[1].substring(0, 2), title: ph[1], subtitle: '${c[ph[0]]}'),
     ];
   }
@@ -1645,7 +1645,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
     final rows = all ? _ShopItemData.history : _ShopItemData.history.where((h) => h['courseId'] == c['id']).toList();
     return [
       _h(all ? '🧾 אודיט · ${rows.length} פעולות במסך' : '🕓 היסטוריה · ${rows.length}'),
-      if (rows.isEmpty) EmptyState(glyph: all ? '🧾' : '🕓', message: all ? 'אין פעולות עדיין' : 'אין היסטוריה לחוג'),
+      if (rows.isEmpty) EmptyState(glyph: all ? '🧾' : '🕓', message: all ? 'אין פעולות עדיין' : 'אין היסטוריה לפריט'),
       for (final h in rows) TimelineItem(title: '${h['act']} · ${h['who']}', time: '${h['at']}', body: '${h['what']}'),
     ];
   }
@@ -1678,7 +1678,7 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
                 if (fmt == 2)
                   const AlertBanner(glyph: '📄', tone: 3, message: 'PDF — מקום-שמור: דורש שער-פלטפורמה (מנוע-PDF/הדפסה). השורות מוכנות ב-🖨 הדפס-מערכת; ההורדה תואר כשהשער יחובר.')
                 else ...[
-                  Text(fmt == 0 ? 'תצוגה מקדימה (BOM + חסימת-הזרקה):' : 'תצוגה מקדימה (VCALENDAR · 6 שיעורים-הבאים פר-חוג · מבוטל=CANCELLED):', style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
+                  Text(fmt == 0 ? 'תצוגה מקדימה (BOM + חסימת-הזרקה):' : 'תצוגה מקדימה (VCALENDAR · 6 שיעורים-הבאים פר-פריט · מבוטל=CANCELLED):', style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
                   _gap(8),
                   Container(
                     padding: const EdgeInsets.all(10),

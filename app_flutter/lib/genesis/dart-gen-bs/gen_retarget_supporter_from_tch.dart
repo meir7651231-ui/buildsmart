@@ -1,7 +1,7 @@
 // 🎯 SupporterScreen — retarget של schoolos_teachers.dart לישות Supporter (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity Supporter
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 19
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · role⇒∅(reserved(8 מועמדים)) · subjects⇒∅(reserved(2 מועמדים)) · homeroom⇒∅(reserved(2 מועמדים)) · contractHours⇒∅(reserved(3 מועמדים)) · contractType⇒∅(reserved(8 מועמדים)) · startDate⇒∅(reserved(3 מועמדים)) · status⇒∅(reserved(8 מועמדים)) · availability⇒∅(reserved) · constraints⇒∅(reserved(2 מועמדים)) · preferredSub⇒nextEventId(unique) · extraRoles⇒∅(reserved(2 מועמדים)) · certs⇒∅(reserved(2 מועמדים)) · issuer⇒∅(reserved(8 מועמדים)) · expiry⇒∅(reserved(3 מועמדים)) · attendance⇒∅(reserved) · absences⇒∅(reserved(2 מועמדים)) · reason⇒∅(reserved(8 מועמדים)) · date⇒∅(reserved(3 מועמדים)) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved(3 מועמדים))
-//   שדות-Supporter בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, email, address, city, idNum, extId, cat, forWho, count, ils, usd, first, last, nextDate, nextNote, photos, donations, hok, ayin, calls · תוויות-UI = של מודול-המקור (הצבה) · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Supporter
+//   שדות-Supporter בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, email, address, city, idNum, extId, cat, forWho, count, ils, usd, first, last, nextDate, nextNote, photos, donations, hok, ayin, calls · תוויות: מונחי teacher (מורה/—) ⇒ Supporter (תורם/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Supporter
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-עומס · זיהוי-חריגה · הכרעה (מחליף-מוצע · דחיפות-מאוחדת) · ביצוע · אימות.
@@ -409,7 +409,7 @@ class _TeamData {
   static List<Map<String, dynamic>> alerts(int role) {
     final out = <Map<String, dynamic>>[];
     final unc = uncoveredToday;
-    if (unc.isNotEmpty) out.add({'g': '🚨', 'tone': 2, 'm': '${unc.length} שיעורים ללא מורה היום: ${unc.map((s) => '${s['time']} ${courseById(s['courseId'] as String)?['cls']}').join(' · ')} — ${unc.where((s) => candidates(s).isNotEmpty).length} עם מחליף-מוצע'});
+    if (unc.isNotEmpty) out.add({'g': '🚨', 'tone': 2, 'm': '${unc.length} שיעורים ללא תורם היום: ${unc.map((s) => '${s['time']} ${courseById(s['courseId'] as String)?['cls']}').join(' · ')} — ${unc.where((s) => candidates(s).isNotEmpty).length} עם מחליף-מוצע'});
     final over = active.where(overLoad).toList();
     if (over.isNotEmpty) out.add({'g': '🔥', 'tone': 3, 'm': 'עומס-יתר: ${over.map((t) => '${t['name']} ${loadPct(t)}%').join(' · ')}'});
     final under = active.where(underLoad).toList();
@@ -463,7 +463,7 @@ class _TeamData {
     {'label': '👑 מנהל/ת', 'principal': 'p:mgr', 'config': {'adminEmails': ['p:mgr']}},
     {'label': '🧭 רכז/ת', 'principal': 'p:coord', 'config': {'features': {'team.assign': true, 'team.sub': true, 'team.avail': true, 'team.absence': true, 'team.export': true}}},
     {'label': '🗂 מזכירות', 'principal': 'p:sec', 'config': {'features': {'team.add': true, 'team.docs': true, 'team.absence': true, 'team.export': true, 'team.contact': true}}},
-    {'label': '👩‍🏫 מורה', 'principal': 'p:t2', 'config': {'roles': {'teachers': {'p:t2': 't2'}}, 'features': {'team.absence': true, 'team.avail': true, 'team.cert': true}}},
+    {'label': '👩‍🏫 תורם', 'principal': 'p:t2', 'config': {'roles': {'teachers': {'p:t2': 't2'}}, 'features': {'team.absence': true, 'team.avail': true, 'team.cert': true}}},
     {'label': '💰 כספים', 'principal': 'p:fin', 'config': {'features': {'team.salary': true, 'team.contract': true, 'team.export': true}}},
     {'label': '👁 צפייה', 'principal': 'p:view', 'config': <String, dynamic>{}},
   ];
@@ -554,9 +554,9 @@ class _TeamData {
   static int _seq = 0;
   static void addTeacher(String who) { // מורה-חדש: רשומה בצורת-החוזה; זהות = מקום-שמור להזרקה (חוק-6)
     _seq++;
-    added.add({'id': 'n$_seq', 'name': 'מורה חדש/ה $_seq', 'role': 'subject', 'subjects': <String>[], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'זמני', 'startDate': today, 'status': 'active',
+    added.add({'id': 'n$_seq', 'name': 'תורם חדש/ה $_seq', 'role': 'subject', 'subjects': <String>[], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'זמני', 'startDate': today, 'status': 'active',
       'availability': <int, List<String>>{}, 'constraints': <String>[], 'extraRoles': <String>[], 'certs': <Map<String, dynamic>>[], 'attendance': <Map<String, dynamic>>[], 'absences': <Map<String, dynamic>>[], 'notes': ''});
-    log(who, 'מורה-חדש (ממתין לפרטים)', 'n$_seq');
+    log(who, 'תורם-חדש (ממתין לפרטים)', 'n$_seq');
   }
   static void markAbsent(Map<String, dynamic> t, String reason, String who) {
     if (absentOn(t, today)) return;
@@ -638,7 +638,7 @@ class _SupporterScreenState extends State<SupporterScreen> {
     for (final t in visible) {
       buckets[_TeamData.sev(t)]!.add(t);
     }
-    const secTitle = {3: '🔴 שיעור-ללא-מורה היום', 2: '🟠 דורש-טיפול', 1: '🟡 לתשומת-לב', 0: '🟢 תקין', -1: '⏸ לא-פעיל/חופשה'};
+    const secTitle = {3: '🔴 שיעור-ללא-תורם היום', 2: '🟠 דורש-טיפול', 1: '🟡 לתשומת-לב', 0: '🟢 תקין', -1: '⏸ לא-פעיל/חופשה'};
     const secTone = {3: 2, 2: 3, 1: 3, 0: 1, -1: 0};
     return DsScaffold(
       title: 'מורים וצוות',
@@ -655,13 +655,13 @@ class _SupporterScreenState extends State<SupporterScreen> {
         // KPI-10: hero=שיעורים-ללא-מורה-היום (המטרה) + 10 מדדי-מצב (BareStat נושאי-ערך-אמת)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            StatHero(value: '$uncovered', label: 'שיעורים ללא מורה היום'),
+            StatHero(value: '$uncovered', label: 'שיעורים ללא תורם היום'),
             const SizedBox(height: 14),
             Row(children: [
               BareStat(value: '${_TeamData.staff.length}', label: '👥 סך-צוות', inkColor: _ink, mutedColor: _muted),
               BareStat(value: '${all.length}', label: '✅ פעילים', inkColor: _ink, mutedColor: _muted),
               BareStat(value: '${_TeamData.absentN}', label: '🤒 נעדרים היום', inkColor: _TeamData.absentN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '$uncovered', label: '🚨 ללא-מורה', inkColor: uncovered > 0 ? _danger : _ok, mutedColor: _muted),
+              BareStat(value: '$uncovered', label: '🚨 ללא-תורם', inkColor: uncovered > 0 ? _danger : _ok, mutedColor: _muted),
               BareStat(value: '${_TeamData.openSubs}', label: '🔁 החלפות פתוחות', inkColor: _TeamData.openSubs > 0 ? _warning : _ok, mutedColor: _muted),
             ]),
             const SizedBox(height: 12),
@@ -683,7 +683,7 @@ class _SupporterScreenState extends State<SupporterScreen> {
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
-          if (_TeamData.can(_role, 'team.add')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ מורה', tone: 0, onTap: () => setState(() => _TeamData.addTeacher(_who))))],
+          if (_TeamData.can(_role, 'team.add')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ תורם', tone: 0, onTap: () => setState(() => _TeamData.addTeacher(_who))))],
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔁 היום', tone: _TeamData.uncoveredToday.isEmpty ? 0 : 2, onTap: () => setState(() => _mode = 2))),
           if (_TeamData.can(_role, 'team.export') && exportAllowed(false)) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport('רשימת-צוות · ${visible.length}', _TeamData.rosterCsv(visible, _TeamData.hiddenKeys(_role)))))],
@@ -724,7 +724,7 @@ class _SupporterScreenState extends State<SupporterScreen> {
         else if (_error != null)
           AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
         else if (_TeamData.staff.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '👥', message: 'אין צוות — הוסף מורה ראשון/ה'))
+          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '👥', message: 'אין צוות — הוסף תורם ראשון/ה'))
         else if (_mode == 2)
           _subsBoard()
         else if (visible.isEmpty)
@@ -982,7 +982,7 @@ class _SupporterScreenState extends State<SupporterScreen> {
   // אודיט: כל פעולה שנרשמה בפנקס (מי·מה·מתי) — TimelineItem
   Widget _audit(Map<String, dynamic> t) {
     final rows = _TeamData.audit.where((a) => a['target'] == t['name'] || '${a['target']}'.contains('${t['name']}')).toList();
-    if (rows.isEmpty) return const EmptyState(glyph: '🧾', message: 'אין רישומי-אודיט למורה זה');
+    if (rows.isEmpty) return const EmptyState(glyph: '🧾', message: 'אין רישומי-אודיט לתורם זה');
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) TimelineItem(title: '${a['what']}', time: fmtDate(a['date'] as String), body: 'ע״י ${a['who']}')]);
   }
 
@@ -1130,7 +1130,7 @@ class _SupporterScreenState extends State<SupporterScreen> {
             PremiumAvatar(name: t['name'] as String, size: 44, status: avatarStatus),
             const SizedBox(width: 10),
             // MediaRow בולע את הקליק (InkWell פנימי no-op) ⇒ כפתור-שברון נפרד כשקע-הפתיחה
-            IconButton(onPressed: () => _openPanel(t), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-מורה ופעולות'),
+            IconButton(onPressed: () => _openPanel(t), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-תורם ופעולות'),
             Expanded(
               child: MediaRow(
                 glyph: t['role'] == 'homeroom' ? '🏫' : t['role'] == 'aide' ? '🤝' : t['role'] == 'mgmt' ? '🧭' : '📚',
