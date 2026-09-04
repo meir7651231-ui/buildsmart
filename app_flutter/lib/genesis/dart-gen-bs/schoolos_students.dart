@@ -48,6 +48,22 @@ import '../dart-maor/wa-link.dart'; // קישור-וואטסאפ להורה (pho
 import '../dart-maor/wa-digits.dart'; // נרמול-ספרות בינ״ל לוואטסאפ — שקע ל-waLink
 import '../dart-maor/tel-href.dart'; // קישור-חיוג tel:
 import '../dart-maor/parse-csv.dart'; // ייבוא: טקסט-CSV ⇒ שורות (מפריד אוטו · מרכאות)
+import '../dart-ui-bs/screens__manager_dashboard_screen/filter_chip_pill.dart'; // צ׳יפ-סינון מבוקר (selected+onTap)
+import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפי-ציון (מדף)
+import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
+import '../dart-maor/finder-matches.dart'; // חריגה: סינון-רב-צירי AND (מדף)
+import '../dart-maor/num-match.dart'; // סף-מספרי ('0-79' · '80+') (מדף)
+import '../dart-maor/norm-phone.dart'; // נרמול-טלפון לחיפוש-הורה
+import '../dart-maor/role-of.dart'; // הרשאות: תפקיד-לפי-מייל admin/teacher/staff (מדף)
+import '../dart-maor/can-granted-action.dart'; // הרשאות: גידור-פעולה פר-מפתח (מדף)
+import '../dart-maor/find-duplicate-groups.dart'; // אוטומציה: זיהוי-כפולים (union-find על טלפון/מפתח-שם)
+import '../dart-maor/merge-families.dart'; // פעולה: מיזוג-כפולים (keeper⊕losers ⇒ רשומה ממוזגת)
+import '../dart-maor/norm-name.dart'; // מפתח-שם מנורמל לכפולים
+import '../dart-maor/cockpit-at-risk.dart'; // אוטומציה: "שקטים" N ימים (ללא הערת-מחנך 90 יום)
+import '../dart-maor/sup-score-bins.dart'; // השוואת-שכבה: התפלגות-ציונים ל-10 דליים (percentile)
+import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
+import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
+import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -80,14 +96,14 @@ class _StuData {
       [for (final d in days) {'date': '$ym-${d.toString().padLeft(2, '0')}', 'reason': reason, 'justified': justified, 'noshow': noshow}];
 
   static Map<String, dynamic> seed() => {
-        'teachers': [
+        'teachers': <Map<String, dynamic>>[
           {'id': 't1', 'name': 'רותי אלמוג', 'phone': '0521110001', 'email': 'ruti@school'},
           {'id': 't2', 'name': 'דוד פרץ', 'phone': '0521110002', 'email': 'david@school'},
           {'id': 't3', 'name': 'מיכל שרון', 'phone': '0521110003', 'email': 'michal@school'},
           {'id': 't4', 'name': 'יוסי כהן', 'phone': '0521110004', 'email': 'yossi@school'},
         ],
         // כיתת-חינוך = Course (teacherId · year · start/end · gradeMin/Max) — מקור: Course
-        'courses': [
+        'courses': <Map<String, dynamic>>[
           {'id': 'c-i1', 'name': 'י׳-1 · כיתת-חינוך', 'teacherId': 't1', 'start': '2026-09-01', 'end': '2027-06-20', 'year': '2026/27', 'gradeMin': 'י', 'gradeMax': 'י', 'cat': 'חינוך'},
           {'id': 'c-i2', 'name': 'י׳-2 · כיתת-חינוך', 'teacherId': 't4', 'start': '2026-09-01', 'end': '2027-06-20', 'year': '2026/27', 'gradeMin': 'י', 'gradeMax': 'י', 'cat': 'חינוך'},
           {'id': 'c-t3', 'name': 'ט׳-3 · כיתת-חינוך', 'teacherId': 't2', 'start': '2026-09-01', 'end': '2027-06-20', 'year': '2026/27', 'gradeMin': 'ט', 'gradeMax': 'ט', 'cat': 'חינוך'},
@@ -98,7 +114,7 @@ class _StuData {
           {'id': 'c-robot', 'name': 'חוג רובוטיקה', 'teacherId': 't2', 'start': '2026-09-01', 'end': '2027-06-20', 'year': '2026/27', 'cat': 'חוג'},
         ],
         // משפחה = Family (schema-fields) · ילד = Member. שדות-אמת בלבד.
-        'families': [
+        'families': <Map<String, dynamic>>[
           {'id': 'f1', 'name': 'שמעוני', 'father': 'אבי', 'mother': 'דנה', 'phone': '0528811223', 'phone2': '0528811224', 'email': '', 'city': 'חולון', 'address': 'הבנים 12', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2024-08-20',
             'docs': [{'id': 'd1', 'name': 'טופס-רישום-2024.pdf', 'addedAt': '2024-08-20'}, {'id': 'd2', 'name': 'אישור-מדיה-חתום.pdf', 'addedAt': '2025-09-02'}], 'cred': {'score': 0, 'log': []},
             'members': [
@@ -144,7 +160,7 @@ class _StuData {
             ]},
         ],
         // רישום = Enrollment: memberId · courseId · status(active/paused/ended/wait) · presents[] · absences[] · enrolledAt · endedAt · renewedToId
-        'enrollments': [
+        'enrollments': <Map<String, dynamic>>[
           {'id': 'e1', 'memberId': 'm1', 'courseId': 'c-i1', 'status': 'active', 'enrolledAt': '2025-09-01', 'group': '', 'note': '',
             'presents': [..._d('2026-05', [3, 4, 5, 6, 10, 11, 12, 13, 17, 18, 19, 20, 24, 25, 26, 27, 31]), ..._d('2026-06', [1, 2, 3, 7, 8, 9, 10, 14, 15, 16, 17, 21, 22, 23]), ..._d('2026-09', [1, 2])],
             'absences': [..._abs('2026-06', [4, 18, 24], reason: 'ללא-סיבה'), ..._abs('2026-09', [3], noshow: true)]},
@@ -178,7 +194,7 @@ class _StuData {
             'presents': [..._d('2026-05', [3, 4, 5, 6, 10, 11, 12, 13, 17, 18, 19, 20, 24, 25, 26, 27, 31]), ..._d('2026-06', [1, 2, 3, 7, 8, 9, 10, 14, 15, 16, 17, 21, 22, 23])], 'absences': [..._abs('2026-06', [4, 18, 24])]},
         ],
         // פניות/משימות = WorkTask: assignee · by · title · ref{kind,id} · pri · due · createdAt · doneAt · note
-        'tasks': [
+        'tasks': <Map<String, dynamic>>[
           {'id': 'k1', 'assignee': 'counselor@school', 'by': 'ruti@school', 'title': 'פנייה ליועצת: ליאור אוחיון — היעדרויות', 'ref': {'kind': 'family', 'id': 'f2', 'memberId': 'm3'}, 'pri': 1, 'due': '2026-09-01', 'createdAt': '2026-06-20', 'doneAt': '', 'note': 'לא נוצר קשר עם הבית'},
           {'id': 'k2', 'assignee': 'office@school', 'by': 'ruti@school', 'title': 'אישור-טיולים פג — רון שמעוני', 'ref': {'kind': 'family', 'id': 'f1', 'memberId': 'm1', 'consent': 'trips'}, 'pri': 2, 'due': '2026-09-10', 'createdAt': '2026-08-20', 'doneAt': '', 'note': ''},
           {'id': 'k3', 'assignee': 'office@school', 'by': 'michal@school', 'title': 'אישור-תרופות פג — איתי כהן', 'ref': {'kind': 'family', 'id': 'f8', 'memberId': 'm10', 'consent': 'meds'}, 'pri': 1, 'due': '2026-08-30', 'createdAt': '2026-08-01', 'doneAt': '', 'note': ''},
@@ -186,14 +202,14 @@ class _StuData {
           {'id': 'k5', 'assignee': 'counselor@school', 'by': 'michal@school', 'title': 'פנייה ליועצת: הדר נחום — אין קשר עם ההורים', 'ref': {'kind': 'family', 'id': 'f3', 'memberId': 'm4'}, 'pri': 2, 'due': '2026-06-30', 'createdAt': '2026-06-10', 'doneAt': '2026-06-28', 'note': 'נסגר — הושג קשר דרך הסבתא'},
         ],
         // אירועים = OrgEvent (famId · date · title · type · done) — ציר-זמן-תלמיד
-        'events': [
+        'events': <Map<String, dynamic>>[
           {'id': 'v1', 'title': 'שיחת-מחנכת עם ההורים', 'date': '2026-06-22', 'time': '17:00', 'type': 'meeting', 'famId': 'f2', 'priority': 'high', 'done': true},
           {'id': 'v2', 'title': 'ועדת-שילוב', 'date': '2026-09-09', 'time': '13:00', 'type': 'meeting', 'famId': 'f2', 'priority': 'high', 'done': false},
           {'id': 'v3', 'title': 'שיחת-הכרות משפחה חדשה', 'date': '2026-09-08', 'time': '16:30', 'type': 'meeting', 'famId': 'f5', 'priority': 'normal', 'done': false},
           {'id': 'v4', 'title': 'יום-הורים', 'date': '2026-06-15', 'time': '18:00', 'type': 'meeting', 'famId': 'f1', 'priority': 'normal', 'done': true},
         ],
         // אודיט = AuditEntry {at, who, act, what} — טבעת-אודיט (pullAuditRing/pushAuditRing = תפר-ההתמדה, כאן בזיכרון)
-        'audit': [
+        'audit': <Map<String, dynamic>>[
           {'at': '2026-09-01T08:10', 'who': 'office@school', 'act': 'update', 'what': 'm7 · רישום לכיתה י׳-1'},
           {'at': '2026-09-02T09:30', 'who': 'office@school', 'act': 'import', 'what': 'f6 · ייבוא-CSV (3 שורות)'},
           {'at': '2026-08-31T12:00', 'who': 'ruti@school', 'act': 'note', 'what': 'm1 · הערת-מחנכת'},
@@ -269,10 +285,10 @@ class _StuData {
   // ─── נוכחות (מקור: Enrollment.presents/absences ⊕ enrollSummary מהמדף) ───
   static const _enrollT = {'k1': 'פעיל', 'k2': 'מוקפא', 'k3': 'הסתיים', 'k4': 'המתנה'};
   static Map<String, dynamic> summary(Map<String, dynamic> e) => enrollSummary(e, (e) => 0, (e) => 0, _enrollT); // payBal/paidOf = שקעים לא-רלוונטיים (0)
-  static List<String> presentsOf(Map<String, dynamic> s) => [for (final e in enrollmentsOf(s)) ...((e['presents'] as List?) ?? const []).cast<String>()];
-  static List<Map<String, dynamic>> absencesOf(Map<String, dynamic> s) => [for (final e in enrollmentsOf(s)) ...((e['absences'] as List?) ?? const []).cast<Map<String, dynamic>>()];
-  static int presents(Map<String, dynamic> s) => grandTotal(enrollmentsOf(s), (e) => summary(e as Map<String, dynamic>)['presents'] as int).toInt();
-  static int absences(Map<String, dynamic> s) => grandTotal(enrollmentsOf(s), (e) => summary(e as Map<String, dynamic>)['absences'] as int).toInt();
+  static List<String> presentsOf(Map<String, dynamic> s) => [for (final e in enrollmentsOf(s)) for (final d in ((e['presents'] as List?) ?? const []).cast<String>()) if (_cutoff.isEmpty || d.compareTo(_cutoff) <= 0) d];
+  static List<Map<String, dynamic>> absencesOf(Map<String, dynamic> s) => [for (final e in enrollmentsOf(s)) for (final a in ((e['absences'] as List?) ?? const []).cast<Map<String, dynamic>>()) if (_cutoff.isEmpty || '${a['date']}'.compareTo(_cutoff) <= 0) a];
+  static int presents(Map<String, dynamic> s) => _cutoff.isEmpty ? grandTotal(enrollmentsOf(s), (e) => summary(e as Map<String, dynamic>)['presents'] as int).toInt() : presentsOf(s).length;
+  static int absences(Map<String, dynamic> s) => _cutoff.isEmpty ? grandTotal(enrollmentsOf(s), (e) => summary(e as Map<String, dynamic>)['absences'] as int).toInt() : absencesOf(s).length;
   static int noshow(Map<String, dynamic> s) => grandTotal(enrollmentsOf(s), (e) => summary(e as Map<String, dynamic>)['noshow'] as int).toInt();
   static double? attendance(Map<String, dynamic> s) { // יחס-נוכחות 0..1 (null = אין נתון)
     final p = presents(s), a = absences(s);
@@ -455,11 +471,12 @@ class _StuData {
   // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 18 עמודות-המפרט כשקעי-דאטה ═══
   //   נגזרת(get) = תמיד-מוצגת · שדה(key) = מוארת רק כשרשומה כלשהי נושאת ערך (חסר ⇒ שקט). fmt = עיצוב-ערך אופציונלי.
   //   הוספת שדה לרשומה (photo/grades/…) ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
+  static int roleCtx = 0; // התפקיד-הפעיל (מוזרק מהמסך לפני רינדור-טבלה)
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
     {'key': 'photo', 'label': 'תמונה'},                                                   // מקום-שמור (ImageProvider/URL)
     {'label': 'שם-מלא', 'get': (Map<String, dynamic> s) => '${s['name']}'},
     {'label': 'מס׳', 'get': (Map<String, dynamic> s) => '${s['id']}'},
-    {'label': 'ת״ז', 'get': (Map<String, dynamic> s) => maskId(s['idNum'] as String?)}, // מוסתר-פר-הרשאה
+    {'label': 'ת״ז', 'get': (Map<String, dynamic> s) => can(roleCtx, 'stu.protected') ? protectedField(roleCtx, s, 'idNum', '${s['idNum'] ?? ''}') : maskId(s['idNum'] as String?)}, // מוסתר-פר-הרשאה (חשיפה נרשמת)
     {'label': 'כיתה', 'get': (Map<String, dynamic> s) => className(s)},
     {'label': 'מחנך/ת', 'get': (Map<String, dynamic> s) => teacherName(s)},
     {'label': 'לידה/גיל', 'get': (Map<String, dynamic> s) => '${fmt(s['birth'] as String?)} · ${age(s) ?? '—'}'},
@@ -613,6 +630,171 @@ class _StuData {
         'הורה: ${parentName(s)} · ${parentPhone(s)}', 'כתובת: ${fam(s)['address']} ${fam(s)['city']}', 'פעולה: ${action(s)}', 'הודפס: ${fmt(today)}',
       ].join('\n');
 
+  // ═══ איתור (הכרעה 23-ג) = DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch ⊕ normPhone ═══
+  //   לא `.contains` שטוח — נרמול-עברי + ניקוד רב-מילתי AND + מיון-לפי-רלוונטיות. מונחים: שם · מס׳ · כיתה · מחנך · הורה · טלפון-הורה.
+  static Iterable _expand(dynamic q, dynamic norm) => [norm(q)];
+  static num _score(dynamic exp, dynamic term) => norm(term).contains('$exp') ? 100 : 0;
+  static num _scoreOf(dynamic q, dynamic terms) => smartScore(q, terms, norm, _expand, _score) as num;
+  static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty;
+  static List<String> terms(Map<String, dynamic> s) => ['${s['name']}', '${s['id']}', className(s), teacherName(s), parentName(s), normPhone(fam(s)['phone'] as String?), '${fam(s)['city']}'];
+  static List<Map<String, dynamic>> search(List<Map<String, dynamic>> xs, String q) {
+    final nq = normPhone(q); // חיפוש-טלפון: ספרות בלבד
+    final query = RegExp(r'^[\d\s+-]{6,}$').hasMatch(q.trim()) && nq.isNotEmpty ? nq : q;
+    return (smartFilter(query, xs, (it) => terms(it as Map<String, dynamic>), _hasQuery, _scoreOf) as List).cast<Map<String, dynamic>>();
+  }
+
+  // ═══ חריגה/פילטרים (הכרעה 23-ג) = FilterChipPill⊕DsEnumField ⊕ finderMatches ⊕ numMatch ═══
+  //   locks = {ציר: ערך} — AND בין צירים. צירי-המפרט: כיתה · שכבה · מחנך · סטטוס · סיכון · נוכחות<סף · ציונים<סף (מקום-שמור) ·
+  //   דגל · ללא-אישור · פנייה · חדשים · יום-הולדת · אחים.
+  static bool birthdayThisMonth(Map<String, dynamic> s) { final b = '${s['birth'] ?? ''}'; return b.length >= 7 && b.substring(5, 7) == today.substring(5, 7); }
+  static bool noConsent(Map<String, dynamic> s) => consentDefs.any((c) => s[c['key']] != true) || consentSlot(s, 'trips').startsWith('⛔') || consentSlot(s, 'meds').startsWith('⛔');
+  static bool hasFlag(Map<String, dynamic> s) => flags(s).isNotEmpty;
+  static String level(Map<String, dynamic> s) => '${s['grade'] ?? ''}'.isEmpty ? '—' : '${s['grade']}׳';
+  static String axisValue(Map<dynamic, dynamic> db, dynamic f, dynamic axis) {
+    final s = f as Map<String, dynamic>;
+    switch (axis) {
+      case 'class': return className(s);
+      case 'level': return level(s);
+      case 'teacher': return teacherName(s);
+      case 'status': return status(s);
+      case 'risk': return '${band(s)}';
+      case 'attBelow80': return attendance(s) != null && numMatch('0-79', attendancePct(s)) ? '1' : '0'; // סף דרך numMatch (מדף)
+      case 'gradesBelow70': { final g = s['grades']; if (g is! Map || g.isEmpty) return '0'; return numMatch('0-69', grandTotal(g.values.toList(), (v) => v as num) / g.length) ? '1' : '0'; } // מקום-שמור
+      case 'flag': return hasFlag(s) ? '1' : '0';
+      case 'noConsent': return noConsent(s) ? '1' : '0';
+      case 'ticket': return hasOpenTicket(s) ? '1' : '0';
+      case 'noParent': return parentMissing(s) ? '1' : '0';
+      case 'isNew': return isNew(s) ? '1' : '0';
+      case 'birthday': return birthdayThisMonth(s) ? '1' : '0';
+      case 'siblings': return siblings(s).isNotEmpty ? '1' : '0';
+    }
+    return '';
+  }
+  static List<Map<String, dynamic>> filter(List<Map<String, dynamic>> xs, Map<String, String> locks) =>
+      finderMatches({'families': xs}, Map<dynamic, dynamic>.from(locks), axisValue).cast<Map<String, dynamic>>();
+  static List<String> options(String axis) { // אפשרויות-ציר מהדאטה (לא מילון קשיח)
+    final v = <String>{for (final s in students) axisValue({}, s, axis)}.toList()..sort();
+    return ['הכל', ...v];
+  }
+  // צ׳יפי-חריגה מהירים: {axis, label}; המונה מחושב פר-צ׳יפ (countBy-דומה: ספירה על הרשימה)
+  static const quickChips = [
+    {'axis': 'risk', 'value': '2', 'label': '🔴 סיכון-גבוה'}, {'axis': 'risk', 'value': '1', 'label': '🟠 סיכון-בינוני'},
+    {'axis': 'attBelow80', 'value': '1', 'label': '📉 נוכחות<80%'}, {'axis': 'gradesBelow70', 'value': '1', 'label': '📝 ציונים<70'},
+    {'axis': 'noParent', 'value': '1', 'label': '📵 ללא-הורה'}, {'axis': 'ticket', 'value': '1', 'label': '📨 פנייה-פתוחה'},
+    {'axis': 'flag', 'value': '1', 'label': '🚩 דגל'}, {'axis': 'noConsent', 'value': '1', 'label': '✗ ללא-אישור'},
+    {'axis': 'isNew', 'value': '1', 'label': '🆕 חדשים'}, {'axis': 'birthday', 'value': '1', 'label': '🎂 יום-הולדת החודש'}, {'axis': 'siblings', 'value': '1', 'label': '👪 אחים'},
+  ];
+  static String countAxis(List<Map<String, dynamic>> xs, String axis, String value) { // מקום-שמור: ציר בלי שום נתון ⇒ '—' (לא '0' מזויף)
+    if (axis == 'gradesBelow70' && !xs.any((s) => s['grades'] is Map && (s['grades'] as Map).isNotEmpty)) return '—';
+    return '${xs.where((s) => axisValue({}, s, axis) == value).length}';
+  }
+
+  // ═══ הרשאות-פר-תפקיד (הכרעה 23-ג · חוק-6 זהות=הזרקה) = roleOf ⊕ canGrantedAction ⊕ scope ═══
+  //   6 זהויות-דמו מוזרקות (לא אטום!). config בצורת-maor: adminEmails · roles.teachers · features. scope = גידור-נראות
+  //   (מחנך/ת: הכיתה שלו/ה · הורה: ילדו/ה). שדות-מוגנים (ת״ז מלאה · רפואי · סוציו-אקונומי · אבחונים/תרופות) = stu.protected + לוג-חשיפה.
+  static const roleDefs = <Map<String, dynamic>>[
+    {'label': '👑 מנהל/ת', 'email': 'mgr@school', 'config': {'adminEmails': ['mgr@school']}}, // admin ⇒ הכל + מחיקה + אודיט
+    {'label': '🧭 יועץ/ת', 'email': 'counselor@school', 'config': {'features': {'stu.protected': true, 'stu.ticket': true, 'stu.note': true, 'stu.flag': true, 'stu.edit': true, 'stu.export': true, 'stu.meeting': true, 'stu.doc': true, 'stu.consent': true, 'stu.parentMsg': true, 'stu.audit': true}}},
+    {'label': '🍎 מחנך/ת', 'email': 'ruti@school', 'config': {'roles': {'teachers': {'ruti@school': 't1'}}, 'features': {'stu.note': true, 'stu.flag': true, 'stu.ticket': true, 'stu.meeting': true, 'stu.doc': true, 'stu.parentMsg': true}}, 'scope': {'teacherId': 't1'}},
+    {'label': '🗂 מזכירות', 'email': 'office@school', 'config': {'features': {'stu.add': true, 'stu.edit': true, 'stu.move': true, 'stu.status': true, 'stu.import': true, 'stu.export': true, 'stu.doc': true, 'stu.consent': true, 'stu.merge': true}}},
+    {'label': '👪 הורה', 'email': 'parent@family', 'config': <String, dynamic>{}, 'scope': {'famId': 'f1'}}, // ילדו/ה בלבד: זהות/נוכחות/ציונים
+    {'label': '👁 צפייה', 'email': 'view@school', 'config': <String, dynamic>{}},
+  ];
+  static bool _isAdmin(Map<String, dynamic> config, String email) => roleOf(config, email) == 'admin';
+  static bool can(int role, String key) {
+    final r = roleDefs[role];
+    return canGrantedAction((r['config'] as Map).cast<String, dynamic>(), r['email'] as String, false, key, _isAdmin);
+  }
+  static String roleName(int role) => roleOf((roleDefs[role]['config'] as Map).cast<String, dynamic>(), roleDefs[role]['email'] as String);
+  static String who(int role) => roleDefs[role]['email'] as String;
+  static bool isParent(int role) => (roleDefs[role]['scope'] as Map?)?['famId'] != null;
+  static bool isTeacher(int role) => (roleDefs[role]['scope'] as Map?)?['teacherId'] != null;
+  static List<Map<String, dynamic>> scoped(int role, List<Map<String, dynamic>> xs) {
+    final sc = roleDefs[role]['scope'] as Map?;
+    if (sc == null) return xs;
+    if (sc['teacherId'] != null) return xs.where((s) => courseOf(mainEnrollment(s)?['courseId'] as String?)?['teacherId'] == sc['teacherId']).toList();
+    if (sc['famId'] != null) return xs.where((s) => s['famId'] == sc['famId']).toList();
+    return xs;
+  }
+  // חשיפת שדה-מוגן: מותרת ⇒ נרשמת בלוג-חשיפה (אודיט act=expose); אסורה ⇒ '🔒' (מצב פרטיות-נעולה)
+  static final Set<String> _exposed = {}; // מניעת-כפילות ברינדור-חוזר (רשומה אחת פר תלמיד·שדה·תפקיד)
+  static String protectedField(int role, Map<String, dynamic> s, String key, String value) {
+    if (!can(role, 'stu.protected')) return '🔒';
+    final k = '${who(role)}|${s['id']}|$key';
+    if (_exposed.add(k)) log(who(role), 'expose', '${s['id']} · חשיפת שדה-מוגן: $key');
+    return value.isEmpty ? '—' : value;
+  }
+  static const encryptionNote = 'הצפנה-במנוחה = תפר-ההתמדה (encryptDoc/isEncrypted/pushAuditRing) — מקום-שמור: מאיר כשמחברים אחסון';
+
+  // ═══ אוטומציות-חכמות (הכרעה 23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — כולן מנועי-מדף/שדות-אמת ═══
+  // 1. קפיצת-סיכון: ציון-היום מול ציון-לפני-30-יום (אותו מנוע על תת-הדאטה עד cutoff) — הפרש ≥15 = התרעה
+  static String _cutoff = '';
+  static int riskAt(Map<String, dynamic> s, String cutoffIso) {
+    _cutoff = cutoffIso;
+    try { return risk(s); } finally { _cutoff = ''; }
+  }
+  static List<Map<String, dynamic>> get riskJumps => [
+        for (final s in active) if (risk(s) - riskAt(s, monthAgo) >= 15) {'s': s, 'now': risk(s), 'prev': riskAt(s, monthAgo)},
+      ];
+  static String get monthAgo => '${today.substring(0, 4)}-${(int.parse(today.substring(5, 7)) - 1).clamp(1, 12).toString().padLeft(2, '0')}-${today.substring(8)}';
+  // 2. זיהוי-כפולים (findDuplicateGroups): מפתח-שם = שם-פרטי+משפחה+לידה מנורמל · טלפון-ילד/ה (טלפון-משפחה משותף לאחים ⇒ לא ציר)
+  static List<List<String>> get duplicateGroups => findDuplicateGroups(
+        students, (s) => [if ('${s['phone'] ?? ''}'.isNotEmpty) normPhone(s['phone'] as String)],
+        (s) => '${normName(s['name'], norm)}|${s['birth'] ?? ''}'.replaceAll(RegExp(r'\|$'), '') == normName(s['name'], norm) ? '' : '${normName(s['name'], norm)}|${s['birth']}');
+  static bool isDupSuspect(Map<String, dynamic> s) => duplicateGroups.any((g) => g.length > 1 && g.contains(s['id']));
+  static List<Map<String, dynamic>> dupPeers(Map<String, dynamic> s) => [for (final g in duplicateGroups) if (g.contains(s['id'])) for (final id in g) if (id != s['id']) byId(id)!];
+  // מיזוג: mergeFamilies(keeper, losers) ⇒ רשומת-משפחה ממוזגת מחליפה את keeper; losers מוסרים; רישומי-ה-loser מועברים ל-keeper-member
+  static void mergeDuplicate(Map<String, dynamic> keep, Map<String, dynamic> lose, String who) {
+    final fk = fam(keep), fl = fam(lose);
+    if (fk['id'] != fl['id']) {
+      final merged = mergeFamilies(fk, [fl], (p) => normPhone(p), (xs) { final seen = <dynamic>{}; return [for (final x in xs) if (seen.add((x as Map)['id'])) x]; }, term: (k) => k == 'mvzg' ? 'מוזג: ' : k);
+      merged['members'] = [for (final m in (merged['members'] as List)) if ((m as Map)['id'] != lose['id']) m]; // הכפיל עצמו לא נשמר
+      final fams = db['families'] as List;
+      fams[fams.indexOf(fk)] = merged; fams.remove(fl);
+    } else { (fk['members'] as List).removeWhere((m) => (m as Map)['id'] == lose['id']); }
+    for (final e in (db['enrollments'] as List).cast<Map<String, dynamic>>()) { if (e['memberId'] == lose['id']) e['memberId'] = keep['id']; }
+    _cache = null;
+    log(who, 'merge', '${keep['id']} · מוזג ${lose['id']} (${lose['name']})');
+  }
+  // 3. ימי-הולדת החודש · 4. אישורים-פגים (taskOverdue על משימות-אישור) · 5. אחים-חדשים⇒קישור-אוטו (Family.members) · 6. ללא-הערת-מחנך 90 יום
+  static List<Map<String, dynamic>> get birthdays => active.where(birthdayThisMonth).toList();
+  static List<Map<String, dynamic>> get expiredConsents => [for (final t in tasks()) if ((t['ref'] as Map?)?['consent'] != null && '${t['doneAt'] ?? ''}'.isEmpty && taskOverdue(t, today)) t];
+  static List<Map<String, dynamic>> get newSiblings => [for (final s in active) if (isNew(s) && siblings(s).isNotEmpty) s]; // חדש/ה עם אחים במוסד ⇒ הקישור כבר אוטומטי (אותה Family)
+  static const noteSilentDays = 90;
+  static List<Map<String, dynamic>> get noNote90 { // cockpitAtRisk (שקטים ≥N ימים מהערה-אחרונה) ∪ תלמידים בלי שום הערה מתוארכת
+    final dated = active.where((s) => lastNoteDate(s) != null).toList();
+    final silent = cockpitAtRisk(dated, today, noteSilentDays, (m) => notes(m.cast<String, dynamic>()).length, (m) => lastNoteDate(m.cast<String, dynamic>()) ?? '', (iso, t) => cockpitDaysSince(iso, t)).cast<Map<String, dynamic>>();
+    return [...silent, ...active.where((s) => lastNoteDate(s) == null)];
+  }
+  // 7. השוואת-שכבה (percentile): התפלגות-סיכון בשכבה ל-10 דליים (supScoreBins · ציון×10 ⇒ דלי=עשירייה) + אחוזון = חלק-הנמוכים-ממני
+  static List<Map<String, dynamic>> cohort(Map<String, dynamic> s) => active.where((o) => o['grade'] == s['grade']).toList();
+  static List<int> cohortBins(Map<String, dynamic> s) => supScoreBins(cohort(s), supScore: (o, _) => risk(o as Map<String, dynamic>) * 10);
+  static int percentile(Map<String, dynamic> s) { final c = cohort(s); if (c.length < 2) return 50; final me = risk(s); return (c.where((o) => risk(o) < me).length * 100 / (c.length - 1)).round().clamp(0, 100); }
+  // 8. דוח-יועץ שבועי (טקסט מהאותות): סיכון-גבוה · קפיצות · פניות-פתוחות · ללא-הורה · אישורים-פגים
+  static String weeklyReport() => [
+        'דוח-יועץ/ת שבועי · ${fmt(today)}', 'תלמידים פעילים: ${active.length} · סיכון-גבוה: $highN · בינוני: $midN',
+        'קפיצות-סיכון (30 יום): ${riskJumps.map((j) => '${(j['s'] as Map)['name']} ${j['prev']}→${j['now']}').join(', ')}'.replaceAll(': ,', ': —'),
+        'פניות-פתוחות: $openTicketsN · ללא-הורה-מעודכן: $noParentN · אישורים-פגים: ${expiredConsents.length}',
+        'ללא-הערת-מחנך/ת $noteSilentDays יום: ${noNote90.map((s) => s['name']).join(', ')}',
+        'כפילויות-חשודות: ${duplicateGroups.where((g) => g.length > 1).length}', 'ימי-הולדת החודש: ${birthdays.map((s) => s['first']).join(', ')}',
+        '', 'פעולות מומלצות:', for (final s in active.where((s) => band(s) > 0)) '· ${s['name']} (${risk(s)}): ${action(s)}',
+      ].join('\n');
+  // 9. מעבר-שנה (העברת-כיתות מרוכזת): כל תלמיד/ה פעיל/ה ⇒ כיתת-השכבה-הבאה (gradeOrder); יב ⇒ בוגר. תצוגה-מקדימה לפני ביצוע.
+  static List<String> yearRolloverPreview() => [
+        for (final s in active)
+          () { final gi = gradeIdx(s); if (gi < 0) return '${s['name']}: כיתה לא-ידועה'; if (gi >= gradeOrder.length - 1) return '${s['name']}: יב ⇒ בוגר'; return '${s['name']}: ${gradeOrder[gi]} ⇒ ${gradeOrder[gi + 1]}'; }(),
+      ];
+  // אינטגרציות: נוכחות⇒סיכון (signalDefs) · ציונים⇒סיכון (מקום-שמור grades) · גבייה⇒דגל-חוב (מקום-שמור s.feeDebt, רק-הנהלה) · הורים⇒קשר (Family) ·
+  //   יומן⇒אירועים (OrgEvent.famId) · לוח-הנהלה⇒מונים (highN/midN/openTicketsN חשופים).
+  static bool feeDebt(Map<String, dynamic> s) => s['feeDebt'] == true; // מקום-שמור: מאיר כשמודול-הגבייה כותב
+
+  // ═══ ייצוא (23-ג) = SoftButton ⊕ toCsv ⊕ csvEscape ⊕ exportAllowed ⊕ הרשאה — שורות = עמודות-החוזה הנראות (ת״ז מוסתרת אלא-אם מוגן-מותר) ═══
+  static String csvOf(List<Map<String, dynamic>> rows) {
+    final cols = [for (final c in columnDefs) if (colShown(c, rows) && c['key'] != 'photo') c];
+    return toCsv([[for (final c in cols) c['label']], for (final s in rows) [for (final c in cols) cell(c, s)]], csvEscape) as String;
+  }
+  static bool exportOk(int role) => exportAllowed(false) && can(role, 'stu.export');
+
   static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
       c['get'] != null || rows.any((s) => s[c['key']] != null && '${s[c['key']]}'.trim().isNotEmpty);
   static String cell(Map<String, Object?> c, Map<String, dynamic> s) {
@@ -635,6 +817,9 @@ class _StudentsScreenState extends State<StudentsScreen> {
   String _q = ''; // איתור (DsSearch)
   int _mode = 0; // 0=🎯 טריאז' (קיבוץ-פר-סיכון) · 1=📋 טבלה (columnDefs) — SegmentedSwitch→תצוגה
   int _sort = 0; // 0=סיכון · 1=כיתה · 2=שם — SegmentedSwitch→דירוג
+  final Map<String, String> _locks = {}; // צירי-סינון פעילים (finderMatches) — AND
+  bool _filtersOpen = false; // פאנל-פילטרים (כיתה/שכבה/מחנך/סטטוס)
+  int _role = 0; // 0=מנהל · 1=יועץ · 2=מחנך · 3=מזכירות · 4=הורה · 5=צפייה (חוק-6 זהות-מוזרקת; בורר מדגים גידור)
   bool _importing = false; // מצב-מיוחד: ייבוא-בתהליך
   Map<String, int>? _importResult; // תוצאת-ייבוא אחרונה
   bool _loading = false; // מצב-מסך שמור: טעינה
@@ -647,32 +832,60 @@ class _StudentsScreenState extends State<StudentsScreen> {
   }
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
+  // צ׳יפ-סינון מבוקר: הזרקת-צבעים (חוק-6) + selected/onTap
+  Widget _fchip(String label, bool selected, VoidCallback onTap) => FilterChipPill(
+        label: label, selected: selected, onTap: onTap,
+        activeFillColor: _acc, surfaceColor: const Color(0xFF14162E), activeTextColor: const Color(0xFF0B0B15), inkColor: _ink, outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
+      );
 
   @override
   Widget build(BuildContext context) {
-    final all = _StuData.active;
+    _StuData.roleCtx = _role;
+    final all = _StuData.scoped(_role, _StuData.active); // גידור-נראות: מחנך/ת=כיתתו · הורה=ילדו · אחרת הכל
     final avgAtt = _StuData.avgAttendance, avgGr = _StuData.avgGrades;
     // דירוג (מיון-נבחר) ⇒ הנראים (פעילים); לא-פעילים בסקשן-ארכיון נפרד
-    final visible = _StuData.sorted(all, _sort);
-    final inactiveVisible = _StuData.sorted(_StuData.inactive, _sort);
+    // איתור⊕חריגה (23-ג): search=smartFilter⊕smartScore⊕normSearch · filter=finderMatches. הפייפליין מזין טריאז' וטבלה וארכיון.
+    final visible = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
+    final inactiveVisible = _StuData.filter(_StuData.search(_StuData.sorted(_StuData.scoped(_role, _StuData.inactive), _sort), _q), _locks);
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: []};
     for (final s in visible) { buckets[_StuData.band(s)]!.add(s); }
     return DsScaffold(
       title: 'תלמידים', subtitle: '${_StuData.students.length} תלמידים · ${_StuData.byClass().length} כיתות · ${_StuData.highN} בסיכון-גבוה', icon: '🎓',
       children: [
-        // פס-עליון: חיפוש-מבוקר + רענון (מצב-טעינה) + רישום + ייבוא + ייצוא
+        // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות+נראות פר-תפקיד (roleOf⊕canGrantedAction⊕scope)
+        Row(children: [
+          Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: [for (final r in _StuData.roleDefs) r['label'] as String], selected: _role, onSelect: (i) => setState(() => _role = i)))),
+          const SizedBox(width: 8),
+          StatusChip(label: 'תפקיד: ${_StuData.roleName(_role)}${_StuData.isTeacher(_role) ? ' · הכיתה שלי' : _StuData.isParent(_role) ? ' · ילדי בלבד' : ''}', tone: 0),
+        ]),
+        _gap(10),
+        if (_StuData.isParent(_role)) ...[const AlertBanner(glyph: '👪', tone: 0, message: 'תצוגת-הורה: זהות · נוכחות · ציונים של ילדך בלבד. שדות-מוגנים ופעולות אינם זמינים.'), _gap(8)],
+        // פס-עליון: חיפוש-מבוקר + רענון (מצב-טעינה) + רישום + ייבוא — מגודרים פר-הרשאה
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ תלמיד', tone: 1, onTap: () => _addForm(context))),
-          const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '📥 ייבוא', tone: 0, onTap: () => _importForm(context))),
+          if (_can('stu.add')) ...[Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ תלמיד', tone: 1, onTap: () => _addForm(context))), const SizedBox(width: 6)],
+          if (_can('stu.import')) Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '📥 ייבוא', tone: 0, onTap: () => _importForm(context))),
         ]),
         // מצב-מיוחד: ייבוא-בתהליך / תוצאת-ייבוא
         if (_importing) ...[const AlertBanner(glyph: '📥', tone: 3, message: 'ייבוא בתהליך… מעבד שורות'), _gap(8)],
         if (!_importing && _importResult != null) ...[AlertBanner(glyph: '📥', tone: 1, message: 'ייבוא הסתיים: ${_importResult!['ok']} נוספו · ${_importResult!['skipped']} נדחו'), _gap(8)],
+        // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"; המונה = ספירת-הציר על הפעילים
+        Wrap(spacing: 8, runSpacing: 6, children: [
+          _fchip('הכל', _locks.isEmpty, () => setState(() => _locks.clear())),
+          for (final c in _StuData.quickChips)
+            _fchip('${c['label']} · ${_StuData.countAxis(all, c['axis']!, c['value']!)}', _locks[c['axis']] == c['value'],
+                () => setState(() { if (_locks[c['axis']] == c['value']) { _locks.remove(c['axis']); } else { _locks[c['axis']!] = c['value']!; } })),
+          _fchip(_filtersOpen ? '⚙ פילטרים ▴' : '⚙ פילטרים ▾', _filtersOpen, () => setState(() => _filtersOpen = !_filtersOpen)),
+        ]),
+        if (_filtersOpen) Row(children: [
+          for (final ax in const [['class', 'כיתה'], ['level', 'שכבה'], ['teacher', 'מחנך/ת'], ['status', 'סטטוס']])
+            Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: DsEnumField(label: ax[1], options: _StuData.options(ax[0]), value: _locks[ax[0]] ?? 'הכל',
+                onChanged: (v) => setState(() { if (v == 'הכל' || v.isEmpty) { _locks.remove(ax[0]); } else { _locks[ax[0]] = v; } })))),
+        ]),
+        const SizedBox(height: 12),
         // KPI-10 (המפרט): hero = המטרה (מי-נופל) + 10 מדדי-מצב (BareStat נושאי-ערך; חסר-נתון ⇒ '—' מקום-שמור)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -695,6 +908,21 @@ class _StudentsScreenState extends State<StudentsScreen> {
             ]),
           ]),
         ),
+        _gap(8),
+        // מרכז-אוטומציות (23-ג · פרואקטיבי): קפיצת-סיכון · כפולים · אישורים-פגים · ללא-הערה-90 · ימי-הולדת · אחים-חדשים — AlertBanner פר-אות
+        if (_StuData.riskJumps.isNotEmpty) ...[AlertBanner(glyph: '📈', tone: 2, message: 'קפיצת-סיכון (30 יום): ${_StuData.riskJumps.map((j) => '${(j['s'] as Map)['name']} ${j['prev']}→${j['now']}').join(' · ')}'), _gap(8)],
+        if (_StuData.duplicateGroups.any((g) => g.length > 1) && _can('stu.merge')) ...[AlertBanner(glyph: '👯', tone: 3, message: 'כפילות-חשודה: ${_StuData.duplicateGroups.where((g) => g.length > 1).map((g) => g.map((id) => _StuData.byId(id)?['name'] ?? id).join(' ≈ ')).join(' · ')} — פתח/י כרטיס ⇒ מיזוג'), _gap(8)],
+        if (_StuData.expiredConsents.isNotEmpty) ...[AlertBanner(glyph: '📄', tone: 3, message: '${_StuData.expiredConsents.length} אישורי-הורים פגו: ${_StuData.expiredConsents.map((t) => t['title']).join(' · ')}'), _gap(8)],
+        if (_StuData.noNote90.isNotEmpty && !_StuData.isParent(_role)) ...[AlertBanner(glyph: '📝', tone: 0, message: 'ללא הערת-מחנך/ת ${_StuData.noteSilentDays} יום: ${_StuData.scoped(_role, _StuData.noNote90).map((s) => s['first']).join(' · ')}'), _gap(8)],
+        if (_StuData.birthdays.isNotEmpty) ...[AlertBanner(glyph: '🎂', tone: 1, message: 'ימי-הולדת החודש: ${_StuData.scoped(_role, _StuData.birthdays).map((s) => '${s['first']} (${_StuData.fmt(s['birth'] as String?)})').join(' · ')}'), _gap(8)],
+        if (_StuData.newSiblings.isNotEmpty && !_StuData.isParent(_role)) ...[AlertBanner(glyph: '👪', tone: 0, message: 'אחים-חדשים קושרו אוטומטית: ${_StuData.newSiblings.map((s) => '${s['first']} ↔ ${_StuData.siblings(s).map((o) => o['first']).join(',')}').join(' · ')}'), _gap(8)],
+        // דוח-יועץ · מעבר-שנה · ייצוא — כלים-מרוכזים (מגודרים)
+        Wrap(spacing: 8, runSpacing: 6, children: [
+          if (_can('stu.ticket') || _StuData.roleName(_role) == 'admin') SoftButton(label: '🧭 דוח-יועץ שבועי', tone: 0, onTap: () => _showText(context, 'דוח-יועץ/ת שבועי', _StuData.weeklyReport())),
+          if (_StuData.roleName(_role) == 'admin') SoftButton(label: '🗓 מעבר-שנה (תצוגה)', tone: 0, onTap: () => _showText(context, 'מעבר-שנה · העברת-כיתות מרוכזת (תצוגה-מקדימה)', _StuData.yearRolloverPreview().join('\n'))),
+          if (_StuData.exportOk(_role)) SoftButton(label: '⬇ CSV (${visible.length})', tone: 0, onTap: () => _showText(context, 'ייצוא CSV · ${visible.length} תלמידים (BOM + חסימת-הזרקה)', _StuData.csvOf(visible))),
+          if (_StuData.exportOk(_role)) SoftButton(label: '⬇ PDF — מקום-שמור', tone: 0, onTap: () => _showText(context, 'ייצוא PDF', 'מקום-שמור: אין מנוע-PDF במדף (§20-ג) — יאיר כשיתווסף; עד אז: הדפס-כרטיס (טקסט) + CSV.')),
+        ]),
         _gap(8),
         // בורר-מבט (🎯 טריאז' · 📋 טבלה) + בורר-דירוג (סיכון · כיתה · שם) — ארגון = פעולת-יסוד עם אטום משלה
         Row(children: [
@@ -759,6 +987,8 @@ class _StudentsScreenState extends State<StudentsScreen> {
               if (_StuData.hasOpenTicket(s)) StatusChip(label: '📨 פנייה פתוחה', tone: 3),
               if (_StuData.parentMissing(s)) const StatusChip(label: '📵 ללא-הורה-מעודכן', tone: 2),
               if (_StuData.isNew(s)) const StatusChip(label: '🆕 חדש/ה השנה', tone: 0),
+              if (_StuData.isDupSuspect(s)) const StatusChip(label: '👯 כפילות-חשודה', tone: 3),
+              if (_StuData.feeDebt(s) && _StuData.roleName(_role) == 'admin') const StatusChip(label: '💳 חוב-גבייה', tone: 2), // מקום-שמור (גבייה⇒דגל, רק-הנהלה)
             ]),
           ),
         ]),
@@ -777,7 +1007,8 @@ class _StudentsScreenState extends State<StudentsScreen> {
   //   פעולות (SoftButton) — כותבות לרשומות-האמת + אודיט, המסך והכרטיס מתעדכנים יחד.
   static const _tabs = ['סקירה', 'אקדמי', 'נוכחות', 'חברתי-רגשי', 'התנהגות', 'משפחה', 'מסמכים', 'ציר-זמן', 'אודיט'];
   final Map<String, int> _tab = {};
-  String get _who => 'ruti@school'; // זהות-מוזרקת (חוק-6) — גל 5: מבורר-התפקיד
+  String get _who => _StuData.who(_role); // זהות-מוזרקת (חוק-6) מבורר-התפקיד
+  bool _can(String k) => _StuData.can(_role, k);
 
   void _openPanel(Map<String, dynamic> s) {
     showModalBottomSheet<void>(
@@ -785,7 +1016,9 @@ class _StudentsScreenState extends State<StudentsScreen> {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
         void act(void Function() f) { f(); setSheet(() {}); setState(() {}); }
         final r = _StuData.risk(s), b = _StuData.band(s), tone = b == 2 ? 2 : b == 1 ? 3 : 1;
-        final tab = _tab[s['id']] ?? 0;
+        final parentView = _StuData.isParent(_role);
+        final tabs = parentView ? const ['סקירה', 'אקדמי', 'נוכחות'] : _tabs;
+        final tab = (_tab[s['id']] ?? 0).clamp(0, tabs.length - 1);
         return DraggableScrollableSheet(
           initialChildSize: 0.86, minChildSize: 0.4, maxChildSize: 0.97, expand: false,
           builder: (ctx, scroll) => Padding(
@@ -798,7 +1031,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                   const SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text('${s['name']}', style: const TextStyle(color: _ink, fontSize: 19, fontWeight: FontWeight.w800)),
-                    Text('${_StuData.className(s)} · ${_StuData.teacherName(s)} · גיל ${_StuData.age(s) ?? '—'} · ${s['gender'] == 'f' ? 'נ' : s['gender'] == 'm' ? 'ז' : '—'} · מס׳ ${s['id']}', style: const TextStyle(color: _muted, fontSize: 12.5)),
+                    Text('${_StuData.className(s)} · ${_StuData.teacherName(s)} · גיל ${_StuData.age(s) ?? '—'} · ${s['gender'] == 'f' ? 'נ' : s['gender'] == 'm' ? 'ז' : '—'} · מס׳ ${s['id']} · ת״ז ${_can('stu.protected') ? _StuData.protectedField(_role, s, 'idNum', '${s['idNum'] ?? ''}') : _StuData.maskId(s['idNum'] as String?)}', style: const TextStyle(color: _muted, fontSize: 12.5)),
                   ])),
                   StatusChip(label: _StuData.status(s), tone: _StuData.isActive(s) ? 1 : 0),
                 ]),
@@ -814,13 +1047,14 @@ class _StudentsScreenState extends State<StudentsScreen> {
                   ])),
                 ]),
                 _gap(12),
-                SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: _tabs, selected: tab, onSelect: (i) => setSheet(() => _tab[s['id'] as String] = i))),
+                SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: tabs, selected: tab, onSelect: (i) => setSheet(() => _tab[s['id'] as String] = i))),
                 _gap(12),
                 ..._tabBody(ctx, s, tab, act),
                 _gap(16),
                 const Text('פעולות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
                 _gap(8),
-                Wrap(spacing: 8, runSpacing: 8, children: _actions(ctx, s, act)),
+                // פעולות מגודרות פר-הרשאה (canGrantedAction); אין-הרשאה ⇒ מצב נעילת-הרשאות
+                Builder(builder: (_) { final acts = _actions(ctx, s, act); return acts.isEmpty ? const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', glyph: '🔒', tone: 2) : Wrap(spacing: 8, runSpacing: 8, children: acts); }),
                 _gap(8),
               ]),
             ),
@@ -852,6 +1086,14 @@ class _StudentsScreenState extends State<StudentsScreen> {
             BareStat(value: t90['dir'] == 'flat' ? '→' : '${t90['pct'] > 0 ? '+' : ''}${t90['pct']}%', label: 'מגמה-90 (נוכחות)', inkColor: t90['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
             BareStat(value: '${_StuData.presentsThisMonth(s)}/${_StuData.presentsThisMonth(s) + _StuData.absencesThisMonth(s)}', label: 'נוכחות-החודש', inkColor: _ink, mutedColor: _muted),
           ]),
+          _gap(10),
+          // השוואת-שכבה (percentile): התפלגות-הסיכון בשכבה (supScoreBins ⇒ NeonBars) + אחוזון-התלמיד
+          _h('השוואת-שכבה ${_StuData.level(s)} · ${_StuData.cohort(s).length} תלמידים'),
+          Row(children: [
+            BareStat(value: '${_StuData.percentile(s)}', label: 'אחוזון-סיכון בשכבה (גבוה=חמור)', inkColor: _StuData.percentile(s) >= 75 ? _danger : _ink, mutedColor: _muted),
+            BareStat(value: '${(grandTotal(_StuData.cohort(s), (o) => _StuData.risk(o as Map<String, dynamic>)) / (_StuData.cohort(s).isEmpty ? 1 : _StuData.cohort(s).length)).round()}', label: 'ממוצע-סיכון בשכבה', inkColor: _ink, mutedColor: _muted),
+          ]),
+          if (_StuData.cohort(s).length >= 2) NeonBars(labels: const ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'], values: [for (final b in _StuData.cohortBins(s)) b.toDouble()], tone: 0),
           _gap(10),
           _h('הערות אחרונות · ${ns.length}'),
           if (ns.isEmpty) const EmptyState(glyph: '📝', message: 'אין הערות-מחנך/ת') else for (final n in ns.take(3)) TimelineItem(title: '📝 ${n['by']}', time: '${n['date']}'.isEmpty ? 'ללא-תאריך' : _StuData.fmt('${n['date']}'), body: '${n['text']}'),
@@ -914,7 +1156,8 @@ class _StudentsScreenState extends State<StudentsScreen> {
           _h('אחים במוסד · ${_StuData.siblings(s).length}'),
           if (_StuData.siblings(s).isEmpty) const StatusChip(label: 'אין אחים במוסד', tone: 0) else Wrap(spacing: 6, children: [for (final o in _StuData.siblings(s)) SoftButton(label: '🔗 ${o['first']} · ${_StuData.className(o)}', tone: 0, onTap: () { Navigator.of(ctx).pop(); _openPanel(o); })]),
           _h('מצב סוציו-אקונומי · 🔒 מוגן'),
-          const StatusChip(label: '🔒 מוגן · יועץ/ת בלבד', tone: 0),
+          if (_can('stu.protected')) Wrap(spacing: 6, children: [StatusChip(label: 'סיוע: ${_StuData.protectedField(_role, s, 'tzedaka', '${f['tzedaka']}')}', tone: 3), StatusChip(label: 'הנחה: ${_StuData.protectedField(_role, s, 'discount', '${f['discount']}'.isEmpty ? '' : '${f['discount']}%')}', tone: 3), const StatusChip(label: '👁 נרשם בלוג-חשיפה', tone: 0)])
+          else const StatusChip(label: '🔒 פרטיות-נעולה · יועץ/ת בלבד', tone: 2),
           _h('אישורי-הורים'),
           Wrap(spacing: 6, runSpacing: 6, children: [
             for (final c in _StuData.consentDefs) StatusChip(label: '${s[c['key']] == true ? '✅' : '✗'} ${c['label']}', tone: s[c['key']] == true ? 1 : 0),
@@ -929,7 +1172,9 @@ class _StudentsScreenState extends State<StudentsScreen> {
           _h('מסמכים · ${docs.length}'),
           if (docs.isEmpty) const EmptyState(glyph: '📎', message: 'אין מסמכים') else for (final d in docs) TimelineItem(title: '📎 ${d['name']}', time: _StuData.fmt(d['addedAt'] as String?)),
           _h('תיק-רפואי · 🔒 מוגן'),
-          StatusChip(label: '${s['health'] ?? ''}'.isEmpty ? 'אין רישום רפואי' : '🔒 קיים רישום רפואי (חשיפה פר-הרשאה)', tone: '${s['health'] ?? ''}'.isEmpty ? 0 : 3),
+          if ('${s['health'] ?? ''}'.isEmpty) const StatusChip(label: 'אין רישום רפואי', tone: 0)
+          else if (_can('stu.protected')) StatusChip(label: '🩺 ${_StuData.protectedField(_role, s, 'health', '${s['health']}')} · 👁 נרשם בלוג-חשיפה', tone: 3)
+          else const StatusChip(label: '🔒 פרטיות-נעולה · קיים רישום רפואי (יועץ/ת)', tone: 2),
           _gap(6), _slot('אבחונים', 's.diagnoses'), _slot('תרופות', 's.medications'),
         ];
       case 7: // ציר-זמן מאוחד
@@ -937,31 +1182,38 @@ class _StudentsScreenState extends State<StudentsScreen> {
         return [_h('ציר-זמן · ${tl.length}'), if (tl.isEmpty) const EmptyState(glyph: '🕒', message: 'אין אירועים') else for (final e in tl) TimelineItem(title: e['title']!, time: _StuData.fmt(e['date']), body: e['body']!.isEmpty ? null : e['body'])];
       default: // אודיט: רשומות-אודיט של התלמיד (at·who·act·what)
         final au = _StuData.auditOf(s);
-        return [_h('אודיט · ${au.length}'), if (au.isEmpty) const EmptyState(glyph: '🧾', message: 'אין רשומות-אודיט') else for (final a in au) TimelineItem(title: '${a['act']} · ${a['who']}', time: '${a['at']}', body: '${a['what']}')];
+        return [
+          if (!_can('stu.audit') && _StuData.roleName(_role) != 'admin') const AlertBanner(glyph: '🔒', tone: 2, message: 'אודיט מלא — מנהל/ת ויועץ/ת בלבד') else ...[
+            _h('אודיט · ${au.length}'), AlertBanner(glyph: '🗄', tone: 0, message: _StuData.encryptionNote),
+            if (au.isEmpty) const EmptyState(glyph: '🧾', message: 'אין רשומות-אודיט') else for (final a in au) TimelineItem(title: '${a['act']}${a['act'] == 'expose' ? ' 👁' : ''} · ${a['who']}', time: '${a['at']}', body: '${a['what']}'),
+          ],
+        ];
     }
   }
 
   // 14+ פעולות (SoftButton) — כל פעולה כותבת לרשומת-האמת + אודיט. גל 5: גידור פר-תפקיד.
   List<Widget> _actions(BuildContext ctx, Map<String, dynamic> s, void Function(void Function()) act) {
     final active = _StuData.isActive(s), st = _StuData.status(s);
+    if (_StuData.isParent(_role)) return const []; // הורה: צפייה בלבד
     return [
-      SoftButton(label: '✏️ ערוך', tone: 0, onTap: () => _editForm(ctx, s, act)),
-      SoftButton(label: '🏫 העבר-כיתה', tone: 0, onTap: () => _pick(ctx, 'העבר-כיתה', [for (final c in _StuData.homeroomCourses()) c['name'] as String], (v) => act(() => _StuData.moveClass(s, v, _who)))),
-      if (active) SoftButton(label: '⏸ הקפא', tone: 3, onTap: () => act(() => _StuData.setStatus(s, 'הוקפא', _who))),
-      if (!active) SoftButton(label: '▶ החזר לפעיל', tone: 1, onTap: () => act(() => _StuData.setStatus(s, 'פעיל', _who))),
-      if (st != 'עזב') SoftButton(label: '🚪 סמן-עזב', tone: 2, onTap: () => act(() => _StuData.setStatus(s, 'עזב', _who))),
-      if (st != 'בוגר') SoftButton(label: '🎓 סמן-בוגר', tone: 0, onTap: () => act(() => _StuData.setStatus(s, 'בוגר', _who))),
-      SoftButton(label: '📝 הוסף-הערה', tone: 1, onTap: () => _prompt(ctx, 'הערת-מחנך/ת', 'מה קרה? מה סוכם?', (v) => act(() => _StuData.addNote(s, v, _who)))),
-      SoftButton(label: '⚠ הערת-התנהגות', tone: 3, onTap: () => _prompt(ctx, 'הערת-התנהגות', 'אירוע · תגובה', (v) => act(() => _StuData.addNote(s, v, _who, kind: 'behavior')))),
-      SoftButton(label: '🚩 הוסף-דגל', tone: 3, onTap: () => _pick(ctx, 'הוסף-דגל', const ['♿ צרכים-מיוחדים', '💛 רגישות', '🩺 רפואי', '🗣 שפה', '🚌 הסעה'], (v) => act(() => _StuData.addFlag(s, v, _who)))),
-      SoftButton(label: '📨 פתח-פנייה (יועץ/ת)', tone: 2, onTap: () => _prompt(ctx, 'פנייה ליועץ/ת', 'נושא הפנייה', (v) => act(() => _StuData.openTicket(s, 'פנייה ליועצת: ${s['name']} — $v', _who)))),
-      SoftButton(label: '💬 שלח-להורה', tone: 0, onTap: () => _showText(ctx, 'הודעה להורה · ${_StuData.parentName(s)}', _StuData.waOf(s, 'שלום ${_StuData.parentName(s)}, מדברים מבית-הספר בעניין ${s['first']}. נשמח לשוחח.') ?? '⛔ אין טלפון-הורה מעודכן — לא ניתן לשלוח')),
-      SoftButton(label: '📅 הזמן-לשיחה', tone: 0, onTap: () => _prompt(ctx, 'הזמנה לשיחה', 'תאריך (YYYY-MM-DD)', (v) => act(() => _StuData.inviteMeeting(s, 'שיחה עם הורי ${s['first']}', v, _who)))),
-      SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => _prompt(ctx, 'צרף-מסמך', 'שם המסמך', (v) => act(() => _StuData.attachDoc(s, v, _who)))),
+      if (_can('stu.edit')) SoftButton(label: '✏️ ערוך', tone: 0, onTap: () => _editForm(ctx, s, act)),
+      if (_can('stu.move')) SoftButton(label: '🏫 העבר-כיתה', tone: 0, onTap: () => _pick(ctx, 'העבר-כיתה', [for (final c in _StuData.homeroomCourses()) c['name'] as String], (v) => act(() => _StuData.moveClass(s, v, _who)))),
+      if (_can('stu.status') && active) SoftButton(label: '⏸ הקפא', tone: 3, onTap: () => act(() => _StuData.setStatus(s, 'הוקפא', _who))),
+      if (_can('stu.status') && !active) SoftButton(label: '▶ החזר לפעיל', tone: 1, onTap: () => act(() => _StuData.setStatus(s, 'פעיל', _who))),
+      if (_can('stu.status') && st != 'עזב') SoftButton(label: '🚪 סמן-עזב', tone: 2, onTap: () => act(() => _StuData.setStatus(s, 'עזב', _who))),
+      if (_can('stu.status') && st != 'בוגר') SoftButton(label: '🎓 סמן-בוגר', tone: 0, onTap: () => act(() => _StuData.setStatus(s, 'בוגר', _who))),
+      if (_can('stu.note')) SoftButton(label: '📝 הוסף-הערה', tone: 1, onTap: () => _prompt(ctx, 'הערת-מחנך/ת', 'מה קרה? מה סוכם?', (v) => act(() => _StuData.addNote(s, v, _who)))),
+      if (_can('stu.note')) SoftButton(label: '⚠ הערת-התנהגות', tone: 3, onTap: () => _prompt(ctx, 'הערת-התנהגות', 'אירוע · תגובה', (v) => act(() => _StuData.addNote(s, v, _who, kind: 'behavior')))),
+      if (_can('stu.flag')) SoftButton(label: '🚩 הוסף-דגל', tone: 3, onTap: () => _pick(ctx, 'הוסף-דגל', const ['♿ צרכים-מיוחדים', '💛 רגישות', '🩺 רפואי', '🗣 שפה', '🚌 הסעה'], (v) => act(() => _StuData.addFlag(s, v, _who)))),
+      if (_can('stu.ticket')) SoftButton(label: '📨 פתח-פנייה (יועץ/ת)', tone: 2, onTap: () => _prompt(ctx, 'פנייה ליועץ/ת', 'נושא הפנייה', (v) => act(() => _StuData.openTicket(s, 'פנייה ליועצת: ${s['name']} — $v', _who)))),
+      if (_can('stu.parentMsg')) SoftButton(label: '💬 שלח-להורה', tone: 0, onTap: () => _showText(ctx, 'הודעה להורה · ${_StuData.parentName(s)}', _StuData.waOf(s, 'שלום ${_StuData.parentName(s)}, מדברים מבית-הספר בעניין ${s['first']}. נשמח לשוחח.') ?? '⛔ אין טלפון-הורה מעודכן — לא ניתן לשלוח')),
+      if (_can('stu.meeting')) SoftButton(label: '📅 הזמן-לשיחה', tone: 0, onTap: () => _prompt(ctx, 'הזמנה לשיחה', 'תאריך (YYYY-MM-DD)', (v) => act(() => _StuData.inviteMeeting(s, 'שיחה עם הורי ${s['first']}', v, _who)))),
+      if (_can('stu.doc')) SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => _prompt(ctx, 'צרף-מסמך', 'שם המסמך', (v) => act(() => _StuData.attachDoc(s, v, _who)))),
       SoftButton(label: '🖨 הדפס-כרטיס', tone: 0, onTap: () => _showText(ctx, 'כרטיס-תלמיד להדפסה', _StuData.card(s))),
-      SoftButton(label: '📷 בקש אישור-מדיה', tone: 0, onTap: () => act(() => _StuData.toggleConsent(s, 'mPhotos', _who))),
-      SoftButton(label: '🧳 בקש אישור-טיולים', tone: 0, onTap: () => act(() => _StuData.requestConsent(s, 'trips', _who))),
-      for (final t in _StuData.openTasksOf(s)) SoftButton(label: '✅ סגור פנייה ${t['id']}', tone: 1, onTap: () => act(() => _StuData.closeTicket(t, _who))), // תווית קצרה (גיליון ≤640px · נתפס בבדיקת-widget)
+      if (_can('stu.merge')) for (final d in _StuData.dupPeers(s)) SoftButton(label: '👯 מזג ${d['id']} לכאן', tone: 3, onTap: () => act(() => _StuData.mergeDuplicate(s, d, _who))),
+      if (_can('stu.consent')) SoftButton(label: '📷 אישור-מדיה: ${s['mPhotos'] == true ? 'בטל' : 'סמן'}', tone: 0, onTap: () => act(() => _StuData.toggleConsent(s, 'mPhotos', _who))),
+      if (_can('stu.consent')) SoftButton(label: '🧳 בקש אישור-טיולים', tone: 0, onTap: () => act(() => _StuData.requestConsent(s, 'trips', _who))),
+      if (_can('stu.ticket')) for (final t in _StuData.openTasksOf(s)) SoftButton(label: '✅ סגור פנייה ${t['id']}', tone: 1, onTap: () => act(() => _StuData.closeTicket(t, _who))), // תווית קצרה (גיליון ≤640px · נתפס בבדיקת-widget)
     ];
   }
 
