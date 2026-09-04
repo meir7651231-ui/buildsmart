@@ -126,7 +126,7 @@ class DashInput {
         'kpi': {'total': 1248, 'active': 1231, 'riskHigh': 14, 'riskMid': 27, 'openInquiries': 5},
         'series': {'riskCount': [22, 21, 19, 18, 17, 16, 15, 15, 14, 13, 14, 14]},
         'tasks': [
-          {'id': 'stu:risk-9', 'kind': 'student.risk', 'title': '6 תלמידי שכבה ט׳ חצו סף-סיכון גבוה', 'owner': 'יועצת', 'opened': '2026-08-31', 'due': '2026-09-04', 'students': 6, 'ils': 0, 'sev': 'risk',
+          {'id': 'stu:risk-9', 'kind': 'student.risk', 'grade': 'ט׳', 'title': '6 תלמידי שכבה ט׳ חצו סף-סיכון גבוה', 'owner': 'יועצת', 'opened': '2026-08-31', 'due': '2026-09-04', 'students': 6, 'ils': 0, 'sev': 'risk',
             'action': 'פתח ועדת-שילוב', 'link': '/students?risk=high&grade=9', 'status': 'open', 'note': 'האות-המוביל: היעדרויות', 'history': [{'iso': '2026-08-31', 'what': 'ציון-סיכון עלה מעל 70'}, {'iso': '2026-09-02', 'what': 'יועצת יידעה מחנכים'}], 'context': {'שכבה': 'ט׳', 'ממוצע-סיכון': '74', 'אות-מוביל': 'היעדרויות'}},
           {'id': 'stu:noparent', 'kind': 'student.contact', 'title': '9 תלמידים ללא הורה מעודכן', 'owner': 'מזכירות', 'opened': '2026-08-20', 'due': '2026-09-10', 'students': 9, 'ils': 0,
             'action': 'פתח רשימת-עדכון', 'link': '/students?filter=noParent', 'status': 'open', 'note': '', 'history': [{'iso': '2026-08-20', 'what': 'זוהה בייבוא-שנתי'}], 'context': {'מקור': 'ייבוא 20.8'}},
@@ -223,10 +223,14 @@ class _DashData {
 
   // ─── כללי-דחיפות (עריכים · state) — ספי-band + SLA-פר-סוג (ברירת-מחדל לפי-סוג; ניתן לערוך ב-UI) ───
   int hi = 12, mid = 5; // ספי band(score): ≥hi ⇒ 🔴 · ≥mid ⇒ 🟠 · אחרת 🟢
+  // חוזה-SLA פר-סוג-משימה (kind-prefix ⇒ תווית + ימים) — הימים עריכים ב-UI; סוג לא-מוכר ⇒ 5 ימים
+  static const kindLabels = {'attendance': 'נוכחות', 'teacher': 'מורים', 'schedule': 'מערכת', 'student': 'תלמידים', 'parent': 'הורים', 'inventory': 'מלאי', 'room': 'חדרים', 'course': 'חוגים', 'fee': 'גבייה'};
   final Map<String, int> slaDays = {
     'attendance': 1, 'teacher': 1, 'schedule': 2, 'student': 3, 'parent': 3, 'inventory': 3, 'room': 7, 'course': 10, 'fee': 14,
   };
-  int slaOf(Map<String, dynamic> t) => slaDays[(t['kind'] as String).split('.').first] ?? 5;
+  static String kindOf(Map<String, dynamic> t) => (t['kind'] as String).split('.').first;
+  static String kindLabel(String k) => kindLabels[k] ?? k;
+  int slaOf(Map<String, dynamic> t) => slaDays[kindOf(t)] ?? 5;
 
   // ─── State של הלוח (חוק-1 · מצב=חיווט): טופל · נדחה(סיבה) · הואצל(למי) · KPI-מוצמדים · יעדים-שהוגדרו · אודיט ───
   final Set<String> doneIds = {};
@@ -366,6 +370,7 @@ class _DashData {
       case 'sla': return slaBreached(t) && !isDone(t) ? '1' : '0';
       case 'status': return statusOf(t);
       case 'kind': return (t['kind'] as String).split('.').first;
+      case 'grade': return '${t['grade'] ?? ''}'; // שכבה/כיתה — מקום-שמור: מאיר רק כשמשימה נושאת grade
     }
     return '';
   }
@@ -381,7 +386,7 @@ class _DashData {
   String rangeTo(int r) => shift(rangeDays[r]);
   List<Map<String, dynamic>> inRange(List<Map<String, dynamic>> items, int r) =>
       items.where((t) => dateInRange('${t['due'] ?? today}', null, rangeTo(r))).toList();
-  String rangeText(int r) => rangeLabel({'from': today, 'to': rangeTo(r)}, fmtDate, const {'k1': 'הכל', 'k2': 'מ-', 'k3': 'עד '});
+  String rangeText(int r) => r == 0 ? 'היום' : rangeLabel({'from': today, 'to': rangeTo(r)}, fmtDate, const {'k1': 'הכל', 'k2': 'מ-', 'k3': 'עד '});
 
   // ═══ פעולה-6 · מגמה = trendFromScan על סדרה-חודשית (מחצית-חדשה מול ישנה ⇒ dir/pct) ═══
   List<num>? series(String mod, String key) {
@@ -475,8 +480,14 @@ class _DashData {
   }
   static bool seesModule(int role, String mod) => can(role, 'dash.module.$mod');
   static bool summaryOnly(int role) => can(role, 'dash.summary') && !_isAdmin((roleDefs[role]['config'] as Map).cast<String, dynamic>(), roleDefs[role]['email'] as String);
-  List<Map<String, dynamic>> forRole(List<Map<String, dynamic>> ts, int role) => ts.where((t) => seesModule(role, t['module'] as String)).toList();
-  List<Map<String, dynamic>> kpisForRole(int role) => kpiDefs.where((d) => seesModule(role, d['mod'] as String)).toList();
+  // מבט-סיכום (ועד): רואה מונים של כל המודולים (אפס-פרטים ברנדר); רכז/כספים: רק המודולים שהוקצו
+  List<Map<String, dynamic>> forRole(List<Map<String, dynamic>> ts, int role) =>
+      summaryOnly(role) ? ts : ts.where((t) => seesModule(role, t['module'] as String)).toList();
+  // KPI פר-מבט · מוצמדים-ראשונים (הצמד-KPI = state; מיון יציב לפי סדר-החוזה)
+  List<Map<String, dynamic>> kpisForRole(int role) {
+    final ks = summaryOnly(role) ? kpiDefs : kpiDefs.where((d) => seesModule(role, d['mod'] as String)).toList();
+    return [...ks.where((k) => pinned.contains(k['key'])), ...ks.where((k) => !pinned.contains(k['key']))];
+  }
 
   // ═══ חוזה-עמודות · 12 עמודות-המפרט (חוק-7 · מקום-שמור): נגזרת=תמיד · שדה=מוארת רק כשיש-ערך ═══
   late final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
@@ -492,6 +503,7 @@ class _DashData {
     {'label': 'SLA', 'get': (Map<String, dynamic> t) => slaBreached(t) && !isDone(t) ? '⛔ פרוץ' : '${slaOf(t)} י׳'},
     {'key': 'link', 'label': 'קישור'},
     {'key': 'note', 'label': 'הערה'},
+    {'key': 'grade', 'label': 'שכבה'}, // מקום-שמור (מואר כשמשימה נושאת grade)
     {'key': 'assignedBy', 'label': 'הוקצה ע״י'}, // מקום-שמור
     {'key': 'escalatedTo', 'label': 'הוסלם ל-'}, // מקום-שמור
   ];
@@ -506,6 +518,8 @@ class _DashData {
     {'key': 'authorityCharter', 'label': 'אמנת-סמכות (מה הלוח רשאי לבצע לבד)', 'why': 'הכרעת-בעלים — הלוח אפס-כתיבה'},
     {'key': 'pdfExport', 'label': 'ייצוא PDF', 'why': 'אין מנוע-PDF במדף (רק pdfSafe לטקסט)'},
     {'key': 'autoMail0500', 'label': 'שליחת-תדרוך אוטומטית 05:00', 'why': 'דורש מתזמן-שרת; הטקסט+הנמענים מוכנים'},
+    {'key': 'autoMonthly', 'label': 'דוח-חודשי אוטומטי', 'why': 'דורש מתזמן-שרת; הדוח עצמו מופק בלחיצה'},
+    {'key': 'crossSearchModules', 'label': 'חיפוש-חוצה בתוך רשומות-המודולים', 'why': 'הלוח מחפש במשימות-המודולים; רשומות-גולמיות (תלמיד/חשבונית) = שקע-חיפוש של כל מודול'},
   ];
 }
 
@@ -528,7 +542,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final Map<String, String> _locks = {}; // צירי-חריגה פעילים (finderMatches)
   bool _loading = false;
   String? _error;
-  static const tabs = ['☀️ תדרוך', '📊 KPI', '📈 מגמות', '⚖️ השוואות', '🎯 יעדים', '📄 דוחות', '🔔 התרעות', '🏛 ועד', '📜 אודיט'];
+  static const tabs = ['תדרוך', 'KPI', 'מגמות', 'השוואות', 'יעדים', 'דוחות', 'התרעות', 'ועד', 'אודיט']; // 9 · בלי אימוג׳י ⇒ נכנס ב-800px בלי גלילה
 
   // ─── שקעי-עזר ───
   Widget _gap([double h = 10]) => SizedBox(height: h);
@@ -540,7 +554,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
   Widget _seg(List<String> items, int sel, ValueChanged<int> on) => Align(
         alignment: Alignment.centerRight,
-        child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: items, selected: sel, onSelect: on)),
+        child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SegmentedSwitch(items: items, selected: sel, onSelect: on)),
       );
   Widget _wrap(List<Widget> kids, {double top = 6}) => Padding(padding: EdgeInsets.only(top: top, right: 4), child: Wrap(spacing: 8, runSpacing: 6, children: kids));
   Widget _title(String s) => Text(s, style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800));
@@ -550,7 +564,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (f != null) {
       f(route);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('drill-down ⇒ $route (שקע-ניווט של המנהל)')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('drill-down: $route (שקע-ניווט של המנהל)')));
     }
     setState(() {});
   }
@@ -618,6 +632,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _fchip('status', 'הואצל', '🤝 הואצלו'),
             for (final o in countBy(all, (t) => '${(t as Map)['owner']}')) _fchip('owner', o[0] as String, '👤 ${o[0]} · ${o[1]}'),
           ]),
+          // סוג-משימה (kind-prefix · SLA-פר-סוג) + שכבה (מקום-שמור: מאיר רק כשיש משימות עם grade)
+          _wrap([
+            for (final k in countBy(all, (t) => _DashData.kindOf(t as Map<String, dynamic>))) _fchip('kind', k[0] as String, '🏷 ${_DashData.kindLabel(k[0] as String)} · ${k[1]} · SLA ${d.slaDays[k[0]] ?? 5}י׳'),
+            for (final g in countBy(all.where((t) => t['grade'] != null).toList(), (t) => '${(t as Map)['grade']}')) _fchip('grade', g[0] as String, '🏫 שכבה ${g[0]} · ${g[1]}'),
+          ]),
           const SizedBox(height: 12),
         ],
         // ── מצבי-מסך שמורים: טעינה · שגיאה-כללית · שגיאה-במודול-אחד (הלוח ממשיך) · מודול-לא-מופעל · יום-חופש · אזעקה ──
@@ -647,7 +666,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 8),
           // ── אוטומציות פרואקטיביות: קפיצת-מגמה · יעד-בסיכון · חג-קרוב (סנכרון-לוח) ──
-          if (jump != null && jump <= -3) ...[AlertBanner(glyph: '📉', tone: 2, message: 'קפיצת-מגמה: נוכחות ירדה ${(-jump).toStringAsFixed(1)} נק׳ בשבוע האחרון (${d.series('attendance', 'weeklyPct')!.map((v) => '$v%').join(' → ')})'), _gap(8)],
+          if (jump != null && jump <= -3) ...[AlertBanner(glyph: '📉', tone: 2, message: 'קפיצת-מגמה: נוכחות ירדה ${(-jump).toStringAsFixed(1)} נק׳ בשבוע האחרון (4 שבועות: ${d.series('attendance', 'weeklyPct')!.map((v) => '$v%').join(' · ')})'), _gap(8)],
           for (final g in _goalsAtRisk()) ...[AlertBanner(glyph: '🎯', tone: 3, message: g), _gap(8)],
           if (d.upcoming.isNotEmpty && d.upcoming.first['iso'] != d.today) ...[AlertBanner(glyph: '📅', tone: 0, message: 'סנכרון-לוח: ${d.upcoming.first['name']} ב-${fmtDate(d.upcoming.first['iso'] as String)} (עוד ${dayDiff(d.today, d.upcoming.first['iso'] as String).toInt()} י׳) · ${d.upcoming.length} חגים ב-45 יום'), _gap(8)],
           // ── טאבים (SegmentedSwitch מבוקר · 9) ──
@@ -748,24 +767,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ]),
       ];
 
-  // ═══ טאב-2 · מגמות: סדרה-חודשית (NeonBars) + trendFromScan ⇒ TrendStat (דלתא-אחוזית = ייעוד-נכון) ═══
+  // ═══ טאב-2 · מגמות: trendFromScan ⇒ TrendStat (דלתא-אחוזית) + NeonBars על **הפער-מהיעד** פר-חודש ═══
+  //   (אימות-רנדר תפס הרכבת-יתר: סדרת-אחוזים 90–94 מנורמלת-למקסימום נראית שטוחה ⇒ הבר מודד פער-מיעד = ההחלטה.)
   List<Widget> _trendsTab() {
     final defs = [
-      ('attendance', 'attendancePct', '🗓 נוכחות חודשית %', true),
-      ('fees', 'collectionPct', '💳 גבייה מצטברת %', true),
-      ('students', 'riskCount', '🚨 תלמידים-בסיכון (מונה)', false),
+      ('attendance', 'attendancePct', '🗓 נוכחות חודשית %', true, 'attendancePct', false),
+      ('fees', 'collectionPct', '💳 גבייה מצטברת %', true, 'collectionPct', false),
+      ('students', 'riskCount', '🚨 תלמידים-בסיכון (מונה)', false, 'riskCount', true),
     ];
     return [
-      for (final (mod, key, label, pct) in defs)
+      for (final (mod, key, label, pct, goalKey, lowerBetter) in defs)
         () {
           final s = d.series(mod, key);
           final tr = d.trend(mod, key);
           if (s == null || tr == null) return DsSection(title: label, tone: 3, children: [const EmptyState(glyph: '📭', message: 'תקופה-ללא-דאטה / מודול לא-זמין — מקום-שמור')]);
-          final months = [for (var i = 0; i < s.length; i++) 'ח׳-${s.length - i}'];
+          final goal = d.goal(goalKey);
+          String mLabel(int i) => i == s.length - 1 ? 'החודש' : 'לפני ${s.length - 1 - i} ח׳';
+          final dir = tr['dir'];
+          final good = dir == 'flat' ? null : (dir == 'up') != lowerBetter;
           return DsSection(title: label, children: [
-            TrendStat(value: pct ? '${s.last}%' : '${s.last}', delta: (tr['pct'] as num).toDouble(), label: 'אחרון מול ${s.length ~/ 2} חודשים קודמים · ${tr['dir'] == 'up' ? 'עולה' : tr['dir'] == 'down' ? 'יורדת' : 'יציב'}'),
+            TrendStat(value: pct ? '${s.last}%' : '${s.last}', delta: (tr['pct'] as num).toDouble(), label: 'אחרון מול ${s.length ~/ 2} חודשים קודמים · ${dir == 'up' ? 'עולה' : dir == 'down' ? 'יורד' : 'יציב'}${good == null ? '' : good ? ' · לטובה' : ' · לרעה'}'),
             _gap(),
-            NeonBars(labels: months, values: [for (final v in s) v.toDouble()], tone: tr['dir'] == 'down' ? (pct ? 2 : 1) : tr['dir'] == 'up' ? (pct ? 1 : 2) : 0),
+            if (goal == null)
+              NeonBars(labels: [for (var i = 0; i < s.length; i++) mLabel(i)], values: [for (final v in s) v.toDouble()], tone: 0)
+            else ...[
+              _title('פער מהיעד ($goal) פר-חודש — בר ארוך = רחוק מהיעד · 0 = ביעד'),
+              _gap(6),
+              NeonBars(
+                labels: [for (var i = 0; i < s.length; i++) '${mLabel(i)} · ${s[i]}${pct ? '%' : ''}'],
+                values: [for (final v in s) math.max(0, lowerBetter ? v - goal : goal - v).toDouble()],
+                tone: 3,
+              ),
+            ],
           ]);
         }(),
     ];
@@ -845,8 +878,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ]),
               if (_DashData.can(_role, 'dash.goals') || _DashData.can(_role, 'dash.act'))
                 _wrap([
-                  SoftButton(label: '🎯 יעד −1', tone: 0, onTap: () => setState(() { d.goalOverride[g.$1] = goal - 1; d.log('מנהל', 'יעד ${g.$2} ⇒ ${goal - 1}'); })),
-                  SoftButton(label: '🎯 יעד +1', tone: 0, onTap: () => setState(() { d.goalOverride[g.$1] = goal + 1; d.log('מנהל', 'יעד ${g.$2} ⇒ ${goal + 1}'); })),
+                  SoftButton(label: '🎯 יעד −1', tone: 0, onTap: () => setState(() { d.goalOverride[g.$1] = goal - 1; d.log('מנהל', 'יעד ${g.$2}: ${goal - 1}'); })),
+                  SoftButton(label: '🎯 יעד +1', tone: 0, onTap: () => setState(() { d.goalOverride[g.$1] = goal + 1; d.log('מנהל', 'יעד ${g.$2}: ${goal + 1}'); })),
                 ], top: 8),
             ]);
           }(),
@@ -881,7 +914,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Widget> _alertsTab(List<Map<String, dynamic>> open, num? jump) {
     final breached = open.where(d.slaBreached).toList();
     final items = <Widget>[
-      for (final t in breached) AlertBanner(glyph: '⛔', tone: 2, message: 'SLA-פרוץ ⇒ הוסלם ל-🔴: ${t['title']} · ${t['owner']} · מאז ${d.since(t)} י׳ (SLA ${d.slaOf(t)})'),
+      for (final t in breached) AlertBanner(glyph: '⛔', tone: 2, message: 'SLA-פרוץ — הוסלם ל-🔴: ${t['title']} · ${t['owner']} · מאז ${d.since(t)} י׳ (SLA ${d.slaOf(t)})'),
       if (jump != null && jump <= -3) AlertBanner(glyph: '📉', tone: 2, message: 'קפיצת-מגמה: נוכחות ${jump.toStringAsFixed(1)} נק׳ בשבוע'),
       for (final g in _goalsAtRisk()) AlertBanner(glyph: '🎯', tone: 3, message: g),
       for (final x in d.gradeOutliers('attendancePct')) AlertBanner(glyph: '⚖️', tone: 3, message: 'חריגה-סטטיסטית: שכבה ${x['name']} נוכחות ${x['attendancePct']}% (z=${(x['z'] as num).toStringAsFixed(1)})'),
@@ -1004,7 +1037,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.all(12),
             child: GlassCard(
               child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                const MediaRow(glyph: '⚙️', title: 'כללי-דחיפות', subtitle: 'ציון = השפעה × (1 + ותק/SLA) · 🔴 ≥ סף-עליון · 🟠 ≥ סף-אמצע · SLA-פרוץ ⇒ 🔴'),
+                const MediaRow(glyph: '⚙️', title: 'כללי-דחיפות', subtitle: 'ציון = השפעה × (1 + ותק/SLA) · 🔴 ≥ סף-עליון · 🟠 ≥ סף-אמצע · SLA-פרוץ = 🔴'),
                 _gap(12),
                 Row(children: [
                   BareStat(value: '${d.hi}', label: 'סף 🔴', inkColor: _danger, mutedColor: _muted),
@@ -1023,7 +1056,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 3),
                     child: Row(children: [
-                      Expanded(child: StatRow(label: e.key, value: '${e.value} י׳', fraction: (e.value / 14).clamp(0.0, 1.0))),
+                      Expanded(child: StatRow(label: _DashData.kindLabel(e.key), value: '${e.value} י׳', fraction: (e.value / 14).clamp(0.0, 1.0))),
                       const SizedBox(width: 6),
                       SoftButton(label: '−', tone: 0, onTap: () => act(() => d.slaDays[e.key] = math.max(1, e.value - 1))),
                       const SizedBox(width: 4),
