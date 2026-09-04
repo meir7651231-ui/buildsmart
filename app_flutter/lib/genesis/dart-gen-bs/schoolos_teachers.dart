@@ -155,7 +155,7 @@ class _TeamData {
   static String nameOf(String? id) => id == null ? '—' : (byId(id)?['name'] as String? ?? id);
   static const roleLabel = {'homeroom': 'מחנך/ת', 'subject': 'מקצועי/ת', 'aide': 'סייע/ת', 'mgmt': 'הנהלה'};
   static const statusLabel = {'active': 'פעיל', 'leave': 'חופשה', 'unpaid': 'חל״ת', 'left': 'עזב/ה'};
-  static List<String> subjects(Map<String, dynamic> t) => (t['subjects'] as List).cast<String>();
+  static List<String> subjects(Map<String, dynamic> t) => [...(t['subjects'] as List).cast<String>(), ...extraSubjects[t['id']] ?? const []];
   static bool isActive(Map<String, dynamic> t) => statusOf(t) == 'active';
   static bool isGone(Map<String, dynamic> t) => statusOf(t) == 'left';
   static int weekdayOf(String iso) => DateTime.parse('${iso}T12:00:00').weekday % 7; // JS getDay: 0=ראשון
@@ -259,7 +259,7 @@ class _TeamData {
   static const _clashT = <String, dynamic>{'k1': 'ended', 'k2': '', 'k3': ' · '};
   static String? clashOf(Map<String, dynamic> t, Map<String, dynamic> course) => scheduleClashText(_clashDb, t['id'], course, sessionsOf, dayNames, _clashT) as String?;
   static bool availableAt(Map<String, dynamic> t, int day, String time) { // חלון-זמינות (timeToMin מהמדף)
-    final w = (t['availability'] as Map)[day] as List?;
+    final w = availabilityOf(t)[day];
     if (w == null) return false;
     final m = timeToMin(time), a = timeToMin(w[0]), b = timeToMin(w[1]);
     return m is num && a is num && b is num && m >= a && m < b;
@@ -306,7 +306,7 @@ class _TeamData {
   static int get underN => active.where(underLoad).length;
   static int get contractsN => staff.where(contractEndsMonth).length;
   static int get certsN => active.where(certMissing).length;
-  static List<List<Object>> get byRole => countBy(staff, (t) => roleLabel[(t as Map)['role']] ?? '${t['role']}'); // מדף
+  static List<List<Object>> get byRole => countBy(staff, (t) => roleLabel[roleOf_(t as Map<String, dynamic>)] ?? roleOf_(t)); // מדף
 
   // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 16 עמודות-המפרט כשקעי-דאטה ═══
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשרשומה נושאת ערך, חסר ⇒ שקט. photo/contact/classAttendance/updatedAt
@@ -314,7 +314,7 @@ class _TeamData {
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
     {'key': 'photo', 'label': 'תמונה'},                                                                  // מקום-שמור (WorkerCert.photo)
     {'label': 'שם', 'get': (Map<String, dynamic> t) => '${t['name']}'},
-    {'label': 'תפקיד', 'get': (Map<String, dynamic> t) => roleLabel[t['role']] ?? '${t['role']}'},
+    {'label': 'תפקיד', 'get': (Map<String, dynamic> t) => roleLabel[roleOf_(t)] ?? roleOf_(t)},
     {'label': 'מקצועות', 'get': (Map<String, dynamic> t) => subjects(t).join('·')},
     {'label': 'כיתות-מחנך', 'get': (Map<String, dynamic> t) => (t['homeroom'] as List).isEmpty ? '—' : (t['homeroom'] as List).join('·')},
     {'label': 'ש׳/שבוע', 'get': (Map<String, dynamic> t) => '${hoursWeek(t).round()}/${contractHours(t)}'},
@@ -329,6 +329,27 @@ class _TeamData {
     {'key': 'contact', 'label': 'קשר'},                                                                 // מקום-שמור · חוק-6 (מוזרק · מוסתר-פר-הרשאה)
     {'key': 'updatedAt', 'label': 'עדכון'},                                                             // מקום-שמור
   ];
+  // חוזה-עובדות (metaFields · חוק-7): שדה שהרשומה נושאת ⇒ שבב; חסר ⇒ שקט. שדה חדש בדאטה מופיע לבד.
+  static const metaFields = <Map<String, String>>[
+    {'key': 'contractType', 'prefix': '📄 חוזה ', 'suffix': ''},
+    {'key': 'contractEnd', 'prefix': '⏳ סיום ', 'suffix': ''},
+    {'key': 'startDate', 'prefix': '🗓 מ-', 'suffix': ''},
+    {'key': 'preferredSub', 'prefix': '⭐ מחליף-מועדף: ', 'suffix': ''},
+    {'key': 'photo', 'prefix': '🖼 ', 'suffix': ''},            // מקום-שמור
+    {'key': 'contact', 'prefix': '📞 ', 'suffix': ''},          // מקום-שמור · חוק-6
+    {'key': 'peerReview', 'prefix': '🤝 הערכת-עמיתים ', 'suffix': ''}, // מקום-שמור
+    {'key': 'studentFeedback', 'prefix': '💬 משוב-תלמידים ', 'suffix': ''}, // מקום-שמור
+    {'key': 'personnelFile', 'prefix': '🗂 תיק-אישי ', 'suffix': ''}, // מקום-שמור
+  ];
+  // ייצוא: מערכת-אישית ⇒ CSV (toCsv⊕csvEscape מהמדף) · רשימת-צוות ⇒ CSV מחוזה-העמודות
+  static String timetableCsv(Map<String, dynamic> t) => toCsv([
+        ['חוג', 'כיתה', 'חדר', 'יום', 'שעה'],
+        for (final c in coursesOf(t)) for (final s in sessionsOf(c) as List) [c['name'], c['cls'], c['roomId'], dayNames[s['day'] as int], s['time']],
+      ], csvEscape) as String;
+  static String rosterCsv(List<Map<String, dynamic>> rows) => toCsv([
+        [for (final c in columnDefs) if (colShown(c, rows)) c['label']],
+        for (final t in rows) [for (final c in columnDefs) if (colShown(c, rows)) cell(c, t)],
+      ], csvEscape) as String;
   static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
       c['get'] != null || rows.any((t) => t[c['key']] != null && '${t[c['key']]}'.trim().isNotEmpty);
   static String cell(Map<String, Object?> c, Map<String, dynamic> t) =>
@@ -340,6 +361,65 @@ class _TeamData {
   static final Map<String, List<Map<String, dynamic>>> extraAbsences = {};
   static final Map<String, List<Map<String, dynamic>>> extraCerts = {};
   static final Map<String, String> reassigned = {}; // courseId ⇒ teacherId (הקצה-כיתה)
+  static final Map<String, List<String>> extraSubjects = {}; // הקצה-מקצוע
+  static final Map<String, String> roleOverride = {}; // ערוך: תפקיד
+  static final Map<String, Map<int, List<String>>> availOverride = {}; // עדכן-זמינות
+  static final Map<String, List<Map<String, dynamic>>> docs = {}; // מקום-שמור: מסמכים (צרף-מסמך רושם רשומה)
+  static String roleOf_(Map<String, dynamic> t) => roleOverride[t['id']] ?? (t['role'] as String);
+  static Map<int, List<String>> availabilityOf(Map<String, dynamic> t) => availOverride[t['id']] ?? (t['availability'] as Map).cast<int, List<String>>();
+  static const subjectPool = ['מתמטיקה', 'אנגלית', 'פיזיקה', 'היסטוריה', 'אזרחות', 'ביולוגיה', 'חינוך'];
+  static void addSubject(Map<String, dynamic> t, String who) { // הקצה-מקצוע: המקצוע הבא מהמאגר שאינו-בידו
+    final has = subjects(t);
+    for (final sj in subjectPool) {
+      if (!has.contains(sj)) {
+        (extraSubjects[t['id'] as String] ??= []).add(sj);
+        log(who, 'הקצאת-מקצוע ($sj)', t['name'] as String);
+        return;
+      }
+    }
+  }
+  static void cycleRole(Map<String, dynamic> t, String who) { // ערוך: תפקיד (מחזור מבוקר)
+    const order = ['homeroom', 'subject', 'aide', 'mgmt'];
+    final next = order[(order.indexOf(roleOf_(t)) + 1) % order.length];
+    roleOverride[t['id'] as String] = next;
+    log(who, 'עריכה: תפקיד ⇒ ${roleLabel[next]}', t['name'] as String);
+  }
+  static void toggleFriday(Map<String, dynamic> t, String who) { // עדכן-זמינות: חלון-שישי
+    final cur = Map<int, List<String>>.from(availabilityOf(t));
+    if (cur.containsKey(5)) { cur.remove(5); } else { cur[5] = ['08:00', '12:00']; }
+    availOverride[t['id'] as String] = cur;
+    log(who, cur.containsKey(5) ? 'זמינות: נוסף חלון-שישי' : 'זמינות: הוסר חלון-שישי', t['name'] as String);
+  }
+  static void addCert(Map<String, dynamic> t, String who) {
+    (extraCerts[t['id'] as String] ??= []).add({'name': 'רענון עזרה-ראשונה', 'issuer': 'מד״א', 'expiry': '2028-09-03'});
+    log(who, 'הוספת-הכשרה (רענון עזרה-ראשונה)', t['name'] as String);
+  }
+  static void addDoc(Map<String, dynamic> t, String who) {
+    (docs[t['id'] as String] ??= []).insert(0, {'name': 'מסמך ${(docs[t['id']]?.length ?? 0) + 1}', 'date': today});
+    log(who, 'צירוף-מסמך', t['name'] as String);
+  }
+  static void cycleStatus(Map<String, dynamic> t, String who) { // סמן-עזב/חופשה: מחזור מבוקר
+    const order = ['active', 'leave', 'unpaid', 'left'];
+    final next = order[(order.indexOf(statusOf(t)) + 1) % order.length];
+    statusOverride[t['id'] as String] = next;
+    if (next != 'active') syncUncovered(); // חופשה/חל״ת ⇒ שיעורי-היום ללא-מורה
+    log(who, 'סטטוס ⇒ ${statusLabel[next]}', t['name'] as String);
+  }
+  // איזון-עומס (הצעה · 23-ד): חוג של עמוס-מדי באותו-מקצוע שפנוי-לשבוע-שלם אצל תת-עומס (clashOf מלא + חלון-זמינות לכל מפגש)
+  static Map<String, dynamic>? balanceFor(Map<String, dynamic> t) {
+    if (!isActive(t) || overLoad(t)) return null;
+    for (final o in active.where(overLoad)) {
+      for (final c in coursesOf(o)) {
+        if (!subjects(t).contains(c['subject']) || clashOf(t, c) != null) continue;
+        if ((sessionsOf(c) as List).every((x) => availableAt(t, x['day'] as int, '${x['time']}'))) return {'course': c, 'from': o};
+      }
+    }
+    return null;
+  }
+  static void reassign(Map<String, dynamic> c, Map<String, dynamic> to, String who) {
+    reassigned[c['id'] as String] = to['id'] as String;
+    log(who, 'הקצאת-כיתה (${c['name']})', to['name'] as String);
+  }
   static final List<Map<String, dynamic>> audit = []; // אודיט (מי·מה·מתי) — TimelineItem
   static void log(String who, String what, String target) => audit.insert(0, {'who': who, 'what': what, 'target': target, 'date': today});
   static void markAbsent(Map<String, dynamic> t, String reason, String who) {
@@ -368,14 +448,18 @@ class _TeamData {
 
 // ═══════════ המסך · מחלקה ציבורית יחידה (const · ללא main) ═══════════
 class TeachersScreen extends StatefulWidget {
-  const TeachersScreen({super.key, this.initialMode = 0}); // initialMode = שקע-הזרקה (תצוגה-מקדימה/בדיקה): 0 חכם · 1 טבלה · 2 החלפות
+  const TeachersScreen({super.key, this.initialMode = 0, this.initialPanel, this.initialTab = 0}); // שקעי-הזרקה לתצוגה-מקדימה/בדיקה: מבט · כרטיס-פתוח · טאב
   final int initialMode;
+  final String? initialPanel; // מזהה-מורה שכרטיסו נפתח אחרי הפריים-הראשון
+  final int initialTab;
   @override
   State<TeachersScreen> createState() => _TeachersScreenState();
 }
 
 class _TeachersScreenState extends State<TeachersScreen> {
   int _sort = 0; // 0=⚖️ עומס · 1=🤒 חיסורים · 2=🏫 כיתות
+  final Map<String, int> _tab = {}; // טאב-נבחר פר-מורה (חיווט SegmentedSwitch→תצוגה)
+  static const _tabNames = ['סקירה', 'מערכת', 'כיתות', 'היעדרויות', 'החלפות', 'ביצועים', 'הכשרות', 'מסמכים', 'אודיט'];
   int _mode = 0; // 0=🎯 חכם (טריאז') · 1=📋 טבלה (DsTable כל-העמודות) · 2=🔁 לוח-החלפות-היום (DsBoard)
   static const _who = 'הנהלה'; // זהות-הפועל (חוק-6 — מוזרק בגל 5 מהתפקיד)
 
@@ -383,7 +467,12 @@ class _TeachersScreenState extends State<TeachersScreen> {
   void initState() {
     super.initState();
     _mode = widget.initialMode;
-    _TeamData.syncUncovered(); // אוטומציה: היעדרויות-של-היום ⇒ שיעורים-ללא-מורה
+    _TeamData.syncUncovered();
+    final p = widget.initialPanel == null ? null : _TeamData.byId(widget.initialPanel!);
+    if (p != null) {
+      _tab[p['id'] as String] = widget.initialTab;
+      WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p); });
+    } // אוטומציה: היעדרויות-של-היום ⇒ שיעורים-ללא-מורה
   }
 
   @override
@@ -464,6 +553,279 @@ class _TeachersScreenState extends State<TeachersScreen> {
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
 
+  // ═══ כרטיס-מורה-נבחר (צד) · GlassCard(child) · 9 טאבים (SegmentedSwitch×2) · 14 פעולות (SoftButton) ═══
+  void _openPanel(Map<String, dynamic> t) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) {
+          void act(void Function() f) { f(); setSheet(() {}); setState(() {}); }
+          final tab = _tab[t['id']] ?? 0;
+          return DraggableScrollableSheet(
+            initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
+            builder: (ctx, scroll) => Padding(
+              padding: const EdgeInsets.all(12),
+              child: GlassCard(
+                child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                  Row(children: [
+                    PremiumAvatar(name: t['name'] as String, size: 56, status: _TeamData.absentToday(t) ? AvatarStatus.busy : _TeamData.presentToday(t) ? AvatarStatus.online : AvatarStatus.none),
+                    const SizedBox(width: 10),
+                    Expanded(child: MediaRow(glyph: '🪪', title: '${t['name']} · ${_TeamData.roleLabel[_TeamData.roleOf_(t)]}', subtitle: '${_TeamData.subjects(t).join(' · ')} · ותק ${_TeamData.tenure(t) ?? '—'} ש׳ · ${_TeamData.statusLabel[_TeamData.statusOf(t)]}')),
+                  ]),
+                  _gap(12),
+                  StatRow(label: 'עומס מול חוזה', value: '${_TeamData.hoursWeek(t).round()} מתוך ${_TeamData.contractHours(t)} ש׳ · ${_TeamData.loadPct(t)}%', fraction: (_TeamData.loadPct(t) / 100).clamp(0.0, 1.0)),
+                  _gap(10),
+                  Row(children: [
+                    BareStat(value: '${_TeamData.coursesOf(t).length}', label: 'חוגים', inkColor: _ink, mutedColor: _muted),
+                    BareStat(value: '${_TeamData.sessionsWeek(t)}', label: 'שיעורים/שבוע', inkColor: _ink, mutedColor: _muted),
+                    BareStat(value: '${_TeamData.absencesMonth(t)}', label: 'היעדרויות החודש', inkColor: _TeamData.absencesMonth(t) > 0 ? _warning : _ok, mutedColor: _muted),
+                    BareStat(value: '${_TeamData.subsDone(t)}/${_TeamData.subsReceived(t)}', label: 'החלפות ביצע/קיבל', inkColor: _acc, mutedColor: _muted),
+                  ]),
+                  _gap(12),
+                  // 9 טאבים ב-3 שורות של SegmentedSwitch (Row-מבוקר; 4+ פריטים גולשים ברוחב-הגיליון — נתפס בבדיקת-widget)
+                  for (var r = 0; r < 3; r++) ...[
+                    Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: _tabNames.sublist(r * 3, r * 3 + 3), selected: tab ~/ 3 == r ? tab % 3 : -1, onSelect: (i) => act(() => _tab[t['id'] as String] = r * 3 + i))),
+                    _gap(6),
+                  ],
+                  _gap(12),
+                  _tabView(t, tab, act),
+                  _gap(16),
+                  const Text('פעולות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
+                  _gap(8),
+                  _actions(t, act, ctx),
+                ]),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _tabView(Map<String, dynamic> t, int tab, void Function(void Function()) act) {
+    switch (tab) {
+      case 1: return _timetable(t);
+      case 2: return _classes(t, act);
+      case 3: return _absences(t);
+      case 4: return _subsOf(t);
+      case 5: return _performance(t);
+      case 6: return _certs(t);
+      case 7: return _docs(t);
+      case 8: return _audit(t);
+      default: return _overview(t);
+    }
+  }
+
+  // סקירה: עובדות (metaFields גנרי) + זמינות + אילוצים + תפקידים-נוספים + הערות-הנהלה (מוגן — גל 5)
+  Widget _overview(Map<String, dynamic> t) {
+    final av = _TeamData.availabilityOf(t);
+    final days = av.keys.toList()..sort();
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Wrap(spacing: 8, runSpacing: 6, children: [
+        for (final f in _TeamData.metaFields)
+          if (t[f['key']] != null) StatusChip(label: '${f['prefix']}${f['key'] == 'preferredSub' ? _TeamData.nameOf(t[f['key']] as String) : f['key']!.contains('Date') || f['key'] == 'contractEnd' ? fmtDate('${t[f['key']]}') : t[f['key']]}${f['suffix']}', tone: 0),
+        for (final r in (t['extraRoles'] as List)) StatusChip(label: '🎖 $r', tone: 1),
+        for (final c in (t['constraints'] as List)) StatusChip(label: '⛔ $c', tone: 3),
+      ]),
+      _gap(10),
+      Text('זמינות שבועית · ${days.length} ימים', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+      _gap(6),
+      Wrap(spacing: 8, runSpacing: 6, children: [
+        for (final d in days) DsChip(label: '${dayNames[d]} ${av[d]![0]}–${av[d]![1]}', tone: 0),
+        if (days.isEmpty) const DsChip(label: 'אין חלונות-זמינות (חופשה/עזב)', tone: 2),
+      ]),
+      if ('${t['notes']}'.isNotEmpty) ...[_gap(10), AlertBanner(glyph: '🔒', tone: 0, message: 'הערת-הנהלה: ${t['notes']}')],
+      if (_TeamData.balanceFor(t) != null) ...[
+        _gap(10),
+        AlertBanner(glyph: '⚖️', tone: 3, message: 'הצעת-איזון: להעביר ${_TeamData.balanceFor(t)!['course']['name']} מ-${_TeamData.balanceFor(t)!['from']['name']} (עמוס-מדי) לכאן'),
+      ],
+    ]);
+  }
+
+  // מערכת-שבועית אישית: DsTable ⊕ sessionsOf ⊕ timeToMin (מיון-שעות) — שורה=שעה · עמודה=יום · תא=כיתה·חדר
+  Widget _timetable(Map<String, dynamic> t) {
+    final cs = _TeamData.coursesOf(t);
+    final grid = <String, Map<int, String>>{};
+    for (final c in cs) {
+      for (final s in sessionsOf(c) as List) {
+        (grid['${s['time']}'] ??= {})[s['day'] as int] = '${c['cls']} · ${c['roomId']}';
+      }
+    }
+    final times = grid.keys.toList()..sort((a, b) => (timeToMin(a) as num).compareTo(timeToMin(b) as num));
+    const days = [0, 1, 2, 3, 4, 5];
+    if (times.isEmpty) return const EmptyState(glyph: '🗓', message: 'אין שיעורים במערכת');
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      DsTable(labels: ['שעה', for (final d in days) dayNames[d]], rows: [for (final tm in times) [tm, for (final d in days) grid[tm]![d] ?? '—']]),
+      _gap(6),
+      Row(children: [
+        BareStat(value: '${times.length}', label: 'רצועות-שעה', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: '${_TeamData.sessionsWeek(t)}', label: 'שיעורים/שבוע', inkColor: _ink, mutedColor: _muted),
+        BareStat(value: minToHM((timeToMin(times.first) as num).toInt(), (n) => n.toString().padLeft(2, '0')), label: 'שיעור-ראשון', inkColor: _acc, mutedColor: _muted),
+      ]),
+    ]);
+  }
+
+  // כיתות: חוג ⇒ MediaRow (שם·כיתה·חדר·מפגשים) · הקצה-כיתה = איזון (balanceFor)
+  Widget _classes(Map<String, dynamic> t, void Function(void Function()) act) {
+    final cs = _TeamData.coursesOf(t);
+    final bal = _TeamData.balanceFor(t);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      if (cs.isEmpty) const EmptyState(glyph: '🏫', message: 'לא הוקצו חוגים'),
+      for (final c in cs)
+        MediaRow(glyph: '📘', title: '${c['name']} · חדר ${c['roomId']}', subtitle: '${(sessionsOf(c) as List).length} מפגשים/שבוע · ${(sessionsOf(c) as List).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ')}'),
+      if (bal != null) ...[
+        _gap(8),
+        Wrap(children: [SoftButton(label: '🏫 הקצה-כיתה: ${bal['course']['name']} מ-${bal['from']['name']}', tone: 1, onTap: () => act(() => _TeamData.reassign(bal['course'] as Map<String, dynamic>, t, _who)))]),
+      ],
+    ]);
+  }
+
+  // היעדרויות: ציר (TimelineItem×list) ⊕ NeonBars(4 חודשים) ⊕ trendFromScan (דפוס)
+  Widget _absences(Map<String, dynamic> t) {
+    final list = _TeamData.absencesOf(t);
+    final monthly = _TeamData.absenceMonthly(t);
+    final trend = _TeamData.absenceTrend(t);
+    final base = DateTime.parse('${_TeamData.today}T12:00:00');
+    final labels = [for (var i = 3; i >= 0; i--) () { final m = DateTime(base.year, base.month - i); return '${m.month}/${m.year % 100}'; }()];
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      NeonBars(labels: labels, values: [for (final v in monthly) v.toDouble()], tone: _TeamData.frequentAbsentee(t) ? 2 : 1),
+      _gap(6),
+      Wrap(spacing: 8, children: [
+        StatusChip(label: 'מגמה: ${trend['dir'] == 'up' ? '↑ עולה' : trend['dir'] == 'down' ? '↓ יורדת' : '→ יציבה'} ${trend['pct']}%', tone: trend['dir'] == 'up' ? 2 : 1),
+        if (_TeamData.frequentAbsentee(t)) const StatusChip(label: 'דפוס-היעדרות — לשיחת-תמיכה', tone: 3),
+      ]),
+      _gap(10),
+      if (list.isEmpty) const EmptyState(glyph: '🌤', message: 'אין היעדרויות רשומות'),
+      for (final a in list)
+        TimelineItem(title: '🤒 ${_TeamData.reasonOf(a['reason'] as String)}', time: fmtDate(a['date'] as String), body: () {
+          final covered = _TeamData.subs.where((s) => s['absentId'] == t['id'] && s['date'] == a['date']).toList();
+          return covered.isEmpty ? 'ללא רישום-החלפה' : '${covered.where((s) => s['stage'] == 2).length}/${covered.length} שיעורים כוסו';
+        }()),
+    ]);
+  }
+
+  // החלפות: ביצע/קיבל (TimelineItem)
+  Widget _subsOf(Map<String, dynamic> t) {
+    final mine = _TeamData.subs.where((s) => s['subId'] == t['id'] || s['absentId'] == t['id']).toList()..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
+    if (mine.isEmpty) return const EmptyState(glyph: '🔁', message: 'אין החלפות');
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      for (final s in mine)
+        TimelineItem(
+          title: '${s['subId'] == t['id'] ? '🟢 ביצע/ה' : '🟠 קיבל/ה'} · ${_TeamData.courseById(s['courseId'] as String)?['name']}',
+          time: '${fmtDate(s['date'] as String)}${s['time'] != null ? ' ${s['time']}' : ''}',
+          body: '${s['stage'] == 2 ? '✅ אושר' : s['stage'] == 1 ? '🟠 הוצע' : '🔴 ללא-מחליף'} · ${s['subId'] == t['id'] ? 'במקום ${_TeamData.nameOf(s['absentId'] as String)}' : 'מחליף: ${_TeamData.nameOf(s['subId'] as String?)}'}',
+        ),
+    ]);
+  }
+
+  // ביצועי-כיתות (מקום-שמור · §20-ג): מאיר רק כשמוזרם classPerf {labels, values, monthly} ממודולי נוכחות/תלמידים
+  Widget _performance(Map<String, dynamic> t) {
+    final perf = t['classPerf'] as Map<String, dynamic>?;
+    if (perf == null) return const EmptyState(glyph: '📊', message: 'מקום-שמור: נוכחות/ציוני-כיתותיו יאירו כשיוזרמו ממודולי נוכחות ותלמידים (לא מזייפים)');
+    final trend = trendFromScan({'monthly': perf['monthly']});
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      NeonBars(labels: (perf['labels'] as List).cast<String>(), values: (perf['values'] as List).map((v) => (v as num).toDouble()).toList(), tone: trend['dir'] == 'down' ? 2 : 1),
+      _gap(6),
+      StatusChip(label: 'מגמה ${trend['dir']} ${trend['pct']}%', tone: trend['dir'] == 'down' ? 2 : 1),
+    ]);
+  }
+
+  // הכשרות+תוקף: MediaRow ⊕ StatusChip(certExpiryStatus)
+  Widget _certs(Map<String, dynamic> t) {
+    final cs = _TeamData.certsOf(t);
+    if (cs.isEmpty) return const EmptyState(glyph: '🎓', message: 'אין הכשרות רשומות — הכשרה-חסרה');
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      for (final c in cs)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(children: [
+            Expanded(child: MediaRow(glyph: '🎓', title: '${c['name']}', subtitle: '${c['issuer']} · תוקף ${fmtDate(c['expiry'] as String)}')),
+            () {
+              final st = _TeamData.certStatus(c);
+              return StatusChip(label: st == CertExpiryStatus.expired ? 'פג' : st == CertExpiryStatus.expiringSoon ? 'פג בקרוב' : 'בתוקף', tone: st == CertExpiryStatus.expired ? 2 : st == CertExpiryStatus.expiringSoon ? 3 : 1);
+            }(),
+          ]),
+        ),
+    ]);
+  }
+
+  // מסמכים (מקום-שמור): רשומות שנרשמו ב"צרף-מסמך"; אין ⇒ ריק-אמת
+  Widget _docs(Map<String, dynamic> t) {
+    final ds = _TeamData.docs[t['id']] ?? const [];
+    if (ds.isEmpty) return const EmptyState(glyph: '📎', message: 'אין מסמכים — צרף-מסמך ירשום כאן (אחסון-קבצים = מקום-שמור להצבה)');
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final d in ds) TimelineItem(title: '📎 ${d['name']}', time: fmtDate(d['date'] as String))]);
+  }
+
+  // אודיט: כל פעולה שנרשמה בפנקס (מי·מה·מתי) — TimelineItem
+  Widget _audit(Map<String, dynamic> t) {
+    final rows = _TeamData.audit.where((a) => a['target'] == t['name'] || '${a['target']}'.contains('${t['name']}')).toList();
+    if (rows.isEmpty) return const EmptyState(glyph: '🧾', message: 'אין רישומי-אודיט למורה זה');
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) TimelineItem(title: '${a['what']}', time: fmtDate(a['date'] as String), body: 'ע״י ${a['who']}')]);
+  }
+
+  // 14 פעולות (המפרט) — SoftButton; מגודרות-הרשאה בגל 5. חסר-נתון ⇒ מקום-שמור מפורש, לא זיוף.
+  Widget _actions(Map<String, dynamic> t, void Function(void Function()) act, BuildContext sheetCtx) {
+    final reasons = absenceReasonChips(term: (k) => kTerms[k] ?? k);
+    final keys = kTerms.keys.toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        SoftButton(label: '✏️ ערוך תפקיד', tone: 0, onTap: () => act(() => _TeamData.cycleRole(t, _who))),
+        SoftButton(label: '📚 הקצה-מקצוע', tone: 0, onTap: () => act(() => _TeamData.addSubject(t, _who))),
+        SoftButton(label: '🔎 מצא-מחליף', tone: 1, onTap: () { Navigator.of(sheetCtx).pop(); setState(() => _mode = 2); }),
+        SoftButton(label: '🗓 עדכן-זמינות (שישי)', tone: 0, onTap: () => act(() => _TeamData.toggleFriday(t, _who))),
+        SoftButton(label: '🎓 הוסף-הכשרה', tone: 0, onTap: () => act(() => _TeamData.addCert(t, _who))),
+        SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => act(() => _TeamData.addDoc(t, _who))),
+        SoftButton(label: '🖨 הדפס-מערכת', tone: 0, onTap: () => _openExport('מערכת אישית · ${t['name']}', _TeamData.timetableCsv(t))),
+        SoftButton(label: '⏸ ${_TeamData.statusOf(t) == 'active' ? 'סמן-חופשה' : 'שנה-סטטוס'}', tone: 2, onTap: () => act(() => _TeamData.cycleStatus(t, _who))),
+      ]),
+      _gap(8),
+      if (t['contact'] == null)
+        const AlertBanner(glyph: '💬', tone: 0, message: 'שלח-הודעה: פרטי-קשר מוזרקים בהצבה (חוק-6) — מקום-שמור, מאיר כשיוזרק contact')
+      else
+        Wrap(children: [SoftButton(label: '💬 שלח-הודעה', tone: 1, onTap: () => act(() => _TeamData.log(_who, 'שליחת-הודעה', t['name'] as String)))]),
+      _gap(8),
+      if (!_TeamData.absentOn(t, _TeamData.today)) ...[
+        const Text('🤒 סמן-היעדרות היום — סיבה:', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+        _gap(6),
+        Wrap(spacing: 8, runSpacing: 6, children: [
+          for (var i = 0; i < reasons.length; i++) SoftButton(label: reasons[i], tone: 2, onTap: () => act(() => _TeamData.markAbsent(t, keys[i], _who))),
+        ]),
+      ] else
+        const AlertBanner(glyph: '🤒', tone: 2, message: 'מסומן/ת נעדר/ת היום — שיעורי-היום נרשמו בלוח-ההחלפות'),
+    ]);
+  }
+
+  // ייצוא/הדפסה: GlassCard-preview של CSV (toCsv⊕csvEscape⊕exportAllowed) — בסנדבוקס ההורדה חסומה ⇒ תצוגה+העתקה
+  void _openExport(String title, String csv) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
+        builder: (ctx, scroll) => Padding(
+          padding: const EdgeInsets.all(12),
+          child: GlassCard(
+            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+              MediaRow(glyph: '⬇', title: title, subtitle: 'CSV · BOM + חסימת-הזרקה · PDF = מקום-שמור (מנוע-PDF בהצבה)'),
+              _gap(8),
+              if (!exportAllowed(false))
+                const AlertBanner(message: 'ייצוא חסום (שער-יציאת-מידע)', tone: 2)
+              else
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
+                  child: SelectableText(csv, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
+                ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+
   // 📋 מבט-טבלה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid (מזייף int rows).
   Widget _table(List<Map<String, dynamic>> rows) {
     final cols = [for (final c in _TeamData.columnDefs) if (_TeamData.colShown(c, rows)) c];
@@ -537,6 +899,8 @@ class _TeachersScreenState extends State<TeachersScreen> {
           Row(children: [
             PremiumAvatar(name: t['name'] as String, size: 44, status: avatarStatus),
             const SizedBox(width: 10),
+            // MediaRow בולע את הקליק (InkWell פנימי no-op) ⇒ כפתור-שברון נפרד כשקע-הפתיחה
+            IconButton(onPressed: () => _openPanel(t), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-מורה ופעולות'),
             Expanded(
               child: MediaRow(
                 glyph: t['role'] == 'homeroom' ? '🏫' : t['role'] == 'aide' ? '🤝' : t['role'] == 'mgmt' ? '🧭' : '📚',
