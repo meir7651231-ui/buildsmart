@@ -533,8 +533,10 @@ class _TeamData {
     if (!isActive(t) || overLoad(t)) return null;
     for (final o in active.where(overLoad)) {
       for (final c in coursesOf(o)) {
-        if (!subjects(t).contains(c['subject']) || clashOf(t, c) != null) continue;
-        if ((sessionsOf(c) as List).every((x) => availableAt(t, x['day'] as int, '${x['time']}'))) return {'course': c, 'from': o};
+        final ss = sessionsOf(c) as List;
+        // תנאי-קיבולת (נתפס ברנדר-מול-המטרה): המקבל לא הופך עמוס-מדי — שעותיו + מפגשי-החוג ≤ חוזה
+        if (!subjects(t).contains(c['subject']) || clashOf(t, c) != null || hoursWeek(t) + ss.length > contractHours(t)) continue;
+        if (ss.every((x) => availableAt(t, x['day'] as int, '${x['time']}'))) return {'course': c, 'from': o};
       }
     }
     return null;
