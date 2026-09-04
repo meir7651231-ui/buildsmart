@@ -1,7 +1,6 @@
 // 🏫 SchoolOS — בנייה מאפס לפי THE-WAY הנכון (פעולה-ראשונה · הרכבה-תמיד).
 // כל מסך: מטרה → פעולות-יסוד הכי-מתאימות → הרכבה (תמיד כמה) → חיווט → אימות-מול-המטרה.
 // בוחרים פעולת-יסוד, לא "אטום"; האטום רק מגלם. לעולם אין אטום-אחד שמשרת מטרה מקסימלית.
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
@@ -40,6 +39,15 @@ import '../dart-maor/can-granted-action.dart'; // הרשאות: גידור-פע�
 import '../dart-maor/expiring-intakes.dart'; // אוטומציה: קליטות-פוקעות תוך חלון (מדף)
 import '../dart-maor/shop-expiry-warn-days.dart'; // אוטומציה: סף-אזהרת-פקיעה =7 (מדף)
 import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט-ציר-זמן (title/time/body) — לא timeline_flow המזייף
+// ═══ 8 מודולי-SchoolOS — נבנו בסשני-בנאי נפרדים (מגילת SCHOOLOS-ORCHESTRATION §2), מחווטים כאן ע"י המנהל (כותב-יחיד) ═══
+import 'schoolos_students.dart';   // 🎓 תלמידים · StudentsScreen
+import 'schoolos_attendance.dart'; // 📋 נוכחות · AttendanceScreen
+import 'schoolos_courses.dart';    // 📚 חוגים/מערכת · CoursesScreen
+import 'schoolos_teachers.dart';   // 👩‍🏫 מורים · TeachersScreen
+import 'schoolos_rooms.dart';      // 🚪 חדרים · RoomsScreen
+import 'schoolos_fees.dart';       // 💳 גבייה · FeesScreen
+import 'schoolos_parents.dart';    // 👪 הורים · ParentsScreen
+import 'schoolos_dashboard.dart';  // 📊 לוח-הנהלה · DashboardScreen
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat דורש הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -69,6 +77,7 @@ class SchoolOsApp extends StatelessWidget {
 // ═══════════ בית · מטרה: "לדעת מה דורש-פעולה עכשיו — בלי שדבר יישמט" ═══════════
 class _Home extends StatelessWidget {
   const _Home();
+  static void _go(BuildContext c, Widget screen) => Navigator.push(c, MaterialPageRoute(builder: (_) => screen));
   @override
   Widget build(BuildContext context) => DsScaffold(
         title: 'SchoolOS', subtitle: 'תיכון עתיד · מה דורש-פעולה עכשיו', icon: '🏫',
@@ -79,8 +88,15 @@ class _Home extends StatelessWidget {
           ]),
           const SizedBox(height: 8),
           DsSection(title: 'כלים', children: [
-            DsNavTile(glyph: '🎓', title: 'תלמידים בסיכון', sub: 'מי מתחיל ליפול — בזמן להתערב', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Students()))),
-            DsNavTile(glyph: '📦', title: 'מלאי', sub: 'ימים-עד-ריקון מול אספקה — שלא ייגמר', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _Inventory()))),
+            DsNavTile(glyph: '📊', title: 'לוח-הנהלה', sub: 'מה דורש החלטה היום — נגזרת של כל המודולים', onTap: () => _go(context, const DashboardScreen())),
+            DsNavTile(glyph: '🎓', title: 'תלמידים', sub: 'תיק-תלמיד · סיכון · שיבוץ · מעבר-שנה', onTap: () => _go(context, const StudentsScreen())),
+            DsNavTile(glyph: '📋', title: 'נוכחות', sub: 'מי חסר עכשיו · חיסורים · השלמות', onTap: () => _go(context, const AttendanceScreen())),
+            DsNavTile(glyph: '📚', title: 'חוגים ומערכת', sub: 'תפוסה · המתנה · מערכת-שעות', onTap: () => _go(context, const CoursesScreen())),
+            DsNavTile(glyph: '👩‍🏫', title: 'מורים', sub: 'עומס · חלון-פנוי · תפקידים', onTap: () => _go(context, const TeachersScreen())),
+            DsNavTile(glyph: '🚪', title: 'חדרים', sub: 'יומן-חדרים · התנגשויות · שיבוץ-מחדש', onTap: () => _go(context, const RoomsScreen())),
+            DsNavTile(glyph: '💳', title: 'גבייה', sub: 'חובות · הסדרים · תזכורות (אפס-קבלה)', onTap: () => _go(context, const FeesScreen())),
+            DsNavTile(glyph: '👪', title: 'הורים', sub: 'קשר · שידור · הסכמות', onTap: () => _go(context, const ParentsScreen())),
+            DsNavTile(glyph: '📦', title: 'מלאי', sub: 'ימים-עד-ריקון מול אספקה — שלא ייגמר', onTap: () => _go(context, const _Inventory())),
           ]),
         ],
       );
@@ -864,75 +880,4 @@ class _InventoryState extends State<_Inventory> {
   }
 }
 
-// ═══════════ תלמידים בסיכון · מטרה: "לתפוס מי מתחיל ליפול — בזמן להתערב לפני נשירה" ═══════════
-// ההחלטה השלמה: מי · למה (האות המוביל) · איזו התערבות. פעולות-יסוד מורכבות (אין מנוע-סיכון-תלמיד מוכן):
-//  · ציון-סיכון      → ממוצע-משוקלל של אותות מנורמלים (היעדרויות40+פער-ציון40+מגמה20)
-//  · האות-המוביל     → מקסימום-התרומה = הסיבה (מכתיב את ההתערבות)
-//  · דירוג לפי-סיכון → הכי-קרוב-לנפילה ראשון · התערבות לפי-band
-class _Students extends StatelessWidget {
-  const _Students();
-  // דאטה-אמת: אות פר-תלמיד — חיסורים(30י) · ממוצע · מגמה(מחצית-חדשה−ישנה)
-  static const _st = <Map<String, dynamic>>[
-    {'name': 'רון שמעוני · י\'-1', 'abs': 7, 'grade': 61, 'trend': -8},
-    {'name': 'ליאור אוחיון · ט\'-3', 'abs': 5, 'grade': 68, 'trend': -5},
-    {'name': 'הדר נחום · ח\'-2', 'abs': 4, 'grade': 72, 'trend': -3},
-    {'name': 'מאיה ביטון · י\'-2', 'abs': 2, 'grade': 79, 'trend': 2},
-    {'name': 'נועה לוי · י\'-3', 'abs': 0, 'grade': 91, 'trend': 3},
-  ];
-  static double _absN(Map<String, dynamic> s) => math.min(1.0, (s['abs'] as int) / 8);
-  static double _gradeN(Map<String, dynamic> s) => math.max(0, 75 - (s['grade'] as int)) / 75;
-  static double _trendN(Map<String, dynamic> s) => (s['trend'] as int) < 0 ? math.min(1.0, -(s['trend'] as int) / 8) : 0;
-  static int _risk(Map<String, dynamic> s) => (_absN(s) * 40 + _gradeN(s) * 40 + _trendN(s) * 20).round();
-  static int get atRisk => _st.where((s) => _risk(s) >= 45).length;
-
-  // האות-המוביל = התרומה הגדולה-ביותר לסיכון (מכתיב את ההתערבות)
-  String _why(Map<String, dynamic> s) {
-    final a = _absN(s) * 40, g = _gradeN(s) * 40, t = _trendN(s) * 20;
-    if (a >= g && a >= t) return 'היעדרויות (${s['abs']})';
-    if (g >= t) return 'ציון נמוך (${s['grade']})';
-    return 'מגמה שלילית (${s['trend']})';
-  }
-
-  String _action(int r) => r >= 70 ? 'ועדת-שילוב + ביקור-בית' : r >= 45 ? 'שיחת-מחנך + יידוע-הורים' : 'מעקב';
-
-  @override
-  Widget build(BuildContext context) {
-    final ranked = [..._st]..sort((a, b) => _risk(b).compareTo(_risk(a))); // הכי-בסיכון ראשון
-    return DsScaffold(
-      title: 'תלמידים בסיכון', subtitle: 'מי מתחיל ליפול — מדורג, בזמן להתערב', icon: '🎓',
-      children: [
-        Wrap(spacing: 12, runSpacing: 12, children: [
-          SizedBox(width: 190, child: KpiTile(glyph: '🚨', value: '$atRisk', label: 'דורשי-התערבות')),
-          SizedBox(width: 190, child: KpiTile(glyph: '🎓', value: '${_st.length}', label: 'בכיתה')),
-        ]),
-        const SizedBox(height: 8),
-        DsSection(title: 'החלטת-התערבות · הכי-בסיכון ראשון', children: [
-          for (final s in ranked) _row(s),
-        ]),
-      ],
-    );
-  }
-
-  // ההחלטה מורכבת מ-3 נגזרות-אמת, כל אחת מגולמת באטום-מדף (אפס-ציור-ביד):
-  //  · ציון-סיכון  → StatRow   (בר: ארוך=בסיכון)
-  //  · האות-המוביל → StatusChip (הסיבה; tone=סכנה בוועדת-שילוב, אחרת אזהרה)
-  //  · ההתערבות    → StatusChip (הפעולה; אותו tone-band)
-  Widget _row(Map<String, dynamic> s) {
-    final r = _risk(s), act = r >= 45;
-    final tone = r >= 70 ? 2 : 3;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        StatRow(label: s['name'] as String, value: 'סיכון $r', fraction: (r / 100).clamp(0.0, 1.0)),
-        if (act)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, right: 4),
-            child: Wrap(spacing: 8, runSpacing: 6, children: [
-              StatusChip(label: _why(s), tone: tone),
-              StatusChip(label: _action(r), tone: tone),
-            ]),
-          ),
-      ]),
-    );
-  }
-}
+// ═══════════ תלמידים · הוחלף ב-StudentsScreen (schoolos_students.dart · סשן-בנאי · 118/135) ═══════════
