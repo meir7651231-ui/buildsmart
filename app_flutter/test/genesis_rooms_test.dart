@@ -46,4 +46,52 @@ void main() {
     expect(find.text('🪑 לא-מנוצלים'), findsOneWidget);
     expect(find.text('📊 ניצולת-שבוע'), findsOneWidget);
   });
+
+  testWidgets('גל 2 · יומן-יום מסמן 2 כפל-תפיסה ביום חמישי · שבוע ורשימה מתחלפים (SegmentedSwitch)', (tester) async {
+    await _pump(tester);
+    // מבט-יום (ברירת-מחדל = היום, חמישי): גריד חדרים×שעות מ-buildSlots · 2 תאי ⚠ = conflictsOf
+    expect(find.text('חדר'), findsOneWidget, reason: 'כותרת-עמודת-החדרים בגריד');
+    expect(find.text('08:00'), findsOneWidget, reason: 'ציר-השעות מתחיל ב-08:00');
+    expect(find.text('⚠ כפל-תפיסה'), findsNWidgets(2), reason: 'r1 09:00 (מתמטיקה⊕מבחן) · r2 10:00 (כימיה⊕ביולוגיה)');
+    expect(find.textContaining('לא-זמין'), findsWidgets, reason: 'אודיטוריום לא-פעיל ⇒ תאי לא-זמין');
+    // מבט-שבוע: חדרים×ימים · תא = תפוס/סך · יום-שישי חסום (blockReason)
+    await tester.tap(find.text('🗓 שבוע'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('שבוע-הבניין'), findsOneWidget);
+    expect(find.textContaining('⛔ יום שישי'), findsWidgets, reason: 'blockReason: שישי חסום לכל חדר-פעיל');
+    expect(find.textContaining('⚠1 · '), findsNWidgets(2), reason: 'תאי-חמישי של r1 ו-r2 נושאים התנגשות אחת כל-אחד');
+    // מבט-רשימה: DsTable מונחה-columnDefs — עמודות-נגזרות תמיד, מקום-שמור (סוג/אחראי/בדיקה/עדכון) שקט
+    await tester.tap(find.text('📋 רשימה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('ניצולת%-שבוע'), findsOneWidget);
+    expect(find.text('תפיסה-נוכחית'), findsOneWidget);
+    expect(find.text('סוג'), findsNothing, reason: 'מקום-שמור: אין נתון ⇒ העמודה שקטה');
+    expect(find.text('אחראי'), findsNothing, reason: 'מקום-שמור');
+    expect(find.text('כימיה יא׳ · יוסי לוי'), findsOneWidget, reason: 'תפיסה-נוכחית של מעבדת-מדעים ב-10:15');
+  });
+
+  testWidgets('גל 3 · פאנל חדר-נבחר: זהות(roomInfoLabel) · 8 טאבים · פעולה משנה מצב (סגירת-תקלה ⇒ KPI יורד)', (tester) async {
+    await _pump(tester);
+    // פתיחת-הפאנל דרך תא-שם-החדר בגריד (InkWell)
+    await tester.tap(find.textContaining('חדר מחשבים').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600)); // אנימציית-sheet
+    expect(find.textContaining('משבצות של 60 דק׳'), findsOneWidget, reason: 'roomInfoLabel(מאור): משבצות·קיבולת·נגישות·ציוד');
+    expect(find.text('תפיסות'), findsOneWidget, reason: 'טאב-3 מ-8');
+    expect(find.text('אודיט'), findsOneWidget, reason: 'טאב-8 מ-8');
+    expect(find.text('פעולות'), findsOneWidget);
+    // טאב-תקלות: f1 (מזגן לא מקרר) פתוחה בחדר-מחשבים ⇒ סגירה מעדכנת את הפאנל והמסך
+    await tester.tap(find.text('תקלות'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('מזגן לא מקרר'), findsOneWidget);
+    await tester.tap(find.text('✔ סגור'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('אין תקלות פתוחות'), findsOneWidget, reason: 'closeFault ⇒ הטאב מתרוקן');
+    // טאב-אודיט: הפעולה נרשמה (מי·מה·מתי)
+    await tester.ensureVisible(find.text('אודיט')); // 8 טאבים בגלילה-אופקית — הטאב האחרון מחוץ-למסך עד שגוללים
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('אודיט'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('סגירת-תקלה'), findsOneWidget, reason: 'log() רשם את הפעולה');
+  });
 }
