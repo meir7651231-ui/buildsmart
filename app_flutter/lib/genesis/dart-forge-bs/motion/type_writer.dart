@@ -12,6 +12,6 @@ class ForgeTypeWriter extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: Container(padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("Label", style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontSize: 15)), Container(width: 2, height: 18, margin: const EdgeInsets.fromLTRB(0, 0, 3, 0), decoration: BoxDecoration(color: theme.aHi))])))])));
+    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: Container(padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [Text("Label", style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 15)), Container(width: 2, height: 18, margin: const EdgeInsets.fromLTRB(0, 0, 3, 0), decoration: BoxDecoration(color: theme.aHi))])))])));
   }
 }

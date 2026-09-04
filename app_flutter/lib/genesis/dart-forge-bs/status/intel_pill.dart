@@ -91,6 +91,6 @@ class ForgeIntelPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(2, 8, 2, 8), child: Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [Directionality(textDirection: TextDirection.ltr, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 5, children: [SizedBox(width: 14, height: 14, child: CustomPaint(painter: _SvgScene([_Op.path("M3 17l6-6 4 4 8-8", skin.ok, false, 1.8), _Op.path("M21 7v6M21 7h-6", skin.ok, false, 1.8)], 24, 24))), Text("Label", style: TextStyle(color: skin.ok, fontFamily: fonts.grotesk, fontSize: 13, fontWeight: FontWeight.w700))]))]));
+    return Container(padding: const EdgeInsets.fromLTRB(2, 8, 2, 8), child: Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [Directionality(textDirection: TextDirection.ltr, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 5, children: [SizedBox(width: 14, height: 14, child: CustomPaint(painter: _SvgScene([_Op.path("M3 17l6-6 4 4 8-8", skin.ok, false, 1.8), _Op.path("M21 7v6M21 7h-6", skin.ok, false, 1.8)], 24, 24))), Text("Label", style: TextStyle(color: skin.ok, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 13, fontWeight: FontWeight.w700))]))]));
   }
 }
