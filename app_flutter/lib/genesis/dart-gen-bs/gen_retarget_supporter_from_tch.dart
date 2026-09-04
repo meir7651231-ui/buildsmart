@@ -1,7 +1,7 @@
 // 🎯 SupporterScreen — retarget של schoolos_teachers.dart לישות Supporter (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity Supporter
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 18 · חוזה-מנוע (לא משתנה) 1
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · status⇒∅(engine-contract) · role⇒∅(reserved(8 מועמדים)) · subjects⇒∅(reserved(2 מועמדים)) · homeroom⇒∅(reserved(2 מועמדים)) · contractHours⇒∅(reserved(3 מועמדים)) · contractType⇒∅(reserved(8 מועמדים)) · startDate⇒∅(reserved(3 מועמדים)) · availability⇒∅(reserved) · constraints⇒∅(reserved(2 מועמדים)) · preferredSub⇒nextEventId(unique) · extraRoles⇒∅(reserved(2 מועמדים)) · certs⇒∅(reserved(2 מועמדים)) · issuer⇒∅(reserved(8 מועמדים)) · expiry⇒∅(reserved(3 מועמדים)) · attendance⇒∅(reserved) · absences⇒∅(reserved(2 מועמדים)) · reason⇒∅(reserved(8 מועמדים)) · date⇒∅(reserved(3 מועמדים)) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved(3 מועמדים))
-//   תפר-עובדות (G9b): SupporterFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel
+//   תפר-עובדות (G9b): SupporterFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel · תפר-סינון-מדד initialMetric
 //   שדות-Supporter בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, email, address, city, idNum, extId, cat, forWho, count, ils, usd, first, last, nextDate, nextNote, photos, donations, hok, ayin, calls · תוויות: מונחי teacher (מורה/—) ⇒ Supporter (תורם/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Supporter
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
@@ -608,7 +608,8 @@ class _TeamData {
 
 // ═══════════ המסך · מחלקה ציבורית יחידה (const · ללא main) ═══════════
 class SupporterScreen extends StatefulWidget {
-  const SupporterScreen({super.key, this.initialMode = 0, this.initialPanel, this.initialTab = 0}); // שקעי-הזרקה לתצוגה-מקדימה/בדיקה: מבט · כרטיס-פתוח · טאב
+  const SupporterScreen({this.initialMetric, super.key, this.initialMode = 0, this.initialPanel, this.initialTab = 0}); // שקעי-הזרקה לתצוגה-מקדימה/בדיקה: מבט · כרטיס-פתוח · טאב
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (SupporterFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
   final int initialMode;
   final String? initialPanel; // מזהה-מורה שכרטיסו נפתח אחרי הפריים-הראשון
   final int initialTab;
@@ -616,6 +617,7 @@ class SupporterScreen extends StatefulWidget {
   State<SupporterScreen> createState() => _SupporterScreenState();
 }
 
+  String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
 class _SupporterScreenState extends State<SupporterScreen> {
   int _sort = 0; // 0=⚖️ עומס · 1=🤒 חיסורים · 2=🏫 כיתות
   final Map<String, int> _tab = {}; // טאב-נבחר פר-מורה (חיווט SegmentedSwitch→תצוגה)
@@ -631,6 +633,7 @@ class _SupporterScreenState extends State<SupporterScreen> {
   @override
   void initState() {
     super.initState();
+    _metric = widget.initialMetric != null && SupporterFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
     _mode = widget.initialMode;
     _TeamData.syncUncovered();
     final p = widget.initialPanel == null ? null : _TeamData.byId(widget.initialPanel!);
@@ -656,7 +659,8 @@ class _SupporterScreenState extends State<SupporterScreen> {
       }
     });
     // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches — פייפליין אחד לטריאז'/טבלה/ייצוא
-    final visible = _TeamData.filter(_TeamData.search(ranked, _q), _locks);
+    final visibleAll = _TeamData.filter(_TeamData.search(ranked, _q), _locks);
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => SupporterFacts.heroRows(_metric!).any((h) => '${h[SupporterFacts.idKey] ?? h['id']}' == '${r[SupporterFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-דחיפות-מאוחדת (sev)
     final buckets = <int, List<Map<String, dynamic>>>{3: [], 2: [], 1: [], 0: [], -1: []};
     for (final t in visible) {
@@ -669,6 +673,9 @@ class _SupporterScreenState extends State<SupporterScreen> {
       subtitle: '${_TeamData.staff.length} אנשי-צוות · ${_TeamData.byRole.map((r) => '${r[0]} ${r[1]}').join(' · ')}',
       icon: '👩‍🏫',
       children: [
+        // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
+        if (_metric != null) AlertBanner(glyph: '🎯', tone: 1, message: 'מסונן למדד: ${SupporterFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}'),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: SoftButton(label: '✖ בטל סינון-מדד', tone: 2, onTap: () => setState(() => _metric = null))),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — roleOf⊕teacherIdOf⊕canGrantedAction מגדרים פעולות/עמודות/רשומות
         //   6 תפקידים ב-2 שורות של SegmentedSwitch (Row-מבוקר; 6 פריטים גולשים ברוחב-המסך — נתפס בבדיקת-widget)
         for (var r = 0; r < 2; r++) ...[

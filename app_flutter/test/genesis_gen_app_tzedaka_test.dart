@@ -66,7 +66,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('hero-TzCampaign'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(TzCampaignScreen), findsOneWidget); expect(tester.takeException(), isNull);
     final id = TzCampaignFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
-    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); expect(find.textContaining('מסונן למדד'), findsOneWidget); expect(find.textContaining('· ${TzCampaignFacts.heroRows(TzCampaignFacts.heroKey).length} מתוך'), findsOneWidget); }
     // ignore: avoid_print
     print('hero-jump TzCampaign: id=$id rows=${TzCampaignFacts.heroRows(TzCampaignFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
   });
@@ -76,7 +76,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('hero-ShopProduct'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(ShopProductScreen), findsOneWidget); expect(tester.takeException(), isNull);
     final id = ShopProductFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
-    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); expect(find.textContaining('מסונן למדד'), findsOneWidget); expect(find.textContaining('· ${ShopProductFacts.heroRows(ShopProductFacts.heroKey).length} מתוך'), findsOneWidget); }
     // ignore: avoid_print
     print('hero-jump ShopProduct: id=$id rows=${ShopProductFacts.heroRows(ShopProductFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
   });
@@ -86,7 +86,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('hero-ShopStore'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(ShopStoreScreen), findsOneWidget); expect(tester.takeException(), isNull);
     final id = ShopStoreFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
-    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); expect(find.textContaining('מסונן למדד'), findsOneWidget); expect(find.textContaining('· ${ShopStoreFacts.heroRows(ShopStoreFacts.heroKey).length} מתוך'), findsOneWidget); }
     // ignore: avoid_print
     print('hero-jump ShopStore: id=$id rows=${ShopStoreFacts.heroRows(ShopStoreFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
   });
@@ -96,7 +96,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('hero-Teacher'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(TeacherScreen), findsOneWidget); expect(tester.takeException(), isNull);
     final id = TeacherFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
-    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); expect(find.textContaining('מסונן למדד'), findsOneWidget); expect(find.textContaining('· ${TeacherFacts.heroRows(TeacherFacts.heroKey).length} מתוך'), findsOneWidget); }
     // ignore: avoid_print
     print('hero-jump Teacher: id=$id rows=${TeacherFacts.heroRows(TeacherFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
   });

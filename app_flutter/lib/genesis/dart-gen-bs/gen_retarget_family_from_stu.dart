@@ -1,7 +1,7 @@
 // 🎯 FamilyScreen — retarget של schoolos_students.dart לישות Family (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Family
 //   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 19 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 13 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · name⇒name(name) · father⇒father(name) · mother⇒mother(name) · phone⇒phone(name) · phone2⇒phone2(name) · email⇒email(name) · city⇒city(name) · address⇒address(name) · language⇒language(name) · maritalStatus⇒maritalStatus(name) · status⇒status(name) · tzedaka⇒tzedaka(name) · discount⇒discount(name) · notes⇒notes(name) · createdAt⇒createdAt(name) · docs⇒docs(name) · cred⇒cred(name) · members⇒members(name) · addedAt⇒∅(reserved) · log⇒∅(reserved) · first⇒∅(reserved(3 מועמדים)) · gender⇒∅(reserved(3 מועמדים)) · birth⇒∅(reserved) · idNum⇒∅(reserved(3 מועמדים)) · school⇒∅(reserved(3 מועמדים)) · grade⇒∅(reserved(3 מועמדים)) · health⇒∅(reserved(3 מועמדים)) · mSefach⇒fullSefach(unique) · mInvite⇒∅(reserved) · mRecommend⇒∅(reserved) · mPhotos⇒∅(reserved) · mVideos⇒∅(reserved)
-//   תפר-עובדות (G9b): FamilyFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId
+//   תפר-עובדות (G9b): FamilyFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric
 //   שדות-Family בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): fatherId, motherId, community, kidsHome, kidsMarried · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Family (משפחה/—) · 2 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Family
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
@@ -853,7 +853,8 @@ class _StuData {
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 class FamilyScreen extends StatefulWidget {
-  const FamilyScreen({this.initialPanelId, super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+  const FamilyScreen({this.initialMetric, this.initialPanelId, super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (FamilyFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
   final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   final Map<String, dynamic>? db;
   /// אינטגרציה לוח-הנהלה⇒מונים: המונים של המודול (המנהל מחווט; אין ייבוא-בין-מודולים)
@@ -865,6 +866,7 @@ class FamilyScreen extends StatefulWidget {
   State<FamilyScreen> createState() => _FamilyScreenState();
 }
 
+  String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
 class _FamilyScreenState extends State<FamilyScreen> {
   final Map<String, String> _coreState = {}; // G6d · פנקס-מצבי-הגרעין לפי id — overlay על הזרע (הזרע const; אין כתיבה אליו)
   String _q = ''; // איתור (DsSearch)
@@ -882,6 +884,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
   @override
   void initState() {
     super.initState();
+    _metric = widget.initialMetric != null && FamilyFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
     final p0 = widget.initialPanelId == null ? null : FamilyFacts.byId(widget.initialPanelId!); // G10a
     if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
     if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset();
@@ -906,13 +909,17 @@ class _FamilyScreenState extends State<FamilyScreen> {
     final avgAtt = _StuData.avgAttendance, avgGr = _StuData.avgGrades;
     // דירוג (מיון-נבחר) ⇒ הנראים (פעילים); לא-פעילים בסקשן-ארכיון נפרד
     // איתור⊕חריגה (23-ג): search=smartFilter⊕smartScore⊕normSearch · filter=finderMatches. הפייפליין מזין טריאז' וטבלה וארכיון.
-    final visible = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
+    final visibleAll = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => FamilyFacts.heroRows(_metric!).any((h) => '${h[FamilyFacts.idKey] ?? h['id']}' == '${r[FamilyFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     final inactiveVisible = _StuData.filter(_StuData.search(_StuData.sorted(_StuData.scoped(_role, _StuData.inactive), _sort), _q), _locks);
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: []};
     for (final s in visible) { buckets[_StuData.band(s)]!.add(s); }
     return DsScaffold(
       title: 'תלמידים', subtitle: '${_StuData.students.length} תלמידים · ${_StuData.byClass().length} כיתות · ${_StuData.highN} בסיכון-גבוה', icon: '🎓',
       children: [
+        // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
+        if (_metric != null) AlertBanner(glyph: '🎯', tone: 1, message: 'מסונן למדד: ${FamilyFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}'),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: SoftButton(label: '✖ בטל סינון-מדד', tone: 2, onTap: () => setState(() => _metric = null))),
         // ═══ הגרעין-מהסכמה (G6c): FamilyCore — מצבים חצובים ⊕ מעבר מאטום-המדף ⊕ חוקים/ערוצים — לא מומצא, לא מצויר-ביד ═══
         DsSection(title: '🧠 מחזור-חיים · ${FamilyCore.term} (גרעין)', children: [
           Wrap(spacing: 6, runSpacing: 6, children: [for (final s in FamilyCore.states) StatusChip(label: s, tone: s == FamilyCore.states.first ? 1 : 0)]),

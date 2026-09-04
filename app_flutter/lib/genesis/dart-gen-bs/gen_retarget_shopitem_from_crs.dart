@@ -1,7 +1,7 @@
 // 🎯 ShopItemScreen — retarget של schoolos_courses.dart לישות ShopItem (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity ShopItem
 //   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 9 · חוזה-מנוע (לא משתנה) 12
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · kind⇒kind(name) · teacherId⇒∅(engine-contract) · roomId⇒∅(engine-contract) · start⇒∅(engine-contract) · end⇒∅(engine-contract) · sessions⇒∅(engine-contract) · time⇒∅(engine-contract) · gender⇒∅(engine-contract) · ageMin⇒∅(engine-contract) · ageMax⇒∅(engine-contract) · gradeMin⇒∅(engine-contract) · gradeMax⇒∅(engine-contract) · day⇒∅(engine-contract) · cat⇒holidays(unique) · semester⇒∅(reserved) · sector⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒∅(reserved(5 מועמדים)) · price⇒∅(reserved(5 מועמדים)) · description⇒∅(reserved) · files⇒∅(reserved) · data⇒∅(reserved) · perLesson⇒active(unique) · lessonPrice⇒∅(reserved(5 מועמדים))
-//   תפר-עובדות (G9b): ShopItemFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher · שורות-מדד (G10a) kpiActive/kpiFull/kpiNoTeacher · תפר-כניסה initialPanelId
+//   תפר-עובדות (G9b): ShopItemFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher · שורות-מדד (G10a) kpiActive/kpiFull/kpiNoTeacher · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric
 //   שדות-ShopItem בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): storeId, value, basePrice, stock, minStock, validDays, waits · תוויות: מונחי course (חוג/—) ⇒ ShopItem (פריט/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopItem
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT · "מה"): knowledge/SPEC-COURSES-FULL-2026-09-04.md · הסטנדרט: מסך-המלאי (schoolos.dart).
@@ -950,16 +950,19 @@ class _ShopItemData {
 
 // ═══════════ המסך · ShopItemScreen (const · ללא main · המנהל מחבר ניווט) ═══════════
 class ShopItemScreen extends StatefulWidget {
-  const ShopItemScreen({this.initialPanelId, super.key});
+  const ShopItemScreen({this.initialMetric, this.initialPanelId, super.key});
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (ShopItemFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
   final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   @override
   State<ShopItemScreen> createState() => _ShopItemScreenState();
 }
 
+  String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
 class _ShopItemScreenState extends State<ShopItemScreen> {
   @override
   void initState() {
     super.initState();
+    _metric = widget.initialMetric != null && ShopItemFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
     final p0 = widget.initialPanelId == null ? null : ShopItemFacts.byId(widget.initialPanelId!); // G10a
     if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
   }
@@ -989,7 +992,8 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
     // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches (AND על נעילות).
     //   'ended' מסנן מכל-החוגים (גם הסתיימו); אחרת מהחיים. הפייפליין רץ פעם-אחת ומזין גריד/רשימה/פר-מורה/פר-חדר.
     final base = _locks['state'] == 'ended' ? _ShopItemData.scopeFor(_role, _ShopItemData.bySemester(_ShopItemData.allCourses, _sem)) : live;
-    final visible = _ShopItemData.filter(_ShopItemData.search(base, _q), _locks);
+    final visibleAll = _ShopItemData.filter(_ShopItemData.search(base, _q), _locks);
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => ShopItemFacts.heroRows(_metric!).any((h) => '${h[ShopItemFacts.idKey] ?? h['id']}' == '${r[ShopItemFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     // דירוג לפי דחיפות-מאוחדת (התנגשות ראשונה), ואז לפי תפוסה-יורדת
     final ranked = [...visible]..sort((a, b) {
         final s = _ShopItemData.sev(b).compareTo(_ShopItemData.sev(a));
@@ -1005,6 +1009,9 @@ class _ShopItemScreenState extends State<ShopItemScreen> {
     return DsScaffold(
       title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_ShopItemData.teachers.length} מורים · ${_ShopItemData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚',
       children: [
+        // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
+        if (_metric != null) AlertBanner(glyph: '🎯', tone: 1, message: 'מסונן למדד: ${ShopItemFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}'),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: SoftButton(label: '✖ בטל סינון-מדד', tone: 2, onTap: () => setState(() => _metric = null))),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות ותצוגה פר-תפקיד (roleOf⊕canGrantedAction⊕teacherIdOf)
         Align(
           alignment: Alignment.centerRight,

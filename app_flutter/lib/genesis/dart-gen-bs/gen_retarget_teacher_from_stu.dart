@@ -1,7 +1,7 @@
 // 🎯 TeacherScreen — retarget של schoolos_students.dart לישות Teacher (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Teacher
 //   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 8 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 19 · חוזה-מנוע (לא משתנה) 4
 //   id⇒id(name) · name⇒name(name) · phone⇒phone(name) · phone2⇒phone2(name) · email⇒email(name) · address⇒address(name) · notes⇒notes(name) · idNum⇒idNum(name) · status⇒∅(engine-contract) · createdAt⇒∅(engine-contract) · docs⇒∅(engine-contract) · members⇒∅(engine-contract) · father⇒∅(reserved(6 מועמדים)) · mother⇒∅(reserved(6 מועמדים)) · city⇒∅(reserved(6 מועמדים)) · language⇒∅(reserved(6 מועמדים)) · maritalStatus⇒∅(reserved(6 מועמדים)) · tzedaka⇒∅(reserved(6 מועמדים)) · discount⇒∅(reserved(6 מועמדים)) · addedAt⇒startDate(unique) · cred⇒∅(reserved) · log⇒∅(reserved) · first⇒∅(reserved(6 מועמדים)) · gender⇒∅(reserved(6 מועמדים)) · birth⇒∅(reserved) · school⇒∅(reserved(6 מועמדים)) · grade⇒∅(reserved(6 מועמדים)) · health⇒∅(reserved(6 מועמדים)) · mSefach⇒payToOther(unique) · mInvite⇒∅(reserved) · mRecommend⇒∅(reserved) · mPhotos⇒∅(reserved) · mVideos⇒∅(reserved)
-//   תפר-עובדות (G9b): TeacherFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId
+//   תפר-עובדות (G9b): TeacherFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric
 //   שדות-Teacher בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): specialty, payRate, payMethod, payeeName, payeePhone, payeeIdNum, bankName, bankBranch, bankAccount · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Teacher (מורה/—) · 2 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Teacher
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
@@ -856,7 +856,8 @@ class _StuData {
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 class TeacherScreen extends StatefulWidget {
-  const TeacherScreen({this.initialPanelId, super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+  const TeacherScreen({this.initialMetric, this.initialPanelId, super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (TeacherFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
   final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   final Map<String, dynamic>? db;
   /// אינטגרציה לוח-הנהלה⇒מונים: המונים של המודול (המנהל מחווט; אין ייבוא-בין-מודולים)
@@ -868,6 +869,7 @@ class TeacherScreen extends StatefulWidget {
   State<TeacherScreen> createState() => _TeacherScreenState();
 }
 
+  String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
 class _TeacherScreenState extends State<TeacherScreen> {
   String _q = ''; // איתור (DsSearch)
   int _mode = 0; // 0=🎯 טריאז' (קיבוץ-פר-סיכון) · 1=📋 טבלה (columnDefs) — SegmentedSwitch→תצוגה
@@ -884,6 +886,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
   @override
   void initState() {
     super.initState();
+    _metric = widget.initialMetric != null && TeacherFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
     final p0 = widget.initialPanelId == null ? null : TeacherFacts.byId(widget.initialPanelId!); // G10a
     if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
     if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset();
@@ -908,13 +911,17 @@ class _TeacherScreenState extends State<TeacherScreen> {
     final avgAtt = _StuData.avgAttendance, avgGr = _StuData.avgGrades;
     // דירוג (מיון-נבחר) ⇒ הנראים (פעילים); לא-פעילים בסקשן-ארכיון נפרד
     // איתור⊕חריגה (23-ג): search=smartFilter⊕smartScore⊕normSearch · filter=finderMatches. הפייפליין מזין טריאז' וטבלה וארכיון.
-    final visible = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
+    final visibleAll = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => TeacherFacts.heroRows(_metric!).any((h) => '${h[TeacherFacts.idKey] ?? h['id']}' == '${r[TeacherFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     final inactiveVisible = _StuData.filter(_StuData.search(_StuData.sorted(_StuData.scoped(_role, _StuData.inactive), _sort), _q), _locks);
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: []};
     for (final s in visible) { buckets[_StuData.band(s)]!.add(s); }
     return DsScaffold(
       title: 'תלמידים', subtitle: '${_StuData.students.length} תלמידים · ${_StuData.byClass().length} כיתות · ${_StuData.highN} בסיכון-גבוה', icon: '🎓',
       children: [
+        // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
+        if (_metric != null) AlertBanner(glyph: '🎯', tone: 1, message: 'מסונן למדד: ${TeacherFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}'),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: SoftButton(label: '✖ בטל סינון-מדד', tone: 2, onTap: () => setState(() => _metric = null))),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות+נראות פר-תפקיד (roleOf⊕canGrantedAction⊕scope)
         Row(children: [
           Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: [for (final r in _StuData.roleDefs) r['label'] as String], selected: _role, onSelect: (i) => setState(() => _role = i)))),

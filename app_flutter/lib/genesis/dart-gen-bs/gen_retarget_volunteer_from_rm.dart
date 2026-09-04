@@ -1,7 +1,7 @@
 // 🎯 VolunteerScreen — retarget של schoolos_rooms.dart לישות Volunteer (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Volunteer
 //   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0 · חוזה-מנוע (לא משתנה) 8
 //   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒∅(engine-contract) · cap⇒∅(engine-contract) · location⇒∅(engine-contract) · from⇒∅(engine-contract) · to⇒∅(engine-contract) · access⇒∅(engine-contract) · notes⇒∅(engine-contract) · eq⇒∅(engine-contract)
-//   תפר-עובדות (G9b): VolunteerFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN · שורות-מדד (G10a) busyNowN/unavailableN · תפר-כניסה initialPanelId
+//   תפר-עובדות (G9b): VolunteerFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN · שורות-מדד (G10a) busyNowN/unavailableN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric
 //   שדות-Volunteer בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, area, maxDeliveries, note, createdAt · תוויות: מונחי room (חדר/חדרים) ⇒ Volunteer (מתנדב/מתנדבים) · 43 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Volunteer
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: VolunteerScreen.
@@ -665,16 +665,19 @@ class _VolunteerData {
 
 // ═══════════ המסך · VolunteerScreen (const · ללא main) ═══════════
 class VolunteerScreen extends StatefulWidget {
-  const VolunteerScreen({this.initialPanelId, super.key});
+  const VolunteerScreen({this.initialMetric, this.initialPanelId, super.key});
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (VolunteerFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
   final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   @override
   State<VolunteerScreen> createState() => _VolunteerScreenState();
 }
 
+  String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
 class _VolunteerScreenState extends State<VolunteerScreen> {
   @override
   void initState() {
     super.initState();
+    _metric = widget.initialMetric != null && VolunteerFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
     final p0 = widget.initialPanelId == null ? null : VolunteerFacts.byId(widget.initialPanelId!); // G10a
     if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
   }
@@ -730,13 +733,17 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
     final blocked = _VolunteerData.blockOf(_iso);
     // איתור⊕חריגה: searchRooms=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filterRooms=finderMatches (AND על נעילות)
     if (_freeAtOn) { _locks.removeWhere((k, v) => k.startsWith('freeAt:')); _locks['freeAt:$_iso@$_slotHour'] = '1'; } // הציר עוקב אחרי היום-הנבחר
-    final visible = _VolunteerData.filterRooms(_VolunteerData.searchRooms(rooms, _q), _locks);
+    final visibleAll = _VolunteerData.filterRooms(_VolunteerData.searchRooms(rooms, _q), _locks);
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => VolunteerFacts.heroRows(_metric!).any((h) => '${h[VolunteerFacts.idKey] ?? h['id']}' == '${r[VolunteerFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     final hoursAll = _VolunteerData.gridHours(rooms, _iso);
     return DsScaffold(
       title: 'מתנדבים ויומן-מרחבים',
       subtitle: '${rooms.length} מתנדבים · ${_VolunteerData.byBuilding.length} בניינים · שבוע ${_VolunteerData.weekIsos.first}',
       icon: '🏫',
       children: [
+        // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
+        if (_metric != null) AlertBanner(glyph: '🎯', tone: 1, message: 'מסונן למדד: ${VolunteerFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}'),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: SoftButton(label: '✖ בטל סינון-מדד', tone: 2, onTap: () => setState(() => _metric = null))),
         // KPI-10 (המפרט): hero=התנגשויות (המטרה: אפס) + 10 מדדי-מצב BareStat — כולם מנועי-מדף/שדות-אמת
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
