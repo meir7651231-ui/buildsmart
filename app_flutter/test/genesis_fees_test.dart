@@ -65,6 +65,18 @@ void main() {
     // אין כפתורי-פעולה כספיים
     expect(find.text('💳 תשלום'), findsNothing);
     expect(find.text('➕ חיוב'), findsNothing);
+    // דגל-בלבד: אפס-פרטי-חוב — אין דירוג-סיכון, אין באנרי-אוטומציה, אין מבטים כספיים, אין הכרעה
+    expect(find.textContaining('סיכון-גבוה'), findsNothing, reason: 'מחנך: אין דירוג-סיכון');
+    expect(find.textContaining('הו״ק נכשלה'), findsNothing, reason: 'מחנך: אין פרטי-הו״ק');
+    expect(find.text('📋 טבלה'), findsNothing, reason: 'מחנך: אין מבט-טבלה/הו״ק/תזכורות/דוחות');
+    expect(find.textContaining('הפעולה-הנכונה'), findsNothing);
+    expect(find.textContaining('🚩 דגל-חוב ·'), findsWidgets, reason: 'מחנך: קבוצת דגל-חוב');
+    // פאנל מצומצם: זהות + דגל + הפניה לגזברות
+    await tester.tap(find.byTooltip('פאנל משפחה').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.textContaining('פרטים וסכומים בגזברות בלבד'), findsOneWidget);
+    expect(find.textContaining('₪'), findsNothing);
   });
 
   testWidgets('גל 6 · מבט-הו״ק: תור-לרישום + אישור-דו-שלבי רושם תשלומים', (tester) async {
@@ -110,5 +122,71 @@ void main() {
     await tester.tap(find.text('אודיט').last);
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('תשלום-חלקי'), findsWidgets);
+  });
+
+  testWidgets('גל 4 · איתור (smartFilter⊕normSearch) + חריגה (finderMatches) מצמצמים את הרשימה', (tester) async {
+    await setup(tester);
+    // חיפוש לפי שם-תלמיד (יונתן ⇒ משפחת לוי בלבד)
+    await tester.enterText(find.byType(TextField).first, 'יונתן');
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('משפחת לוי'), findsWidgets);
+    expect(find.text('משפחת כהן'), findsNothing, reason: 'איתור: משפחה לא-תואמת נעלמת');
+    await tester.enterText(find.byType(TextField).first, '');
+    await tester.pump(const Duration(milliseconds: 300));
+    // צ׳יפ-חריגה: ותק>90 ⇒ רק לוי (חוב מ-05/2026)
+    await tester.tap(find.textContaining('⏰ ותק>90'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('משפחת לוי'), findsWidgets);
+    expect(find.text('משפחת מזרחי'), findsNothing);
+    // צ׳יפ מלגה/הנחה ⇒ אברהם (מלגה מלאה) בקבוצת ללא-חוב
+    await tester.tap(find.textContaining('🎓 מלגה/הנחה'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('משפחת אברהם'), findsWidgets);
+    expect(find.textContaining('מלגה מלאה — אפס-חוב'), findsWidgets);
+  });
+
+  testWidgets('גל 7 · טבלה מונחית-חוזה: 16 עמודות-ליבה, שדות-שער-חיצוני שמורים לא מוארים ללא-נתון', (tester) async {
+    await setup(tester);
+    await tester.tap(find.text('📋 טבלה'));
+    await tester.pump(const Duration(milliseconds: 300));
+    for (final l in ['משפחה', 'תלמידים', 'כיתות', 'סך-חיובים', 'שולם', 'יתרה', 'ותק (ימים)', 'תשלום-אחרון', 'אמצעי', 'הו״ק', 'הנחה/מלגה', 'תזכורות', 'סיכון', 'סטטוס', 'הורה-משלם', 'הערה']) {
+      expect(find.text(l), findsWidgets, reason: 'עמודת-ליבה "$l"');
+    }
+    expect(find.text('מס׳-קבלה (חיצוני)'), findsNothing, reason: 'מקום-שמור: מואר רק כשיגיע נתון מהשער');
+    expect(find.text('אישור-סליקה'), findsNothing);
+    // ייצוא CSV: BOM + כותרת
+    await tester.tap(find.text('⬇ CSV'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.textContaining('ייצוא CSV'), findsOneWidget);
+    expect(find.textContaining('משפחה,תלמידים,כיתות'), findsOneWidget, reason: 'toCsv⊕csvEscape: כותרת-CSV');
+  });
+
+  testWidgets('גל 3 · הורה רואה רק את משפחתו + רישום-תשלום מלא סוגר את היתרה', (tester) async {
+    await setup(tester);
+    await tester.ensureVisible(find.text('👨‍👩‍👧 הורה'));
+    await tester.tap(find.text('👨‍👩‍👧 הורה'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('1 משפחות · 2026'), findsOneWidget, reason: 'הורה: זהות-מוזרקת ⇒ משפחה אחת');
+    expect(find.text('משפחת כהן'), findsWidgets);
+    expect(find.text('משפחת לוי'), findsNothing);
+    // חזרה לגזבר ⇒ רישום-תשלום מלא למשפחת פרץ (הסדר-בפיגור) דרך הפאנל
+    await tester.ensureVisible(find.text('💼 גזבר/ת'));
+    await tester.tap(find.text('💼 גזבר/ת'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byTooltip('פאנל משפחה').at(1));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.text('💳 רשום תשלום'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.text('רשום תשלום'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    // הפאנל מתעדכן: הפעולה-הנכונה ⇒ הכל שולם
+    expect(find.textContaining('הכל שולם'), findsWidgets, reason: 'תשלום-מלא ⇒ יתרה 0 ⇒ הכרעה "הכל שולם"');
   });
 }

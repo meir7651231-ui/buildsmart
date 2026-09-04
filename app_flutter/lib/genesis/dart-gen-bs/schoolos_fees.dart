@@ -375,7 +375,7 @@ class _FeesData {
 
   // ─── סיכון-גבייה (23-ד · חיבור-מודלים בהחלטה): ותק ⊕ דפוס-תשלום-RFM (supScore⊕tierOf) ⊕ מגמה (trendFromScan) ───
   static Map<String, dynamic> _rfmSp(Map<String, dynamic> f) =>
-      {'ils': paid(f), 'usd': 0, 'count': paymentsOf(f).length, 'last': lastPaymentDate(f), 'hist': const []};
+      {'ils': paid(f), 'usd': 0, 'count': paymentsOf(f).where((p) => (p['amount'] as num) > 0).length, 'last': lastPaymentDate(f), 'hist': const []};
   static int rfm(Map<String, dynamic> f) => supScore(_rfmSp(f),
       rate: 1, nowMs: DateTime.parse('${today}T12:00:00').millisecondsSinceEpoch,
       supTotalIls: (sp, r) => supTotalIls(sp, rate: r, supIls: supIls, supUsd: supUsd),
@@ -387,6 +387,7 @@ class _FeesData {
     return [for (var i = months - 1; i >= 0; i--) paidInMonth(f, _ym(DateTime(t.year, t.month - i, 1)))];
   }
   static String _ym(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}';
+  static String ymOf(DateTime d) => _ym(d);
   static Map<String, dynamic> trend(Map<String, dynamic> f) => trendFromScan({'monthly': monthly(f)});
   // 0=נמוך · 1=בינוני · 2=גבוה. חוב-ותיק או דרגת-red ⇒ גבוה; בפיגור/pale/מגמה-יורדת ⇒ בינוני.
   static int risk(Map<String, dynamic> f) {
@@ -506,6 +507,12 @@ class _FeesData {
     if (amount <= 0) return;
     (extraPayments[f['id']] ??= []).add({'rid': _nid('p'), 'date': date, 'amount': amount, 'method': method, if (note.isNotEmpty) 'note': note});
     _log(role, f['id'] as String, 'תשלום ${shekel(amount)} ב$method${note.isEmpty ? '' : ' · $note'}');
+  }
+  static void refund(Map<String, dynamic> f, String role) { // 💸 החזר-זכות: תשלום-שלילי (הפחתת-שולם) בגובה-הזכות
+    final c = credit(f);
+    if (c <= 0) return;
+    (extraPayments[f['id']] ??= []).add({'rid': _nid('r'), 'date': today, 'amount': -c, 'method': 'החזר', 'note': 'החזר-זכות'});
+    _log(role, f['id'] as String, 'החזר-זכות ${shekel(c)}');
   }
   static void cancelCharge(Map<String, dynamic> f, String role, Map<String, dynamic> c, String reason) {
     cancelledIds.add(c['id'] as String);
@@ -677,7 +684,7 @@ class _FeesData {
     {'label': 'סיכון', 'get': (Map<String, dynamic> f) => riskLabel(risk(f))},
     {'label': 'סטטוס', 'get': (Map<String, dynamic> f) => statusOf(f)},
     {'label': 'הורה-משלם', 'get': (Map<String, dynamic> f) => '${f['payer']} · ${f['phone']}'},
-    {'key': 'note', 'label': 'הערה'},
+    {'label': 'הערה', 'get': (Map<String, dynamic> f) => '${f['nextNote'] ?? '—'}'}, // Supporter.nextNote
     {'key': 'receiptNo', 'label': 'מס׳-קבלה (חיצוני)', 'money': true}, // מקום-שמור · שער-חיצוני
     {'key': 'clearingRef', 'label': 'אישור-סליקה'}, // מקום-שמור · שער-חיצוני
     {'key': 'invoiceNo', 'label': 'חשבונית'}, // מקום-שמור · שער-חיצוני
@@ -700,7 +707,7 @@ class _FeesData {
     {'label': '🏛 הנהלה', 'email': 'mgmt@school', 'config': {'features': {'fees.amounts': true, 'fees.scholarship': true, 'fees.arrangement': true, 'fees.writeoff': true, 'fees.export': true, 'fees.remind': true}}},
     {'label': '🧑‍🏫 מחנך/ת', 'email': 'teacher@school', 'config': {'features': {'fees.flag': true}}}, // דגל-חוב בלבד, ללא-סכומים
     {'label': '👨‍👩‍👧 הורה', 'email': 'cohen@family', 'config': {'features': {'fees.self': true, 'fees.amounts': true}}}, // החוב-שלי + תשלום
-    {'label': '👁 צפייה', 'email': 'view@school', 'config': <String, dynamic>{}},
+    {'label': '👁 צפייה', 'email': 'view@school', 'config': {'features': {'fees.amounts': true}}}, // תמונה בלבד, אפס-פעולות
   ];
   static bool _isAdmin(Map<String, dynamic> config, String email) => roleOf(config, email) == 'admin';
   static bool can(int role, String key) {
@@ -782,9 +789,10 @@ class _FeesScreenState extends State<FeesScreen> {
     final tripDebt = all.where((f) => _FeesData.balance(f) > 0 && _FeesData.liveCharges(f).any((c) => c['cat'] == 'טיול')).toList();
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
     for (final f in visible) {
-      buckets[_FeesData.balance(f) <= 0 ? -1 : _FeesData.risk(f)]!.add(f);
+      // דגל-בלבד (מחנך): שני דליים — דגל/תקין; אין דירוג-סיכון גלוי
+      buckets[_FeesData.balance(f) <= 0 ? -1 : _amounts ? _FeesData.risk(f) : 0]!.add(f);
     }
-    const secTitle = {2: '🔴 סיכון-גבוה / חוב-ותיק', 1: '🟠 בפיגור / בינוני', 0: '🟢 חוב-טרי', -1: '✅ ללא-חוב'};
+    final secTitle = {2: '🔴 סיכון-גבוה / חוב-ותיק', 1: '🟠 בפיגור / בינוני', 0: _amounts ? '🟢 חוב-טרי' : '🚩 דגל-חוב', -1: '✅ ללא-חוב'};
     const secTone = {2: 2, 1: 3, 0: 0, -1: 1};
     final trend = _FeesData.collectionTrend(all);
     final thisMonth = _FeesData.collectedInMonth(all, monthKey(_FeesData.today));
@@ -799,7 +807,7 @@ class _FeesScreenState extends State<FeesScreen> {
         ),
         _gap(10),
         if (!_amounts) ...[
-          const AlertBanner(glyph: '🔒', tone: 3, message: 'נעילת-הרשאה-כספית: תפקיד זה רואה דגל-חוב בלבד — אפס-סכומים (מגן-כבוד)'),
+          const AlertBanner(glyph: '🔒', tone: 3, message: 'נעילת-הרשאה-כספית: תפקיד זה רואה דגל-חוב בלבד — אפס-סכומים, אפס-פרטי-חוב (מגן-כבוד)'),
           _gap(8),
         ],
         // פס-עליון: חיפוש (DsSearch) · רענון · חיוב-חדש · רישום-תשלום · ייצוא — מגודרים פר-הרשאה
@@ -823,7 +831,8 @@ class _FeesScreenState extends State<FeesScreen> {
         // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"
         Wrap(spacing: 8, runSpacing: 6, children: [
           _fchip(0, 'הכל'),
-          _fchip(1, '💸 יתרה>0 · $inDebt'),
+          _fchip(1, '🚩 דגל-חוב · $inDebt'),
+          if (_amounts) ...[
           _fchip(2, '⏰ ותק>${_FeesData.oldDebtDays} · $oldN'),
           _fchip(3, '💳 הו״ק · ${all.where(_FeesData.hokFlag).length}'),
           _fchip(4, '🎓 מלגה/הנחה · ${all.where((f) => _FeesData.discountPct(f) > 0).length}'),
@@ -835,6 +844,7 @@ class _FeesScreenState extends State<FeesScreen> {
             label: _filtersOpen ? '▲ פילטרים' : '▼ פילטרים (כיתה·חוג·סוג·אמצעי·שנה·סטטוס)', selected: _filtersOpen, onTap: () => setState(() => _filtersOpen = !_filtersOpen),
             activeFillColor: const Color(0xFF2A2D4A), surfaceColor: const Color(0xFF14162E), activeTextColor: _ink, inkColor: _ink, outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
           ),
+          ],
         ]),
         if (_filtersOpen) ...[
           _gap(8),
@@ -850,6 +860,15 @@ class _FeesScreenState extends State<FeesScreen> {
         ],
         const SizedBox(height: 12),
         // KPI-10 (המפרט): hero=יתרה-פתוחה (המטרה: מה חסר) + 10 מדדי-מצב (BareStat, ערכי-אמת) + יחס-גבייה (StatRow)
+        if (!_amounts)
+          GradientCard(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              StatHero(value: '$inDebt', label: 'משפחות עם דגל-חוב מתוך ${all.length}'),
+              const SizedBox(height: 8),
+              const Text('פרטים וסכומים = גזברות בלבד. לתיאום: לפנות לגזבר/ת, לא לתלמיד.', style: TextStyle(color: _muted, fontSize: 12.5)),
+            ]),
+          )
+        else
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             StatHero(value: _m(kOpen), label: 'יתרה פתוחה · $inDebt משפחות בחוב'),
@@ -878,15 +897,15 @@ class _FeesScreenState extends State<FeesScreen> {
         ),
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): הו״ק-נכשלה · הסדר-בפיגור · חיוב-כפול · הו״ק-לרישום · מעקב-שעבר-מועד · חוב-לפני-טיול
-        if (failed.isNotEmpty) ...[
+        if (failed.isNotEmpty && _amounts) ...[
           AlertBanner(glyph: '⚠️', tone: 2, message: '${failed.length} הו״ק נכשלה (הסליקה פסקה >2 חודשים) — התרעה + ניסיון-חוזר: ${failed.map((f) => f['name']).join(' · ')}'),
           _gap(8),
         ],
-        if (late.isNotEmpty) ...[
+        if (late.isNotEmpty && _amounts) ...[
           AlertBanner(glyph: '📆', tone: 3, message: '${late.length} הסדר-בפיגור: ${late.map((f) => f['name']).join(' · ')}'),
           _gap(8),
         ],
-        if (dups.isNotEmpty) ...[
+        if (dups.isNotEmpty && _amounts) ...[
           AlertBanner(glyph: '👯', tone: 3, message: 'חיוב-כפול-חשוד (אותו סוג·סכום·תאריך·תלמיד): ${dups.map((f) => '${f['name']} (${_FeesData.duplicateCharges(f).map((c) => c['cat']).join(',')})').join(' · ')}'),
           _gap(8),
         ],
@@ -903,29 +922,30 @@ class _FeesScreenState extends State<FeesScreen> {
           _gap(8),
         ],
         // בורר-מבט (SegmentedSwitch מבוקר)
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SegmentedSwitch(items: const ['🎯 חייבים', '📋 טבלה', '💳 הו״ק', '🔔 תזכורות', '📊 דוחות', '🧾 אודיט'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
-        ),
+        if (_amounts)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SegmentedSwitch(items: const ['🎯 חייבים', '📋 טבלה', '💳 הו״ק', '🔔 תזכורות', '📊 דוחות', '🧾 אודיט'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+          ),
         const SizedBox(height: 10),
         // מצבי-מסך שמורים: טעינה · שגיאה · ריק
         if (_loading)
           _loadingView()
         else if (_error != null)
           AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
-        else if (_mode == 2)
+        else if (_mode == 2 && _amounts)
           _hokView(all, hokDue)
-        else if (_mode == 3)
+        else if (_mode == 3 && _amounts)
           _remindersView(visible)
-        else if (_mode == 4)
+        else if (_mode == 4 && _amounts)
           _reportsView(all, trend, thisMonth)
-        else if (_mode == 5)
+        else if (_mode == 5 && _amounts)
           _auditView()
         else if (all.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '📭', message: 'אין משפחות/חיובים — התחל בחיוב-שנה'))
         else if (visible.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין משפחות תואמות לחיפוש/סינון'))
-        else if (_mode == 1)
+        else if (_mode == 1 && _amounts)
           _table(visible)
         else
           for (final st in const [2, 1, 0, -1])
@@ -1002,9 +1022,11 @@ class _FeesScreenState extends State<FeesScreen> {
             Row(children: [
               BareStat(value: bal > 0 ? '🚩' : '✅', label: bal > 0 ? 'דגל-חוב (ללא-סכום)' : 'תקין', inkColor: bal > 0 ? _warning : _ok, mutedColor: _muted),
             ]),
-          _wrap(_facts(f)),
-          _gap(8),
-          AlertBanner(glyph: act['glyph'] as String, tone: act['tone'] as int, message: act['text'] as String),
+          if (_amounts) ...[
+            _wrap(_facts(f)),
+            _gap(8),
+            AlertBanner(glyph: act['glyph'] as String, tone: act['tone'] as int, message: act['text'] as String),
+          ],
         ]),
       ),
     );
@@ -1117,7 +1139,8 @@ class _FeesScreenState extends State<FeesScreen> {
   Widget _reportsView(List<Map<String, dynamic>> all, Map<String, dynamic> trend, int thisMonth) {
     final counts = _FeesData.statusCounts(all);
     final t = DateTime.parse('${_FeesData.today}T12:00:00');
-    final weekAgo = '${t.year}-${(t.month).toString().padLeft(2, '0')}-${(t.day - 7).clamp(1, 31).toString().padLeft(2, '0')}';
+    final wa = DateTime(t.year, t.month, t.day - 7); // חשבון-תאריך אמיתי (חוצה-חודש) — לא clamp בתוך החודש
+    final weekAgo = '${_FeesData.ymOf(wa)}-${wa.day.toString().padLeft(2, '0')}';
     final weekPaid = grandTotal([for (final f in all) for (final p in _FeesData.paymentsOf(f)) if (dateInRange(p['date'] as String, weekAgo, _FeesData.today)) p['amount']], (x) => x as num).toInt();
     final weekRem = grandTotal([for (final f in all) for (final c in _FeesData.remindersSent(f)) if (dateInRange(c['at'] as String, weekAgo, _FeesData.today)) 1], (x) => x as num).toInt();
     final byType = <String, int>{};
@@ -1133,7 +1156,7 @@ class _FeesScreenState extends State<FeesScreen> {
       _gap(10),
       DsBars(title: 'משפחות לפי-סטטוס', labels: [for (final c in counts) c[0] as String], values: [for (final c in counts) (c[1] as int).toDouble()]),
       _gap(10),
-      DsSection(title: '🗓 דוח-גזבר שבועי (${fmtDate(weekAgo)}–${fmtDate(_FeesData.today)})', children: [
+      DsSection(title: '🗓 דוח-גזבר שבועי · מ-${fmtDate(weekAgo)} עד ${fmtDate(_FeesData.today)}', children: [
         Row(children: [
           BareStat(value: _m(weekPaid), label: 'נגבה השבוע', inkColor: _ok, mutedColor: _muted),
           BareStat(value: '$weekRem', label: 'תזכורות השבוע', inkColor: _ink, mutedColor: _muted),
@@ -1154,7 +1177,7 @@ class _FeesScreenState extends State<FeesScreen> {
         for (final inc in _FeesData.incoming)
           () {
             final m = _FeesData.matchIncoming(inc, all);
-            return TimelineItem(title: m == null ? '❓ ${inc['name']} — ללא-התאמה (ידני)' : '✅ ${inc['name']} ⇒ ${m['name']}', time: fmtDate(inc['date'] as String?), body: '${_m(inc['amount'] as num)} · מפתח: ${inc['phone'] != '' ? 'טלפון' : 'מייל'}');
+            return TimelineItem(title: m == null ? '❓ ${inc['name']} — ללא-התאמה (ידני)' : '✅ ${inc['name']} — הותאם: ${m['name']}', time: fmtDate(inc['date'] as String?), body: '${_m(inc['amount'] as num)} · מפתח: ${inc['phone'] != '' ? 'טלפון' : 'מייל'}');
           }(),
       ]),
     ]);
@@ -1172,6 +1195,22 @@ class _FeesScreenState extends State<FeesScreen> {
   // ═══ פאנל משפחה-נבחרת (GlassCard · bottom-sheet): זהות · יתרה (צבועה-לפי-ותק) · פירוק · טאבים-9 · הפעולה-הנכונה · פעולות ═══
   void _openPanel(Map<String, dynamic> f) {
     var tab = 0;
+    if (!_amounts) { // דגל-בלבד: פאנל מצומצם (זהות + דגל + הפניה) — אפס-פרטי-חוב
+      showModalBottomSheet<void>(
+        context: context, backgroundColor: Colors.transparent,
+        builder: (ctx) => Padding(
+          padding: const EdgeInsets.all(12),
+          child: GlassCard(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              MediaRow(glyph: '👨‍👩‍👧', title: f['name'] as String, subtitle: '${_FeesData.studentsOf(f)} · ${_FeesData.gradesOf(f)}'),
+              _gap(10),
+              AlertBanner(glyph: _FeesData.balance(f) > 0 ? '🚩' : '✅', tone: _FeesData.balance(f) > 0 ? 3 : 1, message: _FeesData.balance(f) > 0 ? 'דגל-חוב — פרטים וסכומים בגזברות בלבד. לא לפנות לתלמיד/ה (מגן-כבוד).' : 'תקין — אין דגל-חוב'),
+            ]),
+          ),
+        ),
+      );
+      return;
+    }
     showModalBottomSheet<void>(
       context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
@@ -1224,6 +1263,7 @@ class _FeesScreenState extends State<FeesScreen> {
                     if (_FeesData.can(_role, 'fees.arrangement') && bal > 0 && !_FeesData.hasArrangement(f)) SoftButton(label: '📆 הסדר 3 תשלומים', tone: 0, onTap: () => act(() => _FeesData.setArrangement(f, _roleName, 3))),
                     if (_FeesData.can(_role, 'fees.hok') && _FeesData.hasHok(f)) SoftButton(label: _FeesData.hokFlag(f) ? '⏸ הפסק הו״ק' : '▶ הפעל הו״ק', tone: _FeesData.hokFlag(f) ? 2 : 1, onTap: () => act(() => _FeesData.toggleHok(f, _roleName))),
                     if (_FeesData.can(_role, 'fees.writeoff') && bal > 0 && _FeesData.oldDebt(f)) SoftButton(label: '🗂 סמן חוב-אבוד', tone: 2, onTap: () => act(() => _FeesData.writeOff(f, _roleName))),
+                    if (_FeesData.can(_role, 'fees.refund') && _FeesData.credit(f) > 0) SoftButton(label: '💸 החזר-זכות ${_m(_FeesData.credit(f))}', tone: 1, onTap: () => act(() => _FeesData.refund(f, _roleName))),
                     if ((_FeesData.can(_role, 'fees.pay') || _FeesData.can(_role, 'fees.self')) && bal > 0)
                       // שער-חיצוני (מקום-שמור): payLink מחזיר null כש-payUrl ריק ⇒ הכפתור שמור, לא מזייף קישור
                       SoftButton(label: _FeesData.payLinkOf(f) == null ? '🔗 קישור-תשלום (שער לא-מוגדר)' : '🔗 שלח קישור-תשלום', tone: 0, onTap: _FeesData.payLinkOf(f) == null ? null : () {}),
@@ -1256,7 +1296,7 @@ class _FeesScreenState extends State<FeesScreen> {
         Row(children: [
           BareStat(value: '${_FeesData.rfm(f)}', label: 'דפוס-תשלום (RFM) · ${_FeesData.tierLabel(f)}', inkColor: _FeesData.tierKey(f) == 'red' ? _danger : _ink, mutedColor: _muted),
           BareStat(value: '${_FeesData.trend(f)['dir'] == 'up' ? '↑' : _FeesData.trend(f)['dir'] == 'down' ? '↓' : '→'} ${_FeesData.trend(f)['pct']}%', label: 'מגמת-תשלומים (6 חודשים)', inkColor: _FeesData.trend(f)['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
-          BareStat(value: _FeesData.riskLabel(_FeesData.risk(f)), label: 'סיכון-גבייה (ותק⊕דפוס⊕מגמה)', inkColor: _FeesData.risk(f) == 2 ? _danger : _FeesData.risk(f) == 1 ? _warning : _ok, mutedColor: _muted),
+          BareStat(value: _FeesData.riskLabel(_FeesData.risk(f)), label: 'סיכון-גבייה (ותק · דפוס · מגמה)', inkColor: _FeesData.risk(f) == 2 ? _danger : _FeesData.risk(f) == 1 ? _warning : _ok, mutedColor: _muted),
         ]),
       ];
 
