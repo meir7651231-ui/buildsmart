@@ -69,6 +69,26 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('גל 8 · לולאת-ההכרעה: הצעת-מחליף ⇒ אישור-החלפה ⇒ שיעורים-ללא-מורה יורד מ-5 ל-4', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_wrap(const TeachersScreen(initialMode: 2)));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('5'), findsWidgets, reason: 'hero=5 שיעורים ללא מורה');
+    await tester.tap(find.textContaining('⭐ יוסי מזרחי').first); // candidates: מועדף+עומס-נמוך ראשון
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('הוצע: יוסי מזרחי'), findsWidgets);
+    await tester.tap(find.text('✅ אשר-החלפה').first);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('4'), findsWidgets, reason: 'hero ירד ל-4 אחרי אישור');
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('גל 8 · פנקס-המקומות-השמורים (חוק-7) מדווח 12 שקעים ממתינים', (tester) async {
+    _surface(tester);
+    await tester.pumpWidget(_wrap(const TeachersScreen(initialMode: 1)));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('12 ממתינים לנתון'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
   for (var tab = 0; tab < 9; tab++) {
     testWidgets('כרטיס-מורה טאב $tab מרונדר', (tester) async {
       _surface(tester);
