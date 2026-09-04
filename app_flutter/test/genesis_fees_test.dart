@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/schoolos_fees.dart';
+import 'package:buildsmart/genesis/dart-ui-bs/premium/surfaces/gradient_card.dart';
 
 Widget _app() => MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -14,6 +15,7 @@ Widget _app() => MaterialApp(
 
 void main() {
   Future<void> setup(WidgetTester tester) async {
+    FeesScreen.resetLedger(); // כל בדיקה מבסיס-האמת — אפס-תלות בסדר-הבדיקות (הפנקס סטטי)
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -141,6 +143,8 @@ void main() {
     // צ׳יפ מלגה/הנחה ⇒ אברהם (מלגה מלאה) בקבוצת ללא-חוב
     await tester.tap(find.textContaining('🎓 מלגה/הנחה'));
     await tester.pump(const Duration(milliseconds: 300));
+    // הרשימה עצלה (ListView) ⇒ גוללים עד שהכרטיס נבנה
+    await tester.scrollUntilVisible(find.text('משפחת אברהם'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.text('משפחת אברהם'), findsWidgets);
     expect(find.textContaining('מלגה מלאה — אפס-חוב'), findsWidgets);
   });
@@ -188,5 +192,107 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     // הפאנל מתעדכן: הפעולה-הנכונה ⇒ הכל שולם
     expect(find.textContaining('הכל שולם'), findsWidgets, reason: 'תשלום-מלא ⇒ יתרה 0 ⇒ הכרעה "הכל שולם"');
+  });
+
+  testWidgets('§6 · חיוב-מרוכז לכיתה דרך הטופס ⇒ חיוב פר-תלמיד, KPI/טבלה/אודיט מתעדכנים, אפס-קבלה', (tester) async {
+    await setup(tester);
+    await tester.tap(find.text('➕ חיוב'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('חיוב חדש / חיוב-מרוכז'), findsOneWidget);
+    // סוג-חיוב = טיול (בורר 2: משפחה·עבור-מי·סוג·כיתה)
+    await tester.tap(find.byType(DropdownButton<String>).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('טיול').last);
+    await tester.pump(const Duration(milliseconds: 300));
+    // סכום (TextField 0 = חיפוש במסך-הראשי · 1 = סכום · 2 = הערה)
+    await tester.enterText(find.byType(TextField).at(1), '350');
+    await tester.pump();
+    // כיתה ח' ⇒ חיוב-מרוכז (איתי·ליאור·הדר = 3 תלמידים ב-3 משפחות)
+    await tester.tap(find.byType(DropdownButton<String>).at(3));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text("ח'").last);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining("חיוב-מרוכז לכל ח'"), findsOneWidget, reason: 'הכפתור משקף את הכיתה שנבחרה');
+    await tester.tap(find.textContaining("חיוב-מרוכז לכל ח'"));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+    // KPI: סך-חיובים 36,800+3×350 · יתרה-פתוחה 22,450+1,050
+    expect(find.text('₪37,850'), findsWidgets, reason: 'סך-חיובים גדל ב-3×350');
+    expect(find.text('₪23,500'), findsWidgets, reason: 'יתרה-פתוחה גדלה ב-1,050');
+    // נחום (הייתה ללא-חיובים) נכנסה לחוב ⇒ מונה-הדגל 5⇒6 (בלי גלילה — הרשימה עצלה)
+    expect(find.textContaining('🚩 דגל-חוב · 6'), findsOneWidget, reason: 'משפחה שישית בחוב אחרי החיוב-המרוכז');
+    // אודיט: 3 רשומות חיוב-טיול
+    await tester.ensureVisible(find.text('🧾 אודיט'));
+    await tester.tap(find.text('🧾 אודיט'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('חיוב טיול ₪350'), findsNWidgets(3), reason: 'חיוב-מרוכז = חיוב פר-תלמיד בכיתה');
+    expect(find.textContaining('חיוב-מרוכז ח'), findsNWidgets(3));
+    // טבלה: החיוב מרונדר · אפס-קבלה (הגבול החרוט: אין מס׳-קבלה, השער-החיצוני שמור ולא מואר)
+    await tester.ensureVisible(find.text('📋 טבלה'));
+    await tester.tap(find.text('📋 טבלה'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('משפחת נחום'), findsWidgets);
+    expect(find.text('₪350'), findsWidgets, reason: 'טבלה: סך-חיובים של נחום = ₪350');
+    expect(find.text('מס׳-קבלה (חיצוני)'), findsNothing, reason: 'אפס-קבלה: העמודה השמורה לא מוארת');
+    expect(find.textContaining('קבלה מס'), findsNothing);
+  });
+
+  testWidgets('§6 · הסדר-תשלומים 6 ו-2 דרך ה-UI ⇒ פריסה מרונדרת (סכום-פר-תשלום · מונה), יתרה ללא-שינוי, צפוי-החודש מתעדכן', (tester) async {
+    await setup(tester);
+    // הרשימה עצלה ⇒ אינדקס-שברון מוחלט משתנה אחרי גלילה; מאתרים את הכרטיס לפי שם-המשפחה (אב GradientCard ⇒ צאצא-שברון)
+    Future<void> openPanel(String family) async {
+      await tester.scrollUntilVisible(find.text(family).first, 200, scrollable: find.byType(Scrollable).first);
+      await tester.pump();
+      final chevron = find.descendant(of: find.ancestor(of: find.text(family).first, matching: find.byType(GradientCard)).first, matching: find.byTooltip('פאנל משפחה'));
+      await tester.ensureVisible(chevron);
+      await tester.pump(); // הגלילה מתיישבת לפני ההקשה
+      await tester.tap(chevron);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text(family), findsWidgets);
+      await tester.ensureVisible(find.text('הסדר').last);
+      await tester.tap(find.text('הסדר').last);
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    Future<void> closePanel() async {
+      await tester.tapAt(const Offset(400, 40)); // מחסום-המודל מעל הגיליון
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+    // ביטון: יתרה 160 (הנחה 50%) ⇒ פריסה ל-2 = 2×80
+    await openPanel('משפחת ביטון');
+    expect(find.text('אין הסדר-תשלומים'), findsOneWidget);
+    await tester.tap(find.text('📆 פריסה ל-2'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('הסדר 2/1'), findsOneWidget);
+    expect(find.textContaining('הסדר 2/2'), findsOneWidget);
+    expect(find.textContaining('₪80 ·'), findsNWidgets(2));
+    expect(find.text('₪160'), findsWidgets, reason: 'יתרת-ביטון ללא-שינוי (הפריסה לא-ברת-הנחה)');
+    await closePanel();
+    // מזרחי: יתרה 7,300 (הנחת-אחים 20%) ⇒ פריסה ל-6 = 5×1,217 + 1,215
+    await openPanel('משפחת מזרחי');
+    expect(find.text('אין הסדר-תשלומים'), findsOneWidget);
+    await tester.tap(find.text('📆 פריסה ל-6'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('הסדר 6/1'), findsOneWidget);
+    expect(find.textContaining('הסדר 6/6'), findsOneWidget);
+    expect(find.textContaining('₪1,217'), findsNWidgets(5), reason: '5 תשלומים שווים (ceil) — לא מוּנחים שוב (באג §6 שתוקן)');
+    expect(find.textContaining('₪1,215'), findsOneWidget, reason: 'תשלום-אחרון = השארית');
+    expect(find.text('₪7,300'), findsWidgets, reason: 'הפריסה לא משנה את היתרה (גם עם הנחת-אחים)');
+    await closePanel();
+    // המסך-הראשי (גלילה חזרה למעלה — כרטיס-ה-KPI עצל): צפוי-החודש = 2,000 (הו״ק 600 + הסדר-פרץ 1,400) + 1,217 + 80
+    await tester.scrollUntilVisible(find.text('📅 צפוי-החודש'), -300, scrollable: find.byType(Scrollable).first);
+    await tester.pump();
+    expect(find.text('₪3,297'), findsOneWidget, reason: 'תשלום-ההסדר הראשון (20 לחודש) נכנס לצפוי-החודש');
+    await tester.scrollUntilVisible(find.text('הכל'), -300, scrollable: find.byType(Scrollable).first); // שורת-הצ׳יפים בראש
+    await tester.pump();
+    expect(find.textContaining('📆 הסדר · 3'), findsOneWidget, reason: 'צ׳יפ-הסדר סופר 3 משפחות');
   });
 }

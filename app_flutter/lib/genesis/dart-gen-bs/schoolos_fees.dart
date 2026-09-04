@@ -114,6 +114,7 @@ class _FeesData {
     {'id': 'full', 'discountPct': 100, 'label': 'מלגה מלאה'},
   ];
   static const chargeTypes = ['שכר-לימוד', 'חוג', 'טיול', 'ציוד'];
+  static const arrangementType = 'הסדר'; // תשלומי-פריסה — נגזרים מיתרה-נטו ⇒ לא-ברי-הנחה (discountableTypes לא כולל)
   static const discountableTypes = {'שכר-לימוד'}; // ההנחה חלה על שכ״ל בלבד (מדיניות)
   static const payMethodsSchool = ['הו״ק', 'אשראי', 'מזומן', 'העברה']; // המפרט: אמצעי (הו״ק/אשראי/מזומן/העברה)
 
@@ -191,9 +192,9 @@ class _FeesData {
       'id': 'f5', 'name': 'משפחת פרץ', 'payer': 'אבי פרץ', 'phone': '058-5555555', 'email': 'peretz@family', 'idNum': '056789012',
       'members': [{'first': 'ליאור', 'grade': 'ח\'-2'}],
       'charges': [
-        {'id': 'c12', 'date': '2026-08-20', 'amount': 1400, 'cur': '₪', 'cat': 'שכר-לימוד', 'method': '', 'memberId': 'ליאור', 'installmentOf': 'arr-1', 'note': 'הסדר 3/1'},
-        {'id': 'c13', 'date': '2026-09-20', 'amount': 1400, 'cur': '₪', 'cat': 'שכר-לימוד', 'method': '', 'memberId': 'ליאור', 'installmentOf': 'arr-1', 'note': 'הסדר 3/2'},
-        {'id': 'c14', 'date': '2026-10-20', 'amount': 1400, 'cur': '₪', 'cat': 'שכר-לימוד', 'method': '', 'memberId': 'ליאור', 'installmentOf': 'arr-1', 'note': 'הסדר 3/3'},
+        {'id': 'c12', 'date': '2026-08-20', 'amount': 1400, 'cur': '₪', 'cat': 'הסדר', 'method': '', 'memberId': 'ליאור', 'installmentOf': 'arr-1', 'note': 'הסדר 3/1'},
+        {'id': 'c13', 'date': '2026-09-20', 'amount': 1400, 'cur': '₪', 'cat': 'הסדר', 'method': '', 'memberId': 'ליאור', 'installmentOf': 'arr-1', 'note': 'הסדר 3/2'},
+        {'id': 'c14', 'date': '2026-10-20', 'amount': 1400, 'cur': '₪', 'cat': 'הסדר', 'method': '', 'memberId': 'ליאור', 'installmentOf': 'arr-1', 'note': 'הסדר 3/3'},
         {'id': 'c15', 'date': '2026-08-20', 'amount': 4200, 'cur': '₪', 'cat': 'שכר-לימוד', 'method': '', 'memberId': 'ליאור', 'cancelledAt': '2026-08-21', 'note': 'הוחלף בהסדר-פריסה'},
       ],
       'payments': <Map<String, dynamic>>[],
@@ -259,6 +260,11 @@ class _FeesData {
   static int _seq = 100;
   static String _nid(String p) => '$p${_seq++}';
 
+  // איפוס-פנקס (רתמת-בדיקה · דטרמיניזם): מחזיר את המצב לבסיס-ה-const — אפס-תלות בסדר-הבדיקות
+  static void reset() {
+    extraCharges.clear(); extraPayments.clear(); extraCalls.clear(); cancelledIds.clear(); cancelReason.clear();
+    extraCriteria.clear(); hokOverride.clear(); writtenOff.clear(); audit.clear(); _seq = 100;
+  }
   static void _log(String role, String fid, String what) =>
       audit.insert(0, {'date': today, 'role': role, 'family': fid, 'what': what});
 
@@ -536,10 +542,10 @@ class _FeesData {
       cancelReason[c['id'] as String] = 'הוחלף בהסדר $arr';
     }
     final already = paid(f) - ((f['carryBalance'] as num?) ?? 0);
-    if (already > 0) (extraCharges[f['id']] ??= []).add({'id': _nid('c'), 'date': today, 'amount': already, 'cur': '₪', 'cat': 'שכר-לימוד', 'method': '', 'memberId': studentsOf(f), 'note': 'שולם עד ההסדר'});
+    if (already > 0) (extraCharges[f['id']] ??= []).add({'id': _nid('c'), 'date': today, 'amount': already, 'cur': '₪', 'cat': arrangementType, 'method': '', 'memberId': studentsOf(f), 'note': 'שולם עד ההסדר'});
     for (var i = 0; i < parts; i++) {
       final d = DateTime(t.year, t.month + i, 20);
-      (extraCharges[f['id']] ??= []).add({'id': _nid('c'), 'date': '${_ym(d)}-20', 'amount': i == parts - 1 ? bal - per * (parts - 1) : per, 'cur': '₪', 'cat': 'שכר-לימוד', 'method': '', 'memberId': studentsOf(f), 'installmentOf': arr, 'note': 'הסדר $parts/${i + 1}'});
+      (extraCharges[f['id']] ??= []).add({'id': _nid('c'), 'date': '${_ym(d)}-20', 'amount': i == parts - 1 ? bal - per * (parts - 1) : per, 'cur': '₪', 'cat': arrangementType, 'method': '', 'memberId': studentsOf(f), 'installmentOf': arr, 'note': 'הסדר $parts/${i + 1}'});
     }
     _log(role, f['id'] as String, 'הסדר-תשלומים: ${shekel(bal)} ב-$parts תשלומים');
   }
@@ -727,6 +733,8 @@ class _FeesData {
 // ═══════════════════════════════════════════════════════════════════════════════════════
 class FeesScreen extends StatefulWidget {
   const FeesScreen({super.key});
+  /// איפוס פנקס-הפעולות לבסיס-האמת (לרתמות-בדיקה/דמו; חיבור-אסינק אמיתי יטען מחדש מהמקור)
+  static void resetLedger() => _FeesData.reset();
   @override
   State<FeesScreen> createState() => _FeesScreenState();
 }
@@ -852,7 +860,7 @@ class _FeesScreenState extends State<FeesScreen> {
           Wrap(spacing: 10, runSpacing: 6, children: [
             _enum('כיתה', ['', ..._FeesData.grades(all)], _grade, (v) => setState(() => _grade = v)),
             _enum('חוג', ['', ..._FeesData.courses(all)], _course, (v) => setState(() => _course = v)),
-            _enum('סוג-חיוב', ['', ..._FeesData.chargeTypes], _type, (v) => setState(() => _type = v)),
+            _enum('סוג-חיוב', ['', ..._FeesData.chargeTypes, _FeesData.arrangementType], _type, (v) => setState(() => _type = v)),
             _enum('אמצעי', ['', ..._FeesData.payMethodsSchool], _method, (v) => setState(() => _method = v)),
             _enum('שנה', ['', ..._FeesData.years(all)], _year, (v) => setState(() => _year = v)),
             _enum('סטטוס', const ['', 'תקין', 'בפיגור', 'הסדר', 'הסדר-בפיגור', 'מלגה-מלאה', 'חוב-אבוד'], _status, (v) => setState(() => _status = v)),
