@@ -210,4 +210,91 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('אין תלמידים עדיין'), findsOneWidget);
   });
+  testWidgets('פעולות-מסך: רישום · ייבוא (הצלחה + כשל⇒שגיאה) · עריכה · הדפסה · שלח-להורה · אישור-טיולים · מעבר-שנה · מחיקה (מנהל/ת)', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(app());
+    await tester.pump(const Duration(milliseconds: 300));
+    // ➕ רישום-תלמיד (Family+Member+Enrollment) ⇒ מופיע ברשימה + KPI סך-תלמידים 11
+    await tester.tap(find.text('➕ תלמיד'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(1), 'עדי');
+    await tester.enterText(fields.at(2), 'ברק');
+    await tester.enterText(fields.at(5), '0509998877');
+    await tester.tap(find.text('💾 רשום'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('עדי ברק'), findsWidgets);
+    expect(find.text('11'), findsOneWidget, reason: 'סך-תלמידים 10⇒11');
+    // 📥 ייבוא-CSV: שורה תקינה ⇒ ייבוא-בתהליך ⇒ הסתיים 1 נוספו
+    await tester.tap(find.text('📥 ייבוא'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    await tester.enterText(find.byType(TextField).last, 'גיל,אורן,ט׳-3 · כיתת-חינוך,2011-03-03,מיכל,0501112233');
+    await tester.tap(find.text('📥 ייבא'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('ייבוא בתהליך… מעבד שורות'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 700));
+    expect(find.textContaining('ייבוא הסתיים: 1 נוספו'), findsOneWidget);
+    expect(find.text('גיל אורן'), findsWidgets);
+    // ייבוא-כושל (אין שורות תקינות) ⇒ מצב-שגיאה (AlertBanner) ⇒ סגירה
+    await tester.tap(find.text('📥 ייבוא'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    await tester.enterText(find.byType(TextField).last, 'שורה-לא-תקינה');
+    await tester.tap(find.text('📥 ייבא'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 800));
+    expect(find.textContaining('ייבוא נכשל'), findsOneWidget);
+    await tester.tap(find.text('✕'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('ייבוא נכשל'), findsNothing);
+    // כרטיס עדי ברק: עריכה (שם-פרטי) · הדפסה · שלח-להורה (wa.me) · אישור-טיולים (משימה) · מחיקה (מנהל/ת)
+    await tester.ensureVisible(find.text('עדי ברק').first);
+    final idx = find.byTooltip('כרטיס-תלמיד');
+    final cardOf = find.ancestor(of: find.text('עדי ברק').first, matching: find.byWidgetPredicate((w) => w.runtimeType.toString() == 'GradientCard'));
+    await tester.tap(find.descendant(of: cardOf, matching: idx));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
+    final sheetList = find.descendant(of: find.byType(DraggableScrollableSheet), matching: find.byType(Scrollable)).first;
+    await tester.dragUntilVisible(find.text('✏️ ערוך'), sheetList, const Offset(0, -400));
+    await tester.tap(find.text('✏️ ערוך'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 500));
+    await tester.enterText(find.byType(TextField).first, 'עדי-נועה');
+    await tester.tap(find.text('💾 שמור'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('עדי-נועה ברק'), findsWidgets, reason: 'עריכה נכתבה ל-Member.first');
+    await tester.dragUntilVisible(find.text('🖨 הדפס-כרטיס'), sheetList, const Offset(0, -400));
+    await tester.tap(find.text('🖨 הדפס-כרטיס'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    expect(find.textContaining('כרטיס-תלמיד · עדי-נועה ברק'), findsOneWidget);
+    await tester.tapAt(const Offset(400, 100)); // סגירת-גיליון-הטקסט
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    await tester.dragUntilVisible(find.text('💬 שלח-להורה'), sheetList, const Offset(0, -400));
+    await tester.tap(find.text('💬 שלח-להורה'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    expect(find.textContaining('https://wa.me/972509998877'), findsOneWidget, reason: 'waLink⊕waDigits על טלפון-ההורה');
+    await tester.tapAt(const Offset(400, 100));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    await tester.dragUntilVisible(find.text('🧳 בקש אישור-טיולים'), sheetList, const Offset(0, -400));
+    await tester.tap(find.text('🧳 בקש אישור-טיולים'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    expect(find.textContaining('✅ סגור פנייה k-'), findsWidgets, reason: 'בקשת-אישור = WorkTask חדש (ref.consent=trips)');
+    await tester.dragUntilVisible(find.text('🗑 מחק רשומה'), sheetList, const Offset(0, -400));
+    await tester.tap(find.text('🗑 מחק רשומה'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('עדי-נועה ברק'), findsNothing, reason: 'מחיקה (מנהל/ת): Member+רישומים הוסרו');
+    // 🗓 מעבר-שנה (מנהל/ת): תצוגה ⇒ ביצוע ⇒ דיווח + בוגר/ת
+    // הרשימה-הראשית עצלה ונגללה למטה (ensureVisible על התלמיד/ה החדש/ה) ⇒ גלילה חזרה למעלה עד שכלי-ההנהלה נבנים
+    await tester.dragUntilVisible(find.text('🗓 מעבר-שנה (תצוגה)'), find.byType(Scrollable).first, const Offset(0, 500));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('🗓 מעבר-שנה (תצוגה)'));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    expect(find.textContaining('י ⇒ יא'), findsOneWidget);
+    await tester.tapAt(const Offset(400, 100));
+    await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.text('🗓 בצע מעבר-שנה'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.dragUntilVisible(find.textContaining('מעבר-שנה בוצע:'), find.byType(Scrollable).first, const Offset(0, 500));
+    expect(find.textContaining('מעבר-שנה בוצע:'), findsOneWidget);
+    expect(find.textContaining('ללא כיתת-יעד (לא הומצאה)'), findsOneWidget, reason: 'אין כיתה-יעד ⇒ מדולג, לא מומצא');
+  });
 }
