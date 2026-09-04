@@ -56,6 +56,7 @@ import '../dart-maor/month-key.dart'; // מנוע-מדף: ISO ⇒ YYYY-MM
 import '../dart-maor/week-day-names.dart'; // דאטה-מדף: שמות-ימים (ראשון..שבת)
 import '../dart-maor/time-to-min.dart'; // מנוע-מדף: 'HH:MM' ⇒ דקות (איחור · שיעור-נוכחי)
 import '../dart-maor/holiday-of.dart'; // מנוע-מדף: שם-חג לתאריך (לוח-עברי)
+import '../dart-maor/upcoming-holidays.dart'; // מנוע-מדף: חגים-קרובים בחלון-ימים (סנכרון-לוח מקדים)
 import '../dart-maor/holidays.dart'; // דאטה-מדף: HOLIDAYS מפת-חגים
 import '../dart-maor/heb-parts.dart'; // מנוע-מדף: תאריך ⇒ {day,month(En),year} עברי
 import '../dart-data-maor/holiday-of-terms.dart' as hol_t; // מונחי-חגים-נדחים (דאטה)
@@ -80,6 +81,9 @@ class _Placement {
   static const riskRed = 60, riskOrange = 35; // ספי-סיכון (ציון 0..100)
   static const lockHm = '16:00'; // נעילה-אוטומטית סוף-יום
   static const remindHm = '10:00'; // תזכורת "לא-נרשם-היום" למורה בשעה-X
+  static const responseWindowDays = 2; // חלון-תגובה להורה אחרי הודעה-אוטו (ימים)
+  static const groupAbsenceMin = 2; // חיסור-קבוצתי: לפחות N חסרים וגם ≥ חצי-כיתה ⇒ אירוע?
+  static const thresholdWarnPct = 5; // התרעה-מקדימה: עד N% מעל הסף-הרגולטורי
   // 6 זהויות-דמו מוזרקות (חוק-6 · לא אטום): תפקיד ⇐ roleOf(config,email) · פעולה ⇐ canGrantedAction(features)
   //   scope: classes (null=הכל) · window (ימים סביב היום שמותר לערוך; 0=היום בלבד) · child (הורה)
   static const roleDefs = <Map<String, dynamic>>[
@@ -164,6 +168,9 @@ class _AttData {
     // עידו — חיסורים לא-מוצדקים ללא-אישור-הורה (החודש) ⇒ הודעה-אוטו
     {'date': '2026-09-01', 'lesson': 2, 'sid': 's6', 'status': 'absent', 'reason': 'אחר', 'justified': false, 'by': 't1', 'at': '2026-09-01T08:55'},
     {'date': '2026-09-03', 'lesson': 4, 'sid': 's6', 'status': 'absent', 'reason': 'אחר', 'justified': false, 'by': 't1', 'at': '2026-09-03T10:44'},
+    // ח׳-2 · 25/8 — כל הכיתה חסרה (2/2) ⇒ זיהוי-חיסור-קבוצתי (אירוע: טיול)
+    {'date': '2026-08-25', 'lesson': 1, 'sid': 's11', 'status': 'absent', 'reason': 'טיול', 'justified': true, 'parentOk': true, 'by': 't3', 'at': '2026-08-25T08:05'},
+    {'date': '2026-08-25', 'lesson': 1, 'sid': 's12', 'status': 'absent', 'reason': 'טיול', 'justified': true, 'parentOk': true, 'by': 't3', 'at': '2026-08-25T08:05'},
     // י׳-2 · טל — אבל (מוצדק), יובל — איחור-הסעה
     {'date': '2026-09-02', 'lesson': 1, 'sid': 's8', 'status': 'absent', 'reason': 'אבל', 'justified': true, 'parentOk': true, 'by': 't2', 'at': '2026-09-02T08:03'},
     {'date': '2026-09-03', 'lesson': 1, 'sid': 's9', 'status': 'late', 'arrival': '08:12', 'by': 't2', 'at': '2026-09-03T08:12'},
@@ -607,6 +614,63 @@ class _AttData {
       (marks.where((m) => dateInRange(m['date'] as String, from, to) && (cls == null || studentById(m['sid'] as String)['cls'] == cls)).toList()
         ..sort((a, b) => '${b['date']}${b['lesson']}'.compareTo('${a['date']}${a['lesson']}')));
 
+  // ═══ אוטומציות-חכמות (פעולה-4 "חריגה" + פעולה-5 "הכרעה" · פרואקטיבי — המערכת מתריעה לפני שדבר נשמט) ═══
+  // 1) התרעת-רצף: N חיסורים רצופים (streak ⊕ dayDiff)
+  static List<Map<String, dynamic>> get streakAlerts => [for (final s in activeStudents) if (streak(s['id'] as String) >= _Placement.streakAlert) s];
+  // 2) ניבוי-נשירה: band≥1 עם דפוס (יום/שיעור-קבוע · אחרי-חופשה) — riskParts⊕patterns (countBy)
+  static List<Map<String, dynamic>> get dropoutPredictions => [for (final s in activeStudents) if (riskBand(s['id'] as String) > 0) s];
+  // 3) חלון-תגובה להורה: הודעה נשלחה ואין אישור אחרי responseWindowDays (dayDiff) ⇒ הסלמה
+  static List<Map<String, dynamic>> get expiredResponses => [
+        for (final m in marks)
+          if (unjustified(m) && m['parentOk'] != true && sent.contains(keyOf(m['date'] as String, m['lesson'] as int, m['sid'] as String)) && dayDiff(m['date'] as String, _Placement.today) > _Placement.responseWindowDays) m,
+      ];
+  // 4) הצעת-השלמה: חיסור-מוצדק זכאי (makeupEligibility) שטרם תוזמן
+  static List<Map<String, dynamic>> get makeupSuggestions => [
+        for (final m in marks)
+          if (m['status'] == 'absent' && m['justified'] == true && m['makeupDate'] == null && m['makeupDone'] != true && eligibility(m)['eligible'] == true) m,
+      ];
+  // 6) דוח-שבועי-להנהלה: סימוני 7 הימים האחרונים (dateInRange) בשורות-CSV
+  static List<List<Object?>> weeklyRows() => [
+        ['תאריך', 'תלמיד', 'כיתה', 'שיעור', 'סטטוס', 'סיבה', 'מוצדק', 'אישור-הורה', 'הגעה', 'רשם/ה'],
+        for (final m in marksInRange(shift(_Placement.today, -7), _Placement.today))
+          [m['date'], studentById(m['sid'] as String)['name'], className(studentById(m['sid'] as String)['cls'] as String), m['lesson'], statusLabel[m['status']], m['reason'] ?? '', m['justified'] == true ? 'כן' : 'לא', m['parentOk'] == true ? 'כן' : 'לא', m['arrival'] ?? '', m['by']],
+      ];
+  static String get weeklyCsv => toCsv(weeklyRows(), csvEscape) as String;
+  // 7) סף-רגולטורי: מתחת לסף (זכאות/תעודה) · התרעה-מקדימה (עד thresholdWarnPct מעל הסף)
+  static List<Map<String, dynamic>> get belowThreshold => [for (final s in activeStudents) if (attendancePct(s) * 100 < _Placement.minAttendancePct) s];
+  static List<Map<String, dynamic>> get nearThreshold => [for (final s in activeStudents) if (attendancePct(s) * 100 >= _Placement.minAttendancePct && attendancePct(s) * 100 < _Placement.minAttendancePct + _Placement.thresholdWarnPct) s];
+  // 9) זיהוי-חיסור-קבוצתי: ביום-לימודים, כיתה עם ≥ חצי-הרוסטר חסרים (ומינימום N) ⇒ אירוע? (30 ימי-לימודים אחרונים)
+  static List<Map<String, dynamic>> get groupAbsences => [
+        for (final d in lastSchoolDays(30))
+          for (final c in classes)
+            if (() {
+              final r = studentsOf(c['id'] as String);
+              final n = r.where((s) => absentDay(d, s['id'] as String)).length;
+              return r.isNotEmpty && n >= _Placement.groupAbsenceMin && n * 2 >= r.length;
+            }())
+              {'date': d, 'cls': c['id'], 'absent': studentsOf(c['id'] as String).where((s) => absentDay(d, s['id'] as String)).length, 'total': studentsOf(c['id'] as String).length},
+      ];
+  // 10) סנכרון-לוח מקדים: חגים-קרובים (upcomingHolidays מהמדף על holidayOf) ⇒ ימים שלא ייספרו
+  static List<Map<String, dynamic>> get upcoming => upcomingHolidays(_Placement.today, (d) => holidayName(iso(d)), iso, 30);
+  // 8) נעילה-אוטומטית: autoLocked (nowHm ≥ lockHm) — מוצג כמצב
+
+  // ═══ שקעי-הצבה · מקום-שמור (חוק-7 · מבחן-הקונכייה): כל יכולת חסרת-נתון = שקע מוצהר, מאיר כשמחובר ═══
+  static const reservedSockets = <Map<String, String>>[
+    {'key': 'photo', 'label': 'תמונת-תלמיד', 'where': 'students[].photo ⇒ עמודה "תמונה"'},
+    {'key': 'medicalDoc', 'label': 'אישור-רפואי (קובץ)', 'where': 'mark.medicalDoc ⇒ עמודה + כפתור "צרף-אישור"'},
+    {'key': 'online', 'label': 'נוכחות-מקוונת (היברידי)', 'where': 'mark.online ⇒ עמודה "מקוון"'},
+    {'key': 'transportLate', 'label': 'הסעה-איחור', 'where': 'mark.transportLate ⇒ עמודה "איחור-הסעה"'},
+    {'key': 'cardIn', 'label': 'ביומטרי/כרטיס-כניסה', 'where': 'mark.cardIn ⇒ עמודה + arrival אוטומטי'},
+    {'key': 'gpsIn', 'label': 'GPS-הגעה', 'where': 'mark.gpsIn (מקור: AttendanceDay.inLat/inLng)'},
+    {'key': 'riskExternal', 'label': 'ציון-סיכון חיצוני (מודול-תלמידים)', 'where': 'students[].riskExternal ⇒ max(פנימי,חיצוני)'},
+    {'key': 'noticeHrs', 'label': 'שעות-הודעה-מראש (ביטול-מוקדם)', 'where': 'mark.noticeHrs ⇒ makeupEligibility rawHrs'},
+    {'key': 'notifySink', 'label': 'שקע-שליחה SMS/וואטסאפ (מודול-הורים)', 'where': 'send(key) ⇒ תור בלבד עד חיבור'},
+    {'key': 'auditSink', 'label': 'אחסון-אודיט (pushAuditRing/pullAuditRing)', 'where': 'audit[] בזיכרון עד חיבור fs'},
+    {'key': 'pdfPrint', 'label': 'PDF/הדפסה', 'where': 'CSV זמין; PDF/מדפסת = שקע'},
+    {'key': 'substituteTeacher', 'label': 'מורה-מחליף מוקצה (מודול-מורים)', 'where': 'roleDefs[מחליף].classes מוזרק בהצבה'},
+    {'key': 'dashboardCounters', 'label': 'מוני-לוח-הנהלה', 'where': 'KPI getters — המנהל מחווט למסך-הבית'},
+  ];
+
   // ─── KPI-10 (פעולה-3 · כל אחד = ספירה/יחס על אמת) ───
   static List<Map<String, dynamic>> get activeStudents => students.where(activeOf).toList();
   static int countToday(String status) => activeStudents.where((s) => dayStatus(_Placement.today, s['id'] as String) == status).length;
@@ -723,6 +787,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           if (_AttData.exportOk) SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport(visible)),
           if (_AttData.exportOk) SoftButton(label: '📄 PDF', tone: 0, onTap: () => setState(() => _notice = 'ייצוא-PDF: שקע-מדפסת/PDF לא מחובר בהצבה — מקום-שמור (CSV זמין)')),
           if (_AttData.exportOk) SoftButton(label: '🖨 הדפס-גיליון', tone: 0, onTap: () => setState(() => _notice = 'הדפסה: שקע-מדפסת לא מחובר בהצבה — מקום-שמור')),
+          if (_AttData.exportOk && (_AttData.can('att.audit') || _AttData.roleName == 'admin')) SoftButton(label: '📈 דוח-שבועי', tone: 0, onTap: () => _openCsv('דוח-שבועי להנהלה', _AttData.weeklyRows(), _AttData.weeklyCsv)),
         ]),
         _gap(8),
         DsSearch(value: _q, onChanged: (v) => setState(() => _q = v)),
@@ -762,6 +827,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           AlertBanner(glyph: '📝', tone: 2, message: 'לא-נרשם-היום (תזכורת ${_Placement.remindHm}): ${notRec.map(_AttData.className).join(' · ')} — שיעור שהתחיל ללא רישום'),
           _gap(8),
         ],
+        // ── מרכז-אוטומציות (פרואקטיבי · 23-ג): רק התרעות פעילות — כל אחת = מנוע-מדף ⊕ AlertBanner/StatusChip ──
+        ..._automations(cls),
         // ── 8 טאבים (SegmentedSwitch מבוקר, גלילה-אופקית) ──
         SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: _tabs, selected: _tab, onSelect: (i) => setState(() => _tab = i))),
         _gap(10),
@@ -1021,19 +1088,44 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       _gap(8),
       for (final a in _AttData.audit) TimelineItem(title: '${a['action']} · ${a['key']}', time: '${(a['at'] as String).replaceFirst('T', ' ')} #${a['seq']}', body: 'רשם/ה ${a['by']}'),
       for (final m in base.take(12)) TimelineItem(title: '${m['status']} · ${_AttData.studentById(m['sid'] as String)['name']} · שיעור ${m['lesson']}', time: '${(m['at'] as String).replaceFirst('T', ' ')}', body: 'רשם/ה ${m['by']}'),
+      _gap(12),
+      // 🔌 שקעי-הצבה (מקום-שמור · חוק-7): מוצהרים, לא מזויפים — מאירים כשמחובר נתון
+      Text('🔌 שקעי-הצבה · ${_AttData.reservedSockets.length} מקומות-שמורים (לא-מחוברים)', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+      _gap(6),
+      for (final r in _AttData.reservedSockets) TimelineItem(title: '${r['label']}', time: r['key']!, body: r['where']),
     ]);
   }
 
+  // ═══ מרכז-אוטומציות: 10 אוטומציות-המפרט — כל אחת מנוע-מדף ⊕ AlertBanner (מוצג רק כשפעיל) ═══
+  List<Widget> _automations(String cls) {
+    final streaks = _AttData.streakAlerts, preds = _AttData.dropoutPredictions, exp = _AttData.expiredResponses;
+    final mk = _AttData.makeupSuggestions, below = _AttData.belowThreshold, near = _AttData.nearThreshold;
+    final groups = _AttData.groupAbsences, up = _AttData.upcoming;
+    final autoLock = _AttData.autoLocked(_Placement.today);
+    final out = <Widget>[
+      if (streaks.isNotEmpty) AlertBanner(glyph: '🔗', tone: 2, message: 'התרעת-רצף (≥${_Placement.streakAlert}): ${streaks.map((s) => '${s['name']} (${_AttData.streak(s['id'] as String)})').join(' · ')}'),
+      if (preds.isNotEmpty) AlertBanner(glyph: '🔮', tone: 2, message: 'ניבוי-נשירה: ${preds.map((s) => '${s['name']} ${_AttData.risk(s['id'] as String)} · ${_AttData.riskWhy(s['id'] as String)}${_AttData.patterns(s['id'] as String).isEmpty ? '' : ' · ${_AttData.patterns(s['id'] as String).keys.join(', ')}'}').join(' | ')}'),
+      if (exp.isNotEmpty) AlertBanner(glyph: '⏳', tone: 3, message: 'חלון-תגובה (${_Placement.responseWindowDays} י׳) פג ללא אישור-הורה: ${exp.map((m) => '${_AttData.studentById(m['sid'] as String)['name']} ${fmtDate(m['date'] as String)}').join(' · ')} — הסלמה לרכז/ת'),
+      if (mk.isNotEmpty) AlertBanner(glyph: '🔁', tone: 0, message: 'הצעת-השלמה (חיסור-מוצדק זכאי): ${mk.map((m) => '${_AttData.studentById(m['sid'] as String)['name']} ${fmtDate(m['date'] as String)} ש${m['lesson']}').join(' · ')}'),
+      if (below.isNotEmpty) AlertBanner(glyph: '⚖️', tone: 2, message: 'מתחת לסף-הרגולטורי ${_Placement.minAttendancePct}%: ${below.map((s) => '${s['name']} ${(_AttData.attendancePct(s) * 100).round()}%').join(' · ')}'),
+      if (near.isNotEmpty) AlertBanner(glyph: '⚖️', tone: 3, message: 'התרעה-מקדימה (עד ${_Placement.thresholdWarnPct}% מעל הסף): ${near.map((s) => '${s['name']} ${(_AttData.attendancePct(s) * 100).round()}%').join(' · ')}'),
+      if (groups.isNotEmpty) AlertBanner(glyph: '👥', tone: 3, message: 'חיסור-קבוצתי (≥חצי-כיתה): ${groups.map((g) => '${_AttData.className(g['cls'] as String)} ${fmtDate(g['date'] as String)} ${g['absent']}/${g['total']}').join(' · ')} — אירוע? לסמן כלא-נספר'),
+      if (up.isNotEmpty) AlertBanner(glyph: '🕎', tone: 0, message: 'סנכרון-לוח (30 י׳): ${up.map((h) => '${fmtDate(h['iso'] as String)} ${h['name']}').join(' · ')} — לא ייספרו'),
+      AlertBanner(glyph: autoLock ? '🔒' : '⏰', tone: autoLock ? 3 : 0, message: autoLock ? 'נעילה-אוטומטית סוף-יום פעילה (${_Placement.nowHm} ≥ ${_Placement.lockHm})' : 'נעילה-אוטומטית סוף-יום ב-${_Placement.lockHm} (עכשיו ${_Placement.nowHm})'),
+    ];
+    return [for (final w in out) ...[w, _gap(8)]];
+  }
+
   // ═══ ייצוא (23-ג) = SoftButton ⊕ toCsv ⊕ csvEscape ⊕ exportAllowed ⊕ guardExport ⊕ GlassCard-preview ═══
-  void _openExport(List<Map<String, dynamic>> rows) {
-    final csv = _AttData.csvOf(rows, _date);
+  void _openExport(List<Map<String, dynamic>> rows) => _openCsv('ייצוא CSV · נוכחות · ${fmtDate(_date)}', _AttData.csvRows(rows, _date), _AttData.csvOf(rows, _date));
+  void _openCsv(String title, List<List<Object?>> rows, String csv) {
     showModalBottomSheet<void>(
       context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
       builder: (ctx) => DraggableScrollableSheet(
         initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
         builder: (ctx, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(
           child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-            MediaRow(glyph: '⬇', title: 'ייצוא CSV · נוכחות', subtitle: '${rows.length} תלמידים · ${_AttData.csvRows(rows, _date).first.length} עמודות · ${fmtDate(_date)}'),
+            MediaRow(glyph: '⬇', title: title, subtitle: '${rows.length - 1} שורות · ${rows.first.length} עמודות'),
             _gap(10),
             const Text('תצוגה מקדימה (BOM + חסימת-הזרקה):', style: TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
             _gap(8),
