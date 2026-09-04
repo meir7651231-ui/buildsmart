@@ -39,6 +39,7 @@ import '../dart-ui-bs/premium/showcase/premium_avatar.dart'; // זהות: ראש
 import '../dart-ui-bs/premium/dataviz/gauge_meter.dart'; // מד-סיכון 0..1 (tone מוזרק לפי-band)
 import '../dart-ui-bs/premium/dataviz/neon_bars.dart'; // פירוק-האותות / נוכחות-חודשית (labels+values)
 import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט ציר-זמן/הערה/חיסור/מסמך (title/time/body)
+import '../dart-ui-bs/premium/lists/expandable_tile.dart'; // הערות-מחנך/ת פר-שנה״ל (title+body מתקפל)
 import '../dart-ui-bs/ds/ds_field.dart'; // קלט-טקסט מבוקר (הערה · פנייה · רישום)
 import '../dart-ui-bs/ds/ds_enum_field.dart'; // בחירה-מרשימה (העבר-כיתה · דגל)
 import '../dart-maor/presents-in-month.dart'; // נוכחות-בחודש-הנוכחי (presents ⊕ today)
@@ -529,6 +530,14 @@ class _StuData {
     (fam(s)['docs'] as List).add({'id': 'd-${_seq + 1}', 'name': name, 'addedAt': today});
     log(who, 'doc', '${s['id']} · מסמך: $name');
   }
+  static void deleteStudent(Map<String, dynamic> s, String who) { // מחיקה (מנהל/ת בלבד · המפרט): הסרת Member + רישומיו; משפחה ריקה מוסרת; נרשם באודיט
+    final f = fam(s);
+    (f['members'] as List).removeWhere((m) => (m as Map)['id'] == s['id']);
+    if ((f['members'] as List).isEmpty) (db['families'] as List).remove(f);
+    (db['enrollments'] as List).removeWhere((e) => (e as Map)['memberId'] == s['id']);
+    _cache = null;
+    log(who, 'delete', '${s['id']} · נמחק/ה: ${s['name']}');
+  }
   static void setStatus(Map<String, dynamic> s, String st, String who) { // פעיל · הוקפא · עזב · בוגר — נכתב לרישום-הראשי (Enrollment.status)
     final e = mainEnrollment(s);
     if (e != null) {
@@ -784,6 +793,26 @@ class _StuData {
         for (final s in active)
           () { final gi = gradeIdx(s); if (gi < 0) return '${s['name']}: כיתה לא-ידועה'; if (gi >= gradeOrder.length - 1) return '${s['name']}: יב ⇒ בוגר'; return '${s['name']}: ${gradeOrder[gi]} ⇒ ${gradeOrder[gi + 1]}'; }(),
       ];
+  static Map<String, int> yearRolloverExecute(String who) { // ביצוע (מנהל/ת): כיתת-יעד לפי gradeMin של השכבה-הבאה; אין כיתה-יעד ⇒ מדולג (לא מומצא)
+    var moved = 0, graduated = 0, skipped = 0;
+    for (final s in [...active]) {
+      final gi = gradeIdx(s);
+      if (gi < 0) { skipped++; continue; }
+      if (gi >= gradeOrder.length - 1) { setStatus(s, 'בוגר', who); graduated++; continue; }
+      final next = gradeOrder[gi + 1];
+      final target = homeroomCourses().where((c) => c['gradeMin'] == next).toList();
+      if (target.isEmpty) { skipped++; continue; }
+      moveClass(s, target.first['name'] as String, who); moved++;
+    }
+    log(who, 'rollover', 'מעבר-שנה: $moved הועברו · $graduated בוגרים · $skipped ללא כיתת-יעד');
+    return {'moved': moved, 'graduated': graduated, 'skipped': skipped};
+  }
+  // (מקום-שמור) הערות-מחנך/ת פר-שנה״ל: קיבוץ הערות-מתוארכות לפי academicYearLabel
+  static Map<String, List<Map<String, dynamic>>> notesByYear(Map<String, dynamic> s) {
+    final out = <String, List<Map<String, dynamic>>>{};
+    for (final n in notes(s)) { final d = '${n['date']}'; (out[d.isEmpty ? 'ללא-תאריך' : academicYearLabel(d, _atNoon)] ??= []).add(n); }
+    return out;
+  }
   // אינטגרציות: נוכחות⇒סיכון (signalDefs) · ציונים⇒סיכון (מקום-שמור grades) · גבייה⇒דגל-חוב (מקום-שמור s.feeDebt, רק-הנהלה) · הורים⇒קשר (Family) ·
   //   יומן⇒אירועים (OrgEvent.famId) · לוח-הנהלה⇒מונים (highN/midN/openTicketsN חשופים).
   static bool feeDebt(Map<String, dynamic> s) => s['feeDebt'] == true; // מקום-שמור: מאיר כשמודול-הגבייה כותב
@@ -809,6 +838,11 @@ class _StuData {
 class StudentsScreen extends StatefulWidget {
   const StudentsScreen({super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
   final Map<String, dynamic>? db;
+  /// אינטגרציה לוח-הנהלה⇒מונים: המונים של המודול (המנהל מחווט; אין ייבוא-בין-מודולים)
+  static Map<String, int> get counters => {
+        'total': _StuData.students.length, 'active': _StuData.active.length, 'new': _StuData.newN, 'high': _StuData.highN, 'mid': _StuData.midN,
+        'noParent': _StuData.noParentN, 'openTickets': _StuData.openTicketsN, 'medical': _StuData.medicalN, 'avgAttendance': _StuData.avgAttendance ?? -1, 'avgGrades': _StuData.avgGrades ?? -1,
+      };
   @override
   State<StudentsScreen> createState() => _StudentsScreenState();
 }
@@ -822,6 +856,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
   int _role = 0; // 0=מנהל · 1=יועץ · 2=מחנך · 3=מזכירות · 4=הורה · 5=צפייה (חוק-6 זהות-מוזרקת; בורר מדגים גידור)
   bool _importing = false; // מצב-מיוחד: ייבוא-בתהליך
   Map<String, int>? _importResult; // תוצאת-ייבוא אחרונה
+  String? _rollover; // תוצאת מעבר-שנה אחרונה
   bool _loading = false; // מצב-מסך שמור: טעינה
   String? _error; // מצב-מסך שמור: שגיאה (מקום-שמור — מאיר כש-fetch נכשל)
 
@@ -829,6 +864,11 @@ class _StudentsScreenState extends State<StudentsScreen> {
   void initState() {
     super.initState();
     if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset();
+  }
+  @override
+  void didUpdateWidget(covariant StudentsScreen old) { // שקע-קלט מתחלף ⇒ דאטה חדשה (נתפס בבדיקת-widget: pumpWidget מעדכן State, לא initState)
+    super.didUpdateWidget(old);
+    if (!identical(old.db, widget.db)) { if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset(); _locks.clear(); _q = ''; }
   }
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
@@ -871,6 +911,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
         ]),
         // מצב-מיוחד: ייבוא-בתהליך / תוצאת-ייבוא
         if (_importing) ...[const AlertBanner(glyph: '📥', tone: 3, message: 'ייבוא בתהליך… מעבד שורות'), _gap(8)],
+        if (_rollover != null) ...[AlertBanner(glyph: '🗓', tone: 1, message: _rollover!), _gap(8)],
         if (!_importing && _importResult != null) ...[AlertBanner(glyph: '📥', tone: 1, message: 'ייבוא הסתיים: ${_importResult!['ok']} נוספו · ${_importResult!['skipped']} נדחו'), _gap(8)],
         // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"; המונה = ספירת-הציר על הפעילים
         Wrap(spacing: 8, runSpacing: 6, children: [
@@ -920,6 +961,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
         Wrap(spacing: 8, runSpacing: 6, children: [
           if (_can('stu.ticket') || _StuData.roleName(_role) == 'admin') SoftButton(label: '🧭 דוח-יועץ שבועי', tone: 0, onTap: () => _showText(context, 'דוח-יועץ/ת שבועי', _StuData.weeklyReport())),
           if (_StuData.roleName(_role) == 'admin') SoftButton(label: '🗓 מעבר-שנה (תצוגה)', tone: 0, onTap: () => _showText(context, 'מעבר-שנה · העברת-כיתות מרוכזת (תצוגה-מקדימה)', _StuData.yearRolloverPreview().join('\n'))),
+          if (_StuData.roleName(_role) == 'admin') SoftButton(label: '🗓 בצע מעבר-שנה', tone: 2, onTap: () => setState(() { final r = _StuData.yearRolloverExecute(_who); _importResult = null; _error = null; _rollover = 'מעבר-שנה בוצע: ${r['moved']} הועברו · ${r['graduated']} בוגרים · ${r['skipped']} ללא כיתת-יעד (לא הומצאה)'; })),
           if (_StuData.exportOk(_role)) SoftButton(label: '⬇ CSV (${visible.length})', tone: 0, onTap: () => _showText(context, 'ייצוא CSV · ${visible.length} תלמידים (BOM + חסימת-הזרקה)', _StuData.csvOf(visible))),
           if (_StuData.exportOk(_role)) SoftButton(label: '⬇ PDF — מקום-שמור', tone: 0, onTap: () => _showText(context, 'ייצוא PDF', 'מקום-שמור: אין מנוע-PDF במדף (§20-ג) — יאיר כשיתווסף; עד אז: הדפס-כרטיס (טקסט) + CSV.')),
         ]),
@@ -931,11 +973,10 @@ class _StudentsScreenState extends State<StudentsScreen> {
           SegmentedSwitch(items: const ['⚠ סיכון', '🏫 כיתה', '🔤 שם'], selected: _sort, onSelect: (i) => setState(() => _sort = i)),
         ]),
         _gap(10),
-        // מצבי-מסך שמורים (טעינה/שגיאה) ⇒ אחרת התוכן: ריק · טבלה · טריאז'
+        // מצבי-מסך: שגיאה (AlertBanner + סגירה) · טעינה ⇒ אחרת התוכן: ריק · טבלה · טריאז'
+        if (_error != null) ...[Row(children: [Expanded(child: AlertBanner(glyph: '⚠️', tone: 2, message: _error!)), const SizedBox(width: 6), SoftButton(label: '✕', tone: 0, onTap: () => setState(() => _error = null))]), _gap(8)],
         if (_loading)
           _loadingView()
-        else if (_error != null)
-          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
         else if (_StuData.students.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🎓', message: 'אין תלמידים עדיין — רשום תלמיד ראשון או ייבא'))
         else if (visible.isEmpty)
@@ -1141,6 +1182,8 @@ class _StudentsScreenState extends State<StudentsScreen> {
         final bn = _StuData.notes(s).where((n) => n['kind'] == 'behavior').toList();
         return [
           if (s['behavior'] is num) Row(children: [BareStat(value: '${s['behavior']}', label: 'אירועי-התנהגות בחודש', inkColor: _warning, mutedColor: _muted)]) else _slot('אירועי-התנהגות', 'מודול-משמעת ⇒ s.behavior'),
+          _h('הערות-מחנך/ת לפי שנה״ל'),
+          for (final e in _StuData.notesByYear(s).entries) ExpandableTile(title: '${e.key} · ${e.value.length}', body: e.value.map((n) => '${'${n['date']}'.isEmpty ? '' : '${_StuData.fmt('${n['date']}')} · '}${n['by']}: ${n['text']}').join('\n')),
           _h('הערות-התנהגות · ${bn.length}'),
           if (bn.isEmpty) const EmptyState(glyph: '📝', message: 'אין הערות-התנהגות') else for (final n in bn) TimelineItem(title: '📝 ${n['by']}', time: _StuData.fmt('${n['date']}'), body: '${n['text']}'),
         ];
@@ -1211,6 +1254,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
       if (_can('stu.doc')) SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => _prompt(ctx, 'צרף-מסמך', 'שם המסמך', (v) => act(() => _StuData.attachDoc(s, v, _who)))),
       SoftButton(label: '🖨 הדפס-כרטיס', tone: 0, onTap: () => _showText(ctx, 'כרטיס-תלמיד להדפסה', _StuData.card(s))),
       if (_can('stu.merge')) for (final d in _StuData.dupPeers(s)) SoftButton(label: '👯 מזג ${d['id']} לכאן', tone: 3, onTap: () => act(() => _StuData.mergeDuplicate(s, d, _who))),
+      if (_StuData.roleName(_role) == 'admin') SoftButton(label: '🗑 מחק רשומה', tone: 2, onTap: () { act(() => _StuData.deleteStudent(s, _who)); Navigator.of(ctx).pop(); }),
       if (_can('stu.consent')) SoftButton(label: '📷 אישור-מדיה: ${s['mPhotos'] == true ? 'בטל' : 'סמן'}', tone: 0, onTap: () => act(() => _StuData.toggleConsent(s, 'mPhotos', _who))),
       if (_can('stu.consent')) SoftButton(label: '🧳 בקש אישור-טיולים', tone: 0, onTap: () => act(() => _StuData.requestConsent(s, 'trips', _who))),
       if (_can('stu.ticket')) for (final t in _StuData.openTasksOf(s)) SoftButton(label: '✅ סגור פנייה ${t['id']}', tone: 1, onTap: () => act(() => _StuData.closeTicket(t, _who))), // תווית קצרה (גיליון ≤640px · נתפס בבדיקת-widget)
@@ -1298,7 +1342,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
         Row(children: [SoftButton(label: '📥 ייבא', tone: 1, onTap: () {
           Navigator.of(c2).pop();
           setState(() { _importing = true; });
-          Future.delayed(const Duration(milliseconds: 600), () { if (!mounted) return; setState(() { _importResult = _StuData.importCsv(text, _who); _importing = false; }); });
+          Future.delayed(const Duration(milliseconds: 600), () { if (!mounted) return; setState(() { _importResult = _StuData.importCsv(text, _who); _importing = false; if (_importResult!['ok'] == 0) { _error = 'ייבוא נכשל: אין שורות תקינות (${_importResult!['skipped']} נדחו) — בדוק/י את עמודות-ה-CSV'; _importResult = null; } }); });
         })]),
       ])),
     ));
