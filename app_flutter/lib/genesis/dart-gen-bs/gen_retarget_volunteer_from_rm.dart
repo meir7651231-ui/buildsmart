@@ -1,6 +1,7 @@
-// 🎯 VolunteerScreen — retarget של schoolos_rooms.dart לישות Volunteer (GENMAX·G5c · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Volunteer
-//   מיפוי-מפתחות (שם-זהה ⇒ אותה צורת-טיפוס לפי סדר-הסכמה ⇒ מקום-שמור): id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒maxDeliveries(type) · cap⇒∅(reserved) · location⇒phone(type) · from⇒∅(reserved) · to⇒∅(reserved) · access⇒∅(reserved) · notes⇒area(type) · eq⇒∅(reserved)
-//   שדות-E שלא קיבלו מקור (מקום-שמור, יאירו כשיוזרם נתון): note, createdAt · הזרע (rooms) = זרע-הצבה של מודול-המקור, לא ערך-אמת של Volunteer
+// 🎯 VolunteerScreen — retarget של schoolos_rooms.dart לישות Volunteer (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Volunteer
+//   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 7
+//   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒maxDeliveries(unique) · cap⇒∅(reserved) · location⇒∅(reserved(2 מועמדים)) · from⇒∅(reserved) · to⇒∅(reserved) · access⇒∅(reserved) · notes⇒∅(reserved(2 מועמדים)) · eq⇒∅(reserved)
+//   שדות-Volunteer בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, area, note, createdAt · תוויות-UI = של מודול-המקור (הצבה) · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Volunteer
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: VolunteerScreen.
 //
@@ -106,13 +107,13 @@ class _VolunteerData {
 
   // ── חדרים (מאור Room) ──
   static const rooms = <Map<String, dynamic>>[
-    {'id': 'r1', 'name': 'כיתה 101', 'active': true, 'maxDeliveries': 60, 'cap': 32, 'phone': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '15:00', 'access': true, 'area': '', 'eq': {'מקרן': true, 'לוח-חכם': true, 'מזגן': true}},
-    {'id': 'r2', 'name': 'מעבדת מדעים', 'active': true, 'maxDeliveries': 60, 'cap': 24, 'phone': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': false, 'area': 'כיור-חירום בכניסה', 'eq': {'מקרן': true, 'מזגן': true, 'כיורים': true}},
-    {'id': 'r3', 'name': 'חדר מחשבים', 'active': true, 'maxDeliveries': 60, 'cap': 28, 'phone': 'בניין א׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': true, 'area': '', 'eq': {'מחשבים': true, 'מקרן': true, 'מזגן': false}},
-    {'id': 'r4', 'name': 'אולם ספורט', 'active': true, 'maxDeliveries': 60, 'cap': 120, 'phone': 'בניין ג׳ · קרקע', 'from': '08:00', 'to': '17:00', 'access': true, 'area': '', 'eq': {'מזרנים': true, 'מגבר': true}},
-    {'id': 'r5', 'name': 'כיתה 204', 'active': true, 'maxDeliveries': 60, 'cap': 30, 'phone': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '15:00', 'access': true, 'area': '', 'eq': {'מקרן': false, 'מזגן': true}},
-    {'id': 'r6', 'name': 'חדר מורים', 'active': true, 'maxDeliveries': 60, 'cap': 16, 'phone': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '16:00', 'access': true, 'area': '', 'eq': {'מדפסת': true, 'מזגן': true}},
-    {'id': 'r7', 'name': 'אודיטוריום', 'active': false, 'maxDeliveries': 60, 'cap': 220, 'phone': 'בניין ג׳ · קומה 1', 'from': '08:00', 'to': '20:00', 'access': true, 'area': 'בשיפוץ עד סוף אוקטובר', 'eq': {'מקרן': true, 'מגבר': true}},
+    {'id': 'r1', 'name': 'כיתה 101', 'active': true, 'maxDeliveries': 60, 'cap': 32, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '15:00', 'access': true, 'notes': '', 'eq': {'מקרן': true, 'לוח-חכם': true, 'מזגן': true}},
+    {'id': 'r2', 'name': 'מעבדת מדעים', 'active': true, 'maxDeliveries': 60, 'cap': 24, 'location': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': false, 'notes': 'כיור-חירום בכניסה', 'eq': {'מקרן': true, 'מזגן': true, 'כיורים': true}},
+    {'id': 'r3', 'name': 'חדר מחשבים', 'active': true, 'maxDeliveries': 60, 'cap': 28, 'location': 'בניין א׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מחשבים': true, 'מקרן': true, 'מזגן': false}},
+    {'id': 'r4', 'name': 'אולם ספורט', 'active': true, 'maxDeliveries': 60, 'cap': 120, 'location': 'בניין ג׳ · קרקע', 'from': '08:00', 'to': '17:00', 'access': true, 'notes': '', 'eq': {'מזרנים': true, 'מגבר': true}},
+    {'id': 'r5', 'name': 'כיתה 204', 'active': true, 'maxDeliveries': 60, 'cap': 30, 'location': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '15:00', 'access': true, 'notes': '', 'eq': {'מקרן': false, 'מזגן': true}},
+    {'id': 'r6', 'name': 'חדר מורים', 'active': true, 'maxDeliveries': 60, 'cap': 16, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מדפסת': true, 'מזגן': true}},
+    {'id': 'r7', 'name': 'אודיטוריום', 'active': false, 'maxDeliveries': 60, 'cap': 220, 'location': 'בניין ג׳ · קומה 1', 'from': '08:00', 'to': '20:00', 'access': true, 'notes': 'בשיפוץ עד סוף אוקטובר', 'eq': {'מקרן': true, 'מגבר': true}},
   ];
 
   // ── חוגים/שיעורים (מאור Course) — תפיסות-חוזרות (שבועיות) · sessions=[{day(0=ראשון),time}] ──
@@ -156,11 +157,11 @@ class _VolunteerData {
 
   // ── אירועים/הזמנות חד-פעמיות (מאור OrgEvent ⊕ סטטוס-אישור מבנייה-חכמה) ──
   static const events = <Map<String, dynamic>>[
-    {'id': 'e1', 'title': 'ישיבת-צוות מדעים', 'date': '2026-09-03', 'time': '12:00', 'type': 'meeting', 'roomId': 'r6', 'priority': 'green', 'done': false, 'area': '', 'status': 'pending', 'requestedBy': 't2', 'attendees': 12},
-    {'id': 'e2', 'title': 'הרצאת-אורח בטיחות', 'date': '2026-09-03', 'time': '11:00', 'type': 'lecture', 'roomId': 'r1', 'priority': 'orange', 'done': false, 'area': 'דורש מקרן', 'status': 'proposed', 'requestedBy': 't1', 'attendees': 30},
-    {'id': 'e3', 'title': 'מבחן-מתכונת מתמטיקה', 'date': '2026-09-03', 'time': '09:00', 'type': 'exam', 'roomId': 'r1', 'priority': 'red', 'done': false, 'area': '', 'status': 'pending', 'requestedBy': 't1', 'attendees': 30},
-    {'id': 'e4', 'title': 'אסיפת-הורים ט׳', 'date': '2026-09-06', 'time': '18:00', 'type': 'meeting', 'roomId': 'r4', 'priority': 'green', 'done': false, 'area': '', 'status': 'proposed', 'requestedBy': 's1', 'attendees': 150},
-    {'id': 'e5', 'title': 'חוג-שחמט (חיצוני)', 'date': '2026-09-03', 'time': '14:00', 'type': 'other', 'roomId': 'r5', 'priority': 'green', 'done': false, 'area': '', 'status': 'rejected', 'requestedBy': 's1', 'attendees': 14},
+    {'id': 'e1', 'title': 'ישיבת-צוות מדעים', 'date': '2026-09-03', 'time': '12:00', 'type': 'meeting', 'roomId': 'r6', 'priority': 'green', 'done': false, 'notes': '', 'status': 'pending', 'requestedBy': 't2', 'attendees': 12},
+    {'id': 'e2', 'title': 'הרצאת-אורח בטיחות', 'date': '2026-09-03', 'time': '11:00', 'type': 'lecture', 'roomId': 'r1', 'priority': 'orange', 'done': false, 'notes': 'דורש מקרן', 'status': 'proposed', 'requestedBy': 't1', 'attendees': 30},
+    {'id': 'e3', 'title': 'מבחן-מתכונת מתמטיקה', 'date': '2026-09-03', 'time': '09:00', 'type': 'exam', 'roomId': 'r1', 'priority': 'red', 'done': false, 'notes': '', 'status': 'pending', 'requestedBy': 't1', 'attendees': 30},
+    {'id': 'e4', 'title': 'אסיפת-הורים ט׳', 'date': '2026-09-06', 'time': '18:00', 'type': 'meeting', 'roomId': 'r4', 'priority': 'green', 'done': false, 'notes': '', 'status': 'proposed', 'requestedBy': 's1', 'attendees': 150},
+    {'id': 'e5', 'title': 'חוג-שחמט (חיצוני)', 'date': '2026-09-03', 'time': '14:00', 'type': 'other', 'roomId': 'r5', 'priority': 'green', 'done': false, 'notes': '', 'status': 'rejected', 'requestedBy': 's1', 'attendees': 14},
   ];
 
   // ── תקלות (בנייה-חכמה TaskItem kind='defect' · roomId=מיקום) ──
@@ -186,7 +187,7 @@ class _VolunteerData {
 
   // db בצורת-הקלט של מנועי-מאור (rooms·courses·events)
   static Map<String, dynamic> get db => {'rooms': rooms, 'courses': courses, 'events': events};
-  static const config = <String, dynamic>{'terms': {'entity.course': 'שיעור', 'entity.room': 'חדר'}}; // termOf
+  static const config = <String, dynamic>{'terms': {'entity.course': 'שיעור', 'entity.volunteer': 'Volunteer'}}; // termOf
 
   // ── שקעים (חוק-1: השכנים מוזרקים, לא מיובאים ע"י האטומים) ──
   static num _t2m(dynamic t) => timeToMin(t) as num;
@@ -360,7 +361,7 @@ class _VolunteerData {
       ];
 
   // קיבוץ (countBy מאור) — לפי בניין (location) · לפי סטטוס
-  static List<List<Object>> get byBuilding => countBy(liveRooms, (r) => '${(r as Map)['phone']}'.split(' · ').first);
+  static List<List<Object>> get byBuilding => countBy(liveRooms, (r) => '${(r as Map)['location']}'.split(' · ').first);
   static String statusOf(Map<String, dynamic> r) {
     if (!activeOf(r)) return faultsOf(r).isNotEmpty ? 'שיפוץ' : 'סגור';
     if (faulty(r)) return 'תקול';
@@ -416,7 +417,7 @@ class _VolunteerData {
     }
     return true;
   }
-  static String buildingOf(Map<String, dynamic> r) => '${r['phone']}'.split(' · ').first;
+  static String buildingOf(Map<String, dynamic> r) => '${r['location']}'.split(' · ').first;
   static List<Map<String, dynamic>> altRooms({required String iso, required String time, int need = 0, List<String> needsEq = const [], String? nearId, String? exceptId, String? excludeRoomId}) {
     final t = _t2m(time);
     if (t.isNaN) return const [];
@@ -445,7 +446,7 @@ class _VolunteerData {
   static int _seq = 0;
   static String _newId(String p) => '$p-new-${++_seq}';
   static void book(String who, Map<String, dynamic> r, String iso, String time, String title, {int attendees = 0, bool approved = false}) {
-    extraEvents.insert(0, {'id': _newId('e'), 'title': title, 'date': iso, 'time': time, 'type': 'other', 'roomId': r['id'], 'priority': 'green', 'done': false, 'area': '', 'status': approved ? 'pending' : 'proposed', 'requestedBy': who, 'attendees': attendees});
+    extraEvents.insert(0, {'id': _newId('e'), 'title': title, 'date': iso, 'time': time, 'type': 'other', 'roomId': r['id'], 'priority': 'green', 'done': false, 'notes': '', 'status': approved ? 'pending' : 'proposed', 'requestedBy': who, 'attendees': attendees});
     log(who, approved ? 'הזמנת-חדר (אושרה-אוטו)' : 'הזמנת-חדר (ממתינה-אישור)', '${r['name']} · $iso $time · $title', roomId: r['id'] as String);
     invalidate();
   }
@@ -499,7 +500,7 @@ class _VolunteerData {
   static num _scoreOf(dynamic q, dynamic terms) => smartScore(q, terms, _norm, _expand, _score) as num;
   static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty;
   static List<String> termsOf(Map<String, dynamic> r) => [
-        '${r['name']}', '${r['phone']}', ...eqOf(r).keys,
+        '${r['name']}', '${r['location']}', ...eqOf(r).keys,
         for (final c in liveCourses) if (c['roomId'] == r['id']) '${c['name']}',
         for (final e in liveEvents) if (e['roomId'] == r['id'] && e['done'] != true) '${e['title']}',
       ];
@@ -508,7 +509,7 @@ class _VolunteerData {
 
   // ═══ חריגה/סינון (23-ג) = FilterChipPill ⊕ finderMatches — 11 צירי-המפרט כנעילות AND ═══
   //   בניין · קומה · סוג(מקום-שמור) · קיבולת≥N · ציוד · פנוי-במשבצת · תפוס · תקלה-פתוחה · ניצולת<סף · נגיש · (טקסט=searchRooms)
-  static String floorOf(Map<String, dynamic> r) { final parts = '${r['phone']}'.split(' · '); return parts.length > 1 ? parts[1] : ''; }
+  static String floorOf(Map<String, dynamic> r) { final parts = '${r['location']}'.split(' · '); return parts.length > 1 ? parts[1] : ''; }
   static List<String> get buildings => [for (final b in byBuilding) '${b[0]}'];
   static List<String> get floors => {for (final r in liveRooms) if (floorOf(r).isNotEmpty) floorOf(r)}.toList()..sort();
   static List<String> get eqKeys => {for (final r in liveRooms) ...eqOf(r).keys}.toList()..sort();
@@ -622,7 +623,7 @@ class _VolunteerData {
     final occ = <Map<String, String?>>[
       for (final r in rs)
         for (final o in weekOccupancies(r))
-          {'uid': '${o['id']}@${o['iso']}@rooms', 'title': '${o['name']} · ${o['who']}', 'date': '${o['iso']}', 'time': _m2hm(o['start']), 'phone': '${r['name']} · ${r['phone']}', 'area': o['kind'] == 'event' ? 'הזמנה · ${o['status']}' : 'שיעור שבועי'},
+          {'uid': '${o['id']}@${o['iso']}@rooms', 'title': '${o['name']} · ${o['who']}', 'date': '${o['iso']}', 'time': _m2hm(o['start']), 'location': '${r['name']} · ${r['location']}', 'notes': o['kind'] == 'event' ? 'הזמנה · ${o['status']}' : 'שיעור שבועי'},
     ];
     return buildIcs(occ, 'SchoolOS · יומן-חדרים · שבוע ${weekIsos.first}', DateTime.parse('${today}T12:00:00'), icsEscape, foldIcsLine);
   }
@@ -633,7 +634,7 @@ class _VolunteerData {
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשחדר נושא ערך; חסר ⇒ שקט (type/owner/lastCheck/updatedAt = מקום-שמור).
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
     {'label': 'שם/מספר', 'get': (Map<String, dynamic> r) => '${r['name']}'},
-    {'key': 'phone', 'label': 'בניין/קומה'},
+    {'key': 'location', 'label': 'בניין/קומה'},
     {'key': 'type', 'label': 'סוג'},                           // מקום-שמור (כיתה/מעבדה/אולם/ספורט/מחשבים/חדר-מורים)
     {'label': 'קיבולת', 'get': (Map<String, dynamic> r) => '${r['cap'] ?? '—'}'},
     {'label': 'תפוס-עכשיו?', 'get': (Map<String, dynamic> r) => busyNow(r) != null ? 'כן' : 'לא'},
@@ -646,7 +647,7 @@ class _VolunteerData {
     {'label': 'נגישות', 'get': (Map<String, dynamic> r) => r['access'] == true ? '♿ נגיש' : '—'},
     {'key': 'owner', 'label': 'אחראי'},                        // מקום-שמור
     {'key': 'lastCheck', 'label': 'תאריך-בדיקה-אחרונה'},       // מקום-שמור
-    {'key': 'area', 'label': 'הערה'},
+    {'key': 'notes', 'label': 'הערה'},
     {'key': 'updatedAt', 'label': 'עדכון'},                    // מקום-שמור
   ];
   static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
@@ -915,12 +916,12 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
             padding: const EdgeInsets.all(12),
             child: GlassCard(
               child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                MediaRow(glyph: _VolunteerData.activeOf(r) ? '🏫' : '⛔', title: '${r['name']}', subtitle: '${r['phone']} · ${_VolunteerData.roomInfo(r)}'),
+                MediaRow(glyph: _VolunteerData.activeOf(r) ? '🏫' : '⛔', title: '${r['name']}', subtitle: '${r['location']} · ${_VolunteerData.roomInfo(r)}'),
                 _gap(8),
                 _wrap([
                   StatusChip(label: _VolunteerData.statusOf(r), tone: switch (_VolunteerData.statusOf(r)) { 'זמין' => 1, 'תפוס' => 0, 'חסום' => 3, _ => 2 }),
                   if (r['access'] == true) const StatusChip(label: '♿ נגיש', tone: 1),
-                  if ('${r['area']}'.isNotEmpty) StatusChip(label: '📝 ${r['area']}', tone: 0),
+                  if ('${r['notes']}'.isNotEmpty) StatusChip(label: '📝 ${r['notes']}', tone: 0),
                   if (_VolunteerData.underused(r)) StatusChip(label: '🪑 לא-מנוצל (<${_VolunteerData.utilFloor}%)', tone: 3),
                 ]),
                 _gap(12),
@@ -1079,7 +1080,7 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
           else
             for (final a in alts)
               Row(children: [
-                Expanded(child: MediaRow(glyph: a['sameBuilding'] == true ? '📍' : '🏫', title: '${a['name']}', subtitle: '${a['phone']} · קיבולת ${a['cap']} (+${a['spare']})${a['sameBuilding'] == true ? ' · אותו בניין' : ''}')),
+                Expanded(child: MediaRow(glyph: a['sameBuilding'] == true ? '📍' : '🏫', title: '${a['name']}', subtitle: '${a['location']} · קיבולת ${a['cap']} (+${a['spare']})${a['sameBuilding'] == true ? ' · אותו בניין' : ''}')),
                 SoftButton(label: 'בחר', tone: 1, onTap: () { act(() => isEv ? _VolunteerData.moveEvent(_who, ev!, a) : _VolunteerData.moveCourse(_who, c!, a)); Navigator.of(c2).pop(); }),
               ]),
         ])),
@@ -1298,7 +1299,7 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
           if (rs.isEmpty) const EmptyState(glyph: '🔍', message: 'אין חדרים תואמים'),
           for (final r in rs)
             Row(children: [
-              Expanded(child: MediaRow(glyph: _VolunteerData.activeOf(r) ? '🏫' : '⛔', title: '${r['name']}', subtitle: '${r['phone']} · ${_VolunteerData.statusOf(r)}')),
+              Expanded(child: MediaRow(glyph: _VolunteerData.activeOf(r) ? '🏫' : '⛔', title: '${r['name']}', subtitle: '${r['location']} · ${_VolunteerData.statusOf(r)}')),
               SoftButton(label: 'בחר', tone: 1, onTap: () { Navigator.of(c2).pop(); then(r); }),
             ]),
         ])),

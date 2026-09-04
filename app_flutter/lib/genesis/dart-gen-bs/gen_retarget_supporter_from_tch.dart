@@ -1,6 +1,7 @@
-// 🎯 SupporterScreen — retarget של schoolos_teachers.dart לישות Supporter (GENMAX·G5c · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity Supporter
-//   מיפוי-מפתחות (שם-זהה ⇒ אותה צורת-טיפוס לפי סדר-הסכמה ⇒ מקום-שמור): id⇒id(name) · name⇒name(name) · notes⇒notes(name) · role⇒phone(type) · subjects⇒donations(type) · homeroom⇒calls(type) · contractHours⇒count(type) · contractType⇒email(type) · startDate⇒first(type) · status⇒address(type) · availability⇒∅(reserved) · constraints⇒∅(reserved) · preferredSub⇒nextEventId(type) · extraRoles⇒∅(reserved) · certs⇒∅(reserved) · issuer⇒city(type) · expiry⇒last(type) · attendance⇒∅(reserved) · absences⇒∅(reserved) · reason⇒idNum(type) · date⇒nextDate(type) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved)
-//   שדות-E שלא קיבלו מקור (מקום-שמור, יאירו כשיוזרם נתון): extId, cat, forWho, ils, usd, nextNote, photos, hok, ayin · הזרע (roster) = זרע-הצבה של מודול-המקור, לא ערך-אמת של Supporter
+// 🎯 SupporterScreen — retarget של schoolos_teachers.dart לישות Supporter (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity Supporter
+//   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 19
+//   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · role⇒∅(reserved(8 מועמדים)) · subjects⇒∅(reserved(2 מועמדים)) · homeroom⇒∅(reserved(2 מועמדים)) · contractHours⇒∅(reserved(3 מועמדים)) · contractType⇒∅(reserved(8 מועמדים)) · startDate⇒∅(reserved(3 מועמדים)) · status⇒∅(reserved(8 מועמדים)) · availability⇒∅(reserved) · constraints⇒∅(reserved(2 מועמדים)) · preferredSub⇒nextEventId(unique) · extraRoles⇒∅(reserved(2 מועמדים)) · certs⇒∅(reserved(2 מועמדים)) · issuer⇒∅(reserved(8 מועמדים)) · expiry⇒∅(reserved(3 מועמדים)) · attendance⇒∅(reserved) · absences⇒∅(reserved(2 מועמדים)) · reason⇒∅(reserved(8 מועמדים)) · date⇒∅(reserved(3 מועמדים)) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved(3 מועמדים))
+//   שדות-Supporter בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): phone, email, address, city, idNum, extId, cat, forWho, count, ils, usd, first, last, nextDate, nextNote, photos, donations, hok, ayin, calls · תוויות-UI = של מודול-המקור (הצבה) · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Supporter
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-עומס · זיהוי-חריגה · הכרעה (מחליף-מוצע · דחיפות-מאוחדת) · ביצוע · אימות.
@@ -84,35 +85,35 @@ class _TeamData {
 
   // roster — זהות-תצוגה = שמות-דמו בדויים; בהצבה מוזרק roster אמיתי דרך SupporterScreen(roster:) (חוק-6).
   static const roster = <Map<String, dynamic>>[
-    {'id': 't1', 'name': 'יעל ברק', 'phone': 'calls', 'donations': ['מתמטיקה'], 'calls': ['י-1'], 'count': 24, 'email': 'קבוע', 'first': '2014-09-01', 'address': 'active',
+    {'id': 't1', 'name': 'יעל ברק', 'role': 'homeroom', 'subjects': ['מתמטיקה'], 'homeroom': ['י-1'], 'contractHours': 24, 'contractType': 'קבוע', 'startDate': '2014-09-01', 'status': 'active',
       'availability': {0: ['08:00', '15:00'], 1: ['08:00', '15:00'], 2: ['08:00', '15:00'], 3: ['08:00', '15:00'], 4: ['08:00', '13:00']}, 'constraints': ['לא-בשישי'], 'nextEventId': 't7', 'extraRoles': ['ריכוז-שכבה י׳'],
-      'certs': [{'name': 'תעודת-הוראה', 'city': 'משרד החינוך', 'last': '2030-06-30'}, {'name': 'עזרה-ראשונה', 'city': 'מד״א', 'last': '2026-09-20'}],
-      'attendance': <Map<String, dynamic>>[], 'absences': [{'nextDate': '2026-09-03', 'idNum': 'mchlh'}, {'nextDate': '2026-05-12', 'idNum': 'ayrva-mshpchty'}], 'notes': 'מועמדת לריכוז-פדגוגי בתשפ״ז'},
-    {'id': 't2', 'name': 'דוד כהן', 'phone': 'subject', 'donations': ['מתמטיקה', 'פיזיקה'], 'calls': <String>[], 'count': 20, 'email': 'קבוע', 'first': '2019-09-01', 'address': 'active',
+      'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2030-06-30'}, {'name': 'עזרה-ראשונה', 'issuer': 'מד״א', 'expiry': '2026-09-20'}],
+      'attendance': <Map<String, dynamic>>[], 'absences': [{'date': '2026-09-03', 'reason': 'mchlh'}, {'date': '2026-05-12', 'reason': 'ayrva-mshpchty'}], 'notes': 'מועמדת לריכוז-פדגוגי בתשפ״ז'},
+    {'id': 't2', 'name': 'דוד כהן', 'role': 'subject', 'subjects': ['מתמטיקה', 'פיזיקה'], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'קבוע', 'startDate': '2019-09-01', 'status': 'active',
       'availability': {0: ['08:00', '16:00'], 1: ['08:00', '16:00'], 2: ['08:00', '16:00'], 3: ['08:00', '16:00'], 4: ['08:00', '16:00']}, 'constraints': <String>[], 'nextEventId': 't7', 'extraRoles': <String>[],
-      'certs': [{'name': 'תעודת-הוראה', 'city': 'משרד החינוך', 'last': '2029-08-31'}],
-      'attendance': [{'nextDate': '2026-09-03', 'inTs': '07:41'}], 'absences': [{'nextDate': '2026-09-01', 'idNum': 'mchlh'}, {'nextDate': '2026-08-25', 'idNum': 'mchlh'}, {'nextDate': '2026-08-18', 'idNum': 'nsyah'}, {'nextDate': '2026-07-02', 'idNum': 'mchlh'}, {'nextDate': '2026-06-10', 'idNum': 'shmchh'}], 'notes': ''},
-    {'id': 't3', 'name': 'נועה לוי', 'phone': 'subject', 'donations': ['אנגלית'], 'calls': <String>[], 'count': 18, 'email': 'זמני', 'contractEnd': '2026-09-25', 'first': '2025-09-01', 'address': 'active',
+      'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2029-08-31'}],
+      'attendance': [{'date': '2026-09-03', 'inTs': '07:41'}], 'absences': [{'date': '2026-09-01', 'reason': 'mchlh'}, {'date': '2026-08-25', 'reason': 'mchlh'}, {'date': '2026-08-18', 'reason': 'nsyah'}, {'date': '2026-07-02', 'reason': 'mchlh'}, {'date': '2026-06-10', 'reason': 'shmchh'}], 'notes': ''},
+    {'id': 't3', 'name': 'נועה לוי', 'role': 'subject', 'subjects': ['אנגלית'], 'homeroom': <String>[], 'contractHours': 18, 'contractType': 'זמני', 'contractEnd': '2026-09-25', 'startDate': '2025-09-01', 'status': 'active',
       'availability': {0: ['08:00', '14:00'], 2: ['08:00', '14:00'], 4: ['08:00', '14:00']}, 'constraints': ['לא-בשני-ורביעי'], 'extraRoles': <String>[],
-      'certs': [{'name': 'תעודת-הוראה', 'city': 'משרד החינוך', 'last': '2031-06-30'}],
-      'attendance': [{'nextDate': '2026-09-03', 'inTs': '07:55'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
-    {'id': 't4', 'name': 'אמיר חדד', 'phone': 'aide', 'donations': ['סיוע-לימודי'], 'calls': <String>[], 'count': 30, 'email': 'קבוע', 'first': '2021-09-01', 'address': 'active',
+      'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2031-06-30'}],
+      'attendance': [{'date': '2026-09-03', 'inTs': '07:55'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
+    {'id': 't4', 'name': 'אמיר חדד', 'role': 'aide', 'subjects': ['סיוע-לימודי'], 'homeroom': <String>[], 'contractHours': 30, 'contractType': 'קבוע', 'startDate': '2021-09-01', 'status': 'active',
       'availability': {0: ['08:00', '15:00'], 1: ['08:00', '15:00'], 2: ['08:00', '15:00'], 3: ['08:00', '15:00'], 4: ['08:00', '15:00']}, 'constraints': <String>[], 'extraRoles': <String>[],
-      'certs': [{'name': 'סייע-פדגוגי', 'city': 'משרד החינוך', 'last': '2026-05-01'}],
-      'attendance': [{'nextDate': '2026-09-03', 'inTs': '07:50'}], 'absences': [{'nextDate': '2026-08-30', 'idNum': 'mzg-avvyr'}], 'notes': ''},
-    {'id': 't5', 'name': 'רות אזולאי', 'phone': 'calls', 'donations': ['היסטוריה', 'אזרחות'], 'calls': ['ט-2'], 'count': 22, 'email': 'קבוע', 'first': '2010-09-01', 'address': 'active',
+      'certs': [{'name': 'סייע-פדגוגי', 'issuer': 'משרד החינוך', 'expiry': '2026-05-01'}],
+      'attendance': [{'date': '2026-09-03', 'inTs': '07:50'}], 'absences': [{'date': '2026-08-30', 'reason': 'mzg-avvyr'}], 'notes': ''},
+    {'id': 't5', 'name': 'רות אזולאי', 'role': 'homeroom', 'subjects': ['היסטוריה', 'אזרחות'], 'homeroom': ['ט-2'], 'contractHours': 22, 'contractType': 'קבוע', 'startDate': '2010-09-01', 'status': 'active',
       'availability': {0: ['08:00', '15:00'], 1: ['08:00', '15:00'], 2: ['08:00', '15:00'], 3: ['08:00', '15:00'], 4: ['08:00', '15:00']}, 'constraints': <String>[], 'nextEventId': 't1', 'extraRoles': ['יועצת'],
-      'certs': [{'name': 'תעודת-הוראה', 'city': 'משרד החינוך', 'last': '2028-06-30'}, {'name': 'ייעוץ-חינוכי', 'city': 'אונ׳ ת״א', 'last': '2027-12-31'}],
-      'attendance': [{'nextDate': '2026-09-03', 'inTs': '07:38'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
-    {'id': 't6', 'name': 'מיכל שרון', 'phone': 'subject', 'donations': ['אנגלית'], 'calls': <String>[], 'count': 20, 'email': 'קבוע', 'first': '2017-09-01', 'address': 'leave',
+      'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2028-06-30'}, {'name': 'ייעוץ-חינוכי', 'issuer': 'אונ׳ ת״א', 'expiry': '2027-12-31'}],
+      'attendance': [{'date': '2026-09-03', 'inTs': '07:38'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
+    {'id': 't6', 'name': 'מיכל שרון', 'role': 'subject', 'subjects': ['אנגלית'], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'קבוע', 'startDate': '2017-09-01', 'status': 'leave',
       'availability': <int, List<String>>{}, 'constraints': <String>[], 'extraRoles': <String>[],
-      'certs': [{'name': 'תעודת-הוראה', 'city': 'משרד החינוך', 'last': '2029-06-30'}],
+      'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2029-06-30'}],
       'attendance': <Map<String, dynamic>>[], 'absences': <Map<String, dynamic>>[], 'notes': 'חופשת-לידה עד 2027-01'},
-    {'id': 't7', 'name': 'יוסי מזרחי', 'phone': 'mgmt', 'donations': ['מתמטיקה'], 'calls': <String>[], 'count': 8, 'email': 'קבוע', 'first': '2008-09-01', 'address': 'active',
+    {'id': 't7', 'name': 'יוסי מזרחי', 'role': 'mgmt', 'subjects': ['מתמטיקה'], 'homeroom': <String>[], 'contractHours': 8, 'contractType': 'קבוע', 'startDate': '2008-09-01', 'status': 'active',
       'availability': {0: ['07:30', '16:00'], 1: ['07:30', '16:00'], 2: ['07:30', '16:00'], 3: ['07:30', '16:00'], 4: ['07:30', '16:00']}, 'constraints': <String>[], 'extraRoles': ['סגן-מנהל'],
-      'certs': [{'name': 'תעודת-הוראה', 'city': 'משרד החינוך', 'last': '2027-06-30'}, {'name': 'ניהול-חינוכי', 'city': 'אבני-ראשה', 'last': '2026-10-01'}],
-      'attendance': [{'nextDate': '2026-09-03', 'inTs': '07:20'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
-    {'id': 't8', 'name': 'שרה פרץ', 'phone': 'subject', 'donations': ['ביולוגיה'], 'calls': <String>[], 'count': 16, 'email': 'שעתי', 'first': '2020-09-01', 'address': 'left',
+      'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2027-06-30'}, {'name': 'ניהול-חינוכי', 'issuer': 'אבני-ראשה', 'expiry': '2026-10-01'}],
+      'attendance': [{'date': '2026-09-03', 'inTs': '07:20'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
+    {'id': 't8', 'name': 'שרה פרץ', 'role': 'subject', 'subjects': ['ביולוגיה'], 'homeroom': <String>[], 'contractHours': 16, 'contractType': 'שעתי', 'startDate': '2020-09-01', 'status': 'left',
       'availability': <int, List<String>>{}, 'constraints': <String>[], 'extraRoles': <String>[],
       'certs': <Map<String, dynamic>>[], 'attendance': <Map<String, dynamic>>[], 'absences': <Map<String, dynamic>>[], 'notes': 'סיימה 2026-06-30'},
   ];
@@ -144,9 +145,9 @@ class _TeamData {
   ];
   // החלפות (seed בצורת-רשומה: id·date·courseId·absentId·subId·stage 0=ללא-מחליף·1=הוצע·2=אושר)
   static const subsSeed = <Map<String, dynamic>>[
-    {'id': 's1', 'nextDate': '2026-09-01', 'courseId': 'c2', 'absentId': 't2', 'subId': 't7', 'stage': 2},
-    {'id': 's2', 'nextDate': '2026-08-25', 'courseId': 'c4', 'absentId': 't2', 'subId': 't1', 'stage': 2},
-    {'id': 's3', 'nextDate': '2026-08-30', 'courseId': 'c7', 'absentId': 't4', 'subId': 't5', 'stage': 2},
+    {'id': 's1', 'date': '2026-09-01', 'courseId': 'c2', 'absentId': 't2', 'subId': 't7', 'stage': 2},
+    {'id': 's2', 'date': '2026-08-25', 'courseId': 'c4', 'absentId': 't2', 'subId': 't1', 'stage': 2},
+    {'id': 's3', 'date': '2026-08-30', 'courseId': 'c7', 'absentId': 't4', 'subId': 't5', 'stage': 2},
   ];
 
   // ─── עובדות-נגזרות פר-מורה ───
@@ -159,9 +160,9 @@ class _TeamData {
     return null;
   }
   static String nameOf(String? id) => id == null ? '—' : (byId(id)?['name'] as String? ?? id);
-  static const roleLabel = {'calls': 'מחנך/ת', 'subject': 'מקצועי/ת', 'aide': 'סייע/ת', 'mgmt': 'הנהלה'};
+  static const roleLabel = {'homeroom': 'מחנך/ת', 'subject': 'מקצועי/ת', 'aide': 'סייע/ת', 'mgmt': 'הנהלה'};
   static const statusLabel = {'active': 'פעיל', 'leave': 'חופשה', 'unpaid': 'חל״ת', 'left': 'עזב/ה'};
-  static List<String> subjects(Map<String, dynamic> t) => [...(t['donations'] as List).cast<String>(), ...extraSubjects[t['id']] ?? const []];
+  static List<String> subjects(Map<String, dynamic> t) => [...(t['subjects'] as List).cast<String>(), ...extraSubjects[t['id']] ?? const []];
   static bool isActive(Map<String, dynamic> t) => statusOf(t) == 'active';
   static bool isGone(Map<String, dynamic> t) => statusOf(t) == 'left';
   static int weekdayOf(String iso) => DateTime.parse('${iso}T12:00:00').weekday % 7; // JS getDay: 0=ראשון
@@ -174,7 +175,7 @@ class _TeamData {
   // מפגשים-בשבוע (sessionsOf מהמדף · Σ דרך grandTotal)
   static int sessionsWeek(Map<String, dynamic> t) => grandTotal(coursesOf(t), (c) => (sessionsOf(c) as List).length).toInt();
   static double hoursWeek(Map<String, dynamic> t) => sessionsWeek(t).toDouble(); // ש״ש = מספר-השיעורים בשבוע
-  static int contractHours(Map<String, dynamic> t) => t['count'] as int;
+  static int contractHours(Map<String, dynamic> t) => t['contractHours'] as int;
   static int contractSessions(Map<String, dynamic> t) => contractHours(t); // מפגשי-חוזה = שעות-חוזיות
   // יחס-עומס (clampScale מהמדף · 0..2) ⇒ אחוז
   static int loadPct(Map<String, dynamic> t) => (clampScale(hoursWeek(t) / contractHours(t), 0.0, 2.0) * 100).round();
@@ -186,11 +187,11 @@ class _TeamData {
   static bool underLoad(Map<String, dynamic> t) => isActive(t) && loadPct(t) < underPct;
 
   // נוכחות-עצמית היום (AttendanceDay: יש inTs לתאריך-היום)
-  static bool presentToday(Map<String, dynamic> t) => (t['attendance'] as List).any((a) => a['nextDate'] == today && a['inTs'] != null);
+  static bool presentToday(Map<String, dynamic> t) => (t['attendance'] as List).any((a) => a['date'] == today && a['inTs'] != null);
   static List<Map<String, dynamic>> absencesOf(Map<String, dynamic> t) => [...extraAbsences[t['id']] ?? const [], ...(t['absences'] as List).cast<Map<String, dynamic>>()];
-  static bool absentOn(Map<String, dynamic> t, String iso) => absencesOf(t).any((a) => a['nextDate'] == iso);
+  static bool absentOn(Map<String, dynamic> t, String iso) => absencesOf(t).any((a) => a['date'] == iso);
   static bool absentToday(Map<String, dynamic> t) => absentOn(t, today) || statusOf(t) == 'leave' || statusOf(t) == 'unpaid';
-  static int absencesMonth(Map<String, dynamic> t) => presentsInMonth([for (final a in absencesOf(t)) a['nextDate']], today); // ספירה-בחודש (מדף)
+  static int absencesMonth(Map<String, dynamic> t) => presentsInMonth([for (final a in absencesOf(t)) a['date']], today); // ספירה-בחודש (מדף)
   static String reasonOf(String key) => kTerms[key] ?? key;
   // דפוס-היעדרות (23-ד · שני מודלים מחוברים): ספירה-ב-4-חודשים ∨ מגמה-עולה (trendFromScan על חודשים)
   static List<num> absenceMonthly(Map<String, dynamic> t) {
@@ -198,7 +199,7 @@ class _TeamData {
     return [for (var i = 3; i >= 0; i--) () {
       final m = DateTime(base.year, base.month - i);
       final ym = '${m.year}-${m.month.toString().padLeft(2, '0')}';
-      return absencesOf(t).where((a) => (a['nextDate'] as String).startsWith(ym)).length;
+      return absencesOf(t).where((a) => (a['date'] as String).startsWith(ym)).length;
     }()];
   }
   static Map<String, dynamic> absenceTrend(Map<String, dynamic> t) => trendFromScan({'monthly': absenceMonthly(t)});
@@ -210,7 +211,7 @@ class _TeamData {
   // הכשרות+תוקף (certExpiryStatus מבנייה-חכמה · now מוזרק)
   static DateTime get _now => DateTime.parse('${today}T12:00:00');
   static List<Map<String, dynamic>> certsOf(Map<String, dynamic> t) => [...(t['certs'] as List).cast<Map<String, dynamic>>(), ...extraCerts[t['id']] ?? const []];
-  static CertExpiryStatus certStatus(Map<String, dynamic> c) => certExpiryStatus(DateTime.parse(c['last'] as String), now: _now);
+  static CertExpiryStatus certStatus(Map<String, dynamic> c) => certExpiryStatus(DateTime.parse(c['expiry'] as String), now: _now);
   static bool certExpired(Map<String, dynamic> t) => certsOf(t).any((c) => certStatus(c) == CertExpiryStatus.expired);
   static bool certSoon(Map<String, dynamic> t) => certsOf(t).any((c) => certStatus(c) == CertExpiryStatus.expiringSoon);
   static bool certMissing(Map<String, dynamic> t) => isActive(t) && (certsOf(t).isEmpty || certExpired(t)); // הכשרה-חסרה = אין/פגה
@@ -218,7 +219,7 @@ class _TeamData {
   static num? contractDays(Map<String, dynamic> t) => t['contractEnd'] == null ? null : -dayDiff(t['contractEnd'] as String, today);
   static bool contractEndsMonth(Map<String, dynamic> t) => t['contractEnd'] != null && presentsInMonth([t['contractEnd']], today) > 0;
   static bool contractExpired(Map<String, dynamic> t) => (contractDays(t) ?? 1) < 0;
-  static int? tenure(Map<String, dynamic> t) => ageOf(t['first'] as String?, _now); // ותק בשנים (ageOf מהמדף)
+  static int? tenure(Map<String, dynamic> t) => ageOf(t['startDate'] as String?, _now); // ותק בשנים (ageOf מהמדף)
 
   // ─── שיעורים-ללא-מורה היום + לוח-החלפות (זיהוי-חריגה ⇒ הכרעה ⇒ ביצוע) ───
   static final List<Map<String, dynamic>> subs = [...subsSeed.map((s) => Map<String, dynamic>.from(s))];
@@ -243,23 +244,23 @@ class _TeamData {
           if (s['day'] != todayWd) continue;
           final id = 'u-${c['id']}-${s['time']}';
           if (!subs.any((x) => x['id'] == id)) {
-            subs.add({'id': id, 'nextDate': today, 'courseId': c['id'], 'time': s['time'], 'absentId': t['id'], 'subId': null, 'stage': 0});
+            subs.add({'id': id, 'date': today, 'courseId': c['id'], 'time': s['time'], 'absentId': t['id'], 'subId': null, 'stage': 0});
           }
         }
       }
     }
   }
-  static List<Map<String, dynamic>> get todaySubs => subs.where((s) => s['nextDate'] == today).toList()..sort((a, b) => '${a['time'] ?? ''}'.compareTo('${b['time'] ?? ''}'));
+  static List<Map<String, dynamic>> get todaySubs => subs.where((s) => s['date'] == today).toList()..sort((a, b) => '${a['time'] ?? ''}'.compareTo('${b['time'] ?? ''}'));
   static List<Map<String, dynamic>> get uncoveredToday => todaySubs.where((s) => (s['stage'] as int) < 2).toList();
   static int get openSubs => subs.where((s) => (s['stage'] as int) < 2).length;
-  static bool subOverdue(Map<String, dynamic> s) => taskOverdue({'due': s['nextDate'], 'doneAt': (s['stage'] as int) == 2 ? s['nextDate'] : null}, today); // מדף
+  static bool subOverdue(Map<String, dynamic> s) => taskOverdue({'due': s['date'], 'doneAt': (s['stage'] as int) == 2 ? s['date'] : null}, today); // מדף
   static int subsDone(Map<String, dynamic> t) => subs.where((s) => s['subId'] == t['id'] && s['stage'] == 2).length;
   static int subsReceived(Map<String, dynamic> t) => subs.where((s) => s['absentId'] == t['id'] && s['stage'] == 2).length;
 
   // הצעת-מחליף (23-ד: זמין ∧ מקצוע ∧ פנוי-בסלוט ∧ עומס-נמוך ∧ מועדף — מחוברים בדירוג):
   //   פנוי-בסלוט = scheduleClashText מהמדף (enrollments = שיבוצי-המורים לחוגיהם; null ⇒ אין התנגשות)
   static Map<String, dynamic> get _clashDb => {
-        'enrollments': [for (final t in everyone) for (final c in coursesOf(t)) {'memberId': t['id'], 'courseId': c['id'], 'address': 'active'}],
+        'enrollments': [for (final t in everyone) for (final c in coursesOf(t)) {'memberId': t['id'], 'courseId': c['id'], 'status': 'active'}],
         'courses': courses,
       };
   static const _clashT = <String, dynamic>{'k1': 'ended', 'k2': '', 'k3': ' · '};
@@ -321,7 +322,7 @@ class _TeamData {
   static num _score(dynamic exp, dynamic term) => _norm(term).contains('$exp') ? 100 : 0;
   static num _scoreOf(dynamic q, dynamic terms) => smartScore(q, terms, _norm, _expand, _score) as num;
   static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty;
-  static List<String> _termsOf(Map<String, dynamic> t) => ['${t['name']}', ...subjects(t), ...(t['calls'] as List).cast<String>(), roleLabel[roleOf_(t)] ?? '', for (final c in coursesOf(t)) '${c['cls']}', for (final r in (t['extraRoles'] as List)) '$r'];
+  static List<String> _termsOf(Map<String, dynamic> t) => ['${t['name']}', ...subjects(t), ...(t['homeroom'] as List).cast<String>(), roleLabel[roleOf_(t)] ?? '', for (final c in coursesOf(t)) '${c['cls']}', for (final r in (t['extraRoles'] as List)) '$r'];
   static List<Map<String, dynamic>> search(List<Map<String, dynamic>> items, String q) =>
       (smartFilter(q, items, (it) => _termsOf(it as Map<String, dynamic>), _hasQuery, _scoreOf) as List).cast<Map<String, dynamic>>();
 
@@ -337,10 +338,10 @@ class _TeamData {
       case 'cert': return certMissing(t) || certSoon(t) ? '1' : '0';
       case 'contract': return contractEndsMonth(t) || contractExpired(t) ? '1' : '0';
       case 'free': return isActive(t) && !absentToday(t) && availableAt(t, todayWd, openSlot) && clashOf(t, {'id': '__slot', 'sessions': [{'day': todayWd, 'time': openSlot}]}) == null ? '1' : '0';
-      case 'phone': return roleOf_(t);
-      case 'address': return statusOf(t);
+      case 'role': return roleOf_(t);
+      case 'status': return statusOf(t);
       case 'subject': return subjects(t).join('|');
-      case 'cls': return [for (final c in coursesOf(t)) '${c['cls']}', ...(t['calls'] as List)].join('|');
+      case 'cls': return [for (final c in coursesOf(t)) '${c['cls']}', ...(t['homeroom'] as List)].join('|');
     }
     return '';
   }
@@ -361,7 +362,7 @@ class _TeamData {
     {'label': 'שם', 'get': (Map<String, dynamic> t) => '${t['name']}'},
     {'label': 'תפקיד', 'get': (Map<String, dynamic> t) => roleLabel[roleOf_(t)] ?? roleOf_(t)},
     {'label': 'מקצועות', 'get': (Map<String, dynamic> t) => subjects(t).join('·')},
-    {'label': 'כיתות-מחנך', 'get': (Map<String, dynamic> t) => (t['calls'] as List).isEmpty ? '—' : (t['calls'] as List).join('·')},
+    {'label': 'כיתות-מחנך', 'get': (Map<String, dynamic> t) => (t['homeroom'] as List).isEmpty ? '—' : (t['homeroom'] as List).join('·')},
     {'label': 'ש׳/שבוע', 'get': (Map<String, dynamic> t) => '${hoursWeek(t).round()}/${contractHours(t)}'},
     {'label': 'עומס%', 'get': (Map<String, dynamic> t) => '${loadPct(t)}%'},
     {'label': 'חוגים', 'get': (Map<String, dynamic> t) => '${coursesOf(t).length}'},
@@ -377,9 +378,9 @@ class _TeamData {
   ];
   // חוזה-עובדות (metaFields · חוק-7): שדה שהרשומה נושאת ⇒ שבב; חסר ⇒ שקט. שדה חדש בדאטה מופיע לבד.
   static const metaFields = <Map<String, String>>[
-    {'key': 'email', 'prefix': '📄 חוזה ', 'suffix': ''},
+    {'key': 'contractType', 'prefix': '📄 חוזה ', 'suffix': ''},
     {'key': 'contractEnd', 'prefix': '⏳ סיום ', 'suffix': ''},
-    {'key': 'first', 'prefix': '🗓 מ-', 'suffix': ''},
+    {'key': 'startDate', 'prefix': '🗓 מ-', 'suffix': ''},
     {'key': 'nextEventId', 'prefix': '⭐ מחליף-מועדף: ', 'suffix': ''},
     {'key': 'photo', 'prefix': '🖼 ', 'suffix': ''},            // מקום-שמור
     {'key': 'contact', 'prefix': '📞 ', 'suffix': ''},          // מקום-שמור · חוק-6
@@ -483,7 +484,7 @@ class _TeamData {
 
   // ─── פנקס-פעולות (מצב=חיווט · הבסיס const נשאר מקור-האמת) ───
   static final Map<String, String> statusOverride = {};
-  static String statusOf(Map<String, dynamic> t) => statusOverride[t['id']] ?? (t['address'] as String);
+  static String statusOf(Map<String, dynamic> t) => statusOverride[t['id']] ?? (t['status'] as String);
   static final Map<String, List<Map<String, dynamic>>> extraAbsences = {};
   static final Map<String, List<Map<String, dynamic>>> extraCerts = {};
   static final Map<String, String> reassigned = {}; // courseId ⇒ teacherId (הקצה-כיתה)
@@ -491,7 +492,7 @@ class _TeamData {
   static final Map<String, String> roleOverride = {}; // ערוך: תפקיד
   static final Map<String, Map<int, List<String>>> availOverride = {}; // עדכן-זמינות
   static final Map<String, List<Map<String, dynamic>>> docs = {}; // מקום-שמור: מסמכים (צרף-מסמך רושם רשומה)
-  static String roleOf_(Map<String, dynamic> t) => roleOverride[t['id']] ?? (t['phone'] as String);
+  static String roleOf_(Map<String, dynamic> t) => roleOverride[t['id']] ?? (t['role'] as String);
   static Map<int, List<String>> availabilityOf(Map<String, dynamic> t) => availOverride[t['id']] ?? (t['availability'] as Map).cast<int, List<String>>();
   static const subjectPool = ['מתמטיקה', 'אנגלית', 'פיזיקה', 'היסטוריה', 'אזרחות', 'ביולוגיה', 'חינוך'];
   static void addSubject(Map<String, dynamic> t, String who) { // הקצה-מקצוע: המקצוע הבא מהמאגר שאינו-בידו
@@ -505,7 +506,7 @@ class _TeamData {
     }
   }
   static void cycleRole(Map<String, dynamic> t, String who) { // ערוך: תפקיד (מחזור מבוקר)
-    const order = ['calls', 'subject', 'aide', 'mgmt'];
+    const order = ['homeroom', 'subject', 'aide', 'mgmt'];
     final next = order[(order.indexOf(roleOf_(t)) + 1) % order.length];
     roleOverride[t['id'] as String] = next;
     log(who, 'עריכה: תפקיד ⇒ ${roleLabel[next]}', t['name'] as String);
@@ -517,11 +518,11 @@ class _TeamData {
     log(who, cur.containsKey(5) ? 'זמינות: נוסף חלון-שישי' : 'זמינות: הוסר חלון-שישי', t['name'] as String);
   }
   static void addCert(Map<String, dynamic> t, String who) {
-    (extraCerts[t['id'] as String] ??= []).add({'name': 'רענון עזרה-ראשונה', 'city': 'מד״א', 'last': '2028-09-03'});
+    (extraCerts[t['id'] as String] ??= []).add({'name': 'רענון עזרה-ראשונה', 'issuer': 'מד״א', 'expiry': '2028-09-03'});
     log(who, 'הוספת-הכשרה (רענון עזרה-ראשונה)', t['name'] as String);
   }
   static void addDoc(Map<String, dynamic> t, String who) {
-    (docs[t['id'] as String] ??= []).insert(0, {'name': 'מסמך ${(docs[t['id']]?.length ?? 0) + 1}', 'nextDate': today});
+    (docs[t['id'] as String] ??= []).insert(0, {'name': 'מסמך ${(docs[t['id']]?.length ?? 0) + 1}', 'date': today});
     log(who, 'צירוף-מסמך', t['name'] as String);
   }
   static void cycleStatus(Map<String, dynamic> t, String who) { // סמן-עזב/חופשה: מחזור מבוקר
@@ -549,17 +550,17 @@ class _TeamData {
     log(who, 'הקצאת-כיתה (${c['name']})', to['name'] as String);
   }
   static final List<Map<String, dynamic>> audit = []; // אודיט (מי·מה·מתי) — TimelineItem
-  static void log(String who, String what, String target) => audit.insert(0, {'who': who, 'what': what, 'target': target, 'nextDate': today});
+  static void log(String who, String what, String target) => audit.insert(0, {'who': who, 'what': what, 'target': target, 'date': today});
   static int _seq = 0;
   static void addTeacher(String who) { // מורה-חדש: רשומה בצורת-החוזה; זהות = מקום-שמור להזרקה (חוק-6)
     _seq++;
-    added.add({'id': 'n$_seq', 'name': 'מורה חדש/ה $_seq', 'phone': 'subject', 'donations': <String>[], 'calls': <String>[], 'count': 20, 'email': 'זמני', 'first': today, 'address': 'active',
+    added.add({'id': 'n$_seq', 'name': 'מורה חדש/ה $_seq', 'role': 'subject', 'subjects': <String>[], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'זמני', 'startDate': today, 'status': 'active',
       'availability': <int, List<String>>{}, 'constraints': <String>[], 'extraRoles': <String>[], 'certs': <Map<String, dynamic>>[], 'attendance': <Map<String, dynamic>>[], 'absences': <Map<String, dynamic>>[], 'notes': ''});
     log(who, 'מורה-חדש (ממתין לפרטים)', 'n$_seq');
   }
   static void markAbsent(Map<String, dynamic> t, String reason, String who) {
     if (absentOn(t, today)) return;
-    (extraAbsences[t['id'] as String] ??= []).insert(0, {'nextDate': today, 'idNum': reason});
+    (extraAbsences[t['id'] as String] ??= []).insert(0, {'date': today, 'reason': reason});
     syncUncovered(); // אוטומציה: זיהוי שיעור-ללא-מורה ברגע-ההיעדרות
     log(who, 'סימון-היעדרות (${reasonOf(reason)})', t['name'] as String);
   }
@@ -697,9 +698,9 @@ class _SupporterScreenState extends State<SupporterScreen> {
           _fchip('free', '🟢 זמין ב-${_TeamData.openSlot}'),
         ]),
         const SizedBox(height: 8),
-        Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['כל תפקיד', 'מחנך', 'מקצועי', 'סייע', 'הנהלה'], selected: _segIdx('phone', const ['calls', 'subject', 'aide', 'mgmt']), onSelect: (i) => _segSet('phone', const ['calls', 'subject', 'aide', 'mgmt'], i))),
+        Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['כל תפקיד', 'מחנך', 'מקצועי', 'סייע', 'הנהלה'], selected: _segIdx('role', const ['homeroom', 'subject', 'aide', 'mgmt']), onSelect: (i) => _segSet('role', const ['homeroom', 'subject', 'aide', 'mgmt'], i))),
         const SizedBox(height: 6),
-        Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['כל סטטוס', 'פעיל', 'חופשה', 'חל״ת', 'עזב'], selected: _segIdx('address', const ['active', 'leave', 'unpaid', 'left']), onSelect: (i) => _segSet('address', const ['active', 'leave', 'unpaid', 'left'], i))),
+        Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['כל סטטוס', 'פעיל', 'חופשה', 'חל״ת', 'עזב'], selected: _segIdx('status', const ['active', 'leave', 'unpaid', 'left']), onSelect: (i) => _segSet('status', const ['active', 'leave', 'unpaid', 'left'], i))),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 6, children: [for (final sj in _TeamData.allSubjects) _vchip('subject', sj, '📚 $sj')]),
         const SizedBox(height: 6),
@@ -919,8 +920,8 @@ class _SupporterScreenState extends State<SupporterScreen> {
       _gap(10),
       if (list.isEmpty) const EmptyState(glyph: '🌤', message: 'אין היעדרויות רשומות'),
       for (final a in list)
-        TimelineItem(title: '🤒 ${_TeamData.reasonOf(a['idNum'] as String)}', time: fmtDate(a['nextDate'] as String), body: () {
-          final covered = _TeamData.subs.where((s) => s['absentId'] == t['id'] && s['nextDate'] == a['nextDate']).toList();
+        TimelineItem(title: '🤒 ${_TeamData.reasonOf(a['reason'] as String)}', time: fmtDate(a['date'] as String), body: () {
+          final covered = _TeamData.subs.where((s) => s['absentId'] == t['id'] && s['date'] == a['date']).toList();
           return covered.isEmpty ? 'ללא רישום-החלפה' : '${covered.where((s) => s['stage'] == 2).length}/${covered.length} שיעורים כוסו';
         }()),
     ]);
@@ -928,13 +929,13 @@ class _SupporterScreenState extends State<SupporterScreen> {
 
   // החלפות: ביצע/קיבל (TimelineItem)
   Widget _subsOf(Map<String, dynamic> t) {
-    final mine = _TeamData.subs.where((s) => s['subId'] == t['id'] || s['absentId'] == t['id']).toList()..sort((a, b) => '${b['nextDate']}'.compareTo('${a['nextDate']}'));
+    final mine = _TeamData.subs.where((s) => s['subId'] == t['id'] || s['absentId'] == t['id']).toList()..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
     if (mine.isEmpty) return const EmptyState(glyph: '🔁', message: 'אין החלפות');
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       for (final s in mine)
         TimelineItem(
           title: '${s['subId'] == t['id'] ? '🟢 ביצע/ה' : '🟠 קיבל/ה'} · ${_TeamData.courseById(s['courseId'] as String)?['name']}',
-          time: '${fmtDate(s['nextDate'] as String)}${s['time'] != null ? ' ${s['time']}' : ''}',
+          time: '${fmtDate(s['date'] as String)}${s['time'] != null ? ' ${s['time']}' : ''}',
           body: '${s['stage'] == 2 ? '✅ אושר' : s['stage'] == 1 ? '🟠 הוצע' : '🔴 ללא-מחליף'} · ${s['subId'] == t['id'] ? 'במקום ${_TeamData.nameOf(s['absentId'] as String)}' : 'מחליף: ${_TeamData.nameOf(s['subId'] as String?)}'}',
         ),
     ]);
@@ -961,7 +962,7 @@ class _SupporterScreenState extends State<SupporterScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 3),
           child: Row(children: [
-            Expanded(child: MediaRow(glyph: '🎓', title: '${c['name']}', subtitle: '${c['city']} · תוקף ${fmtDate(c['last'] as String)}')),
+            Expanded(child: MediaRow(glyph: '🎓', title: '${c['name']}', subtitle: '${c['issuer']} · תוקף ${fmtDate(c['expiry'] as String)}')),
             () {
               final st = _TeamData.certStatus(c);
               return StatusChip(label: st == CertExpiryStatus.expired ? 'פג' : st == CertExpiryStatus.expiringSoon ? 'פג בקרוב' : 'בתוקף', tone: st == CertExpiryStatus.expired ? 2 : st == CertExpiryStatus.expiringSoon ? 3 : 1);
@@ -975,14 +976,14 @@ class _SupporterScreenState extends State<SupporterScreen> {
   Widget _docs(Map<String, dynamic> t) {
     final ds = _TeamData.docs[t['id']] ?? const [];
     if (ds.isEmpty) return const EmptyState(glyph: '📎', message: 'אין מסמכים — צרף-מסמך ירשום כאן (אחסון-קבצים = מקום-שמור להצבה)');
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final d in ds) TimelineItem(title: '📎 ${d['name']}', time: fmtDate(d['nextDate'] as String))]);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final d in ds) TimelineItem(title: '📎 ${d['name']}', time: fmtDate(d['date'] as String))]);
   }
 
   // אודיט: כל פעולה שנרשמה בפנקס (מי·מה·מתי) — TimelineItem
   Widget _audit(Map<String, dynamic> t) {
     final rows = _TeamData.audit.where((a) => a['target'] == t['name'] || '${a['target']}'.contains('${t['name']}')).toList();
     if (rows.isEmpty) return const EmptyState(glyph: '🧾', message: 'אין רישומי-אודיט למורה זה');
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) TimelineItem(title: '${a['what']}', time: fmtDate(a['nextDate'] as String), body: 'ע״י ${a['who']}')]);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) TimelineItem(title: '${a['what']}', time: fmtDate(a['date'] as String), body: 'ע״י ${a['who']}')]);
   }
 
   // 14 פעולות (המפרט) — SoftButton; מגודרות-הרשאה בגל 5. חסר-נתון ⇒ מקום-שמור מפורש, לא זיוף.
@@ -1132,9 +1133,9 @@ class _SupporterScreenState extends State<SupporterScreen> {
             IconButton(onPressed: () => _openPanel(t), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-מורה ופעולות'),
             Expanded(
               child: MediaRow(
-                glyph: t['phone'] == 'calls' ? '🏫' : t['phone'] == 'aide' ? '🤝' : t['phone'] == 'mgmt' ? '🧭' : '📚',
-                title: '${t['name']} · ${_TeamData.roleLabel[t['phone']]}',
-                subtitle: '${_TeamData.subjects(t).join(' · ')}${(t['calls'] as List).isNotEmpty ? ' · מחנך/ת ${(t['calls'] as List).join(',')}' : ''} · ${_TeamData.coursesOf(t).length} חוגים',
+                glyph: t['role'] == 'homeroom' ? '🏫' : t['role'] == 'aide' ? '🤝' : t['role'] == 'mgmt' ? '🧭' : '📚',
+                title: '${t['name']} · ${_TeamData.roleLabel[t['role']]}',
+                subtitle: '${_TeamData.subjects(t).join(' · ')}${(t['homeroom'] as List).isNotEmpty ? ' · מחנך/ת ${(t['homeroom'] as List).join(',')}' : ''} · ${_TeamData.coursesOf(t).length} חוגים',
               ),
             ),
           ]),
