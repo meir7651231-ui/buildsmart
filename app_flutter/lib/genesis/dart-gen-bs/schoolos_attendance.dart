@@ -9,18 +9,32 @@ import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/bare_stat.dart'; // עובדה-KPI חשופה (ערך+תווית, פיגמנט מוזרק)
 import '../dart-ui-bs/premium/surfaces/gradient_card.dart';
+import '../dart-ui-bs/premium/surfaces/glass_card.dart'; // מיכל-פאנל-התלמיד (child שרירותי)
 import '../dart-ui-bs/premium/surfaces/stat_hero.dart'; // ההירו = המטרה (דורשי-פעולה)
-import '../dart-ui-bs/premium/actions/segmented_switch.dart'; // בורר-כיתה מבוקר
+import '../dart-ui-bs/premium/actions/segmented_switch.dart'; // בורר-כיתה/שיעור/מבט מבוקר
 import '../dart-ui-bs/premium/actions/soft_button.dart';
 import '../dart-ui-bs/premium/feedback/alert_banner.dart';
 import '../dart-ui-bs/premium/feedback/status_chip.dart';
+import '../dart-ui-bs/premium/feedback/status_dot.dart'; // נקודת-יום צבעונית (ציר-30-יום)
+import '../dart-ui-bs/premium/feedback/empty_state.dart';
 import '../dart-ui-bs/premium/lists/media_row.dart';
+import '../dart-ui-bs/premium/lists/avatar_tile.dart'; // זהות-תלמיד בפאנל (ראשי-תיבות+שם+תת)
+import '../dart-ui-bs/premium/lists/stat_row.dart'; // יחס (ציון-סיכון · נוכחות%) — בר-מילוי
+import '../dart-ui-bs/premium/lists/timeline_item.dart'; // פריט-ציר-זמן (השלמות · היסטוריה · אודיט)
 import '../dart-ui-bs/premium/dataviz/progress_ring.dart'; // יחס נוכחות-חודשי (0..1) — תובנת-יחס
+import '../dart-ui-bs/premium/dataviz/neon_bars.dart'; // השוואת-סיבות (countBy) — עמודות-מנורמלות
+import '../dart-ui-bs/premium/dataviz/trend_stat.dart'; // מגמה (ערך+דלתא%) — trendFromScan
+import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון) — לא DataGrid המזייף
+import '../dart-ui-bs/ds/ds_enum_field.dart'; // בורר-סיבה מרשימה-סגורה (absenceReasonChips)
 import '../dart-maor/presents-in-month.dart'; // מנוע-מדף: ספירת-נוכחויות בחודש (presents ISO)
 import '../dart-maor/sheet-summary.dart'; // מנוע-מדף: {present,total} לתאריך על roster
 import '../dart-maor/sheet-roster.dart'; // מנוע-מדף: roster פר-חוג (active בלבד)
 import '../dart-maor/pending-makeups.dart'; // מנוע-מדף: השלמות-ממתינות (לא-מתוזמנות קודם)
+import '../dart-maor/makeup-eligibility.dart'; // מנוע-מדף: זכאות-השלמה (noshow לעולם לא · מוצדק כן)
 import '../dart-maor/enroll-summary.dart'; // מנוע-מדף: {presents,absences,noshow,...} פר-שיבוץ
+import '../dart-maor/count-by.dart'; // מנוע-מדף: קיבוץ+ספירה (סיבות · ימים · שיעורים)
+import '../dart-maor/grand-total.dart'; // מנוע-מדף: Σ-לפי-מפתח (דקות-איחור)
+import '../dart-maor/clamp-scale.dart'; // מנוע-מדף: הצמדה לגבולות (יחסים 0..1)
 import '../dart-maor/intel-day-diff.dart'; // מנוע-מדף: הפרש-ימים בין ISO (רצף/חלון-מורה)
 import '../dart-maor/intel-trend-from-scan.dart'; // מנוע-מדף: מגמה מרשימה-חודשית {dir,pct}
 import '../dart-maor/fmt-date.dart'; // מנוע-מדף: ISO ⇒ dd/mm/yyyy
@@ -49,6 +63,8 @@ class _Placement {
   static const lateWindowMin = 10; // חלון-איחור (דקות) — מוגדר-מוסד
   static const minAttendancePct = 80; // סף-רגולטורי (זכאות/תעודה)
   static const streakAlert = 3; // התרעת-רצף: N חיסורים רצופים
+  static const riskRed = 60, riskOrange = 35; // ספי-סיכון (ציון 0..100)
+  static const recorder = 't1'; // זהות-הרושם המוזרקת (מי-רשם באודיט) — בורר-תפקיד בגל 5
   // קשרי-הורים (הצבה): studentId ⇒ {name, phone}. חסר ⇒ המקום-השמור שקט.
   static const parents = <String, Map<String, String>>{
     's1': {'name': 'דנה שמעוני', 'phone': '050-555-0101'},
@@ -74,7 +90,7 @@ class _AttData {
     {'id': 'y2', 'name': 'י׳-2', 'teacher': 't2'},
     {'id': 'h2', 'name': 'ח׳-2', 'teacher': 't3'},
   ];
-  // שיעור = {n, time, subject, teacher}. שבת=אין. שישי=4 שיעורים.
+  // שיעור = {n, time, subject}. שבת=אין. שישי=4 שיעורים.
   static const lessonsByDow = <int, List<Map<String, dynamic>>>{
     0: [{'n': 1, 'time': '08:00', 'subject': 'מתמטיקה'}, {'n': 2, 'time': '08:50', 'subject': 'לשון'}, {'n': 3, 'time': '09:50', 'subject': 'אנגלית'}, {'n': 4, 'time': '10:40', 'subject': 'היסטוריה'}, {'n': 5, 'time': '11:40', 'subject': 'מדעים'}],
     1: [{'n': 1, 'time': '08:00', 'subject': 'לשון'}, {'n': 2, 'time': '08:50', 'subject': 'מתמטיקה'}, {'n': 3, 'time': '09:50', 'subject': 'ספורט'}, {'n': 4, 'time': '10:40', 'subject': 'אנגלית'}, {'n': 5, 'time': '11:40', 'subject': 'תנ״ך'}],
@@ -136,9 +152,15 @@ class _AttData {
   // ─── פנקס-הפעולות (state): סימונים מעל הבסיס — אידמפוטנטי (מפתח date|lesson|sid) ───
   static final Map<String, Map<String, dynamic>> _overrides = {};
   static final Set<String> _recorded = {...baseRecorded};
+  static final List<Map<String, dynamic>> audit = []; // אודיט-רישום {at, by, action, key} (חדש-ראשון)
+  static final Map<String, List<String>> notes = {}; // הערות פר-תלמיד
+  static int _seq = 0; // מונה-אירועים (סדר-אודיט דטרמיניסטי; השעון מוזרק)
   static String keyOf(String date, int lesson, String sid) => '$date|$lesson|$sid';
   static bool isRecorded(String date, String cls, int lesson) => _recorded.contains('$date|$cls|$lesson');
-  static void record(String date, String cls, int lesson) => _recorded.add('$date|$cls|$lesson');
+  static void _log(String action, String key) {
+    _seq++;
+    audit.insert(0, {'at': '${_Placement.today}T${_Placement.nowHm}', 'seq': _seq, 'by': _Placement.recorder, 'action': action, 'key': key});
+  }
 
   // כל הסימונים האפקטיביים: בסיס + דריסות (דריסה עם status='present' = ביטול ⇒ נעלם מהמודל-ההפוך)
   static List<Map<String, dynamic>> get marks {
@@ -151,26 +173,86 @@ class _AttData {
     }
     return [for (final v in m.values) if (v['status'] != 'present') v];
   }
+  static final Map<String, Map<String, dynamic>> _baseIndex = {
+    for (final b in baseMarks) keyOf(b['date'] as String, b['lesson'] as int, b['sid'] as String): b,
+  };
   static Map<String, dynamic>? markOf(String date, int lesson, String sid) {
     final k = keyOf(date, lesson, sid);
     final v = _overrides[k] ?? _baseIndex[k];
     return v == null || v['status'] == 'present' ? null : v;
   }
-  static final Map<String, Map<String, dynamic>> _baseIndex = {
-    for (final b in baseMarks) keyOf(b['date'] as String, b['lesson'] as int, b['sid'] as String): b,
-  };
+
+  // ═══ רישום (פעולה-2): אידמפוטנטי — אותו מפתח+אותו מצב ⇒ false (רישום-כפול חסום, לא מוכפל) ═══
+  static bool mark(String date, int lesson, String sid, String status, {String? reason, String? arrival}) {
+    final cur = markOf(date, lesson, sid);
+    if ((cur?['status'] ?? 'present') == status) return false; // כפול ⇒ חסום
+    final k = keyOf(date, lesson, sid);
+    if (status == 'present') {
+      _overrides[k] = {...?cur, 'date': date, 'lesson': lesson, 'sid': sid, 'status': 'present'};
+    } else {
+      _overrides[k] = {
+        ...?cur, 'date': date, 'lesson': lesson, 'sid': sid, 'status': status,
+        'reason': reason ?? cur?['reason'] ?? (status == 'absent' ? 'אחר' : null),
+        'justified': cur?['justified'] ?? (status == 'released'),
+        if (status == 'late') 'arrival': arrival ?? cur?['arrival'] ?? _Placement.nowHm,
+        'by': _Placement.recorder, 'at': '${_Placement.today}T${_Placement.nowHm}',
+      };
+    }
+    _recorded.add('$date|${studentById(sid)['cls']}|$lesson');
+    _log(status, k);
+    return true;
+  }
+  static const cycleOrder = ['present', 'absent', 'late', 'released']; // טאפ-מחזורי
+  static String cycle(String date, int lesson, String sid) {
+    final cur = markOf(date, lesson, sid)?['status'] as String? ?? 'present';
+    final next = cycleOrder[(cycleOrder.indexOf(cur) + 1) % cycleOrder.length];
+    mark(date, lesson, sid, next);
+    return next;
+  }
+  static void patch(String date, int lesson, String sid, Map<String, dynamic> fields) {
+    final cur = markOf(date, lesson, sid);
+    if (cur == null) return;
+    _overrides[keyOf(date, lesson, sid)] = {...cur, ...fields, 'by': _Placement.recorder, 'at': '${_Placement.today}T${_Placement.nowHm}'};
+    _log(fields.keys.join('+'), keyOf(date, lesson, sid));
+  }
+  // כולם-נוכחים (טאפ-אחד): מאפס סימוני-השיעור לנוכח + מסמן "נרשם"
+  static int allPresent(String date, String cls, int lesson) {
+    var n = 0;
+    for (final s in studentsOf(cls)) {
+      if (mark(date, lesson, s['id'] as String, 'present')) n++;
+    }
+    _recorded.add('$date|$cls|$lesson');
+    _log('all-present', '$date|$cls|$lesson');
+    return n;
+  }
+  // תזמון-השלמה: ליום-הלימודים הבא אחרי today (לא חג/שבת) — עם זכאות makeupEligibility (מדף)
+  static Map<String, bool> eligibility(Map<String, dynamic> m) =>
+      makeupEligibility(m['justified'] == true ? 'cancel' : 'noshow', m['justified'] == true, m['noticeHrs'] as num?); // noticeHrs = מקום-שמור
+  static String nextSchoolDay(String from) {
+    var d = shift(from, 1);
+    for (var i = 0; i < 30 && !isSchoolDay(d); i++) {
+      d = shift(d, 1);
+    }
+    return d;
+  }
 
   // ─── תלמידים/כיתות (עובדות) ───
   static bool activeOf(Map<String, dynamic> s) => (s['active'] as bool?) ?? true;
   static List<Map<String, dynamic>> studentsOf(String cls) => students.where((s) => s['cls'] == cls && activeOf(s)).toList();
   static Map<String, dynamic> studentById(String sid) => students.firstWhere((s) => s['id'] == sid);
   static String className(String cls) => classes.firstWhere((c) => c['id'] == cls)['name'] as String;
+  static String initials(String name) => name.split(' ').where((w) => w.isNotEmpty).map((w) => w[0]).take(2).join();
   static int dow(String iso) => DateTime.parse('${iso}T12:00:00').weekday % 7; // 0=ראשון
   static List<Map<String, dynamic>> lessonsOf(String iso) => lessonsByDow[dow(iso)] ?? const [];
   static String iso(DateTime d) => '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
   static String shift(String isoDate, int days) {
     final d = DateTime.parse('${isoDate}T12:00:00');
     return iso(DateTime(d.year, d.month, d.day + days));
+  }
+  // השיעור-הנוכחי (מודול-חוגים): האחרון שהתחיל לפי nowHm (היום) · 1 ביום אחר
+  static int currentLesson(String date) {
+    final ls = lessonsStarted(date);
+    return ls.isEmpty ? (lessonsOf(date).isEmpty ? 1 : lessonsOf(date).first['n'] as int) : ls.last['n'] as int;
   }
 
   // ─── לוח/חופשים (מודול-יומן): holidayOf ⊕ hebParts ⊕ HOLIDAYS — חג ⇒ לא-נספר אוטומטית ───
@@ -183,10 +265,11 @@ class _AttData {
     }
     return {'has30': has30};
   }
-  static String? holidayName(String isoDate) {
-    final d = DateTime.parse('${isoDate}T12:00:00');
-    return holidayOf(d, (x) => hebParts(x), (_) => _scanHebYear(d), HOLIDAYS, term: (k) => hol_t.kTerms[k] ?? k);
-  }
+  static final Map<String, String?> _holCache = {};
+  static String? holidayName(String isoDate) => _holCache.putIfAbsent(isoDate, () {
+        final d = DateTime.parse('${isoDate}T12:00:00');
+        return holidayOf(d, (x) => hebParts(x), (_) => _scanHebYear(d), HOLIDAYS, term: (k) => hol_t.kTerms[k] ?? k);
+      });
   // יום-לימודים = יש שיעורים בשבוע-הלימודים וגם אין-חג (נספר בנוכחות%; חג/שבת ⇒ לא-נספר)
   static bool isSchoolDay(String isoDate) => lessonsOf(isoDate).isNotEmpty && holidayName(isoDate) == null;
   static List<String> schoolDaysInMonth(String anyIso, {String? upTo}) {
@@ -202,7 +285,7 @@ class _AttData {
     }
     return out;
   }
-  // 30 ימי-לימודים אחרונים (עד today כולל) — חלון-הדפוס
+  // N ימי-לימודים אחרונים (עד today כולל) — חלון-הדפוס
   static List<String> lastSchoolDays(int n) {
     final out = <String>[];
     var d = _Placement.today;
@@ -239,8 +322,10 @@ class _AttData {
     final d = (a - s).toInt();
     return d < 0 ? 0 : d;
   }
+  static int lateMinutesOn(String date, String sid) => grandTotal(marksOn(date, sid).where((m) => m['status'] == 'late').toList(), (m) => lateMinutes(m as Map<String, dynamic>)).toInt();
   static bool isLate(Map<String, dynamic> m) => m['status'] == 'late' && lateMinutes(m) > _Placement.lateWindowMin;
   static bool unjustified(Map<String, dynamic> m) => m['status'] == 'absent' && m['justified'] != true;
+  static Map<String, dynamic>? firstMarkOn(String date, String sid) => marksOn(date, sid).isEmpty ? null : marksOn(date, sid).first;
 
   // ─── מיפוי לצורת-מאור (enrollment) ⇒ מנועי-המדף עובדים על האמת-ההפוכה ───
   //   presents = ימי-לימודים בחודש שהתלמיד לא-חסר בהם (נגזרת מהמודל-ההפוך) · absences = הסימונים
@@ -284,11 +369,101 @@ class _AttData {
     final counts = [for (final mk in months) marks.where((m) => m['sid'] == sid && m['status'] == 'absent' && monthKey(m['date'] as String) == mk).length];
     return trendFromScan({'monthly': counts});
   }
+  static String trendLabel(String sid) {
+    final t = trend(sid);
+    return t['dir'] == 'up' ? '↑ ${t['pct']}%' : t['dir'] == 'down' ? '↓ ${t['pct']}%' : '→';
+  }
   static List<Map<String, Object?>> get pendingMakeupList => pendingMakeups(enrollments);
   static List<Map<String, Object?>> pendingMakeupsOf(String sid) => pendingMakeupList.where((p) => p['memberId'] == sid).toList();
+  static String? scheduledMakeup(String sid) {
+    for (final p in pendingMakeupsOf(sid)) {
+      if (p['makeupDate'] != null) return p['makeupDate'] as String;
+    }
+    return null;
+  }
+  // חיסורים-לפי-סיבה (countBy מהמדף) — 30 ימי-לימודים אחרונים
+  static List<Map<String, dynamic>> absencesOf(String sid) => marks.where((m) => m['sid'] == sid && m['status'] == 'absent').toList();
+  static List<List<Object>> reasonsOf(String sid) => countBy(absencesOf(sid), (m) => '${(m as Map)['reason'] ?? 'אחר'}');
+
+  // ═══ ניבוי-נשירה (הכרעה 23-ד · חיבור-מודלים): דפוס-היעדרות ⇒ ציון-סיכון 0..100 ═══
+  //   4 אותות מנורמלים: שיעור-חיסורים-לא-מוצדקים(40) · רצף(30) · מגמה(20) · דפוס-קבוע(10).
+  //   פוקטור-חיצוני (מודול-תלמידים): riskExternal = מקום-שמור — כשיוזרק, מחברים max(פנימי,חיצוני).
+  static Map<String, int> patterns(String sid) {
+    final abs = absencesOf(sid);
+    if (abs.length < 3) return const {};
+    final byDow = countBy(abs, (m) => '${dow((m as Map)['date'] as String)}');
+    final byLesson = countBy(abs, (m) => '${(m as Map)['lesson']}');
+    final afterHoliday = abs.where((m) => holidayName(shift(m['date'] as String, -1)) != null || dow(m['date'] as String) == 0).length;
+    final out = <String, int>{};
+    if ((byDow.first[1] as int) * 2 >= abs.length) out['יום-קבוע: ${dayNames[int.parse(byDow.first[0] as String)]}'] = byDow.first[1] as int;
+    if ((byLesson.first[1] as int) * 2 >= abs.length) out['שיעור-קבוע: ${byLesson.first[0]}'] = byLesson.first[1] as int;
+    if (afterHoliday * 2 >= abs.length) out['אחרי-חופשה/סופ״ש'] = afterHoliday;
+    return out;
+  }
+  static Map<String, num> riskParts(String sid) {
+    final days = lastSchoolDays(30);
+    final unj = days.where((d) => marksOn(d, sid).any(unjustified)).length;
+    final rate = clampScale(unj / 6, 0, 1); // 6 חיסורים לא-מוצדקים ב-30 ימי-לימודים = מקסימום
+    final st = clampScale(streak(sid) / 4, 0, 1);
+    final t = trend(sid);
+    final tr = t['dir'] == 'up' ? 1 : t['dir'] == 'flat' && unj > 0 ? 0.4 : 0;
+    final pat = patterns(sid).isEmpty ? 0 : 1;
+    return {'rate': rate * 40, 'streak': st * 30, 'trend': tr * 20, 'pattern': pat * 10};
+  }
+  static int risk(String sid) {
+    final internal = riskParts(sid).values.fold<num>(0, (a, b) => a + b).round();
+    final ext = studentById(sid)['riskExternal'] as int?; // מקום-שמור (מודול-תלמידים)
+    return ext == null ? internal : (ext > internal ? ext : internal);
+  }
+  static String riskWhy(String sid) {
+    final p = riskParts(sid);
+    final top = p.entries.reduce((a, b) => a.value >= b.value ? a : b);
+    const why = {'rate': 'חיסורים לא-מוצדקים', 'streak': 'רצף-חיסורים', 'trend': 'מגמה עולה', 'pattern': 'דפוס-קבוע'};
+    return top.value == 0 ? 'אין-אות' : why[top.key]!;
+  }
+  static int riskBand(String sid) => risk(sid) >= _Placement.riskRed ? 2 : risk(sid) >= _Placement.riskOrange ? 1 : 0;
+  static String riskAction(String sid) => riskBand(sid) == 2 ? 'ועדת-שילוב + ביקור-בית' : riskBand(sid) == 1 ? 'שיחת-מחנך + יידוע-הורים' : 'מעקב';
 
   // ─── סיבות-מובנות: absenceReasonChips (מדף) ⊕ מונחי-דאטה + סיבות-מוסד (חולה/משפחתי/טיול/אבל/אחר) ───
   static List<String> get reasons => [...absenceReasonChips(term: (k) => reason_t.kTerms[k] ?? k), 'חולה', 'טיול', 'אבל', 'רפואי', 'אחר'];
+
+  // ═══ חוזה-עמודות · מקום-שמור (חוק-7 · מבחן-הקונכייה) — 16 עמודות-המפרט + 5 שקעים כחוזה-דאטה ═══
+  //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשתלמיד/סימון נושא ערך, חסר ⇒ שקט. הזרקת photo/medicalDoc/
+  //   online/transportLate/cardIn/gpsIn לדאטה ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
+  static List<Map<String, Object?>> columnDefs(String date) => <Map<String, Object?>>[
+        {'key': 'photo', 'label': 'תמונה'}, // מקום-שמור
+        {'label': 'שם', 'get': (Map<String, dynamic> s) => '${s['name']}'},
+        {'label': 'כיתה', 'get': (Map<String, dynamic> s) => className(s['cls'] as String)},
+        {'label': 'מס׳', 'get': (Map<String, dynamic> s) => '${s['num']}'},
+        {'label': 'סטטוס-היום', 'get': (Map<String, dynamic> s) => statusLabel[dayStatus(date, s['id'] as String)]!},
+        {'label': 'שעת-הגעה', 'get': (Map<String, dynamic> s) => arrivalOf(date, s['id'] as String) ?? '—'},
+        {'label': 'דקות-איחור', 'get': (Map<String, dynamic> s) => '${lateMinutesOn(date, s['id'] as String)}'},
+        {'label': 'סיבה', 'get': (Map<String, dynamic> s) => '${firstMarkOn(date, s['id'] as String)?['reason'] ?? '—'}'},
+        {'label': 'מוצדק?', 'get': (Map<String, dynamic> s) => firstMarkOn(date, s['id'] as String) == null ? '—' : firstMarkOn(date, s['id'] as String)!['justified'] == true ? 'כן' : 'לא'},
+        {'label': 'אישור-הורה', 'get': (Map<String, dynamic> s) => firstMarkOn(date, s['id'] as String) == null ? '—' : firstMarkOn(date, s['id'] as String)!['parentOk'] == true ? '✓' : '✗'},
+        {'label': 'חיסורים-החודש', 'get': (Map<String, dynamic> s) => '${absencesThisMonth(s['id'] as String)}'},
+        {'label': 'רצף-חיסורים', 'get': (Map<String, dynamic> s) => '${streak(s['id'] as String)}'},
+        {'label': 'נוכחות%', 'get': (Map<String, dynamic> s) => '${(attendancePct(s) * 100).round()}'},
+        {'label': 'מגמה', 'get': (Map<String, dynamic> s) => trendLabel(s['id'] as String)},
+        {'label': 'ציון-סיכון', 'get': (Map<String, dynamic> s) => '${risk(s['id'] as String)}'},
+        {'label': 'השלמה-מתוזמנת', 'get': (Map<String, dynamic> s) => scheduledMakeup(s['id'] as String) ?? (pendingMakeupsOf(s['id'] as String).isEmpty ? '—' : 'ממתין')},
+        {'key': 'medicalDoc', 'label': 'אישור-רפואי'}, // מקום-שמור (קובץ)
+        {'key': 'online', 'label': 'מקוון'}, // מקום-שמור (היברידי)
+        {'key': 'transportLate', 'label': 'איחור-הסעה'}, // מקום-שמור
+        {'key': 'cardIn', 'label': 'כרטיס/ביומטרי'}, // מקום-שמור
+        {'key': 'gpsIn', 'label': 'GPS-הגעה'}, // מקום-שמור
+      ];
+  static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
+      c['get'] != null || rows.any((s) => s[c['key']] != null && '${s[c['key']]}'.trim().isNotEmpty);
+  static const statusLabel = {'present': '✅ נוכח', 'absent': '⛔ חסר', 'late': '⏰ איחור', 'released': '🚪 שחרור'};
+  static const statusTone = {'present': 1, 'absent': 2, 'late': 3, 'released': 0};
+  // חוזה-עובדות-הפאנל (מקום-שמור כמו metaFields): שדה מוצג רק כשקיים ערך
+  static const metaFields = <Map<String, String>>[
+    {'key': 'phone', 'prefix': '📞 ', 'suffix': ''},
+    {'key': 'name', 'prefix': '👪 ', 'suffix': ''},
+    {'key': 'email', 'prefix': '✉️ ', 'suffix': ''}, // מקום-שמור
+    {'key': 'lang', 'prefix': '🗣 ', 'suffix': ''}, // מקום-שמור (שפת-הודעה)
+  ];
 
   // ─── KPI-10 (פעולה-3 · כל אחד = ספירה/יחס על אמת) ───
   static List<Map<String, dynamic>> get activeStudents => students.where(activeOf).toList();
@@ -306,6 +481,7 @@ class _AttData {
     }
     return p / n;
   }
+  static int get atRiskCount => activeStudents.where((s) => riskBand(s['id'] as String) > 0).length;
   static int get unjustifiedMonth => marks.where((m) => unjustified(m) && monthKey(m['date'] as String) == monthKey(_Placement.today)).length;
   static int get noParentOk => marks.where((m) => unjustified(m) && m['parentOk'] != true).length;
   // כיתות-שטרם-נרשמו-היום: כיתה עם שיעור שכבר התחיל (nowHm) ואין לו רישום (סימון או אישור-כולם-נוכחים)
@@ -316,7 +492,7 @@ class _AttData {
   }
   static List<String> get classesNotRecordedToday => [
         for (final c in classes)
-          if (lessonsStarted(_Placement.today).any((l) => !isRecorded(_Placement.today, c['id'] as String, l['n'] as int) && !marks.any((m) => m['date'] == _Placement.today && m['lesson'] == l['n'] && studentById(m['sid'] as String)['cls'] == c['id'])))
+          if (lessonsStarted(_Placement.today).any((l) => !isRecorded(_Placement.today, c['id'] as String, l['n'] as int)))
             c['id'] as String,
       ];
 }
@@ -331,6 +507,11 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen> {
   String _date = _Placement.today; // תאריך-נבחר (בורר-תאריך)
   int _cls = 0; // כיתה-נבחרת (SegmentedSwitch)
+  int? _lesson; // שיעור-נבחר (null ⇒ השיעור-הנוכחי)
+  int _mode = 0; // 0=📋 גיליון (טאפ-מחזורי) · 1=🗂 טבלה (DsTable כל-העמודות)
+  String? _notice; // הודעת-מערכת אחרונה (רישום-כפול · כולם-נוכחים)
+
+  int get _lessonN => _lesson ?? _AttData.currentLesson(_date);
 
   @override
   Widget build(BuildContext context) {
@@ -341,6 +522,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final sum = sheetSummary(_AttData.rosterOf(cls), _date) as Map; // {present,total} מהמדף
     final monthPct = _AttData.monthPct;
     final notRec = _AttData.classesNotRecordedToday;
+    final lessonIdx = lessons.indexWhere((l) => l['n'] == _lessonN);
+    final recorded = lessons.isNotEmpty && _AttData.isRecorded(_date, cls, _lessonN);
     return DsScaffold(
       title: 'נוכחות',
       subtitle: '${_AttData.activeStudents.length} תלמידים · ${_AttData.classes.length} כיתות · ${fmtDate(_Placement.today)}',
@@ -390,7 +573,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ]),
             const SizedBox(height: 12),
             Row(children: [
-              BareStat(value: '${_AttData.activeStudents.where((s) => _AttData.streak(s['id'] as String) >= _Placement.streakAlert).length}', label: '🚨 בסיכון-נשירה', inkColor: _danger, mutedColor: _muted),
+              BareStat(value: '${_AttData.atRiskCount}', label: '🚨 בסיכון-נשירה', inkColor: _AttData.atRiskCount > 0 ? _danger : _ok, mutedColor: _muted),
               BareStat(value: '${_AttData.pendingMakeupList.length}', label: '🔁 השלמות-ממתינות', inkColor: _ink, mutedColor: _muted),
               BareStat(value: '${_AttData.unjustifiedMonth}', label: '❔ לא-מוצדקים-החודש', inkColor: _AttData.unjustifiedMonth > 0 ? _warning : _ok, mutedColor: _muted),
               BareStat(value: '${_AttData.noParentOk}', label: '👪 ללא-אישור-הורה', inkColor: _AttData.noParentOk > 0 ? _warning : _ok, mutedColor: _muted),
@@ -399,37 +582,224 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ]),
         ),
         _gap(8),
+        if (_notice != null) ...[AlertBanner(glyph: 'ℹ️', tone: 0, message: _notice!), _gap(8)],
         if (holiday != null)
           AlertBanner(glyph: '🕎', tone: 3, message: '$holiday — יום-חופש: היום לא נספר בנוכחות (סנכרון-לוח)')
         else if (lessons.isEmpty)
           const AlertBanner(glyph: '📭', tone: 0, message: 'אין-שיעורים ביום זה')
-        else
-          DsSection(
-            title: '📋 ${_AttData.className(cls)} · ${fmtDate(_date)} · ${sum['present']}/${sum['total']} נוכחים',
-            children: [
-              for (final s in roster) _row(s),
-            ],
-          ),
+        else ...[
+          // ── בורר-שיעור (פר-שיעור, לא פר-יום) + מבט + רישום-מרוכז ──
+          Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            SegmentedSwitch(
+              items: [for (final l in lessons) '${l['n']} · ${l['time']}'],
+              selected: lessonIdx < 0 ? 0 : lessonIdx,
+              onSelect: (i) => setState(() => _lesson = lessons[i]['n'] as int),
+            ),
+            SegmentedSwitch(items: const ['📋 גיליון', '🗂 טבלה'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+          ]),
+          _gap(8),
+          Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            StatusChip(label: '${lessons[lessonIdx < 0 ? 0 : lessonIdx]['subject']} · ${recorded ? 'נרשם' : 'טרם-נרשם'}', tone: recorded ? 1 : 3),
+            SoftButton(label: '✅ כולם-נוכחים', tone: 1, onTap: () => setState(() {
+              final n = _AttData.allPresent(_date, cls, _lessonN);
+              _notice = 'שיעור $_lessonN · ${_AttData.className(cls)}: נרשם "כולם נוכחים" ($n סימונים אופסו)';
+            })),
+          ]),
+          _gap(8),
+          if (roster.isEmpty)
+            const EmptyState(glyph: '🏫', message: 'כיתה ריקה — אין תלמידים פעילים')
+          else if (_mode == 1)
+            DsSection(title: '🗂 טבלה · ${_AttData.className(cls)} · ${fmtDate(_date)}', children: [_table(roster)])
+          else
+            DsSection(
+              title: '📋 ${_AttData.className(cls)} · שיעור $_lessonN · ${sum['present']}/${sum['total']} נוכחים-היום',
+              children: [for (final s in roster) _row(s)],
+            ),
+        ],
       ],
     );
   }
 
-  // שורת-תלמיד (גל 1: עובדות בלבד — זהות + סטטוס-יומי; טאפ-מחזורי ופאנל בגל 2-3)
+  // שורת-תלמיד (גיליון): זהות (MediaRow) ⊕ מצב-בשיעור (StatusChip) ⊕ טאפ-מחזורי (SoftButton) ⊕ פאנל (שברון)
+  //   הטאפ-המחזורי: נוכח→חסר→איחור→שחרור→נוכח (מודל-הפוך: "נוכח" = מחיקת-הסימון). אידמפוטנטי.
   Widget _row(Map<String, dynamic> s) {
     final sid = s['id'] as String;
-    final st = _AttData.dayStatus(_date, sid);
-    final arr = _AttData.arrivalOf(_date, sid);
-    const label = {'present': '✅ נוכח', 'absent': '⛔ חסר', 'late': '⏰ איחור', 'released': '🚪 שחרור'};
-    const tone = {'present': 1, 'absent': 2, 'late': 3, 'released': 0};
+    final m = _AttData.markOf(_date, _lessonN, sid);
+    final st = m?['status'] as String? ?? 'present';
+    final dayst = _AttData.dayStatus(_date, sid);
+    final arr = m?['arrival'] as String?;
+    final rb = _AttData.riskBand(sid);
+    final sub = [
+      '${_AttData.className(s['cls'] as String)} · מס׳ ${s['num']}',
+      if (arr != null) 'הגעה $arr (+${_AttData.lateMinutes(m!)}׳)',
+      if (m?['reason'] != null) '${m!['reason']}${m['justified'] == true ? ' · מוצדק' : ''}',
+      if (dayst != st) 'היום: ${_AttData.statusLabel[dayst]}',
+      if (_AttData.streak(sid) >= _Placement.streakAlert) '🚨 רצף ${_AttData.streak(sid)}',
+    ].join(' · ');
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(children: [
-        Expanded(child: MediaRow(glyph: '🎓', title: s['name'] as String, subtitle: '${_AttData.className(s['cls'] as String)} · מס׳ ${s['num']}${arr != null ? ' · הגעה $arr' : ''}')),
-        const SizedBox(width: 8),
-        if (_Placement.parents[sid] == null) const StatusChip(label: 'ללא קשר-הורה', tone: 3), // מקום-שמור מואר רק כשחסר (חוק-7)
-        StatusChip(label: label[st]!, tone: tone[st]!),
+        Expanded(child: MediaRow(glyph: rb == 2 ? '🚨' : rb == 1 ? '⚠️' : '🎓', title: s['name'] as String, subtitle: sub)),
+        const SizedBox(width: 6),
+        SoftButton(label: _AttData.statusLabel[st]!, tone: _AttData.statusTone[st]!, onTap: () => setState(() => _AttData.cycle(_date, _lessonN, sid))),
+        IconButton(onPressed: () => _openPanel(s), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פרטים ופעולות'),
       ]),
     );
+  }
+
+  // 🗂 מבט-טבלה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid.
+  Widget _table(List<Map<String, dynamic>> rows) {
+    final cols = [for (final c in _AttData.columnDefs(_date)) if (_AttData.colShown(c, rows)) c];
+    final labels = [for (final c in cols) c['label'] as String];
+    final data = <List<String>>[
+      for (final s in rows)
+        [
+          for (final c in cols)
+            if (c['get'] != null) (c['get'] as String Function(Map<String, dynamic>))(s) else '${s[c['key']] ?? '—'}',
+        ],
+    ];
+    return DsTable(labels: labels, rows: data);
+  }
+
+  // ═══ פאנל תלמיד-נבחר (GlassCard) · פעולת-יסוד "ביצוע"+"הערכה": זהות · סטטוס-היום · ציר-30-יום ·
+  //   סיבות (NeonBars⊕countBy) · מגמה+סיכון (TrendStat⊕StatRow⊕StatusChip) · השלמות · קשר-הורה · הערות · פעולות ═══
+  void _openPanel(Map<String, dynamic> s) {
+    final sid = s['id'] as String;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) {
+          void act(void Function() f) {
+            f();
+            setSheet(() {});
+            setState(() {});
+          }
+          final m = _AttData.markOf(_date, _lessonN, sid);
+          final st = m?['status'] as String? ?? 'present';
+          final days = _AttData.lastSchoolDays(30);
+          final reasons = _AttData.reasonsOf(sid);
+          final pend = _AttData.pendingMakeupsOf(sid);
+          final r = _AttData.risk(sid), rb = _AttData.riskBand(sid);
+          final t = _AttData.trend(sid);
+          final pct = _AttData.attendancePct(s);
+          final parent = _Placement.parents[sid];
+          final elig = m == null || m['status'] != 'absent' ? null : _AttData.eligibility(m);
+          return DraggableScrollableSheet(
+            initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
+            builder: (ctx, scroll) => Padding(
+              padding: const EdgeInsets.all(12),
+              child: GlassCard(
+                child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                  AvatarTile(initials: _AttData.initials(s['name'] as String), title: s['name'] as String, subtitle: '${_AttData.className(s['cls'] as String)} · מס׳ ${s['num']} · ${_AttData.summaryOf(s)['statusLabel']}'),
+                  _gap(10),
+                  Wrap(spacing: 8, runSpacing: 6, children: [
+                    StatusChip(label: 'היום: ${_AttData.statusLabel[_AttData.dayStatus(_date, sid)]}', tone: _AttData.statusTone[_AttData.dayStatus(_date, sid)]!),
+                    StatusChip(label: 'שיעור $_lessonN: ${_AttData.statusLabel[st]}', tone: _AttData.statusTone[st]!),
+                    if (m?['arrival'] != null) StatusChip(label: 'הגעה ${m!['arrival']} · +${_AttData.lateMinutes(m)}׳', tone: _AttData.isLate(m) ? 3 : 1),
+                  ]),
+                  _gap(8),
+                  // שיעורים-מרובים-ביום (פר-שיעור, לא פר-יום): כפתור פר-שיעור — טאפ מחזורי על אותו שיעור
+                  Wrap(spacing: 6, runSpacing: 6, children: [
+                    for (final l in _AttData.lessonsOf(_date))
+                      SoftButton(
+                        label: 'ש${l['n']} ${_AttData.statusLabel[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']}',
+                        tone: _AttData.statusTone[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']!,
+                        onTap: () => act(() => _AttData.cycle(_date, l['n'] as int, sid)),
+                      ),
+                  ]),
+                  _gap(12),
+                  // ציר-30-יום: StatusDot פר-יום-לימודים (ירוק/אדום/כתום/ציאן) + יום-בחודש (עובדה)
+                  Text('ציר 30 ימי-לימודים · ${_AttData.presentsThisMonth(s)}/${_AttData.schoolDaysSoFar()} נוכח החודש', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                  _gap(6),
+                  Wrap(spacing: 2, runSpacing: 4, children: [
+                    for (final d in days)
+                      Column(mainAxisSize: MainAxisSize.min, children: [
+                        StatusDot(tone: _AttData.statusTone[_AttData.dayStatus(d, sid)]!, size: 9),
+                        Text(d.substring(8), style: TextStyle(color: d == _date ? _ink : _muted, fontSize: 9)),
+                      ]),
+                  ]),
+                  _gap(12),
+                  StatRow(label: 'נוכחות% החודש (סף ${_Placement.minAttendancePct}%)', value: '${(pct * 100).round()}%', fraction: pct),
+                  _gap(8),
+                  // מגמה+ציון-סיכון (חיבור-מודלים): TrendStat (דלתא-חיסורים, הפוך) ⊕ StatRow (ציון) ⊕ StatusChip (אות-מוביל+התערבות)
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Expanded(child: TrendStat(value: '${_AttData.absencesThisMonth(sid)}', delta: -((t['pct'] as num).toDouble()), label: 'חיסורים החודש · מגמת-נוכחות (↓=מחמיר)')),
+                    const SizedBox(width: 8),
+                    Expanded(child: Column(children: [
+                      StatRow(label: 'ציון-סיכון-נשירה', value: '$r', fraction: r / 100),
+                      _gap(6),
+                      Wrap(spacing: 6, runSpacing: 4, children: [
+                        StatusChip(label: _AttData.riskWhy(sid), tone: rb == 2 ? 2 : rb == 1 ? 3 : 1),
+                        StatusChip(label: _AttData.riskAction(sid), tone: rb == 2 ? 2 : rb == 1 ? 3 : 1),
+                        for (final p in _AttData.patterns(sid).entries) StatusChip(label: '${p.key} (${p.value})', tone: 3),
+                      ]),
+                    ])),
+                  ]),
+                  if (reasons.isNotEmpty) ...[
+                    _gap(12),
+                    const Text('חיסורים לפי סיבה', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                    _gap(6),
+                    NeonBars(labels: [for (final e in reasons) '${e[0]}'], values: [for (final e in reasons) (e[1] as int).toDouble()], tone: 3),
+                  ],
+                  _gap(12),
+                  Text('השלמות · ${pend.length}', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                  _gap(6),
+                  if (pend.isEmpty)
+                    const Align(alignment: Alignment.centerRight, child: StatusChip(label: 'אין השלמות ממתינות', tone: 1))
+                  else
+                    for (final p in pend)
+                      TimelineItem(title: p['makeupDate'] == null ? '🔁 ממתין לתזמון' : '📅 מתוזמן ל-${fmtDate(p['makeupDate'] as String)}', time: fmtDate(p['date'] as String), body: '${p['reason'] ?? ''}'),
+                  _gap(12),
+                  // קשר-הורה: לולאה גנרית על metaFields (מקום-שמור) — שדה מואר רק כשקיים
+                  const Text('קשר-הורה', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                  _gap(6),
+                  if (parent == null)
+                    const AlertBanner(glyph: '👪', tone: 3, message: 'אין קשר-הורה מוזרק (בלוק-הצבה) — הודעות לא יישלחו')
+                  else
+                    Wrap(spacing: 8, runSpacing: 6, children: [
+                      for (final f in _AttData.metaFields)
+                        if (parent[f['key']] != null) StatusChip(label: '${f['prefix']}${parent[f['key']]}${f['suffix']}', tone: 0),
+                      if (m != null) StatusChip(label: m['parentOk'] == true ? 'אישור-הורה ✓' : 'ללא אישור-הורה', tone: m['parentOk'] == true ? 1 : 3),
+                    ]),
+                  _gap(12),
+                  Text('הערות · ${(_AttData.notes[sid] ?? const []).length}', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                  _gap(6),
+                  for (final n in _AttData.notes[sid] ?? const <String>[]) TimelineItem(title: n, time: '${fmtDate(_Placement.today)} ${_Placement.nowHm}'),
+                  _gap(12),
+                  const Text('פעולות-מהירות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
+                  _gap(8),
+                  Wrap(spacing: 8, runSpacing: 8, children: [
+                    SoftButton(label: '⛔ סמן-חיסור', tone: 2, onTap: () => act(() => _mark(sid, 'absent'))),
+                    SoftButton(label: '⏰ סמן-איחור', tone: 3, onTap: () => act(() => _mark(sid, 'late'))),
+                    SoftButton(label: '🚪 סמן-שחרור', tone: 0, onTap: () => act(() => _mark(sid, 'released'))),
+                    if (m != null) SoftButton(label: '↩ בטל', tone: 0, onTap: () => act(() => _mark(sid, 'present'))),
+                    if (m != null && m['justified'] != true) SoftButton(label: '✔ סמן-מוצדק', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'justified': true}))),
+                    if (m != null) SoftButton(label: '📎 צרף-אישור', tone: 0, onTap: () => act(() => _notice = 'צרף-אישור: שקע-קובץ (medicalDoc) לא מחובר בהצבה — מקום-שמור')),
+                    if (m != null && m['status'] == 'absent' && elig!['eligible'] == true && m['makeupDate'] == null)
+                      SoftButton(label: '📅 תזמן-השלמה', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': true, 'makeupDate': _AttData.nextSchoolDay(_Placement.today)}))),
+                    if (m != null && m['makeupDate'] != null) SoftButton(label: '✅ השלמה-בוצעה', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': false, 'makeupDone': true}))),
+                    if (m != null && m['parentOk'] != true && parent != null) SoftButton(label: '📨 הודעה-להורה', tone: 0, onTap: () => act(() => _notice = 'הודעה ל-${parent['name']} (${parent['phone']}) נרשמה בתור — שקע-שליחה (מודול-הורים) מקום-שמור')),
+                    SoftButton(label: '📝 הוסף-הערה', tone: 0, onTap: () => act(() => (_AttData.notes[sid] ??= []).insert(0, 'הערה ${(_AttData.notes[sid]?.length ?? 0) + 1} · ${_AttData.riskWhy(sid)}'))),
+                  ]),
+                  if (m != null && m['status'] == 'absent') ...[
+                    _gap(10),
+                    if (elig!['eligible'] != true) const AlertBanner(glyph: '🔁', tone: 3, message: 'לא-זכאי להשלמה (חיסור לא-מוצדק = no-show · makeupEligibility)'),
+                    DsEnumField(label: 'סיבה (מובנית)', options: _AttData.reasons, value: '${m['reason'] ?? ''}', onChanged: (v) => act(() => _AttData.patch(_date, _lessonN, sid, {'reason': v}))),
+                  ],
+                ]),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _mark(String sid, String status) {
+    final ok = _AttData.mark(_date, _lessonN, sid, status);
+    _notice = ok ? null : 'רישום-כפול חסום (אידמפוטנטי): ${_AttData.studentById(sid)['name']} כבר ${_AttData.statusLabel[status]} בשיעור $_lessonN';
   }
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
