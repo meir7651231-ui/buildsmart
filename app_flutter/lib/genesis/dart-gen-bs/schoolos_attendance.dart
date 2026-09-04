@@ -26,6 +26,9 @@ import '../dart-ui-bs/premium/dataviz/neon_bars.dart'; // השוואת-סיבו�
 import '../dart-ui-bs/premium/dataviz/trend_stat.dart'; // מגמה (ערך+דלתא%) — trendFromScan
 import '../dart-ui-bs/ds/ds_table.dart'; // טבלה-אמיתית (labels+rows, מיון) — לא DataGrid המזייף
 import '../dart-ui-bs/ds/ds_enum_field.dart'; // בורר-סיבה מרשימה-סגורה (absenceReasonChips)
+import '../dart-ui-bs/ds/ds_search.dart'; // חיפוש-מבוקר (value+onChanged) — פעולת-יסוד "איתור"
+import '../dart-ui-bs/ds/ds_calendar.dart'; // לוח-חודש עם תפר-דאטה אמיתי (ספירת-חיסורים פר-יום) — טאב "חודש"
+import '../dart-ui-bs/screens__manager_dashboard_screen/filter_chip_pill.dart'; // צ׳יפ-סינון מבוקר (חריגה)
 import '../dart-maor/presents-in-month.dart'; // מנוע-מדף: ספירת-נוכחויות בחודש (presents ISO)
 import '../dart-maor/sheet-summary.dart'; // מנוע-מדף: {present,total} לתאריך על roster
 import '../dart-maor/sheet-roster.dart'; // מנוע-מדף: roster פר-חוג (active בלבד)
@@ -36,6 +39,17 @@ import '../dart-maor/count-by.dart'; // מנוע-מדף: קיבוץ+ספירה (
 import '../dart-maor/grand-total.dart'; // מנוע-מדף: Σ-לפי-מפתח (דקות-איחור)
 import '../dart-maor/clamp-scale.dart'; // מנוע-מדף: הצמדה לגבולות (יחסים 0..1)
 import '../dart-maor/intel-day-diff.dart'; // מנוע-מדף: הפרש-ימים בין ISO (רצף/חלון-מורה)
+import '../dart-maor/date-in-range.dart'; // מנוע-מדף: ISO בטווח כוללני (היסטוריה/דוח)
+import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפי-ציון (מדף)
+import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
+import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (מדף)
+import '../dart-maor/finder-matches.dart'; // חריגה: סינון-רב-צירי AND (מדף)
+import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
+import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
+import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
+import '../dart-maor/guard-export.dart'; // ייצוא: שומר-סף עם notify (מדף)
+import '../dart-maor/role-of.dart'; // הרשאות: תפקיד-לפי-מייל admin/teacher/staff (מדף)
+import '../dart-maor/can-granted-action.dart'; // הרשאות: גידור-פעולה פר-מפתח (מדף)
 import '../dart-maor/intel-trend-from-scan.dart'; // מנוע-מדף: מגמה מרשימה-חודשית {dir,pct}
 import '../dart-maor/fmt-date.dart'; // מנוע-מדף: ISO ⇒ dd/mm/yyyy
 import '../dart-maor/month-key.dart'; // מנוע-מדף: ISO ⇒ YYYY-MM
@@ -64,7 +78,18 @@ class _Placement {
   static const minAttendancePct = 80; // סף-רגולטורי (זכאות/תעודה)
   static const streakAlert = 3; // התרעת-רצף: N חיסורים רצופים
   static const riskRed = 60, riskOrange = 35; // ספי-סיכון (ציון 0..100)
-  static const recorder = 't1'; // זהות-הרושם המוזרקת (מי-רשם באודיט) — בורר-תפקיד בגל 5
+  static const lockHm = '16:00'; // נעילה-אוטומטית סוף-יום
+  static const remindHm = '10:00'; // תזכורת "לא-נרשם-היום" למורה בשעה-X
+  // 6 זהויות-דמו מוזרקות (חוק-6 · לא אטום): תפקיד ⇐ roleOf(config,email) · פעולה ⇐ canGrantedAction(features)
+  //   scope: classes (null=הכל) · window (ימים סביב היום שמותר לערוך; 0=היום בלבד) · child (הורה)
+  static const roleDefs = <Map<String, dynamic>>[
+    {'label': '👩‍🏫 מורה', 'id': 't1', 'email': 'teacher1@school', 'classes': ['y1'], 'window': 1, 'config': {'roles': {'teachers': {'teacher1@school': true}}, 'features': {'att.mark': true, 'att.notify': true, 'att.makeup': true, 'att.export': true}}},
+    {'label': '🔄 מחליף', 'id': 'sub1', 'email': 'sub@school', 'classes': ['y2'], 'window': 0, 'config': {'features': {'att.mark': true}}},
+    {'label': '🧭 רכז/ת', 'id': 'coord', 'email': 'coord@school', 'classes': null, 'window': 365, 'config': {'features': {'att.mark': true, 'att.back': true, 'att.justify': true, 'att.unlock': true, 'att.lock': true, 'att.makeup': true, 'att.notify': true, 'att.export': true, 'att.audit': true}}},
+    {'label': '👑 הנהלה', 'id': 'mgmt', 'email': 'mgr@school', 'classes': null, 'window': 365, 'config': {'adminEmails': ['mgr@school']}}, // admin ⇒ הכל
+    {'label': '👪 הורה', 'id': 'parent-s1', 'email': 'parent1@home', 'child': 's1', 'window': 0, 'config': {'features': {'att.parentOk': true}}},
+    {'label': '👁 צפייה', 'id': 'viewer', 'email': 'view@school', 'classes': null, 'window': 0, 'config': <String, dynamic>{}},
+  ];
   // קשרי-הורים (הצבה): studentId ⇒ {name, phone}. חסר ⇒ המקום-השמור שקט.
   static const parents = <String, Map<String, String>>{
     's1': {'name': 'דנה שמעוני', 'phone': '050-555-0101'},
@@ -159,7 +184,7 @@ class _AttData {
   static bool isRecorded(String date, String cls, int lesson) => _recorded.contains('$date|$cls|$lesson');
   static void _log(String action, String key) {
     _seq++;
-    audit.insert(0, {'at': '${_Placement.today}T${_Placement.nowHm}', 'seq': _seq, 'by': _Placement.recorder, 'action': action, 'key': key});
+    audit.insert(0, {'at': '${_Placement.today}T${_Placement.nowHm}', 'seq': _seq, 'by': _AttData.recorder, 'action': action, 'key': key});
   }
 
   // כל הסימונים האפקטיביים: בסיס + דריסות (דריסה עם status='present' = ביטול ⇒ נעלם מהמודל-ההפוך)
@@ -184,6 +209,7 @@ class _AttData {
 
   // ═══ רישום (פעולה-2): אידמפוטנטי — אותו מפתח+אותו מצב ⇒ false (רישום-כפול חסום, לא מוכפל) ═══
   static bool mark(String date, int lesson, String sid, String status, {String? reason, String? arrival}) {
+    if (!canMarkOn(date)) return false; // יום-נעול / מחוץ-לחלון / אין-הרשאה ⇒ חסום (המסך מדווח why)
     final cur = markOf(date, lesson, sid);
     if ((cur?['status'] ?? 'present') == status) return false; // כפול ⇒ חסום
     final k = keyOf(date, lesson, sid);
@@ -195,7 +221,7 @@ class _AttData {
         'reason': reason ?? cur?['reason'] ?? (status == 'absent' ? 'אחר' : null),
         'justified': cur?['justified'] ?? (status == 'released'),
         if (status == 'late') 'arrival': arrival ?? cur?['arrival'] ?? _Placement.nowHm,
-        'by': _Placement.recorder, 'at': '${_Placement.today}T${_Placement.nowHm}',
+        'by': _AttData.recorder, 'at': '${_Placement.today}T${_Placement.nowHm}',
       };
     }
     _recorded.add('$date|${studentById(sid)['cls']}|$lesson');
@@ -212,7 +238,7 @@ class _AttData {
   static void patch(String date, int lesson, String sid, Map<String, dynamic> fields) {
     final cur = markOf(date, lesson, sid);
     if (cur == null) return;
-    _overrides[keyOf(date, lesson, sid)] = {...cur, ...fields, 'by': _Placement.recorder, 'at': '${_Placement.today}T${_Placement.nowHm}'};
+    _overrides[keyOf(date, lesson, sid)] = {...cur, ...fields, 'by': _AttData.recorder, 'at': '${_Placement.today}T${_Placement.nowHm}'};
     _log(fields.keys.join('+'), keyOf(date, lesson, sid));
   }
   // כולם-נוכחים (טאפ-אחד): מאפס סימוני-השיעור לנוכח + מסמן "נרשם"
@@ -465,6 +491,122 @@ class _AttData {
     {'key': 'lang', 'prefix': '🗣 ', 'suffix': ''}, // מקום-שמור (שפת-הודעה)
   ];
 
+  // ═══ הרשאות-פר-תפקיד (חוק-6 · הכרעה 23-ג) = roleOf ⊕ canGrantedAction — 6 תפקידים ═══
+  static int role = 0; // אינדקס-תפקיד נבחר (בורר מדגים גידור)
+  static String recorder = 't1'; // זהות-הרושם (אודיט "מי-רשם") — נגזרת מהתפקיד הנבחר
+  static Map<String, dynamic> get roleDef => _Placement.roleDefs[role];
+  static bool _isAdmin(Map<String, dynamic> config, String email) => roleOf(config, email) == 'admin';
+  static bool can(String key) => canGrantedAction((roleDef['config'] as Map).cast<String, dynamic>(), roleDef['email'] as String, false, key, _isAdmin);
+  static String get roleName => roleOf((roleDef['config'] as Map).cast<String, dynamic>(), roleDef['email'] as String);
+  static void setRole(int i) {
+    role = i;
+    recorder = roleDef['id'] as String;
+  }
+  // כיתות-בהיקף: מורה=כיתותיו · מחליף=כיתה-מוקצית · הורה=כיתת-ילדו · רכז/הנהלה/צפייה=הכל
+  static List<Map<String, dynamic>> get visibleClasses {
+    final child = roleDef['child'] as String?;
+    if (child != null) return classes.where((c) => c['id'] == studentById(child)['cls']).toList();
+    final cs = roleDef['classes'] as List?;
+    return cs == null ? classes : classes.where((c) => cs.contains(c['id'])).toList();
+  }
+  // תלמידים-בהיקף: הורה רואה רק את ילדו
+  static List<Map<String, dynamic>> visibleStudents(String cls) {
+    final child = roleDef['child'] as String?;
+    return child == null ? studentsOf(cls) : studentsOf(cls).where((s) => s['id'] == child).toList();
+  }
+  // חלון-עריכה: |date−today| ≤ window (dayDiff מהמדף) — מורה היום±1, מחליף היום, רכז אחורה
+  static bool inWindow(String date) => dayDiff(date, _Placement.today).abs() <= (roleDef['window'] as int? ?? 0);
+  static bool canMarkOn(String date) => can('att.mark') && inWindow(date) && !isLocked(date);
+  static String? whyCannot(String date) => !can('att.mark') ? 'אין הרשאת-רישום לתפקיד $roleName' : isLocked(date) ? 'יום-נעול — רק רכז/ת פותח/ת' : !inWindow(date) ? 'מחוץ לחלון-העריכה (היום±${roleDef['window']}) — אין עריכה-לאחור' : null;
+
+  // ═══ נעילת-יום (מצב-מיוחד): ידנית (רכז/הנהלה) · אוטומטית סוף-יום (nowHm ≥ lockHm) ═══
+  static final Set<String> _locked = {};
+  static final Set<String> _unlocked = {}; // פתיחה-מפורשת של רכז גוברת על נעילה-אוטו
+  static bool autoLocked(String date) => date.compareTo(_Placement.today) < 0 || (date == _Placement.today && (timeToMin(_Placement.nowHm) as num) >= (timeToMin(_Placement.lockHm) as num));
+  static bool isLocked(String date) => !_unlocked.contains(date) && (_locked.contains(date) || (autoLocked(date) && date != _Placement.today && !can('att.back')));
+  static void lockDay(String date) { _locked.add(date); _unlocked.remove(date); _log('lock', date); }
+  static void unlockDay(String date) { _unlocked.add(date); _locked.remove(date); _log('unlock', date); }
+
+  // ═══ איתור (הכרעה 23-ג) = DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch — לא .contains שטוח ═══
+  static const Map<String, String> _finals = {'k1': 'כ', 'k2': 'מ', 'k3': 'נ', 'k4': 'פ', 'k5': 'צ'};
+  static String _norm(dynamic q) => normSearch(q, _finals);
+  static Iterable _expand(dynamic q, dynamic norm) => [norm(q)];
+  static num _score(dynamic exp, dynamic term) => _norm(term).contains('$exp') ? 100 : 0;
+  static num _scoreOf(dynamic q, dynamic terms) => smartScore(q, terms, _norm, _expand, _score) as num;
+  static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty;
+  static List<String> _termsOf(Map<String, dynamic> s) => ['${s['name']}', '${s['num']}', className(s['cls'] as String), '${_Placement.parents[s['id']]?['name'] ?? ''}'];
+  static List<Map<String, dynamic>> search(List<Map<String, dynamic>> items, String q) =>
+      (smartFilter(q, items, (it) => _termsOf(it as Map<String, dynamic>), _hasQuery, _scoreOf) as List).cast<Map<String, dynamic>>();
+
+  // ═══ חריגה (הכרעה 23-ג) = FilterChipPill ⊕ finderMatches — 10 צירי-נעילה (המפרט: סטטוס·מוצדק·בסיכון·רצף·אישור·השלמה·הגעה) ═══
+  static const filterDefs = <Map<String, String>>[
+    {'axis': '', 'label': 'הכל'},
+    {'axis': 'absent', 'label': '⛔ חסרים'},
+    {'axis': 'late', 'label': '⏰ מאחרים'},
+    {'axis': 'released', 'label': '🚪 שוחררו'},
+    {'axis': 'unjust', 'label': '❔ לא-מוצדק'},
+    {'axis': 'just', 'label': '✔ מוצדק'},
+    {'axis': 'risk', 'label': '🚨 בסיכון'},
+    {'axis': 'streak', 'label': '🔗 רצף≥${_Placement.streakAlert}'},
+    {'axis': 'noParent', 'label': '👪 ללא-אישור'},
+    {'axis': 'makeup', 'label': '🔁 השלמה-ממתינה'},
+    {'axis': 'lateArr', 'label': '🕒 הגעה>${_Placement.lateWindowMin}׳'},
+  ];
+  static String _axisValue(Map<dynamic, dynamic> db, dynamic f, dynamic axis) {
+    final s = f as Map<String, dynamic>;
+    final sid = s['id'] as String, date = db['date'] as String;
+    final ms = marksOn(date, sid);
+    switch (axis) {
+      case 'absent': case 'late': case 'released': return dayStatus(date, sid) == axis ? '1' : '0';
+      case 'unjust': return ms.any(unjustified) ? '1' : '0';
+      case 'just': return ms.any((m) => m['status'] == 'absent' && m['justified'] == true) ? '1' : '0';
+      case 'risk': return riskBand(sid) > 0 ? '1' : '0';
+      case 'streak': return streak(sid) >= _Placement.streakAlert ? '1' : '0';
+      case 'noParent': return ms.any((m) => unjustified(m) && m['parentOk'] != true) ? '1' : '0';
+      case 'makeup': return pendingMakeupsOf(sid).isNotEmpty ? '1' : '0';
+      case 'lateArr': return ms.any(isLate) ? '1' : '0';
+    }
+    return '';
+  }
+  static List<Map<String, dynamic>> filter(List<Map<String, dynamic>> items, String date, int chip) {
+    final axis = filterDefs[chip]['axis']!;
+    final locks = axis.isEmpty ? <dynamic, dynamic>{} : <dynamic, dynamic>{axis: '1'};
+    return finderMatches({'families': items, 'date': date}, locks, _axisValue).cast<Map<String, dynamic>>();
+  }
+
+  // ═══ ייצוא (23-ג) = toCsv ⊕ csvEscape ⊕ exportAllowed ⊕ guardExport — שורות מהחוזה-עמודות ═══
+  static List<List<Object?>> csvRows(List<Map<String, dynamic>> rows, String date) {
+    final cols = [for (final c in columnDefs(date)) if (colShown(c, rows)) c];
+    return [
+      [for (final c in cols) c['label']],
+      for (final s in rows) [for (final c in cols) c['get'] != null ? (c['get'] as String Function(Map<String, dynamic>))(s) : '${s[c['key']] ?? ''}'],
+    ];
+  }
+  static String csvOf(List<Map<String, dynamic>> rows, String date) => toCsv(csvRows(rows, date), csvEscape) as String;
+  static bool get exportOk => exportAllowed(false) && guardExport(!can('att.export'), null);
+
+  // ═══ תקשורת-הורים: תור-הודעות אוטו (חיסור לא-מוצדק ללא-אישור ⇒ הודעה) + שליחות ידניות; שקע-שליחה = מקום-שמור ═══
+  static final Set<String> sent = {}; // מפתחות-סימון שנשלחה עליהם הודעה (חלון-תגובה נפתח)
+  static final List<Map<String, dynamic>> manualQueue = []; // הודעות-כיתה/ידניות
+  static List<Map<String, dynamic>> get notificationQueue => [
+        for (final m in marks)
+          if (unjustified(m) && m['parentOk'] != true && _Placement.parents[m['sid']] != null)
+            {'key': keyOf(m['date'] as String, m['lesson'] as int, m['sid'] as String), 'sid': m['sid'], 'date': m['date'], 'lesson': m['lesson'], 'to': _Placement.parents[m['sid']]!['name'], 'phone': _Placement.parents[m['sid']]!['phone'], 'text': 'חיסור לא-מוצדק בשיעור ${m['lesson']} ב-${fmtDate(m['date'] as String)} — נא לאשר/לנמק', 'auto': true},
+        ...manualQueue,
+      ];
+  static void send(String key) { sent.add(key); _log('notify', key); }
+  static void notifyClass(String cls, String text) {
+    for (final s in studentsOf(cls)) {
+      final p = _Placement.parents[s['id']];
+      if (p != null) manualQueue.insert(0, {'key': 'cls|$cls|${s['id']}|${manualQueue.length}', 'sid': s['id'], 'date': _Placement.today, 'lesson': 0, 'to': p['name'], 'phone': p['phone'], 'text': text, 'auto': false});
+    }
+    _log('notify-class', cls);
+  }
+  // חיסורים-בטווח (dateInRange מהמדף) — היסטוריה/דוח
+  static List<Map<String, dynamic>> marksInRange(String from, String to, {String? cls}) =>
+      (marks.where((m) => dateInRange(m['date'] as String, from, to) && (cls == null || studentById(m['sid'] as String)['cls'] == cls)).toList()
+        ..sort((a, b) => '${b['date']}${b['lesson']}'.compareTo('${a['date']}${a['lesson']}')));
+
   // ─── KPI-10 (פעולה-3 · כל אחד = ספירה/יחס על אמת) ───
   static List<Map<String, dynamic>> get activeStudents => students.where(activeOf).toList();
   static int countToday(String status) => activeStudents.where((s) => dayStatus(_Placement.today, s['id'] as String) == status).length;
@@ -506,17 +648,33 @@ class AttendanceScreen extends StatefulWidget {
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
   String _date = _Placement.today; // תאריך-נבחר (בורר-תאריך)
-  int _cls = 0; // כיתה-נבחרת (SegmentedSwitch)
+  int _cls = 0; // כיתה-נבחרת (SegmentedSwitch, בהיקף-התפקיד)
   int? _lesson; // שיעור-נבחר (null ⇒ השיעור-הנוכחי)
   int _mode = 0; // 0=📋 גיליון (טאפ-מחזורי) · 1=🗂 טבלה (DsTable כל-העמודות)
-  String? _notice; // הודעת-מערכת אחרונה (רישום-כפול · כולם-נוכחים)
+  int _tab = 0; // 8 טאבים: היום · חודש · היסטוריה · השלמות · סיבות · הורים · בסיכון · אודיט
+  String _q = ''; // חיפוש-איתור (DsSearch→smartFilter)
+  int _filter = 0; // צ׳יפ-חריגה (FilterChipPill→finderMatches)
+  int _range = 1; // טווח-היסטוריה: 0=7 · 1=30 · 2=90 ימים (dateInRange)
+  String? _notice; // הודעת-מערכת אחרונה (רישום-כפול · כולם-נוכחים · שקעים)
+  bool _loading = false; // מצב-מסך שמור: טעינה (רענון מדגים; חיבור-אסינק מאיר זהה)
+  String? _error; // מצב-מסך שמור: שגיאה (מאיר כש-fetch נכשל; null בזרימה-התקינה)
 
   int get _lessonN => _lesson ?? _AttData.currentLesson(_date);
+  static const _tabs = ['📋 היום', '🗓 חודש', '📜 היסטוריה', '🔁 השלמות', '📊 סיבות', '👪 הורים', '🚨 בסיכון', '🧾 אודיט'];
+  static const _rangeDays = [7, 30, 90];
+
+  Widget _fchip(int i) => FilterChipPill(
+        label: _AttData.filterDefs[i]['label']!, selected: _filter == i, onTap: () => setState(() => _filter = i),
+        activeFillColor: _acc, surfaceColor: const Color(0xFF14162E), activeTextColor: const Color(0xFF0B0B15),
+        inkColor: _ink, outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
+      );
 
   @override
   Widget build(BuildContext context) {
-    final cls = _AttData.classes[_cls]['id'] as String;
-    final roster = _AttData.studentsOf(cls);
+    final vClasses = _AttData.visibleClasses;
+    if (_cls >= vClasses.length) _cls = 0;
+    final cls = vClasses[_cls]['id'] as String;
+    final roster = _AttData.visibleStudents(cls);
     final holiday = _AttData.holidayName(_date);
     final lessons = _AttData.lessonsOf(_date);
     final sum = sheetSummary(_AttData.rosterOf(cls), _date) as Map; // {present,total} מהמדף
@@ -524,19 +682,29 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final notRec = _AttData.classesNotRecordedToday;
     final lessonIdx = lessons.indexWhere((l) => l['n'] == _lessonN);
     final recorded = lessons.isNotEmpty && _AttData.isRecorded(_date, cls, _lessonN);
+    // איתור⊕חריגה (23-ג): search=smartFilter⊕smartScore⊕normSearch · filter=finderMatches — פייפליין אחד לכל הטאבים
+    final visible = _AttData.filter(_AttData.search(roster, _q), _date, _filter);
+    final locked = _AttData.isLocked(_date);
+    final why = _AttData.whyCannot(_date);
     return DsScaffold(
       title: 'נוכחות',
-      subtitle: '${_AttData.activeStudents.length} תלמידים · ${_AttData.classes.length} כיתות · ${fmtDate(_Placement.today)}',
+      subtitle: '${_AttData.activeStudents.length} תלמידים · ${_AttData.classes.length} כיתות · ${fmtDate(_Placement.today)} ${_Placement.nowHm}',
       icon: '🗓️',
       children: [
-        // ── פס-עליון: בורר-תאריך (◀ היום ▶ · שם-יום · חג) + בורר-כיתה ──
+        // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות פר-תפקיד (roleOf⊕canGrantedAction)
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal, reverse: true,
+          child: SegmentedSwitch(items: [for (final r in _Placement.roleDefs) r['label'] as String], selected: _AttData.role, onSelect: (i) => setState(() => _AttData.setRole(i))),
+        ),
+        _gap(10),
+        // ── פס-עליון: בורר-תאריך (◀ היום ▶ · שם-יום · חג) + בורר-כיתה (בהיקף) + חיפוש + נעילה ──
         Row(children: [
           SoftButton(label: '◀', tone: 0, onTap: () => setState(() => _date = _AttData.shift(_date, -1))),
           const SizedBox(width: 6),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-              Text('${dayNames[_AttData.dow(_date)]} · ${fmtDate(_date)}', style: const TextStyle(color: _ink, fontSize: 15, fontWeight: FontWeight.w800)),
-              Text(holiday != null ? '🕎 $holiday · לא-נספר' : lessons.isEmpty ? 'אין-שיעורים' : '${lessons.length} שיעורים', style: const TextStyle(color: _muted, fontSize: 12)),
+              Text('${dayNames[_AttData.dow(_date)]} · ${fmtDate(_date)}${locked ? ' · 🔒' : ''}', style: const TextStyle(color: _ink, fontSize: 15, fontWeight: FontWeight.w800)),
+              Text(holiday != null ? '🕎 $holiday · לא-נספר' : lessons.isEmpty ? 'אין-שיעורים' : '${lessons.length} שיעורים · תפקיד: ${_AttData.roleName}', style: const TextStyle(color: _muted, fontSize: 12)),
             ]),
           ),
           const SizedBox(width: 6),
@@ -547,14 +715,18 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ],
         ]),
         _gap(10),
-        Align(
-          alignment: Alignment.centerRight,
-          child: SegmentedSwitch(
-            items: [for (final c in _AttData.classes) c['name'] as String],
-            selected: _cls,
-            onSelect: (i) => setState(() => _cls = i),
-          ),
-        ),
+        Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          SegmentedSwitch(items: [for (final c in vClasses) c['name'] as String], selected: _cls, onSelect: (i) => setState(() => _cls = i)),
+          SoftButton(label: '🔄', tone: 0, onTap: _refresh),
+          if (_AttData.can('att.lock') && !locked) SoftButton(label: '🔒 נעל-יום', tone: 3, onTap: () => setState(() => _AttData.lockDay(_date))),
+          if (_AttData.can('att.unlock') && locked) SoftButton(label: '🔓 פתח יום-נעול', tone: 1, onTap: () => setState(() => _AttData.unlockDay(_date))),
+          if (_AttData.exportOk) SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport(visible)),
+          if (_AttData.exportOk) SoftButton(label: '📄 PDF', tone: 0, onTap: () => setState(() => _notice = 'ייצוא-PDF: שקע-מדפסת/PDF לא מחובר בהצבה — מקום-שמור (CSV זמין)')),
+          if (_AttData.exportOk) SoftButton(label: '🖨 הדפס-גיליון', tone: 0, onTap: () => setState(() => _notice = 'הדפסה: שקע-מדפסת לא מחובר בהצבה — מקום-שמור')),
+        ]),
+        _gap(8),
+        DsSearch(value: _q, onChanged: (v) => setState(() => _q = v)),
+        Wrap(spacing: 8, runSpacing: 6, children: [for (var i = 0; i < _AttData.filterDefs.length; i++) _fchip(i)]),
         _gap(12),
         // ── KPI-10 (המפרט): hero = דורשי-פעולה-היום (המטרה) + 10 עובדות-ספירה (BareStat) + יחס-חודשי (ProgressRing) ──
         GradientCard(
@@ -582,46 +754,100 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ]),
         ),
         _gap(8),
+        // ── מצבי-מסך: הודעה · נעילה · לא-נרשם-היום (התרעה-למורה) ──
         if (_notice != null) ...[AlertBanner(glyph: 'ℹ️', tone: 0, message: _notice!), _gap(8)],
-        if (holiday != null)
+        if (locked) ...[AlertBanner(glyph: '🔒', tone: 3, message: 'יום-נעול (${_AttData._locked.contains(_date) ? 'נעילה-ידנית' : 'נעילה-אוטומטית סוף-יום/עבר'}) — רישום חסום; רכז/ת פותח/ת'), _gap(8)],
+        if (why != null && !locked && _tab == 0) ...[AlertBanner(glyph: '🔐', tone: 2, message: 'צפייה-בלבד: $why'), _gap(8)],
+        if (_date == _Placement.today && notRec.isNotEmpty && (timeToMin(_Placement.nowHm) as num) >= (timeToMin(_Placement.remindHm) as num)) ...[
+          AlertBanner(glyph: '📝', tone: 2, message: 'לא-נרשם-היום (תזכורת ${_Placement.remindHm}): ${notRec.map(_AttData.className).join(' · ')} — שיעור שהתחיל ללא רישום'),
+          _gap(8),
+        ],
+        // ── 8 טאבים (SegmentedSwitch מבוקר, גלילה-אופקית) ──
+        SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: _tabs, selected: _tab, onSelect: (i) => setState(() => _tab = i))),
+        _gap(10),
+        if (_loading)
+          _loadingView()
+        else if (_error != null)
+          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
+        else if (_tab == 1)
+          _monthTab(cls)
+        else if (_tab == 2)
+          _historyTab(cls)
+        else if (_tab == 3)
+          _makeupsTab(cls)
+        else if (_tab == 4)
+          _reasonsTab(cls)
+        else if (_tab == 5)
+          _parentsTab(cls)
+        else if (_tab == 6)
+          _riskTab(visible)
+        else if (_tab == 7)
+          _auditTab()
+        else if (holiday != null)
           AlertBanner(glyph: '🕎', tone: 3, message: '$holiday — יום-חופש: היום לא נספר בנוכחות (סנכרון-לוח)')
         else if (lessons.isEmpty)
-          const AlertBanner(glyph: '📭', tone: 0, message: 'אין-שיעורים ביום זה')
+          const EmptyState(glyph: '📭', message: 'אין-שיעורים ביום זה (שבת)')
         else ...[
           // ── בורר-שיעור (פר-שיעור, לא פר-יום) + מבט + רישום-מרוכז ──
           Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SegmentedSwitch(
-              items: [for (final l in lessons) '${l['n']} · ${l['time']}'],
-              selected: lessonIdx < 0 ? 0 : lessonIdx,
-              onSelect: (i) => setState(() => _lesson = lessons[i]['n'] as int),
-            ),
+            SegmentedSwitch(items: [for (final l in lessons) '${l['n']} · ${l['time']}'], selected: lessonIdx < 0 ? 0 : lessonIdx, onSelect: (i) => setState(() => _lesson = lessons[i]['n'] as int)),
             SegmentedSwitch(items: const ['📋 גיליון', '🗂 טבלה'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
           ]),
           _gap(8),
           Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
             StatusChip(label: '${lessons[lessonIdx < 0 ? 0 : lessonIdx]['subject']} · ${recorded ? 'נרשם' : 'טרם-נרשם'}', tone: recorded ? 1 : 3),
-            SoftButton(label: '✅ כולם-נוכחים', tone: 1, onTap: () => setState(() {
-              final n = _AttData.allPresent(_date, cls, _lessonN);
-              _notice = 'שיעור $_lessonN · ${_AttData.className(cls)}: נרשם "כולם נוכחים" ($n סימונים אופסו)';
-            })),
+            if (_AttData.canMarkOn(_date))
+              SoftButton(label: '✅ כולם-נוכחים', tone: 1, onTap: () => setState(() {
+                final n = _AttData.allPresent(_date, cls, _lessonN);
+                _notice = 'שיעור $_lessonN · ${_AttData.className(cls)}: נרשם "כולם נוכחים" ($n סימונים אופסו)';
+              })),
+            if (_AttData.can('att.notify')) SoftButton(label: '📣 הודעה-לכיתה', tone: 0, onTap: () => setState(() { _AttData.notifyClass(cls, 'הודעה מהמחנך/ת ל-${_AttData.className(cls)} · ${fmtDate(_date)}'); _notice = 'הודעה-לכיתה נרשמה בתור ל-${_AttData.studentsOf(cls).where((s) => _Placement.parents[s['id']] != null).length} הורים (שקע-שליחה: מקום-שמור)'; })),
           ]),
           _gap(8),
           if (roster.isEmpty)
             const EmptyState(glyph: '🏫', message: 'כיתה ריקה — אין תלמידים פעילים')
+          else if (visible.isEmpty)
+            const EmptyState(glyph: '🔍', message: 'אין תלמידים תואמים לחיפוש/סינון')
           else if (_mode == 1)
-            DsSection(title: '🗂 טבלה · ${_AttData.className(cls)} · ${fmtDate(_date)}', children: [_table(roster)])
+            DsSection(title: '🗂 טבלה · ${_AttData.className(cls)} · ${fmtDate(_date)} · ${visible.length}', children: [_table(visible)])
           else
             DsSection(
               title: '📋 ${_AttData.className(cls)} · שיעור $_lessonN · ${sum['present']}/${sum['total']} נוכחים-היום',
-              children: [for (final s in roster) _row(s)],
+              children: [for (final s in visible) _row(s)],
             ),
+          // מצב-מיוחד: תלמידים לא-פעילים (StatusChip תג, אפס-פעולות) — מחוץ לתפעול/KPI
+          if (_AttData.students.any((s) => s['cls'] == cls && !_AttData.activeOf(s)) && _AttData.roleDef['child'] == null) ...[
+            _gap(6),
+            DsSection(title: '🚫 לא-פעילים', tone: 0, children: [
+              for (final s in _AttData.students.where((s) => s['cls'] == cls && !_AttData.activeOf(s)))
+                Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [
+                  Expanded(child: MediaRow(glyph: '🚫', title: s['name'] as String, subtitle: 'מס׳ ${s['num']} · עזב/ה — לא נספר בנוכחות')),
+                  const SizedBox(width: 8),
+                  const StatusChip(label: 'לא-פעיל', tone: 0),
+                ])),
+            ]),
+          ],
         ],
       ],
     );
   }
 
-  // שורת-תלמיד (גיליון): זהות (MediaRow) ⊕ מצב-בשיעור (StatusChip) ⊕ טאפ-מחזורי (SoftButton) ⊕ פאנל (שברון)
-  //   הטאפ-המחזורי: נוכח→חסר→איחור→שחרור→נוכח (מודל-הפוך: "נוכח" = מחיקת-הסימון). אידמפוטנטי.
+  // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
+  void _refresh() {
+    setState(() { _loading = true; _error = null; });
+    Future.delayed(const Duration(milliseconds: 700), () { if (mounted) setState(() => _loading = false); });
+  }
+  Widget _loadingView() => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 48),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+          CircularProgressIndicator(color: _acc),
+          SizedBox(height: 14),
+          Text('טוען נוכחות…', style: TextStyle(color: _muted, fontSize: 14)),
+        ]),
+      );
+
+  // שורת-תלמיד (גיליון): זהות (MediaRow) ⊕ מצב-בשיעור (StatusChip/SoftButton-cycle) ⊕ פאנל (שברון)
+  //   הטאפ-המחזורי: נוכח→חסר→איחור→שחרור→נוכח (מודל-הפוך: "נוכח" = מחיקת-הסימון). אידמפוטנטי. מגודר-הרשאה.
   Widget _row(Map<String, dynamic> s) {
     final sid = s['id'] as String;
     final m = _AttData.markOf(_date, _lessonN, sid);
@@ -641,7 +867,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       child: Row(children: [
         Expanded(child: MediaRow(glyph: rb == 2 ? '🚨' : rb == 1 ? '⚠️' : '🎓', title: s['name'] as String, subtitle: sub)),
         const SizedBox(width: 6),
-        SoftButton(label: _AttData.statusLabel[st]!, tone: _AttData.statusTone[st]!, onTap: () => setState(() => _AttData.cycle(_date, _lessonN, sid))),
+        if (_AttData.canMarkOn(_date))
+          SoftButton(label: _AttData.statusLabel[st]!, tone: _AttData.statusTone[st]!, onTap: () => setState(() => _AttData.cycle(_date, _lessonN, sid)))
+        else
+          StatusChip(label: _AttData.statusLabel[st]!, tone: _AttData.statusTone[st]!),
         IconButton(onPressed: () => _openPanel(s), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פרטים ופעולות'),
       ]),
     );
@@ -653,29 +882,178 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final labels = [for (final c in cols) c['label'] as String];
     final data = <List<String>>[
       for (final s in rows)
-        [
-          for (final c in cols)
-            if (c['get'] != null) (c['get'] as String Function(Map<String, dynamic>))(s) else '${s[c['key']] ?? '—'}',
-        ],
+        [for (final c in cols) if (c['get'] != null) (c['get'] as String Function(Map<String, dynamic>))(s) else '${s[c['key']] ?? '—'}'],
     ];
     return DsTable(labels: labels, rows: data);
   }
 
-  // ═══ פאנל תלמיד-נבחר (GlassCard) · פעולת-יסוד "ביצוע"+"הערכה": זהות · סטטוס-היום · ציר-30-יום ·
-  //   סיבות (NeonBars⊕countBy) · מגמה+סיכון (TrendStat⊕StatRow⊕StatusChip) · השלמות · קשר-הורה · הערות · פעולות ═══
+  // 🗓 חודש (לוח-חום): DsCalendar עם תפר-דאטה אמיתי — רשומה=חיסור, התא סופר חיסורים-פר-יום · חגים כרשומות-לוח
+  Widget _monthTab(String cls) {
+    final recs = <Map<String, String>>[
+      for (final m in _AttData.marks)
+        if (_AttData.studentById(m['sid'] as String)['cls'] == cls && m['status'] == 'absent') {'date': m['date'] as String, 'title': _AttData.studentById(m['sid'] as String)['name'] as String},
+    ];
+    final days = _AttData.schoolDaysInMonth(_date);
+    final hols = [for (var i = 1; i <= 31; i++) if (DateTime.parse('${monthKey(_date)}-01T12:00:00').add(Duration(days: i - 1)).month == int.parse(_date.substring(5, 7))) _AttData.shift('${monthKey(_date)}-01', i - 1)].where((d) => _AttData.holidayName(d) != null).toList();
+    return DsSection(title: '🗓 ${_AttData.className(cls)} · ${recs.length} חיסורים החודש · ${days.length} ימי-לימודים', children: [
+      DsCalendar(records: recs, dateOf: (r) => r['date']!, titleOf: (r) => r['title']!),
+      _gap(8),
+      Wrap(spacing: 6, runSpacing: 6, children: [
+        for (final d in hols) StatusChip(label: '🕎 ${fmtDate(d)} ${_AttData.holidayName(d)} · לא-נספר', tone: 3),
+        if (hols.isEmpty) const StatusChip(label: 'אין חגים החודש', tone: 1),
+      ]),
+    ]);
+  }
+
+  // 📜 היסטוריה: סימונים-בטווח (dateInRange) · TimelineItem פר-סימון (מי-רשם+מתי = אודיט-שדה)
+  Widget _historyTab(String cls) {
+    final from = _AttData.shift(_Placement.today, -_rangeDays[_range]);
+    final rows = _AttData.marksInRange(from, _Placement.today, cls: cls);
+    return DsSection(
+      title: '📜 היסטוריה · ${_AttData.className(cls)} · ${rows.length} סימונים',
+      trailing: SegmentedSwitch(items: const ['7 י׳', '30 י׳', '90 י׳'], selected: _range, onSelect: (i) => setState(() => _range = i)),
+      children: [
+        if (rows.isEmpty) const EmptyState(glyph: '📜', message: 'אין סימונים בטווח') else
+          for (final m in rows)
+            TimelineItem(
+              title: '${_AttData.statusLabel[m['status']]} · ${_AttData.studentById(m['sid'] as String)['name']} · שיעור ${m['lesson']}',
+              time: '${fmtDate(m['date'] as String)}${m['arrival'] != null ? ' ${m['arrival']}' : ''}',
+              body: '${m['reason'] ?? ''}${m['justified'] == true ? ' · מוצדק' : ''}${m['parentOk'] == true ? ' · אישור-הורה' : ''} · רשם/ה ${m['by']} ב-${(m['at'] as String).replaceFirst('T', ' ')}',
+            ),
+      ],
+    );
+  }
+
+  // 🔁 השלמות: pendingMakeups (לא-מתוזמנות קודם) ⊕ makeupEligibility · תזמון/בוצע מגודר-הרשאה
+  Widget _makeupsTab(String cls) {
+    final pend = _AttData.pendingMakeupList.where((p) => p['courseId'] == cls).toList();
+    return DsSection(title: '🔁 השלמות · ${_AttData.className(cls)} · ${pend.length} ממתינות', children: [
+      if (pend.isEmpty) const EmptyState(glyph: '🔁', message: 'אין השלמות ממתינות') else
+        for (final p in pend)
+          Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
+            Expanded(child: TimelineItem(title: '${_AttData.studentById(p['memberId'] as String)['name']} · ${p['makeupDate'] == null ? 'ממתין לתזמון' : 'מתוזמן ${fmtDate(p['makeupDate'] as String)}'}', time: fmtDate(p['date'] as String), body: '${p['reason'] ?? ''}')),
+            if (_AttData.can('att.makeup') && p['makeupDate'] == null)
+              SoftButton(label: '📅 תזמן', tone: 1, onTap: () => setState(() => _patchAbsence(p, {'makeupDate': _AttData.nextSchoolDay(_Placement.today)}))),
+            if (_AttData.can('att.makeup') && p['makeupDate'] != null)
+              SoftButton(label: '✅ בוצע', tone: 1, onTap: () => setState(() => _patchAbsence(p, {'makeup': false, 'makeupDone': true}))),
+          ])),
+    ]);
+  }
+  void _patchAbsence(Map<String, Object?> p, Map<String, dynamic> fields) {
+    final date = p['date'] as String, sid = p['memberId'] as String;
+    for (final m in _AttData.marksOn(date, sid)) {
+      if (m['status'] == 'absent' && m['makeup'] == true) {
+        final saved = _AttData.role; _AttData.setRole(2); // רכז: השלמה מותרת גם לאחור (חלון-365)
+        _AttData.patch(date, m['lesson'] as int, sid, fields);
+        _AttData.setRole(saved);
+        break;
+      }
+    }
+  }
+
+  // 📊 סיבות (פילוח): countBy על חיסורי-הכיתה החודש ⇒ NeonBars · מוצדק/לא ⇒ BareStat×2
+  Widget _reasonsTab(String cls) {
+    final abs = _AttData.marks.where((m) => m['status'] == 'absent' && _AttData.studentById(m['sid'] as String)['cls'] == cls && monthKey(m['date'] as String) == monthKey(_date)).toList();
+    final by = countBy(abs, (m) => '${(m as Map)['reason'] ?? 'אחר'}');
+    final just = abs.where((m) => m['justified'] == true).length;
+    return DsSection(title: '📊 סיבות · ${_AttData.className(cls)} · ${abs.length} חיסורים החודש', children: [
+      Row(children: [
+        BareStat(value: '$just', label: '✔ מוצדקים', inkColor: _ok, mutedColor: _muted),
+        BareStat(value: '${abs.length - just}', label: '❔ לא-מוצדקים', inkColor: abs.length - just > 0 ? _danger : _ok, mutedColor: _muted),
+        BareStat(value: '${by.length}', label: '🗂 סיבות-שונות', inkColor: _ink, mutedColor: _muted),
+      ]),
+      _gap(10),
+      if (by.isEmpty) const EmptyState(glyph: '📊', message: 'אין חיסורים החודש') else NeonBars(labels: [for (final e in by) '${e[0]}'], values: [for (final e in by) (e[1] as int).toDouble()], tone: 3),
+    ]);
+  }
+
+  // 👪 תקשורת-הורים: תור-אוטו (חיסור לא-מוצדק ללא-אישור) + ידני · שליחה מגודרת · הורה מאשר-חיסור
+  Widget _parentsTab(String cls) {
+    final q = _AttData.notificationQueue.where((n) => _AttData.studentById(n['sid'] as String)['cls'] == cls && (_AttData.roleDef['child'] == null || n['sid'] == _AttData.roleDef['child'])).toList();
+    return DsSection(title: '👪 תקשורת-הורים · ${q.length} הודעות · ${q.where((n) => _AttData.sent.contains(n['key'])).length} נשלחו', children: [
+      const AlertBanner(glyph: '📨', tone: 0, message: 'שקע-שליחה (מודול-הורים · SMS/וואטסאפ) לא מחובר בהצבה — ההודעות מנוהלות בתור (מקום-שמור)'),
+      _gap(8),
+      if (q.isEmpty) const EmptyState(glyph: '👪', message: 'אין הודעות ממתינות') else
+        for (final n in q)
+          Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
+            Expanded(child: TimelineItem(title: '${n['auto'] == true ? '🤖 אוטו' : '✍️ ידני'} · ${n['to']} (${n['phone']})', time: fmtDate(n['date'] as String), body: '${n['text']}')),
+            if (_AttData.sent.contains(n['key'])) const StatusChip(label: 'נשלח · חלון-תגובה', tone: 1)
+            else if (_AttData.can('att.notify')) SoftButton(label: '📨 שלח', tone: 0, onTap: () => setState(() => _AttData.send(n['key'] as String))),
+            if (_AttData.can('att.parentOk') && n['lesson'] != 0) SoftButton(label: '✔ אשר-חיסור', tone: 1, onTap: () => setState(() { final saved = _AttData.role; _AttData.setRole(2); _AttData.patch(n['date'] as String, n['lesson'] as int, n['sid'] as String, {'parentOk': true}); _AttData.setRole(saved); })),
+          ])),
+    ]);
+  }
+
+  // 🚨 בסיכון (טריאז'): קיבוץ-פר-band (DsSection tone) · StatRow ציון · StatusChip אות+התערבות (חיבור-מודלים)
+  Widget _riskTab(List<Map<String, dynamic>> rows) {
+    final ranked = [...rows]..sort((a, b) => _AttData.risk(b['id'] as String).compareTo(_AttData.risk(a['id'] as String)));
+    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: []};
+    for (final s in ranked) {
+      buckets[_AttData.riskBand(s['id'] as String)]!.add(s);
+    }
+    const title = {2: '🔴 בסיכון-נשירה', 1: '🟠 מעקב', 0: '🟢 תקין'};
+    const tone = {2: 2, 1: 3, 0: 1};
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      for (final b in const [2, 1, 0])
+        if (buckets[b]!.isNotEmpty)
+          DsSection(title: '${title[b]} · ${buckets[b]!.length}', tone: tone[b]!, children: [
+            for (final s in buckets[b]!)
+              Padding(padding: const EdgeInsets.only(bottom: 10), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                StatRow(label: '${s['name']} · ${_AttData.className(s['cls'] as String)}', value: 'סיכון ${_AttData.risk(s['id'] as String)}', fraction: _AttData.risk(s['id'] as String) / 100),
+                if (b > 0)
+                  Padding(padding: const EdgeInsets.only(top: 6, right: 4), child: Wrap(spacing: 8, runSpacing: 6, children: [
+                    StatusChip(label: _AttData.riskWhy(s['id'] as String), tone: tone[b]!),
+                    StatusChip(label: _AttData.riskAction(s['id'] as String), tone: tone[b]!),
+                    for (final p in _AttData.patterns(s['id'] as String).entries) StatusChip(label: '${p.key} (${p.value})', tone: 3),
+                    if ((s['riskExternal'] as int?) != null) StatusChip(label: 'ציון-חיצוני ${s['riskExternal']}', tone: 0), // מקום-שמור (מודול-תלמידים)
+                  ])),
+              ])),
+          ]),
+    ]);
+  }
+
+  // 🧾 אודיט-רישום: פעולות-הסשן (audit) + סימוני-הבסיס (by/at) — TimelineItem · מגודר att.audit
+  Widget _auditTab() {
+    if (!_AttData.can('att.audit')) return const AlertBanner(glyph: '🔒', tone: 2, message: 'אודיט — רכז/ת והנהלה בלבד');
+    final base = [..._AttData.baseMarks]..sort((a, b) => '${b['at']}'.compareTo('${a['at']}'));
+    return DsSection(title: '🧾 אודיט-רישום · ${_AttData.audit.length} פעולות-סשן · ${base.length} סימוני-בסיס', children: [
+      const AlertBanner(glyph: '🗄', tone: 0, message: 'שקע-אחסון (pushAuditRing/pullAuditRing · Firestore) לא מחובר בהצבה — הטבעת בזיכרון (מקום-שמור)'),
+      _gap(8),
+      for (final a in _AttData.audit) TimelineItem(title: '${a['action']} · ${a['key']}', time: '${(a['at'] as String).replaceFirst('T', ' ')} #${a['seq']}', body: 'רשם/ה ${a['by']}'),
+      for (final m in base.take(12)) TimelineItem(title: '${m['status']} · ${_AttData.studentById(m['sid'] as String)['name']} · שיעור ${m['lesson']}', time: '${(m['at'] as String).replaceFirst('T', ' ')}', body: 'רשם/ה ${m['by']}'),
+    ]);
+  }
+
+  // ═══ ייצוא (23-ג) = SoftButton ⊕ toCsv ⊕ csvEscape ⊕ exportAllowed ⊕ guardExport ⊕ GlassCard-preview ═══
+  void _openExport(List<Map<String, dynamic>> rows) {
+    final csv = _AttData.csvOf(rows, _date);
+    showModalBottomSheet<void>(
+      context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
+        builder: (ctx, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(
+          child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+            MediaRow(glyph: '⬇', title: 'ייצוא CSV · נוכחות', subtitle: '${rows.length} תלמידים · ${_AttData.csvRows(rows, _date).first.length} עמודות · ${fmtDate(_date)}'),
+            _gap(10),
+            const Text('תצוגה מקדימה (BOM + חסימת-הזרקה):', style: TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
+            _gap(8),
+            Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
+              child: SelectableText(csv, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6))),
+          ]),
+        )),
+      ),
+    );
+  }
+
+  // ═══ פאנל תלמיד-נבחר (GlassCard) · פעולת-יסוד "ביצוע"+"הערכה": זהות · סטטוס-היום · פר-שיעור · ציר-30-יום ·
+  //   סיבות (NeonBars⊕countBy) · מגמה+סיכון (TrendStat⊕StatRow⊕StatusChip) · השלמות · קשר-הורה · הערות · פעולות (מגודרות) ═══
   void _openPanel(Map<String, dynamic> s) {
     final sid = s['id'] as String;
     showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
+      context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheet) {
-          void act(void Function() f) {
-            f();
-            setSheet(() {});
-            setState(() {});
-          }
+          void act(void Function() f) { f(); setSheet(() {}); setState(() {}); }
           final m = _AttData.markOf(_date, _lessonN, sid);
           final st = m?['status'] as String? ?? 'present';
           final days = _AttData.lastSchoolDays(30);
@@ -686,111 +1064,107 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           final pct = _AttData.attendancePct(s);
           final parent = _Placement.parents[sid];
           final elig = m == null || m['status'] != 'absent' ? null : _AttData.eligibility(m);
+          final canMark = _AttData.canMarkOn(_date);
           return DraggableScrollableSheet(
             initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
-            builder: (ctx, scroll) => Padding(
-              padding: const EdgeInsets.all(12),
-              child: GlassCard(
-                child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                  AvatarTile(initials: _AttData.initials(s['name'] as String), title: s['name'] as String, subtitle: '${_AttData.className(s['cls'] as String)} · מס׳ ${s['num']} · ${_AttData.summaryOf(s)['statusLabel']}'),
-                  _gap(10),
-                  Wrap(spacing: 8, runSpacing: 6, children: [
-                    StatusChip(label: 'היום: ${_AttData.statusLabel[_AttData.dayStatus(_date, sid)]}', tone: _AttData.statusTone[_AttData.dayStatus(_date, sid)]!),
-                    StatusChip(label: 'שיעור $_lessonN: ${_AttData.statusLabel[st]}', tone: _AttData.statusTone[st]!),
-                    if (m?['arrival'] != null) StatusChip(label: 'הגעה ${m!['arrival']} · +${_AttData.lateMinutes(m)}׳', tone: _AttData.isLate(m) ? 3 : 1),
-                  ]),
-                  _gap(8),
-                  // שיעורים-מרובים-ביום (פר-שיעור, לא פר-יום): כפתור פר-שיעור — טאפ מחזורי על אותו שיעור
-                  Wrap(spacing: 6, runSpacing: 6, children: [
-                    for (final l in _AttData.lessonsOf(_date))
-                      SoftButton(
-                        label: 'ש${l['n']} ${_AttData.statusLabel[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']}',
-                        tone: _AttData.statusTone[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']!,
-                        onTap: () => act(() => _AttData.cycle(_date, l['n'] as int, sid)),
-                      ),
-                  ]),
-                  _gap(12),
-                  // ציר-30-יום: StatusDot פר-יום-לימודים (ירוק/אדום/כתום/ציאן) + יום-בחודש (עובדה)
-                  Text('ציר 30 ימי-לימודים · ${_AttData.presentsThisMonth(s)}/${_AttData.schoolDaysSoFar()} נוכח החודש', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
-                  _gap(6),
-                  Wrap(spacing: 2, runSpacing: 4, children: [
-                    for (final d in days)
-                      Column(mainAxisSize: MainAxisSize.min, children: [
-                        StatusDot(tone: _AttData.statusTone[_AttData.dayStatus(d, sid)]!, size: 9),
-                        Text(d.substring(8), style: TextStyle(color: d == _date ? _ink : _muted, fontSize: 9)),
-                      ]),
-                  ]),
-                  _gap(12),
-                  StatRow(label: 'נוכחות% החודש (סף ${_Placement.minAttendancePct}%)', value: '${(pct * 100).round()}%', fraction: pct),
-                  _gap(8),
-                  // מגמה+ציון-סיכון (חיבור-מודלים): TrendStat (דלתא-חיסורים, הפוך) ⊕ StatRow (ציון) ⊕ StatusChip (אות-מוביל+התערבות)
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Expanded(child: TrendStat(value: '${_AttData.absencesThisMonth(sid)}', delta: -((t['pct'] as num).toDouble()), label: 'חיסורים החודש · מגמת-נוכחות (↓=מחמיר)')),
-                    const SizedBox(width: 8),
-                    Expanded(child: Column(children: [
-                      StatRow(label: 'ציון-סיכון-נשירה', value: '$r', fraction: r / 100),
-                      _gap(6),
-                      Wrap(spacing: 6, runSpacing: 4, children: [
-                        StatusChip(label: _AttData.riskWhy(sid), tone: rb == 2 ? 2 : rb == 1 ? 3 : 1),
-                        StatusChip(label: _AttData.riskAction(sid), tone: rb == 2 ? 2 : rb == 1 ? 3 : 1),
-                        for (final p in _AttData.patterns(sid).entries) StatusChip(label: '${p.key} (${p.value})', tone: 3),
-                      ]),
-                    ])),
-                  ]),
-                  if (reasons.isNotEmpty) ...[
-                    _gap(12),
-                    const Text('חיסורים לפי סיבה', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
-                    _gap(6),
-                    NeonBars(labels: [for (final e in reasons) '${e[0]}'], values: [for (final e in reasons) (e[1] as int).toDouble()], tone: 3),
-                  ],
-                  _gap(12),
-                  Text('השלמות · ${pend.length}', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
-                  _gap(6),
-                  if (pend.isEmpty)
-                    const Align(alignment: Alignment.centerRight, child: StatusChip(label: 'אין השלמות ממתינות', tone: 1))
-                  else
-                    for (final p in pend)
-                      TimelineItem(title: p['makeupDate'] == null ? '🔁 ממתין לתזמון' : '📅 מתוזמן ל-${fmtDate(p['makeupDate'] as String)}', time: fmtDate(p['date'] as String), body: '${p['reason'] ?? ''}'),
-                  _gap(12),
-                  // קשר-הורה: לולאה גנרית על metaFields (מקום-שמור) — שדה מואר רק כשקיים
-                  const Text('קשר-הורה', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
-                  _gap(6),
-                  if (parent == null)
-                    const AlertBanner(glyph: '👪', tone: 3, message: 'אין קשר-הורה מוזרק (בלוק-הצבה) — הודעות לא יישלחו')
-                  else
-                    Wrap(spacing: 8, runSpacing: 6, children: [
-                      for (final f in _AttData.metaFields)
-                        if (parent[f['key']] != null) StatusChip(label: '${f['prefix']}${parent[f['key']]}${f['suffix']}', tone: 0),
-                      if (m != null) StatusChip(label: m['parentOk'] == true ? 'אישור-הורה ✓' : 'ללא אישור-הורה', tone: m['parentOk'] == true ? 1 : 3),
-                    ]),
-                  _gap(12),
-                  Text('הערות · ${(_AttData.notes[sid] ?? const []).length}', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
-                  _gap(6),
-                  for (final n in _AttData.notes[sid] ?? const <String>[]) TimelineItem(title: n, time: '${fmtDate(_Placement.today)} ${_Placement.nowHm}'),
-                  _gap(12),
-                  const Text('פעולות-מהירות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
-                  _gap(8),
-                  Wrap(spacing: 8, runSpacing: 8, children: [
-                    SoftButton(label: '⛔ סמן-חיסור', tone: 2, onTap: () => act(() => _mark(sid, 'absent'))),
-                    SoftButton(label: '⏰ סמן-איחור', tone: 3, onTap: () => act(() => _mark(sid, 'late'))),
-                    SoftButton(label: '🚪 סמן-שחרור', tone: 0, onTap: () => act(() => _mark(sid, 'released'))),
-                    if (m != null) SoftButton(label: '↩ בטל', tone: 0, onTap: () => act(() => _mark(sid, 'present'))),
-                    if (m != null && m['justified'] != true) SoftButton(label: '✔ סמן-מוצדק', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'justified': true}))),
-                    if (m != null) SoftButton(label: '📎 צרף-אישור', tone: 0, onTap: () => act(() => _notice = 'צרף-אישור: שקע-קובץ (medicalDoc) לא מחובר בהצבה — מקום-שמור')),
-                    if (m != null && m['status'] == 'absent' && elig!['eligible'] == true && m['makeupDate'] == null)
-                      SoftButton(label: '📅 תזמן-השלמה', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': true, 'makeupDate': _AttData.nextSchoolDay(_Placement.today)}))),
-                    if (m != null && m['makeupDate'] != null) SoftButton(label: '✅ השלמה-בוצעה', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': false, 'makeupDone': true}))),
-                    if (m != null && m['parentOk'] != true && parent != null) SoftButton(label: '📨 הודעה-להורה', tone: 0, onTap: () => act(() => _notice = 'הודעה ל-${parent['name']} (${parent['phone']}) נרשמה בתור — שקע-שליחה (מודול-הורים) מקום-שמור')),
-                    SoftButton(label: '📝 הוסף-הערה', tone: 0, onTap: () => act(() => (_AttData.notes[sid] ??= []).insert(0, 'הערה ${(_AttData.notes[sid]?.length ?? 0) + 1} · ${_AttData.riskWhy(sid)}'))),
-                  ]),
-                  if (m != null && m['status'] == 'absent') ...[
-                    _gap(10),
-                    if (elig!['eligible'] != true) const AlertBanner(glyph: '🔁', tone: 3, message: 'לא-זכאי להשלמה (חיסור לא-מוצדק = no-show · makeupEligibility)'),
-                    DsEnumField(label: 'סיבה (מובנית)', options: _AttData.reasons, value: '${m['reason'] ?? ''}', onChanged: (v) => act(() => _AttData.patch(_date, _lessonN, sid, {'reason': v}))),
-                  ],
+            builder: (ctx, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(
+              child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                AvatarTile(initials: _AttData.initials(s['name'] as String), title: s['name'] as String, subtitle: '${_AttData.className(s['cls'] as String)} · מס׳ ${s['num']} · ${_AttData.summaryOf(s)['statusLabel']}'),
+                _gap(10),
+                Wrap(spacing: 8, runSpacing: 6, children: [
+                  StatusChip(label: 'היום: ${_AttData.statusLabel[_AttData.dayStatus(_date, sid)]}', tone: _AttData.statusTone[_AttData.dayStatus(_date, sid)]!),
+                  StatusChip(label: 'שיעור $_lessonN: ${_AttData.statusLabel[st]}', tone: _AttData.statusTone[st]!),
+                  if (m?['arrival'] != null) StatusChip(label: 'הגעה ${m!['arrival']} · +${_AttData.lateMinutes(m)}׳', tone: _AttData.isLate(m) ? 3 : 1),
                 ]),
-              ),
-            ),
+                _gap(8),
+                // שיעורים-מרובים-ביום (פר-שיעור, לא פר-יום): כפתור פר-שיעור — טאפ מחזורי על אותו שיעור (מגודר)
+                Wrap(spacing: 6, runSpacing: 6, children: [
+                  for (final l in _AttData.lessonsOf(_date))
+                    if (canMark)
+                      SoftButton(label: 'ש${l['n']} ${_AttData.statusLabel[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']}', tone: _AttData.statusTone[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']!, onTap: () => act(() => _AttData.cycle(_date, l['n'] as int, sid)))
+                    else
+                      StatusChip(label: 'ש${l['n']} ${_AttData.statusLabel[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']}', tone: _AttData.statusTone[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']!),
+                ]),
+                _gap(12),
+                Text('ציר 30 ימי-לימודים · ${_AttData.presentsThisMonth(s)}/${_AttData.schoolDaysSoFar()} נוכח החודש', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                _gap(6),
+                Wrap(spacing: 2, runSpacing: 4, children: [
+                  for (final d in days)
+                    Column(mainAxisSize: MainAxisSize.min, children: [
+                      StatusDot(tone: _AttData.statusTone[_AttData.dayStatus(d, sid)]!, size: 9),
+                      Text(d.substring(8), style: TextStyle(color: d == _date ? _ink : _muted, fontSize: 9)),
+                    ]),
+                ]),
+                _gap(12),
+                StatRow(label: 'נוכחות% החודש (סף ${_Placement.minAttendancePct}%)', value: '${(pct * 100).round()}%', fraction: pct),
+                if (pct * 100 < _Placement.minAttendancePct) ...[_gap(6), AlertBanner(glyph: '⚖️', tone: pct * 100 < _Placement.minAttendancePct - 5 ? 2 : 3, message: 'מתחת לסף-הרגולטורי ${_Placement.minAttendancePct}% (זכאות/תעודה) — התרעה-מקדימה')],
+                _gap(8),
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(child: TrendStat(value: '${_AttData.absencesThisMonth(sid)}', delta: -((t['pct'] as num).toDouble()), label: 'חיסורים החודש · מגמת-נוכחות (↓=מחמיר)')),
+                  const SizedBox(width: 8),
+                  Expanded(child: Column(children: [
+                    StatRow(label: 'ציון-סיכון-נשירה', value: '$r', fraction: r / 100),
+                    _gap(6),
+                    Wrap(spacing: 6, runSpacing: 4, children: [
+                      StatusChip(label: _AttData.riskWhy(sid), tone: rb == 2 ? 2 : rb == 1 ? 3 : 1),
+                      StatusChip(label: _AttData.riskAction(sid), tone: rb == 2 ? 2 : rb == 1 ? 3 : 1),
+                      for (final p in _AttData.patterns(sid).entries) StatusChip(label: '${p.key} (${p.value})', tone: 3),
+                    ]),
+                  ])),
+                ]),
+                if (reasons.isNotEmpty) ...[
+                  _gap(12),
+                  const Text('חיסורים לפי סיבה', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                  _gap(6),
+                  NeonBars(labels: [for (final e in reasons) '${e[0]}'], values: [for (final e in reasons) (e[1] as int).toDouble()], tone: 3),
+                ],
+                _gap(12),
+                Text('השלמות · ${pend.length}', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                _gap(6),
+                if (pend.isEmpty) const Align(alignment: Alignment.centerRight, child: StatusChip(label: 'אין השלמות ממתינות', tone: 1)) else
+                  for (final p in pend)
+                    TimelineItem(title: p['makeupDate'] == null ? '🔁 ממתין לתזמון' : '📅 מתוזמן ל-${fmtDate(p['makeupDate'] as String)}', time: fmtDate(p['date'] as String), body: '${p['reason'] ?? ''}'),
+                _gap(12),
+                const Text('קשר-הורה', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                _gap(6),
+                if (parent == null)
+                  const AlertBanner(glyph: '👪', tone: 3, message: 'אין קשר-הורה מוזרק (בלוק-הצבה) — הודעות לא יישלחו')
+                else
+                  Wrap(spacing: 8, runSpacing: 6, children: [
+                    for (final f in _AttData.metaFields) if (parent[f['key']] != null) StatusChip(label: '${f['prefix']}${parent[f['key']]}${f['suffix']}', tone: 0),
+                    if (m != null) StatusChip(label: m['parentOk'] == true ? 'אישור-הורה ✓' : 'ללא אישור-הורה', tone: m['parentOk'] == true ? 1 : 3),
+                  ]),
+                _gap(12),
+                Text('הערות · ${(_AttData.notes[sid] ?? const []).length}', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                _gap(6),
+                for (final n in _AttData.notes[sid] ?? const <String>[]) TimelineItem(title: n, time: '${fmtDate(_Placement.today)} ${_Placement.nowHm}'),
+                _gap(12),
+                const Text('פעולות-מהירות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
+                _gap(8),
+                Builder(builder: (_) {
+                  final acts = <Widget>[
+                    if (canMark) SoftButton(label: '⛔ סמן-חיסור', tone: 2, onTap: () => act(() => _mark(sid, 'absent'))),
+                    if (canMark) SoftButton(label: '⏰ סמן-איחור', tone: 3, onTap: () => act(() => _mark(sid, 'late'))),
+                    if (canMark) SoftButton(label: '🚪 סמן-שחרור', tone: 0, onTap: () => act(() => _mark(sid, 'released'))),
+                    if (canMark && m != null) SoftButton(label: '↩ בטל', tone: 0, onTap: () => act(() => _mark(sid, 'present'))),
+                    if (_AttData.can('att.justify') && m != null && m['justified'] != true) SoftButton(label: '✔ סמן-מוצדק', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'justified': true}))),
+                    if (canMark && m != null) SoftButton(label: '📎 צרף-אישור', tone: 0, onTap: () => act(() => _notice = 'צרף-אישור: שקע-קובץ (medicalDoc) לא מחובר בהצבה — מקום-שמור')),
+                    if (_AttData.can('att.makeup') && m != null && m['status'] == 'absent' && elig!['eligible'] == true && m['makeupDate'] == null)
+                      SoftButton(label: '📅 תזמן-השלמה', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': true, 'makeupDate': _AttData.nextSchoolDay(_Placement.today)}))),
+                    if (_AttData.can('att.makeup') && m != null && m['makeupDate'] != null) SoftButton(label: '✅ השלמה-בוצעה', tone: 1, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': false, 'makeupDone': true}))),
+                    if (_AttData.can('att.notify') && m != null && m['parentOk'] != true && parent != null) SoftButton(label: '📨 הודעה-להורה', tone: 0, onTap: () => act(() { _AttData.send(_AttData.keyOf(_date, _lessonN, sid)); _notice = 'הודעה ל-${parent['name']} (${parent['phone']}) נרשמה בתור — שקע-שליחה (מודול-הורים) מקום-שמור'; })),
+                    if (_AttData.can('att.parentOk') && m != null && m['parentOk'] != true) SoftButton(label: '✔ אשר-חיסור (הורה)', tone: 1, onTap: () => act(() { final saved = _AttData.role; _AttData.setRole(2); _AttData.patch(_date, _lessonN, sid, {'parentOk': true}); _AttData.setRole(saved); })),
+                    if (_AttData.can('att.mark') || _AttData.can('att.justify')) SoftButton(label: '📝 הוסף-הערה', tone: 0, onTap: () => act(() => (_AttData.notes[sid] ??= []).insert(0, 'הערה ${(_AttData.notes[sid]?.length ?? 0) + 1} · ${_AttData.riskWhy(sid)}'))),
+                  ];
+                  return acts.isEmpty ? AlertBanner(message: 'צפייה-בלבד — ${_AttData.whyCannot(_date) ?? 'אין הרשאת-פעולה'}', glyph: '🔒', tone: 2) : Wrap(spacing: 8, runSpacing: 8, children: acts);
+                }),
+                if (m != null && m['status'] == 'absent') ...[
+                  _gap(10),
+                  if (elig!['eligible'] != true) const AlertBanner(glyph: '🔁', tone: 3, message: 'לא-זכאי להשלמה (חיסור לא-מוצדק = no-show · makeupEligibility)'),
+                  if (canMark) DsEnumField(label: 'סיבה (מובנית)', options: _AttData.reasons, value: '${m['reason'] ?? ''}', onChanged: (v) => act(() => _AttData.patch(_date, _lessonN, sid, {'reason': v}))),
+                ],
+              ]),
+            )),
           );
         },
       ),
@@ -799,7 +1173,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   void _mark(String sid, String status) {
     final ok = _AttData.mark(_date, _lessonN, sid, status);
-    _notice = ok ? null : 'רישום-כפול חסום (אידמפוטנטי): ${_AttData.studentById(sid)['name']} כבר ${_AttData.statusLabel[status]} בשיעור $_lessonN';
+    _notice = ok ? null : (_AttData.whyCannot(_date) ?? 'רישום-כפול חסום (אידמפוטנטי): ${_AttData.studentById(sid)['name']} כבר ${_AttData.statusLabel[status]} בשיעור $_lessonN');
   }
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
