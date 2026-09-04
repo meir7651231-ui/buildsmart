@@ -353,8 +353,9 @@ class _CoursesData {
   static int lessonsThisWeek() {
     var n = 0;
     for (final c in liveCourses) {
+      if (!hasSessions(c)) continue;
       for (final s in (sessionsOf(c) as List)) {
-        if (!cancelledSessions.contains('${c['id']}|${isoOfDayThisWeek(s['day'] as int)}')) n++;
+        if (s['day'] is int && !cancelledSessions.contains('${c['id']}|${isoOfDayThisWeek(s['day'] as int)}')) n++;
       }
     }
     return n;
@@ -408,13 +409,14 @@ class _CoursesData {
   }
   static List<Map<String, dynamic>> coursesInRoom(Map<String, dynamic> r) => liveCourses.where((c) => c['roomId'] == r['id']).toList();
   static List<Map<String, dynamic>> coursesOf(Map<String, dynamic> t) => (coursesOfTeacher(liveCourses, t['id']) as List).cast<Map<String, dynamic>>();
-  static int weeklyOf(List<Map<String, dynamic>> cs) => grandTotal(cs, (c) => (sessionsOf(c) as List).length).toInt();
+  static int weeklyOf(List<Map<String, dynamic>> cs) => grandTotal(cs, (c) => hasSessions(c as Map<String, dynamic>) ? (sessionsOf(c) as List).length : 0).toInt();
 
   // ─── סינון-סמסטר (פס-עליון): 0=הכל · i>0 ⇒ semesterOptions[i-1] (אטום-דאטה ממאור) ───
   static List<Map<String, dynamic>> bySemester(List<Map<String, dynamic>> cs, int sem) =>
       sem == 0 ? cs : cs.where((c) => c['semester'] == semesterOptions[sem - 1]).toList();
 
-  static String sessionsLabel(Map<String, dynamic> c) => (sessionsOf(c) as List).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ');
+  static String sessionsLabel(Map<String, dynamic> c) =>
+      hasSessions(c) ? (sessionsOf(c) as List).where((s) => s['day'] is int).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ') : 'ללא-מפגשים';
   static String statusLabel(Map<String, dynamic> c) {
     final lc = lifecycle(c);
     if (lc != 'פעיל') return lc == 'מתוכנן' ? '🗓 מתוכנן' : lc == 'בוטל' ? '⛔ בוטל' : '🏁 הסתיים';
@@ -433,7 +435,7 @@ class _CoursesData {
     {'label': 'חדר', 'get': (Map<String, dynamic> c) => '${roomOf(c)?['name'] ?? '—'}'},
     {'label': 'יום+שעה', 'get': (Map<String, dynamic> c) => sessionsLabel(c)},
     {'label': 'משך', 'get': (Map<String, dynamic> c) => roomOf(c) == null ? '—' : '${roomOf(c)!['slot']} דק׳'}, // מקור: Room.slot
-    {'label': 'תדירות', 'get': (Map<String, dynamic> c) => '×${(sessionsOf(c) as List).length}/שבוע'},
+    {'label': 'תדירות', 'get': (Map<String, dynamic> c) => hasSessions(c) ? '×${(sessionsOf(c) as List).length}/שבוע' : '—'},
     {'label': 'סמסטר', 'get': (Map<String, dynamic> c) => '${c['semester'] ?? '—'} · ${c['start']}–${c['end']}'},
     {'label': 'קיבולת', 'get': (Map<String, dynamic> c) => '${capacity(c)}'},
     {'label': 'רשומים', 'get': (Map<String, dynamic> c) => '${enrolled(c)}'},
@@ -647,8 +649,15 @@ class _CoursesData {
   }
   static num courseExpected(Map<String, dynamic> c) => grandTotal(liveEnrollmentsOf(c), (e) => ((e as Map)['totalDue'] as num?) ?? 0);
   // השיעורים-הבאים: nextSessionDate (מנוע) מופעל n פעמים מ-"עכשיו" המוזרק
+  // מפגש-אמיתי = יום(int)+שעה(HH:MM תקינה). חוג-חדש נולד בלי מפגשים ⇒ sessionsOf נופל ל-{weekday:null,time:null} ⇒ חובה לגדר
+  //   (הבדיקה 8ב תפסה: nextSessionDate עשה `as int` על null ⇒ קריסת-build באוטומציות. §6: לא "מתקמפל" — נבדק).
+  static bool hasSessions(Map<String, dynamic> c) => (sessionsOf(c) as List).any((s) {
+        final t = timeToMin(s['time']);
+        return s['day'] is int && t is num && !t.isNaN;
+      });
   static List<DateTime> upcoming(Map<String, dynamic> c, int n) {
     final out = <DateTime>[];
+    if (!hasSessions(c)) return out;
     var from = nowAt;
     for (var i = 0; i < n; i++) {
       final d = nextSessionDate(c, from, sessionsOf);
@@ -1566,7 +1575,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
     final next = _CoursesData.upcoming(c, 6);
     return [
       _h('🗓 מפגשים קבועים · ${ss.length}/שבוע · ${c['start']}–${c['end']}'),
-      for (final s in ss) TimelineItem(title: '${dayNames[s['day'] as int]} ${s['time']}', time: '${(s['label'] ?? '') == '' ? 'קבוצה יחידה' : s['label']}', body: _CoursesData.roomLabel(c)),
+      if (!_CoursesData.hasSessions(c)) const EmptyState(glyph: '🗓', message: 'אין מפגשים קבועים — הגדר יום+שעה (מקום-שמור: עורך-מפגשים)'),
+      for (final s in ss) if (s['day'] is int) TimelineItem(title: '${dayNames[s['day'] as int]} ${s['time']}', time: '${(s['label'] ?? '') == '' ? 'קבוצה יחידה' : s['label']}', body: _CoursesData.roomLabel(c)),
       _h('📅 השיעורים הבאים · ${next.length}'),
       if (next.isEmpty) const EmptyState(glyph: '📅', message: 'אין מפגשים משובצים') else for (final dt in next) _lessonTile(c, dt, both),
     ];

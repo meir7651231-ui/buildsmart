@@ -292,4 +292,265 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.textContaining('PDF — מקום-שמור'), findsOneWidget);
   });
+  _wave8b();
+}
+
+// ═══ גל 8ב · חוב-§6 = אפס (הכוונת-מנהל): כל פעולה שנבדקה "בקוד בלבד" ⇒ בדיקת-widget דטרמיניסטית ═══
+//   מצב-הדמו סטטי ומשותף בין הבדיקות (סדר-הרצה = סדר-הקובץ): הבדיקות כאן מניחות את המצב אחרי גלים 1–7.
+Future<void> _openBySearch(WidgetTester tester, String q) async {
+  await tester.enterText(find.byType(TextField).first, q); // DsSearch = ה-TextField הראשון במסך
+  await tester.pump(const Duration(milliseconds: 100));
+  await tester.tap(find.byTooltip('פרטים ופעולות').first);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 600));
+}
+Future<void> _closeSheet(WidgetTester tester, Finder inside) async {
+  Navigator.of(tester.element(inside)).pop();
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1));
+  await tester.enterText(find.byType(TextField).first, '');
+  await tester.pump(const Duration(milliseconds: 100));
+}
+Future<void> _tapTab(WidgetTester tester, String tab) async {
+  await tester.tap(find.text(tab));
+  await tester.pump(const Duration(milliseconds: 200));
+}
+
+void _wave8b() {
+  testWidgets('גל 8ב-א · תיאטרון: שבץ (קדם⊕התנגשות⊕קיבולת) · הזמן-להמתנה · העלה · העבר (חסימת-התנגשות ⇒ יעד-אחר) · בטל-שיעור · מורה-מחליף · ערוך-קיבולת ⇒ העלאה-אוטו · טאבים', (tester) async {
+    await _mount(tester);
+    await _openBySearch(tester, 'תיאטרון');
+    expect(find.text('1 מתוך 14'), findsOneWidget, reason: 'פאנל תיאטרון (עומר בלבד)');
+    // 🎓 שבץ-תלמיד: תמר מזרחי (ו · גיל 10 · אין התנגשות עם שלישי 17:00) ⇒ enrolled
+    await tester.tap(find.text('🎓 שבץ-תלמיד'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('🎓 בחר תלמיד לשיבוץ (קדם ⊕ התנגשות ⊕ קיבולת נבדקים)'), findsOneWidget);
+    await tester.tap(find.text('תמר מזרחי · ו'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('תמר שובץ/ה ל-תיאטרון'), findsWidgets);
+    expect(find.text('2 מתוך 14'), findsOneWidget);
+    // ⏳ הזמן-להמתנה: מאיה חדד (ז) ⇒ wait
+    await tester.tap(find.text('⏳ הזמן-להמתנה').first);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('⏳ בחר תלמיד להזמנה-להמתנה'), findsOneWidget);
+    await tester.tap(find.text('מאיה חדד · ז'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await _tapTab(tester, 'המתנה');
+    expect(find.text('⏳ רשימת-המתנה · 2 · 12 מקומות פנויים'), findsOneWidget, reason: 'שירה (e16) + מאיה');
+    // ⬆ העלה (ידני, יש מקום): שירה פרץ = השורה הראשונה בגיליון; לפניה באנרי-אוטומציה במסך שמאחור (תיאטרון+ציור) ⇒ אינדקס n−2
+    final promoteBtns = find.text('⬆ העלה');
+    await tester.tap(promoteBtns.at(tester.widgetList(promoteBtns).length - 2));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('שירה פרץ הועלה/תה מההמתנה'), findsWidgets);
+    expect(find.text('⏳ רשימת-המתנה · 1 · 11 מקומות פנויים'), findsOneWidget);
+    // 🔁 העבר: עומר ⇒ מקהלה נחסם (ראשון 16:00 מתנגש עם גיטרה שלו, מוקפא≠ended) ⇒ שחמט מצליח
+    await _tapTab(tester, 'נרשמים');
+    expect(find.text('🎓 נרשמים · 3 מתוך 14'), findsOneWidget);
+    // סדר-הנרשמים = סדר allEnrollments (זרע ואז חדשים): שירה (e16, הועלתה) · עומר (e24) · תמר ⇒ עומר = at(1)
+    await tester.tap(find.text('🔁').at(1));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('🔁 העבר את עומר אברהם אל…'), findsOneWidget);
+    await tester.tap(find.textContaining('מקהלה 1/25').last);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('נחסם: התנגשות — עומר אברהם מתנגש עם גיטרה מתחילים · ראשון 16:00'), findsWidgets, reason: 'scheduleClashText חוסם העברה');
+    expect(find.text('🎓 נרשמים · 3 מתוך 14'), findsOneWidget, reason: 'לא הוסר מהמקור כשהיעד נחסם');
+    await tester.tap(find.text('🔁').at(1));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.textContaining('שחמט 1/12').last);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('הועבר/ה ל-שחמט'), findsWidgets);
+    expect(find.text('🎓 נרשמים · 3 מתוך 14'), findsOneWidget, reason: 'עומר יצא ⇒ מקום התפנה ⇒ מאיה הועלתה אוטומטית מההמתנה (V5: הבודק טעה, האוטומציה צדקה)');
+    await _tapTab(tester, 'המתנה');
+    expect(find.text('⏳ רשימת-המתנה · 0 · 11 מקומות פנויים'), findsOneWidget);
+    // ✖ בטל-שיעור-יחיד: השיעור הבא (שלישי 8.9) ⇒ מבוטל ⇒ ↩ שחזר מופיע
+    await _tapTab(tester, 'מערכת');
+    expect(find.text('🗓 מפגשים קבועים · 1/שבוע · 2026-09-01–2027-06-30'), findsOneWidget);
+    await tester.tap(find.text('✖ בטל').first);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('השיעור 2026-09-08 בוטל'), findsWidgets);
+    expect(find.text('↩ שחזר'), findsOneWidget);
+    // 🔄 מורה-מחליף חד-פעמי לשיעור הקרוב ⇒ מופיע בגוף-השיעור
+    await _tapTab(tester, 'סקירה');
+    await tester.tap(find.text('🔄 מורה-מחליף (חד-פעמי)'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('🔄 מורה-מחליף לשיעור 2026-09-08'), findsOneWidget);
+    await tester.tap(find.text('דני אשכנזי · ספורט'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('דני אשכנזי מחליף/ה ב-2026-09-08'), findsWidgets);
+    await _tapTab(tester, 'מערכת');
+    expect(find.textContaining('🔄 דני אשכנזי (מחליף/ה)'), findsOneWidget);
+    // ✏️ ערוך קיבולת: 14⇒2 (מלא) ⇒ 3 ⇒ מאיה מועלית אוטומטית מההמתנה
+    await _tapTab(tester, 'סקירה');
+    await tester.tap(find.text('✏️ ערוך'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('✏️ עריכה (שם · קיבולת — הגדלת-קיבולת מעלה מהמתנה אוטומטית)'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).last, '3');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('3 מתוך 3'), findsOneWidget, reason: 'קיבולת 3 ⇒ מלא');
+    // הזמן-להמתנה כשמלא: איתי ישראלי (ז) ⇒ wait; הגדלת-קיבולת ל-4 ⇒ איתי מועלה אוטומטית
+    await tester.tap(find.text('⏳ הזמן-להמתנה').first);
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('איתי ישראלי · ז'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('החוג מלא ⇒ נוסף לרשימת-ההמתנה'), findsWidgets);
+    // מצב-העריכה עדיין פתוח (toggle) ⇒ שדה-הקיבולת = ה-TextField האחרון
+    await tester.enterText(find.byType(TextField).last, '4');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('4 מתוך 4'), findsOneWidget, reason: 'קיבולת 4 ⇒ איתי הועלה אוטומטית מההמתנה');
+    await _tapTab(tester, 'המתנה');
+    expect(find.text('⏳ רשימת-המתנה · 0 · החוג מלא'), findsOneWidget);
+    // טאבים: נוכחות · גבייה · חומרים · היסטוריה · אודיט
+    await _tapTab(tester, 'נוכחות');
+    expect(find.text('נוכחות-החוג (נוכח ÷ (נוכח+נעדר))'), findsOneWidget);
+    await _tapTab(tester, 'גבייה');
+    expect(find.text('צפוי (Σ totalDue)'), findsOneWidget);
+    expect(find.text('₪5,700'), findsNWidgets(2), reason: 'צפוי = חוב-פתוח = 3 הרשמות חדשות × 1,900 (שירה=זרע 0 · אין תשלומים עדיין)');
+    await _tapTab(tester, 'חומרים');
+    expect(find.text('📎 חומרי-לימוד · 0'), findsOneWidget);
+    expect(find.text('אין חומרים מצורפים'), findsOneWidget);
+    await _tapTab(tester, 'היסטוריה');
+    expect(find.text('מורה-מחליף · 👑 רכז/ת'), findsOneWidget);
+    expect(find.text('עריכה · 👑 רכז/ת'), findsNWidgets(2));
+    expect(find.text('העלאה-מהמתנה · אוטומציה'), findsNWidgets(2), reason: 'מאיה (אחרי העברת-עומר) + איתי (אחרי הגדלת-קיבולת)');
+    await _tapTab(tester, 'אודיט');
+    expect(find.textContaining('🧾 אודיט · '), findsOneWidget);
+    await _closeSheet(tester, find.textContaining('🧾 אודיט · '));
+  });
+
+  testWidgets('גל 8ב-ב · הקצאות: מורה נחסם על התנגשות · חדר מוקצה (פותר התנגשות-חדר) · שלח-הודעה (waLink) · חומרים (CourseFile) · הדפס-מערכת', (tester) async {
+    await _mount(tester);
+    final hero0 = _CoursesDataProbe.heroClashes(tester);
+    // גיטרה: הקצאת רות כהן נחסמת — היא מלמדת מקהלה באותו slot (ראשון 16:00)
+    await _openBySearch(tester, 'גיטרה');
+    await tester.tap(find.text('👩‍🏫 הקצה-מורה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('👩‍🏫 בחר מורה (התנגשות חוסמת)'), findsOneWidget);
+    await tester.tap(find.text('רות כהן · מוזיקה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('נחסם: התנגשות-מורה — רות כהן מלמד/ת חוג-אחר באותו slot'), findsWidgets);
+    // 💬 שלח-הודעה ⇒ קישורי-WhatsApp פר-משפחה (waLink⊕waDigits): ישראלי 052-0000011 ⇒ 972520000011
+    await tester.tap(find.text('💬 שלח-הודעה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('💬 קישורי-WhatsApp למשפחות הנרשמים (waLink)'), findsOneWidget);
+    expect(find.textContaining('https://wa.me/972520000011?text='), findsOneWidget);
+    // 📎 חומרים: CourseFile אמיתי של גיטרה
+    await _tapTab(tester, 'חומרים');
+    expect(find.text('📎 חומרי-לימוד · 1'), findsOneWidget);
+    expect(find.text('ספר-אקורדים.pdf'), findsOneWidget);
+    await _closeSheet(tester, find.text('ספר-אקורדים.pdf'));
+    // מקהלה ⇒ מעבדת מדעים (פנויה ראשון 16:00) ⇒ התנגשות-החדר עם גיטרה נפתרת ⇒ hero יורד ב-1
+    await _openBySearch(tester, 'מקהלה');
+    await tester.tap(find.text('🚪 הקצה-חדר'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('🚪 בחר חדר (תפוס באותו slot ⇒ נחסם)'), findsOneWidget);
+    await tester.tap(find.text('מעבדת מדעים · 16 · 90 דק׳'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('מעבדת מדעים הוקצה ל-מקהלה'), findsWidgets);
+    await _closeSheet(tester, find.text('מעבדת מדעים הוקצה ל-מקהלה').last);
+    expect(_CoursesDataProbe.heroClashes(tester), hero0 - 1, reason: 'התנגשות-חדר אחת נפתרה (מורה עדיין מתנגשת)');
+    // 🚪 חדר תפוס נחסם: גיטרה ⇒ מעבדת מדעים (עכשיו מקהלה שם בראשון 16:00)
+    await _openBySearch(tester, 'גיטרה');
+    await tester.tap(find.text('🚪 הקצה-חדר'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('מעבדת מדעים · 16 · 90 דק׳'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('נחסם: התנגשות-חדר — מעבדת מדעים תפוס באותו slot'), findsWidgets);
+    await _closeSheet(tester, find.text('נחסם: התנגשות-חדר — מעבדת מדעים תפוס באותו slot').last);
+    // 🖨 הדפס-מערכת ⇒ תצוגת-הדפסה: כותרת-שבוע + שורת-יום + שיעור
+    await tester.tap(find.text('🖨 הדפס-מערכת'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('הדפסת-מערכת'), findsOneWidget);
+    final txt = tester.widget<SelectableText>(find.byType(SelectableText)).data!;
+    expect(txt, contains('מערכת-שעות · שבוע 2026-08-30 – 2026-09-04'));
+    expect(txt, contains('ראשון 2026-08-30'));
+    expect(txt, contains('16:00  גיטרה מתחילים — רות כהן · אולם מוזיקה'));
+    expect(txt, contains('שישי 2026-09-04 — אין שיעורים'));
+  });
+
+  testWidgets('גל 8ב-ג · חוג-חדש (ללא-מורה/חדר/סמסטר) ⇒ הקצה ⇒ בטל-חוג · שכפל-חוג ⇒ התנגשות-יורשת ⇒ סיים-חוג · שכפל-סמסטר (טיוטות מתוכננות) · שבוע-הבא (✖ מבוטל בגריד)', (tester) async {
+    await _mount(tester);
+    // ➕ חוג-חדש: נולד ללא-מורה/ללא-חדר, סמסטר ריק
+    await tester.tap(find.text('➕ חוג-חדש'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('נוצר חוג-חדש (ללא-מורה/ללא-חדר — שבץ בפאנל)'), findsOneWidget);
+    await _openBySearch(tester, 'חוג חדש');
+    expect(find.text('🚫 ללא-מורה — הקצה מורה'), findsOneWidget);
+    await tester.tap(find.text('👩‍🏫 הקצה-מורה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('רות כהן · מוזיקה'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('רות כהן הוקצה/תה ל-חוג חדש'), findsWidgets, reason: 'בלי מפגשים ⇒ אין התנגשות');
+    await tester.tap(find.text('🚪 הקצה-חדר'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('אולם מוזיקה · 20 · 60 דק׳'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('אולם מוזיקה הוקצה ל-חוג חדש'), findsWidgets);
+    await _closeSheet(tester, find.text('אולם מוזיקה הוקצה ל-חוג חדש').last);
+    await tester.enterText(find.byType(TextField).first, 'חוג חדש');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('📆 סמסטר לא-מוגדר'), findsOneWidget, reason: 'מצב-מיוחד: יש מורה+חדר אך semester ריק');
+    // ⛔ בטל-חוג ⇒ סטטוס בוטל
+    await tester.tap(find.byTooltip('פרטים ופעולות').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.text('⛔ בטל-חוג'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('חוג חדש בוטל'), findsWidgets);
+    await _closeSheet(tester, find.text('חוג חדש בוטל').last);
+    // חוג מבוטל יוצא מהרשימה-החיה ⇒ נראה רק תחת צ׳יפ "הסתיימו" (state=ended ⊕ טקסט) — AND בין צירים
+    await tester.enterText(find.byType(TextField).first, 'חוג חדש');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('📆 סמסטר לא-מוגדר'), findsNothing, reason: 'בוטל ⇒ לא חי ⇒ השורה יצאה מהרשימה-החיה');
+    await tester.tap(find.textContaining('🏁 הסתיימו · '));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('⛔ בוטל'), findsOneWidget);
+    await tester.tap(find.textContaining('הכל · '));
+    await tester.enterText(find.byType(TextField).first, '');
+    await tester.pump(const Duration(milliseconds: 100));
+    // 📄 שכפל-חוג: העותק יורש slot+מורה+חדר ⇒ התנגשות מיידית ⇒ 🏁 סיים-חוג על העותק
+    await _openBySearch(tester, 'ציור');
+    await tester.tap(find.text('📄 שכפל-חוג'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('נוצר ציור וקרמיקה (עותק) — יורש slot ⇒ בדוק התנגשות והקצה מחדש'), findsWidgets);
+    await _closeSheet(tester, find.text('נוצר ציור וקרמיקה (עותק) — יורש slot ⇒ בדוק התנגשות והקצה מחדש').last);
+    await _openBySearch(tester, 'עותק');
+    expect(find.text('⚠️ התנגשויות · 2 (חוסמות-שיבוץ)'), findsOneWidget, reason: 'מורה+חדר של המקור באותו slot');
+    await tester.tap(find.text('🏁 סיים-חוג'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('ציור וקרמיקה (עותק) הסתיים — ההרשמות נסגרו'), findsWidgets);
+    await _closeSheet(tester, find.text('ציור וקרמיקה (עותק) הסתיים — ההרשמות נסגרו').last);
+    await tester.tap(find.textContaining('🏁 הסתיימו · '));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('ציור וקרמיקה (עותק)'), findsOneWidget, reason: 'העותק בין ההסתיימו');
+    expect(find.text('אנגלית מדוברת (קיץ)'), findsOneWidget);
+    await tester.tap(find.textContaining('הכל · '));
+    await tester.pump(const Duration(milliseconds: 100));
+    // 📑 שכפל-סמסטר ⇒ טיוטות לשנה-הבאה (nextYearCourseDraft) = 🗓 מתוכנן
+    expect(find.text('🗓 מתוכנן'), findsNothing);
+    await tester.tap(find.text('📑 שכפל-סמסטר'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('שכפול-סמסטר: '), findsOneWidget);
+    expect(find.textContaining('דורשות מורה/חדר'), findsOneWidget);
+    expect(find.text('🗓 מתוכנן'), findsWidgets, reason: 'טיוטות start=2027-09-01 > today ⇒ מתוכנן');
+    // ⏭ שבוע-הבא: השיעור שבוטל (תיאטרון 8.9) מסומן ✖ בגריד
+    await tester.tap(find.text('⏭ שבוע הבא'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.textContaining('✖ תיאטרון'), findsOneWidget);
+    expect(find.textContaining('📅 מערכת-שעות · שבוע הבא (2026-09-06 – 2026-09-11)'), findsOneWidget);
+  });
+}
+
+// גישה לערך-ה-hero (התנגשויות) מהעץ — StatHero מרנדר את הערך כ-Text; קוראים את ה-Text שמתחת לתווית
+class _CoursesDataProbe {
+  static int heroClashes(WidgetTester tester) {
+    final label = find.text('התנגשויות (מורה/חדר/תלמיד)');
+    final col = find.ancestor(of: label, matching: find.byType(Column)).first;
+    final texts = find.descendant(of: col, matching: find.byType(Text));
+    for (final t in tester.widgetList<Text>(texts)) {
+      final v = int.tryParse(t.data ?? '');
+      if (v != null) return v;
+    }
+    throw StateError('hero value not found');
+  }
 }
