@@ -1,5 +1,5 @@
-// 🎨 schoolos_courses.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow
-//   החלפות: stat×0 · hero×1 · statRow×20 · button×31 · statusChip×10 · banner×14 · emptyState×18 · mediaRow×12 · section×8 · segmented×8 · meter×5 · frame×4 · timeline×3 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_courses.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
+//   החלפות: stat×0 · hero×1 · statRow×20 · button×31 · statusChip×10 · banner×14 · emptyState×18 · mediaRow×12 · section×8 · segmented×8 · meter×5 · frame×4 · timeline×3 · field×1 · numberField×1 · search×1 · pageHeader×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT · "מה"): knowledge/SPEC-COURSES-FULL-2026-09-04.md · הסטנדרט: מסך-המלאי (schoolos.dart).
 // 🎯 המטרה: "שכל שיעור יקרה — עם מורה, בחדר, לתלמידים הנכונים, בזמן — ושאף שיבוץ לא יתנגש ואף מקום לא יתבזבז."
@@ -83,6 +83,7 @@ import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במו
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -988,9 +989,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     }
     const secTitle = {3: '⚠️ התנגשות — חוסם', 2: '🚫 ללא-מורה / ללא-חדר', 1: '📉 מתחת-למינימום', 0: '🟢 תקין', -1: '🏁 הסתיימו / בוטלו'};
     const secTone = {3: 2, 2: 2, 1: 3, 0: 1, -1: 0};
-    return DsScaffold(
-      title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_CoursesData.teachers.length} מורים · ${_CoursesData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚',
-      children: [
+    return DsScaffold(title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_CoursesData.teachers.length} מורים · ${_CoursesData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'חוגים ומערכת', '${live.length} חוגים חיים · ${_CoursesData.teachers.length} מורים · ${_CoursesData.rooms.where((r) => r['active'] == true).length} חדרים']), ...[
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות ותצוגה פר-תפקיד (roleOf⊕canGrantedAction⊕teacherIdOf)
         Align(
           alignment: Alignment.centerRight,
@@ -1024,7 +1023,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
         _gap(6),
         // איתור: חיפוש-מבוקר (DsSearch → smartFilter⊕smartScore⊕normSearch) + סינון-מתקדם
         Row(children: [
-          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _adv = !_adv), child: ForgeSoftButton(fields: [_adv ? '🔎 פחות' : '🔎 סינון']))),
         ]),
@@ -1100,8 +1099,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
         ],
         // הורה + הרשמה-עצמית מופעלת: קטלוג-חוגים פתוחים להרשמה (wait ⇒ רכז מאשר). כל בדיקות-הקדם/התנגשות חלות.
         if (_can('crs.self') && _CoursesData.myFamilyId(_role) != null && !_loading) ..._selfCatalog(),
-      ],
-    );
+      ]]);
   }
 
   // מרכז-אוטומציות: חג⇒ביטול · מתחת-מינ׳ · חדר/מורה-חלופי · המתנה-עם-מקום · תזכורות · ביקוש · ניצולת
@@ -1434,8 +1432,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
       ..._picker(c, both),
       if (_edit) ...[
         _h('✏️ עריכה (שם · קיבולת — הגדלת-קיבולת מעלה מהמתנה אוטומטית)'),
-        DsField(label: 'שם-חוג', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _CoursesData.edit(c, 'name', v, _who))),
-        DsNumberField(label: 'קיבולת (maxStudents)', value: '${_CoursesData.capacity(c)}', onChanged: (v) { final n = int.tryParse(v); if (n != null) both(() => _CoursesData.edit(c, 'maxStudents', n, _who)); }),
+        ForgeDsField(state: ('${c['name']}').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['שם-חוג', ''], control: DsField(label: 'שם-חוג', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _CoursesData.edit(c, 'name', v, _who)), bare: true)),
+        ForgeDsNumberField(fields: ['קיבולת (maxStudents)'], control: DsNumberField(label: 'קיבולת (maxStudents)', value: '${_CoursesData.capacity(c)}', onChanged: (v) { final n = int.tryParse(v); if (n != null) both(() => _CoursesData.edit(c, 'maxStudents', n, _who)); }, bare: true)),
       ],
     ];
   }

@@ -71,13 +71,14 @@ import '../dart-maor/sup-score-bins.dart'; // השוואת-שכבה: התפלג�
 import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
 import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -932,7 +933,7 @@ class _MemberScreenState extends State<MemberScreen> {
         if (_StuData.isParent(_role)) ...[const ForgeSectionPill(fields: ['תצוגת-הורה: זהות · נוכחות · ציונים של ילדך בלבד. שדות-מוגנים ופעולות אינם זמינים.', '']), _gap(8)],
         // פס-עליון: חיפוש-מבוקר + רענון (מצב-טעינה) + רישום + ייבוא — מגודרים פר-הרשאה
         Row(children: [
-          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
           const SizedBox(width: 6),
@@ -944,17 +945,11 @@ class _MemberScreenState extends State<MemberScreen> {
         if (_rollover != null) ...[ForgeSectionPill(fields: [_rollover!, '']), _gap(8)],
         if (!_importing && _importResult != null) ...[ForgeSectionPill(fields: ['ייבוא הסתיים: ${_importResult!['ok']} נוספו · ${_importResult!['skipped']} נדחו', '']), _gap(8)],
         // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"; המונה = ספירת-הציר על הפעילים
-        Wrap(spacing: 8, runSpacing: 6, children: [
-          _fchip('הכל', _locks.isEmpty, () => setState(() => _locks.clear())),
-          for (final c in _StuData.quickChips)
-            _fchip('${c['label']} · ${_StuData.countAxis(all, c['axis']!, c['value']!)}', _locks[c['axis']] == c['value'],
-                () => setState(() { if (_locks[c['axis']] == c['value']) { _locks.remove(c['axis']); } else { _locks[c['axis']!] = c['value']!; } })),
-          _fchip(_filtersOpen ? '⚙ פילטרים ▴' : '⚙ פילטרים ▾', _filtersOpen, () => setState(() => _filtersOpen = !_filtersOpen)),
-        ]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[(('הכל'), (_locks.isEmpty), (() => setState(() => _locks.clear()))), for (final c in _StuData.quickChips) (('${c['label']} · ${_StuData.countAxis(all, c['axis']!, c['value']!)}'), (_locks[c['axis']] == c['value']), (() => setState(() { if (_locks[c['axis']] == c['value']) { _locks.remove(c['axis']); } else { _locks[c['axis']!] = c['value']!; } }))), ((_filtersOpen ? '⚙ פילטרים ▴' : '⚙ פילטרים ▾'), (_filtersOpen), (() => setState(() => _filtersOpen = !_filtersOpen)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         if (_filtersOpen) Row(children: [
           for (final ax in const [['class', 'כיתה'], ['level', 'שכבה'], ['teacher', 'מחנך/ת'], ['status', 'סטטוס']])
-            Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: DsEnumField(label: ax[1], options: _StuData.options(ax[0]), value: _locks[ax[0]] ?? 'הכל',
-                onChanged: (v) => setState(() { if (v == 'הכל' || v.isEmpty) { _locks.remove(ax[0]); } else { _locks[ax[0]] = v; } })))),
+            Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: ForgeDsEnumField(fields: [ax[1]], control: DsEnumField(label: ax[1], options: _StuData.options(ax[0]), value: _locks[ax[0]] ?? 'הכל',
+                onChanged: (v) => setState(() { if (v == 'הכל' || v.isEmpty) { _locks.remove(ax[0]); } else { _locks[ax[0]] = v; } }), bare: true)))),
         ]),
         const SizedBox(height: 12),
         // KPI-10 (המפרט): hero = המטרה (מי-נופל) + 10 מדדי-מצב (BareStat נושאי-ערך; חסר-נתון ⇒ '—' מקום-שמור)
@@ -1292,7 +1287,7 @@ class _MemberScreenState extends State<MemberScreen> {
       padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(c2).viewInsets.bottom + 12),
       child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
-        DsField(label: title, hint: hint, value: v, onChanged: (x) => v = x),
+        ForgeDsField(state: (v).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [title, ''], control: DsField(label: title, hint: hint, value: v, onChanged: (x) => v = x, bare: true)),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.trim().isNotEmpty) { onSave(v.trim()); Navigator.of(c2).pop(); } }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
       ])),
     ));
@@ -1303,7 +1298,7 @@ class _MemberScreenState extends State<MemberScreen> {
       padding: const EdgeInsets.all(12),
       child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
-        DsEnumField(label: title, options: options, value: v, onChanged: (x) => setS(() => v = x)),
+        ForgeDsEnumField(fields: [title], control: DsEnumField(label: title, options: options, value: v, onChanged: (x) => setS(() => v = x), bare: true)),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.isNotEmpty) { onSave(v); Navigator.of(c2).pop(); } }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
       ])),
     )));
@@ -1327,7 +1322,7 @@ class _MemberScreenState extends State<MemberScreen> {
       initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
       builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
         Text('עריכה · ${s['name']}', style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
-        for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
+        for (final k in vals.keys) ForgeDsField(state: (vals[k]!).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [labels[k]!, ''], control: DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x, bare: true)),
         _gap(8),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() { for (final k in vals.keys) { if (vals[k] != '${k == 'first' || k == 'school' ? s[k] ?? '' : f[k]}') _StuData.editField(s, k, vals[k]!, _who); } }); Navigator.of(c2).pop(); }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
       ]))),
@@ -1343,8 +1338,8 @@ class _MemberScreenState extends State<MemberScreen> {
       initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
       builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
         const Text('רישום בן/בת משפחה חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
-        for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
-        DsEnumField(label: 'כיתה', options: classes, value: cls, onChanged: (x) => setS(() => cls = x)),
+        for (final k in vals.keys) ForgeDsField(state: (vals[k]!).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [labels[k]!, ''], control: DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x, bare: true)),
+        ForgeDsEnumField(fields: ['כיתה'], control: DsEnumField(label: 'כיתה', options: classes, value: cls, onChanged: (x) => setS(() => cls = x), bare: true)),
         _gap(8),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
           if (vals['first']!.trim().isEmpty || vals['last']!.trim().isEmpty) return;
@@ -1362,7 +1357,7 @@ class _MemberScreenState extends State<MemberScreen> {
       child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Text('ייבוא בני משפחה (CSV)', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל בן/בת משפחה', style: TextStyle(color: _muted, fontSize: 12)),
-        DsField(label: 'CSV', hint: 'דנה,כהן,י׳-1 · כיתת-חינוך,2010-05-05,רונית,0501234567', value: text, onChanged: (x) => text = x),
+        ForgeDsField(state: (text).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['CSV', ''], control: DsField(label: 'CSV', hint: 'דנה,כהן,י׳-1 · כיתת-חינוך,2010-05-05,רונית,0501234567', value: text, onChanged: (x) => text = x, bare: true)),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
           Navigator.of(c2).pop();
           setState(() { _importing = true; });

@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'ds.dart';
 
 class DsField extends StatefulWidget {
-  const DsField({required this.label, required this.hint, required this.value, required this.onChanged, super.key});
+  const DsField({required this.label, required this.hint, required this.value, required this.onChanged, this.bare = false, super.key});
   final String label, hint, value;
   final ValueChanged<String> onChanged;
+  /// G13c · bare=true ⇒ שדה-הקלט בלבד (בלי תווית/ריפוד) — נכנס לחריץ-ה-control של אטום-forge שמצייר את התווית. false ⇒ ביט-זהה.
+  final bool bare;
   @override
   State<DsField> createState() => _DsFieldState();
 }
@@ -23,11 +25,11 @@ class _DsFieldState extends State<DsField> {
   void dispose() { _c.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: widget.bare ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
+            if (!widget.bare) Padding(
               padding: const EdgeInsets.only(right: 2, bottom: 6),
               child: Text(widget.label, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w600)),
             ),

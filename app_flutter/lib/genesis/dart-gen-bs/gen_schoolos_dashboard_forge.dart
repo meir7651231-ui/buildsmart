@@ -1,5 +1,5 @@
-// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow
-//   החלפות: stat×0 · hero×1 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · section×15 · segmented×1 · meter×3 · frame×5 · timeline×3 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
+//   החלפות: stat×0 · hero×1 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · section×15 · segmented×1 · meter×3 · frame×5 · timeline×3 · search×1 · pageHeader×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 📊 SchoolOS · לוח-הנהלה (DASHBOARD) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-DASHBOARD-FULL-2026-09-04.
 // 🎯 המטרה: שהמנהל/ת יפתח את הבוקר ותוך 30 שניות יידע: מה דורש-החלטה היום · מה בסיכון · מה מגמתי · מה הפעולה-הראשונה.
 // 🔒 גבול-חרוט: הלוח = נגזרת-טהורה של כל המודולים. אפס נתון-חדש, אפס-כתיבה. המודולים מוזרקים כשקעי-קלט
@@ -70,6 +70,7 @@ import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במו
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 const _danger = Color(0xFFF43F5E);
@@ -610,16 +611,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const secTone = {2: 2, 1: 3, 0: 1, -1: 1};
     final firstAction = buckets[2]!.isNotEmpty ? buckets[2]!.first : buckets[1]!.isNotEmpty ? buckets[1]!.first : null;
 
-    return DsScaffold(
-      title: 'לוח-הנהלה', subtitle: '${fmtDate(d.today)} · ${d.rangeText(_range)} · ${all.length} משימות מ-${d.modules.where((m) => d.live(m['id'] as String)).length} מודולים', icon: '📊',
-      children: [
+    return DsScaffold(title: 'לוח-הנהלה', subtitle: '${fmtDate(d.today)} · ${d.rangeText(_range)} · ${all.length} משימות מ-${d.modules.where((m) => d.live(m['id'] as String)).length} מודולים', icon: '📊', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'לוח-הנהלה', '${fmtDate(d.today)} · ${d.rangeText(_range)} · ${all.length} משימות מ-${d.modules.where((m) => d.live(m['id'] as String)).length} מודולים']), ...[
         // ── פס-עליון: מבט (הרשאות · חוק-6) · טווח · חיפוש · פעולות-גלובליות ──
         _seg([for (final r in _DashData.roleDefs) r['label'] as String], _role, (i) => setState(() { _role = i; if (_DashData.summaryOnly(i)) _tab = 7; })),
         _gap(8),
         _seg(const ['היום', 'שבוע', 'חודש', 'שנה'], _range, (i) => setState(() => _range = i)),
         _gap(10),
         Row(children: [
-          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
           if (d.exportOk(_role)) ...[
@@ -695,8 +694,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           else if (_tab == 6) ..._alertsTab(open, jump)
           else ..._auditTab(),
         ],
-      ],
-    );
+      ]]);
   }
 
   // ═══ טאב-0 · תדרוך-היום: טריאז' (DsSection פר-דחיפות) או טבלה (DsTable · 12 עמודות) ═══

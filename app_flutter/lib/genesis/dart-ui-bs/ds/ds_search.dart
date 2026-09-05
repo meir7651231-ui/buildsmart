@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'ds.dart';
 
 class DsSearch extends StatelessWidget {
-  const DsSearch({required this.value, required this.onChanged, super.key});
+  const DsSearch({required this.value, required this.onChanged, this.bare = false, super.key});
   final String value;
   final ValueChanged<String> onChanged;
+  /// G13c · bare=true ⇒ שורת-הקלט בלבד (בלי מסגרת/ריפוד/אייקון-חיפוש) — לחריץ-ה-control של אטום-forge שמצייר את המסגרת. false ⇒ ביט-זהה.
+  final bool bare;
 
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) => bare ? _row(bare: true) : Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -17,10 +19,13 @@ class DsSearch extends StatelessWidget {
             borderRadius: BorderRadius.circular(DsTokens.rSm),
             border: Border.all(color: DsTokens.line),
           ),
-          child: Row(
+          child: _row(bare: false),
+        ),
+      );
+  Widget _row({required bool bare}) => Row(
             children: [
-              const Icon(Icons.search, size: 18, color: DsTokens.faint),
-              const SizedBox(width: 8),
+              if (!bare) const Icon(Icons.search, size: 18, color: DsTokens.faint),
+              if (!bare) const SizedBox(width: 8),
               Expanded(
                 child: TextField(
                   onChanged: onChanged,
@@ -41,7 +46,5 @@ class DsSearch extends StatelessWidget {
                   child: const Icon(Icons.close, size: 17, color: DsTokens.faint),
                 ),
             ],
-          ),
-        ),
-      );
+          );
 }

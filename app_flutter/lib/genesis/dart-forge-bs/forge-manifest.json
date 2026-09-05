@@ -408,6 +408,14 @@
       "file": "primary_btn.dart",
       "seam": "fields",
       "states": true,
+      "stateIds": [
+        "state",
+        "state1",
+        "state2",
+        "state3",
+        "state4",
+        "state5"
+      ],
       "fieldSlots": 2,
       "fieldDemo": [
         "Action",
@@ -426,6 +434,7 @@
       "file": "action_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -443,6 +452,7 @@
       "file": "filled_cta_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -460,6 +470,7 @@
       "file": "submit_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -477,6 +488,7 @@
       "file": "send_report_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -494,6 +506,7 @@
       "file": "add_trade_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -511,6 +524,7 @@
       "file": "quick_action_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -528,6 +542,7 @@
       "file": "gallery_all_btn.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -543,6 +558,7 @@
       "file": "sheet_advance_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -560,6 +576,7 @@
       "file": "18_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 20,
       "fieldDemo": [
         "Action",
@@ -601,6 +618,7 @@
       "file": "save_draft_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -618,6 +636,7 @@
       "file": "outlined_action_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -635,6 +654,7 @@
       "file": "link_btn.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action →"
@@ -652,6 +672,7 @@
       "file": "soft_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -669,6 +690,7 @@
       "file": "gold_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -686,6 +708,7 @@
       "file": "glass_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -703,6 +726,7 @@
       "file": "neon_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -720,6 +744,7 @@
       "file": "grad_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -737,6 +762,7 @@
       "file": "gradient_pulse_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -754,6 +780,7 @@
       "file": "pill_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -771,6 +798,7 @@
       "file": "pill_cta_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -788,6 +816,7 @@
       "file": "courier_forms_pill_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -805,6 +834,7 @@
       "file": "worker_forms_pill_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -822,6 +852,7 @@
       "file": "trade_builder_accessory_rule_editor_pill_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -839,6 +870,7 @@
       "file": "card_btn.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -857,6 +889,7 @@
       "file": "site_hub_card_btn.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -875,6 +908,7 @@
       "file": "portal_tile_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -893,6 +927,7 @@
       "file": "ripple_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -910,6 +945,7 @@
       "file": "magnetic_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Action"
@@ -927,6 +963,7 @@
       "file": "circle_close_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -942,6 +979,7 @@
       "file": "shutter_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -957,6 +995,7 @@
       "file": "step_btn.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "−",
@@ -976,6 +1015,7 @@
       "file": "store_step_btn.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "QTY",
@@ -996,6 +1036,7 @@
       "file": "mini_qty_btn.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "−",
@@ -1015,6 +1056,7 @@
       "file": "circle_fab.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "＋"
@@ -1032,6 +1074,7 @@
       "file": "cart_fab_button.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "2"
@@ -1049,6 +1092,7 @@
       "file": "fab_action.dart",
       "seam": "zero",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "FabAction",
@@ -1067,6 +1111,7 @@
       "file": "fab_menu.dart",
       "seam": "zero",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "FabMenu",
@@ -1085,6 +1130,12 @@
       "file": "premium_toggle.dart",
       "seam": "fields",
       "states": true,
+      "stateIds": [
+        "state",
+        "state1",
+        "state2",
+        "state3"
+      ],
       "fieldSlots": 1,
       "fieldDemo": [
         "on"
@@ -1102,6 +1153,7 @@
       "file": "animated_toggle.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -1117,6 +1169,7 @@
       "file": "switch_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1135,6 +1188,7 @@
       "file": "settings_switch_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1153,6 +1207,7 @@
       "file": "notif_settings_switch_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1171,6 +1226,7 @@
       "file": "chat_settings_switch_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1189,6 +1245,7 @@
       "file": "courier_settings_switch_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1207,6 +1264,7 @@
       "file": "segmented_switch.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1230,6 +1288,7 @@
       "file": "unit_segment_toggle.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1253,6 +1312,7 @@
       "file": "segmented_pill_toggle.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1276,6 +1336,7 @@
       "file": "ds_toggle_tile.dart",
       "seam": "zero",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1294,6 +1355,7 @@
       "file": "flat_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "FLAT",
@@ -1313,6 +1375,7 @@
       "file": "section_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "ELEVATED",
@@ -1332,6 +1395,7 @@
       "file": "outlined_card_section.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "OUTLINED",
@@ -1351,6 +1415,7 @@
       "file": "glass_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "GLASS",
@@ -1370,6 +1435,7 @@
       "file": "gradient_hero_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "GRADIENT",
@@ -1389,6 +1455,7 @@
       "file": "spotlight_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "SPOTLIGHT · HOVER",
@@ -1408,6 +1475,7 @@
       "file": "hero_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "HERO",
@@ -1427,6 +1495,7 @@
       "file": "stat_tile.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -1446,6 +1515,7 @@
       "file": "metric_tile.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -1465,6 +1535,7 @@
       "file": "stat_plain.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1483,6 +1554,7 @@
       "file": "kpi_box.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1506,6 +1578,7 @@
       "file": "trend_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -1526,6 +1599,7 @@
       "file": "summary_stat_strip.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 8,
       "fieldDemo": [
         "Label",
@@ -1555,6 +1629,7 @@
       "file": "11_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 13,
       "fieldDemo": [
         "42",
@@ -1589,6 +1664,7 @@
       "file": "ds_record_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 8,
       "fieldDemo": [
         "L",
@@ -1618,6 +1694,7 @@
       "file": "profile_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "L",
@@ -1646,6 +1723,7 @@
       "file": "product_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -1665,6 +1743,7 @@
       "file": "9_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 11,
       "fieldDemo": [
         "L",
@@ -1697,6 +1776,7 @@
       "file": "hub_tile.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1715,6 +1795,7 @@
       "file": "grid_hub_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1733,6 +1814,7 @@
       "file": "contact_tile.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1751,6 +1833,7 @@
       "file": "6_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "INHERIT HUBTILE →",
@@ -1779,6 +1862,7 @@
       "file": "accordion_panel.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Label",
@@ -1805,6 +1889,7 @@
       "file": "accordion_section_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1823,6 +1908,7 @@
       "file": "price_estimate_panel.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -1850,6 +1936,7 @@
       "file": "strip_panel_frame.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -1868,6 +1955,7 @@
       "file": "status_dot.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -1892,6 +1980,7 @@
       "file": "live_status_dot.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -1909,6 +1998,7 @@
       "file": "live_status_pill.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "LIVE"
@@ -1926,6 +2016,7 @@
       "file": "pulsing_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label · Meta"
@@ -1943,6 +2034,7 @@
       "file": "flip_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -1960,6 +2052,7 @@
       "file": "reveal_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -1977,6 +2070,7 @@
       "file": "message_thread.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 10,
       "fieldDemo": [
         "Meta",
@@ -2008,6 +2102,7 @@
       "file": "bubble_states.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "Label",
@@ -2038,6 +2133,7 @@
       "file": "typing_indicator.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "three dots breathe · reduced-motion parks them"
@@ -2060,6 +2156,7 @@
       "file": "composer.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -2075,6 +2172,7 @@
       "file": "quick_reply.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -2100,6 +2198,7 @@
       "file": "delivery_ticks.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label ",
@@ -2125,6 +2224,7 @@
       "file": "form_card.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "Label",
@@ -2150,6 +2250,7 @@
       "file": "sign_in_form.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Label",
@@ -2176,6 +2277,7 @@
       "file": "quick_add_form.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -2198,6 +2300,7 @@
       "file": "8_assemblies.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "INHERIT FORMCARD →",
@@ -2228,6 +2331,7 @@
       "file": "filter_bar.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -2253,6 +2357,7 @@
       "file": "filter_toolbar.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Label",
@@ -2279,6 +2384,7 @@
       "file": "wizard_header.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "2 / 4",
@@ -2301,6 +2407,7 @@
       "file": "wizard_step.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -2323,6 +2430,7 @@
       "file": "request_composer.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -2347,6 +2455,7 @@
       "file": "reply_composer.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -2365,6 +2474,7 @@
       "file": "cart_summary_card.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 20,
       "fieldDemo": [
         "Label",
@@ -2406,6 +2516,7 @@
       "file": "summary_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 10,
       "fieldDemo": [
         "Label",
@@ -2437,6 +2548,7 @@
       "file": "settings_group.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "Label",
@@ -2467,6 +2579,7 @@
       "file": "strip_group_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "Label",
@@ -2497,6 +2610,7 @@
       "file": "6_row_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "INHERIT SETTINGSGROUP →",
@@ -2525,6 +2639,7 @@
       "file": "split_control.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 24,
       "fieldDemo": [
         "L",
@@ -2570,6 +2685,7 @@
       "file": "stat_cluster_card.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 12,
       "fieldDemo": [
         "Label",
@@ -2603,6 +2719,7 @@
       "file": "summary_stat_strip_composite.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 11,
       "fieldDemo": [
         "Label",
@@ -2635,6 +2752,7 @@
       "file": "bar_chart.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -2653,6 +2771,7 @@
       "file": "rating_bars.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -2671,6 +2790,7 @@
       "file": "stacked_bar_group.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -2689,6 +2809,7 @@
       "file": "9_atoms_dataviz.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 10,
       "fieldDemo": [
         "INHERIT BARCHART →",
@@ -2720,6 +2841,7 @@
       "file": "area_chart.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -2739,6 +2861,7 @@
       "file": "trend_chart.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -2757,6 +2880,7 @@
       "file": "step_area_chart.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -2776,6 +2900,7 @@
       "file": "7_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 8,
       "fieldDemo": [
         "INHERIT LINECHART →",
@@ -2805,6 +2930,7 @@
       "file": "donut_chart.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -2822,6 +2948,7 @@
       "file": "pie_chart.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -2839,6 +2966,7 @@
       "file": "radial_gauge.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -2856,6 +2984,7 @@
       "file": "progress_ring.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -2873,6 +3002,7 @@
       "file": "5_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "INHERIT DONUTCHART →",
@@ -2900,6 +3030,7 @@
       "file": "line_spark.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -2927,6 +3058,7 @@
       "file": "waveform_bars.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -2945,6 +3077,7 @@
       "file": "spark_area.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -2963,6 +3096,7 @@
       "file": "heat_grid.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -2981,6 +3115,7 @@
       "file": "intensity_strip.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -3005,6 +3140,7 @@
       "file": "linear_progress.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -3032,6 +3168,7 @@
       "file": "segmented_meter.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -3059,6 +3196,7 @@
       "file": "6_atoms_dataviz.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "INHERIT LINEARPROGRESS →",
@@ -3087,6 +3225,7 @@
       "file": "chart_legend.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "Label",
@@ -3115,6 +3254,7 @@
       "file": "legend_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Label",
@@ -3141,6 +3281,7 @@
       "file": "stat_block.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -3160,6 +3301,7 @@
       "file": "snack_toast.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "DOCKED · OVER CONTENT",
@@ -3184,6 +3326,7 @@
       "file": "alert_banner.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 8,
       "fieldDemo": [
         "Label",
@@ -3208,6 +3351,7 @@
       "file": "5_atoms_feedback.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "Label",
@@ -3236,6 +3380,7 @@
       "file": "modal_dialog.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "MODAL · OVER SCRIM",
@@ -3262,6 +3407,7 @@
       "file": "confirm_dialog.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -3282,6 +3428,7 @@
       "file": "consent_dialog.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -3302,6 +3449,7 @@
       "file": "rule_inspect_dialog.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -3321,6 +3469,7 @@
       "file": "slide_sheet.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "RISES FROM BOTTOM",
@@ -3345,6 +3494,7 @@
       "file": "6_atoms_feedback.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "INHERIT SLIDESHEET →",
@@ -3373,6 +3523,7 @@
       "file": "tooltip_bubble.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -3392,6 +3543,7 @@
       "file": "empty_hint.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label · hint",
@@ -3411,6 +3563,7 @@
       "file": "zoom_hint.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -3430,6 +3583,7 @@
       "file": "empty_state.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -3449,6 +3603,7 @@
       "file": "animated_empty.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -3467,6 +3622,7 @@
       "file": "search_empty_state.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -3485,6 +3641,7 @@
       "file": "10_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 11,
       "fieldDemo": [
         "INHERIT EMPTYSTATE →",
@@ -3517,6 +3674,7 @@
       "file": "shimmer_skeleton.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -3537,6 +3695,7 @@
       "file": "skeleton_card.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -3557,6 +3716,7 @@
       "file": "linear_progress_feedback.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "62%"
@@ -3574,6 +3734,7 @@
       "file": "progress_ring_feedback.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "65%"
@@ -3591,6 +3752,7 @@
       "file": "orbit_spinner.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -3606,6 +3768,7 @@
       "file": "dots_loader.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -3626,6 +3789,7 @@
       "file": "story_ring.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -3641,6 +3805,7 @@
       "file": "notify_badge.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "3"
@@ -3663,6 +3828,7 @@
       "file": "draft_badge.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "DRAFT",
@@ -3682,6 +3848,7 @@
       "file": "4_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "9",
@@ -3709,6 +3876,7 @@
       "file": "page_header.dart",
       "seam": "title+actions",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "SECTION",
@@ -3734,6 +3902,7 @@
       "file": "detail_header.dart",
       "seam": "title+actions",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "SECTION",
@@ -3753,6 +3922,7 @@
       "file": "centered_page_header.dart",
       "seam": "title",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "SECTION",
@@ -3772,6 +3942,7 @@
       "file": "titled_section.dart",
       "seam": "title+actions",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -3792,6 +3963,7 @@
       "file": "section_header.dart",
       "seam": "title+link",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -3811,6 +3983,7 @@
       "file": "section_title.dart",
       "seam": "title+link",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -3830,6 +4003,7 @@
       "file": "emoji_section_title.dart",
       "seam": "title",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -3848,6 +4022,7 @@
       "file": "lens_group_header.dart",
       "seam": "title+link",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "GROUP",
@@ -3867,6 +4042,7 @@
       "file": "6_atoms_header.dart",
       "seam": "title+link",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "INHERIT SECTIONHEADER →",
@@ -3895,6 +4071,7 @@
       "file": "sticky_header.dart",
       "seam": "sticky",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 23,
       "fieldDemo": [
         "Label",
@@ -3939,6 +4116,7 @@
       "file": "hero_header.dart",
       "seam": "title+cta",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "EYEBROW",
@@ -3960,6 +4138,7 @@
       "file": "gradient_hero_card_header.dart",
       "seam": "title+cta",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "EYEBROW",
@@ -3980,6 +4159,7 @@
       "file": "smart_project_hero.dart",
       "seam": "title",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "PROJECT",
@@ -3999,6 +4179,7 @@
       "file": "brand_header.dart",
       "seam": "mark+nav",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "L",
@@ -4027,6 +4208,7 @@
       "file": "brand_list_row.dart",
       "seam": "mark",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "L",
@@ -4045,6 +4227,7 @@
       "file": "store_supplier_header.dart",
       "seam": "mark",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "L",
@@ -4065,6 +4248,7 @@
       "file": "wizard_header_header.dart",
       "seam": "progress",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Step ",
@@ -4091,6 +4275,7 @@
       "file": "step_progress_header.dart",
       "seam": "progress",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "3",
@@ -4110,6 +4295,7 @@
       "file": "sheet_header.dart",
       "seam": "title",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -4127,6 +4313,7 @@
       "file": "modal_header.dart",
       "seam": "title",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -4144,6 +4331,7 @@
       "file": "profile_header_row.dart",
       "seam": "avatar+meta",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "L",
@@ -4170,6 +4358,7 @@
       "file": "profile_card_header.dart",
       "seam": "avatar+meta",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "L",
@@ -4190,6 +4379,7 @@
       "file": "profile_row.dart",
       "seam": "avatar",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "L",
@@ -4210,6 +4400,7 @@
       "file": "date_header.dart",
       "seam": "divider",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "03",
@@ -4229,6 +4420,7 @@
       "file": "date_chip.dart",
       "seam": "date",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "LABEL",
@@ -4249,6 +4441,7 @@
       "file": "date_pills.dart",
       "seam": "date",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -4274,6 +4467,7 @@
       "file": "ds_date_field.dart",
       "seam": "divider",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "LABEL",
@@ -4292,6 +4486,13 @@
       "file": "ds_field.dart",
       "seam": "self",
       "states": true,
+      "stateIds": [
+        "empty",
+        "focus",
+        "filled",
+        "error",
+        "disabled"
+      ],
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -4310,6 +4511,7 @@
       "file": "field.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -4325,6 +4527,7 @@
       "file": "labeled_field.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -4343,6 +4546,7 @@
       "file": "field_row.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -4360,6 +4564,7 @@
       "file": "field_label.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -4379,6 +4584,10 @@
       "file": "premium_field.dart",
       "seam": "fields",
       "states": true,
+      "stateIds": [
+        "rest",
+        "focusFilled"
+      ],
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -4396,6 +4605,7 @@
       "file": "glow_field.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -4413,6 +4623,7 @@
       "file": "ds_date_field_input.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -4430,6 +4641,7 @@
       "file": "ds_number_field.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -4447,6 +4659,7 @@
       "file": "ds_enum_field.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -4464,6 +4677,7 @@
       "file": "ds_search.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -4479,6 +4693,7 @@
       "file": "search_field.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -4494,6 +4709,7 @@
       "file": "input_bar.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -4509,6 +4725,11 @@
       "file": "number_stepper.dart",
       "seam": "fields",
       "states": true,
+      "stateIds": [
+        "defaultLive",
+        "focus",
+        "minDisabled"
+      ],
       "fieldSlots": 3,
       "fieldDemo": [
         "−",
@@ -4528,6 +4749,7 @@
       "file": "qty_stepper_box.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "+",
@@ -4547,6 +4769,7 @@
       "file": "smart_qty_stepper.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "−",
@@ -4574,6 +4797,7 @@
       "file": "4_atoms_input.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 8,
       "fieldDemo": [
         "−",
@@ -4603,6 +4827,7 @@
       "file": "glow_slider.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "58"
@@ -4620,6 +4845,7 @@
       "file": "dual_range.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "26 — 74"
@@ -4637,6 +4863,7 @@
       "file": "seg_picker.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -4661,6 +4888,7 @@
       "file": "picker_option.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -4679,6 +4907,7 @@
       "file": "picker_option_chip.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -4702,6 +4931,7 @@
       "file": "picker_options_panel.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -4727,6 +4957,7 @@
       "file": "tag_input.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -4752,6 +4983,7 @@
       "file": "otp_input.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "2",
@@ -4775,6 +5007,7 @@
       "file": "pin_pad.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 10,
       "fieldDemo": [
         "1",
@@ -4801,6 +5034,7 @@
       "file": "wheel_picker.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -4821,6 +5055,7 @@
       "file": "number_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -4848,6 +5083,7 @@
       "file": "profile_row_list.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 11,
       "fieldDemo": [
         "L",
@@ -4880,6 +5116,7 @@
       "file": "7_atoms_list.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "L",
@@ -4910,6 +5147,7 @@
       "file": "action_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -4937,6 +5175,7 @@
       "file": "5_atoms_list.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "INHERIT ACTIONROW →",
@@ -4964,6 +5203,7 @@
       "file": "switch_row_list.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Label",
@@ -4990,6 +5230,7 @@
       "file": "4_atoms_list.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "INHERIT SWITCHROW →",
@@ -5016,6 +5257,7 @@
       "file": "link_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -5041,6 +5283,7 @@
       "file": "6_atoms_list.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "INHERIT LINKROW →",
@@ -5069,6 +5312,7 @@
       "file": "kv_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 8,
       "fieldDemo": [
         "Label",
@@ -5098,6 +5342,7 @@
       "file": "8_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 10,
       "fieldDemo": [
         "42",
@@ -5129,6 +5374,7 @@
       "file": "check_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -5156,6 +5402,7 @@
       "file": "2_atoms.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "INHERIT CHECKROW →",
@@ -5180,6 +5427,7 @@
       "file": "notif_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "Label",
@@ -5208,6 +5456,7 @@
       "file": "swipe_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 10,
       "fieldDemo": [
         "Action",
@@ -5239,6 +5488,7 @@
       "file": "manage_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 15,
       "fieldDemo": [
         "L",
@@ -5275,6 +5525,7 @@
       "file": "avatar.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "L",
@@ -5295,6 +5546,7 @@
       "file": "avatar_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "L",
@@ -5319,6 +5571,7 @@
       "file": "avatar_ring.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "L",
@@ -5342,6 +5595,7 @@
       "file": "profile_avatar.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "L"
@@ -5359,6 +5613,7 @@
       "file": "avatar_stack.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "L",
@@ -5379,6 +5634,7 @@
       "file": "avatar_group.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "L",
@@ -5399,6 +5655,7 @@
       "file": "face_pile_group.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "L",
@@ -5418,6 +5675,7 @@
       "file": "story_ring_media.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "L",
@@ -5441,6 +5699,7 @@
       "file": "story_reel.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "L",
@@ -5460,6 +5719,7 @@
       "file": "thumbnail.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5475,6 +5735,7 @@
       "file": "image_tile.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5490,6 +5751,7 @@
       "file": "proof_thumb.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5505,6 +5767,7 @@
       "file": "media_thumb.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5520,6 +5783,7 @@
       "file": "thumb_strip.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5540,6 +5804,7 @@
       "file": "image_face_pager.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5560,6 +5825,7 @@
       "file": "cover_banner.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -5578,6 +5844,7 @@
       "file": "profile_cover.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "L",
@@ -5597,6 +5864,7 @@
       "file": "hero_cover_mark.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5612,6 +5880,7 @@
       "file": "logo_mark.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -5630,6 +5899,7 @@
       "file": "brand_mark.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5645,6 +5915,7 @@
       "file": "gallery_grid.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "+12"
@@ -5662,6 +5933,7 @@
       "file": "gallery_mosaic.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5677,6 +5949,7 @@
       "file": "gallery_all_btn_media.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5692,6 +5965,7 @@
       "file": "thumb_placeholder.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "no media"
@@ -5709,6 +5983,7 @@
       "file": "media_placeholder.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "empty"
@@ -5726,6 +6001,7 @@
       "file": "avatar_fallback.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "L",
@@ -5744,6 +6020,7 @@
       "file": "12_atoms.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 14,
       "fieldDemo": [
         "L",
@@ -5779,6 +6056,7 @@
       "file": "aurora_field.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "AURORA"
@@ -5796,6 +6074,7 @@
       "file": "particle_field.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "PARTICLES"
@@ -5813,6 +6092,7 @@
       "file": "generative_canvas.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "ORGANISM"
@@ -5830,6 +6110,7 @@
       "file": "glow_pulse.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5845,6 +6126,7 @@
       "file": "gradient_sweep.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5860,6 +6142,7 @@
       "file": "parallax_tilt.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -5875,6 +6158,7 @@
       "file": "type_writer.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -5892,6 +6176,7 @@
       "file": "confetti_burst.dart",
       "seam": "self",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "ACTION · BURST"
@@ -5909,6 +6194,7 @@
       "file": "animated_tabs.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -5934,6 +6220,7 @@
       "file": "segmented_pill_toggle_nav.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -5958,6 +6245,7 @@
       "file": "stock_tab.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -5981,6 +6269,7 @@
       "file": "breadcrumb_trail.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -6000,6 +6289,7 @@
       "file": "hop_breadcrumb.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -6019,6 +6309,7 @@
       "file": "menu_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -6043,6 +6334,7 @@
       "file": "home_shell_menu_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6068,6 +6360,7 @@
       "file": "worker_nav.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Label",
@@ -6094,6 +6387,7 @@
       "file": "ds_nav_tile.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -6118,6 +6412,7 @@
       "file": "action_chip_rail.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -6145,6 +6440,7 @@
       "file": "image_face_pager_nav.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -6165,6 +6461,7 @@
       "file": "fab_menu_nav.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "closed",
@@ -6189,6 +6486,7 @@
       "file": "check_row_selection.dart",
       "seam": "state",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6214,6 +6512,7 @@
       "file": "pending_check_row.dart",
       "seam": "state",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6234,6 +6533,7 @@
       "file": "check_pop.dart",
       "seam": "state",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6259,6 +6559,7 @@
       "file": "regression_panel_check_row.dart",
       "seam": "state",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6284,6 +6585,7 @@
       "file": "picker_options_panel_selection.dart",
       "seam": "group",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -6311,6 +6613,7 @@
       "file": "picker_option_selection.dart",
       "seam": "group",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -6338,6 +6641,7 @@
       "file": "4_atoms_selection.dart",
       "seam": "group",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "INHERIT PICKEROPTIONSPANEL →",
@@ -6364,6 +6668,7 @@
       "file": "switch_row_selection.dart",
       "seam": "state",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6389,6 +6694,7 @@
       "file": "animated_toggle_selection.dart",
       "seam": "state",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6414,6 +6720,7 @@
       "file": "settings_switch_row_selection.dart",
       "seam": "state",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6439,6 +6746,7 @@
       "file": "facet_chip.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -6466,6 +6774,7 @@
       "file": "preset_chip.dart",
       "seam": "choice",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -6490,6 +6799,7 @@
       "file": "must_chip.dart",
       "seam": "choice",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -6514,6 +6824,7 @@
       "file": "6_atoms_selection.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "INHERIT FACETCHIP →",
@@ -6542,6 +6853,7 @@
       "file": "unit_segment_toggle_selection.dart",
       "seam": "exclusive",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -6566,6 +6878,7 @@
       "file": "segmented_pill_toggle_selection.dart",
       "seam": "exclusive",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -6589,6 +6902,7 @@
       "file": "seg_picker_selection.dart",
       "seam": "exclusive",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6614,6 +6928,7 @@
       "file": "tag_input_selection.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6639,6 +6954,7 @@
       "file": "tinted_tag.dart",
       "seam": "token",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -6662,6 +6978,7 @@
       "file": "tag_detail_row.dart",
       "seam": "token",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -6687,6 +7004,7 @@
       "file": "star_rating.dart",
       "seam": "value",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Value ",
@@ -6711,6 +7029,7 @@
       "file": "rating_bars_selection.dart",
       "seam": "value",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Value ",
@@ -6735,6 +7054,7 @@
       "file": "drop_select.dart",
       "seam": "value",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -6753,6 +7073,7 @@
       "file": "ds_chip.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "Label",
@@ -6780,6 +7101,7 @@
       "file": "14_atoms.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 16,
       "fieldDemo": [
         "Label",
@@ -6817,6 +7139,7 @@
       "file": "5_atoms_selection.dart",
       "seam": "state",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "SEMANTIC (FIXED) →",
@@ -6844,6 +7167,7 @@
       "file": "map_surface.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -6859,6 +7183,7 @@
       "file": "marker_states.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "DEFAULT",
@@ -6884,6 +7209,7 @@
       "file": "data_table.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 24,
       "fieldDemo": [
         "LABEL",
@@ -6929,6 +7255,7 @@
       "file": "sort_header_states.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 6,
       "fieldDemo": [
         "VALUE",
@@ -6956,6 +7283,7 @@
       "file": "minimap.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -6971,6 +7299,7 @@
       "file": "tree_grid.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 12,
       "fieldDemo": [
         "Label",
@@ -7004,6 +7333,7 @@
       "file": "status_chip.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Label · info",
@@ -7025,6 +7355,7 @@
       "file": "status_dot_chip.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -7043,6 +7374,7 @@
       "file": "hierarchy_chip_pill.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -7066,6 +7398,7 @@
       "file": "9_atoms_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 11,
       "fieldDemo": [
         "Label",
@@ -7098,6 +7431,7 @@
       "file": "status_dot_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -7122,6 +7456,7 @@
       "file": "live_status_dot_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -7139,6 +7474,7 @@
       "file": "live_status_pill_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "LIVE"
@@ -7156,6 +7492,7 @@
       "file": "pulsing_status_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label · Meta"
@@ -7173,6 +7510,7 @@
       "file": "6_atoms_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "INHERIT STATUSDOT →",
@@ -7201,6 +7539,7 @@
       "file": "notify_badge_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "8",
@@ -7224,6 +7563,7 @@
       "file": "count_badge.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -7244,6 +7584,7 @@
       "file": "tinted_badge_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "LABEL 3",
@@ -7263,6 +7604,7 @@
       "file": "draft_badge_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "DRAFT",
@@ -7281,6 +7623,7 @@
       "file": "5_atoms_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "5",
@@ -7309,6 +7652,7 @@
       "file": "severity_chip.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 8,
       "fieldDemo": [
         "LOW",
@@ -7338,6 +7682,7 @@
       "file": "linear_progress_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -7356,6 +7701,7 @@
       "file": "meter.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -7374,6 +7720,7 @@
       "file": "progress_stat_row.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -7397,6 +7744,7 @@
       "file": "4_atoms_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "INHERIT LINEARPROGRESS →",
@@ -7423,6 +7771,7 @@
       "file": "radial_gauge_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "72",
@@ -7441,6 +7790,7 @@
       "file": "progress_ring_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "65",
@@ -7464,6 +7814,7 @@
       "file": "score_band_chip.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "76",
@@ -7490,6 +7841,7 @@
       "file": "stage_pill.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 5,
       "fieldDemo": [
         "Label",
@@ -7511,6 +7863,7 @@
       "file": "section_pill.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
@@ -7529,6 +7882,7 @@
       "file": "trend_indicator.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "12%",
@@ -7548,6 +7902,7 @@
       "file": "intel_pill.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Label"
@@ -7565,6 +7920,7 @@
       "file": "stat_tile_status.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 3,
       "fieldDemo": [
         "Label",
@@ -7584,6 +7940,7 @@
       "file": "mini_calendar.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "Label",
@@ -7609,6 +7966,7 @@
       "file": "range_picker.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "א",
@@ -7632,6 +7990,7 @@
       "file": "week_strip_date_cell_theater.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 10,
       "fieldDemo": [
         "12",
@@ -7663,6 +8022,7 @@
       "file": "time_slot.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 0,
       "fieldDemo": [],
       "child": true,
@@ -7678,6 +8038,7 @@
       "file": "countdown_timer.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 11,
       "fieldDemo": [
         "02",
@@ -7705,6 +8066,7 @@
       "file": "live_clock_relative_time.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "14:32:07",
@@ -7725,6 +8087,7 @@
       "file": "meta_ticker.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "Meta ticker — Label · Value pairs streaming, one row, tabular. Reduced-motion parks it."
@@ -7742,6 +8105,7 @@
       "file": "type_scale.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 18,
       "fieldDemo": [
         "DISPLAY",
@@ -7781,6 +8145,7 @@
       "file": "voice_pair.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 8,
       "fieldDemo": [
         "LATIN · FRAUNCES",
@@ -7805,6 +8170,7 @@
       "file": "pull_quote.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "”",
@@ -7825,6 +8191,7 @@
       "file": "code_block.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 13,
       "fieldDemo": [
         "// tokens",
@@ -7854,6 +8221,7 @@
       "file": "link_row_text.dart",
       "seam": "collection",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 10,
       "fieldDemo": [
         "שורה עם ",
@@ -7880,6 +8248,7 @@
       "file": "bullet_list.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 4,
       "fieldDemo": [
         "Label",
@@ -7905,6 +8274,7 @@
       "file": "numbered_list.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 7,
       "fieldDemo": [
         "1",
@@ -7933,6 +8303,7 @@
       "file": "gradient_text.dart",
       "seam": "series",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "כותרת מדורגת",
@@ -7951,6 +8322,7 @@
       "file": "marquee.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 12,
       "fieldDemo": [
         "LABEL · ",
@@ -7979,6 +8351,7 @@
       "file": "overline.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "OVERLINE · META"
@@ -7996,6 +8369,7 @@
       "file": "eyebrow.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "EYEBROW · LABEL"
@@ -8013,6 +8387,7 @@
       "file": "section_label.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 1,
       "fieldDemo": [
         "SECTION · LABEL"
@@ -8030,6 +8405,7 @@
       "file": "7_atoms_text.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "ABC · 123",
@@ -8060,6 +8436,7 @@
       "file": "emphasis_text.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 9,
       "fieldDemo": [
         "טקסט ראשי בדגש",
@@ -8090,6 +8467,7 @@
       "file": "trunc_one.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "SINGLE-LINE · ELLIPSIS",
@@ -8108,6 +8486,7 @@
       "file": "trunc_clamp.dart",
       "seam": "fields",
       "states": false,
+      "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "2-LINE · CLAMP",

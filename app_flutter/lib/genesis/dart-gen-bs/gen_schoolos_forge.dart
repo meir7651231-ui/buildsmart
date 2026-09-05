@@ -1,5 +1,5 @@
-// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow
-//   החלפות: stat×0 · hero×1 · statRow×25 · kpi×2 · navTile×9 · button×11 · statusChip×3 · banner×6 · emptyState×2 · mediaRow×4 · section×4 · segmented×3 · meter×3 · frame×4 · timeline×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
+//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×4 · statRow×25 · kpi×2 · navTile×9 · button×11 · statusChip×3 · banner×6 · emptyState×2 · mediaRow×4 · section×4 · segmented×3 · meter×3 · frame×4 · timeline×2 · search×1 · pageHeader×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS — בנייה מאפס לפי THE-WAY הנכון (פעולה-ראשונה · הרכבה-תמיד).
 // כל מסך: מטרה → פעולות-יסוד הכי-מתאימות → הרכבה (תמיד כמה) → חיווט → אימות-מול-המטרה.
 // בוחרים פעולת-יסוד, לא "אטום"; האטום רק מגלם. לעולם אין אטום-אחד שמשרת מטרה מקסימלית.
@@ -50,13 +50,14 @@ import 'gen_schoolos_rooms_forge.dart';      // 🚪 חדרים · RoomsScreen
 import 'gen_schoolos_fees_forge.dart';       // 💳 גבייה · FeesScreen
 import 'gen_schoolos_parents_forge.dart';    // 👪 הורים · ParentsScreen
 import 'gen_schoolos_dashboard_forge.dart';  // 📊 לוח-הנהלה · DashboardScreen
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat דורש הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -89,9 +90,7 @@ class _Home extends StatelessWidget {
   static void _go(BuildContext c, Widget screen) => Navigator.push(c, MaterialPageRoute(builder: (_) => screen));
   static const modules = ['dashboard', 'students', 'attendance', 'courses', 'teachers', 'rooms', 'fees', 'parents', 'inventory']; // 9 מסכים מחווטים
   @override
-  Widget build(BuildContext context) => DsScaffold(
-        title: 'SchoolOS', subtitle: 'תיכון עתיד · מה דורש-פעולה עכשיו', icon: '🏫',
-        children: [
+  Widget build(BuildContext context) => DsScaffold(title: 'SchoolOS', subtitle: 'תיכון עתיד · מה דורש-פעולה עכשיו', icon: '🏫', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'SchoolOS', 'תיכון עתיד · מה דורש-פעולה עכשיו']), ...[
           Wrap(spacing: 12, runSpacing: 12, children: [
             SizedBox(width: 168, child: ForgeStatPlain(fields: ['מסכים מחוברים', '${_Home.modules.length}'])), // עובדה-אמת (לא '1,248' מומצא — L-goal-proof-af3c91)
             SizedBox(width: 168, child: ForgeStatPlain(fields: ['מלאי לא-יספיק', '${_InvData.urgent}'])),
@@ -108,8 +107,7 @@ class _Home extends StatelessWidget {
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ParentsScreen()), child: ForgeHubTile(fields: ['הורים', 'קשר · שידור · הסכמות'])),
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const _Inventory()), child: ForgeHubTile(fields: ['מלאי', 'ימים-עד-ריקון מול אספקה — שלא ייגמר'])),
           ]])),
-        ],
-      );
+        ]]);
 }
 
 // ═══════════ מלאי · מטרה: "שלא ייגמר פריט קריטי בלי שנספיק להזמין" ═══════════
@@ -430,7 +428,7 @@ class _InventoryState extends State<_Inventory> {
         _gap(10),
         // פס-עליון: חיפוש-מבוקר (DsSearch) + יצירה + ייצוא — מגודרים פר-הרשאה (canGrantedAction)
         Row(children: [
-          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           // רענון — מדגים את מצב-הטעינה השמור (חיבור-אסינק אמיתי יאיר אותו זהה)
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
@@ -445,12 +443,7 @@ class _InventoryState extends State<_Inventory> {
           ],
         ]),
         // צ׳יפי-סינון-חריגה (FilterChipPill מבוקר) — פעולת-יסוד "זיהוי-חריגה"
-        Wrap(spacing: 8, runSpacing: 6, children: [
-          _fchip(0, 'הכל'),
-          _fchip(1, '📉 מתחת-מינ׳ · $belowMinN'),
-          _fchip(2, '⏳ פקיעה · $expN'),
-          _fchip(3, '⛔ אזלו · $outN'),
-        ]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[(('הכל'), _filter == (0), () => setState(() => _filter = (0))), (('📉 מתחת-מינ׳ · $belowMinN'), _filter == (1), () => setState(() => _filter = (1))), (('⏳ פקיעה · $expN'), _filter == (2), () => setState(() => _filter = (2))), (('⛔ אזלו · $outN'), _filter == (3), () => setState(() => _filter = (3)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         const SizedBox(height: 12),
         // KPI-8: hero=דורשי-פעולה (המטרה) + 8 מדדי-מצב (BareStat, נושאי-ערך-אמת)
         ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

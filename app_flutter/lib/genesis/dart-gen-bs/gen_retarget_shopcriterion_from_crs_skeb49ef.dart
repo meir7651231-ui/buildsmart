@@ -87,6 +87,7 @@ import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במו
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -1006,9 +1007,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     }
     const secTitle = {3: '⚠️ התנגשות — חוסם', 2: '🚫 ללא-מורה / ללא-חדר', 1: '📉 מתחת-למינימום', 0: '🟢 תקין', -1: '🏁 הסתיימו / בוטלו'};
     const secTone = {3: 2, 2: 2, 1: 3, 0: 1, -1: 0};
-    return DsScaffold(
-      title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_ShopCriterionData.teachers.length} מורים · ${_ShopCriterionData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚',
-      children: [
+    return DsScaffold(title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_ShopCriterionData.teachers.length} מורים · ${_ShopCriterionData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'חוגים ומערכת', '${live.length} חוגים חיים · ${_ShopCriterionData.teachers.length} מורים · ${_ShopCriterionData.rooms.where((r) => r['active'] == true).length} חדרים']), ...[
         // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
         if (_metric != null) ForgeSectionPill(fields: ['מסונן למדד: ${ShopCriterionFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}', '']),
         if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeSoftButton(fields: ['✖ בטל סינון-מדד']))),
@@ -1045,7 +1044,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         _gap(6),
         // איתור: חיפוש-מבוקר (DsSearch → smartFilter⊕smartScore⊕normSearch) + סינון-מתקדם
         Row(children: [
-          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _adv = !_adv), child: ForgeSoftButton(fields: [_adv ? '🔎 פחות' : '🔎 סינון']))),
         ]),
@@ -1121,8 +1120,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         ],
         // הורה + הרשמה-עצמית מופעלת: קטלוג-חוגים פתוחים להרשמה (wait ⇒ רכז מאשר). כל בדיקות-הקדם/התנגשות חלות.
         if (_can('crs.self') && _ShopCriterionData.myFamilyId(_role) != null && !_loading) ..._selfCatalog(),
-      ],
-    );
+      ]]);
   }
 
   // מרכז-אוטומציות: חג⇒ביטול · מתחת-מינ׳ · חדר/מורה-חלופי · המתנה-עם-מקום · תזכורות · ביקוש · ניצולת
@@ -1455,8 +1453,8 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       ..._picker(c, both),
       if (_edit) ...[
         _h('✏️ עריכה (שם · קיבולת — הגדלת-קיבולת מעלה מהמתנה אוטומטית)'),
-        DsField(label: 'שם-קריטריון', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _ShopCriterionData.edit(c, 'name', v, _who))),
-        DsNumberField(label: 'קיבולת (maxStudents)', value: '${_ShopCriterionData.capacity(c)}', onChanged: (v) { final n = int.tryParse(v); if (n != null) both(() => _ShopCriterionData.edit(c, 'discountPct', n, _who)); }),
+        ForgeDsField(state: ('${c['name']}').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['שם-קריטריון', ''], control: DsField(label: 'שם-קריטריון', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _ShopCriterionData.edit(c, 'name', v, _who)), bare: true)),
+        ForgeDsNumberField(fields: ['קיבולת (maxStudents)'], control: DsNumberField(label: 'קיבולת (maxStudents)', value: '${_ShopCriterionData.capacity(c)}', onChanged: (v) { final n = int.tryParse(v); if (n != null) both(() => _ShopCriterionData.edit(c, 'discountPct', n, _who)); }, bare: true)),
       ],
     ];
   }

@@ -1,5 +1,5 @@
-// 🎨 schoolos_attendance.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow
-//   החלפות: stat×0 · hero×1 · statRow×13 · button×29 · statusChip×20 · banner×22 · emptyState×7 · mediaRow×3 · section×10 · segmented×6 · meter×3 · frame×3 · timeline×8 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_attendance.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
+//   החלפות: stat×0 · hero×1 · statRow×13 · button×29 · statusChip×20 · banner×22 · emptyState×7 · mediaRow×3 · section×10 · segmented×6 · meter×3 · frame×3 · timeline×8 · enumField×1 · search×1 · pageHeader×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS · מודול נוכחות (ATTENDANCE) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT): knowledge/SPEC-ATTENDANCE-FULL-2026-09-04.md · הסטנדרט: schoolos.dart (מלאי).
 // מטרה: "לדעת מי נוכח ומי לא — עכשיו, היום, החודש — ולפעול לפני שהיעדרות הופכת לנשירה."
@@ -71,6 +71,7 @@ import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במו
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה)
@@ -763,11 +764,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final visible = _AttData.filter(_AttData.search(roster, _q), _date, _filter);
     final locked = _AttData.isLocked(_date);
     final why = _AttData.whyCannot(_date);
-    return DsScaffold(
-      title: 'נוכחות',
-      subtitle: '${_AttData.activeStudents.length} תלמידים · ${_AttData.classes.length} כיתות · ${fmtDate(_Placement.today)} ${_Placement.nowHm}',
-      icon: '🗓️',
-      children: [
+    return DsScaffold(title: 'נוכחות', subtitle: '${_AttData.activeStudents.length} תלמידים · ${_AttData.classes.length} כיתות · ${fmtDate(_Placement.today)} ${_Placement.nowHm}', icon: '🗓️', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'נוכחות', '${_AttData.activeStudents.length} תלמידים · ${_AttData.classes.length} כיתות · ${fmtDate(_Placement.today)} ${_Placement.nowHm}']), ...[
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות פר-תפקיד (roleOf⊕canGrantedAction)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal, reverse: true,
@@ -803,7 +800,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           if (_AttData.exportOk && (_AttData.can('att.audit') || _AttData.roleName == 'admin')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openCsv('דוח-שבועי להנהלה', _AttData.weeklyRows(), _AttData.weeklyCsv), child: ForgeSoftButton(fields: ['📈 דוח-שבועי'])),
         ]),
         _gap(8),
-        DsSearch(value: _q, onChanged: (v) => setState(() => _q = v)),
+        ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true)),
         Wrap(spacing: 8, runSpacing: 6, children: [for (var i = 0; i < _AttData.filterDefs.length; i++) _fchip(i)]),
         _gap(12),
         // ── KPI-10 (המפרט): hero = דורשי-פעולה-היום (המטרה) + 10 עובדות-ספירה (BareStat) + יחס-חודשי (ProgressRing) ──
@@ -903,8 +900,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ]])),
           ],
         ],
-      ],
-    );
+      ]]);
   }
 
   // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
@@ -1256,7 +1252,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 if (m != null && m['status'] == 'absent') ...[
                   _gap(10),
                   if (elig!['eligible'] != true) const ForgeSectionPill(fields: ['לא-זכאי להשלמה (חיסור לא-מוצדק = no-show · makeupEligibility)', '']),
-                  if (canMark) DsEnumField(label: 'סיבה (מובנית)', options: _AttData.reasons, value: '${m['reason'] ?? ''}', onChanged: (v) => act(() => _AttData.patch(_date, _lessonN, sid, {'reason': v}))),
+                  if (canMark) ForgeDsEnumField(fields: ['סיבה (מובנית)'], control: DsEnumField(label: 'סיבה (מובנית)', options: _AttData.reasons, value: '${m['reason'] ?? ''}', onChanged: (v) => act(() => _AttData.patch(_date, _lessonN, sid, {'reason': v})), bare: true)),
                 ],
               ]))),
           );

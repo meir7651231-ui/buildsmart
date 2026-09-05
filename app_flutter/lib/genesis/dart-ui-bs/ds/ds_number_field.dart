@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'ds.dart';
 
 class DsNumberField extends StatefulWidget {
-  const DsNumberField({required this.label, required this.value, required this.onChanged, super.key});
+  const DsNumberField({required this.label, required this.value, required this.onChanged, this.bare = false, super.key});
   final String label, value;
   final ValueChanged<String> onChanged;
+  /// G13c · bare=true ⇒ שדה-הקלט בלבד (בלי תווית/ריפוד). false ⇒ ביט-זהה.
+  final bool bare;
   @override
   State<DsNumberField> createState() => _DsNumberFieldState();
 }
@@ -24,11 +26,11 @@ class _DsNumberFieldState extends State<DsNumberField> {
   void dispose() { _c.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: widget.bare ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
+            if (!widget.bare) Padding(
               padding: const EdgeInsets.only(right: 2, bottom: 6),
               child: Text(widget.label, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w600)),
             ),

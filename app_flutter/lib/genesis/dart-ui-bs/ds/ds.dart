@@ -69,10 +69,12 @@ class DsTokens {
 
 // ── שלד-מסך: רקע כהה + כותרת-זכוכית + גוף גלילה מרווח ──
 class DsScaffold extends StatelessWidget {
-  const DsScaffold({required this.title, required this.subtitle, required this.icon, required this.children, this.bottomBar, super.key});
+  const DsScaffold({required this.title, required this.subtitle, required this.icon, required this.children, this.bottomBar, this.header = true, super.key});
   final String title, subtitle, icon;
   final List<Widget> children;
   final Widget? bottomBar;
+  /// G13c · header=false ⇒ בלי כותרת-המסך של ה-DS (אטום-forge מצייר אותה בראש children); כפתור-חזרה נשמר. true ⇒ ביט-זהה.
+  final bool header;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +93,8 @@ class DsScaffold extends StatelessWidget {
           child: SafeArea(
             child: Column(
               children: [
-                Container(
+                if (!header && canPop) Align(alignment: Alignment.centerLeft, child: IconButton(onPressed: () => Navigator.of(context).maybePop(), icon: const Icon(Icons.arrow_forward, color: DsTokens.muted, size: 22))),
+                if (header) Container(
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                   decoration: const BoxDecoration(
                     color: DsTokens.card,

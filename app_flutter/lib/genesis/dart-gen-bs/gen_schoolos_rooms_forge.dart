@@ -1,5 +1,5 @@
-// 🎨 schoolos_rooms.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow
-//   החלפות: stat×0 · hero×1 · statRow×17 · button×32 · statusChip×9 · banner×16 · emptyState×12 · mediaRow×9 · section×5 · segmented×7 · meter×1 · frame×8 · timeline×6 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_rooms.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
+//   החלפות: stat×0 · hero×1 · statRow×17 · button×32 · statusChip×9 · banner×16 · emptyState×12 · mediaRow×9 · section×5 · segmented×7 · meter×1 · frame×8 · timeline×6 · field×2 · search×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: RoomsScreen.
 //
@@ -85,6 +85,7 @@ import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במו
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -757,7 +758,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
         ..._automationCenter(),
         // פס-עליון · חיפוש (DsSearch) + הזמנת-חדר + דיווח-תקלה (בחירת-חדר ⇒ הזרימה של הפאנל)
         Row(children: [
-          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
           const SizedBox(width: 6),
@@ -1104,7 +1105,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
             ForgeContactTile(fields: [weekly ? 'הזמנה-חוזרת (שבועית) · ${r['name']}' : 'הזמן-חדר · ${r['name']}', 'בחר יום ומשבצת פנויה · ${_RoomsData.roomInfo(r)}']),
             _gap(8),
-            DsField(label: 'כותרת', hint: 'למה החדר נדרש', value: title, onChanged: (v) => title = v),
+            ForgeDsField(state: (title).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['כותרת', ''], control: DsField(label: 'כותרת', hint: 'למה החדר נדרש', value: title, onChanged: (v) => title = v, bare: true)),
             SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in dayNames()) [s]], selected: {day}, onSelect: (i) => setB(() => day = i))),
             _gap(8),
             if (blocked != null)
@@ -1133,7 +1134,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
         child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
           ForgeContactTile(fields: ['דווח-תקלה · ${r['name']}', 'תקלה-חמורה ⇒ החדר לא-זמין + העברת-שיעורים']),
           _gap(8),
-          DsField(label: 'תיאור', hint: 'מה התקלה', value: name, onChanged: (v) => name = v),
+          ForgeDsField(state: (name).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['תיאור', ''], control: DsField(label: 'תיאור', hint: 'מה התקלה', value: name, onChanged: (v) => name = v, bare: true)),
           ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in sevs) [s]], selected: {sev}, onSelect: (i) => setB(() => sev = i)),
           _h('ציוד מעורב (אופציונלי)'),
           _wrap([for (final k in _RoomsData.eqOf(r).keys) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setB(() => detail = detail == k ? '' : k), child: ForgeSoftButton(fields: [detail == k ? '✔ $k' : k]))]),

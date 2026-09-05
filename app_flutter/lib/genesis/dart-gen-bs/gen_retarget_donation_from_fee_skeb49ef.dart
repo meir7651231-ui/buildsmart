@@ -93,6 +93,7 @@ import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במו
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומים-טהורים (חוק-6: צבע=הצבה)
@@ -828,9 +829,7 @@ class _DonationScreenState extends State<DonationScreen> {
     final trend = _DonationData.collectionTrend(all);
     final thisMonth = _DonationData.collectedInMonth(all, monthKey(_DonationData.today));
 
-    return DsScaffold(
-      title: 'גבייה ותשלומים', subtitle: '${all.length} משפחות · ${_DonationData.year} · $_roleName', icon: '💰',
-      children: [
+    return DsScaffold(title: 'גבייה ותשלומים', subtitle: '${all.length} משפחות · ${_DonationData.year} · $_roleName', icon: '💰', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'גבייה ותשלומים', '${all.length} משפחות · ${_DonationData.year} · $_roleName']), ...[
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות (roleOf⊕canGrantedAction)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -843,7 +842,7 @@ class _DonationScreenState extends State<DonationScreen> {
         ],
         // פס-עליון: חיפוש (DsSearch) · רענון · חיוב-חדש · רישום-תשלום · ייצוא — מגודרים פר-הרשאה
         Row(children: [
-          Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
+          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
           if (_DonationData.can(_role, 'fees.charge')) ...[
@@ -980,13 +979,12 @@ class _DonationScreenState extends State<DonationScreen> {
               ForgeTitledSection(fields: ['${secTitle[st]} · ${buckets[st]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
                 for (final f in buckets[st]!) _row(f),
               ]])),
-      ],
-    );
+      ]]);
   }
 
   Widget _enum(String label, List<String> options, String value, void Function(String) on) => SizedBox(
         width: 170,
-        child: DsEnumField(label: label, options: options, value: value, onChanged: on),
+        child: ForgeDsEnumField(fields: [label], control: DsEnumField(label: label, options: options, value: value, onChanged: on, bare: true)),
       );
 
   void _refresh() {
@@ -1480,14 +1478,14 @@ class _DonationScreenState extends State<DonationScreen> {
               child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                   const ForgeContactTile(fields: ['חיוב חדש / חיוב-מרוכז', 'סוג · סכום · תאריך · עבור-מי — או מרוכז לכל כיתה']),
                   _gap(8),
-                  DsEnumField(label: 'משפחה', options: [for (final x in _DonationData.families) '${x['name']}'], value: '${f['name']}', onChanged: (v) => setSheet(() => fam = _DonationData.families.firstWhere((x) => x['name'] == v)['id'] as String)),
-                  DsEnumField(label: 'עבור-מי', options: members, value: member, onChanged: (v) => setSheet(() => member = v)),
-                  DsEnumField(label: 'סוג-חיוב', options: _DonationData.chargeTypes, value: cat, onChanged: (v) => setSheet(() => cat = v)),
-                  DsNumberField(label: 'סכום (₪)', value: amount, onChanged: (v) => amount = v),
-                  DsDateField(label: 'תאריך', value: date, onChanged: (v) => setSheet(() => date = v)),
-                  DsField(label: 'הערה', hint: 'למשל: טיול שנתי / שם-חוג', value: note, onChanged: (v) => note = v),
+                  ForgeDsEnumField(fields: ['משפחה'], control: DsEnumField(label: 'משפחה', options: [for (final x in _DonationData.families) '${x['name']}'], value: '${f['name']}', onChanged: (v) => setSheet(() => fam = _DonationData.families.firstWhere((x) => x['name'] == v)['id'] as String), bare: true)),
+                  ForgeDsEnumField(fields: ['עבור-מי'], control: DsEnumField(label: 'עבור-מי', options: members, value: member, onChanged: (v) => setSheet(() => member = v), bare: true)),
+                  ForgeDsEnumField(fields: ['סוג-חיוב'], control: DsEnumField(label: 'סוג-חיוב', options: _DonationData.chargeTypes, value: cat, onChanged: (v) => setSheet(() => cat = v), bare: true)),
+                  ForgeDsNumberField(fields: ['סכום (₪)'], control: DsNumberField(label: 'סכום (₪)', value: amount, onChanged: (v) => amount = v, bare: true)),
+                  ForgeDsDateFieldInput(fields: ['תאריך'], control: DsDateField(label: 'תאריך', value: date, onChanged: (v) => setSheet(() => date = v), bare: true)),
+                  ForgeDsField(state: (note).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['הערה', ''], control: DsField(label: 'הערה', hint: 'למשל: טיול שנתי / שם-חוג', value: note, onChanged: (v) => note = v, bare: true)),
                   _gap(6),
-                  DsEnumField(label: 'חיוב-מרוכז לכיתה (אופציונלי)', options: ['', ...grades], value: bulk, onChanged: (v) => setSheet(() => bulk = v)),
+                  ForgeDsEnumField(fields: ['חיוב-מרוכז לכיתה (אופציונלי)'], control: DsEnumField(label: 'חיוב-מרוכז לכיתה (אופציונלי)', options: ['', ...grades], value: bulk, onChanged: (v) => setSheet(() => bulk = v), bare: true)),
                   _gap(10),
                   DsPrimaryButton(label: bulk.isEmpty ? 'שמור חיוב' : 'חיוב-מרוכז לכל $bulk', onTap: () {
                     final a = int.tryParse(amount.trim()) ?? 0;
@@ -1530,11 +1528,11 @@ class _DonationScreenState extends State<DonationScreen> {
               child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                   ForgeContactTile(fields: ['רישום תשלום', 'יתרה נוכחית ${_m(bal)} · המסך רושם — אינו סולק']),
                   _gap(8),
-                  DsEnumField(label: 'משפחה', options: [for (final x in _DonationData.families) '${x['name']}'], value: '${f['name']}', onChanged: (v) => setSheet(() => fam = _DonationData.families.firstWhere((x) => x['name'] == v)['id'] as String)),
-                  DsEnumField(label: 'אמצעי', options: _DonationData.payMethodsSchool, value: method, onChanged: (v) => setSheet(() => method = v)),
-                  DsNumberField(label: 'סכום (₪) · ריק = מלוא-היתרה', value: amount, onChanged: (v) => amount = v),
-                  DsDateField(label: 'תאריך', value: date, onChanged: (v) => setSheet(() => date = v)),
-                  DsField(label: 'הערה / אסמכתא', hint: 'אסמכתת-העברה (לא מס׳-קבלה)', value: note, onChanged: (v) => note = v),
+                  ForgeDsEnumField(fields: ['משפחה'], control: DsEnumField(label: 'משפחה', options: [for (final x in _DonationData.families) '${x['name']}'], value: '${f['name']}', onChanged: (v) => setSheet(() => fam = _DonationData.families.firstWhere((x) => x['name'] == v)['id'] as String), bare: true)),
+                  ForgeDsEnumField(fields: ['אמצעי'], control: DsEnumField(label: 'אמצעי', options: _DonationData.payMethodsSchool, value: method, onChanged: (v) => setSheet(() => method = v), bare: true)),
+                  ForgeDsNumberField(fields: ['סכום (₪) · ריק = מלוא-היתרה'], control: DsNumberField(label: 'סכום (₪) · ריק = מלוא-היתרה', value: amount, onChanged: (v) => amount = v, bare: true)),
+                  ForgeDsDateFieldInput(fields: ['תאריך'], control: DsDateField(label: 'תאריך', value: date, onChanged: (v) => setSheet(() => date = v), bare: true)),
+                  ForgeDsField(state: (note).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['הערה / אסמכתא', ''], control: DsField(label: 'הערה / אסמכתא', hint: 'אסמכתת-העברה (לא מס׳-קבלה)', value: note, onChanged: (v) => note = v, bare: true)),
                   _gap(10),
                   DsPrimaryButton(label: 'רשום תשלום', onTap: () {
                     final a = amount.trim().isEmpty ? bal : (int.tryParse(amount.trim()) ?? 0);

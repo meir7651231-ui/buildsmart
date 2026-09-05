@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'ds.dart';
 
 class DsDateField extends StatelessWidget {
-  const DsDateField({required this.label, required this.value, required this.onChanged, super.key});
+  const DsDateField({required this.label, required this.value, required this.onChanged, this.bare = false, super.key});
   final String label, value;
   final ValueChanged<String> onChanged;
+  /// G13c · bare=true ⇒ בורר-התאריך בלבד (בלי תווית/ריפוד). false ⇒ ביט-זהה.
+  final bool bare;
 
   static String _two(int n) => n < 10 ? '0$n' : '$n';
 
@@ -25,11 +27,11 @@ class DsDateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: bare ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
+            if (!bare) Padding(
               padding: const EdgeInsets.only(right: 2, bottom: 6),
               child: Text(label, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w600)),
             ),

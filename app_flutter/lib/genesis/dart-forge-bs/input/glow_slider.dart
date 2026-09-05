@@ -24,7 +24,7 @@ class ForgeGlowSlider extends StatelessWidget {
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    final Widget body = Container(padding: const EdgeInsets.fromLTRB(4, 14, 4, 6), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [(control ?? Container(constraints: const BoxConstraints(minHeight: 44), child: Align(alignment: Alignment.centerRight, child: Text("58", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13))))), const SizedBox(height: 12), Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "58"), textAlign: TextAlign.center, style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 11)))]), child));
+    final Widget body = Container(padding: const EdgeInsets.fromLTRB(4, 14, 4, 6), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [(control == null ? Container(constraints: const BoxConstraints(minHeight: 44), child: Align(alignment: Alignment.centerRight, child: Text("58", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13)))) : control!), const SizedBox(height: 12), Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "58"), textAlign: TextAlign.center, style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 11)))]), child));
     return body;
   }
 }
