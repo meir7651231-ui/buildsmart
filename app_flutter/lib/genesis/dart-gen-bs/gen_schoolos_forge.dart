@@ -1,5 +1,5 @@
-// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile
-//   החלפות: stat×0 · hero×1 · statRow×25 · kpi×2 · navTile×9 · button×11 · statusChip×3 · banner×6 · emptyState×2 · mediaRow×4 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow
+//   החלפות: stat×0 · hero×1 · statRow×25 · kpi×2 · navTile×9 · button×11 · statusChip×3 · banner×6 · emptyState×2 · mediaRow×4 · section×4 · segmented×3 · meter×3 · frame×4 · timeline×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS — בנייה מאפס לפי THE-WAY הנכון (פעולה-ראשונה · הרכבה-תמיד).
 // כל מסך: מטרה → פעולות-יסוד הכי-מתאימות → הרכבה (תמיד כמה) → חיווט → אימות-מול-המטרה.
 // בוחרים פעולת-יסוד, לא "אטום"; האטום רק מגלם. לעולם אין אטום-אחד שמשרת מטרה מקסימלית.
@@ -54,6 +54,9 @@ import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat דורש הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -94,7 +97,7 @@ class _Home extends StatelessWidget {
             SizedBox(width: 168, child: ForgeStatPlain(fields: ['מלאי לא-יספיק', '${_InvData.urgent}'])),
           ]),
           const SizedBox(height: 8),
-          DsSection(title: 'כלים', children: [
+          ForgeTitledSection(fields: ['כלים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const DashboardScreen()), child: ForgeHubTile(fields: ['לוח-הנהלה', 'מה דורש החלטה היום — נגזרת של כל המודולים'])),
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const StudentsScreen()), child: ForgeHubTile(fields: ['תלמידים', 'תיק-תלמיד · סיכון · שיבוץ · מעבר-שנה'])),
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const AttendanceScreen()), child: ForgeHubTile(fields: ['נוכחות', 'מי חסר עכשיו · חיסורים · השלמות'])),
@@ -104,7 +107,7 @@ class _Home extends StatelessWidget {
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const FeesScreen()), child: ForgeHubTile(fields: ['גבייה', 'חובות · הסדרים · תזכורות (אפס-קבלה)'])),
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ParentsScreen()), child: ForgeHubTile(fields: ['הורים', 'קשר · שידור · הסכמות'])),
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const _Inventory()), child: ForgeHubTile(fields: ['מלאי', 'ימים-עד-ריקון מול אספקה — שלא ייגמר'])),
-          ]),
+          ]])),
         ],
       );
 }
@@ -422,11 +425,7 @@ class _InventoryState extends State<_Inventory> {
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות פר-תפקיד (roleOf⊕canGrantedAction)
         Align(
           alignment: Alignment.centerRight,
-          child: SegmentedSwitch(
-            items: [for (final r in _InvData.roleDefs) r['label'] as String],
-            selected: _role,
-            onSelect: (i) => setState(() => _role = i),
-          ),
+          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _InvData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i)),
         ),
         _gap(10),
         // פס-עליון: חיפוש-מבוקר (DsSearch) + יצירה + ייצוא — מגודרים פר-הרשאה (canGrantedAction)
@@ -454,8 +453,7 @@ class _InventoryState extends State<_Inventory> {
         ]),
         const SizedBox(height: 12),
         // KPI-8: hero=דורשי-פעולה (המטרה) + 8 מדדי-מצב (BareStat, נושאי-ערך-אמת)
-        GradientCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['פריטים דורשי-הזמנה', '$urgentAll'])),
             const SizedBox(height: 14),
             Row(children: [
@@ -471,8 +469,7 @@ class _InventoryState extends State<_Inventory> {
               Expanded(child: ForgeStatPlain(fields: ['🐌 איטיים', '$slowN'])),
               Expanded(child: ForgeStatPlain(fields: ['⏳ פקיעה', '$expN'])),
             ]),
-          ]),
-        ),
+          ])),
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — פקיעה + מלאי-מת
         if (_InvData.expiringList.isNotEmpty) ...[
@@ -486,7 +483,7 @@ class _InventoryState extends State<_Inventory> {
         // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (כל-העמודות)
         Align(
           alignment: Alignment.centerRight,
-          child: SegmentedSwitch(items: const ['🎯 חכם', '📋 טבלה', '📜 תנועות'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['🎯 חכם', '📋 טבלה', '📜 תנועות']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i)),
         ),
         const SizedBox(height: 10),
         // מצבי-מסך שמורים (מקום-שמור): טעינה + שגיאה מאירים במצב-אמת; אחרת התוכן הרגיל.
@@ -503,13 +500,13 @@ class _InventoryState extends State<_Inventory> {
         else
           for (final st in const [2, 1, 0, -1])
             if (buckets[st]!.isNotEmpty)
-              DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
+              ForgeTitledSection(fields: ['${secTitle[st]} · ${buckets[st]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
                 for (final s in buckets[st]!) _row(s),
-              ]),
+              ]])),
         // מצב-מיוחד: פריטים לא-פעילים (StatusChip תג + ▶ הפעל מגודר-הרשאה) — מחוץ לתפעול
         if (_InvData.inactiveItems.isNotEmpty && _mode != 2) ...[
           _gap(10),
-          DsSection(title: '🚫 לא-פעילים · ${_InvData.inactiveItems.length}', tone: 0, children: [
+          ForgeTitledSection(fields: ['🚫 לא-פעילים · ${_InvData.inactiveItems.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
             for (final s in _InvData.inactiveItems)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
@@ -522,7 +519,7 @@ class _InventoryState extends State<_Inventory> {
                   ],
                 ]),
               ),
-          ]),
+          ]])),
         ],
       ],
     );
@@ -560,7 +557,7 @@ class _InventoryState extends State<_Inventory> {
     final log = intakeLog(_InvData.movDb);
     final rows = log['rows'] as List;
     final totalCost = (log['totalCost'] as num).toInt();
-    return DsSection(title: '📜 יומן-תנועות · ${rows.length} · Σ ${shekel(totalCost)}', children: [
+    return ForgeTitledSection(fields: ['📜 יומן-תנועות · ${rows.length} · Σ ${shekel(totalCost)}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
       for (final r in rows)
         () {
           final intake = (r as Map)['intake'] as Map;
@@ -568,13 +565,9 @@ class _InventoryState extends State<_Inventory> {
           final k = intake['kind'];
           final kind = k == 'donation' ? '🎁 תרומה-בעין' : k == 'issue' ? '📤 הוצאה' : k == 'count' ? '🔢 ספירה' : '🛒 קליטה';
           final cost = (intake['cost'] as num).toInt();
-          return TimelineItem(
-            title: '$kind · $name',
-            time: '${intake['date']}',
-            body: '${intake['qty']} ${_InvData.items.firstWhere((s) => s['name'] == name, orElse: () => const {'unit': 'יח׳'})['unit'] ?? 'יח׳'} · ${intake['source']}${cost > 0 ? ' · ${shekel(cost)}' : ''}',
-          );
+          return ForgeNotifRow(items: [['$kind · $name', '${intake['date']}']]);
         }(),
-    ]);
+    ]]));
   }
 
   // 📋 מבט-טבלה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid (מזייף int rows).
@@ -633,11 +626,10 @@ class _InventoryState extends State<_Inventory> {
             initialChildSize: 0.72, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
             builder: (ctx, scroll) => Padding(
               padding: const EdgeInsets.all(12),
-              child: GlassCard(
-                child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+              child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                   ForgeContactTile(fields: [name, '${s['sku'] ?? ''} · ${s['cat'] ?? ''} · ${s['unit'] ?? ''}']),
                   _gap(12),
-                  StatRow(label: 'מלאי מול יעד', value: '$cur מתוך $target', fraction: target == 0 ? 0 : (cur / target).clamp(0.0, 1.0)),
+                  ForgeLinearProgressStatus(fields: ['מלאי מול יעד', '$cur מתוך $target'], values: [target == 0 ? 0 : (cur / target).clamp(0.0, 1.0)]),
                   _gap(10),
                   Row(children: [
                     Expanded(child: ForgeStatPlain(fields: ['ביד', '$cur'])),
@@ -669,8 +661,7 @@ class _InventoryState extends State<_Inventory> {
                     const ForgeSearchEmptyState(fields: ['אין תנועות רשומות לפריט', ''])
                   else
                     for (final r in moves) _moveTile((r as Map)['intake'] as Map, s),
-                ]),
-              ),
+                ])),
             ),
           );
         },
@@ -691,8 +682,7 @@ class _InventoryState extends State<_Inventory> {
         initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
         builder: (ctx, scroll) => Padding(
           padding: const EdgeInsets.all(12),
-          child: GlassCard(
-            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+          child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
               ForgeContactTile(fields: ['ייצוא CSV', '${items.length} פריטים · ${_InvData.csvHeaderLen} עמודות']),
               _gap(10),
               if (!allowed)
@@ -706,8 +696,7 @@ class _InventoryState extends State<_Inventory> {
                   child: SelectableText(csv, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
                 ),
               ],
-            ]),
-          ),
+            ])),
         ),
       ),
     );
@@ -718,11 +707,7 @@ class _InventoryState extends State<_Inventory> {
     final k = intake['kind'];
     final kind = k == 'donation' ? '🎁 תרומה-בעין' : k == 'issue' ? '📤 הוצאה' : k == 'count' ? '🔢 ספירה' : '🛒 קליטה';
     final cost = (intake['cost'] as num).toInt();
-    return TimelineItem(
-      title: kind,
-      time: '${intake['date']}',
-      body: '${intake['qty']} ${s['unit'] ?? 'יח׳'} · ${intake['source']}${cost > 0 ? ' · ${shekel(cost)}' : ''}',
-    );
+    return ForgeNotifRow(items: [[kind, '${intake['date']}']]);
   }
 
   // המקום-השמור (חוק-7): לולאה גנרית מעל חוזה-התצוגה (_InvData.metaFields) — לא קוד-פר-שדה.
@@ -739,7 +724,7 @@ class _InventoryState extends State<_Inventory> {
 
   Widget _card(Widget inner) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: GradientCard(child: inner),
+        child: ForgeStripPanelFrame(fields: ['', ''], child: inner),
       );
 
   Widget _gap([double h = 10]) => SizedBox(height: h);
@@ -782,11 +767,7 @@ class _InventoryState extends State<_Inventory> {
       _gap(10),
       Align(
         alignment: Alignment.centerRight,
-        child: SegmentedSwitch(
-          items: const ['🎯 החלטה', '📊 ניתוח', '📦 מלאי'],
-          selected: sel,
-          onSelect: (i) => setState(() => _seg[name] = i),
-        ),
+        child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['🎯 החלטה', '📊 ניתוח', '📦 מלאי']) [s]], selected: {sel}, onSelect: (i) => setState(() => _seg[name] = i)),
       ),
       _gap(12),
       view,
@@ -836,7 +817,7 @@ class _InventoryState extends State<_Inventory> {
         Expanded(child: ForgeStatPlain(fields: ['מרווח מול הקו', '${margin.round()} י׳'])),
       ]),
       _gap(8),
-      StatRow(label: 'כיסוי זמן-האספקה', value: '${(suff * 100).round()}%', fraction: suff),
+      ForgeLinearProgressStatus(fields: ['כיסוי זמן-האספקה', '${(suff * 100).round()}%'], values: [suff]),
       _gap(10),
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['קצב צריכה', '${rate % 1 == 0 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(1)}/יום'])),
@@ -874,7 +855,7 @@ class _InventoryState extends State<_Inventory> {
     final cur = _InvData.curOf(s), target = s['target'] as int;
     final deficit = (target - cur).clamp(0, target);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      StatRow(label: 'מלאי מול יעד בריא', value: '$cur מתוך $target', fraction: target == 0 ? 0 : cur / target),
+      ForgeLinearProgressStatus(fields: ['מלאי מול יעד בריא', '$cur מתוך $target'], values: [target == 0 ? 0 : cur / target]),
       _gap(8),
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['חסר עד היעד', '$deficit'])),

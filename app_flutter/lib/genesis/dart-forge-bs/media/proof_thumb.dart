@@ -86,11 +86,18 @@ Path _parse(String d) {
 
 /// ProofThumb — seam:fields
 class ForgeProofThumb extends StatelessWidget {
-  const ForgeProofThumb({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  const ForgeProofThumb({super.key, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return AspectRatio(aspectRatio: 1.0000, child: Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [Color.lerp(skin.raised2, theme.a, 0.120)!, skin.sunken], stops: [0.0, 1.0]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: FractionallySizedBox(widthFactor: 0.380, child: FittedBox(fit: BoxFit.contain, child: SizedBox(width: 24, height: 24, child: Opacity(opacity: 0.8, child: CustomPaint(painter: _SvgScene([_Op.path("M12 3l7 4v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7z", skin.faint, false, 1.8), _Op.path("M9.5 12l1.8 1.8L15 10", skin.faint, false, 1.8)], 24, 24)))))))));
+    final Widget body = AspectRatio(aspectRatio: 1.0000, child: Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [Color.lerp(skin.raised2, theme.a, 0.120)!, skin.sunken], stops: [0.0, 1.0]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: _withChild(FractionallySizedBox(widthFactor: 0.380, child: FittedBox(fit: BoxFit.contain, child: SizedBox(width: 24, height: 24, child: Opacity(opacity: 0.8, child: CustomPaint(painter: _SvgScene([_Op.path("M12 3l7 4v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7z", skin.faint, false, 1.8), _Op.path("M9.5 12l1.8 1.8L15 10", skin.faint, false, 1.8)], 24, 24)))))), child))));
+    return body;
   }
 }

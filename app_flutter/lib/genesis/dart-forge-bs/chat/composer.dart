@@ -86,12 +86,27 @@ Path _parse(String d) {
 
 /// Composer — seam:self
 class ForgeComposer extends StatelessWidget {
-  const ForgeComposer({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13b · bare=true ⇒ ליבת-הבקרה בלי מסגרת-הגלריה של Pure (.ctl/.body/.stage); child נכנס לליבה. false ⇒ ביט-זהה לגלריה.
+  final bool bare;
+  /// G13a · שדה-חי (TextField וכו׳) במקום ציור-ה-input של הגלריה. null ⇒ הציור.
+  final Widget? control;
+  /// G13a · הקשה על כפתור/קישור k (סדר-הופעה, 1 פעולות).
+  final void Function(int)? onAction;
+  static const int actionSlots = 1;
+  const ForgeComposer({super.key, this.child, this.bare = false, this.control, this.onAction});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Expanded(child: Container(constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [SizedBox(width: 17, height: 17, child: CustomPaint(painter: _SvgScene([_Op.path("M21 12.5l-8 8a5 5 0 0 1-7-7l8.5-8.5a3 3 0 0 1 4.5 4.5L9 13.5", skin.mut, false, 1.8)], 24, 24)))]), Expanded(child: Container(constraints: const BoxConstraints(minHeight: 44), child: Align(alignment: Alignment.centerRight, child: Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)))))]))), Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999)), child: SizedBox(width: 18, height: 18, child: CustomPaint(painter: _SvgScene([_Op.path("M20 4L10 14", const Color(0xFF0B0B0D), false, 1.8), _Op.path("M20 4l-6 17-4-7-7-4z", const Color(0xFF0B0B0D), false, 1.8)], 24, 24))))]));
+    final Widget core = Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Expanded(child: Container(constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [SizedBox(width: 17, height: 17, child: CustomPaint(painter: _SvgScene([_Op.path("M21 12.5l-8 8a5 5 0 0 1-7-7l8.5-8.5a3 3 0 0 1 4.5 4.5L9 13.5", skin.mut, false, 1.8)], 24, 24)))]), Expanded(child: (control ?? Container(constraints: const BoxConstraints(minHeight: 44), child: Align(alignment: Alignment.centerRight, child: Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13))))))]))), GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(0), child: Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999)), child: SizedBox(width: 18, height: 18, child: CustomPaint(painter: _SvgScene([_Op.path("M20 4L10 14", const Color(0xFF0B0B0D), false, 1.8), _Op.path("M20 4l-6 17-4-7-7-4z", const Color(0xFF0B0B0D), false, 1.8)], 24, 24)))))]);
+    final Widget body = bare ? _withChild(core, child) : Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: _withChild(core, child));
+    return body;
   }
 }

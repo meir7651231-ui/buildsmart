@@ -91,12 +91,19 @@ class ForgeLogoMark extends StatelessWidget {
   static const int fieldSlots = 2;
   static const List<String> fieldDemo = <String>["Label", "META"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeLogoMark({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  const ForgeLogoMark({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(height: 88, alignment: Alignment.centerRight, child: Wrap(spacing: 14, runSpacing: 14, crossAxisAlignment: WrapCrossAlignment.center, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.path("M4 4h7v7H4z", const Color(0xFF0B0B0D), false, 1.8), _Op.path("M13 4h7v7h-7z", const Color(0xFF0B0B0D).withValues(alpha: 0.65), false, 1.8), _Op.path("M4 13h7v7H4z", const Color(0xFF0B0B0D).withValues(alpha: 0.65), false, 1.8), _Op.circle(16.5, 16.5, 3.5, const Color(0xFF0B0B0D), false, 1.8)], 24, 24)))), Directionality(textDirection: TextDirection.ltr, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serif, fontFamilyFallback: [fonts.serifHe], fontSize: 19, fontWeight: FontWeight.w700, letterSpacing: -0.19)), Text(_f(1, "META"), style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 8.5, fontWeight: FontWeight.w600, letterSpacing: 2.5))]))])]));
+    final Widget body = Container(height: 88, alignment: Alignment.centerRight, child: Wrap(spacing: 14, runSpacing: 14, crossAxisAlignment: WrapCrossAlignment.center, children: [_withChild(Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.path("M4 4h7v7H4z", const Color(0xFF0B0B0D), false, 1.8), _Op.path("M13 4h7v7h-7z", const Color(0xFF0B0B0D).withValues(alpha: 0.65), false, 1.8), _Op.path("M4 13h7v7H4z", const Color(0xFF0B0B0D).withValues(alpha: 0.65), false, 1.8), _Op.circle(16.5, 16.5, 3.5, const Color(0xFF0B0B0D), false, 1.8)], 24, 24)))), Directionality(textDirection: TextDirection.ltr, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serif, fontFamilyFallback: [fonts.serifHe], fontSize: 19, fontWeight: FontWeight.w700, letterSpacing: -0.19)), Text(_f(1, "META"), style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 8.5, fontWeight: FontWeight.w600, letterSpacing: 2.5))]))]), child)]));
+    return body;
   }
 }

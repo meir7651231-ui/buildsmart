@@ -86,12 +86,22 @@ Path _parse(String d) {
 
 /// MapSurface — seam:fields
 class ForgeMapSurface extends StatelessWidget {
-  const ForgeMapSurface({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13b · bare=true ⇒ ליבת-הבקרה בלי מסגרת-הגלריה של Pure (.ctl/.body/.stage); child נכנס לליבה. false ⇒ ביט-זהה לגלריה.
+  final bool bare;
+  const ForgeMapSurface({super.key, this.child, this.bare = false});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: LayoutBuilder(builder: (ctx, cns) { final _w = cns.maxWidth.isFinite ? cns.maxWidth : 440.0; return SizedBox(width: _w, height: _w / 1.8803, child: CustomPaint(painter: _SvgScene([_Op.line(0, 58, 440, 58, skin.hair2, 1.8), _Op.line(0, 117, 440, 117, skin.hair2, 1.8), _Op.line(0, 176, 440, 176, skin.hair2, 1.8), _Op.line(88, 0, 88, 234, skin.hair2, 1.8), _Op.line(176, 0, 176, 234, skin.hair2, 1.8), _Op.line(264, 0, 264, 234, skin.hair2, 1.8), _Op.line(352, 0, 352, 234, skin.hair2, 1.8), _Op.path("M40 150 C70 96 120 84 168 104 C210 121 214 70 268 74 C332 79 356 118 402 108 L420 150 C388 196 300 210 236 196 C168 181 92 210 52 182 Z", const Color(0x08ECE9E2), true, 1), _Op.path("M 66 178 L 150 120 L 232 150 L 322 92 L 398 120", theme.a.withValues(alpha: 0.90), false, 2), _Op.circle(66, 178, 3, theme.aHi, true, 1.8), _Op.circle(232, 150, 3, theme.aHi, true, 1.8), _Op.circle(398, 120, 3, theme.aHi, true, 1.8), _Op.path("M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z", skin.surface, true, 1.6), _Op.circle(0, -16, 3.6, theme.a, true, 1.8), _Op.path("M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z", skin.surface, true, 1.6), _Op.circle(0, -16, 3.6, theme.a, true, 1.8), _Op.path("M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z", theme.a, true, 2), _Op.circle(0, -16, 3.6, const Color(0xFF0B0B0D), true, 1.8), _Op.circle(0, 0, 15, theme.a, true, 1.8), _Op.text("12", 0, 0, 12, const Color(0xFF0B0B0D), 1, fonts.grotesk)], 440, 234))); })));
+    final Widget core = Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: LayoutBuilder(builder: (ctx, cns) { final _w = cns.maxWidth.isFinite ? cns.maxWidth : 440.0; return SizedBox(width: _w, height: _w / 1.8803, child: CustomPaint(painter: _SvgScene([_Op.line(0, 58, 440, 58, skin.hair2, 1.8), _Op.line(0, 117, 440, 117, skin.hair2, 1.8), _Op.line(0, 176, 440, 176, skin.hair2, 1.8), _Op.line(88, 0, 88, 234, skin.hair2, 1.8), _Op.line(176, 0, 176, 234, skin.hair2, 1.8), _Op.line(264, 0, 264, 234, skin.hair2, 1.8), _Op.line(352, 0, 352, 234, skin.hair2, 1.8), _Op.path("M40 150 C70 96 120 84 168 104 C210 121 214 70 268 74 C332 79 356 118 402 108 L420 150 C388 196 300 210 236 196 C168 181 92 210 52 182 Z", const Color(0x08ECE9E2), true, 1), _Op.path("M 66 178 L 150 120 L 232 150 L 322 92 L 398 120", theme.a.withValues(alpha: 0.90), false, 2), _Op.circle(66, 178, 3, theme.aHi, true, 1.8), _Op.circle(232, 150, 3, theme.aHi, true, 1.8), _Op.circle(398, 120, 3, theme.aHi, true, 1.8), _Op.path("M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z", skin.surface, true, 1.6), _Op.circle(0, -16, 3.6, theme.a, true, 1.8), _Op.path("M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z", skin.surface, true, 1.6), _Op.circle(0, -16, 3.6, theme.a, true, 1.8), _Op.path("M0 0 C-9 -15 -9 -24 0 -24 C9 -24 9 -15 0 0 Z", theme.a, true, 2), _Op.circle(0, -16, 3.6, const Color(0xFF0B0B0D), true, 1.8), _Op.circle(0, 0, 15, theme.a, true, 1.8), _Op.text("12", 0, 0, 12, const Color(0xFF0B0B0D), 1, fonts.grotesk)], 440, 234))); }));
+    final Widget body = bare ? _withChild(core, child) : Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: _withChild(core, child));
+    return body;
   }
 }

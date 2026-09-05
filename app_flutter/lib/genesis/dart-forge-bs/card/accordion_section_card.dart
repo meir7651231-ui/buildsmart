@@ -91,11 +91,19 @@ class ForgeAccordionSectionCard extends StatelessWidget {
   static const int fieldSlots = 2;
   static const List<String> fieldDemo = <String>["Label", "Meta"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeAccordionSectionCard({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  static Widget _hide(String s, Widget w) => s.isEmpty ? const SizedBox.shrink() : w;   // G13a · חריץ-ריק ⇒ הקופסה נעלמת
+  const ForgeAccordionSectionCard({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.fromLTRB(15, 13, 15, 13), child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [Flexible(child: Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontSize: 13, fontWeight: FontWeight.w600, fontFamily: fonts.he), overflow: TextOverflow.ellipsis, softWrap: false)), SizedBox(width: 13, height: 13, child: CustomPaint(painter: _SvgScene([_Op.path("M6 9l6 6 6-6", skin.faint, false, 1.8)], 24, 24)))])), Container(padding: const EdgeInsets.fromLTRB(15, 0, 15, 13), child: Text(_f(1, "Meta"), style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he)))]));
+    final Widget body = Container(decoration: BoxDecoration(color: skin.surface, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(14)), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.fromLTRB(15, 13, 15, 13), child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [Flexible(child: Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontSize: 13, fontWeight: FontWeight.w600, fontFamily: fonts.he), overflow: TextOverflow.ellipsis, softWrap: false)), SizedBox(width: 13, height: 13, child: CustomPaint(painter: _SvgScene([_Op.path("M6 9l6 6 6-6", skin.faint, false, 1.8)], 24, 24)))])), _hide(_f(1, "Meta"), Container(padding: const EdgeInsets.fromLTRB(15, 0, 15, 13), child: Text(_f(1, "Meta"), style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he))))]), child));
+    return body;
   }
 }

@@ -91,12 +91,19 @@ class ForgeRadialGaugeStatus extends StatelessWidget {
   static const int fieldSlots = 2;
   static const List<String> fieldDemo = <String>["72", "LABEL"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeRadialGaugeStatus({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  const ForgeRadialGaugeStatus({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(0, 4, 0, 4), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Wrap(spacing: 20, runSpacing: 20, crossAxisAlignment: WrapCrossAlignment.center, children: [Container(width: 112, height: 112, child: Stack(clipBehavior: Clip.none, children: [LayoutBuilder(builder: (ctx, cns) { final _w = cns.maxWidth.isFinite ? cns.maxWidth : 112.0; return SizedBox(width: _w, height: _w / 1.0000, child: CustomPaint(painter: _SvgScene([_Op.circle(56, 56, 46, skin.sunken, false, 9), _Op.arc(56, 56, 46, -1.5708, 4.5435, theme.a, 9)], 112, 112))); }), Positioned.fill(child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Text.rich(TextSpan(children: [TextSpan(text: _f(0, "72"), style: TextStyle(color: skin.ink, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 23, fontWeight: FontWeight.w700, height: 1, leadingDistribution: TextLeadingDistribution.even)), TextSpan(text: _f(1, "LABEL"), style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 8.5, letterSpacing: 1))]), textAlign: TextAlign.center)))]))])));
+    final Widget body = Container(padding: const EdgeInsets.fromLTRB(0, 4, 0, 4), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: _withChild(Wrap(spacing: 20, runSpacing: 20, crossAxisAlignment: WrapCrossAlignment.center, children: [Container(width: 112, height: 112, child: Stack(clipBehavior: Clip.none, children: [LayoutBuilder(builder: (ctx, cns) { final _w = cns.maxWidth.isFinite ? cns.maxWidth : 112.0; return SizedBox(width: _w, height: _w / 1.0000, child: CustomPaint(painter: _SvgScene([_Op.circle(56, 56, 46, skin.sunken, false, 9), _Op.arc(56, 56, 46, -1.5708, 4.5435, theme.a, 9)], 112, 112))); }), Positioned.fill(child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Text.rich(TextSpan(children: [TextSpan(text: _f(0, "72"), style: TextStyle(color: skin.ink, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 23, fontWeight: FontWeight.w700, height: 1, leadingDistribution: TextLeadingDistribution.even)), TextSpan(text: _f(1, "LABEL"), style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 8.5, letterSpacing: 1))]), textAlign: TextAlign.center)))]))]), child)));
+    return body;
   }
 }

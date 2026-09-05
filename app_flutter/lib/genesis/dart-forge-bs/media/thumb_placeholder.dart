@@ -91,11 +91,18 @@ class ForgeThumbPlaceholder extends StatelessWidget {
   static const int fieldSlots = 1;
   static const List<String> fieldDemo = <String>["no media"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeThumbPlaceholder({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  const ForgeThumbPlaceholder({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(constraints: const BoxConstraints(minHeight: 120), padding: const EdgeInsets.fromLTRB(22, 22, 22, 22), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair, width: 1.5), borderRadius: BorderRadius.circular(12)), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: [SizedBox(width: 30, height: 30, child: CustomPaint(painter: _SvgScene([_Op.rect(3, 4, 18, 16, 2.5, skin.faint, false, 1.8), _Op.path("M3 16l5-4 4 3 3-2 6 4", skin.faint.withValues(alpha: 0.60), false, 1.8), _Op.path("M4 4l16 16", skin.faint, false, 1.8)], 24, 24))), Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "no media"), style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10)))])));
+    final Widget body = Container(constraints: const BoxConstraints(minHeight: 120), padding: const EdgeInsets.fromLTRB(22, 22, 22, 22), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair, width: 1.5), borderRadius: BorderRadius.circular(12)), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 8, children: [SizedBox(width: 30, height: 30, child: CustomPaint(painter: _SvgScene([_Op.rect(3, 4, 18, 16, 2.5, skin.faint, false, 1.8), _Op.path("M3 16l5-4 4 3 3-2 6 4", skin.faint.withValues(alpha: 0.60), false, 1.8), _Op.path("M4 4l16 16", skin.faint, false, 1.8)], 24, 24))), Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "no media"), style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10)))]), child)));
+    return body;
   }
 }

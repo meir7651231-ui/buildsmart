@@ -11,11 +11,21 @@ class ForgeFilledCtaButton extends StatelessWidget {
   static const int fieldSlots = 1;
   static const List<String> fieldDemo = <String>["Action"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeFilledCtaButton({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13a · הקשה על כפתור/קישור k (סדר-הופעה, 1 פעולות).
+  final void Function(int)? onAction;
+  static const int actionSlots = 1;
+  const ForgeFilledCtaButton({super.key, this.fields, this.child, this.onAction});
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(height: 50, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a, theme.a800], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(13), boxShadow: [BoxShadow(color: const Color(0x66000000), offset: const Offset(0, 1), blurRadius: 2, spreadRadius: 0), BoxShadow(color: theme.gl, offset: const Offset(0, 7), blurRadius: 18, spreadRadius: 0)]), child: Center(widthFactor: 1.0, child: Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [Padding(padding: const EdgeInsets.fromLTRB(24, 0, 24, 0), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [Text(_f(0, "Action"), style: TextStyle(color: const Color(0xFF0B0B0D), fontFamily: fonts.he, fontSize: 15, fontWeight: FontWeight.w700))])), Positioned(top: 0, left: 0, right: 0, child: Container(height: 1.2, decoration: BoxDecoration(gradient: LinearGradient(colors: [const Color(0x00000000), const Color(0xB3FFFFFF), const Color(0x00000000)], begin: Alignment.centerLeft, end: Alignment.centerRight))))])));
+    final Widget body = GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(0), child: Container(height: 50, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a, theme.a800], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(13), boxShadow: [BoxShadow(color: const Color(0x66000000), offset: const Offset(0, 1), blurRadius: 2, spreadRadius: 0), BoxShadow(color: theme.gl, offset: const Offset(0, 7), blurRadius: 18, spreadRadius: 0)]), child: Center(widthFactor: 1.0, child: _withChild(Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [Padding(padding: const EdgeInsets.fromLTRB(24, 0, 24, 0), child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [Text(_f(0, "Action"), style: TextStyle(color: const Color(0xFF0B0B0D), fontFamily: fonts.he, fontSize: 15, fontWeight: FontWeight.w700))])), Positioned(top: 0, left: 0, right: 0, child: Container(height: 1.2, decoration: BoxDecoration(gradient: LinearGradient(colors: [const Color(0x00000000), const Color(0xB3FFFFFF), const Color(0x00000000)], begin: Alignment.centerLeft, end: Alignment.centerRight))))]), child))));
+    return body;
   }
 }

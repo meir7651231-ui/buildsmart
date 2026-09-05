@@ -1,5 +1,5 @@
-// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile
-//   החלפות: stat×0 · hero×1 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow
+//   החלפות: stat×0 · hero×1 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · section×15 · segmented×1 · meter×3 · frame×5 · timeline×3 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 📊 SchoolOS · לוח-הנהלה (DASHBOARD) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-DASHBOARD-FULL-2026-09-04.
 // 🎯 המטרה: שהמנהל/ת יפתח את הבוקר ותוך 30 שניות יידע: מה דורש-החלטה היום · מה בסיכון · מה מגמתי · מה הפעולה-הראשונה.
 // 🔒 גבול-חרוט: הלוח = נגזרת-טהורה של כל המודולים. אפס נתון-חדש, אפס-כתיבה. המודולים מוזרקים כשקעי-קלט
@@ -67,6 +67,9 @@ import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 const _danger = Color(0xFFF43F5E);
@@ -566,7 +569,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
   Widget _seg(List<String> items, int sel, ValueChanged<int> on) => Align(
         alignment: Alignment.centerRight,
-        child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SegmentedSwitch(items: items, selected: sel, onSelect: on)),
+        child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in items) [s]], selected: {sel}, onSelect: on)),
       );
   Widget _wrap(List<Widget> kids, {double top = 6}) => Padding(padding: EdgeInsets.only(top: top, right: 4), child: Wrap(spacing: 8, runSpacing: 6, children: kids));
   Widget _title(String s) => Text(s, style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800));
@@ -661,11 +664,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           if (red >= 3) ...[ForgeSectionPill(fields: ['אזעקה: $red משימות דורשות-החלטה היום · $breached SLA-פרוצים — התחל מ: ${firstAction?['title'] ?? ''}', '']), _gap(8)]
           else if (firstAction != null) ...[ForgeSectionPill(fields: ['הפעולה-הראשונה: ${firstAction['action']} — ${firstAction['title']}', '']), _gap(8)],
           // ── KPI · הערכת-בריאות: hero=דורש-החלטה · התקדמות (cockpitProgress) · 12 BareStat עם מקור-אמת/מקום-שמור ──
-          GradientCard(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['דורש-החלטה היום · ${open.length} פתוחות', '$red'])),
               const SizedBox(height: 10),
-              StatRow(label: 'התקדמות-הבוקר (טופלו מתוך התור)', value: '${prog['done']} / ${prog['total']}', fraction: (prog['total'] as int) == 0 ? 0 : (prog['done'] as int) / (prog['total'] as int)),
+              ForgeLinearProgressStatus(fields: ['התקדמות-הבוקר (טופלו מתוך התור)', '${prog['done']} / ${prog['total']}'], values: [(prog['total'] as int) == 0 ? 0 : (prog['done'] as int) / (prog['total'] as int)]),
               const SizedBox(height: 14),
               for (var r = 0; r < kpis.length; r += 4) ...[
                 Row(children: [
@@ -674,8 +676,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ]),
                 const SizedBox(height: 12),
               ],
-            ]),
-          ),
+            ])),
           const SizedBox(height: 8),
           // ── אוטומציות פרואקטיביות: קפיצת-מגמה · יעד-בסיכון · חג-קרוב (סנכרון-לוח) ──
           if (jump != null && jump <= -3) ...[ForgeSectionPill(fields: ['קפיצת-מגמה: נוכחות ירדה ${(-jump).toStringAsFixed(1)} נק׳ בשבוע האחרון (4 שבועות: ${d.series('attendance', 'weeklyPct')!.map((v) => '$v%').join(' · ')})', '']), _gap(8)],
@@ -719,7 +720,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         else
           for (final st in const [2, 1, 0, -1])
             if (buckets[st]!.isNotEmpty)
-              DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [for (final t in buckets[st]!) _row(t)]),
+              ForgeTitledSection(fields: ['${secTitle[st]} · ${buckets[st]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[for (final t in buckets[st]!) _row(t)]])),
       ];
 
   // שורת-משימה: MediaRow(כותרת) + עובדות-שבב (מאז · השפעה · SLA · אחראי · סטטוס) + פעולה-בלחיצה + פתיחת-פאנל
@@ -728,8 +729,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final due = d.dueIn(t);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: GlassCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      child: ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             Expanded(child: ForgeContactTile(fields: ['${t['title']}', '${t['moduleLabel']} · ${t['owner']} · ${due < 0 ? 'באיחור ${-due} י׳' : due == 0 ? 'יעד היום' : 'יעד בעוד $due י׳'}'])),
             IconButton(onPressed: () => _openPanel(t), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פרטים ופעולות'),
@@ -747,8 +747,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _open('${t['link']}'), child: ForgeSoftButton(fields: ['▶ ${t['action']}'])),
               GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.doneIds.add(t['id'] as String); d.log(t['owner'] as String, 'סימן בוצע: ${t['title']}'); }), child: ForgeSoftButton(fields: ['✅ בוצע'])),
             ], top: 8),
-        ]),
-      ),
+        ])),
     );
   }
 
@@ -763,7 +762,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // ═══ טאב-1 · KPI מלא: ערך + מקור + הצמדה + מקום-שמור ═══
   List<Widget> _kpiTab(List<Map<String, dynamic>> kpis) => [
-        DsSection(title: '📊 KPI חוצה-מוסד · ${kpis.length} · לפי מקור-אמת', children: [
+        ForgeTitledSection(fields: ['📊 KPI חוצה-מוסד · ${kpis.length} · לפי מקור-אמת', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           for (final k in kpis)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
@@ -773,10 +772,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => d.pinned.contains(k['key']) ? d.pinned.remove(k['key']) : d.pinned.add(k['key'] as String)), child: ForgeSoftButton(fields: [d.pinned.contains(k['key']) ? '📌 הסר' : '📌 הצמד']))),
               ]),
             ),
-        ]),
-        DsSection(title: '🧩 מקום-שמור · ${_DashData.reserved.length} יכולות ללא מקור-אמת (מאירות כשיגיע נתון)', tone: 3, children: [
-          for (final r in _DashData.reserved) TimelineItem(title: r['label']!, time: 'שמור', body: r['why']),
-        ]),
+        ]])),
+        ForgeTitledSection(fields: ['🧩 מקום-שמור · ${_DashData.reserved.length} יכולות ללא מקור-אמת (מאירות כשיגיע נתון)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+          for (final r in _DashData.reserved) ForgeNotifRow(items: [[r['label']!, 'שמור']]),
+        ]])),
       ];
 
   // ═══ טאב-2 · מגמות: trendFromScan ⇒ TrendStat (דלתא-אחוזית) + NeonBars על **הפער-מהיעד** פר-חודש ═══
@@ -792,12 +791,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         () {
           final s = d.series(mod, key);
           final tr = d.trend(mod, key);
-          if (s == null || tr == null) return DsSection(title: label, tone: 3, children: [const ForgeSearchEmptyState(fields: ['תקופה-ללא-דאטה / מודול לא-זמין — מקום-שמור', ''])]);
+          if (s == null || tr == null) return ForgeTitledSection(fields: [label, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[const ForgeSearchEmptyState(fields: ['תקופה-ללא-דאטה / מודול לא-זמין — מקום-שמור', ''])]]));
           final goal = d.goal(goalKey);
           String mLabel(int i) => i == s.length - 1 ? 'החודש' : 'לפני ${s.length - 1 - i} ח׳';
           final dir = tr['dir'];
           final good = dir == 'flat' ? null : (dir == 'up') != lowerBetter;
-          return DsSection(title: label, children: [
+          return ForgeTitledSection(fields: [label, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
             TrendStat(value: pct ? '${s.last}%' : '${s.last}', delta: (tr['pct'] as num).toDouble(), label: 'אחרון מול ${s.length ~/ 2} חודשים קודמים · ${dir == 'up' ? 'עולה' : dir == 'down' ? 'יורד' : 'יציב'}${good == null ? '' : good ? ' · לטובה' : ' · לרעה'}'),
             _gap(),
             if (goal == null)
@@ -811,7 +810,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 tone: 3,
               ),
             ],
-          ]);
+          ]]));
         }(),
     ];
   }
@@ -833,23 +832,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ]);
     }
     return [
-      DsSection(title: '⚖️ נוכחות לפי שכבה · ${g.length}', children: [
+      ForgeTitledSection(fields: ['⚖️ נוכחות לפי שכבה · ${g.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (g.isEmpty) const ForgeSearchEmptyState(fields: ['אין נתוני-שכבות — מקום-שמור', ''])
         else ...[
           NeonBars(labels: [for (final x in g) 'שכבה ${x['name']}'], values: [for (final x in g) (x['attendancePct'] as num).toDouble()], tone: out.isEmpty ? 1 : 3),
           _wrap([for (final x in out) ForgeIntelPill(fields: ['⚠️ שכבה ${x['name']}: ${x['attendancePct']}% (z=${(x['z'] as num).toStringAsFixed(1)}) — חריגה-סטטיסטית'])]),
           if (out.isEmpty) _wrap([const ForgeIntelPill(fields: ['אין חריגה-סטטיסטית (|z| ≤ 1.5)'])]),
         ],
-      ]),
-      DsSection(title: '🚨 בסיכון לפי שכבה', children: [
+      ]])),
+      ForgeTitledSection(fields: ['🚨 בסיכון לפי שכבה', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (g.isNotEmpty) NeonBars(labels: [for (final x in g) 'שכבה ${x['name']}'], values: [for (final x in g) (x['riskCount'] as num).toDouble()], tone: 2),
-      ]),
-      DsSection(title: '📆 השוואה לשנה-שעברה', children: [
+      ]])),
+      ForgeTitledSection(fields: ['📆 השוואה לשנה-שעברה', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         vs('נוכחות-היום', att, d.input.lastYear['attendancePct'], pct: true), _gap(8),
         vs('גבייה', col, d.input.lastYear['collectionPct'], pct: true), _gap(8),
         vs('בסיכון', risk, d.input.lastYear['riskCount'], lowerBetter: true), _gap(8),
         vs('תלמידים-פעילים', d.kpiValue(d.kpiDefs[0]), d.input.lastYear['students']),
-      ]),
+      ]])),
     ];
   }
 
@@ -876,12 +875,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           () {
             final goal = d.goal(g.$1);
             final now = g.$3;
-            if (goal == null || now == null) return DsSection(title: g.$2, tone: 3, children: [const ForgeSearchEmptyState(fields: ['אין יעד/נתון — מקום-שמור', ''])]);
+            if (goal == null || now == null) return ForgeTitledSection(fields: [g.$2, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[const ForgeSearchEmptyState(fields: ['אין יעד/נתון — מקום-שמור', ''])]]));
             final frac = g.$4 ? (now == 0 ? 1.0 : (goal / now).clamp(0.0, 1.0)) : (goal == 0 ? 1.0 : (now / goal).clamp(0.0, 1.0));
             final met = g.$4 ? now <= goal : now >= goal;
             final f30 = g.$4 ? d.forecast(g.$1 == 'riskCount' ? 'students' : 'fees', g.$1, 1) : d.forecast(g.$1 == 'attendancePct' ? 'attendance' : 'fees', g.$1, 1);
-            return DsSection(title: '🎯 ${g.$2} · ${met ? '✅ ביעד' : '⚠️ מתחת ליעד'}', tone: met ? 1 : 3, children: [
-              StatRow(label: 'מדד מול יעד', value: '${now.toStringAsFixed(1)} מתוך $goal', fraction: frac),
+            return ForgeTitledSection(fields: ['🎯 ${g.$2} · ${met ? '✅ ביעד' : '⚠️ מתחת ליעד'}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+              ForgeLinearProgressStatus(fields: ['מדד מול יעד', '${now.toStringAsFixed(1)} מתוך $goal'], values: [frac]),
               _gap(8),
               Row(children: [
                 Expanded(child: ForgeStatPlain(fields: ['עכשיו', now.toStringAsFixed(1)])),
@@ -893,13 +892,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.goalOverride[g.$1] = goal - 1; d.log('מנהל', 'יעד ${g.$2}: ${goal - 1}'); }), child: ForgeSoftButton(fields: ['🎯 יעד −1'])),
                   GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.goalOverride[g.$1] = goal + 1; d.log('מנהל', 'יעד ${g.$2}: ${goal + 1}'); }), child: ForgeSoftButton(fields: ['🎯 יעד +1'])),
                 ], top: 8),
-            ]);
+            ]]));
           }(),
       ];
 
   // ═══ טאב-5 · דוחות: הפק-דוח (שבועי/חודשי/שנתי) · תדרוך · CSV · הדפס · מקום-שמור (PDF/משרד) ═══
   List<Widget> _reportsTab(List<Map<String, dynamic>> open) => [
-        DsSection(title: '📄 דוחות ותוצרים', children: [
+        ForgeTitledSection(fields: ['📄 דוחות ותוצרים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           _wrap([
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('דוח שבועי · עד ${fmtDate(d.rangeTo(1))}', d.briefText(d.inRange(open, 1))), child: ForgeSoftButton(fields: ['📅 דוח שבועי'])),
             GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('דוח חודשי · עד ${fmtDate(d.rangeTo(2))}', d.briefText(d.inRange(open, 2))), child: ForgeSoftButton(fields: ['🗓 דוח חודשי'])),
@@ -912,14 +911,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const ForgeIntelPill(fields: ['🏛 דוח-למשרד-החינוך · מקום-שמור (אין סכמה)']),
             const ForgeIntelPill(fields: ['📎 PDF · מקום-שמור (אין מנוע-PDF במדף)']),
           ], top: 0),
-        ]),
-        DsSection(title: '☀️ תדרוך-בוקר (טקסט-מוכן · 05:00 אוטומטי = מקום-שמור למתזמן)', children: [
+        ]])),
+        ForgeTitledSection(fields: ['☀️ תדרוך-בוקר (טקסט-מוכן · 05:00 אוטומטי = מקום-שמור למתזמן)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
             child: SelectableText(d.briefText(open), style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
           ),
-        ]),
+        ]])),
       ];
 
   // ═══ טאב-6 · התרעות: כל האותות הפרואקטיביים במקום-אחד ═══
@@ -934,17 +933,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       for (final h in d.upcoming) ForgeSectionPill(fields: ['${h['name']} · ${fmtDate(h['iso'] as String)}', '']),
     ];
     return [
-      DsSection(title: '🔔 התרעות · ${items.length}', tone: items.isEmpty ? 1 : 2, children: [
+      ForgeTitledSection(fields: ['🔔 התרעות · ${items.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (items.isEmpty) const ForgeSearchEmptyState(fields: ['אין התרעות פעילות', ''])
         else for (final w in items) Padding(padding: const EdgeInsets.only(bottom: 8), child: w),
-      ]),
+      ]])),
     ];
   }
 
   // ═══ טאב-7 · מבט-ועד: מונים-בלבד (אפס-חשיפת-פרטי-תלמיד/אחראי) ═══
   Widget _boardView(List<Map<String, dynamic>> all) {
     final byMod = countBy(d.tasks, (t) => '${(t as Map)['moduleLabel']}');
-    return DsSection(title: '🏛 סיכום לוועד/בעלים · מונים בלבד (ללא פרטים מזהים)', children: [
+    return ForgeTitledSection(fields: ['🏛 סיכום לוועד/בעלים · מונים בלבד (ללא פרטים מזהים)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['משימות פתוחות', '${d.tasks.length}'])),
         Expanded(child: ForgeStatPlain(fields: ['🔴 דחופות', '${d.tasks.where((t) => d.sev(t) == 2).length}'])),
@@ -960,15 +959,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Row(children: [for (final k in d.kpiDefs.sublist(r, math.min(r + 4, d.kpiDefs.length))) Expanded(child: ForgeStatPlain(fields: [k['label'] as String, d.kpiText(k)]))]),
         ),
       const ForgeIntelPill(fields: ['🔒 צפייה-בלבד · שמות תלמידים/אחראים אינם מוצגים במבט-זה']),
-    ]);
+    ]]));
   }
 
   // ═══ טאב-8 · אודיט: יומן-פעולות-הלוח (TimelineItem) — מצב-בלבד, המודולים לא נכתבו ═══
   List<Widget> _auditTab() => [
-        DsSection(title: '📜 אודיט · ${d.audit.length} פעולות-לוח (אפס-כתיבה למודולים)', children: [
+        ForgeTitledSection(fields: ['📜 אודיט · ${d.audit.length} פעולות-לוח (אפס-כתיבה למודולים)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           if (d.audit.isEmpty) const ForgeSearchEmptyState(fields: ['טרם בוצעו פעולות בלוח בסשן זה', ''])
-          else for (final a in d.audit) TimelineItem(title: a['what']!, time: fmtDate(a['iso']), body: a['who']),
-        ]),
+          else for (final a in d.audit) ForgeNotifRow(items: [[a['what']!, fmtDate(a['iso'])]]),
+        ]])),
       ];
 
   // ═══ פאנל-משימה-נבחרת (GlassCard · bottom-sheet): מקור · הקשר-מלא · היסטוריה · אחראי · פעולה-בלחיצה · השפעה-אם-לא · פעולות ═══
@@ -985,8 +984,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           initialChildSize: 0.75, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
           builder: (ctx, scroll) => Padding(
             padding: const EdgeInsets.all(12),
-            child: GlassCard(
-              child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+            child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                 ForgeContactTile(fields: ['${t['title']}', 'מקור: ${t['moduleLabel']} · ${t['kind']} · ${d.statusOf(t)}']),
                 _gap(12),
                 Row(children: [
@@ -1023,9 +1021,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _title('היסטוריה · ${hist.length}'),
                 _gap(8),
                 if (hist.isEmpty) const ForgeSearchEmptyState(fields: ['אין היסטוריה רשומה במודול-המקור', ''])
-                else for (final h in hist) TimelineItem(title: '${(h as Map)['what']}', time: fmtDate('${h['iso']}'), body: '${t['moduleLabel']}'),
-              ]),
-            ),
+                else for (final h in hist) ForgeNotifRow(items: [['${(h as Map)['what']}', fmtDate('${h['iso']}')]]),
+              ])),
           ),
         );
       }),
@@ -1047,8 +1044,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           initialChildSize: 0.7, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
           builder: (ctx, scroll) => Padding(
             padding: const EdgeInsets.all(12),
-            child: GlassCard(
-              child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+            child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                 const ForgeContactTile(fields: ['כללי-דחיפות', 'ציון = השפעה × (1 + ותק/SLA) · 🔴 ≥ סף-עליון · 🟠 ≥ סף-אמצע · SLA-פרוץ = 🔴']),
                 _gap(12),
                 Row(children: [
@@ -1068,15 +1064,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 3),
                     child: Row(children: [
-                      Expanded(child: StatRow(label: _DashData.kindLabel(e.key), value: '${e.value} י׳', fraction: (e.value / 14).clamp(0.0, 1.0))),
+                      Expanded(child: ForgeLinearProgressStatus(fields: [_DashData.kindLabel(e.key), '${e.value} י׳'], values: [(e.value / 14).clamp(0.0, 1.0)])),
                       const SizedBox(width: 6),
                       Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.slaDays[e.key] = math.max(1, e.value - 1)), child: ForgeSoftButton(fields: ['−']))),
                       const SizedBox(width: 4),
                       Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.slaDays[e.key] = e.value + 1), child: ForgeSoftButton(fields: ['+']))),
                     ]),
                   ),
-              ]),
-            ),
+              ])),
           ),
         );
       }),
@@ -1098,8 +1093,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         initialChildSize: 0.65, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
         builder: (ctx, scroll) => Padding(
           padding: const EdgeInsets.all(12),
-          child: GlassCard(
-            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+          child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
               ForgeContactTile(fields: [title.split('\n').first, title.contains('\n') ? title.split('\n').skip(1).join(' ') : '${body.split('\n').length} שורות']),
               _gap(10),
               Container(
@@ -1107,8 +1101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
                 child: SelectableText(body, textDirection: ltr ? TextDirection.ltr : TextDirection.rtl, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
               ),
-            ]),
-          ),
+            ])),
         ),
       ),
     );

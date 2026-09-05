@@ -84,13 +84,28 @@ Path _parse(String d) {
   return path;
 }
 
-/// ModalHeader — seam:title
+/// ModalHeader — seam:title · 1 חריצים
 class ForgeModalHeader extends StatelessWidget {
-  const ForgeModalHeader({super.key});
+  /// תפר-דאטה (G12a): 1 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  final List<String>? fields;
+  static const int fieldSlots = 1;
+  static const List<String> fieldDemo = <String>["Label"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13a · הקשה על כפתור/קישור k (סדר-הופעה, 2 פעולות).
+  final void Function(int)? onAction;
+  static const int actionSlots = 2;
+  const ForgeModalHeader({super.key, this.fields, this.child, this.onAction});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(16, 14, 16, 14), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 16, children: [Container(width: 40, height: 40, alignment: Alignment.center, decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(10)), child: SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.path("M9 6l6 6-6 6", skin.mut, false, 1.8)], 24, 24)))), Expanded(child: Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: -0.15, height: 1.05, leadingDistribution: TextLeadingDistribution.even))), Container(width: 32, height: 32, alignment: Alignment.center, decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: SizedBox(width: 15, height: 15, child: CustomPaint(painter: _SvgScene([_Op.path("M5 13l4 4L19 7", skin.mut, false, 1.8)], 24, 24))))]));
+    final Widget body = Container(padding: const EdgeInsets.fromLTRB(16, 14, 16, 14), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 16, children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(0), child: Container(width: 40, height: 40, alignment: Alignment.center, decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(10)), child: SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.path("M9 6l6 6-6 6", skin.mut, false, 1.8)], 24, 24))))), Expanded(child: Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: -0.15, height: 1.05, leadingDistribution: TextLeadingDistribution.even))), GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(1), child: Container(width: 32, height: 32, alignment: Alignment.center, decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: SizedBox(width: 15, height: 15, child: CustomPaint(painter: _SvgScene([_Op.path("M5 13l4 4L19 7", skin.mut, false, 1.8)], 24, 24)))))]), child));
+    return body;
   }
 }

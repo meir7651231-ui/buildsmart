@@ -86,10 +86,17 @@ Path _parse(String d) {
 
 /// BrandMark — seam:fields
 class ForgeBrandMark extends StatelessWidget {
-  const ForgeBrandMark({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  const ForgeBrandMark({super.key, this.child});
   @override
   Widget build(BuildContext context) {
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(height: 88, alignment: Alignment.centerRight, child: Wrap(spacing: 14, runSpacing: 14, crossAxisAlignment: WrapCrossAlignment.center, children: [Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.circle(8, 8, 4, const Color(0xFF0B0B0D), false, 1.8), _Op.circle(16, 16, 4, const Color(0xFF0B0B0D).withValues(alpha: 0.60), false, 1.8), _Op.circle(16, 8, 4, const Color(0xFF0B0B0D).withValues(alpha: 0.80), false, 1.8)], 24, 24)))), Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.path("M12 2l2.6 6.6L21 9.5l-5 4.3 1.6 6.7L12 16.9 6.4 20.5 8 13.8 3 9.5l6.4-.9z", theme.aHi, false, 1.8)], 24, 24))))]));
+    final Widget body = Container(height: 88, alignment: Alignment.centerRight, child: _withChild(Wrap(spacing: 14, runSpacing: 14, crossAxisAlignment: WrapCrossAlignment.center, children: [Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.circle(8, 8, 4, const Color(0xFF0B0B0D), false, 1.8), _Op.circle(16, 16, 4, const Color(0xFF0B0B0D).withValues(alpha: 0.60), false, 1.8), _Op.circle(16, 8, 4, const Color(0xFF0B0B0D).withValues(alpha: 0.80), false, 1.8)], 24, 24)))), Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.path("M12 2l2.6 6.6L21 9.5l-5 4.3 1.6 6.7L12 16.9 6.4 20.5 8 13.8 3 9.5l6.4-.9z", theme.aHi, false, 1.8)], 24, 24))))]), child));
+    return body;
   }
 }

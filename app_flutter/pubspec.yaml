@@ -163,6 +163,20 @@ flutter:
     - family: FrankRuhlLibre
       fonts:
         - asset: assets/fonts/FrankRuhlLibre.ttf
+    # G13a · גופני-Pure של ספריית-forge (DsPureFonts: serif=Fraunces · serifHe="Frank Ruhl Libre" · grotesk="Space Grotesk"); בלעדיהם המספרים נפלו ל-Roboto
+    - family: Frank Ruhl Libre
+      fonts:
+        - asset: assets/fonts/FrankRuhlLibre.ttf
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces-700.ttf
+          weight: 700
+    - family: Space Grotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-400.ttf
+          weight: 400
+        - asset: assets/fonts/SpaceGrotesk-600.ttf
+          weight: 600
     # JetBrains Mono — the RingDive numerals + RINGDIVE·OS wordmark (RD-G).
     - family: JetBrains Mono
       fonts:

@@ -86,11 +86,23 @@ Path _parse(String d) {
 
 /// DsSearch — seam:fields
 class ForgeDsSearch extends StatelessWidget {
-  const ForgeDsSearch({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13a · שדה-חי (TextField וכו׳) במקום ציור-ה-input של הגלריה. null ⇒ הציור.
+  final Widget? control;
+  /// G13a · הקשה על כפתור/קישור k (סדר-הופעה, 1 פעולות).
+  final void Function(int)? onAction;
+  static const int actionSlots = 1;
+  const ForgeDsSearch({super.key, this.child, this.control, this.onAction});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [Expanded(child: Directionality(textDirection: TextDirection.rtl, child: SizedBox(width: double.infinity, child: Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(38, 0, 40, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Align(alignment: Alignment.centerRight, child: Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)))))))]), Positioned(right: 13, top: 0, bottom: 0, child: Align(alignment: Alignment.center, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.circle(11, 11, 7, skin.mut, false, 1.8), _Op.path("M21 21l-4-4", skin.mut, false, 1.8)], 24, 24)))]))), Positioned(left: 12, top: 0, bottom: 0, child: Align(alignment: Alignment.center, child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.path("M6 6l12 12M18 6L6 18", skin.mut, false, 1.8)], 24, 24)))]))))]));
+    final Widget body = _withChild(SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [Expanded(child: (control ?? Directionality(textDirection: TextDirection.rtl, child: SizedBox(width: double.infinity, child: Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(38, 0, 40, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Align(alignment: Alignment.centerRight, child: Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13))))))))]), Positioned(right: 13, top: 0, bottom: 0, child: Align(alignment: Alignment.center, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.circle(11, 11, 7, skin.mut, false, 1.8), _Op.path("M21 21l-4-4", skin.mut, false, 1.8)], 24, 24)))]))), Positioned(left: 12, top: 0, bottom: 0, child: Align(alignment: Alignment.center, child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(0), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.path("M6 6l12 12M18 6L6 18", skin.mut, false, 1.8)], 24, 24)))])))))])), child);
+    return body;
   }
 }

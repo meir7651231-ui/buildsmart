@@ -6,10 +6,13 @@ import '../../dart-ui-bs/ds/ds_seam.dart';
 
 /// OrbitSpinner — seam:fields
 class ForgeOrbitSpinner extends StatelessWidget {
-  const ForgeOrbitSpinner({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  const ForgeOrbitSpinner({super.key, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Container(width: 34, height: 34, decoration: BoxDecoration(border: Border.all(color: skin.raised2, width: 3), borderRadius: BorderRadius.circular(999)))]);
+    final Widget body = Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 9, children: [Container(width: 34, height: 34, decoration: BoxDecoration(border: Border.all(color: skin.raised2, width: 3), borderRadius: BorderRadius.circular(999)), child: (child ?? const SizedBox.shrink()))]);
+    return body;
   }
 }

@@ -91,12 +91,20 @@ class ForgeSearchEmptyState extends StatelessWidget {
   static const int fieldSlots = 2;
   static const List<String> fieldDemo = <String>["Label", "Meta · no results"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeSearchEmptyState({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  static Widget _hide(String s, Widget w) => s.isEmpty ? const SizedBox.shrink() : w;   // G13a · חריץ-ריק ⇒ הקופסה נעלמת
+  const ForgeSearchEmptyState({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Container(width: 56, height: 56, alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.gl, skin.sunken], stops: [0.0, 0.60]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: SizedBox(width: 26, height: 26, child: CustomPaint(painter: _SvgScene([_Op.circle(11, 11, 7, theme.aHi, false, 1.8), _Op.path("M21 21l-4-4", theme.aHi, false, 1.8)], 24, 24)))), Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700)), IntrinsicWidth(child: Text(_f(1, "Meta · no results"), style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he)))]));
+    final Widget body = Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Container(width: 56, height: 56, alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.gl, skin.sunken], stops: [0.0, 0.60]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: SizedBox(width: 26, height: 26, child: CustomPaint(painter: _SvgScene([_Op.circle(11, 11, 7, theme.aHi, false, 1.8), _Op.path("M21 21l-4-4", theme.aHi, false, 1.8)], 24, 24)))), Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700)), _hide(_f(1, "Meta · no results"), IntrinsicWidth(child: Text(_f(1, "Meta · no results"), style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he))))]), child));
+    return body;
   }
 }

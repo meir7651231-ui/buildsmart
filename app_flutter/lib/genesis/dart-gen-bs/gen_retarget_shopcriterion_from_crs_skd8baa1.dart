@@ -84,6 +84,9 @@ import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -1012,18 +1015,18 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות ותצוגה פר-תפקיד (roleOf⊕canGrantedAction⊕teacherIdOf)
         Align(
           alignment: Alignment.centerRight,
-          child: FittedBox(fit: BoxFit.scaleDown, child: SegmentedSwitch(items: [for (final r in _ShopCriterionData.roleDefs) r['label'] as String], selected: _role, onSelect: (i) => setState(() { _role = i; _locks.clear(); }))),
+          child: FittedBox(fit: BoxFit.scaleDown, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _ShopCriterionData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() { _role = i; _locks.clear(); }))),
         ),
         _gap(8),
         // פס-עליון: בורר-שבוע/סמסטר + בורר-תצוגה (SegmentedSwitch מבוקר ×3) — ארגון = פעולת-יסוד עם אטום משלה
         Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.end, children: [
-          SegmentedSwitch(items: const ['📅 השבוע', '⏭ שבוע הבא'], selected: _week, onSelect: (i) => setState(() => _week = i)),
-          SegmentedSwitch(items: ['הכל', ...semesterOptions], selected: _sem, onSelect: (i) => setState(() => _sem = i)),
+          ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['📅 השבוע', '⏭ שבוע הבא']) [s]], selected: {_week}, onSelect: (i) => setState(() => _week = i)),
+          ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in ['הכל', ...semesterOptions]) [s]], selected: {_sem}, onSelect: (i) => setState(() => _sem = i)),
         ]),
         _gap(8),
         Align(
           alignment: Alignment.centerRight,
-          child: SegmentedSwitch(items: const ['📅 גריד', '📋 רשימה', '👩‍🏫 פר-מורה', '🚪 פר-חדר'], selected: _view, onSelect: (i) => setState(() => _view = i)),
+          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['📅 גריד', '📋 רשימה', '👩‍🏫 פר-מורה', '🚪 פר-חדר']) [s]], selected: {_view}, onSelect: (i) => setState(() => _view = i)),
         ),
         _gap(8),
         // פס-עליון · פעולות-גלובליות: חוג-חדש (defaultCourseDates) · שכפל-סמסטר (nextYearCourseDraft) · הדפס-מערכת
@@ -1072,8 +1075,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         if (_msg != null) ...[_gap(8), ForgeSectionPill(fields: [_msg!, ''])],
         _gap(12),
         // KPI-10: hero=התנגשויות (המטרה: "אף שיבוץ לא יתנגש") + 9 מדדי-מצב (BareStat נושאי-ערך-אמת)
-        GradientCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['התנגשויות (מורה/חדר/תלמיד)', '$clashes'])),
             _gap(14),
             Row(children: [
@@ -1090,8 +1092,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
               Expanded(child: ForgeStatPlain(fields: ['📉 מתחת-מינ׳', _ShopCriterionData.kpiBelowMinKnown ? '${_ShopCriterionData.kpiBelowMin}' : '—'])),
               Expanded(child: ForgeStatPlain(fields: ['💳 חוב-פתוח', shekel(_ShopCriterionData.kpiDebt.toInt())])),
             ]),
-          ]),
-        ),
+          ])),
         _gap(10),
         // 🤖 מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה ומציעה לפני שדבר נשמט — כל התראה = מנוע ⊕ AlertBanner ⊕ פעולה
         if (!_loading && _ShopCriterionData.myFamilyId(_role) == null) ..._automations(live),
@@ -1107,16 +1108,16 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         else if (visible.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין חוגים תואמים לחיפוש/סינון', '']))
         else if (_view == 1)
-          DsSection(title: '📋 רשימת-חוגים · ${visible.length} · ${_ShopCriterionData.columnDefs.where((c) => _ShopCriterionData.colShown(c, visible)).length} עמודות', children: [_table(ranked)])
+          ForgeTitledSection(fields: ['📋 רשימת-חוגים · ${visible.length} · ${_ShopCriterionData.columnDefs.where((c) => _ShopCriterionData.colShown(c, visible)).length} עמודות', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_table(ranked)]]))
         else if (_view == 2)
           ..._byTeacher(visible)
         else if (_view == 3)
           ..._byRoom(visible)
         else ...[
-          DsSection(title: '📅 מערכת-שעות · ${_week == 0 ? 'השבוע' : 'שבוע הבא'} (${_ShopCriterionData.isoOfDay(0, _week)} – ${_ShopCriterionData.isoOfDay(5, _week)})', children: [_grid(visible)]),
+          ForgeTitledSection(fields: ['📅 מערכת-שעות · ${_week == 0 ? 'השבוע' : 'שבוע הבא'} (${_ShopCriterionData.isoOfDay(0, _week)} – ${_ShopCriterionData.isoOfDay(5, _week)})', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_grid(visible)]])),
           for (final st in const [3, 2, 1, 0, -1])
             if (buckets[st]!.isNotEmpty)
-              DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [for (final c in buckets[st]!) _row(c)]),
+              ForgeTitledSection(fields: ['${secTitle[st]} · ${buckets[st]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[for (final c in buckets[st]!) _row(c)]])),
         ],
         // הורה + הרשמה-עצמית מופעלת: קטלוג-חוגים פתוחים להרשמה (wait ⇒ רכז מאשר). כל בדיקות-הקדם/התנגשות חלות.
         if (_can('crs.self') && _ShopCriterionData.myFamilyId(_role) != null && !_loading) ..._selfCatalog(),
@@ -1135,7 +1136,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     final demand = _ShopCriterionData.demandSignals;
     Widget withAction(Widget banner, Widget? action) => action == null ? banner : Row(children: [Expanded(child: banner), const SizedBox(width: 6), action]);
     return [
-      DsSection(title: '🤖 אוטומציות · ${hl.length + rem.length + bm.length + pr.length + noRoomCs.length + noTeacherCs.length + clashRooms.length + demand.length} אותות', children: [
+      ForgeTitledSection(fields: ['🤖 אוטומציות · ${hl.length + rem.length + bm.length + pr.length + noRoomCs.length + noTeacherCs.length + clashRooms.length + demand.length} אותות', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         // דוח-ניצולת (BareStat×3 — עובדות): חדרים · עומס-מורים · חגים-קרובים
         Row(children: [
           Expanded(child: ForgeStatPlain(fields: ['🚪 ניצולת-חדרים', '${_ShopCriterionData.avgRoomUtilPct}%'])),
@@ -1166,7 +1167,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         if (demand.isNotEmpty) ForgeSectionPill(fields: ['ביקוש לסמסטר-הבא: ${demand.map((c) => '${c['name']} (${_ShopCriterionData.isFull(c) ? 'מלא' : ''}${_ShopCriterionData.waitlist(c).isNotEmpty ? ' +${_ShopCriterionData.waitlist(c).length} ממתינים' : ''}${_ShopCriterionData.trend(c)['dir'] == 'up' ? ' ↑' : ''})').join(' · ')} ⇒ שקול קבוצה נוספת', '']),
         if (hl.isEmpty && bm.isEmpty && pr.isEmpty && noRoomCs.isEmpty && noTeacherCs.isEmpty && clashRooms.isEmpty && rem.isEmpty && demand.isEmpty)
           const ForgeSearchEmptyState(fields: ['אין אותות — המערכת מסודרת', '']),
-      ]),
+      ]])),
     ];
   }
 
@@ -1192,7 +1193,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     final mine = _ShopCriterionData.familyCourses(_ShopCriterionData.liveCourses, fam['id'] as String).map((c) => c['id']).toSet();
     final open = _ShopCriterionData.bySemester(_ShopCriterionData.liveCourses, _sem).where((c) => !mine.contains(c['id'])).toList();
     return [
-      DsSection(title: '🛒 הרשמה-עצמית · ${open.length} חוגים פתוחים (רכז/ת מאשר/ת)', children: [
+      ForgeTitledSection(fields: ['🛒 הרשמה-עצמית · ${open.length} חוגים פתוחים (רכז/ת מאשר/ת)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (open.isEmpty) const ForgeSearchEmptyState(fields: ['אין חוגים נוספים להרשמה', '']),
         for (final c in open)
           Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [
@@ -1200,7 +1201,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
             for (final m in (fam['members'] as List))
               Padding(padding: const EdgeInsets.only(left: 4), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _result(_ShopCriterionData.selfEnroll(c, m['id'], _who), 'נרשם/ה — ממתין לאישור')), child: ForgeSoftButton(fields: ['➕ ${m['first']}']))),
           ])),
-      ]),
+      ]])),
     ];
   }
 
@@ -1280,13 +1281,9 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       for (final t in _ShopCriterionData.teachers)
         () {
           final cs = live.where((c) => c['teacherId'] == t['id']).toList(); // הרשימה-הנראית (אחרי איתור+חריגה); coursesOfTeacher = אותו מנוע על כל-החיים
-          return DsSection(
-            title: '👩‍🏫 ${t['name']} · ${t['specialty']}',
-            trailing: ForgeIntelPill(fields: ['${cs.length} חוגים · ${_ShopCriterionData.weeklyOf(cs)} מפגשים/שבוע']),
-            children: cs.isEmpty ? [const ForgeSearchEmptyState(fields: ['אין חוגים למורה זה', ''])] : [for (final c in cs) _row(c)],
-          );
+          return ForgeTitledSection(fields: ['👩‍🏫 ${t['name']} · ${t['specialty']}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: ForgeIntelPill(fields: ['${cs.length} חוגים · ${_ShopCriterionData.weeklyOf(cs)} מפגשים/שבוע'])), ...cs.isEmpty ? [const ForgeSearchEmptyState(fields: ['אין חוגים למורה זה', ''])] : [for (final c in cs) _row(c)]]));
         }(),
-      if (orphan.isNotEmpty) DsSection(title: '🚫 ללא-מורה · ${orphan.length}', tone: 2, children: [for (final c in orphan) _row(c)]),
+      if (orphan.isNotEmpty) ForgeTitledSection(fields: ['🚫 ללא-מורה · ${orphan.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[for (final c in orphan) _row(c)]])),
     ];
   }
 
@@ -1297,16 +1294,11 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
             final cs = live.where((c) => c['roomId'] == r['id']).toList(); // הרשימה-הנראית (אחרי איתור+חריגה)
             final active = r['active'] == true;
             final weekly = _ShopCriterionData.roomWeekly(r), cap = _ShopCriterionData.roomSlotsPerWeek(r);
-            return DsSection(
-              title: '🚪 ${r['name']} · ${r['location']} · קיבולת ${r['cap']}',
-              tone: active ? 0 : 2,
-              trailing: ForgeIntelPill(fields: [active ? '${r['from']}–${r['to']} · ${r['slot']} דק׳' : 'לא-פעיל']),
-              children: [
-                StatRow(label: 'ניצולת שבועית', value: '$weekly מתוך $cap משבצות', fraction: _ShopCriterionData.roomUtil(r)),
+            return ForgeTitledSection(fields: ['🚪 ${r['name']} · ${r['location']} · קיבולת ${r['cap']}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: ForgeIntelPill(fields: [active ? '${r['from']}–${r['to']} · ${r['slot']} דק׳' : 'לא-פעיל'])), ...[
+                ForgeLinearProgressStatus(fields: ['ניצולת שבועית', '$weekly מתוך $cap משבצות'], values: [_ShopCriterionData.roomUtil(r)]),
                 _gap(6),
                 if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['אין חוגים בחדר', '']) else for (final c in cs) _row(c),
-              ],
-            );
+              ]]));
           }(),
       ];
 
@@ -1362,8 +1354,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
             padding: const EdgeInsets.all(12),
             child: Directionality(
               textDirection: TextDirection.rtl,
-              child: GlassCard(
-                child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+              child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                   Row(children: [
                     Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${_ShopCriterionData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_ShopCriterionData.roomOf(c)?['name'] ?? 'ללא-חדר'} · ${_ShopCriterionData.sessionsLabel(c)}'])),
                     Flexible(child: ForgeIntelPill(fields: [_ShopCriterionData.statusLabel(c)])),
@@ -1371,8 +1362,8 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
                   _gap(8),
                   // 9 טאבים בשתי שורות-SegmentedSwitch (שורה-אחת גלשה מ-800px ⇒ טאב לא-נגיש · הרנדר תפס)
                   Wrap(spacing: 8, runSpacing: 6, alignment: WrapAlignment.end, children: [
-                    FittedBox(fit: BoxFit.scaleDown, child: SegmentedSwitch(items: const ['סקירה', 'נרשמים', 'המתנה', 'מערכת', 'נוכחות'], selected: _tab < 5 ? _tab : -1, onSelect: (i) => both(() { _tab = i; _pick = null; }))),
-                    FittedBox(fit: BoxFit.scaleDown, child: SegmentedSwitch(items: const ['גבייה', 'חומרים', 'היסטוריה', 'אודיט'], selected: _tab >= 5 ? _tab - 5 : -1, onSelect: (i) => both(() { _tab = i + 5; _pick = null; }))),
+                    FittedBox(fit: BoxFit.scaleDown, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['סקירה', 'נרשמים', 'המתנה', 'מערכת', 'נוכחות']) [s]], selected: {_tab < 5 ? _tab : -1}, onSelect: (i) => both(() { _tab = i; _pick = null; }))),
+                    FittedBox(fit: BoxFit.scaleDown, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['גבייה', 'חומרים', 'היסטוריה', 'אודיט']) [s]], selected: {_tab >= 5 ? _tab - 5 : -1}, onSelect: (i) => both(() { _tab = i + 5; _pick = null; }))),
                   ]),
                   _gap(10),
                   if (_msg != null) ...[ForgeSectionPill(fields: [_msg!, '']), _gap(8)],
@@ -1387,8 +1378,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
                     8 => _tabHistory(c, true),
                     _ => _tabOverview(c, both),
                   },
-                ]),
-              ),
+                ])),
             ),
           ),
         );
@@ -1403,7 +1393,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     final clashes = _ShopCriterionData.clashesOf(c);
     final next = _ShopCriterionData.upcoming(c, 3);
     return [
-      StatRow(label: 'תפוסה מול קיבולת', value: '${_ShopCriterionData.enrolled(c)} מתוך ${_ShopCriterionData.capacity(c)}', fraction: _ShopCriterionData.occupancy(c)),
+      ForgeLinearProgressStatus(fields: ['תפוסה מול קיבולת', '${_ShopCriterionData.enrolled(c)} מתוך ${_ShopCriterionData.capacity(c)}'], values: [_ShopCriterionData.occupancy(c)]),
       _gap(8),
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['רשומים', '${_ShopCriterionData.enrolled(c)}'])),
@@ -1533,11 +1523,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     final sub = _ShopCriterionData.substitutes['${c['id']}|$iso'];
     final subName = sub == null ? null : _ShopCriterionData.teachers.where((t) => t['id'] == sub).firstOrNull?['name'];
     return Row(children: [
-      Expanded(child: TimelineItem(
-        title: '${cancelled ? '✖ מבוטל · ' : ''}${dayNames[dt.weekday % 7]} ${_ShopCriterionData.hm(dt.hour * 60 + dt.minute)}${_ShopCriterionData.holidayName(dt) != null ? ' · 🕎 ${_ShopCriterionData.holidayName(dt)}' : ''}',
-        time: iso,
-        body: '${subName != null ? '🔄 $subName (מחליף/ה)' : _ShopCriterionData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_ShopCriterionData.roomOf(c)?['name'] ?? 'ללא-חדר'}',
-      )),
+      Expanded(child: ForgeNotifRow(items: [['${cancelled ? '✖ מבוטל · ' : ''}${dayNames[dt.weekday % 7]} ${_ShopCriterionData.hm(dt.hour * 60 + dt.minute)}${_ShopCriterionData.holidayName(dt) != null ? ' · 🕎 ${_ShopCriterionData.holidayName(dt)}' : ''}', iso]])),
       if (_can('crs.cancel')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _ShopCriterionData.cancelSession(c, iso, _who); _flash(cancelled ? 'השיעור $iso שוחזר' : 'השיעור $iso בוטל', cancelled ? 1 : 3); }), child: ForgeSoftButton(fields: [cancelled ? '↩ שחזר' : '✖ בטל']))),
     ]);
   }
@@ -1585,7 +1571,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       _gap(6),
       Row(children: [
         Expanded(child: Text('העלאה-אוטומטית כשמתפנה מקום', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700))),
-        SegmentedSwitch(items: const ['פועל', 'כבוי'], selected: _ShopCriterionData.autoPromote ? 0 : 1, onSelect: (i) => both(() => _ShopCriterionData.autoPromote = i == 0)),
+        Flexible(child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['פועל', 'כבוי']) [s]], selected: {_ShopCriterionData.autoPromote ? 0 : 1}, onSelect: (i) => both(() => _ShopCriterionData.autoPromote = i == 0))),
       ]),
     ];
   }
@@ -1597,7 +1583,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     return [
       _h('🗓 מפגשים קבועים · ${ss.length}/שבוע · ${c['start']}–${c['end']}'),
       if (!_ShopCriterionData.hasSessions(c)) const ForgeSearchEmptyState(fields: ['אין מפגשים קבועים — הגדר יום+שעה (מקום-שמור: עורך-מפגשים)', '']),
-      for (final s in ss) if (s['day'] is int) TimelineItem(title: '${dayNames[s['day'] as int]} ${s['time']}', time: '${(s['label'] ?? '') == '' ? 'קבוצה יחידה' : s['label']}', body: _ShopCriterionData.roomLabel(c)),
+      for (final s in ss) if (s['day'] is int) ForgeNotifRow(items: [['${dayNames[s['day'] as int]} ${s['time']}', '${(s['label'] ?? '') == '' ? 'קבוצה יחידה' : s['label']}']]),
       _h('📅 השיעורים הבאים · ${next.length}'),
       if (next.isEmpty) const ForgeSearchEmptyState(fields: ['אין מפגשים משובצים', '']) else for (final dt in next) _lessonTile(c, dt, both),
     ];
@@ -1608,7 +1594,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     final es = _ShopCriterionData.liveEnrollmentsOf(c);
     final rate = _ShopCriterionData.attendanceRate(c);
     return [
-      StatRow(label: 'נוכחות-הקריטריון (נוכח ÷ (נוכח+נעדר))', value: '${(rate * 100).round()}%', fraction: rate),
+      ForgeLinearProgressStatus(fields: ['נוכחות-הקריטריון (נוכח ÷ (נוכח+נעדר))', '${(rate * 100).round()}%'], values: [rate]),
       _gap(8),
       if (es.isEmpty) const ForgeSearchEmptyState(fields: ['אין נרשמים', '']),
       for (final e in es)
@@ -1616,7 +1602,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
           final sm = _ShopCriterionData.summary(e);
           final tot = (sm['presents'] as int) + (sm['absences'] as int);
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            StatRow(label: _ShopCriterionData.memberName(e['memberId']), value: '${sm['presents']}/$tot · החודש ${_ShopCriterionData.presentsThisMonth(e)}', fraction: tot == 0 ? 0 : (sm['presents'] as int) / tot),
+            ForgeLinearProgressStatus(fields: [_ShopCriterionData.memberName(e['memberId']), '${sm['presents']}/$tot · החודש ${_ShopCriterionData.presentsThisMonth(e)}'], values: [tot == 0 ? 0 : (sm['presents'] as int) / tot]),
             Padding(padding: const EdgeInsets.only(top: 4, bottom: 8), child: Wrap(spacing: 6, children: [
               if ((sm['noshow'] as int) > 0) _chip('👻 noshow ${sm['noshow']}', 2),
               if ('${sm['lastPresent']}'.isNotEmpty) _chip('🕐 אחרון ${sm['lastPresent']}', 0),
@@ -1638,7 +1624,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         Expanded(child: ForgeStatPlain(fields: ['חוב-פתוח', shekel(debt.toInt())])),
       ]),
       _gap(8),
-      StatRow(label: 'גבייה מול צפוי', value: exp == 0 ? '—' : '${(col / exp * 100).clamp(0, 100).round()}%', fraction: exp == 0 ? 0 : (col / exp).clamp(0.0, 1.0)),
+      ForgeLinearProgressStatus(fields: ['גבייה מול צפוי', exp == 0 ? '—' : '${(col / exp * 100).clamp(0, 100).round()}%'], values: [exp == 0 ? 0 : (col / exp).clamp(0.0, 1.0)]),
       _gap(8),
       for (final e in es)
         ForgeContactTile(fields: [_ShopCriterionData.memberName(e['memberId']), '${_ShopCriterionData.paidLabel(e)} · שולם ${shekel(paidOf(e).toInt())} מתוך ${shekel(((e['totalDue'] as num?) ?? 0).toInt())}${_ShopCriterionData.debtOf(e) > 0 ? ' · חוב ${shekel(_ShopCriterionData.debtOf(e).toInt())}' : ''}${'${e['dueDate'] ?? ''}'.isNotEmpty ? ' · לתשלום עד ${e['dueDate']}' : ''}']),
@@ -1663,7 +1649,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     return [
       _h(all ? '🧾 אודיט · ${rows.length} פעולות במסך' : '🕓 היסטוריה · ${rows.length}'),
       if (rows.isEmpty) ForgeSearchEmptyState(fields: [all ? 'אין פעולות עדיין' : 'אין היסטוריה לקריטריון', '']),
-      for (final h in rows) TimelineItem(title: '${h['act']} · ${h['who']}', time: '${h['at']}', body: '${h['what']}'),
+      for (final h in rows) ForgeNotifRow(items: [['${h['act']} · ${h['who']}', '${h['at']}']]),
     ];
   }
 
@@ -1686,11 +1672,10 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
           initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
           builder: (ctx, scroll) => Padding(
             padding: const EdgeInsets.all(12),
-            child: Directionality(textDirection: TextDirection.rtl, child: GlassCard(
-              child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+            child: Directionality(textDirection: TextDirection.rtl, child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                 ForgeContactTile(fields: ['ייצוא', '${cs.length} חוגים · ${_ShopCriterionData.csvRows(cs).first.length} עמודות · שער-ייצוא פתוח']),
                 _gap(8),
-                SegmentedSwitch(items: const ['CSV', 'iCal', 'PDF'], selected: fmt, onSelect: (i) => setSheet(() => fmt = i)),
+                ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['CSV', 'iCal', 'PDF']) [s]], selected: {fmt}, onSelect: (i) => setSheet(() => fmt = i)),
                 _gap(10),
                 if (fmt == 2)
                   const ForgeSectionPill(fields: ['PDF — מקום-שמור: דורש שער-פלטפורמה (מנוע-PDF/הדפסה). השורות מוכנות ב-🖨 הדפס-מערכת; ההורדה תואר כשהשער יחובר.', ''])
@@ -1703,8 +1688,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
                     child: SelectableText(text, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
                   ),
                 ],
-              ]),
-            )),
+              ]))),
           ),
         );
       }),
@@ -1731,8 +1715,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
         builder: (ctx, scroll) => Padding(
           padding: const EdgeInsets.all(12),
-          child: Directionality(textDirection: TextDirection.rtl, child: GlassCard(
-            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+          child: Directionality(textDirection: TextDirection.rtl, child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
               ForgeContactTile(fields: ['הדפסת-מערכת', '${lines.length} שורות · תצוגה-מקדימה (הדפסה = מקום-שמור לשער-פלטפורמה)']),
               _gap(10),
               Container(
@@ -1740,8 +1723,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
                 decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
                 child: SelectableText(lines.join('\n'), style: const TextStyle(color: _ink, fontSize: 12.5, height: 1.6)),
               ),
-            ]),
-          )),
+            ]))),
         ),
       ),
     );

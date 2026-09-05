@@ -75,6 +75,9 @@ import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -921,7 +924,7 @@ class _MemberScreenState extends State<MemberScreen> {
         if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeSoftButton(fields: ['✖ בטל סינון-מדד']))),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות+נראות פר-תפקיד (roleOf⊕canGrantedAction⊕scope)
         Row(children: [
-          Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: [for (final r in _StuData.roleDefs) r['label'] as String], selected: _role, onSelect: (i) => setState(() => _role = i)))),
+          Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _StuData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i)))),
           const SizedBox(width: 8),
           Flexible(child: ForgeIntelPill(fields: ['תפקיד: ${_StuData.roleName(_role)}${_StuData.isTeacher(_role) ? ' · הכיתה שלי' : _StuData.isParent(_role) ? ' · ילדי בלבד' : ''}'])),
         ]),
@@ -955,8 +958,7 @@ class _MemberScreenState extends State<MemberScreen> {
         ]),
         const SizedBox(height: 12),
         // KPI-10 (המפרט): hero = המטרה (מי-נופל) + 10 מדדי-מצב (BareStat נושאי-ערך; חסר-נתון ⇒ '—' מקום-שמור)
-        GradientCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['בני משפחה בסיכון-גבוה — לפעול עכשיו', '${_StuData.highN}'])),
             const SizedBox(height: 14),
             Row(children: [
@@ -974,8 +976,7 @@ class _MemberScreenState extends State<MemberScreen> {
               Expanded(child: ForgeStatPlain(fields: ['📵 ללא-הורה-מעודכן', '${_StuData.noParentN}'])),
               Expanded(child: ForgeStatPlain(fields: ['📨 פניות-פתוחות', '${_StuData.openTicketsN}'])),
             ]),
-          ]),
-        ),
+          ])),
         _gap(8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): קפיצת-סיכון · כפולים · אישורים-פגים · ללא-הערה-90 · ימי-הולדת · אחים-חדשים — AlertBanner פר-אות
         if (_StuData.riskJumps.isNotEmpty) ...[ForgeSectionPill(fields: ['קפיצת-סיכון (30 יום): ${_StuData.riskJumps.map((j) => '${(j['s'] as Map)['name']} ${j['prev']}→${j['now']}').join(' · ')}', '']), _gap(8)],
@@ -995,9 +996,9 @@ class _MemberScreenState extends State<MemberScreen> {
         _gap(8),
         // בורר-מבט (🎯 טריאז' · 📋 טבלה) + בורר-דירוג (סיכון · כיתה · שם) — ארגון = פעולת-יסוד עם אטום משלה
         Row(children: [
-          SegmentedSwitch(items: const ['🎯 טריאז׳', '📋 טבלה'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+          Flexible(child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['🎯 טריאז׳', '📋 טבלה']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i))),
           const Spacer(),
-          SegmentedSwitch(items: const ['⚠ סיכון', '🏫 כיתה', '🔤 שם'], selected: _sort, onSelect: (i) => setState(() => _sort = i)),
+          Flexible(child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['⚠ סיכון', '🏫 כיתה', '🔤 שם']) [s]], selected: {_sort}, onSelect: (i) => setState(() => _sort = i))),
         ]),
         _gap(10),
         // מצבי-מסך: שגיאה (AlertBanner + סגירה) · טעינה ⇒ אחרת התוכן: ריק · טבלה · טריאז'
@@ -1014,12 +1015,12 @@ class _MemberScreenState extends State<MemberScreen> {
           // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-band (הדחוף בראש כקבוצה); בתוך כל דלי — סדר-הדירוג הנבחר
           for (final b in const [2, 1, 0])
             if (buckets[b]!.isNotEmpty)
-              DsSection(title: '${_secTitle[b]} · ${buckets[b]!.length}', tone: _secTone[b]!, children: [for (final s in buckets[b]!) _row(s)]),
+              ForgeTitledSection(fields: ['${_secTitle[b]} · ${buckets[b]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[for (final s in buckets[b]!) _row(s)]])),
         ],
         // מצב-מיוחד: לא-פעילים (הוקפא/עזב/בוגר) — מחוץ לתפעול, גלויים כארכיון
         if (_mode == 0 && inactiveVisible.isNotEmpty) ...[
           _gap(10),
-          DsSection(title: '🗂 לא-פעילים · ${inactiveVisible.length}', tone: 0, children: [for (final s in inactiveVisible) _row(s)]),
+          ForgeTitledSection(fields: ['🗂 לא-פעילים · ${inactiveVisible.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[for (final s in inactiveVisible) _row(s)]])),
         ],
       ],
     );
@@ -1037,14 +1038,13 @@ class _MemberScreenState extends State<MemberScreen> {
     final glyph = !active ? '🗂' : b == 2 ? '🔴' : b == 1 ? '🟠' : '🟢';
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: GradientCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      child: ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             Expanded(child: ForgeContactTile(fields: ['${s['name']}', '${_StuData.className(s)} · ${_StuData.teacherName(s)} · גיל ${_StuData.age(s) ?? '—'}'])),
             IconButton(onPressed: () => _openPanel(s), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-תלמיד'),
           ]),
           _gap(8),
-          StatRow(label: active ? 'ציון-סיכון מאוחד' : 'ציון-סיכון (ארכיון)', value: 'סיכון $r · ${_StuData.bandLabel(b)}', fraction: (r / 100).clamp(0.0, 1.0)),
+          ForgeLinearProgressStatus(fields: [active ? 'ציון-סיכון מאוחד' : 'ציון-סיכון (ארכיון)', 'סיכון $r · ${_StuData.bandLabel(b)}'], values: [(r / 100).clamp(0.0, 1.0)]),
           Padding(
             padding: const EdgeInsets.only(top: 8, right: 4),
             child: Wrap(spacing: 8, runSpacing: 6, children: [
@@ -1059,8 +1059,7 @@ class _MemberScreenState extends State<MemberScreen> {
               if (_StuData.feeDebt(s) && _StuData.roleName(_role) == 'admin') const ForgeIntelPill(fields: ['💳 חוב-גבייה']), // מקום-שמור (גבייה⇒דגל, רק-הנהלה)
             ]),
           ),
-        ]),
-      ),
+        ])),
     );
   }
 
@@ -1091,8 +1090,7 @@ class _MemberScreenState extends State<MemberScreen> {
           initialChildSize: 0.86, minChildSize: 0.4, maxChildSize: 0.97, expand: false,
           builder: (ctx, scroll) => Padding(
             padding: const EdgeInsets.all(12),
-            child: GlassCard(
-              child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+            child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                 // זהות: אווטאר (ראשי-תיבות; image = מקום-שמור לתמונה) + שם + כיתה·מחנך·גיל·מין + סטטוס
                 Row(children: [
                   PremiumAvatar(name: '${s['name']}', size: 56, image: s['photo'] is ImageProvider ? s['photo'] as ImageProvider : null),
@@ -1115,7 +1113,7 @@ class _MemberScreenState extends State<MemberScreen> {
                   ])),
                 ]),
                 _gap(12),
-                SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: tabs, selected: tab, onSelect: (i) => setSheet(() => _tab[s['id'] as String] = i))),
+                SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in tabs) [s]], selected: {tab}, onSelect: (i) => setSheet(() => _tab[s['id'] as String] = i))),
                 _gap(12),
                 ..._tabBody(ctx, s, tab, act),
                 _gap(16),
@@ -1124,8 +1122,7 @@ class _MemberScreenState extends State<MemberScreen> {
                 // פעולות מגודרות פר-הרשאה (canGrantedAction); אין-הרשאה ⇒ מצב נעילת-הרשאות
                 Builder(builder: (_) { final acts = _actions(ctx, s, act); return acts.isEmpty ? const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', '']) : Wrap(spacing: 8, runSpacing: 8, children: acts); }),
                 _gap(8),
-              ]),
-            ),
+              ])),
           ),
         );
       }),
@@ -1164,7 +1161,7 @@ class _MemberScreenState extends State<MemberScreen> {
           if (_StuData.cohort(s).length >= 2) NeonBars(labels: const ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'], values: [for (final b in _StuData.cohortBins(s)) b.toDouble()], tone: 0),
           _gap(10),
           _h('הערות אחרונות · ${ns.length}'),
-          if (ns.isEmpty) const ForgeSearchEmptyState(fields: ['אין הערות-מחנך/ת', '']) else for (final n in ns.take(3)) TimelineItem(title: '📝 ${n['by']}', time: '${n['date']}'.isEmpty ? 'ללא-תאריך' : _StuData.fmt('${n['date']}'), body: '${n['text']}'),
+          if (ns.isEmpty) const ForgeSearchEmptyState(fields: ['אין הערות-מחנך/ת', '']) else for (final n in ns.take(3)) ForgeNotifRow(items: [['📝 ${n['by']}', '${n['date']}'.isEmpty ? 'ללא-תאריך' : _StuData.fmt('${n['date']}')]]),
           _h('דגלים'),
           Wrap(spacing: 6, runSpacing: 6, children: [for (final f in _StuData.flags(s)) ForgeIntelPill(fields: [f]), if (_StuData.flags(s).isEmpty) const ForgeIntelPill(fields: ['אין דגלים'])]),
           _h('משפחה · פניות'),
@@ -1175,9 +1172,9 @@ class _MemberScreenState extends State<MemberScreen> {
         final hist = _StuData.history(s);
         return [
           _h('ציונים לפי מקצוע'),
-          if (g is Map && g.isNotEmpty) ...[for (final e in g.entries) StatRow(label: '${e.key}', value: '${e.value}', fraction: ((e.value as num) / 100).clamp(0.0, 1.0))] else _slot('ציונים לפי מקצוע · ממוצע · מגמה-אקדמית', 'מודול-ציונים ⇒ s.grades'),
+          if (g is Map && g.isNotEmpty) ...[for (final e in g.entries) ForgeLinearProgressStatus(fields: ['${e.key}', '${e.value}'], values: [((e.value as num) / 100).clamp(0.0, 1.0)])] else _slot('ציונים לפי מקצוע · ממוצע · מגמה-אקדמית', 'מודול-ציונים ⇒ s.grades'),
           _h('היסטוריית-כיתות ורישומים · ${hist.length}'),
-          for (final h in hist) TimelineItem(title: '${h['courseName']}${h['fromRenewal'] == true ? ' · חידוש' : ''}', time: '${h['yearLabel']}', body: 'נוכחויות ${(h['summary'] as Map)['presents']} · חיסורים ${(h['summary'] as Map)['absences']} · ${(h['summary'] as Map)['statusLabel']}'),
+          for (final h in hist) ForgeNotifRow(items: [['${h['courseName']}${h['fromRenewal'] == true ? ' · חידוש' : ''}', '${h['yearLabel']}']]),
           _h('מקומות-שמורים'),
           _slot('תעודות-קודמות', 'Family.docs מסוג תעודה'), _slot('תוכנית-אישית (IEP)', 's.iep'), _slot('חונך/ת', 's.mentor'), _slot('ציוני-חוץ (מבחנים ארציים)', 's.externalScores'),
         ];
@@ -1195,12 +1192,12 @@ class _MemberScreenState extends State<MemberScreen> {
           _h('נוכחות חודשית (%)'),
           if (ms.isEmpty) const ForgeSearchEmptyState(fields: ['אין נתוני-נוכחות עדיין', '']) else NeonBars(labels: ms, values: [for (final m in ms) _StuData.monthRate(s, m) * 100], tone: 0),
           _h('חיסורים · ${abs.length}'),
-          if (abs.isEmpty) const ForgeSearchEmptyState(fields: ['אין חיסורים רשומים', '']) else for (final a in abs.take(12)) TimelineItem(title: a['noshow'] == true ? '⛔ אי-הופעה' : '🚫 חיסור', time: _StuData.fmt(a['date'] as String?), body: '${a['reason']}${a['justified'] == true ? ' · מוצדק' : ' · לא-מוצדק'}'),
+          if (abs.isEmpty) const ForgeSearchEmptyState(fields: ['אין חיסורים רשומים', '']) else for (final a in abs.take(12)) ForgeNotifRow(items: [[a['noshow'] == true ? '⛔ אי-הופעה' : '🚫 חיסור', _StuData.fmt(a['date'] as String?)]]),
         ];
       case 3: // חברתי-רגשי: מקום-שמור + חוגים/מועדונים (מקור: Enrollment⊕Course.cat=חוג) + תפקידים/הישגים (מקום-שמור)
         final clubs = _StuData.coursesOf(s, cat: 'חוג');
         return [
-          if (s['social'] is num) StatRow(label: 'מדד חברתי-רגשי (1=מצוקה)', value: '${s['social']}', fraction: (s['social'] as num).toDouble().clamp(0.0, 1.0)) else _slot('מדד חברתי-רגשי', 'שאלון/יועץ ⇒ s.social'),
+          if (s['social'] is num) ForgeLinearProgressStatus(fields: ['מדד חברתי-רגשי (1=מצוקה)', '${s['social']}'], values: [(s['social'] as num).toDouble().clamp(0.0, 1.0)]) else _slot('מדד חברתי-רגשי', 'שאלון/יועץ ⇒ s.social'),
           _h('מועדונים וחוגים · ${clubs.length}'),
           if (clubs.isEmpty) const ForgeSearchEmptyState(fields: ['לא רשום/ה לחוגים', '']) else for (final c in clubs) ForgeContactTile(fields: ['${c['name']}', '${_StuData.teacherOf(c['teacherId'] as String?)?['name'] ?? ''}']),
           _h('מקומות-שמורים'), _slot('תפקידים', 's.roles'), _slot('הישגים', 's.achievements'),
@@ -1212,7 +1209,7 @@ class _MemberScreenState extends State<MemberScreen> {
           _h('הערות-מחנך/ת לפי שנה״ל'),
           for (final e in _StuData.notesByYear(s).entries) ExpandableTile(title: '${e.key} · ${e.value.length}', body: e.value.map((n) => '${'${n['date']}'.isEmpty ? '' : '${_StuData.fmt('${n['date']}')} · '}${n['by']}: ${n['text']}').join('\n')),
           _h('הערות-התנהגות · ${bn.length}'),
-          if (bn.isEmpty) const ForgeSearchEmptyState(fields: ['אין הערות-התנהגות', '']) else for (final n in bn) TimelineItem(title: '📝 ${n['by']}', time: _StuData.fmt('${n['date']}'), body: '${n['text']}'),
+          if (bn.isEmpty) const ForgeSearchEmptyState(fields: ['אין הערות-התנהגות', '']) else for (final n in bn) ForgeNotifRow(items: [['📝 ${n['by']}', _StuData.fmt('${n['date']}')]]),
         ];
       case 5: // משפחה: הורים+קשר · כתובת · שפה · אחים · סוציו-אקונומי (מוגן) · אישורי-הורים · הסעה (מקום-שמור)
         final f = _StuData.fam(s);
@@ -1240,7 +1237,7 @@ class _MemberScreenState extends State<MemberScreen> {
         final docs = (_StuData.fam(s)['docs'] as List).cast<Map<String, dynamic>>();
         return [
           _h('מסמכים · ${docs.length}'),
-          if (docs.isEmpty) const ForgeSearchEmptyState(fields: ['אין מסמכים', '']) else for (final d in docs) TimelineItem(title: '📎 ${d['name']}', time: _StuData.fmt(d['addedAt'] as String?)),
+          if (docs.isEmpty) const ForgeSearchEmptyState(fields: ['אין מסמכים', '']) else for (final d in docs) ForgeNotifRow(items: [['📎 ${d['name']}', _StuData.fmt(d['addedAt'] as String?)]]),
           _h('תיק-רפואי · 🔒 מוגן'),
           if ('${s['health'] ?? ''}'.isEmpty) const ForgeIntelPill(fields: ['אין רישום רפואי'])
           else if (_can('stu.protected')) ForgeIntelPill(fields: ['🩺 ${_StuData.protectedField(_role, s, 'health', '${s['health']}')} · 👁 נרשם בלוג-חשיפה'])
@@ -1249,13 +1246,13 @@ class _MemberScreenState extends State<MemberScreen> {
         ];
       case 7: // ציר-זמן מאוחד
         final tl = _StuData.timeline(s);
-        return [_h('ציר-זמן · ${tl.length}'), if (tl.isEmpty) const ForgeSearchEmptyState(fields: ['אין אירועים', '']) else for (final e in tl) TimelineItem(title: e['title']!, time: _StuData.fmt(e['date']), body: e['body']!.isEmpty ? null : e['body'])];
+        return [_h('ציר-זמן · ${tl.length}'), if (tl.isEmpty) const ForgeSearchEmptyState(fields: ['אין אירועים', '']) else for (final e in tl) ForgeNotifRow(items: [[e['title']!, _StuData.fmt(e['date'])]])];
       default: // אודיט: רשומות-אודיט של התלמיד (at·who·act·what)
         final au = _StuData.auditOf(s);
         return [
           if (!_can('stu.audit') && _StuData.roleName(_role) != 'admin') const ForgeSectionPill(fields: ['אודיט מלא — מנהל/ת ויועץ/ת בלבד', '']) else ...[
             _h('אודיט · ${au.length}'), ForgeSectionPill(fields: [_StuData.encryptionNote, '']),
-            if (au.isEmpty) const ForgeSearchEmptyState(fields: ['אין רשומות-אודיט', '']) else for (final a in au) TimelineItem(title: '${a['act']}${a['act'] == 'expose' ? ' 👁' : ''} · ${a['who']}', time: '${a['at']}', body: '${a['what']}'),
+            if (au.isEmpty) const ForgeSearchEmptyState(fields: ['אין רשומות-אודיט', '']) else for (final a in au) ForgeNotifRow(items: [['${a['act']}${a['act'] == 'expose' ? ' 👁' : ''} · ${a['who']}', '${a['at']}']]),
           ],
         ];
     }
@@ -1293,7 +1290,7 @@ class _MemberScreenState extends State<MemberScreen> {
     var v = '';
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => Padding(
       padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(c2).viewInsets.bottom + 12),
-      child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         DsField(label: title, hint: hint, value: v, onChanged: (x) => v = x),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.trim().isNotEmpty) { onSave(v.trim()); Navigator.of(c2).pop(); } }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
@@ -1304,7 +1301,7 @@ class _MemberScreenState extends State<MemberScreen> {
     var v = options.isEmpty ? '' : options.first;
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, builder: (c2) => StatefulBuilder(builder: (c2, setS) => Padding(
       padding: const EdgeInsets.all(12),
-      child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         DsEnumField(label: title, options: options, value: v, onChanged: (x) => setS(() => v = x)),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.isNotEmpty) { onSave(v); Navigator.of(c2).pop(); } }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
@@ -1314,7 +1311,7 @@ class _MemberScreenState extends State<MemberScreen> {
   void _showText(BuildContext ctx, String title, String text) {
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => Padding(
       padding: const EdgeInsets.all(12),
-      child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         _gap(8),
         Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)), child: SelectableText(text, style: const TextStyle(color: _ink, fontSize: 13, height: 1.6))),
@@ -1328,7 +1325,7 @@ class _MemberScreenState extends State<MemberScreen> {
     const labels = {'first': 'שם פרטי', 'school': 'בית-ספר', 'mother': 'אם', 'father': 'אב', 'phone': 'טלפון-הורה', 'city': 'ישוב', 'address': 'כתובת', 'language': 'שפת-בית'};
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => DraggableScrollableSheet(
       initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
-      builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+      builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
         Text('עריכה · ${s['name']}', style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
         _gap(8),
@@ -1344,7 +1341,7 @@ class _MemberScreenState extends State<MemberScreen> {
     const labels = {'first': 'שם פרטי', 'last': 'שם משפחה', 'birth': 'תאריך-לידה (YYYY-MM-DD)', 'parent': 'הורה ראשי', 'phone': 'טלפון-הורה'};
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => StatefulBuilder(builder: (c2, setS) => DraggableScrollableSheet(
       initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
-      builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+      builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
         const Text('רישום בן/בת משפחה חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
         DsEnumField(label: 'כיתה', options: classes, value: cls, onChanged: (x) => setS(() => cls = x)),
@@ -1362,7 +1359,7 @@ class _MemberScreenState extends State<MemberScreen> {
     var text = '';
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => Padding(
       padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(c2).viewInsets.bottom + 12),
-      child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Text('ייבוא בני משפחה (CSV)', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל בן/בת משפחה', style: TextStyle(color: _muted, fontSize: 12)),
         DsField(label: 'CSV', hint: 'דנה,כהן,י׳-1 · כיתת-חינוך,2010-05-05,רונית,0501234567', value: text, onChanged: (x) => text = x),

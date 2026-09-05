@@ -86,12 +86,24 @@ Path _parse(String d) {
 
 /// InputBar — seam:fields
 class ForgeInputBar extends StatelessWidget {
-  const ForgeInputBar({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13a · שדה-חי (TextField וכו׳) במקום ציור-ה-input של הגלריה. null ⇒ הציור.
+  final Widget? control;
+  /// G13a · הקשה על כפתור/קישור k (סדר-הופעה, 1 פעולות).
+  final void Function(int)? onAction;
+  static const int actionSlots = 1;
+  const ForgeInputBar({super.key, this.child, this.control, this.onAction});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [Expanded(child: Directionality(textDirection: TextDirection.rtl, child: SizedBox(width: double.infinity, child: Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(38, 0, 13, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Align(alignment: Alignment.centerRight, child: Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)))))))]), Positioned(top: 5, left: 6, width: 34, child: Container(width: 34, height: 34, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999)), child: SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.path("M22 2L11 13M22 2l-7 20-4-9-9-4z", const Color(0xFF0B0B0D), false, 1.8)], 24, 24)))))]));
+    final Widget body = _withChild(SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [Expanded(child: (control ?? Directionality(textDirection: TextDirection.rtl, child: SizedBox(width: double.infinity, child: Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(38, 0, 13, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Align(alignment: Alignment.centerRight, child: Text("Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13))))))))]), Positioned(top: 5, left: 6, width: 34, child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(0), child: Container(width: 34, height: 34, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(999)), child: SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.path("M22 2L11 13M22 2l-7 20-4-9-9-4z", const Color(0xFF0B0B0D), false, 1.8)], 24, 24))))))])), child);
+    return body;
   }
 }

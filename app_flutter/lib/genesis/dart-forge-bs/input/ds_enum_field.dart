@@ -84,13 +84,27 @@ Path _parse(String d) {
   return path;
 }
 
-/// DsEnumField — seam:collection
+/// DsEnumField — seam:collection · 1 חריצים
 class ForgeDsEnumField extends StatelessWidget {
-  const ForgeDsEnumField({super.key});
+  /// תפר-דאטה (G12a): 1 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  final List<String>? fields;
+  static const int fieldSlots = 1;
+  static const List<String> fieldDemo = <String>["Label"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13a · שדה-חי (TextField וכו׳) במקום ציור-ה-input של הגלריה. null ⇒ הציור.
+  final Widget? control;
+  const ForgeDsEnumField({super.key, this.fields, this.child, this.control});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [SizedBox(width: double.infinity, child: Text("Label", textAlign: TextAlign.right, style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 11, fontWeight: FontWeight.w600))), Stack(clipBehavior: Clip.none, children: [Directionality(textDirection: TextDirection.rtl, child: SizedBox(width: double.infinity, child: Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(13, 0, 38, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Align(alignment: Alignment.centerRight, child: Text("Option", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13)))))), Positioned(right: 12, child: SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.path("M6 9l6 6 6-6", skin.mut, false, 1.8)], 24, 24))))])]);
+    final Widget body = _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [SizedBox(width: double.infinity, child: Text(_f(0, "Label"), textAlign: TextAlign.right, style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 11, fontWeight: FontWeight.w600))), Stack(clipBehavior: Clip.none, children: [(control ?? Directionality(textDirection: TextDirection.rtl, child: SizedBox(width: double.infinity, child: Container(height: 44, constraints: const BoxConstraints(minHeight: 44), padding: const EdgeInsets.fromLTRB(13, 0, 38, 0), decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: Align(alignment: Alignment.centerRight, child: Text("Option", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13))))))), Positioned(right: 12, child: SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.path("M6 9l6 6 6-6", skin.mut, false, 1.8)], 24, 24))))])]), child);
+    return body;
   }
 }

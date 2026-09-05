@@ -84,14 +84,27 @@ Path _parse(String d) {
   return path;
 }
 
-/// EmojiSectionTitle — seam:title
+/// EmojiSectionTitle — seam:title · 2 חריצים
 class ForgeEmojiSectionTitle extends StatelessWidget {
-  const ForgeEmojiSectionTitle({super.key});
+  /// תפר-דאטה (G12a): 2 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  final List<String>? fields;
+  static const int fieldSlots = 2;
+  static const List<String> fieldDemo = <String>["Label", "8"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  static Widget _hide(String s, Widget w) => s.isEmpty ? const SizedBox.shrink() : w;   // G13a · חריץ-ריק ⇒ הקופסה נעלמת
+  const ForgeEmojiSectionTitle({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(18, 15, 18, 15), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 16, children: [Container(width: 32, height: 32, alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.gl, skin.sunken], stops: [0.0, 0.60]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(9)), child: SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.rect(4, 4, 16, 16, 3, theme.aHi, false, 1.8)], 24, 24)))), Expanded(child: Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.17, height: 1.05, leadingDistribution: TextLeadingDistribution.even))), Directionality(textDirection: TextDirection.ltr, child: Container(padding: const EdgeInsets.fromLTRB(9, 2, 9, 2), decoration: BoxDecoration(color: theme.a.withValues(alpha: 0.150), border: Border.all(color: theme.a.withValues(alpha: 0.320)), borderRadius: BorderRadius.circular(999)), child: Text("8", style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10, fontWeight: FontWeight.w700))))]));
+    final Widget body = Container(padding: const EdgeInsets.fromLTRB(18, 15, 18, 15), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 16, children: [Container(width: 32, height: 32, alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.gl, skin.sunken], stops: [0.0, 0.60]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(9)), child: SizedBox(width: 16, height: 16, child: CustomPaint(painter: _SvgScene([_Op.rect(4, 4, 16, 16, 3, theme.aHi, false, 1.8)], 24, 24)))), Expanded(child: Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.17, height: 1.05, leadingDistribution: TextLeadingDistribution.even))), _hide(_f(1, "8"), Directionality(textDirection: TextDirection.ltr, child: Container(padding: const EdgeInsets.fromLTRB(9, 2, 9, 2), decoration: BoxDecoration(color: theme.a.withValues(alpha: 0.150), border: Border.all(color: theme.a.withValues(alpha: 0.320)), borderRadius: BorderRadius.circular(999)), child: Text(_f(1, "8"), style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10, fontWeight: FontWeight.w700)))))]), child));
+    return body;
   }
 }

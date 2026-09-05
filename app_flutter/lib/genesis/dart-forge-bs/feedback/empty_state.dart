@@ -91,12 +91,23 @@ class ForgeEmptyState extends StatelessWidget {
   static const int fieldSlots = 3;
   static const List<String> fieldDemo = <String>["Label", "Meta", "Action"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeEmptyState({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  static Widget _hide(String s, Widget w) => s.isEmpty ? const SizedBox.shrink() : w;   // G13a · חריץ-ריק ⇒ הקופסה נעלמת
+  /// G13a · הקשה על כפתור/קישור k (סדר-הופעה, 1 פעולות).
+  final void Function(int)? onAction;
+  static const int actionSlots = 1;
+  const ForgeEmptyState({super.key, this.fields, this.child, this.onAction});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Container(width: 56, height: 56, alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.gl, skin.sunken], stops: [0.0, 0.60]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: SizedBox(width: 26, height: 26, child: CustomPaint(painter: _SvgScene([_Op.rect(3, 5, 18, 14, 2, theme.aHi, false, 1.8), _Op.path("M3 10h18M8 15h5", theme.aHi, false, 1.8)], 24, 24)))), Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700)), IntrinsicWidth(child: Text(_f(1, "Meta"), style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he))), Container(height: 44, margin: const EdgeInsets.fromLTRB(0, 4, 0, 0), padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 6), blurRadius: 16, spreadRadius: 0)]), child: Center(widthFactor: 1.0, child: Text(_f(2, "Action"), style: TextStyle(color: const Color(0xFF0B0B0D), fontSize: 12.5, fontWeight: FontWeight.w700, fontFamily: fonts.he))))]));
+    final Widget body = Container(padding: const EdgeInsets.fromLTRB(10, 18, 10, 18), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 10, children: [Container(width: 56, height: 56, alignment: Alignment.center, decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(-0.40, -0.60), radius: 1.20, colors: [theme.gl, skin.sunken], stops: [0.0, 0.60]), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: SizedBox(width: 26, height: 26, child: CustomPaint(painter: _SvgScene([_Op.rect(3, 5, 18, 14, 2, theme.aHi, false, 1.8), _Op.path("M3 10h18M8 15h5", theme.aHi, false, 1.8)], 24, 24)))), Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 15, fontWeight: FontWeight.w700)), _hide(_f(1, "Meta"), IntrinsicWidth(child: Text(_f(1, "Meta"), style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he)))), GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(0), child: _hide(_f(2, "Action"), Container(height: 44, margin: const EdgeInsets.fromLTRB(0, 4, 0, 0), padding: const EdgeInsets.fromLTRB(16, 0, 16, 0), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: theme.gl, offset: const Offset(0, 6), blurRadius: 16, spreadRadius: 0)]), child: Center(widthFactor: 1.0, child: Text(_f(2, "Action"), style: TextStyle(color: const Color(0xFF0B0B0D), fontSize: 12.5, fontWeight: FontWeight.w700, fontFamily: fonts.he))))))]), child));
+    return body;
   }
 }

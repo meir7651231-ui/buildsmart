@@ -1,5 +1,5 @@
-// 🎨 schoolos_rooms.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile
-//   החלפות: stat×0 · hero×1 · statRow×17 · button×32 · statusChip×9 · banner×16 · emptyState×12 · mediaRow×9 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_rooms.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow
+//   החלפות: stat×0 · hero×1 · statRow×17 · button×32 · statusChip×9 · banner×16 · emptyState×12 · mediaRow×9 · section×5 · segmented×7 · meter×1 · frame×8 · timeline×6 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: RoomsScreen.
 //
@@ -82,6 +82,9 @@ import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -724,8 +727,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
       icon: '🏫',
       children: [
         // KPI-10 (המפרט): hero=התנגשויות (המטרה: אפס) + 10 מדדי-מצב BareStat — כולם מנועי-מדף/שדות-אמת
-        GradientCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['התנגשויות-תפיסה השבוע', '${conflicts.length}'])),
             const SizedBox(height: 14),
             Row(children: [
@@ -743,13 +745,12 @@ class _RoomsScreenState extends State<RoomsScreen> {
               Expanded(child: ForgeStatPlain(fields: ['🧰 ציוד-חסר/תקול', '${_RoomsData.brokenEqN}'])),
               Expanded(child: ForgeStatPlain(fields: ['🪑 לא-מנוצלים', '$underN'])),
             ]),
-          ]),
-        ),
+          ])),
         const SizedBox(height: 8),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות פר-תפקיד (roleOf⊕canGrantedAction)
         Align(
           alignment: Alignment.centerRight,
-          child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SegmentedSwitch(items: [for (final r in _RoomsData.roleDefs) r['label'] as String], selected: _role, onSelect: (i) => setState(() => _role = i))),
+          child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _RoomsData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i))),
         ),
         const SizedBox(height: 10),
         // 🚨 מרכז-דורש-פעולה (אוטומציות 1·3·5·6·7·9) — המערכת מתריעה ומציעה; כל שורה = מנוע-מדף ⊕ AlertBanner/SoftButton
@@ -783,13 +784,13 @@ class _RoomsScreenState extends State<RoomsScreen> {
         ]),
         if (_freeAtOn && hoursAll.isNotEmpty) ...[
           const SizedBox(height: 6),
-          Align(alignment: Alignment.centerRight, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SegmentedSwitch(items: hoursAll, selected: hoursAll.indexOf(_slotHour).clamp(0, hoursAll.length - 1), onSelect: (i) => setState(() => _slotHour = hoursAll[i])))),
+          Align(alignment: Alignment.centerRight, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in hoursAll) [s]], selected: {hoursAll.indexOf(_slotHour).clamp(0, hoursAll.length - 1)}, onSelect: (i) => setState(() => _slotHour = hoursAll[i])))),
         ],
         const SizedBox(height: 10),
         // פס-עליון · בורר-מבט (ארגון = פעולת-יסוד עם אטום משלה: SegmentedSwitch מבוקר)
         Align(
           alignment: Alignment.centerRight,
-          child: SegmentedSwitch(items: const ['📅 יום', '🗓 שבוע', '📋 רשימה'], selected: _view, onSelect: (i) => setState(() => _view = i)),
+          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['📅 יום', '🗓 שבוע', '📋 רשימה']) [s]], selected: {_view}, onSelect: (i) => setState(() => _view = i)),
         ),
         if (_view == 0) ...[
           const SizedBox(height: 8),
@@ -798,7 +799,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
             alignment: Alignment.centerRight,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: SegmentedSwitch(items: [for (var i = 0; i < letters.length; i++) '${letters[i]} ${_RoomsData.weekIsos[i].substring(8)}'], selected: _dayIdx, onSelect: (i) => setState(() => _dayIdx = i)),
+              child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (var i = 0; i < letters.length; i++) '${letters[i]} ${_RoomsData.weekIsos[i].substring(8)}']) [s]], selected: {_dayIdx}, onSelect: (i) => setState(() => _dayIdx = i)),
             ),
           ),
         ],
@@ -813,16 +814,16 @@ class _RoomsScreenState extends State<RoomsScreen> {
         else if (visible.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין חדרים תואמים לחיפוש/סינון', '']))
         else if (_view == 2)
-          DsSection(title: '📋 רשימת-חדרים · ${visible.length}', children: [_table(visible)])
+          ForgeTitledSection(fields: ['📋 רשימת-חדרים · ${visible.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_table(visible)]]))
         else if (_view == 1)
-          DsSection(title: '🗓 שבוע-הבניין · ${_RoomsData.weekIsos.first} → ${_RoomsData.weekIsos.last}', children: [_weekGrid(visible, names)])
+          ForgeTitledSection(fields: ['🗓 שבוע-הבניין · ${_RoomsData.weekIsos.first} → ${_RoomsData.weekIsos.last}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_weekGrid(visible, names)]]))
         else ...[
           // מצב-מיוחד: יום-חסום (שבת/שישי/חג/צום-נדחה/חוה"מ) — blockReason מסנכרן-לוח ⇒ כל המשבצות הפנויות חסומות
           if (blocked != null) ...[
             ForgeSectionPill(fields: ['יום חסום לתפיסה — $blocked', '']),
             const SizedBox(height: 8),
           ],
-          DsSection(title: '📅 יומן-חדרים · ${names[_dayIdx]} $_iso · ${visible.length} חדרים', tone: blocked != null ? 2 : 0, children: [_dayGrid(visible)]),
+          ForgeTitledSection(fields: ['📅 יומן-חדרים · ${names[_dayIdx]} $_iso · ${visible.length} חדרים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_dayGrid(visible)]])),
         ],
       ],
     );
@@ -916,8 +917,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           initialChildSize: 0.78, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
           builder: (ctx, scroll) => Padding(
             padding: const EdgeInsets.all(12),
-            child: GlassCard(
-              child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+            child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                 ForgeContactTile(fields: ['${r['name']}', '${r['location']} · ${_RoomsData.roomInfo(r)}']),
                 _gap(8),
                 _wrap([
@@ -934,7 +934,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                   Expanded(child: ForgeStatPlain(fields: ['התנגשויות', '${conf.length}'])),
                 ]),
                 _gap(10),
-                StatRow(label: 'תפיסות-שבוע מול קיבולת-משבצות', value: '$used מתוך $cap', fraction: cap == 0 ? 0 : used / cap),
+                ForgeLinearProgressStatus(fields: ['תפיסות-שבוע מול קיבולת-משבצות', '$used מתוך $cap'], values: [cap == 0 ? 0 : used / cap]),
                 // שדות-מתקדמים · מקום-שמור (חוק-7): נוכח ⇒ שבב · חסר ⇒ נרשם בחוזה (מאיר כשיגיע נתון, אפס-שינוי-קוד)
                 _gap(8),
                 _wrap([for (final f in _RoomsData.presentFields(r)) ForgeIntelPill(fields: ['${f['glyph']} ${f['label']}: ${r[f['key']]}'])]),
@@ -950,15 +950,14 @@ class _RoomsScreenState extends State<RoomsScreen> {
                 _gap(12),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: SegmentedSwitch(items: const ['היום', 'שבוע', 'תפיסות', 'ציוד', 'תקלות', 'אחזקה', 'היסטוריה', 'אודיט'], selected: tab, onSelect: (i) => setSheet(() => tab = i)),
+                  child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['היום', 'שבוע', 'תפיסות', 'ציוד', 'תקלות', 'אחזקה', 'היסטוריה', 'אודיט']) [s]], selected: {tab}, onSelect: (i) => setSheet(() => tab = i)),
                 ),
                 _gap(10),
                 ..._tabBody(ctx, r, tab, act),
                 _h('פעולות'),
                 _wrap(_actions(ctx, r, act)),
                 _gap(8),
-              ]),
-            ),
+              ])),
           ),
         );
       }),
@@ -974,7 +973,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
         return [
           _h('ציר-שעות · ${dayNames()[_dayIdx]} $_iso'),
           for (final x in sl)
-            TimelineItem(title: '${_kindGlyph('${x['kind']}')} ${x['label']}', time: '${x['time']}', body: x['kind'] == 'course' ? '${_RoomsData.teacherName((x['course'] as Map)['teacherId'])}' : x['kind'] == 'event' ? '${_RoomsData.teacherName((x['event'] as Map)['requestedBy'])} · ${(x['event'] as Map)['status'] == 'proposed' ? 'ממתין-אישור' : 'מאושר'}' : null),
+            ForgeNotifRow(items: [['${_kindGlyph('${x['kind']}')} ${x['label']}', '${x['time']}']]),
         ];
       case 1: // שבוע · מיני-גריד (dayCell × 6)
         final names = dayNames();
@@ -1016,7 +1015,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           _h('תקלות פתוחות · ${fs.length}'),
           for (final f in fs)
             Row(children: [
-              Expanded(child: TimelineItem(title: '🔧 ${f['name']} · ${f['severity']}', time: '${f['date']}', body: '${f['status']} · דווח: ${_RoomsData.teacherName(f['createdBy'])}${'${f['detail']}'.isNotEmpty ? ' · ציוד: ${f['detail']}' : ''}')),
+              Expanded(child: ForgeNotifRow(items: [['🔧 ${f['name']} · ${f['severity']}', '${f['date']}']])),
               if (_can('rooms.faultClose')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.closeFault(_who, f)), child: ForgeSoftButton(fields: ['✔ סגור']))),
             ]),
         ];
@@ -1034,13 +1033,13 @@ class _RoomsScreenState extends State<RoomsScreen> {
         ];
       case 6: // היסטוריה · תקלות-שנסגרו ⊕ אירועים-שבוצעו/נדחו (TimelineItem)
         final hist = <Widget>[
-          for (final f in _RoomsData.faultsOf(r, openOnly: false)) if (f['status'] == 'done') TimelineItem(title: '✔ תקלה נסגרה · ${f['name']}', time: '${f['date']}', body: '${f['severity']}'),
-          for (final e in _RoomsData.liveEvents) if (e['roomId'] == r['id'] && e['done'] == true) TimelineItem(title: '${e['status'] == 'rejected' ? '✖ נדחה' : e['status'] == 'cancelled' ? '↩ בוטל' : '✔ בוצע'} · ${e['title']}', time: '${e['date']} ${e['time']}', body: '${_RoomsData.teacherName(e['requestedBy'])}'),
+          for (final f in _RoomsData.faultsOf(r, openOnly: false)) if (f['status'] == 'done') ForgeNotifRow(items: [['✔ תקלה נסגרה · ${f['name']}', '${f['date']}']]),
+          for (final e in _RoomsData.liveEvents) if (e['roomId'] == r['id'] && e['done'] == true) ForgeNotifRow(items: [['${e['status'] == 'rejected' ? '✖ נדחה' : e['status'] == 'cancelled' ? '↩ בוטל' : '✔ בוצע'} · ${e['title']}', '${e['date']} ${e['time']}']]),
         ];
         return hist.isEmpty ? [const ForgeSearchEmptyState(fields: ['אין היסטוריה', ''])] : [_h('היסטוריה · ${hist.length}'), ...hist];
       default: // אודיט · פנקס-הפעולות של החדר (מי · מה · מתי)
         final au = _RoomsData.audit.where((a) => a['roomId'] == r['id']).toList();
-        return au.isEmpty ? [const ForgeSearchEmptyState(fields: ['אין רשומות-אודיט לחדר', ''])] : [_h('אודיט · ${au.length}'), for (final a in au) TimelineItem(title: '${a['what']}', time: '${a['when']}', body: '${a['who']} · ${a['target']}')];
+        return au.isEmpty ? [const ForgeSearchEmptyState(fields: ['אין רשומות-אודיט לחדר', ''])] : [_h('אודיט · ${au.length}'), for (final a in au) ForgeNotifRow(items: [['${a['what']}', '${a['when']}']])];
     }
   }
 
@@ -1049,7 +1048,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
     final isEv = o['kind'] == 'event';
     final st = isEv ? '${o['status']}' : 'שבועי';
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      TimelineItem(title: '${isEv ? '📌' : '🎓'} ${o['name']}', time: '${dayNames()[o['dayIdx'] as int]} ${o['iso']} ${_RoomsData._m2hm(o['start'])}', body: '${o['who']} · ${st == 'proposed' ? 'ממתין-אישור' : st == 'pending' ? 'מאושר' : st}'),
+      ForgeNotifRow(items: [['${isEv ? '📌' : '🎓'} ${o['name']}', '${dayNames()[o['dayIdx'] as int]} ${o['iso']} ${_RoomsData._m2hm(o['start'])}']]),
       _wrap([
         if (isEv && st == 'proposed' && _can('rooms.approve')) ...[
           GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, _RoomsData.eventById(o['id'])!, 'pending')), child: ForgeSoftButton(fields: ['✔ אשר'])),
@@ -1074,7 +1073,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
       context: ctx, backgroundColor: Colors.transparent,
       builder: (c2) => Padding(
         padding: const EdgeInsets.all(12),
-        child: GlassCard(child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
+        child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
           ForgeContactTile(fields: ['העבר: ${o['name']}', '${o['iso']} ${_RoomsData._m2hm(o['start'])} · נדרש ≥$need${needsEq.isNotEmpty ? ' · ציוד: ${needsEq.join(', ')}' : ''}']),
           _gap(8),
           if (alts.isEmpty)
@@ -1102,11 +1101,11 @@ class _RoomsScreenState extends State<RoomsScreen> {
         final blocked = _RoomsData.blockOf(iso) ?? (_RoomsData.blockedDates.contains(iso) ? 'חסימה-ידנית' : null);
         return Padding(
           padding: const EdgeInsets.all(12),
-          child: GlassCard(child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
+          child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
             ForgeContactTile(fields: [weekly ? 'הזמנה-חוזרת (שבועית) · ${r['name']}' : 'הזמן-חדר · ${r['name']}', 'בחר יום ומשבצת פנויה · ${_RoomsData.roomInfo(r)}']),
             _gap(8),
             DsField(label: 'כותרת', hint: 'למה החדר נדרש', value: title, onChanged: (v) => title = v),
-            SingleChildScrollView(scrollDirection: Axis.horizontal, child: SegmentedSwitch(items: dayNames(), selected: day, onSelect: (i) => setB(() => day = i))),
+            SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in dayNames()) [s]], selected: {day}, onSelect: (i) => setB(() => day = i))),
             _gap(8),
             if (blocked != null)
               ForgeSectionPill(fields: ['יום חסום — $blocked', ''])
@@ -1131,11 +1130,11 @@ class _RoomsScreenState extends State<RoomsScreen> {
       context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true,
       builder: (c2) => StatefulBuilder(builder: (c2, setB) => Padding(
         padding: const EdgeInsets.all(12),
-        child: GlassCard(child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
+        child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
           ForgeContactTile(fields: ['דווח-תקלה · ${r['name']}', 'תקלה-חמורה ⇒ החדר לא-זמין + העברת-שיעורים']),
           _gap(8),
           DsField(label: 'תיאור', hint: 'מה התקלה', value: name, onChanged: (v) => name = v),
-          SegmentedSwitch(items: sevs, selected: sev, onSelect: (i) => setB(() => sev = i)),
+          ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in sevs) [s]], selected: {sev}, onSelect: (i) => setB(() => sev = i)),
           _h('ציוד מעורב (אופציונלי)'),
           _wrap([for (final k in _RoomsData.eqOf(r).keys) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setB(() => detail = detail == k ? '' : k), child: ForgeSoftButton(fields: [detail == k ? '✔ $k' : k]))]),
           _gap(10),
@@ -1172,7 +1171,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
       context: ctx, backgroundColor: Colors.transparent,
       builder: (c2) => Padding(
         padding: const EdgeInsets.all(12),
-        child: GlassCard(child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
+        child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
           ForgeContactTile(fields: ['יומן-יומי · ${r['name']}', '${dayNames()[_dayIdx]} $_iso']),
           _gap(8),
           Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)), child: SelectableText(lines, style: const TextStyle(color: _ink, fontSize: 12.5, height: 1.7))),
@@ -1194,7 +1193,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
     final dueCheck = _RoomsData.liveRooms.where(_RoomsData.checkDue).toList();
     void act(void Function() f) { f(); setState(() {}); }
     return [
-      DsSection(title: '🚨 דורש-פעולה · ${_RoomsData.actionItems}', tone: _RoomsData.actionItems > 0 ? 2 : 1, children: [
+      ForgeTitledSection(fields: ['🚨 דורש-פעולה · ${_RoomsData.actionItems}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (_RoomsData.actionItems == 0) const ForgeSearchEmptyState(fields: ['אין כפל-תפיסה · אין הזמנות ממתינות · כל שיעור בחדר עם הציוד הנדרש', '']),
         // 1 · גילוי-כפל-תפיסה בזמן-אמת (חוסם) ⇒ פתור = העברה לחדר-חלופי (altRooms)
         for (final c in conf)
@@ -1230,7 +1229,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
             Expanded(child: ForgeSectionPill(fields: ['חדר תקול (תקלה חמורה): ${r['name']} — ${_RoomsData.affectedByFault(r).length} תפיסות השבוע מושפעות', ''])),
             if (_can('rooms.move') && _RoomsData.affectedByFault(r).isNotEmpty) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.autoRelocate(_who, r)), child: ForgeSoftButton(fields: ['🚚 העבר-אוטו']))],
           ])),
-      ]),
+      ]])),
       // 6 · חדר-לא-מנוצל · 3 · סנכרון-לוח (חגים קרובים ⇒ חסימה-אוטו) · 5 · בדיקה-תקופתית (מקום-שמור)
       if (under.isNotEmpty) ...[ForgeSectionPill(fields: ['${under.length} חדרים מתחת לסף-ניצולת ${_RoomsData.utilFloor}%: ${under.map((r) => '${r['name']} ${_RoomsData.utilPct(r)}%').join(' · ')}', '']), _gap(8)],
       if (hol.isNotEmpty) ...[ForgeSectionPill(fields: ['סנכרון-לוח · ${hol.length} חגים ב-45 יום ⇒ חסימה-אוטו: ${hol.map((h) => '${h['name']} ${h['iso']}').join(' · ')}', '']), _gap(8)],
@@ -1238,7 +1237,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
       if (unknownCheck > 0) ...[ForgeSectionPill(fields: ['תזכורת-בדיקה-תקופתית (מזגן/כיבוי-אש): אין תאריך-בדיקה ל-$unknownCheck חדרים — מקום-שמור (lastCheck), מאיר כשיגיע נתון', '']), _gap(8)],
       // 8 · ניצולת-שבועית-להנהלה (admin): NeonBars על ערכי-אמת (utilPct) — לא bar_chart המזייף
       if (_RoomsData.roleName(_role) == 'admin') ...[
-        DsSection(title: '📊 ניצולת-שבועית להנהלה · ממוצע ${_RoomsData.utilAvgPct}%', children: [
+        ForgeTitledSection(fields: ['📊 ניצולת-שבועית להנהלה · ממוצע ${_RoomsData.utilAvgPct}%', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           NeonBars(labels: [for (final r in _RoomsData.utilRanked) '${r['name']}'], values: [for (final r in _RoomsData.utilRanked) _RoomsData.utilPct(r).toDouble()], tone: 0),
           _gap(6),
           Row(children: [
@@ -1246,7 +1245,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
             Expanded(child: ForgeStatPlain(fields: ['הכי-פחות', '${_RoomsData.utilRanked.isEmpty ? '—' : _RoomsData.utilRanked.last['name']}'])),
             Expanded(child: ForgeStatPlain(fields: ['הודעות שנשלחו', '${_RoomsData.outbox.length}'])),
           ]),
-        ]),
+        ]])),
       ],
     ];
   }
@@ -1264,8 +1263,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
         initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
         builder: (ctx, scroll) => Padding(
           padding: const EdgeInsets.all(12),
-          child: GlassCard(
-            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+          child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
               ForgeContactTile(fields: [ical ? 'ייצוא iCal (VCALENDAR)' : 'ייצוא CSV', ical ? '${rs.length} חדרים · $occN תפיסות השבוע · RFC5545 (buildIcs)' : '${rs.length} חדרים · ${_RoomsData.csvRows(rs).first.length} עמודות · BOM + חסימת-הזרקה']),
               _gap(10),
               if (!ok)
@@ -1276,8 +1274,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                   decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
                   child: SelectableText(body, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 11.5, height: 1.6)),
                 ),
-            ]),
-          ),
+            ])),
         ),
       ),
     );
@@ -1295,7 +1292,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
       context: context, backgroundColor: Colors.transparent,
       builder: (c2) => Padding(
         padding: const EdgeInsets.all(12),
-        child: GlassCard(child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
+        child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
           const ForgeContactTile(fields: ['בחר חדר', 'מהרשימה-הנראית (אחרי חיפוש וסינון)']),
           _gap(6),
           if (rs.isEmpty) const ForgeSearchEmptyState(fields: ['אין חדרים תואמים', '']),

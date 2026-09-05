@@ -64,6 +64,9 @@ import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat/FilterChipPill דורשים הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -670,20 +673,19 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         if (_metric != null) ForgeSectionPill(fields: ['מסונן למדד: ${ShopAssignmentFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}', '']),
         if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeSoftButton(fields: ['✖ בטל סינון-מדד']))),
         // ═══ הגרעין-מהסכמה (G6c): ShopAssignmentCore — מצבים חצובים ⊕ מעבר מאטום-המדף ⊕ חוקים/ערוצים — לא מומצא, לא מצויר-ביד ═══
-        DsSection(title: '🧠 מחזור-חיים · ${ShopAssignmentCore.term} (גרעין)', children: [
+        ForgeTitledSection(fields: ['🧠 מחזור-חיים · ${ShopAssignmentCore.term} (גרעין)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           Wrap(spacing: 6, runSpacing: 6, children: [for (final s in ShopAssignmentCore.states) ForgeIntelPill(fields: [s])]),
           ForgeSectionPill(fields: ['הבא אחרי ${ShopAssignmentCore.states.first}: ${ShopAssignmentCore.next(ShopAssignmentCore.states.first) ?? 'סופי'} · ${ShopAssignmentCore.rules.length} חוקים · ${ShopAssignmentCore.channels.length} ערוצים · ${ShopAssignmentCore.relations.length} יחסים', '']),
-        ]),
+        ]])),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — roleOf⊕teacherIdOf⊕canGrantedAction מגדרים פעולות/עמודות/רשומות
         //   6 תפקידים ב-2 שורות של SegmentedSwitch (Row-מבוקר; 6 פריטים גולשים ברוחב-המסך — נתפס בבדיקת-widget)
         for (var r = 0; r < 2; r++) ...[
-          Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: [for (final d in _TeamData.roleDefs.sublist(r * 3, r * 3 + 3)) d['label'] as String], selected: _role ~/ 3 == r ? _role % 3 : -1, onSelect: (i) => setState(() => _role = r * 3 + i))),
+          Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final d in _TeamData.roleDefs.sublist(r * 3, r * 3 + 3)) d['label'] as String]) [s]], selected: {_role ~/ 3 == r ? _role % 3 : -1}, onSelect: (i) => setState(() => _role = r * 3 + i))),
           _gap(6),
         ],
         _gap(4),
         // KPI-10: hero=שיעורים-ללא-מורה-היום (המטרה) + 10 מדדי-מצב (BareStat נושאי-ערך-אמת)
-        GradientCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['שיעורים ללא שיוך היום', '$uncovered'])),
             const SizedBox(height: 14),
             Row(children: [
@@ -701,8 +703,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
               Expanded(child: ForgeStatPlain(fields: ['📄 חוזים פגים החודש', '${_TeamData.contractsN}'])),
               Expanded(child: ForgeStatPlain(fields: ['🎓 הכשרות חסרות', '${_TeamData.certsN}'])),
             ]),
-          ]),
-        ),
+          ])),
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — 9 אוטומציות-המפרט
         for (final a in _TeamData.alerts(_role)) ...[ForgeSectionPill(fields: [a['m'] as String, '']), _gap(6)],
@@ -727,9 +728,9 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
           _fchip('free', '🟢 זמין ב-${_TeamData.openSlot}'),
         ]),
         const SizedBox(height: 8),
-        Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['כל תפקיד', 'מחנך', 'מקצועי', 'סייע', 'הנהלה'], selected: _segIdx('role', const ['homeroom', 'subject', 'aide', 'mgmt']), onSelect: (i) => _segSet('role', const ['homeroom', 'subject', 'aide', 'mgmt'], i))),
+        Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['כל תפקיד', 'מחנך', 'מקצועי', 'סייע', 'הנהלה']) [s]], selected: {_segIdx('role', const ['homeroom', 'subject', 'aide', 'mgmt'])}, onSelect: (i) => _segSet('role', const ['homeroom', 'subject', 'aide', 'mgmt'], i))),
         const SizedBox(height: 6),
-        Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: const ['כל סטטוס', 'פעיל', 'חופשה', 'חל״ת', 'עזב'], selected: _segIdx('status', const ['active', 'leave', 'unpaid', 'left']), onSelect: (i) => _segSet('status', const ['active', 'leave', 'unpaid', 'left'], i))),
+        Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['כל סטטוס', 'פעיל', 'חופשה', 'חל״ת', 'עזב']) [s]], selected: {_segIdx('status', const ['active', 'leave', 'unpaid', 'left'])}, onSelect: (i) => _segSet('status', const ['active', 'leave', 'unpaid', 'left'], i))),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 6, children: [for (final sj in _TeamData.allSubjects) _vchip('subject', sj, '📚 $sj')]),
         const SizedBox(height: 6),
@@ -738,13 +739,13 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         // מיון (המפרט: עומס · חיסורים · כיתות) — SegmentedSwitch מבוקר
         Align(
           alignment: Alignment.centerRight,
-          child: SegmentedSwitch(items: const ['⚖️ עומס', '🤒 חיסורים', '🏫 כיתות'], selected: _sort, onSelect: (i) => setState(() => _sort = i)),
+          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['⚖️ עומס', '🤒 חיסורים', '🏫 כיתות']) [s]], selected: {_sort}, onSelect: (i) => setState(() => _sort = i)),
         ),
         const SizedBox(height: 10),
         // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (חוזה-עמודות) · 🔁 לוח-החלפות-היום
         Align(
           alignment: Alignment.centerRight,
-          child: SegmentedSwitch(items: const ['🎯 חכם', '📋 טבלה', '🔁 החלפות היום'], selected: _mode, onSelect: (i) => setState(() => _mode = i)),
+          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['🎯 חכם', '📋 טבלה', '🔁 החלפות היום']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i)),
         ),
         const SizedBox(height: 10),
         // מצבי-מסך שמורים: טעינה · שגיאה · אין-צוות · ללא-תוצאות — ואז התוכן
@@ -763,9 +764,9 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         else
           for (final st in const [3, 2, 1, 0, -1])
             if (buckets[st]!.isNotEmpty)
-              DsSection(title: '${secTitle[st]} · ${buckets[st]!.length}', tone: secTone[st]!, children: [
+              ForgeTitledSection(fields: ['${secTitle[st]} · ${buckets[st]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
                 for (final t in buckets[st]!) _row(t),
-              ]),
+              ]])),
         // פנקס-המקומות-השמורים (חוק-7): שקוף לגבי מה עוד לא מואר — ExpandableTile (מתקפל)
         _gap(6),
         ExpandableTile(
@@ -816,18 +817,17 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
             initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
             builder: (ctx, scroll) => Padding(
               padding: const EdgeInsets.all(12),
-              child: GlassCard(
-                child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+              child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                   // ═══ הגרעין על הרשומה (G6d): מצב-הרשומה ⊕ ShopAssignmentCore.next ⊕ פנקס-overlay — מצב שאינו במחזור-החיים החצוב מדווח כפער, לא מתוקן בשקט ═══
                   Builder(builder: (_) {
                     final cur = _coreState['${t['id']}'] ?? '${t['status'] ?? ShopAssignmentCore.states.first}';
                     if (!ShopAssignmentCore.states.contains(cur)) return ForgeSectionPill(fields: ['מצב הרשומה "$cur" אינו במחזור-החיים החצוב (${ShopAssignmentCore.states.join('→')}) — פער זרע/סכמה, מקום-שמור', '']);
                     final nx = ShopAssignmentCore.next(cur);
-                    return DsSection(title: '🧠 מחזור-חיים · רשומה (גרעין)', children: [
+                    return ForgeTitledSection(fields: ['🧠 מחזור-חיים · רשומה (גרעין)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
                       Wrap(spacing: 6, runSpacing: 6, children: [for (final st in ShopAssignmentCore.states) ForgeIntelPill(fields: [st])]),
                       ForgeSectionPill(fields: [nx == null ? 'מצב-סופי: $cur' : 'הבא אחרי $cur: $nx', '']),
                       GestureDetector(behavior: HitTestBehavior.opaque, onTap: nx == null ? null : () => act(() => _coreState['${t['id']}'] = nx), child: ForgeSoftButton(fields: [nx == null ? 'אין מעבר' : 'קדם מצב ⇒ $nx'])),
-                    ]);
+                    ]]));
                   }),
                   Row(children: [
                     PremiumAvatar(name: t['name'] as String, size: 56, status: _TeamData.absentToday(t) ? AvatarStatus.busy : _TeamData.presentToday(t) ? AvatarStatus.online : AvatarStatus.none),
@@ -835,7 +835,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
                     Expanded(child: ForgeContactTile(fields: ['${t['name']} · ${_TeamData.roleLabel[_TeamData.roleOf_(t)]}', '${_TeamData.subjects(t).join(' · ')} · ותק ${_TeamData.tenure(t) ?? '—'} ש׳ · ${_TeamData.statusLabel[_TeamData.statusOf(t)]}'])),
                   ]),
                   _gap(12),
-                  StatRow(label: 'עומס מול חוזה', value: '${_TeamData.hoursWeek(t).round()} מתוך ${_TeamData.contractHours(t)} ש׳ · ${_TeamData.loadPct(t)}%', fraction: (_TeamData.loadPct(t) / 100).clamp(0.0, 1.0)),
+                  ForgeLinearProgressStatus(fields: ['עומס מול חוזה', '${_TeamData.hoursWeek(t).round()} מתוך ${_TeamData.contractHours(t)} ש׳ · ${_TeamData.loadPct(t)}%'], values: [(_TeamData.loadPct(t) / 100).clamp(0.0, 1.0)]),
                   _gap(10),
                   Row(children: [
                     Expanded(child: ForgeStatPlain(fields: ['חוגים', '${_TeamData.coursesOf(t).length}'])),
@@ -846,7 +846,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
                   _gap(12),
                   // 9 טאבים ב-3 שורות של SegmentedSwitch (Row-מבוקר; 4+ פריטים גולשים ברוחב-הגיליון — נתפס בבדיקת-widget)
                   for (var r = 0; r < 3; r++) ...[
-                    Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: _tabNames.sublist(r * 3, r * 3 + 3), selected: tab ~/ 3 == r ? tab % 3 : -1, onSelect: (i) => act(() => _tab[t['id'] as String] = r * 3 + i))),
+                    Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in _tabNames.sublist(r * 3, r * 3 + 3)) [s]], selected: {tab ~/ 3 == r ? tab % 3 : -1}, onSelect: (i) => act(() => _tab[t['id'] as String] = r * 3 + i))),
                     _gap(6),
                   ],
                   _gap(12),
@@ -855,8 +855,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
                   const Text('פעולות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
                   _gap(8),
                   _actions(t, act, ctx),
-                ]),
-              ),
+                ])),
             ),
           );
         },
@@ -960,10 +959,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
       _gap(10),
       if (list.isEmpty) const ForgeSearchEmptyState(fields: ['אין היעדרויות רשומות', '']),
       for (final a in list)
-        TimelineItem(title: '🤒 ${_TeamData.reasonOf(a['reason'] as String)}', time: fmtDate(a['date'] as String), body: () {
-          final covered = _TeamData.subs.where((s) => s['absentId'] == t['id'] && s['date'] == a['date']).toList();
-          return covered.isEmpty ? 'ללא רישום-החלפה' : '${covered.where((s) => s['stage'] == 2).length}/${covered.length} שיעורים כוסו';
-        }()),
+        ForgeNotifRow(items: [['🤒 ${_TeamData.reasonOf(a['reason'] as String)}', fmtDate(a['date'] as String)]]),
     ]);
   }
 
@@ -973,11 +969,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
     if (mine.isEmpty) return const ForgeSearchEmptyState(fields: ['אין החלפות', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       for (final s in mine)
-        TimelineItem(
-          title: '${s['subId'] == t['id'] ? '🟢 ביצע/ה' : '🟠 קיבל/ה'} · ${_TeamData.courseById(s['courseId'] as String)?['name']}',
-          time: '${fmtDate(s['date'] as String)}${s['time'] != null ? ' ${s['time']}' : ''}',
-          body: '${s['stage'] == 2 ? '✅ אושר' : s['stage'] == 1 ? '🟠 הוצע' : '🔴 ללא-מחליף'} · ${s['subId'] == t['id'] ? 'במקום ${_TeamData.nameOf(s['absentId'] as String)}' : 'מחליף: ${_TeamData.nameOf(s['subId'] as String?)}'}',
-        ),
+        ForgeNotifRow(items: [['${s['subId'] == t['id'] ? '🟢 ביצע/ה' : '🟠 קיבל/ה'} · ${_TeamData.courseById(s['courseId'] as String)?['name']}', '${fmtDate(s['date'] as String)}${s['time'] != null ? ' ${s['time']}' : ''}']]),
     ]);
   }
 
@@ -1016,14 +1008,14 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
   Widget _docs(Map<String, dynamic> t) {
     final ds = _TeamData.docs[t['id']] ?? const [];
     if (ds.isEmpty) return const ForgeSearchEmptyState(fields: ['אין מסמכים — צרף-מסמך ירשום כאן (אחסון-קבצים = מקום-שמור להצבה)', '']);
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final d in ds) TimelineItem(title: '📎 ${d['name']}', time: fmtDate(d['date'] as String))]);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final d in ds) ForgeNotifRow(items: [['📎 ${d['name']}', fmtDate(d['date'] as String)]])]);
   }
 
   // אודיט: כל פעולה שנרשמה בפנקס (מי·מה·מתי) — TimelineItem
   Widget _audit(Map<String, dynamic> t) {
     final rows = _TeamData.audit.where((a) => a['target'] == t['name'] || '${a['target']}'.contains('${t['name']}')).toList();
     if (rows.isEmpty) return const ForgeSearchEmptyState(fields: ['אין רישומי-אודיט לשיוך זה', '']);
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) TimelineItem(title: '${a['what']}', time: fmtDate(a['date'] as String), body: 'ע״י ${a['who']}')]);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) ForgeNotifRow(items: [['${a['what']}', fmtDate(a['date'] as String)]])]);
   }
 
   // 14 פעולות (המפרט) — SoftButton; מגודרות-הרשאה בגל 5. חסר-נתון ⇒ מקום-שמור מפורש, לא זיוף.
@@ -1075,8 +1067,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
         builder: (ctx, scroll) => Padding(
           padding: const EdgeInsets.all(12),
-          child: GlassCard(
-            child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+          child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
               ForgeContactTile(fields: [title, 'CSV · BOM + חסימת-הזרקה · PDF = מקום-שמור (מנוע-PDF בהצבה)']),
               _gap(8),
               if (!exportAllowed(false))
@@ -1087,8 +1078,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
                   decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
                   child: SelectableText(csv, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
                 ),
-            ]),
-          ),
+            ])),
         ),
       ),
     );
@@ -1120,10 +1110,10 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         if (overdue > 0) ...[_gap(8), ForgeSectionPill(fields: ['$overdue החלפות פתוחות שעבר מועדן', ''])],
         _gap(10),
         // הצעת-מחליף אוטומטית פר-שיעור-פתוח: המועמד-הראשון = מועדף/עומס-נמוך; אין ⇒ אמת (לא מזייפים מחליף)
-        DsSection(title: '🧭 מחליף מוצע · ${open.length} שיעורים פתוחים', tone: open.isEmpty ? 1 : 2, children: [
+        ForgeTitledSection(fields: ['🧭 מחליף מוצע · ${open.length} שיעורים פתוחים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           if (open.isEmpty) const ForgeSearchEmptyState(fields: ['כל שיעורי-היום מכוסים', ''])
           else for (final s in open) _subRow(s),
-        ]),
+        ]])),
       ],
     ]);
   }
@@ -1160,8 +1150,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
     final sev = _TeamData.sev(t);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: GradientCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      child: ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             PremiumAvatar(name: t['name'] as String, size: 44, status: avatarStatus),
             const SizedBox(width: 10),
@@ -1172,7 +1161,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
             ),
           ]),
           _gap(8),
-          StatRow(label: 'עומס מול חוזה', value: '${hours % 1 == 0 ? hours.toStringAsFixed(0) : hours.toStringAsFixed(1)} מתוך $ch ש׳ · $pct%', fraction: (pct / 100).clamp(0.0, 1.0)),
+          ForgeLinearProgressStatus(fields: ['עומס מול חוזה', '${hours % 1 == 0 ? hours.toStringAsFixed(0) : hours.toStringAsFixed(1)} מתוך $ch ש׳ · $pct%'], values: [(pct / 100).clamp(0.0, 1.0)]),
           if (sev >= 1 || st != 'active') ...[
             _gap(8),
             Wrap(spacing: 8, runSpacing: 6, children: [
@@ -1180,8 +1169,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
               if (_TeamData.why(t).isNotEmpty) ForgeIntelPill(fields: [_TeamData.why(t)]),
             ]),
           ],
-        ]),
-      ),
+        ])),
     );
   }
 }

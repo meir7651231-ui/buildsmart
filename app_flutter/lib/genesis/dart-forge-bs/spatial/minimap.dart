@@ -86,11 +86,21 @@ Path _parse(String d) {
 
 /// Minimap — seam:fields
 class ForgeMinimap extends StatelessWidget {
-  const ForgeMinimap({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13b · bare=true ⇒ ליבת-הבקרה בלי מסגרת-הגלריה של Pure (.ctl/.body/.stage); child נכנס לליבה. false ⇒ ביט-זהה לגלריה.
+  final bool bare;
+  const ForgeMinimap({super.key, this.child, this.bare = false});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: LayoutBuilder(builder: (ctx, cns) { final _w = cns.maxWidth.isFinite ? cns.maxWidth : 220.0; return SizedBox(width: _w, height: _w / 1.6667, child: CustomPaint(painter: _SvgScene([_Op.line(0, 44, 220, 44, skin.hair2, 1.8), _Op.line(0, 88, 220, 88, skin.hair2, 1.8), _Op.line(73, 0, 73, 132, skin.hair2, 1.8), _Op.line(146, 0, 146, 132, skin.hair2, 1.8), _Op.path("M22 84 C42 52 78 46 108 60 C136 72 150 44 182 50 C200 53 208 74 200 92 C188 116 128 120 88 110 C58 102 34 108 22 84 Z", const Color(0x08ECE9E2), true, 1), _Op.rect(118, 34, 66, 50, 4, theme.a.withValues(alpha: 0.140), true, 1.5), _Op.circle(151, 59, 3, theme.aHi, true, 1.8)], 220, 132))); })));
+    final Widget core = Container(decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(12)), child: LayoutBuilder(builder: (ctx, cns) { final _w = cns.maxWidth.isFinite ? cns.maxWidth : 220.0; return SizedBox(width: _w, height: _w / 1.6667, child: CustomPaint(painter: _SvgScene([_Op.line(0, 44, 220, 44, skin.hair2, 1.8), _Op.line(0, 88, 220, 88, skin.hair2, 1.8), _Op.line(73, 0, 73, 132, skin.hair2, 1.8), _Op.line(146, 0, 146, 132, skin.hair2, 1.8), _Op.path("M22 84 C42 52 78 46 108 60 C136 72 150 44 182 50 C200 53 208 74 200 92 C188 116 128 120 88 110 C58 102 34 108 22 84 Z", const Color(0x08ECE9E2), true, 1), _Op.rect(118, 34, 66, 50, 4, theme.a.withValues(alpha: 0.140), true, 1.5), _Op.circle(151, 59, 3, theme.aHi, true, 1.8)], 220, 132))); }));
+    final Widget body = bare ? _withChild(core, child) : Container(padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), child: _withChild(core, child));
+    return body;
   }
 }

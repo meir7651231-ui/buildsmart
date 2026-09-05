@@ -11,11 +11,18 @@ class ForgeMetaTicker extends StatelessWidget {
   static const int fieldSlots = 1;
   static const List<String> fieldDemo = <String>["Meta ticker — Label · Value pairs streaming, one row, tabular. Reduced-motion parks it."];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeMetaTicker({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  const ForgeMetaTicker({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(decoration: BoxDecoration(color: skin.sunken, border: Border(top: BorderSide(color: skin.hair2, width: 1), bottom: BorderSide(color: skin.hair2, width: 1))), child: const SizedBox.shrink()), Container(padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "Meta ticker — Label · Value pairs streaming, one row, tabular. Reduced-motion parks it."), style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 11, fontFeatures: const [FontFeature.tabularFigures()]))))]);
+    final Widget body = Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(decoration: BoxDecoration(color: skin.sunken, border: Border(top: BorderSide(color: skin.hair2, width: 1), bottom: BorderSide(color: skin.hair2, width: 1))), child: _withChild(const SizedBox.shrink(), child)), Container(padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "Meta ticker — Label · Value pairs streaming, one row, tabular. Reduced-motion parks it."), style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 11, fontFeatures: const [FontFeature.tabularFigures()]))))]);
+    return body;
   }
 }

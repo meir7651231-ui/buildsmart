@@ -84,14 +84,26 @@ Path _parse(String d) {
   return path;
 }
 
-/// TrendChart — seam:series
+/// TrendChart — seam:series · 2 חריצים
 class ForgeTrendChart extends StatelessWidget {
-  const ForgeTrendChart({super.key});
+  /// תפר-דאטה (G12a): 2 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  final List<String>? fields;
+  static const int fieldSlots = 2;
+  static const List<String> fieldDemo = <String>["Label", "9%"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  const ForgeTrendChart({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(constraints: const BoxConstraints(minHeight: 150), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 11, children: [Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, spacing: 10, children: [Flexible(child: Text("Label", style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false)), Directionality(textDirection: TextDirection.ltr, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 3, children: [SizedBox(width: 11, height: 11, child: CustomPaint(painter: _SvgScene([_Op.path("M7 17L17 7M17 7H9M17 7v8", skin.ok, false, 1.8)], 24, 24))), Text("9%", style: TextStyle(color: skin.ok, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10.5, fontWeight: FontWeight.w700))]))]), LayoutBuilder(builder: (ctx, cns) { final _w = cns.maxWidth.isFinite ? cns.maxWidth : 240.0; return SizedBox(width: _w, height: _w / 2.4000, child: CustomPaint(painter: _SvgScene([_Op.line(0, 30, 240, 30, skin.hair2, 1), _Op.line(0, 60, 240, 60, skin.hair2, 1), _Op.line(0, 88, 240, 88, skin.hair, 1), _Op.path("M2,60 C34,54 54,40 84,44 C114,48 128,30 160,34 C192,38 214,26 238,22", theme.aHi, false, 2.4), _Op.path("M2,74 C34,72 54,66 84,68 C114,70 128,58 160,62 C192,66 214,58 238,54", theme.c2.withValues(alpha: 0.85), false, 1.8), _Op.path("M2,80 C34,82 54,78 84,80 C114,82 128,74 160,78 C192,82 214,78 238,72", theme.c3.withValues(alpha: 0.70), false, 1.6)], 240, 100))); })]));
+    final Widget body = Container(constraints: const BoxConstraints(minHeight: 150), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 11, children: [Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, spacing: 10, children: [Flexible(child: Text(_f(0, "Label"), style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false)), Directionality(textDirection: TextDirection.ltr, child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 3, children: [SizedBox(width: 11, height: 11, child: CustomPaint(painter: _SvgScene([_Op.path("M7 17L17 7M17 7H9M17 7v8", skin.ok, false, 1.8)], 24, 24))), Text(_f(1, "9%"), style: TextStyle(color: skin.ok, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10.5, fontWeight: FontWeight.w700))]))]), LayoutBuilder(builder: (ctx, cns) { final _w = cns.maxWidth.isFinite ? cns.maxWidth : 240.0; return SizedBox(width: _w, height: _w / 2.4000, child: CustomPaint(painter: _SvgScene([_Op.line(0, 30, 240, 30, skin.hair2, 1), _Op.line(0, 60, 240, 60, skin.hair2, 1), _Op.line(0, 88, 240, 88, skin.hair, 1), _Op.path("M2,60 C34,54 54,40 84,44 C114,48 128,30 160,34 C192,38 214,26 238,22", theme.aHi, false, 2.4), _Op.path("M2,74 C34,72 54,66 84,68 C114,70 128,58 160,62 C192,66 214,58 238,54", theme.c2.withValues(alpha: 0.85), false, 1.8), _Op.path("M2,80 C34,82 54,78 84,80 C114,82 128,74 160,78 C192,82 214,78 238,72", theme.c3.withValues(alpha: 0.70), false, 1.6)], 240, 100))); })]), child));
+    return body;
   }
 }

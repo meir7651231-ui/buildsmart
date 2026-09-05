@@ -84,13 +84,28 @@ Path _parse(String d) {
   return path;
 }
 
-/// SheetHeader — seam:title
+/// SheetHeader — seam:title · 1 חריצים
 class ForgeSheetHeader extends StatelessWidget {
-  const ForgeSheetHeader({super.key});
+  /// תפר-דאטה (G12a): 1 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  final List<String>? fields;
+  static const int fieldSlots = 1;
+  static const List<String> fieldDemo = <String>["Label"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13a · הקשה על כפתור/קישור k (סדר-הופעה, 1 פעולות).
+  final void Function(int)? onAction;
+  static const int actionSlots = 1;
+  const ForgeSheetHeader({super.key, this.fields, this.child, this.onAction});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Padding(padding: const EdgeInsets.fromLTRB(18, 16, 18, 16), child: Padding(padding: const EdgeInsets.only(top: 6, bottom: 0), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 16, children: [Expanded(child: Text("Label", style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: -0.16, height: 1.05, leadingDistribution: TextLeadingDistribution.even))), Container(width: 32, height: 32, alignment: Alignment.center, decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: SizedBox(width: 15, height: 15, child: CustomPaint(painter: _SvgScene([_Op.path("M6 6l12 12M18 6L6 18", skin.mut, false, 1.8)], 24, 24))))]))), Positioned(top: 8, left: 0, right: 0, child: Container(width: 38, height: 4, margin: const EdgeInsets.fromLTRB(0, 0, 0, 0), decoration: BoxDecoration(color: skin.hair, borderRadius: BorderRadius.circular(999))))])));
+    final Widget body = Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Padding(padding: const EdgeInsets.fromLTRB(18, 16, 18, 16), child: Padding(padding: const EdgeInsets.only(top: 6, bottom: 0), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 16, children: [Expanded(child: Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.serifHe, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: -0.16, height: 1.05, leadingDistribution: TextLeadingDistribution.even))), GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(0), child: Container(width: 32, height: 32, alignment: Alignment.center, decoration: BoxDecoration(color: skin.sunken, border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(11)), child: SizedBox(width: 15, height: 15, child: CustomPaint(painter: _SvgScene([_Op.path("M6 6l12 12M18 6L6 18", skin.mut, false, 1.8)], 24, 24)))))]))), Positioned(top: 8, left: 0, right: 0, child: Container(width: 38, height: 4, margin: const EdgeInsets.fromLTRB(0, 0, 0, 0), decoration: BoxDecoration(color: skin.hair, borderRadius: BorderRadius.circular(999))))])), child));
+    return body;
   }
 }

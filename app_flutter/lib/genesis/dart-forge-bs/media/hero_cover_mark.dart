@@ -86,11 +86,18 @@ Path _parse(String d) {
 
 /// HeroCoverMark — seam:fields
 class ForgeHeroCoverMark extends StatelessWidget {
-  const ForgeHeroCoverMark({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  const ForgeHeroCoverMark({super.key, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(constraints: const BoxConstraints(minHeight: 132), padding: const EdgeInsets.fromLTRB(18, 18, 18, 18), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.a800, theme.a, theme.c3], begin: Alignment.topLeft, end: Alignment.bottomRight), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), foregroundDecoration: BoxDecoration(gradient: RadialGradient(center: Alignment(0.64, -1.50), radius: 1.30, colors: [theme.gl, const Color(0x00000000)], stops: [0.0, 0.55]), borderRadius: BorderRadius.circular(16)), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, spacing: 2, children: [Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0x24FFFFFF), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.path("M4 4h7v7H4z", const Color(0xFFFFFFFF), false, 1.8), _Op.path("M13 4h7v7h-7z", const Color(0xFFFFFFFF).withValues(alpha: 0.65), false, 1.8), _Op.path("M4 13h7v7H4z", const Color(0xFFFFFFFF).withValues(alpha: 0.65), false, 1.8), _Op.circle(16.5, 16.5, 3.5, const Color(0xFFFFFFFF), false, 1.8)], 24, 24))))])));
+    final Widget body = Container(constraints: const BoxConstraints(minHeight: 132), padding: const EdgeInsets.fromLTRB(18, 18, 18, 18), decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.a800, theme.a, theme.c3], begin: Alignment.topLeft, end: Alignment.bottomRight), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), foregroundDecoration: BoxDecoration(gradient: RadialGradient(center: Alignment(0.64, -1.50), radius: 1.30, colors: [theme.gl, const Color(0x00000000)], stops: [0.0, 0.55]), borderRadius: BorderRadius.circular(16)), child: Center(widthFactor: 1.0, heightFactor: 1.0, child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, spacing: 2, children: [Container(width: 44, height: 44, alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0x24FFFFFF), borderRadius: BorderRadius.circular(12)), child: SizedBox(width: 24, height: 24, child: CustomPaint(painter: _SvgScene([_Op.path("M4 4h7v7H4z", const Color(0xFFFFFFFF), false, 1.8), _Op.path("M13 4h7v7h-7z", const Color(0xFFFFFFFF).withValues(alpha: 0.65), false, 1.8), _Op.path("M4 13h7v7H4z", const Color(0xFFFFFFFF).withValues(alpha: 0.65), false, 1.8), _Op.circle(16.5, 16.5, 3.5, const Color(0xFFFFFFFF), false, 1.8)], 24, 24))))]), child)));
+    return body;
   }
 }

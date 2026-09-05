@@ -91,11 +91,19 @@ class ForgeZoomHint extends StatelessWidget {
   static const int fieldSlots = 3;
   static const List<String> fieldDemo = <String>["Label", "ZoomHint", "FIELDS"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
-  const ForgeZoomHint({super.key, this.fields});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  static Widget _hide(String s, Widget w) => s.isEmpty ? const SizedBox.shrink() : w;   // G13a · חריץ-ריק ⇒ הקופסה נעלמת
+  const ForgeZoomHint({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [SizedBox(width: 15, height: 15, child: CustomPaint(painter: _SvgScene([_Op.path("M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6", skin.mut, false, 1.8)], 24, 24))), Text(_f(0, "Label"), style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he))]), const SizedBox(height: 2), SizedBox(width: double.infinity, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Flexible(child: Text(_f(1, "ZoomHint"), style: TextStyle(color: skin.ink, fontSize: 16, fontFamily: fonts.he), overflow: TextOverflow.ellipsis, softWrap: false)), Directionality(textDirection: TextDirection.ltr, child: Container(padding: const EdgeInsets.fromLTRB(5, 1, 5, 1), decoration: BoxDecoration(border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text(_f(2, "FIELDS"), style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 7.5, fontWeight: FontWeight.w600, letterSpacing: 1))))]))]);
+    final Widget body = Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [_withChild(Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 7, children: [SizedBox(width: 15, height: 15, child: CustomPaint(painter: _SvgScene([_Op.path("M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6", skin.mut, false, 1.8)], 24, 24))), Text(_f(0, "Label"), style: TextStyle(color: skin.mut, fontSize: 12, fontFamily: fonts.he))]), child), const SizedBox(height: 2), SizedBox(width: double.infinity, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 8, children: [Flexible(child: Text(_f(1, "ZoomHint"), style: TextStyle(color: skin.ink, fontSize: 16, fontFamily: fonts.he), overflow: TextOverflow.ellipsis, softWrap: false)), _hide(_f(2, "FIELDS"), Directionality(textDirection: TextDirection.ltr, child: Container(padding: const EdgeInsets.fromLTRB(5, 1, 5, 1), decoration: BoxDecoration(border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Text(_f(2, "FIELDS"), style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 7.5, fontWeight: FontWeight.w600, letterSpacing: 1)))))]))]);
+    return body;
   }
 }

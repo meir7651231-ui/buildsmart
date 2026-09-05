@@ -6,11 +6,21 @@ import '../../dart-ui-bs/ds/ds_seam.dart';
 
 /// GradientSweep — seam:fields
 class ForgeGradientSweep extends StatelessWidget {
-  const ForgeGradientSweep({super.key});
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13b · bare=true ⇒ ליבת-הבקרה בלי מסגרת-הגלריה של Pure (.ctl/.body/.stage); child נכנס לליבה. false ⇒ ביט-זהה לגלריה.
+  final bool bare;
+  const ForgeGradientSweep({super.key, this.child, this.bare = false});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
-    return Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [const Color(0x00000000), const Color(0x24FFFFFF), theme.gl, const Color(0x00000000)], begin: Alignment.topCenter, end: Alignment.bottomCenter))))])));
+    final Widget core = Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [const Color(0x00000000), const Color(0x24FFFFFF), theme.gl, const Color(0x00000000)], begin: Alignment.topCenter, end: Alignment.bottomCenter)));
+    final Widget body = bare ? _withChild(core, child) : Container(height: 150, decoration: BoxDecoration(color: skin.sunken), child: _withChild(SizedBox(width: double.infinity, child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: core)])), child));
+    return body;
   }
 }

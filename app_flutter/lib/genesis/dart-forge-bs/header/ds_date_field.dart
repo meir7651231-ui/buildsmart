@@ -4,14 +4,29 @@
 import 'package:flutter/material.dart';
 import '../../dart-ui-bs/ds/ds_seam.dart';
 
-/// DsDateField — seam:divider
+/// DsDateField — seam:divider · 2 חריצים
 class ForgeDsDateField extends StatelessWidget {
-  const ForgeDsDateField({super.key});
+  /// תפר-דאטה (G12a): 2 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  final List<String>? fields;
+  static const int fieldSlots = 2;
+  static const List<String> fieldDemo = <String>["LABEL", "Today"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
+  /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
+  final Widget? child;
+  // G13a · תוכן-נוסף בתוך המסגרת; null ⇒ ביט-זהה. גובה-חסום (Expanded/SizedBox סביב המסגרת) ⇒ התוכן ממלא (Expanded — רשימות/גלילה חיות, כמו GlassCard(child) של הזהב); גובה-חופשי ⇒ Column מכווץ-לתוכן.
+  static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
+      ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
+      : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  /// G13a · הקשה על כפתור/קישור k (סדר-הופעה, 1 פעולות).
+  final void Function(int)? onAction;
+  static const int actionSlots = 1;
+  const ForgeDsDateField({super.key, this.fields, this.child, this.onAction});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    return Container(padding: const EdgeInsets.fromLTRB(16, 12, 16, 12), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: Container(padding: const EdgeInsets.fromLTRB(2, 6, 2, 6), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 12, children: [Flexible(child: Directionality(textDirection: TextDirection.ltr, child: Text("LABEL", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 2), overflow: TextOverflow.ellipsis, softWrap: false))), Expanded(child: Container(height: 1, decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.hair, const Color(0x00000000)], begin: Alignment.centerLeft, end: Alignment.centerRight)))), Flexible(child: Directionality(textDirection: TextDirection.ltr, child: Text("Today", style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 11, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false)))])));
+    final Widget body = Container(padding: const EdgeInsets.fromLTRB(16, 12, 16, 12), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(Container(padding: const EdgeInsets.fromLTRB(2, 6, 2, 6), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 12, children: [Flexible(child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "LABEL"), style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 2), overflow: TextOverflow.ellipsis, softWrap: false))), Expanded(child: Container(height: 1, decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.hair, const Color(0x00000000)], begin: Alignment.centerLeft, end: Alignment.centerRight)))), GestureDetector(behavior: HitTestBehavior.opaque, onTap: onAction == null ? null : () => onAction!(0), child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(1, "Today"), style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 11, fontWeight: FontWeight.w600))))])), child));
+    return body;
   }
 }
