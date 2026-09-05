@@ -1,7 +1,7 @@
 // 🎯 ShopAssignmentScreen — retarget של schoolos_teachers.dart לישות ShopAssignment (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity ShopAssignment
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 18 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · status⇒status(name) · notes⇒notes(name) · name⇒∅(reserved) · role⇒∅(reserved) · subjects⇒redemptions(unique) · homeroom⇒∅(reserved) · contractHours⇒∅(reserved) · contractType⇒∅(reserved) · startDate⇒since(unique) · availability⇒∅(reserved) · constraints⇒∅(reserved) · preferredSub⇒∅(reserved(4 מועמדים)) · extraRoles⇒∅(reserved) · certs⇒∅(reserved) · issuer⇒∅(reserved) · expiry⇒∅(reserved) · attendance⇒∅(reserved) · absences⇒∅(reserved) · reason⇒∅(reserved) · date⇒∅(reserved) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved)
-//   עור-forge (G12c): BareStat⇒ForgeMetricTile ×0 (ב-Wrap) · נשארו BareStat ב-Row ×17 · StatHero⇒ForgeStatBlock ×1 — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
+//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×17 (ב-Row, Expanded) · פנימיים: button×19 statusChip×12 banner×16 emptyState×12 mediaRow×6 · StatHero⇒ForgeStatPlain ×1 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
 //   תפר-עובדות (G9b): ShopAssignmentFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
 //   שדות-ShopAssignment בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): productId, famId, memberId, criterionIds · תוויות: מונחי teacher (מורה/—) ⇒ ShopAssignment (שיוך/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopAssignment
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
@@ -60,7 +60,10 @@ import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מי
 import '../dart-maor/absence-reason-chips.dart'; // סיבות-היעדרות (term-מוזרק)
 import '../dart-data-maor/absence-reason-chips-terms.dart'; // kTerms — שמות-הסיבות (אטום-דאטה)
 import 'gen_core_shopassignment.dart'; // G6c · הגרעין-מהסכמה של ShopAssignment (מצבים · מעבר · חוקים · ערוצים)
-import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat/FilterChipPill דורשים הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -664,12 +667,12 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
       icon: '👩‍🏫',
       children: [
         // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
-        if (_metric != null) AlertBanner(glyph: '🎯', tone: 1, message: 'מסונן למדד: ${ShopAssignmentFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}'),
-        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: SoftButton(label: '✖ בטל סינון-מדד', tone: 2, onTap: () => setState(() => _metric = null))),
+        if (_metric != null) ForgeSectionPill(fields: ['מסונן למדד: ${ShopAssignmentFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}', '']),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeSoftButton(fields: ['✖ בטל סינון-מדד']))),
         // ═══ הגרעין-מהסכמה (G6c): ShopAssignmentCore — מצבים חצובים ⊕ מעבר מאטום-המדף ⊕ חוקים/ערוצים — לא מומצא, לא מצויר-ביד ═══
         DsSection(title: '🧠 מחזור-חיים · ${ShopAssignmentCore.term} (גרעין)', children: [
-          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in ShopAssignmentCore.states) StatusChip(label: s, tone: s == ShopAssignmentCore.states.first ? 1 : 0)]),
-          AlertBanner(message: 'הבא אחרי ${ShopAssignmentCore.states.first}: ${ShopAssignmentCore.next(ShopAssignmentCore.states.first) ?? 'סופי'} · ${ShopAssignmentCore.rules.length} חוקים · ${ShopAssignmentCore.channels.length} ערוצים · ${ShopAssignmentCore.relations.length} יחסים', tone: 0, glyph: '🧠'),
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in ShopAssignmentCore.states) ForgeIntelPill(fields: [s])]),
+          ForgeSectionPill(fields: ['הבא אחרי ${ShopAssignmentCore.states.first}: ${ShopAssignmentCore.next(ShopAssignmentCore.states.first) ?? 'סופי'} · ${ShopAssignmentCore.rules.length} חוקים · ${ShopAssignmentCore.channels.length} ערוצים · ${ShopAssignmentCore.relations.length} יחסים', '']),
         ]),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — roleOf⊕teacherIdOf⊕canGrantedAction מגדרים פעולות/עמודות/רשומות
         //   6 תפקידים ב-2 שורות של SegmentedSwitch (Row-מבוקר; 6 פריטים גולשים ברוחב-המסך — נתפס בבדיקת-widget)
@@ -681,38 +684,38 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         // KPI-10: hero=שיעורים-ללא-מורה-היום (המטרה) + 10 מדדי-מצב (BareStat נושאי-ערך-אמת)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatBlock(fields: ['שיעורים ללא שיוך היום', '$uncovered', ''])),
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['שיעורים ללא שיוך היום', '$uncovered'])),
             const SizedBox(height: 14),
             Row(children: [
-              BareStat(value: '${_TeamData.staff.length}', label: '👥 סך-צוות', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${all.length}', label: '✅ פעילים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_TeamData.absentN}', label: '🤒 נעדרים היום', inkColor: _TeamData.absentN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '$uncovered', label: '🚨 ללא-שיוך', inkColor: uncovered > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '${_TeamData.openSubs}', label: '🔁 החלפות פתוחות', inkColor: _TeamData.openSubs > 0 ? _warning : _ok, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: ['👥 סך-צוות', '${_TeamData.staff.length}'])),
+              Expanded(child: ForgeStatPlain(fields: ['✅ פעילים', '${all.length}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🤒 נעדרים היום', '${_TeamData.absentN}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🚨 ללא-שיוך', '$uncovered'])),
+              Expanded(child: ForgeStatPlain(fields: ['🔁 החלפות פתוחות', '${_TeamData.openSubs}'])),
             ]),
             const SizedBox(height: 12),
             Row(children: [
-              BareStat(value: _TeamData.avgHours.toStringAsFixed(1), label: '⚖️ עומס ממוצע ש׳/שב׳', inkColor: _acc, mutedColor: _muted),
-              BareStat(value: '${_TeamData.overN}', label: '🔥 עמוסים-מדי', inkColor: _TeamData.overN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '${_TeamData.underN}', label: '🪫 בתת-עומס', inkColor: _TeamData.underN > 0 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: '${_TeamData.contractsN}', label: '📄 חוזים פגים החודש', inkColor: _TeamData.contractsN > 0 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: '${_TeamData.certsN}', label: '🎓 הכשרות חסרות', inkColor: _TeamData.certsN > 0 ? _danger : _ok, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: ['⚖️ עומס ממוצע ש׳/שב׳', _TeamData.avgHours.toStringAsFixed(1)])),
+              Expanded(child: ForgeStatPlain(fields: ['🔥 עמוסים-מדי', '${_TeamData.overN}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🪫 בתת-עומס', '${_TeamData.underN}'])),
+              Expanded(child: ForgeStatPlain(fields: ['📄 חוזים פגים החודש', '${_TeamData.contractsN}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🎓 הכשרות חסרות', '${_TeamData.certsN}'])),
             ]),
           ]),
         ),
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — 9 אוטומציות-המפרט
-        for (final a in _TeamData.alerts(_role)) ...[AlertBanner(glyph: a['g'] as String, tone: a['tone'] as int, message: a['m'] as String), _gap(6)],
+        for (final a in _TeamData.alerts(_role)) ...[ForgeSectionPill(fields: [a['m'] as String, '']), _gap(6)],
         const SizedBox(height: 4),
         // פס-עליון: חיפוש-מבוקר (DsSearch) · מורה-חדש · לוח-החלפות-היום · ייצוא (רשימה-נראית)
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
-          if (_TeamData.can(_role, 'team.add')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ שיוך', tone: 0, onTap: () => setState(() => _TeamData.addTeacher(_who))))],
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
+          if (_TeamData.can(_role, 'team.add')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _TeamData.addTeacher(_who)), child: ForgeSoftButton(fields: ['➕ שיוך'])))],
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔁 היום', tone: _TeamData.uncoveredToday.isEmpty ? 0 : 2, onTap: () => setState(() => _mode = 2))),
-          if (_TeamData.can(_role, 'team.export') && exportAllowed(false)) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport('רשימת-צוות · ${visible.length}', _TeamData.rosterCsv(visible, _TeamData.hiddenKeys(_role)))))],
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _mode = 2), child: ForgeSoftButton(fields: ['🔁 היום']))),
+          if (_TeamData.can(_role, 'team.export') && exportAllowed(false)) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport('רשימת-צוות · ${visible.length}', _TeamData.rosterCsv(visible, _TeamData.hiddenKeys(_role))), child: ForgeSoftButton(fields: ['⬇ CSV'])))],
         ]),
         // פילטרים (המפרט: 11) — צ׳יפי-חריגה (finderMatches) + תפקיד/סטטוס (SegmentedSwitch) + מקצוע/כיתה (FilterChipPill)
         Wrap(spacing: 8, runSpacing: 6, children: [
@@ -748,13 +751,13 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
+          ForgeSectionPill(fields: [_error!, ''])
         else if (_TeamData.staff.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '👥', message: 'אין צוות — הוסף שיוך ראשון/ה'))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין צוות — הוסף שיוך ראשון/ה', '']))
         else if (_mode == 2)
           _subsBoard()
         else if (visible.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין אנשי-צוות תואמים לחיפוש/סינון'))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין אנשי-צוות תואמים לחיפוש/סינון', '']))
         else if (_mode == 1)
           _table(visible)
         else
@@ -818,27 +821,27 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
                   // ═══ הגרעין על הרשומה (G6d): מצב-הרשומה ⊕ ShopAssignmentCore.next ⊕ פנקס-overlay — מצב שאינו במחזור-החיים החצוב מדווח כפער, לא מתוקן בשקט ═══
                   Builder(builder: (_) {
                     final cur = _coreState['${t['id']}'] ?? '${t['status'] ?? ShopAssignmentCore.states.first}';
-                    if (!ShopAssignmentCore.states.contains(cur)) return AlertBanner(message: 'מצב הרשומה "$cur" אינו במחזור-החיים החצוב (${ShopAssignmentCore.states.join('→')}) — פער זרע/סכמה, מקום-שמור', tone: 3, glyph: '🧠');
+                    if (!ShopAssignmentCore.states.contains(cur)) return ForgeSectionPill(fields: ['מצב הרשומה "$cur" אינו במחזור-החיים החצוב (${ShopAssignmentCore.states.join('→')}) — פער זרע/סכמה, מקום-שמור', '']);
                     final nx = ShopAssignmentCore.next(cur);
                     return DsSection(title: '🧠 מחזור-חיים · רשומה (גרעין)', children: [
-                      Wrap(spacing: 6, runSpacing: 6, children: [for (final st in ShopAssignmentCore.states) StatusChip(label: st, tone: st == cur ? 1 : 0)]),
-                      AlertBanner(message: nx == null ? 'מצב-סופי: $cur' : 'הבא אחרי $cur: $nx', tone: 0, glyph: '🧠'),
-                      SoftButton(label: nx == null ? 'אין מעבר' : 'קדם מצב ⇒ $nx', onTap: nx == null ? null : () => act(() => _coreState['${t['id']}'] = nx)),
+                      Wrap(spacing: 6, runSpacing: 6, children: [for (final st in ShopAssignmentCore.states) ForgeIntelPill(fields: [st])]),
+                      ForgeSectionPill(fields: [nx == null ? 'מצב-סופי: $cur' : 'הבא אחרי $cur: $nx', '']),
+                      GestureDetector(behavior: HitTestBehavior.opaque, onTap: nx == null ? null : () => act(() => _coreState['${t['id']}'] = nx), child: ForgeSoftButton(fields: [nx == null ? 'אין מעבר' : 'קדם מצב ⇒ $nx'])),
                     ]);
                   }),
                   Row(children: [
                     PremiumAvatar(name: t['name'] as String, size: 56, status: _TeamData.absentToday(t) ? AvatarStatus.busy : _TeamData.presentToday(t) ? AvatarStatus.online : AvatarStatus.none),
                     const SizedBox(width: 10),
-                    Expanded(child: MediaRow(glyph: '🪪', title: '${t['name']} · ${_TeamData.roleLabel[_TeamData.roleOf_(t)]}', subtitle: '${_TeamData.subjects(t).join(' · ')} · ותק ${_TeamData.tenure(t) ?? '—'} ש׳ · ${_TeamData.statusLabel[_TeamData.statusOf(t)]}')),
+                    Expanded(child: ForgeContactTile(fields: ['${t['name']} · ${_TeamData.roleLabel[_TeamData.roleOf_(t)]}', '${_TeamData.subjects(t).join(' · ')} · ותק ${_TeamData.tenure(t) ?? '—'} ש׳ · ${_TeamData.statusLabel[_TeamData.statusOf(t)]}'])),
                   ]),
                   _gap(12),
                   StatRow(label: 'עומס מול חוזה', value: '${_TeamData.hoursWeek(t).round()} מתוך ${_TeamData.contractHours(t)} ש׳ · ${_TeamData.loadPct(t)}%', fraction: (_TeamData.loadPct(t) / 100).clamp(0.0, 1.0)),
                   _gap(10),
                   Row(children: [
-                    BareStat(value: '${_TeamData.coursesOf(t).length}', label: 'חוגים', inkColor: _ink, mutedColor: _muted),
-                    BareStat(value: '${_TeamData.sessionsWeek(t)}', label: 'שיעורים/שבוע', inkColor: _ink, mutedColor: _muted),
-                    BareStat(value: '${_TeamData.absencesMonth(t)}', label: 'היעדרויות החודש', inkColor: _TeamData.absencesMonth(t) > 0 ? _warning : _ok, mutedColor: _muted),
-                    BareStat(value: '${_TeamData.subsDone(t)}/${_TeamData.subsReceived(t)}', label: 'החלפות ביצע/קיבל', inkColor: _acc, mutedColor: _muted),
+                    Expanded(child: ForgeStatPlain(fields: ['חוגים', '${_TeamData.coursesOf(t).length}'])),
+                    Expanded(child: ForgeStatPlain(fields: ['שיעורים/שבוע', '${_TeamData.sessionsWeek(t)}'])),
+                    Expanded(child: ForgeStatPlain(fields: ['היעדרויות החודש', '${_TeamData.absencesMonth(t)}'])),
+                    Expanded(child: ForgeStatPlain(fields: ['החלפות ביצע/קיבל', '${_TeamData.subsDone(t)}/${_TeamData.subsReceived(t)}'])),
                   ]),
                   _gap(12),
                   // 9 טאבים ב-3 שורות של SegmentedSwitch (Row-מבוקר; 4+ פריטים גולשים ברוחב-הגיליון — נתפס בבדיקת-widget)
@@ -882,9 +885,9 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Wrap(spacing: 8, runSpacing: 6, children: [
         for (final f in _TeamData.metaFields)
-          if (t[f['key']] != null) StatusChip(label: '${f['prefix']}${f['key'] == 'preferredSub' ? _TeamData.nameOf(t[f['key']] as String) : f['key']!.contains('Date') || f['key'] == 'contractEnd' ? fmtDate('${t[f['key']]}') : t[f['key']]}${f['suffix']}', tone: 0),
-        for (final r in (t['extraRoles'] as List)) StatusChip(label: '🎖 $r', tone: 1),
-        for (final c in (t['constraints'] as List)) StatusChip(label: '⛔ $c', tone: 3),
+          if (t[f['key']] != null) ForgeIntelPill(fields: ['${f['prefix']}${f['key'] == 'preferredSub' ? _TeamData.nameOf(t[f['key']] as String) : f['key']!.contains('Date') || f['key'] == 'contractEnd' ? fmtDate('${t[f['key']]}') : t[f['key']]}${f['suffix']}']),
+        for (final r in (t['extraRoles'] as List)) ForgeIntelPill(fields: ['🎖 $r']),
+        for (final c in (t['constraints'] as List)) ForgeIntelPill(fields: ['⛔ $c']),
       ]),
       _gap(10),
       Text('זמינות שבועית · ${days.length} ימים', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
@@ -893,11 +896,11 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         for (final d in days) DsChip(label: '${dayNames[d]} ${av[d]![0]}–${av[d]![1]}', tone: 0),
         if (days.isEmpty) const DsChip(label: 'אין חלונות-זמינות (חופשה/עזב)', tone: 2),
       ]),
-      if ('${t['notes']}'.isNotEmpty && !_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), AlertBanner(glyph: '🔒', tone: 0, message: 'הערת-הנהלה (מוגן): ${t['notes']}')],
-      if (_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), const AlertBanner(glyph: '🔒', tone: 0, message: 'הערות-הנהלה מוגנות — למנהל/ת בלבד')],
+      if ('${t['notes']}'.isNotEmpty && !_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), ForgeSectionPill(fields: ['הערת-הנהלה (מוגן): ${t['notes']}', ''])],
+      if (_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), const ForgeSectionPill(fields: ['הערות-הנהלה מוגנות — למנהל/ת בלבד', ''])],
       if (_TeamData.balanceFor(t) != null) ...[
         _gap(10),
-        AlertBanner(glyph: '⚖️', tone: 3, message: 'הצעת-איזון: להעביר ${_TeamData.balanceFor(t)!['course']['name']} מ-${_TeamData.balanceFor(t)!['from']['name']} (עמוס-מדי) לכאן'),
+        ForgeSectionPill(fields: ['הצעת-איזון: להעביר ${_TeamData.balanceFor(t)!['course']['name']} מ-${_TeamData.balanceFor(t)!['from']['name']} (עמוס-מדי) לכאן', '']),
       ],
     ]);
   }
@@ -913,14 +916,14 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
     }
     final times = grid.keys.toList()..sort((a, b) => (timeToMin(a) as num).compareTo(timeToMin(b) as num));
     const days = [0, 1, 2, 3, 4, 5];
-    if (times.isEmpty) return const EmptyState(glyph: '🗓', message: 'אין שיעורים במערכת');
+    if (times.isEmpty) return const ForgeSearchEmptyState(fields: ['אין שיעורים במערכת', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       DsTable(labels: ['שעה', for (final d in days) dayNames[d]], rows: [for (final tm in times) [tm, for (final d in days) grid[tm]![d] ?? '—']]),
       _gap(6),
       Row(children: [
-        BareStat(value: '${times.length}', label: 'רצועות-שעה', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: '${_TeamData.sessionsWeek(t)}', label: 'שיעורים/שבוע', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: minToHM((timeToMin(times.first) as num).toInt(), (n) => n.toString().padLeft(2, '0')), label: 'שיעור-ראשון', inkColor: _acc, mutedColor: _muted),
+        Expanded(child: ForgeStatPlain(fields: ['רצועות-שעה', '${times.length}'])),
+        Expanded(child: ForgeStatPlain(fields: ['שיעורים/שבוע', '${_TeamData.sessionsWeek(t)}'])),
+        Expanded(child: ForgeStatPlain(fields: ['שיעור-ראשון', minToHM((timeToMin(times.first) as num).toInt(), (n) => n.toString().padLeft(2, '0'))])),
       ]),
     ]);
   }
@@ -930,12 +933,12 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
     final cs = _TeamData.coursesOf(t);
     final bal = _TeamData.balanceFor(t);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      if (cs.isEmpty) const EmptyState(glyph: '🏫', message: 'לא הוקצו חוגים'),
+      if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['לא הוקצו חוגים', '']),
       for (final c in cs)
-        MediaRow(glyph: '📘', title: '${c['name']} · חדר ${c['roomId']}', subtitle: '${(sessionsOf(c) as List).length} מפגשים/שבוע · ${(sessionsOf(c) as List).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ')}'),
+        ForgeContactTile(fields: ['${c['name']} · חדר ${c['roomId']}', '${(sessionsOf(c) as List).length} מפגשים/שבוע · ${(sessionsOf(c) as List).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ')}']),
       if (bal != null && _TeamData.can(_role, 'team.assign')) ...[
         _gap(8),
-        Wrap(children: [SoftButton(label: '🏫 הקצה-כיתה: ${bal['course']['name']} מ-${bal['from']['name']}', tone: 1, onTap: () => act(() => _TeamData.reassign(bal['course'] as Map<String, dynamic>, t, _who)))]),
+        Wrap(children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.reassign(bal['course'] as Map<String, dynamic>, t, _who)), child: ForgeSoftButton(fields: ['🏫 הקצה-כיתה: ${bal['course']['name']} מ-${bal['from']['name']}']))]),
       ],
     ]);
   }
@@ -951,11 +954,11 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
       NeonBars(labels: labels, values: [for (final v in monthly) v.toDouble()], tone: _TeamData.frequentAbsentee(t) ? 2 : 1),
       _gap(6),
       Wrap(spacing: 8, children: [
-        StatusChip(label: 'מגמה: ${trend['dir'] == 'up' ? '↑ עולה' : trend['dir'] == 'down' ? '↓ יורדת' : '→ יציבה'} ${trend['pct']}%', tone: trend['dir'] == 'up' ? 2 : 1),
-        if (_TeamData.frequentAbsentee(t)) const StatusChip(label: 'דפוס-היעדרות — לשיחת-תמיכה', tone: 3),
+        ForgeIntelPill(fields: ['מגמה: ${trend['dir'] == 'up' ? '↑ עולה' : trend['dir'] == 'down' ? '↓ יורדת' : '→ יציבה'} ${trend['pct']}%']),
+        if (_TeamData.frequentAbsentee(t)) const ForgeIntelPill(fields: ['דפוס-היעדרות — לשיחת-תמיכה']),
       ]),
       _gap(10),
-      if (list.isEmpty) const EmptyState(glyph: '🌤', message: 'אין היעדרויות רשומות'),
+      if (list.isEmpty) const ForgeSearchEmptyState(fields: ['אין היעדרויות רשומות', '']),
       for (final a in list)
         TimelineItem(title: '🤒 ${_TeamData.reasonOf(a['reason'] as String)}', time: fmtDate(a['date'] as String), body: () {
           final covered = _TeamData.subs.where((s) => s['absentId'] == t['id'] && s['date'] == a['date']).toList();
@@ -967,7 +970,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
   // החלפות: ביצע/קיבל (TimelineItem)
   Widget _subsOf(Map<String, dynamic> t) {
     final mine = _TeamData.subs.where((s) => s['subId'] == t['id'] || s['absentId'] == t['id']).toList()..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
-    if (mine.isEmpty) return const EmptyState(glyph: '🔁', message: 'אין החלפות');
+    if (mine.isEmpty) return const ForgeSearchEmptyState(fields: ['אין החלפות', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       for (final s in mine)
         TimelineItem(
@@ -981,28 +984,28 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
   // ביצועי-כיתות (מקום-שמור · §20-ג): מאיר רק כשמוזרם classPerf {labels, values, monthly} ממודולי נוכחות/תלמידים
   Widget _performance(Map<String, dynamic> t) {
     final perf = t['classPerf'] as Map<String, dynamic>?;
-    if (perf == null) return const EmptyState(glyph: '📊', message: 'מקום-שמור: נוכחות/ציוני-כיתותיו יאירו כשיוזרמו ממודולי נוכחות ותלמידים (לא מזייפים)');
+    if (perf == null) return const ForgeSearchEmptyState(fields: ['מקום-שמור: נוכחות/ציוני-כיתותיו יאירו כשיוזרמו ממודולי נוכחות ותלמידים (לא מזייפים)', '']);
     final trend = trendFromScan({'monthly': perf['monthly']});
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       NeonBars(labels: (perf['labels'] as List).cast<String>(), values: (perf['values'] as List).map((v) => (v as num).toDouble()).toList(), tone: trend['dir'] == 'down' ? 2 : 1),
       _gap(6),
-      StatusChip(label: 'מגמה ${trend['dir']} ${trend['pct']}%', tone: trend['dir'] == 'down' ? 2 : 1),
+      ForgeIntelPill(fields: ['מגמה ${trend['dir']} ${trend['pct']}%']),
     ]);
   }
 
   // הכשרות+תוקף: MediaRow ⊕ StatusChip(certExpiryStatus)
   Widget _certs(Map<String, dynamic> t) {
     final cs = _TeamData.certsOf(t);
-    if (cs.isEmpty) return const EmptyState(glyph: '🎓', message: 'אין הכשרות רשומות — הכשרה-חסרה');
+    if (cs.isEmpty) return const ForgeSearchEmptyState(fields: ['אין הכשרות רשומות — הכשרה-חסרה', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       for (final c in cs)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 3),
           child: Row(children: [
-            Expanded(child: MediaRow(glyph: '🎓', title: '${c['name']}', subtitle: '${c['issuer']} · תוקף ${fmtDate(c['expiry'] as String)}')),
+            Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${c['issuer']} · תוקף ${fmtDate(c['expiry'] as String)}'])),
             () {
               final st = _TeamData.certStatus(c);
-              return StatusChip(label: st == CertExpiryStatus.expired ? 'פג' : st == CertExpiryStatus.expiringSoon ? 'פג בקרוב' : 'בתוקף', tone: st == CertExpiryStatus.expired ? 2 : st == CertExpiryStatus.expiringSoon ? 3 : 1);
+              return Flexible(child: ForgeIntelPill(fields: [st == CertExpiryStatus.expired ? 'פג' : st == CertExpiryStatus.expiringSoon ? 'פג בקרוב' : 'בתוקף']));
             }(),
           ]),
         ),
@@ -1012,14 +1015,14 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
   // מסמכים (מקום-שמור): רשומות שנרשמו ב"צרף-מסמך"; אין ⇒ ריק-אמת
   Widget _docs(Map<String, dynamic> t) {
     final ds = _TeamData.docs[t['id']] ?? const [];
-    if (ds.isEmpty) return const EmptyState(glyph: '📎', message: 'אין מסמכים — צרף-מסמך ירשום כאן (אחסון-קבצים = מקום-שמור להצבה)');
+    if (ds.isEmpty) return const ForgeSearchEmptyState(fields: ['אין מסמכים — צרף-מסמך ירשום כאן (אחסון-קבצים = מקום-שמור להצבה)', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final d in ds) TimelineItem(title: '📎 ${d['name']}', time: fmtDate(d['date'] as String))]);
   }
 
   // אודיט: כל פעולה שנרשמה בפנקס (מי·מה·מתי) — TimelineItem
   Widget _audit(Map<String, dynamic> t) {
     final rows = _TeamData.audit.where((a) => a['target'] == t['name'] || '${a['target']}'.contains('${t['name']}')).toList();
-    if (rows.isEmpty) return const EmptyState(glyph: '🧾', message: 'אין רישומי-אודיט לשיוך זה');
+    if (rows.isEmpty) return const ForgeSearchEmptyState(fields: ['אין רישומי-אודיט לשיוך זה', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) TimelineItem(title: '${a['what']}', time: fmtDate(a['date'] as String), body: 'ע״י ${a['who']}')]);
   }
 
@@ -1029,25 +1032,25 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
     final keys = kTerms.keys.toList();
     final r = _role;
     final acts = <Widget>[
-      if (_TeamData.can(r, 'team.assign')) SoftButton(label: '✏️ ערוך תפקיד', tone: 0, onTap: () => act(() => _TeamData.cycleRole(t, _who))),
-      if (_TeamData.can(r, 'team.assign')) SoftButton(label: '📚 הקצה-מקצוע', tone: 0, onTap: () => act(() => _TeamData.addSubject(t, _who))),
-      if (_TeamData.can(r, 'team.sub')) SoftButton(label: '🔎 מצא-מחליף', tone: 1, onTap: () { Navigator.of(sheetCtx).pop(); setState(() => _mode = 2); }),
-      if (_TeamData.can(r, 'team.avail')) SoftButton(label: '🗓 עדכן-זמינות (שישי)', tone: 0, onTap: () => act(() => _TeamData.toggleFriday(t, _who))),
-      if (_TeamData.can(r, 'team.cert') || _TeamData.can(r, 'team.docs')) SoftButton(label: '🎓 הוסף-הכשרה', tone: 0, onTap: () => act(() => _TeamData.addCert(t, _who))),
-      if (_TeamData.can(r, 'team.docs')) SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => act(() => _TeamData.addDoc(t, _who))),
-      SoftButton(label: '🖨 הדפס-מערכת', tone: 0, onTap: () => _openExport('מערכת אישית · ${t['name']}', _TeamData.timetableCsv(t))),
-      if (_TeamData.roleName(r) == 'admin') SoftButton(label: '⏸ ${_TeamData.statusOf(t) == 'active' ? 'סמן-חופשה' : 'שנה-סטטוס'}', tone: 2, onTap: () => act(() => _TeamData.cycleStatus(t, _who))),
+      if (_TeamData.can(r, 'team.assign')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.cycleRole(t, _who)), child: ForgeSoftButton(fields: ['✏️ ערוך תפקיד'])),
+      if (_TeamData.can(r, 'team.assign')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.addSubject(t, _who)), child: ForgeSoftButton(fields: ['📚 הקצה-מקצוע'])),
+      if (_TeamData.can(r, 'team.sub')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(sheetCtx).pop(); setState(() => _mode = 2); }, child: ForgeSoftButton(fields: ['🔎 מצא-מחליף'])),
+      if (_TeamData.can(r, 'team.avail')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.toggleFriday(t, _who)), child: ForgeSoftButton(fields: ['🗓 עדכן-זמינות (שישי)'])),
+      if (_TeamData.can(r, 'team.cert') || _TeamData.can(r, 'team.docs')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.addCert(t, _who)), child: ForgeSoftButton(fields: ['🎓 הוסף-הכשרה'])),
+      if (_TeamData.can(r, 'team.docs')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.addDoc(t, _who)), child: ForgeSoftButton(fields: ['📎 צרף-מסמך'])),
+      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport('מערכת אישית · ${t['name']}', _TeamData.timetableCsv(t)), child: ForgeSoftButton(fields: ['🖨 הדפס-מערכת'])),
+      if (_TeamData.roleName(r) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.cycleStatus(t, _who)), child: ForgeSoftButton(fields: ['⏸ ${_TeamData.statusOf(t) == 'active' ? 'סמן-חופשה' : 'שנה-סטטוס'}'])),
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Wrap(spacing: 8, runSpacing: 8, children: acts),
-      if (acts.length <= 1) ...[_gap(8), const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', glyph: '🔒', tone: 2)],
+      if (acts.length <= 1) ...[_gap(8), const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', ''])],
       _gap(8),
       if (!_TeamData.can(r, 'team.contact'))
-        const AlertBanner(glyph: '🔒', tone: 0, message: 'שלח-הודעה: פרטי-קשר מוסתרים לתפקיד זה (הרשאה)')
+        const ForgeSectionPill(fields: ['שלח-הודעה: פרטי-קשר מוסתרים לתפקיד זה (הרשאה)', ''])
       else if (t['contact'] == null)
-        const AlertBanner(glyph: '💬', tone: 0, message: 'שלח-הודעה: פרטי-קשר מוזרקים בהצבה (חוק-6) — מקום-שמור, מאיר כשיוזרק contact')
+        const ForgeSectionPill(fields: ['שלח-הודעה: פרטי-קשר מוזרקים בהצבה (חוק-6) — מקום-שמור, מאיר כשיוזרק contact', ''])
       else
-        Wrap(children: [SoftButton(label: '💬 שלח-הודעה', tone: 1, onTap: () => act(() => _TeamData.log(_who, 'שליחת-הודעה', t['name'] as String)))]),
+        Wrap(children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.log(_who, 'שליחת-הודעה', t['name'] as String)), child: ForgeSoftButton(fields: ['💬 שלח-הודעה']))]),
       _gap(8),
       if (!_TeamData.can(r, 'team.absence'))
         const SizedBox.shrink()
@@ -1055,10 +1058,10 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         const Text('🤒 סמן-היעדרות היום — סיבה:', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
         _gap(6),
         Wrap(spacing: 8, runSpacing: 6, children: [
-          for (var i = 0; i < reasons.length; i++) SoftButton(label: reasons[i], tone: 2, onTap: () => act(() => _TeamData.markAbsent(t, keys[i], _who))),
+          for (var i = 0; i < reasons.length; i++) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.markAbsent(t, keys[i], _who)), child: ForgeSoftButton(fields: [reasons[i]])),
         ]),
       ] else
-        const AlertBanner(glyph: '🤒', tone: 2, message: 'מסומן/ת נעדר/ת היום — שיעורי-היום נרשמו בלוח-ההחלפות'),
+        const ForgeSectionPill(fields: ['מסומן/ת נעדר/ת היום — שיעורי-היום נרשמו בלוח-ההחלפות', '']),
     ]);
   }
 
@@ -1074,10 +1077,10 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
           padding: const EdgeInsets.all(12),
           child: GlassCard(
             child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-              MediaRow(glyph: '⬇', title: title, subtitle: 'CSV · BOM + חסימת-הזרקה · PDF = מקום-שמור (מנוע-PDF בהצבה)'),
+              ForgeContactTile(fields: [title, 'CSV · BOM + חסימת-הזרקה · PDF = מקום-שמור (מנוע-PDF בהצבה)']),
               _gap(8),
               if (!exportAllowed(false))
-                const AlertBanner(message: 'ייצוא חסום (שער-יציאת-מידע)', tone: 2)
+                const ForgeSectionPill(fields: ['ייצוא חסום (שער-יציאת-מידע)', ''])
               else
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -1105,7 +1108,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
     final overdue = _TeamData.subs.where((s) => _TeamData.subOverdue(s)).length;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       if (today.isEmpty)
-        const EmptyState(glyph: '🎉', message: 'אין החלפות להיום — כל השיעורים מכוסים')
+        const ForgeSearchEmptyState(fields: ['אין החלפות להיום — כל השיעורים מכוסים', ''])
       else ...[
         DsBoard(
           stages: const ['🔴 ללא-מחליף', '🟠 הוצע', '✅ אושר'],
@@ -1114,11 +1117,11 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
           titleOf: (r) => r['title']!,
           onMove: (id, to) { if (_TeamData.can(_role, 'team.sub')) setState(() => _TeamData.moveSub(id, to, _who)); },
         ),
-        if (overdue > 0) ...[_gap(8), AlertBanner(glyph: '⏰', tone: 2, message: '$overdue החלפות פתוחות שעבר מועדן')],
+        if (overdue > 0) ...[_gap(8), ForgeSectionPill(fields: ['$overdue החלפות פתוחות שעבר מועדן', ''])],
         _gap(10),
         // הצעת-מחליף אוטומטית פר-שיעור-פתוח: המועמד-הראשון = מועדף/עומס-נמוך; אין ⇒ אמת (לא מזייפים מחליף)
         DsSection(title: '🧭 מחליף מוצע · ${open.length} שיעורים פתוחים', tone: open.isEmpty ? 1 : 2, children: [
-          if (open.isEmpty) const EmptyState(glyph: '✅', message: 'כל שיעורי-היום מכוסים')
+          if (open.isEmpty) const ForgeSearchEmptyState(fields: ['כל שיעורי-היום מכוסים', ''])
           else for (final s in open) _subRow(s),
         ]),
       ],
@@ -1132,21 +1135,17 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        MediaRow(glyph: '🚨', title: '${s['time'] ?? ''} · ${c['name']} · ${c['roomId']}', subtitle: 'במקום ${_TeamData.nameOf(s['absentId'] as String)} · ${s['stage'] == 1 ? 'הוצע: ${chosen?['name']}' : 'ללא-מחליף'}'),
+        ForgeContactTile(fields: ['${s['time'] ?? ''} · ${c['name']} · ${c['roomId']}', 'במקום ${_TeamData.nameOf(s['absentId'] as String)} · ${s['stage'] == 1 ? 'הוצע: ${chosen?['name']}' : 'ללא-מחליף'}']),
         _gap(6),
         if (cands.isEmpty)
-          const AlertBanner(glyph: '⚠️', tone: 3, message: 'אין מחליף זמין (מקצוע+חלון-זמינות+פנוי-בסלוט) — נדרשת הכרעה ידנית')
+          const ForgeSectionPill(fields: ['אין מחליף זמין (מקצוע+חלון-זמינות+פנוי-בסלוט) — נדרשת הכרעה ידנית', ''])
         else if (!_TeamData.can(_role, 'team.sub'))
-          Wrap(spacing: 8, children: [for (final t in cands.take(3)) StatusChip(label: '${t['name']} · ${_TeamData.loadPct(t)}%', tone: 0)])
+          Wrap(spacing: 8, children: [for (final t in cands.take(3)) ForgeIntelPill(fields: ['${t['name']} · ${_TeamData.loadPct(t)}%'])])
         else
           Wrap(spacing: 8, runSpacing: 6, children: [
             for (final t in cands.take(3))
-              SoftButton(
-                label: '${t == cands.first ? '⭐ ' : ''}${t['name']} · ${_TeamData.loadPct(t)}%${(_TeamData.byId(s['absentId'] as String)?['preferredSub']) == t['id'] ? ' · מועדף' : ''}',
-                tone: t == cands.first ? 1 : 0,
-                onTap: () => setState(() => _TeamData.propose(s, t, _who)),
-              ),
-            if (s['stage'] == 1) SoftButton(label: '✅ אשר-החלפה', tone: 1, onTap: () => setState(() => _TeamData.moveSub(s['id'] as String, 2, _who))),
+              GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _TeamData.propose(s, t, _who)), child: ForgeSoftButton(fields: ['${t == cands.first ? '⭐ ' : ''}${t['name']} · ${_TeamData.loadPct(t)}%${(_TeamData.byId(s['absentId'] as String)?['preferredSub']) == t['id'] ? ' · מועדף' : ''}'])),
+            if (s['stage'] == 1) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _TeamData.moveSub(s['id'] as String, 2, _who)), child: ForgeSoftButton(fields: ['✅ אשר-החלפה'])),
           ]),
       ]),
     );
@@ -1169,11 +1168,7 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
             // MediaRow בולע את הקליק (InkWell פנימי no-op) ⇒ כפתור-שברון נפרד כשקע-הפתיחה
             IconButton(onPressed: () => _openPanel(t), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-שיוך ופעולות'),
             Expanded(
-              child: MediaRow(
-                glyph: t['role'] == 'homeroom' ? '🏫' : t['role'] == 'aide' ? '🤝' : t['role'] == 'mgmt' ? '🧭' : '📚',
-                title: '${t['name']} · ${_TeamData.roleLabel[t['role']]}',
-                subtitle: '${_TeamData.subjects(t).join(' · ')}${(t['homeroom'] as List).isNotEmpty ? ' · מחנך/ת ${(t['homeroom'] as List).join(',')}' : ''} · ${_TeamData.coursesOf(t).length} חוגים',
-              ),
+              child: ForgeContactTile(fields: ['${t['name']} · ${_TeamData.roleLabel[t['role']]}', '${_TeamData.subjects(t).join(' · ')}${(t['homeroom'] as List).isNotEmpty ? ' · מחנך/ת ${(t['homeroom'] as List).join(',')}' : ''} · ${_TeamData.coursesOf(t).length} חוגים']),
             ),
           ]),
           _gap(8),
@@ -1181,8 +1176,8 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
           if (sev >= 1 || st != 'active') ...[
             _gap(8),
             Wrap(spacing: 8, runSpacing: 6, children: [
-              if (st != 'active') StatusChip(label: _TeamData.statusLabel[st] ?? st, tone: 0),
-              if (_TeamData.why(t).isNotEmpty) StatusChip(label: _TeamData.why(t), tone: sev == 3 ? 2 : sev == 2 ? 3 : 0),
+              if (st != 'active') ForgeIntelPill(fields: [_TeamData.statusLabel[st] ?? st]),
+              if (_TeamData.why(t).isNotEmpty) ForgeIntelPill(fields: [_TeamData.why(t)]),
             ]),
           ],
         ]),

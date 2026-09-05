@@ -1,5 +1,5 @@
-// 🎨 schoolos_parents.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatBlock · navTile=ForgeHubTile · stat=ForgeMetricTile · hero=ForgeStatBlock
-//   החלפות: stat×0 · hero×1 · keptRow×25 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_parents.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile
+//   החלפות: stat×0 · hero×1 · statRow×25 · button×47 · statusChip×30 · banner×24 · emptyState×11 · mediaRow×13 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 👪 SchoolOS · הורים ותקשורת — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-PARENTS-FULL-2026-09-04.
 // מטרה: "ששום הורה לא יגלה משהו על ילדו מאוחר מדי — ושהצוות יגיע לכל הורה בערוץ הנכון,
 //         בזמן הנכון, בטון הנכון, ויידע שההודעה נקראה."
@@ -79,7 +79,10 @@ import '../dart-data-maor/block-reason-strings.dart'; // BLOCK_REASON_T
 import '../dart-data-maor/phone-issue-strings.dart'; // PHONE_ISSUE_T
 import '../dart-data-maor/support-day-label-strings.dart'; // SUPPORT_DAY_LABEL_T
 import '../dart/digest_lines.dart'; // סיכום (urgent/approvals/vacations) — term מוזרק ⇒ סיכום-שבועי-להורה
-import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 const _danger = Color(0xFFF43F5E);
@@ -822,16 +825,16 @@ class _ParentsScreenState extends State<ParentsScreen> {
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
         ]),
         Wrap(spacing: 8, runSpacing: 6, children: [
-          if (_can('pr.msg')) SoftButton(label: '✉️ הודעה-חדשה', tone: 1, onTap: () => _openCompose(null)),
-          if (_can('pr.class')) SoftButton(label: '🏫 הודעה-לכיתה', tone: 0, onTap: () => _openBroadcast(cls: true)),
-          if (_can('pr.org')) SoftButton(label: '🏛 הודעה-מוסדית', tone: 0, onTap: () => _openBroadcast(cls: false)),
-          if (_can('pr.consent')) SoftButton(label: '📝 בקשת-אישור', tone: 0, onTap: () => _openConsentRequest(null)),
-          if (_can('pr.meeting')) SoftButton(label: '📅 פגישה', tone: 0, onTap: () => _openMeeting(null)),
-          if (_PrData.exportOk(_role)) SoftButton(label: '⬇ ייצוא-לוג', tone: 0, onTap: _openExport),
-          if (_can('pr.crisis')) SoftButton(label: _crisis ? '🚨 משבר: פעיל' : '🚨 מצב-משבר', tone: _crisis ? 2 : 0, onTap: () => setState(() => _crisis = !_crisis)),
+          if (_can('pr.msg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openCompose(null), child: ForgeSoftButton(fields: ['✉️ הודעה-חדשה'])),
+          if (_can('pr.class')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBroadcast(cls: true), child: ForgeSoftButton(fields: ['🏫 הודעה-לכיתה'])),
+          if (_can('pr.org')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBroadcast(cls: false), child: ForgeSoftButton(fields: ['🏛 הודעה-מוסדית'])),
+          if (_can('pr.consent')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openConsentRequest(null), child: ForgeSoftButton(fields: ['📝 בקשת-אישור'])),
+          if (_can('pr.meeting')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMeeting(null), child: ForgeSoftButton(fields: ['📅 פגישה'])),
+          if (_PrData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: _openExport, child: ForgeSoftButton(fields: ['⬇ ייצוא-לוג'])),
+          if (_can('pr.crisis')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _crisis = !_crisis), child: ForgeSoftButton(fields: [_crisis ? '🚨 משבר: פעיל' : '🚨 מצב-משבר'])),
         ]),
         _gap(8),
         // צ׳יפי-חריגה (finderMatches) + צירי-כיתה/ערוץ/שפה
@@ -847,52 +850,52 @@ class _ParentsScreenState extends State<ParentsScreen> {
         _gap(8),
         // KPI-10: hero = הורים דורשי-פעולה (המטרה) + 10 מדדי-מצב-התקשורת
         GradientCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatBlock(fields: ['משפחות דורשות-פעולה', '$hero', ''])),
+          ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['משפחות דורשות-פעולה', '$hero'])),
           const SizedBox(height: 14),
           Row(children: [
-            BareStat(value: '$famN', label: '👪 משפחות', inkColor: _ink, mutedColor: _muted),
-            BareStat(value: '$freshN', label: '🔄 קשר-מעודכן', inkColor: _ink, mutedColor: _muted),
-            BareStat(value: '$badN', label: '📵 ללא-קשר-תקין', inkColor: badN > 0 ? _danger : _ok, mutedColor: _muted),
-            BareStat(value: '$sentN', label: '📤 נשלחו-החודש', inkColor: _ink, mutedColor: _muted),
+            Expanded(child: ForgeStatPlain(fields: ['👪 משפחות', '$famN'])),
+            Expanded(child: ForgeStatPlain(fields: ['🔄 קשר-מעודכן', '$freshN'])),
+            Expanded(child: ForgeStatPlain(fields: ['📵 ללא-קשר-תקין', '$badN'])),
+            Expanded(child: ForgeStatPlain(fields: ['📤 נשלחו-החודש', '$sentN'])),
           ]),
           const SizedBox(height: 12),
           Row(children: [
-            BareStat(value: '$readPct%', label: '👁 נקראו', inkColor: readPct >= 70 ? _ok : _warning, mutedColor: _muted),
-            BareStat(value: '$pendN', label: '⏳ אישורים-ממתינים', inkColor: _warning, mutedColor: _muted),
-            BareStat(value: '$expN', label: '⛔ אישורים-פגים', inkColor: expN > 0 ? _danger : _ok, mutedColor: _muted),
+            Expanded(child: ForgeStatPlain(fields: ['👁 נקראו', '$readPct%'])),
+            Expanded(child: ForgeStatPlain(fields: ['⏳ אישורים-ממתינים', '$pendN'])),
+            Expanded(child: ForgeStatPlain(fields: ['⛔ אישורים-פגים', '$expN'])),
           ]),
           const SizedBox(height: 12),
           Row(children: [
-            BareStat(value: '$openQ', label: '📨 פניות-פתוחות', inkColor: overdueQ > 0 ? _danger : _ink, mutedColor: _muted),
-            BareStat(value: '${avgH.toStringAsFixed(1)} ש׳', label: '⏱ זמן-תגובה-ממוצע', inkColor: avgH <= 24 ? _ok : _warning, mutedColor: _muted),
-            BareStat(value: '$weekM', label: '📅 פגישות-השבוע', inkColor: _acc, mutedColor: _muted),
+            Expanded(child: ForgeStatPlain(fields: ['📨 פניות-פתוחות', '$openQ'])),
+            Expanded(child: ForgeStatPlain(fields: ['⏱ זמן-תגובה-ממוצע', '${avgH.toStringAsFixed(1)} ש׳'])),
+            Expanded(child: ForgeStatPlain(fields: ['📅 פגישות-השבוע', '$weekM'])),
           ]),
           const SizedBox(height: 10),
           StatRow(label: 'נקראו מתוך נשלחו-החודש', value: '${_PrData.readThisMonth} מתוך $sentN', fraction: sentN == 0 ? 0 : _PrData.readThisMonth / sentN),
         ])),
         _gap(8),
         // ── מרכז-אוטומציות (פרואקטיבי): המערכת מתריעה לפני שדבר נשמט ──
-        if (_PrData.localQuiet) ...[AlertBanner(glyph: '🌙', tone: 3, message: 'שעות-מנוחה (${QUIET_FROM}:00–${QUIET_TO}:00): הודעות יוחזקו עד הבוקר${_crisis ? ' · 🚨 משבר: שליחה מיידית' : ''}'), _gap(8)],
-        if (rb != null) ...[AlertBanner(glyph: '🕯', tone: 3, message: 'מנוחה: $rb — הודעות לא-דחופות מוחזקות${_crisis ? ' · 🚨 משבר: שליחה מיידית' : ''}'), _gap(8)],
-        if (staleN > 0) ...[AlertBanner(glyph: '👁', tone: 2, message: '$staleN הודעות לא-נקראו מעל ${_PrData.unreadAlertDays * 24} שעות — לשקול ערוץ-אחר'), _gap(8)],
-        if (unrespN > 0) ...[AlertBanner(glyph: '🔴', tone: 2, message: '$unrespN הורים לא-מגיבים ⇒ דגל-סיכון לתלמיד: ${scope.where((f) => _PrData.engagement(f) == 'unresponsive').map(_PrData.famLabel).join(' · ')}'), _gap(8)],
+        if (_PrData.localQuiet) ...[ForgeSectionPill(fields: ['שעות-מנוחה (${QUIET_FROM}:00–${QUIET_TO}:00): הודעות יוחזקו עד הבוקר${_crisis ? ' · 🚨 משבר: שליחה מיידית' : ''}', '']), _gap(8)],
+        if (rb != null) ...[ForgeSectionPill(fields: ['מנוחה: $rb — הודעות לא-דחופות מוחזקות${_crisis ? ' · 🚨 משבר: שליחה מיידית' : ''}', '']), _gap(8)],
+        if (staleN > 0) ...[ForgeSectionPill(fields: ['$staleN הודעות לא-נקראו מעל ${_PrData.unreadAlertDays * 24} שעות — לשקול ערוץ-אחר', '']), _gap(8)],
+        if (unrespN > 0) ...[ForgeSectionPill(fields: ['$unrespN הורים לא-מגיבים ⇒ דגל-סיכון לתלמיד: ${scope.where((f) => _PrData.engagement(f) == 'unresponsive').map(_PrData.famLabel).join(' · ')}', '']), _gap(8)],
         if (_PrData.expiringConsents.isNotEmpty) ...[
-          AlertBanner(glyph: '⏳', tone: 3, message: '${_PrData.expiringConsents.length} אישורים פוקעים תוך $shopExpiryWarnDays ימים: ${_PrData.expiringConsents.map((e) => e['itemName']).join(' · ')}'),
-          if (_can('pr.consent') || _can('pr.consent.mark')) _wrap([for (final c in _PrData.pendingConsents.where((c) => dayDiff('${c['due']}', _PrData.today) >= -shopExpiryWarnDays)) SoftButton(label: '🔔 תזכורת · ${c['title']} (${_PrData.remindersOf(c)})', tone: 0, onTap: () => setState(() => _PrData.remindConsent(_actor, c)))]),
+          ForgeSectionPill(fields: ['${_PrData.expiringConsents.length} אישורים פוקעים תוך $shopExpiryWarnDays ימים: ${_PrData.expiringConsents.map((e) => e['itemName']).join(' · ')}', '']),
+          if (_can('pr.consent') || _can('pr.consent.mark')) _wrap([for (final c in _PrData.pendingConsents.where((c) => dayDiff('${c['due']}', _PrData.today) >= -shopExpiryWarnDays)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _PrData.remindConsent(_actor, c)), child: ForgeSoftButton(fields: ['🔔 תזכורת · ${c['title']} (${_PrData.remindersOf(c)})']))]),
           _gap(8),
         ],
         if (overdueQ > 0) ...[
-          AlertBanner(glyph: '📨', tone: 2, message: '$overdueQ פניות ללא-מענה מעבר לסף ⇒ העלאה-להנהלה'),
-          _wrap([for (final q in _PrData.overdueInquiries.where((q) => !(q['escalated'] as bool) && _PrData.sensitiveOk(_role, q))) SoftButton(label: '⬆ העלה: ${q['title']}', tone: 2, onTap: () => setState(() => _PrData.escalate(_actor, q)))]),
+          ForgeSectionPill(fields: ['$overdueQ פניות ללא-מענה מעבר לסף ⇒ העלאה-להנהלה', '']),
+          _wrap([for (final q in _PrData.overdueInquiries.where((q) => !(q['escalated'] as bool) && _PrData.sensitiveOk(_role, q))) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _PrData.escalate(_actor, q)), child: ForgeSoftButton(fields: ['⬆ העלה: ${q['title']}']))]),
           _gap(8),
         ],
         if (_PrData.absencesToNotify.isNotEmpty && _can('pr.msg')) ...[
-          AlertBanner(glyph: '🏫', tone: 3, message: '${_PrData.absencesToNotify.length} חיסורים לא-מוצדקים (מנוכחות) ממתינים להודעה-אוטומטית להורים'),
-          _wrap([for (final a in _PrData.absencesToNotify) SoftButton(label: '📤 הודע · ${_PrData.famLabel(_PrData.fam(a['famId'] as String))} · ${a['date']}', tone: 1, onTap: () => _act(() => _PrData.notifyAbsence(_actor, a)))]),
+          ForgeSectionPill(fields: ['${_PrData.absencesToNotify.length} חיסורים לא-מוצדקים (מנוכחות) ממתינים להודעה-אוטומטית להורים', '']),
+          _wrap([for (final a in _PrData.absencesToNotify) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _act(() => _PrData.notifyAbsence(_actor, a)), child: ForgeSoftButton(fields: ['📤 הודע · ${_PrData.famLabel(_PrData.fam(a['famId'] as String))} · ${a['date']}']))]),
           _gap(8),
         ],
         if (_PrData.summariesDue.isNotEmpty && _can('pr.meeting')) ...[
-          AlertBanner(glyph: '🗒', tone: 3, message: '${_PrData.summariesDue.length} פגישות הסתיימו בלי סיכום להורים'),
+          ForgeSectionPill(fields: ['${_PrData.summariesDue.length} פגישות הסתיימו בלי סיכום להורים', '']),
           _gap(8),
         ],
         // בורר-מבט
@@ -901,9 +904,9 @@ class _ParentsScreenState extends State<ParentsScreen> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
+          ForgeSectionPill(fields: [_error!, ''])
         else if (visible.isEmpty)
-          Padding(padding: const EdgeInsets.only(top: 24), child: EmptyState(glyph: scope.isEmpty ? '👪' : '🔍', message: scope.isEmpty ? 'אין הורים בהיקף שלך' : 'אין משפחות תואמות לחיפוש/סינון'))
+          Padding(padding: const EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: [scope.isEmpty ? 'אין הורים בהיקף שלך' : 'אין משפחות תואמות לחיפוש/סינון', '']))
         else if (_mode == 2)
           _table(visible)
         else if (_mode == 1)
@@ -951,7 +954,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final sorted = (sortSupportThreads(ts) as List).cast<Map<String, dynamic>>();
     final noThread = fams.where((f) => _PrData.thread(f['id'] as String) == null).toList();
     return DsSection(title: '📥 תיבת-הודעות · ${sorted.length}', children: [
-      if (sorted.isEmpty) const EmptyState(glyph: '📭', message: 'אין שיחות'),
+      if (sorted.isEmpty) const ForgeSearchEmptyState(fields: ['אין שיחות', '']),
       for (final t in sorted)
         if (ids.contains(t['famId']))
           () {
@@ -961,17 +964,16 @@ class _ParentsScreenState extends State<ParentsScreen> {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(children: [
-                Expanded(child: MediaRow(glyph: t['lastFrom'] == 'user' ? '👪' : '🏫', title: _PrData.famLabel(f),
-                  subtitle: '${supportDayLabel('${t['lastAt']}', _PrData.today, SUPPORT_DAY_LABEL_T.cast<String, dynamic>())} ${supportMsgTime('${t['lastAt']}')} · ${supportPreview(t['lastText'], 36)}')),
+                Expanded(child: ForgeContactTile(fields: [_PrData.famLabel(f), '${supportDayLabel('${t['lastAt']}', _PrData.today, SUPPORT_DAY_LABEL_T.cast<String, dynamic>())} ${supportMsgTime('${t['lastAt']}')} · ${supportPreview(t['lastText'], 36)}'])),
                 if (un > 0) BadgeCount(count: un),
-                if (un == 0) StatusChip(label: byParent == 0 ? '✓✓ נקרא' : '✓ ${byParent} לא-נקרא', tone: byParent == 0 ? 1 : 3),
+                if (un == 0) Flexible(child: ForgeIntelPill(fields: [byParent == 0 ? '✓✓ נקרא' : '✓ ${byParent} לא-נקרא'])),
                 IconButton(onPressed: () => _openPanel(f, tab: 0), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פתח שיחה'),
               ]),
             );
           }(),
       if (noThread.isNotEmpty) ...[
         _gap(6), _label('ללא שיחה עדיין · ${noThread.length}'),
-        for (final f in noThread) Row(children: [Expanded(child: MediaRow(glyph: '🆕', title: _PrData.famLabel(f), subtitle: _PrData.kidsLabel(f))), if (_can('pr.msg')) SoftButton(label: '✉️', tone: 0, onTap: () => _openCompose(f))]),
+        for (final f in noThread) Row(children: [Expanded(child: ForgeContactTile(fields: [_PrData.famLabel(f), _PrData.kidsLabel(f)])), if (_can('pr.msg')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openCompose(f), child: ForgeSoftButton(fields: ['✉️'])))]),
       ],
     ]);
   }
@@ -981,22 +983,22 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final id = f['id'] as String;
     final byParent = _PrData.unreadByParent(id);
     final header = Row(children: [
-      Expanded(child: MediaRow(glyph: '👪', title: _PrData.famLabel(f), subtitle: _PrData.kidsLabel(f))),
+      Expanded(child: ForgeContactTile(fields: [_PrData.famLabel(f), _PrData.kidsLabel(f)])),
       if (_PrData.unreadByStaff(id) > 0) BadgeCount(count: _PrData.unreadByStaff(id)),
       IconButton(onPressed: () => _openPanel(f), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פרטים ופעולות'),
     ]);
     final chips = <Widget>[
-      StatusChip(label: _PrData.engagementLabel[_PrData.engagement(f)]!, tone: _PrData.engagement(f) == 'active' ? 1 : _PrData.engagement(f) == 'quiet' ? 3 : 2),
+      ForgeIntelPill(fields: [_PrData.engagementLabel[_PrData.engagement(f)]!]),
       for (final pk in _PrData.parentKeys(f)) _contactChip(f, pk),
-      if (_PrData.unreadStale(f)) StatusChip(label: '👁 לא-נקרא ${dayDiff(_PrData.lastAdminAt(id)!, _PrData.today)} י׳ · $byParent', tone: 2),
-      if (_PrData.hasFailed(f)) const StatusChip(label: '⚠️ הודעה-נכשלה', tone: 2),
-      for (final c in _PrData.consentsOf(id)) if (_PrData.consentState(c) != 'received') StatusChip(label: '${_PrData.consentKind[c['kind']]} ${_PrData.consentLabel[_PrData.consentState(c)]}', tone: _PrData.consentState(c) == 'expired' ? 2 : 3),
-      for (final q in _PrData.inquiriesOf(id)) if ('${q['doneAt']}'.isEmpty && _PrData.sensitiveOk(_role, q)) StatusChip(label: '📨 ${q['title']}${_PrData.overdue(q) ? ' · חורג' : ''}${q['escalated'] == true ? ' · ⬆' : ''}', tone: _PrData.overdue(q) ? 2 : 0),
-      if (_PrData.feesFeed[id] != null && _can('pr.org')) StatusChip(label: '💳 חוב ₪${_PrData.feesFeed[id]}', tone: 3),
-      if ((f['custody'] as Map?)?['restricted'] == true) const StatusChip(label: '⚖️ הסדר-ראייה מגביל', tone: 3),
-      if (_PrData.blockedOf(f) != null) StatusChip(label: '🚫 ${_PrData.parent(f, _PrData.blockedOf(f)!)['role']} חסום/ה', tone: 2),
-      for (final pk in _PrData.parentKeys(f)) if (_PrData.parent(f, pk)['lang'] != 'עברית') StatusChip(label: '🌐 תרגום-אוטו: ${_PrData.parent(f, pk)['lang']}', tone: 0),
-      if (!_PrData.contactFresh(f)) StatusChip(label: '🕰 קשר לא-עודכן ${dayDiff('${f['contactUpdatedAt']}', _PrData.today)} י׳', tone: 3),
+      if (_PrData.unreadStale(f)) ForgeIntelPill(fields: ['👁 לא-נקרא ${dayDiff(_PrData.lastAdminAt(id)!, _PrData.today)} י׳ · $byParent']),
+      if (_PrData.hasFailed(f)) const ForgeIntelPill(fields: ['⚠️ הודעה-נכשלה']),
+      for (final c in _PrData.consentsOf(id)) if (_PrData.consentState(c) != 'received') ForgeIntelPill(fields: ['${_PrData.consentKind[c['kind']]} ${_PrData.consentLabel[_PrData.consentState(c)]}']),
+      for (final q in _PrData.inquiriesOf(id)) if ('${q['doneAt']}'.isEmpty && _PrData.sensitiveOk(_role, q)) ForgeIntelPill(fields: ['📨 ${q['title']}${_PrData.overdue(q) ? ' · חורג' : ''}${q['escalated'] == true ? ' · ⬆' : ''}']),
+      if (_PrData.feesFeed[id] != null && _can('pr.org')) ForgeIntelPill(fields: ['💳 חוב ₪${_PrData.feesFeed[id]}']),
+      if ((f['custody'] as Map?)?['restricted'] == true) const ForgeIntelPill(fields: ['⚖️ הסדר-ראייה מגביל']),
+      if (_PrData.blockedOf(f) != null) ForgeIntelPill(fields: ['🚫 ${_PrData.parent(f, _PrData.blockedOf(f)!)['role']} חסום/ה']),
+      for (final pk in _PrData.parentKeys(f)) if (_PrData.parent(f, pk)['lang'] != 'עברית') ForgeIntelPill(fields: ['🌐 תרגום-אוטו: ${_PrData.parent(f, pk)['lang']}']),
+      if (!_PrData.contactFresh(f)) ForgeIntelPill(fields: ['🕰 קשר לא-עודכן ${dayDiff('${f['contactUpdatedAt']}', _PrData.today)} י׳']),
     ];
     final next = _PrData.columnDefs[11]['get'] as String Function(Map<String, dynamic>);
     return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -1004,9 +1006,9 @@ class _ParentsScreenState extends State<ParentsScreen> {
       _wrap(chips),
       if (next(f) != '—') Padding(padding: const EdgeInsets.only(top: 6, right: 4), child: Text('📅 פגישה הבאה: ${next(f)}', style: const TextStyle(color: _muted, fontSize: 12.5))),
       _wrap([
-        if (_can('pr.msg')) SoftButton(label: '✉️ הודעה', tone: 1, onTap: () => _openCompose(f)),
-        if (_can('pr.inquiry')) SoftButton(label: '📨 פתח-פנייה', tone: 0, onTap: () => _openInquiry(f)),
-        if (_can('pr.meeting')) SoftButton(label: '📅 פגישה', tone: 0, onTap: () => _openMeeting(f)),
+        if (_can('pr.msg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openCompose(f), child: ForgeSoftButton(fields: ['✉️ הודעה'])),
+        if (_can('pr.inquiry')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openInquiry(f), child: ForgeSoftButton(fields: ['📨 פתח-פנייה'])),
+        if (_can('pr.meeting')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMeeting(f), child: ForgeSoftButton(fields: ['📅 פגישה'])),
       ], top: 10),
     ]));
   }
@@ -1017,7 +1019,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final st = _PrData.contactState(id, pk);
     final ch = _PrData.channelLabel[_PrData.smartChannel(f, pk)];
     final label = '${_PrData.parent(f, pk)['role']} · $ch${_PrData.channelOverridden(f, pk) ? '*' : ''} · ${st == 'ok' ? '✅' : st == 'bad' ? '⚠️ ${_PrData.contactWhy(id, pk)}' : '🔒 לא-הוזרק'}';
-    return StatusChip(label: label, tone: st == 'ok' ? 1 : st == 'bad' ? 2 : 0);
+    return ForgeIntelPill(fields: [label]);
   }
 
   // ═══ פאנל הורה/שיחה-נבחר · GlassCard · 9 טאבים (SegmentedSwitch) ═══
@@ -1049,52 +1051,52 @@ class _ParentsScreenState extends State<ParentsScreen> {
         return DraggableScrollableSheet(
           initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
           builder: (ctx, scroll) => Padding(padding: const EdgeInsets.all(12), child: GlassCard(child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-            MediaRow(glyph: '👪', title: _PrData.famLabel(f), subtitle: _PrData.kidsLabel(f)),
+            ForgeContactTile(fields: [_PrData.famLabel(f), _PrData.kidsLabel(f)]),
             _gap(8),
             // זהות+ילדים · ערוץ+שפה+שעות — פר-הורה (זהות מוזרקת)
             for (final pk in _PrData.parentKeys(f))
               Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Wrap(spacing: 8, runSpacing: 6, children: [
-                StatusChip(label: '${_PrData.parent(f, pk)['role']}: ${_PrData.nameOf(id, pk) ?? '🔒 מוזרק-בהצבה'}', tone: 0),
-                StatusChip(label: '📞 ${_PrData.phoneShown(id, pk)}', tone: _PrData.contactState(id, pk) == 'ok' ? 1 : _PrData.contactState(id, pk) == 'bad' ? 2 : 0),
-                StatusChip(label: '📡 ${_PrData.channelLabel[_PrData.smartChannel(f, pk)]}${_PrData.channelOverridden(f, pk) ? ' (ענה-כאן, מועדף: ${_PrData.channelLabel[_PrData.parent(f, pk)['channel']]})' : ''}', tone: 0),
-                StatusChip(label: '🗣 ${_PrData.parent(f, pk)['lang']}', tone: 0),
-                StatusChip(label: '🕐 ${'${_PrData.parent(f, pk)['hours']}'.isEmpty ? 'שעות-נוחות: לא-הוגדר' : _PrData.parent(f, pk)['hours']}', tone: _PrData.inConvenientHours(f, pk) ? 1 : 3),
-                if (_PrData.isBlocked(f, pk)) const StatusChip(label: '🚫 חסום/ה', tone: 2),
-                if (_PrData.sendHold(f, pk) != null && !_PrData.isBlocked(f, pk)) StatusChip(label: '⏸ ${_PrData.sendHold(f, pk)}', tone: 3),
+                ForgeIntelPill(fields: ['${_PrData.parent(f, pk)['role']}: ${_PrData.nameOf(id, pk) ?? '🔒 מוזרק-בהצבה'}']),
+                ForgeIntelPill(fields: ['📞 ${_PrData.phoneShown(id, pk)}']),
+                ForgeIntelPill(fields: ['📡 ${_PrData.channelLabel[_PrData.smartChannel(f, pk)]}${_PrData.channelOverridden(f, pk) ? ' (ענה-כאן, מועדף: ${_PrData.channelLabel[_PrData.parent(f, pk)['channel']]})' : ''}']),
+                ForgeIntelPill(fields: ['🗣 ${_PrData.parent(f, pk)['lang']}']),
+                ForgeIntelPill(fields: ['🕐 ${'${_PrData.parent(f, pk)['hours']}'.isEmpty ? 'שעות-נוחות: לא-הוגדר' : _PrData.parent(f, pk)['hours']}']),
+                if (_PrData.isBlocked(f, pk)) const ForgeIntelPill(fields: ['🚫 חסום/ה']),
+                if (_PrData.sendHold(f, pk) != null && !_PrData.isBlocked(f, pk)) ForgeIntelPill(fields: ['⏸ ${_PrData.sendHold(f, pk)}']),
               ])),
-            if (f['guardian'] != null) StatusChip(label: '🧓 אפוטרופוס: ${f['guardian']} · ${_PrData.identity[id]?['emergencyName'] ?? '🔒 מוזרק-בהצבה'}', tone: 0),
+            if (f['guardian'] != null) ForgeIntelPill(fields: ['🧓 אפוטרופוס: ${f['guardian']} · ${_PrData.identity[id]?['emergencyName'] ?? '🔒 מוזרק-בהצבה'}']),
             Wrap(spacing: 8, runSpacing: 6, children: [
-              StatusChip(label: '🆘 חירום: ${_PrData.identity[id]?['emergencyName'] ?? '🔒 מוזרק-בהצבה'}', tone: 0),
-              StatusChip(label: '✉️ מייל: ${(_PrData.identity[id]?['email'] ?? '').isEmpty ? '🔒 מוזרק-בהצבה' : _PrData.identity[id]!['email']}', tone: 0),
-              StatusChip(label: '📷 מדיה: ${_PrData.mediaOf(f) ? 'מאושר' : 'לא'}', tone: _PrData.mediaOf(f) ? 1 : 3),
+              ForgeIntelPill(fields: ['🆘 חירום: ${_PrData.identity[id]?['emergencyName'] ?? '🔒 מוזרק-בהצבה'}']),
+              ForgeIntelPill(fields: ['✉️ מייל: ${(_PrData.identity[id]?['email'] ?? '').isEmpty ? '🔒 מוזרק-בהצבה' : _PrData.identity[id]!['email']}']),
+              ForgeIntelPill(fields: ['📷 מדיה: ${_PrData.mediaOf(f) ? 'מאושר' : 'לא'}']),
             ]),
             _gap(10),
             // מבט-הילד (מה-שההורה-רואה): נוכחות/ציונים/חוב — הזנות-בין-מודולים
             _label('מבט-הילד'),
             for (final k in f['kids'] as List)
               Row(children: [
-                BareStat(value: '${(k as Map)['first']}', label: '${k['cls']}', inkColor: _ink, mutedColor: _muted),
-                BareStat(value: '${_PrData.childFeed[k['sid']]?['absences30'] ?? '—'}', label: '📆 חיסורים/30י', inkColor: ((_PrData.childFeed[k['sid']]?['absences30'] ?? 0) as int) >= 4 ? _danger : _ink, mutedColor: _muted),
-                BareStat(value: '${_PrData.childFeed[k['sid']]?['avg'] ?? '—'}', label: '📊 ממוצע', inkColor: _ink, mutedColor: _muted),
-                BareStat(value: _PrData.feesFeed[id] == null ? '✓' : '₪${_PrData.feesFeed[id]}', label: '💳 חוב', inkColor: _PrData.feesFeed[id] == null ? _ok : _danger, mutedColor: _muted),
+                Expanded(child: ForgeStatPlain(fields: ['${k['cls']}', '${(k as Map)['first']}'])),
+                Expanded(child: ForgeStatPlain(fields: ['📆 חיסורים/30י', '${_PrData.childFeed[k['sid']]?['absences30'] ?? '—'}'])),
+                Expanded(child: ForgeStatPlain(fields: ['📊 ממוצע', '${_PrData.childFeed[k['sid']]?['avg'] ?? '—'}'])),
+                Expanded(child: ForgeStatPlain(fields: ['💳 חוב', _PrData.feesFeed[id] == null ? '✓' : '₪${_PrData.feesFeed[id]}'])),
               ]),
             _gap(10),
             _label('פעולות'),
             _gap(6),
             Builder(builder: (_) {
               final acts = <Widget>[
-                if (_can('pr.msg')) SoftButton(label: '✉️ הודעה-אישית', tone: 1, onTap: () => _openCompose(f)),
-                if (_can('pr.consent')) SoftButton(label: '📝 בקשת-אישור', tone: 0, onTap: () => _openConsentRequest(f)),
-                if (_can('pr.inquiry')) SoftButton(label: '📨 פתח-פנייה', tone: 0, onTap: () => _openInquiry(f)),
-                if (_can('pr.meeting')) SoftButton(label: '📅 קבע-פגישה', tone: 0, onTap: () => _openMeeting(f)),
-                if (_can('pr.contact')) SoftButton(label: '📞 עדכן-קשר', tone: 0, onTap: () => _openContact(f)),
-                if (_can('pr.contact')) SoftButton(label: _PrData.mediaOf(f) ? '📷 בטל הרשאת-מדיה' : '📷 אשר מדיה', tone: 0, onTap: () => act(() { _PrData.mediaAdj[id] = !_PrData.mediaOf(f); _PrData.audit(_actor, 'הרשאת-מדיה', id, note: _PrData.mediaOf(f) ? 'כן' : 'לא'); })),
-                if (_can('pr.msg')) SoftButton(label: _PrData.markedUnresponsive.contains(id) ? '↩ בטל לא-מגיב' : '🔴 סמן לא-מגיב', tone: 2, onTap: () => act(() { _PrData.markedUnresponsive.contains(id) ? _PrData.markedUnresponsive.remove(id) : _PrData.markedUnresponsive.add(id); _PrData.audit(_actor, 'סימון לא-מגיב', id); })),
-                if (_can('pr.block')) for (final pk in _PrData.parentKeys(f)) SoftButton(label: _PrData.isBlocked(f, pk) ? '✅ בטל חסימת ${_PrData.parent(f, pk)['role']}' : '🚫 חסום ${_PrData.parent(f, pk)['role']}', tone: 2, onTap: () => act(() { _PrData.blockedAdj[id] = _PrData.isBlocked(f, pk) ? null : pk; _PrData.audit(_actor, 'חסימת-הורה', id, to: pk, note: _PrData.isBlocked(f, pk) ? 'חסום' : 'שוחרר'); })),
-                if (_can('pr.msg')) SoftButton(label: '🖨 הדפס-מכתב', tone: 0, onTap: () => _openLetter(f)),
-                if (_can('pr.msg')) SoftButton(label: '📬 סיכום-שבועי', tone: 0, onTap: () => act(() { for (final l in _PrData.weeklyDigest(f)) { _PrData.send(_actor, f, _PrData.parentKeys(f).first, l); } })),
+                if (_can('pr.msg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openCompose(f), child: ForgeSoftButton(fields: ['✉️ הודעה-אישית'])),
+                if (_can('pr.consent')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openConsentRequest(f), child: ForgeSoftButton(fields: ['📝 בקשת-אישור'])),
+                if (_can('pr.inquiry')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openInquiry(f), child: ForgeSoftButton(fields: ['📨 פתח-פנייה'])),
+                if (_can('pr.meeting')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMeeting(f), child: ForgeSoftButton(fields: ['📅 קבע-פגישה'])),
+                if (_can('pr.contact')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openContact(f), child: ForgeSoftButton(fields: ['📞 עדכן-קשר'])),
+                if (_can('pr.contact')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.mediaAdj[id] = !_PrData.mediaOf(f); _PrData.audit(_actor, 'הרשאת-מדיה', id, note: _PrData.mediaOf(f) ? 'כן' : 'לא'); }), child: ForgeSoftButton(fields: [_PrData.mediaOf(f) ? '📷 בטל הרשאת-מדיה' : '📷 אשר מדיה'])),
+                if (_can('pr.msg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.markedUnresponsive.contains(id) ? _PrData.markedUnresponsive.remove(id) : _PrData.markedUnresponsive.add(id); _PrData.audit(_actor, 'סימון לא-מגיב', id); }), child: ForgeSoftButton(fields: [_PrData.markedUnresponsive.contains(id) ? '↩ בטל לא-מגיב' : '🔴 סמן לא-מגיב'])),
+                if (_can('pr.block')) for (final pk in _PrData.parentKeys(f)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.blockedAdj[id] = _PrData.isBlocked(f, pk) ? null : pk; _PrData.audit(_actor, 'חסימת-הורה', id, to: pk, note: _PrData.isBlocked(f, pk) ? 'חסום' : 'שוחרר'); }), child: ForgeSoftButton(fields: [_PrData.isBlocked(f, pk) ? '✅ בטל חסימת ${_PrData.parent(f, pk)['role']}' : '🚫 חסום ${_PrData.parent(f, pk)['role']}'])),
+                if (_can('pr.msg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openLetter(f), child: ForgeSoftButton(fields: ['🖨 הדפס-מכתב'])),
+                if (_can('pr.msg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { for (final l in _PrData.weeklyDigest(f)) { _PrData.send(_actor, f, _PrData.parentKeys(f).first, l); } }), child: ForgeSoftButton(fields: ['📬 סיכום-שבועי'])),
               ];
-              return acts.isEmpty ? const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה', glyph: '🔒', tone: 2) : Wrap(spacing: 8, runSpacing: 8, children: acts);
+              return acts.isEmpty ? const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה', '']) : Wrap(spacing: 8, runSpacing: 8, children: acts);
             }),
             _gap(14),
             Align(alignment: Alignment.centerRight, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SegmentedSwitch(items: tabs, selected: sel, onSelect: (i) => setSheet(() => sel = i)))),
@@ -1138,16 +1140,16 @@ class _ParentsScreenState extends State<ParentsScreen> {
       Row(children: [
         _label('שיחה · ${ms.length}'),
         const Spacer(),
-        StatusChip(label: byParent == 0 ? '✓✓ ההורה קרא הכל' : '✓ $byParent טרם נקראו', tone: byParent == 0 ? 1 : 3),
+        Flexible(child: ForgeIntelPill(fields: [byParent == 0 ? '✓✓ ההורה קרא הכל' : '✓ $byParent טרם נקראו'])),
       ]),
       _gap(8),
-      if (ms.isEmpty) const EmptyState(glyph: '📭', message: 'אין הודעות עדיין — פתח בהודעה-אישית') else ...children,
+      if (ms.isEmpty) const ForgeSearchEmptyState(fields: ['אין הודעות עדיין — פתח בהודעה-אישית', '']) else ...children,
       _gap(10),
       if (_can('pr.msg')) ...[
         DsField(label: 'מענה מהיר', hint: 'כתוב/י הודעה…', value: reply, onChanged: onReply),
         _wrap([
-          for (final pk in _PrData.parentKeys(f)) if (!_PrData.isBlocked(f, pk)) SoftButton(label: '📤 שלח ל${_PrData.parent(f, pk)['role']} (${_PrData.channelLabel[_PrData.smartChannel(f, pk)]})', tone: 1, onTap: () => act(() { _PrData.send(_actor, f, pk, reply, crisis: _crisis); onReply(''); })),
-          for (final pk in _PrData.parentKeys(f)) if (_PrData.waHrefOf(id, pk, reply) != null) StatusChip(label: '🔗 wa.me מוכן ל${_PrData.parent(f, pk)['role']}', tone: 1),
+          for (final pk in _PrData.parentKeys(f)) if (!_PrData.isBlocked(f, pk)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.send(_actor, f, pk, reply, crisis: _crisis); onReply(''); }), child: ForgeSoftButton(fields: ['📤 שלח ל${_PrData.parent(f, pk)['role']} (${_PrData.channelLabel[_PrData.smartChannel(f, pk)]})'])),
+          for (final pk in _PrData.parentKeys(f)) if (_PrData.waHrefOf(id, pk, reply) != null) ForgeIntelPill(fields: ['🔗 wa.me מוכן ל${_PrData.parent(f, pk)['role']}']),
         ]),
       ],
     ]);
@@ -1159,16 +1161,16 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('אישורים · ${cs.length}'),
       _gap(6),
-      if (cs.isEmpty) const EmptyState(glyph: '📝', message: 'אין בקשות-אישור') else
+      if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['אין בקשות-אישור', '']) else
         DsTable(labels: const ['מה', 'סוג', 'נשלח', 'עד', 'סטטוס', 'תזכורות'], rows: [for (final c in cs) ['${c['title']}', _PrData.consentKind[c['kind']]!, '${c['sentAt']}', '${c['due']}', _PrData.consentLabel[_PrData.consentState(c)]!, '${_PrData.remindersOf(c)}']]),
       _wrap([
         for (final c in cs) if (_PrData.consentState(c) == 'pending' || _PrData.consentState(c) == 'expired') ...[
-          if (_can('pr.consent.mark')) SoftButton(label: '✅ התקבל: ${c['title']}', tone: 1, onTap: () => act(() { _PrData.consentStatus[c['id'] as String] = 'received'; _PrData.audit(_actor, 'אישור-התקבל', f['id'] as String, note: '${c['title']}'); })),
-          if (_can('pr.consent') || _can('pr.consent.mark')) SoftButton(label: '🔔 תזכורת ${_PrData.reminderTier(c) == 'escalate' ? '⬆ + העלאה' : _PrData.reminderTier(c) == 'urgent' ? 'דחופה' : 'ידידותית'}', tone: _PrData.reminderTier(c) == 'friendly' ? 0 : 2, onTap: () => act(() => _PrData.remindConsent(_actor, c))),
+          if (_can('pr.consent.mark')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.consentStatus[c['id'] as String] = 'received'; _PrData.audit(_actor, 'אישור-התקבל', f['id'] as String, note: '${c['title']}'); }), child: ForgeSoftButton(fields: ['✅ התקבל: ${c['title']}'])),
+          if (_can('pr.consent') || _can('pr.consent.mark')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _PrData.remindConsent(_actor, c)), child: ForgeSoftButton(fields: ['🔔 תזכורת ${_PrData.reminderTier(c) == 'escalate' ? '⬆ + העלאה' : _PrData.reminderTier(c) == 'urgent' ? 'דחופה' : 'ידידותית'}'])),
         ],
       ]),
       _gap(8),
-      const AlertBanner(glyph: '✍️', tone: 0, message: 'מקום-שמור: חתימה-דיגיטלית-על-אישור — מאיר כשיחובר ספק-חתימה'),
+      const ForgeSectionPill(fields: ['מקום-שמור: חתימה-דיגיטלית-על-אישור — מאיר כשיחובר ספק-חתימה', '']),
     ]);
   }
 
@@ -1179,7 +1181,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('פניות · ${qs.length}${hidden > 0 ? ' · $hidden רגישות מוסתרות' : ''}'),
       _gap(6),
-      if (qs.isEmpty) const EmptyState(glyph: '📨', message: 'אין פניות'),
+      if (qs.isEmpty) const ForgeSearchEmptyState(fields: ['אין פניות', '']),
       for (final q in qs)
         TimelineItem(
           title: '${'${q['doneAt']}'.isNotEmpty ? '✅' : _PrData.overdue(q) ? '⛔' : '📨'} ${q['title']}${q['sensitive'] == true ? ' · 🔒 רגיש' : ''}${q['escalated'] == true ? ' · ⬆ הנהלה' : ''}',
@@ -1188,9 +1190,9 @@ class _ParentsScreenState extends State<ParentsScreen> {
         ),
       _wrap([
         for (final q in qs) if ('${q['doneAt']}'.isEmpty && _can('pr.inquiry')) ...[
-          if ('${q['answeredAt']}'.isEmpty) SoftButton(label: '💬 ענה: ${q['title']}', tone: 1, onTap: () => act(() { _PrData.inquiryAnswered[q['id'] as String] = _PrData.nowIso(); _PrData.send(_actor, f, _PrData.parentKeys(f).first, 'בנוגע לפנייתך "${q['title']}": טופל, נעדכן בהמשך.', crisis: _crisis); _PrData.audit(_actor, 'מענה-לפנייה', f['id'] as String, note: '${q['title']}'); })),
-          SoftButton(label: '✔ סגור: ${q['title']}', tone: 0, onTap: () => act(() { _PrData.inquiryDone[q['id'] as String] = _PrData.nowIso(); _PrData.audit(_actor, 'סגירת-פנייה', f['id'] as String, note: '${q['title']}'); })),
-          if (_PrData.overdue(q) && q['escalated'] != true) SoftButton(label: '⬆ העלה-להנהלה', tone: 2, onTap: () => act(() => _PrData.escalate(_actor, q))),
+          if ('${q['answeredAt']}'.isEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.inquiryAnswered[q['id'] as String] = _PrData.nowIso(); _PrData.send(_actor, f, _PrData.parentKeys(f).first, 'בנוגע לפנייתך "${q['title']}": טופל, נעדכן בהמשך.', crisis: _crisis); _PrData.audit(_actor, 'מענה-לפנייה', f['id'] as String, note: '${q['title']}'); }), child: ForgeSoftButton(fields: ['💬 ענה: ${q['title']}'])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.inquiryDone[q['id'] as String] = _PrData.nowIso(); _PrData.audit(_actor, 'סגירת-פנייה', f['id'] as String, note: '${q['title']}'); }), child: ForgeSoftButton(fields: ['✔ סגור: ${q['title']}'])),
+          if (_PrData.overdue(q) && q['escalated'] != true) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _PrData.escalate(_actor, q)), child: ForgeSoftButton(fields: ['⬆ העלה-להנהלה'])),
         ],
       ]),
     ]);
@@ -1202,14 +1204,14 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('פגישות · ${ms.length}'),
       _gap(6),
-      if (ms.isEmpty) const EmptyState(glyph: '📅', message: 'אין פגישות'),
+      if (ms.isEmpty) const ForgeSearchEmptyState(fields: ['אין פגישות', '']),
       for (final m in ms)
         TimelineItem(title: '${m['done'] == true ? '✅' : '📅'} ${m['title']}', time: '${m['date']} ${m['time']}', body: m['done'] == true ? (m['summarySent'] == true ? 'סיכום נשלח להורים' : '⚠️ סיכום טרם נשלח') : 'מתוכנן · תזכורת יום-לפני'),
       _wrap([
         for (final m in ms) if (_can('pr.meeting')) ...[
-          if (m['done'] != true) SoftButton(label: '🔔 תזכורת: ${m['title']}', tone: 0, onTap: () => act(() => _PrData.send(_actor, f, _PrData.parentKeys(f).first, _PrData.render('sc.meeting', {'date': '${m['date']}', 'time': '${m['time']}', 'what': '${m['title']}'}), crisis: _crisis))),
-          if (m['done'] == true && m['summarySent'] != true) SoftButton(label: '🗒 שלח-סיכום: ${m['title']}', tone: 1, onTap: () => act(() { _PrData.send(_actor, f, _PrData.parentKeys(f).first, _PrData.render('sc.summary', {'date': '${m['date']}', 'what': '${m['title']}', 'note': 'סוכם המשך מעקב'}), crisis: _crisis); _PrData.meetingSummary[m['id'] as String] = true; })),
-          if (m['done'] != true) SoftButton(label: '✔ התקיימה: ${m['title']}', tone: 0, onTap: () => act(() { final i = _PrData.extraMeetings.indexWhere((x) => x['id'] == m['id']); if (i >= 0) { _PrData.extraMeetings[i] = {..._PrData.extraMeetings[i], 'done': true}; } else { _PrData.extraMeetings.add({...m, 'done': true, 'id': '${m['id']}-done'}); } _PrData.audit(_actor, 'פגישה-התקיימה', f['id'] as String, note: '${m['title']}'); })),
+          if (m['done'] != true) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _PrData.send(_actor, f, _PrData.parentKeys(f).first, _PrData.render('sc.meeting', {'date': '${m['date']}', 'time': '${m['time']}', 'what': '${m['title']}'}), crisis: _crisis)), child: ForgeSoftButton(fields: ['🔔 תזכורת: ${m['title']}'])),
+          if (m['done'] == true && m['summarySent'] != true) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.send(_actor, f, _PrData.parentKeys(f).first, _PrData.render('sc.summary', {'date': '${m['date']}', 'what': '${m['title']}', 'note': 'סוכם המשך מעקב'}), crisis: _crisis); _PrData.meetingSummary[m['id'] as String] = true; }), child: ForgeSoftButton(fields: ['🗒 שלח-סיכום: ${m['title']}'])),
+          if (m['done'] != true) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { final i = _PrData.extraMeetings.indexWhere((x) => x['id'] == m['id']); if (i >= 0) { _PrData.extraMeetings[i] = {..._PrData.extraMeetings[i], 'done': true}; } else { _PrData.extraMeetings.add({...m, 'done': true, 'id': '${m['id']}-done'}); } _PrData.audit(_actor, 'פגישה-התקיימה', f['id'] as String, note: '${m['title']}'); }), child: ForgeSoftButton(fields: ['✔ התקיימה: ${m['title']}'])),
         ],
       ]),
     ]);
@@ -1229,8 +1231,8 @@ class _ParentsScreenState extends State<ParentsScreen> {
       if (_can('pr.templates') || _can('pr.org')) ...[
         DsField(label: 'עריכת-תבנית (משתנים ב-{סוגריים})', hint: cur['def']!, value: text, onChanged: (v) => onEdit(key, v)),
         _wrap([
-          SoftButton(label: '💾 שמור עריכה', tone: 1, onTap: () => act(() { _PrData.templateCfg = {'templates': {...?(_PrData.templateCfg['templates'] as Map?), key: text}}; _PrData.audit(_actor, 'עריכת-תבנית', '*', note: key); })),
-          SoftButton(label: '↩ ברירת-מחדל', tone: 0, onTap: () => act(() { _PrData.templateCfg = {'templates': {...?(_PrData.templateCfg['templates'] as Map?)}..remove(key)}; })),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.templateCfg = {'templates': {...?(_PrData.templateCfg['templates'] as Map?), key: text}}; _PrData.audit(_actor, 'עריכת-תבנית', '*', note: key); }), child: ForgeSoftButton(fields: ['💾 שמור עריכה'])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.templateCfg = {'templates': {...?(_PrData.templateCfg['templates'] as Map?)}..remove(key)}; }), child: ForgeSoftButton(fields: ['↩ ברירת-מחדל'])),
         ]),
       ],
     ]);
@@ -1245,16 +1247,16 @@ class _ParentsScreenState extends State<ParentsScreen> {
       _label('הודעות-כלל'),
       _gap(6),
       Row(children: [
-        BareStat(value: '${targets.length}', label: 'הורים מורשים', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: '${reach.length}', label: 'ברי-השגה בוואטסאפ', inkColor: reach.isEmpty ? _warning : _ok, mutedColor: _muted),
-        BareStat(value: '${targets.length - reach.length}', label: 'ערוץ-חלופי/לא-הוזרק', inkColor: _muted, mutedColor: _muted),
+        Expanded(child: ForgeStatPlain(fields: ['הורים מורשים', '${targets.length}'])),
+        Expanded(child: ForgeStatPlain(fields: ['ברי-השגה בוואטסאפ', '${reach.length}'])),
+        Expanded(child: ForgeStatPlain(fields: ['ערוץ-חלופי/לא-הוזרק', '${targets.length - reach.length}'])),
       ]),
       _gap(8),
-      if (bcasts.isEmpty) const EmptyState(glyph: '🏛', message: 'טרם נשלחו הודעות-כלל'),
+      if (bcasts.isEmpty) const ForgeSearchEmptyState(fields: ['טרם נשלחו הודעות-כלל', '']),
       for (final e in bcasts) TimelineItem(title: '${e['action']} · ${e['famId']}', time: '${e['at']}', body: '${e['note']}'),
       _wrap([
-        if (_can('pr.class')) SoftButton(label: '🏫 הודעה-לכיתה', tone: 0, onTap: () => _openBroadcast(cls: true)),
-        if (_can('pr.org')) SoftButton(label: '🏛 הודעה-מוסדית', tone: 0, onTap: () => _openBroadcast(cls: false)),
+        if (_can('pr.class')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBroadcast(cls: true), child: ForgeSoftButton(fields: ['🏫 הודעה-לכיתה'])),
+        if (_can('pr.org')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBroadcast(cls: false), child: ForgeSoftButton(fields: ['🏛 הודעה-מוסדית'])),
       ]),
     ]);
   }
@@ -1266,21 +1268,21 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(children: [_label('תצוגת-הורה'), const Spacer(), SegmentedSwitch(items: [for (final k in pks) '${_PrData.parent(f, k)['role']}'], selected: pks.indexOf(pk), onSelect: (i) => onParent(pks[i]))]),
       _gap(8),
-      if (_PrData.isBlocked(f, pk)) const AlertBanner(glyph: '🚫', tone: 2, message: 'הורה חסום — אין גישה לפורטל')
+      if (_PrData.isBlocked(f, pk)) const ForgeSectionPill(fields: ['הורה חסום — אין גישה לפורטל', ''])
       else ...[
-        if ((f['custody'] as Map?)?['restricted'] == true) AlertBanner(glyph: '⚖️', tone: 3, message: 'הסדר-ראייה מגביל: ${_PrData.parent(f, pk)['role']} רואה ${views.map((v) => _PrData.childViewLabel[v]).join(' · ')}${views.length == _PrData.childViews.length ? ' (הכל)' : ' בלבד'}'),
+        if ((f['custody'] as Map?)?['restricted'] == true) ForgeSectionPill(fields: ['הסדר-ראייה מגביל: ${_PrData.parent(f, pk)['role']} רואה ${views.map((v) => _PrData.childViewLabel[v]).join(' · ')}${views.length == _PrData.childViews.length ? ' (הכל)' : ' בלבד'}', '']),
         _gap(6),
         for (final k in f['kids'] as List)
           Row(children: [
-            BareStat(value: '${(k as Map)['first']}', label: '${k['cls']}', inkColor: _ink, mutedColor: _muted),
-            if (views.contains('attendance')) BareStat(value: '${_PrData.childFeed[k['sid']]?['absences30'] ?? '—'}', label: '📆 חיסורים', inkColor: _ink, mutedColor: _muted),
-            if (views.contains('grades')) BareStat(value: '${_PrData.childFeed[k['sid']]?['avg'] ?? '—'}', label: '📊 ממוצע', inkColor: _ink, mutedColor: _muted),
-            if (views.contains('fees')) BareStat(value: _PrData.feesFeed[f['id']] == null ? '✓' : '₪${_PrData.feesFeed[f['id']]}', label: '💳 חוב', inkColor: _PrData.feesFeed[f['id']] == null ? _ok : _danger, mutedColor: _muted),
+            Expanded(child: ForgeStatPlain(fields: ['${k['cls']}', '${(k as Map)['first']}'])),
+            if (views.contains('attendance')) Expanded(child: ForgeStatPlain(fields: ['📆 חיסורים', '${_PrData.childFeed[k['sid']]?['absences30'] ?? '—'}'])),
+            if (views.contains('grades')) Expanded(child: ForgeStatPlain(fields: ['📊 ממוצע', '${_PrData.childFeed[k['sid']]?['avg'] ?? '—'}'])),
+            if (views.contains('fees')) Expanded(child: ForgeStatPlain(fields: ['💳 חוב', _PrData.feesFeed[f['id']] == null ? '✓' : '₪${_PrData.feesFeed[f['id']]}'])),
           ]),
         _gap(6),
         _label('המערכת · שקע-אינטגרציה (חוגים/מערכת) — מאיר כשיחובר'),
         _gap(8),
-        const AlertBanner(glyph: '🔐', tone: 0, message: 'מקום-שמור: פורטל-מזוהה (login) · תשלום-מהפורטל · צ׳אט-חי — מאירים כשיחוברו ספקי-זהות/סליקה'),
+        const ForgeSectionPill(fields: ['מקום-שמור: פורטל-מזוהה (login) · תשלום-מהפורטל · צ׳אט-חי — מאירים כשיחוברו ספקי-זהות/סליקה', '']),
       ],
     ]);
   }
@@ -1290,17 +1292,17 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final es = _PrData.log.where((e) => e['famId'] == famId).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('לוג-שליחה · ${es.length}'),
-      if (es.isEmpty) const EmptyState(glyph: '📜', message: 'אין פעולות רשומות למשפחה בסשן זה'),
+      if (es.isEmpty) const ForgeSearchEmptyState(fields: ['אין פעולות רשומות למשפחה בסשן זה', '']),
       for (final e in es) TimelineItem(title: '${e['action']} · ${e['status']}', time: '${e['at']}', body: '${e['actor']}${'${e['to']}'.isEmpty ? '' : ' → ${e['to']}'}${'${e['channel']}'.isEmpty ? '' : ' · ${_PrData.channelLabel[e['channel']]}'}${'${e['note']}'.isEmpty ? '' : ' · ${e['note']}'}'),
     ]);
   }
   Widget _auditTab() {
-    if (!_can('pr.audit') && !_can('pr.org')) return const AlertBanner(glyph: '🔒', tone: 2, message: 'אודיט מלא — הנהלה/מזכירות בלבד');
+    if (!_can('pr.audit') && !_can('pr.org')) return const ForgeSectionPill(fields: ['אודיט מלא — הנהלה/מזכירות בלבד', '']);
     final lines = _PrData.auditLines();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('אודיט · ${_PrData.log.length}'),
       for (final l in lines) Text(l, style: const TextStyle(color: _ink, fontSize: 12.5, height: 1.5)),
-      if (_PrData.log.isEmpty) const EmptyState(glyph: '🔍', message: 'אין פעולות בסשן זה'),
+      if (_PrData.log.isEmpty) const ForgeSearchEmptyState(fields: ['אין פעולות בסשן זה', '']),
     ]);
   }
 
@@ -1327,18 +1329,18 @@ class _ParentsScreenState extends State<ParentsScreen> {
       final f = _PrData.fam(famId);
       final hold = _PrData.sendHold(f, pk, crisis: _crisis);
       return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        MediaRow(glyph: '✉️', title: 'הודעה-אישית', subtitle: _PrData.famLabel(f)),
+        ForgeContactTile(fields: ['הודעה-אישית', _PrData.famLabel(f)]),
         DsEnumField(label: 'משפחה', options: [for (final x in _PrData.scope(_role)) _PrData.famLabel(x)], value: _PrData.famLabel(f), onChanged: (v) => setSheet(() { famId = _PrData.scope(_role).firstWhere((x) => _PrData.famLabel(x) == v)['id'] as String; pk = 'p1'; })),
         DsEnumField(label: 'נמען', options: [for (final k in _PrData.parentKeys(f)) '${_PrData.parent(f, k)['role']}'], value: '${_PrData.parent(f, pk)['role']}', onChanged: (v) => setSheet(() => pk = _PrData.parentKeys(f).firstWhere((k) => _PrData.parent(f, k)['role'] == v))),
         DsEnumField(label: 'ערוץ (ברירת-מחדל: חכם = מה-ההורה-עונה-לו)', options: ['חכם: ${_PrData.channelLabel[_PrData.smartChannel(f, pk)]}', ..._PrData.channelLabel.values], value: channel == null ? 'חכם: ${_PrData.channelLabel[_PrData.smartChannel(f, pk)]}' : _PrData.channelLabel[channel]!, onChanged: (v) => setSheet(() => channel = v.startsWith('חכם') ? null : _PrData.channelLabel.entries.firstWhere((e) => e.value == v).key)),
         DsEnumField(label: 'תבנית', options: ['ללא', for (final d in _PrData.templateList) d['label']!], value: tpl, onChanged: (v) => setSheet(() { tpl = v; if (v != 'ללא') text = _PrData.render(_PrData.templateList.firstWhere((d) => d['label'] == v)['key']!, {'first': '${(f['kids'] as List).first['first']}', 'date': _PrData.today, 'what': 'הטיול השנתי', 'due': '2026-09-10', 'time': '17:30', 'note': '', 'name': '${_PrData.parent(f, pk)['role']}', 'amount': '${_PrData.feesFeed[famId] ?? 0}', 'link': '—', 'absences': '${_PrData.childFeed[(f['kids'] as List).first['sid']]?['absences30'] ?? '—'}', 'avg': '${_PrData.childFeed[(f['kids'] as List).first['sid']]?['avg'] ?? '—'}'}); })),
         DsField(label: 'הודעה (עד $supportMsgMax תווים · ${_PrData.parent(f, pk)['lang'] != 'עברית' ? 'תרגום-אוטו ל${_PrData.parent(f, pk)['lang']} — מקום-שמור' : 'עברית'})', hint: 'תוכן ההודעה…', value: text, onChanged: (v) => setSheet(() => text = v)),
-        if (hold != null) AlertBanner(glyph: hold == 'הורה חסום' ? '🚫' : '⏸', tone: hold == 'הורה חסום' ? 2 : 3, message: hold == 'הורה חסום' ? 'הורה חסום — לא ניתן לשלוח' : 'תוחזק: $hold — תישלח בחלון הבא${_can('pr.crisis') ? ' (או במצב-משבר)' : ''}'),
-        if (_PrData.contactState(famId, pk) != 'ok' && (channel ?? _PrData.smartChannel(f, pk)) != 'email') AlertBanner(glyph: '📵', tone: 2, message: 'קשר-לא-תקין (${_PrData.contactState(famId, pk) == 'none' ? 'טלפון לא-הוזרק' : _PrData.contactWhy(famId, pk)}) — השליחה תיכשל; עדכן-קשר תחילה'),
+        if (hold != null) ForgeSectionPill(fields: [hold == 'הורה חסום' ? 'הורה חסום — לא ניתן לשלוח' : 'תוחזק: $hold — תישלח בחלון הבא${_can('pr.crisis') ? ' (או במצב-משבר)' : ''}', '']),
+        if (_PrData.contactState(famId, pk) != 'ok' && (channel ?? _PrData.smartChannel(f, pk)) != 'email') ForgeSectionPill(fields: ['קשר-לא-תקין (${_PrData.contactState(famId, pk) == 'none' ? 'טלפון לא-הוזרק' : _PrData.contactWhy(famId, pk)}) — השליחה תיכשל; עדכן-קשר תחילה', '']),
         _gap(8),
         _wrap([
-          SoftButton(label: '📤 שלח', tone: 1, onTap: () { final st = _PrData.send(_actor, f, pk, text, channel: channel, crisis: _crisis); setSheet(() => result = st); setState(() {}); }),
-          if (result != null) StatusChip(label: {'sent': '✅ נשלח', 'queued': '⏸ מוחזק לחלון', 'failed': '⚠️ נכשל (קשר)', 'blocked': '🚫 חסום', 'empty': '✋ ריק'}[result]!, tone: result == 'sent' ? 1 : result == 'queued' ? 3 : 2),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { final st = _PrData.send(_actor, f, pk, text, channel: channel, crisis: _crisis); setSheet(() => result = st); setState(() {}); }, child: ForgeSoftButton(fields: ['📤 שלח'])),
+          if (result != null) ForgeIntelPill(fields: [{'sent': '✅ נשלח', 'queued': '⏸ מוחזק לחלון', 'failed': '⚠️ נכשל (קשר)', 'blocked': '🚫 חסום', 'empty': '✋ ריק'}[result]!]),
         ]),
       ]);
     });
@@ -1350,16 +1352,16 @@ class _ParentsScreenState extends State<ParentsScreen> {
     var text = '';
     Map<String, int>? result;
     _sheet((ctx, setSheet) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      MediaRow(glyph: cls ? '🏫' : '🏛', title: cls ? 'הודעה-לכיתה' : 'הודעה-מוסדית', subtitle: cls ? 'כל הורי הכיתה (ללא חסומים)' : 'כל ההורים המורשים'),
+      ForgeContactTile(fields: [cls ? 'הודעה-לכיתה' : 'הודעה-מוסדית', cls ? 'כל הורי הכיתה (ללא חסומים)' : 'כל ההורים המורשים']),
       if (cls) DsEnumField(label: 'כיתה', options: (_PrData.roleDefs[_role]['classes'] as List?)?.cast<String>() ?? _PrData.allClasses, value: target, onChanged: (v) => setSheet(() => target = v)),
       DsField(label: 'הודעה', hint: 'תוכן ההודעה לכולם…', value: text, onChanged: (v) => setSheet(() => text = v)),
       _gap(8),
       _wrap([
-        SoftButton(label: '📤 שדר', tone: 1, onTap: () { final r = _PrData.broadcast(_actor, text, cls: cls ? target : null); setSheet(() => result = r); setState(() {}); }),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { final r = _PrData.broadcast(_actor, text, cls: cls ? target : null); setSheet(() => result = r); setState(() {}); }, child: ForgeSoftButton(fields: ['📤 שדר'])),
         if (result != null) ...[
-          StatusChip(label: '✅ נשלחו ${result!['sent']}', tone: 1),
-          StatusChip(label: '⏸ מוחזקים ${result!['queued']}', tone: 3),
-          StatusChip(label: '⚠️ נכשלו ${result!['failed']}', tone: 2),
+          ForgeIntelPill(fields: ['✅ נשלחו ${result!['sent']}']),
+          ForgeIntelPill(fields: ['⏸ מוחזקים ${result!['queued']}']),
+          ForgeIntelPill(fields: ['⚠️ נכשלו ${result!['failed']}']),
         ],
       ]),
     ]));
@@ -1374,18 +1376,18 @@ class _ParentsScreenState extends State<ParentsScreen> {
     _sheet((ctx, setSheet) {
       final f = _PrData.fam(famId);
       return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        MediaRow(glyph: '📝', title: 'בקשת-אישור', subtitle: _PrData.famLabel(f)),
+        ForgeContactTile(fields: ['בקשת-אישור', _PrData.famLabel(f)]),
         DsEnumField(label: 'משפחה', options: [for (final x in _PrData.scope(_role)) _PrData.famLabel(x)], value: _PrData.famLabel(f), onChanged: (v) => setSheet(() => famId = _PrData.scope(_role).firstWhere((x) => _PrData.famLabel(x) == v)['id'] as String)),
         DsEnumField(label: 'סוג', options: _PrData.consentKind.values.toList(), value: _PrData.consentKind[kind]!, onChanged: (v) => setSheet(() => kind = _PrData.consentKind.entries.firstWhere((e) => e.value == v).key)),
         DsField(label: 'מה', hint: 'למשל: טיול שנתי · גליל', value: title, onChanged: (v) => setSheet(() => title = v)),
         DsDateField(label: 'עד', value: due, onChanged: (v) => setSheet(() => due = v)),
         _gap(8),
-        SoftButton(label: '📤 שלח בקשה', tone: 1, onTap: () {
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
           _PrData.send(_actor, f, _PrData.parentKeys(f).first, _PrData.render('sc.consent', {'what': title, 'due': due, 'first': '${(f['kids'] as List).first['first']}'}), crisis: _crisis);
           _PrData.audit(_actor, 'בקשת-אישור', famId, note: '$title עד $due');
           Navigator.pop(ctx); setState(() {});
-        }),
-        const AlertBanner(glyph: 'ℹ️', tone: 0, message: 'האישור עצמו נרשם כשההורה מחזיר (סמן-התקבל) — חתימה-דיגיטלית = מקום-שמור'),
+        }, child: ForgeSoftButton(fields: ['📤 שלח בקשה'])),
+        const ForgeSectionPill(fields: ['האישור עצמו נרשם כשההורה מחזיר (סמן-התקבל) — חתימה-דיגיטלית = מקום-שמור', '']),
       ]);
     });
   }
@@ -1396,17 +1398,17 @@ class _ParentsScreenState extends State<ParentsScreen> {
     var pri = 'רגילה';
     var sensitive = false;
     _sheet((ctx, setSheet) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      MediaRow(glyph: '📨', title: 'פנייה חדשה', subtitle: _PrData.famLabel(f)),
+      ForgeContactTile(fields: ['פנייה חדשה', _PrData.famLabel(f)]),
       DsField(label: 'נושא', hint: 'תוכן הפנייה…', value: title, onChanged: (v) => setSheet(() => title = v)),
       DsEnumField(label: 'עדיפות', options: const ['דחופה', 'רגילה', 'נמוכה'], value: pri, onChanged: (v) => setSheet(() => pri = v)),
       PremiumToggle(value: sensitive, label: '🔒 פנייה רגישה (יועץ/ת · הנהלה בלבד)', onChanged: (v) => setSheet(() => sensitive = v)),
       _gap(8),
-      SoftButton(label: '➕ פתח', tone: 1, onTap: () {
+      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
         if (title.trim().isEmpty) return;
         _PrData.extraInquiries.add({'id': 'q-${_PrData.log.length + 100}', 'famId': f['id'], 'title': title.trim(), 'pri': pri == 'דחופה' ? 1 : pri == 'רגילה' ? 2 : 3, 'createdAt': _PrData.nowIso(), 'due': _PrData.today, 'doneAt': '', 'answeredAt': '', 'assignee': sensitive ? 'counselor' : _actor, 'sensitive': sensitive, 'ref': {'kind': 'family', 'id': f['id']}});
         _PrData.audit(_actor, 'פתיחת-פנייה', f['id'] as String, note: title.trim());
         Navigator.pop(ctx); setState(() {});
-      }),
+      }, child: ForgeSoftButton(fields: ['➕ פתח'])),
     ]));
   }
 
@@ -1419,18 +1421,18 @@ class _ParentsScreenState extends State<ParentsScreen> {
     _sheet((ctx, setSheet) {
       final f = _PrData.fam(famId);
       return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        MediaRow(glyph: '📅', title: 'קביעת-פגישה', subtitle: _PrData.famLabel(f)),
+        ForgeContactTile(fields: ['קביעת-פגישה', _PrData.famLabel(f)]),
         DsEnumField(label: 'משפחה', options: [for (final x in _PrData.scope(_role)) _PrData.famLabel(x)], value: _PrData.famLabel(f), onChanged: (v) => setSheet(() => famId = _PrData.scope(_role).firstWhere((x) => _PrData.famLabel(x) == v)['id'] as String)),
         DsDateField(label: 'תאריך', value: date, onChanged: (v) => setSheet(() => date = v)),
         DsField(label: 'שעה', hint: 'HH:MM', value: time, onChanged: (v) => setSheet(() => time = v)),
         DsField(label: 'נושא', hint: 'נושא הפגישה', value: title, onChanged: (v) => setSheet(() => title = v)),
         _gap(8),
-        SoftButton(label: '📅 קבע + שלח תזכורת', tone: 1, onTap: () {
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
           _PrData.extraMeetings.add({'id': 'm-${_PrData.log.length + 100}', 'famId': famId, 'kind': 'meeting', 'date': date, 'time': time, 'done': false, 'title': title, 'summarySent': false});
           _PrData.send(_actor, f, _PrData.parentKeys(f).first, _PrData.render('sc.meeting', {'date': date, 'time': time, 'what': title}), crisis: _crisis);
           _PrData.audit(_actor, 'קביעת-פגישה', famId, note: '$title · $date $time');
           Navigator.pop(ctx); setState(() {});
-        }),
+        }, child: ForgeSoftButton(fields: ['📅 קבע + שלח תזכורת'])),
       ]);
     });
   }
@@ -1441,22 +1443,22 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final draft = {for (final pk in _PrData.parentKeys(f)) pk: _PrData.phoneOf(id, pk) ?? ''};
     var email = _PrData.identity[id]?['email'] ?? '';
     _sheet((ctx, setSheet) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      MediaRow(glyph: '📞', title: 'עדכון-קשר', subtitle: '${_PrData.famLabel(f)} · זהות = שקע-הצבה (חוק-6)'),
+      ForgeContactTile(fields: ['עדכון-קשר', '${_PrData.famLabel(f)} · זהות = שקע-הצבה (חוק-6)']),
       for (final pk in _PrData.parentKeys(f)) ...[
         DsField(label: 'טלפון ${_PrData.parent(f, pk)['role']}', hint: '05x-xxxxxxx', value: draft[pk]!, onChanged: (v) => setSheet(() => draft[pk] = v)),
-        if (draft[pk]!.trim().isNotEmpty && phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>()) != null) AlertBanner(glyph: '⚠️', tone: 2, message: phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>())!),
-        if (draft[pk]!.trim().isNotEmpty && phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>()) == null) StatusChip(label: '✅ ${formatIsraeliPhone(draft[pk])} · wa: ${waDigits(draft[pk]) ?? 'לא-שליח'}', tone: waDigits(draft[pk]) == null ? 3 : 1),
+        if (draft[pk]!.trim().isNotEmpty && phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>()) != null) ForgeSectionPill(fields: [phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>())!, '']),
+        if (draft[pk]!.trim().isNotEmpty && phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>()) == null) ForgeIntelPill(fields: ['✅ ${formatIsraeliPhone(draft[pk])} · wa: ${waDigits(draft[pk]) ?? 'לא-שליח'}']),
       ],
       DsField(label: 'מייל', hint: 'כתובת מייל', value: email, onChanged: (v) => setSheet(() => email = v)),
       _gap(8),
-      SoftButton(label: '💾 שמור', tone: 1, onTap: () {
+      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
         final cur = Map<String, String>.from(_PrData.identity[id] ?? {});
         for (final e in draft.entries) { cur['${e.key}Phone'] = e.value.trim(); }
         cur['email'] = email.trim();
         _PrData.identity[id] = cur;
         _PrData.audit(_actor, 'עדכון-קשר', id, note: [for (final pk in draft.keys) '$pk: ${_PrData.contactState(id, pk)}'].join(' · '));
         Navigator.pop(ctx); setState(() {});
-      }),
+      }, child: ForgeSoftButton(fields: ['💾 שמור'])),
     ]));
   }
 
@@ -1465,7 +1467,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final txt = _PrData.render('sc.letter', {'first': _PrData.kidsLabel(f), 'what': 'עדכון להורים', 'note': _PrData.weeklyDigest(f).join('\n')});
     _PrData.audit(_actor, 'הדפסת-מכתב', f['id'] as String);
     _sheet((ctx, setSheet) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      MediaRow(glyph: '🖨', title: 'מכתב להורים', subtitle: _PrData.famLabel(f)),
+      ForgeContactTile(fields: ['מכתב להורים', _PrData.famLabel(f)]),
       _gap(8),
       Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)), child: SelectableText(txt, style: const TextStyle(color: _ink, fontSize: 13, height: 1.6))),
     ]));
@@ -1477,9 +1479,9 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final csv = allowed ? _PrData.csvOfLog() : '';
     _PrData.audit(_actor, 'ייצוא-לוג', '*', status: allowed ? 'ok' : 'blocked');
     _sheet((ctx, setSheet) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      MediaRow(glyph: '⬇', title: 'ייצוא-לוג CSV', subtitle: '${_PrData.log.length} רשומות · ${_PrData._csvHeader.length} עמודות'),
+      ForgeContactTile(fields: ['ייצוא-לוג CSV', '${_PrData.log.length} רשומות · ${_PrData._csvHeader.length} עמודות']),
       _gap(8),
-      if (!allowed) const AlertBanner(message: 'ייצוא חסום (שער-הרשאות)', tone: 2)
+      if (!allowed) const ForgeSectionPill(fields: ['ייצוא חסום (שער-הרשאות)', ''])
       else Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)), child: SelectableText(csv, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6))),
     ]));
   }
@@ -1498,36 +1500,36 @@ class _ParentsScreenState extends State<ParentsScreen> {
       children: [
         Align(alignment: Alignment.centerRight, child: SegmentedSwitch(items: [for (final x in _PrData.roleDefs) x['label'] as String], selected: _role, onSelect: (i) => setState(() => _role = i))),
         _gap(10),
-        if (_PrData.isBlocked(f, pk)) const AlertBanner(glyph: '🚫', tone: 2, message: 'הגישה חסומה — פנה/י למזכירות')
+        if (_PrData.isBlocked(f, pk)) const ForgeSectionPill(fields: ['הגישה חסומה — פנה/י למזכירות', ''])
         else ...[
-          if ((f['custody'] as Map?)?['restricted'] == true) AlertBanner(glyph: '⚖️', tone: 3, message: 'לפי הסדר-הראייה מוצג: ${views.map((v) => _PrData.childViewLabel[v]).join(' · ')}'),
+          if ((f['custody'] as Map?)?['restricted'] == true) ForgeSectionPill(fields: ['לפי הסדר-הראייה מוצג: ${views.map((v) => _PrData.childViewLabel[v]).join(' · ')}', '']),
           _gap(8),
           DsSection(title: 'הילד/ה שלי', children: [
             for (final k in f['kids'] as List)
               Row(children: [
-                BareStat(value: '${(k as Map)['first']}', label: '${k['cls']}', inkColor: _ink, mutedColor: _muted),
-                if (views.contains('attendance')) BareStat(value: '${_PrData.childFeed[k['sid']]?['absences30'] ?? '—'}', label: '📆 חיסורים/30י', inkColor: _ink, mutedColor: _muted),
-                if (views.contains('grades')) BareStat(value: '${_PrData.childFeed[k['sid']]?['avg'] ?? '—'}', label: '📊 ממוצע', inkColor: _ink, mutedColor: _muted),
-                if (views.contains('fees')) BareStat(value: _PrData.feesFeed[id] == null ? '✓' : '₪${_PrData.feesFeed[id]}', label: '💳 חוב', inkColor: _PrData.feesFeed[id] == null ? _ok : _danger, mutedColor: _muted),
+                Expanded(child: ForgeStatPlain(fields: ['${k['cls']}', '${(k as Map)['first']}'])),
+                if (views.contains('attendance')) Expanded(child: ForgeStatPlain(fields: ['📆 חיסורים/30י', '${_PrData.childFeed[k['sid']]?['absences30'] ?? '—'}'])),
+                if (views.contains('grades')) Expanded(child: ForgeStatPlain(fields: ['📊 ממוצע', '${_PrData.childFeed[k['sid']]?['avg'] ?? '—'}'])),
+                if (views.contains('fees')) Expanded(child: ForgeStatPlain(fields: ['💳 חוב', _PrData.feesFeed[id] == null ? '✓' : '₪${_PrData.feesFeed[id]}'])),
               ]),
-            if (views.contains('fees') && _PrData.feesFeed[id] != null) const AlertBanner(glyph: '💳', tone: 0, message: 'תשלום-מהפורטל = מקום-שמור (מאיר כשתחובר סליקה)'),
+            if (views.contains('fees') && _PrData.feesFeed[id] != null) const ForgeSectionPill(fields: ['תשלום-מהפורטל = מקום-שמור (מאיר כשתחובר סליקה)', '']),
           ]),
           DsSection(title: 'הודעות מבית-הספר · ${ms.length}', children: [
-            if (ms.isEmpty) const EmptyState(glyph: '📭', message: 'אין הודעות'),
+            if (ms.isEmpty) const ForgeSearchEmptyState(fields: ['אין הודעות', '']),
             for (final m in ms) Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: PureBubble(text: '${m['text']}', time: '${supportMsgTime('${m['at']}')}', kind: m['from'] == 'user' ? PureBubbleKind.outgoing : PureBubbleKind.incoming)),
             _wrap([
-              SoftButton(label: '👁 סמן: קראתי', tone: 0, onTap: () => setState(() { final t = _PrData.thread(id); if (t != null) _PrData.threadAdj[id] = {...t, 'unreadUser': 0}; })),
-              SoftButton(label: '📨 שלח פנייה', tone: 1, onTap: () => setState(() => _PrData.receive(id, pk, 'פנייה מההורה דרך הפורטל', _PrData.smartChannel(f, pk)))),
+              GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { final t = _PrData.thread(id); if (t != null) _PrData.threadAdj[id] = {...t, 'unreadUser': 0}; }), child: ForgeSoftButton(fields: ['👁 סמן: קראתי'])),
+              GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _PrData.receive(id, pk, 'פנייה מההורה דרך הפורטל', _PrData.smartChannel(f, pk))), child: ForgeSoftButton(fields: ['📨 שלח פנייה'])),
             ]),
           ]),
           DsSection(title: 'אישורים · ${cs.length}', children: [
-            if (cs.isEmpty) const EmptyState(glyph: '📝', message: 'אין בקשות'),
+            if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['אין בקשות', '']),
             for (final c in cs)
               Row(children: [
-                Expanded(child: MediaRow(glyph: '📝', title: '${c['title']}', subtitle: '${_PrData.consentKind[c['kind']]} · עד ${c['due']} · ${_PrData.consentLabel[_PrData.consentState(c)]}')),
-                if (_PrData.consentState(c) == 'pending' || _PrData.consentState(c) == 'expired') SoftButton(label: '✅ מאשר/ת', tone: 1, onTap: () => setState(() { _PrData.consentStatus[c['id'] as String] = 'received'; _PrData.audit('parent:$pk', 'אישור-מהפורטל', id, note: '${c['title']}'); })),
+                Expanded(child: ForgeContactTile(fields: ['${c['title']}', '${_PrData.consentKind[c['kind']]} · עד ${c['due']} · ${_PrData.consentLabel[_PrData.consentState(c)]}'])),
+                if (_PrData.consentState(c) == 'pending' || _PrData.consentState(c) == 'expired') Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _PrData.consentStatus[c['id'] as String] = 'received'; _PrData.audit('parent:$pk', 'אישור-מהפורטל', id, note: '${c['title']}'); }), child: ForgeSoftButton(fields: ['✅ מאשר/ת']))),
               ]),
-            const AlertBanner(glyph: '✍️', tone: 0, message: 'חתימה-דיגיטלית · פורטל-מזוהה · צ׳אט-חי — מקום-שמור'),
+            const ForgeSectionPill(fields: ['חתימה-דיגיטלית · פורטל-מזוהה · צ׳אט-חי — מקום-שמור', '']),
           ]),
         ],
       ],

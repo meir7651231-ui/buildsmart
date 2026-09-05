@@ -1,11 +1,11 @@
 // מחולל ע"י machtzev/generator/app-from-sentences.mjs — בדיקת-ניווט של StudioApp: בית ⇒ כל מודול מרונדר וחוזר, אפס-חריגות
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_studio.dart';
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_course_from_crs_sk139238.dart' show CourseScreen, CourseFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu_sk139238.dart' show MemberScreen, MemberFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_teacher_from_stu_sk139238.dart' show TeacherScreen, TeacherFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopassignment_from_tch_sk139238.dart' show ShopAssignmentScreen, ShopAssignmentFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopcriterion_from_crs_sk139238.dart' show ShopCriterionScreen, ShopCriterionFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee_sk139238.dart' show DonationScreen, DonationFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_course_from_crs_skcfded2.dart' show CourseScreen, CourseFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu_skcfded2.dart' show MemberScreen, MemberFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_teacher_from_stu_skcfded2.dart' show TeacherScreen, TeacherFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopassignment_from_tch_skcfded2.dart' show ShopAssignmentScreen, ShopAssignmentFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopcriterion_from_crs_skcfded2.dart' show ShopCriterionScreen, ShopCriterionFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee_skcfded2.dart' show DonationScreen, DonationFacts;
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/premium/feedback/empty_state.dart';
 import 'package:buildsmart/genesis/dart-forge-bs/card/card.dart';

@@ -1,5 +1,5 @@
-// 🎨 schoolos_fees.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatBlock · navTile=ForgeHubTile · stat=ForgeMetricTile · hero=ForgeStatBlock
-//   החלפות: stat×0 · hero×2 · keptRow×31 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_fees.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile
+//   החלפות: stat×0 · hero×2 · statRow×31 · button×23 · statusChip×15 · banner×23 · emptyState×14 · mediaRow×9 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
 //         מה נגבה, מה חסר ומה בסיכון — בלי לבייש איש."
@@ -82,7 +82,10 @@ import '../dart-data-maor/hok-recorded-this-month-sockets.dart' as skHokRec;
 import '../dart-data-maor/hok-method-label-terms.dart' as tdHokMethod;
 import '../dart-data-maor/tier-of-terms.dart' as tdTier;
 import '../dart-data-maor/overdue-contact-task-drafts-sockets.dart' as skOverdue;
-import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומים-טהורים (חוק-6: צבע=הצבה)
@@ -818,25 +821,25 @@ class _FeesScreenState extends State<FeesScreen> {
         ),
         _gap(10),
         if (!_amounts) ...[
-          const AlertBanner(glyph: '🔒', tone: 3, message: 'נעילת-הרשאה-כספית: תפקיד זה רואה דגל-חוב בלבד — אפס-סכומים, אפס-פרטי-חוב (מגן-כבוד)'),
+          const ForgeSectionPill(fields: ['נעילת-הרשאה-כספית: תפקיד זה רואה דגל-חוב בלבד — אפס-סכומים, אפס-פרטי-חוב (מגן-כבוד)', '']),
           _gap(8),
         ],
         // פס-עליון: חיפוש (DsSearch) · רענון · חיוב-חדש · רישום-תשלום · ייצוא — מגודרים פר-הרשאה
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
           if (_FeesData.can(_role, 'fees.charge')) ...[
             const SizedBox(width: 6),
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ חיוב', tone: 0, onTap: () => _openChargeForm(null, visible))),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openChargeForm(null, visible), child: ForgeSoftButton(fields: ['➕ חיוב']))),
           ],
           if (_FeesData.can(_role, 'fees.pay')) ...[
             const SizedBox(width: 6),
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '💳 תשלום', tone: 1, onTap: () => _openPaymentForm(null, visible))),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openPaymentForm(null, visible), child: ForgeSoftButton(fields: ['💳 תשלום']))),
           ],
           if (_FeesData.exportOk(_role)) ...[
             const SizedBox(width: 6),
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '⬇ CSV', tone: 0, onTap: () => _openExport(visible))),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible), child: ForgeSoftButton(fields: ['⬇ CSV']))),
           ],
         ]),
         // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"
@@ -874,7 +877,7 @@ class _FeesScreenState extends State<FeesScreen> {
         if (!_amounts)
           GradientCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatBlock(fields: ['משפחות עם דגל-חוב מתוך ${all.length}', '$inDebt', ''])),
+              ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['משפחות עם דגל-חוב מתוך ${all.length}', '$inDebt'])),
               const SizedBox(height: 8),
               const Text('פרטים וסכומים = גזברות בלבד. לתיאום: לפנות לגזבר/ת, לא לתלמיד.', style: TextStyle(color: _muted, fontSize: 12.5)),
             ]),
@@ -882,54 +885,54 @@ class _FeesScreenState extends State<FeesScreen> {
         else
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatBlock(fields: ['יתרה פתוחה · $inDebt משפחות בחוב', _m(kOpen), ''])),
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['יתרה פתוחה · $inDebt משפחות בחוב', _m(kOpen)])),
             const SizedBox(height: 12),
             StatRow(label: 'אחוז-גבייה (שולם מתוך חיובים)', value: '$kPct%', fraction: kPct / 100),
             const SizedBox(height: 12),
             Row(children: [
-              BareStat(value: _m(kCharged), label: '🧾 סך-חיובים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: _m(kPaid), label: '✅ נגבה', inkColor: _ok, mutedColor: _muted),
-              BareStat(value: _m(kOpen), label: '💸 יתרה-פתוחה', inkColor: kOpen > 0 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: '$kPct%', label: '📈 אחוז-גבייה', inkColor: kPct >= 80 ? _ok : _warning, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: ['🧾 סך-חיובים', _m(kCharged)])),
+              Expanded(child: ForgeStatPlain(fields: ['✅ נגבה', _m(kPaid)])),
+              Expanded(child: ForgeStatPlain(fields: ['💸 יתרה-פתוחה', _m(kOpen)])),
+              Expanded(child: ForgeStatPlain(fields: ['📈 אחוז-גבייה', '$kPct%'])),
             ]),
             const SizedBox(height: 12),
             Row(children: [
-              BareStat(value: '$inDebt', label: '👨‍👩‍👧 משפחות-בחוב', inkColor: inDebt > 0 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: _m(kOld), label: '⏰ חוב-ותיק >${_FeesData.oldDebtDays}י׳ · $oldN', inkColor: kOld > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: _m(kExp), label: '📅 צפוי-החודש', inkColor: _acc, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: ['👨‍👩‍👧 משפחות-בחוב', '$inDebt'])),
+              Expanded(child: ForgeStatPlain(fields: ['⏰ חוב-ותיק >${_FeesData.oldDebtDays}י׳ · $oldN', _m(kOld)])),
+              Expanded(child: ForgeStatPlain(fields: ['📅 צפוי-החודש', _m(kExp)])),
             ]),
             const SizedBox(height: 12),
             Row(children: [
-              BareStat(value: '$kHok', label: '💳 הו״ק-פעילות', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: _m(kSch), label: '🎓 מלגות/הנחות', inkColor: _acc, mutedColor: _muted),
-              BareStat(value: '$kRem', label: '🔔 תזכורות-החודש', inkColor: _ink, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: ['💳 הו״ק-פעילות', '$kHok'])),
+              Expanded(child: ForgeStatPlain(fields: ['🎓 מלגות/הנחות', _m(kSch)])),
+              Expanded(child: ForgeStatPlain(fields: ['🔔 תזכורות-החודש', '$kRem'])),
             ]),
           ]),
         ),
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): הו״ק-נכשלה · הסדר-בפיגור · חיוב-כפול · הו״ק-לרישום · מעקב-שעבר-מועד · חוב-לפני-טיול
         if (failed.isNotEmpty && _amounts) ...[
-          AlertBanner(glyph: '⚠️', tone: 2, message: '${failed.length} הו״ק נכשלה (הסליקה פסקה >2 חודשים) — התרעה + ניסיון-חוזר: ${failed.map((f) => f['name']).join(' · ')}'),
+          ForgeSectionPill(fields: ['${failed.length} הו״ק נכשלה (הסליקה פסקה >2 חודשים) — התרעה + ניסיון-חוזר: ${failed.map((f) => f['name']).join(' · ')}', '']),
           _gap(8),
         ],
         if (late.isNotEmpty && _amounts) ...[
-          AlertBanner(glyph: '📆', tone: 3, message: '${late.length} הסדר-בפיגור: ${late.map((f) => f['name']).join(' · ')}'),
+          ForgeSectionPill(fields: ['${late.length} הסדר-בפיגור: ${late.map((f) => f['name']).join(' · ')}', '']),
           _gap(8),
         ],
         if (dups.isNotEmpty && _amounts) ...[
-          AlertBanner(glyph: '👯', tone: 3, message: 'חיוב-כפול-חשוד (אותו סוג·סכום·תאריך·תלמיד): ${dups.map((f) => '${f['name']} (${_FeesData.duplicateCharges(f).map((c) => c['cat']).join(',')})').join(' · ')}'),
+          ForgeSectionPill(fields: ['חיוב-כפול-חשוד (אותו סוג·סכום·תאריך·תלמיד): ${dups.map((f) => '${f['name']} (${_FeesData.duplicateCharges(f).map((c) => c['cat']).join(',')})').join(' · ')}', '']),
           _gap(8),
         ],
         if (tripDebt.isNotEmpty && _amounts) ...[
-          AlertBanner(glyph: '🚌', tone: 0, message: 'חוב לפני-טיול (התרעה-מוקדמת, לא-מניעה): ${tripDebt.map((f) => f['name']).join(' · ')}'),
+          ForgeSectionPill(fields: ['חוב לפני-טיול (התרעה-מוקדמת, לא-מניעה): ${tripDebt.map((f) => f['name']).join(' · ')}', '']),
           _gap(8),
         ],
         if (follow.isNotEmpty && _FeesData.can(_role, 'fees.remind')) ...[
-          AlertBanner(glyph: '📞', tone: 0, message: 'מעקב שעבר-מועד: ${follow.map((t) => t['title']).join(' · ')}'),
+          ForgeSectionPill(fields: ['מעקב שעבר-מועד: ${follow.map((t) => t['title']).join(' · ')}', '']),
           _gap(8),
         ],
         if (hokDue.isNotEmpty && _FeesData.can(_role, 'fees.hok')) ...[
-          AlertBanner(glyph: '💳', tone: 0, message: '${hokDue.length} הו״ק לרישום החודש (${_m(_FeesData.hokExpected(all))}) — ראה מבט הו״ק'),
+          ForgeSectionPill(fields: ['${hokDue.length} הו״ק לרישום החודש (${_m(_FeesData.hokExpected(all))}) — ראה מבט הו״ק', '']),
           _gap(8),
         ],
         // בורר-מבט (SegmentedSwitch מבוקר)
@@ -943,7 +946,7 @@ class _FeesScreenState extends State<FeesScreen> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          AlertBanner(glyph: '⚠️', tone: 2, message: _error!)
+          ForgeSectionPill(fields: [_error!, ''])
         else if (_mode == 2 && _amounts)
           _hokView(all, hokDue)
         else if (_mode == 3 && _amounts)
@@ -953,9 +956,9 @@ class _FeesScreenState extends State<FeesScreen> {
         else if (_mode == 5 && _amounts)
           _auditView()
         else if (all.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '📭', message: 'אין משפחות/חיובים — התחל בחיוב-שנה'))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין משפחות/חיובים — התחל בחיוב-שנה', '']))
         else if (visible.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין משפחות תואמות לחיפוש/סינון'))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין משפחות תואמות לחיפוש/סינון', '']))
         else if (_mode == 1 && _amounts)
           _table(visible)
         else
@@ -1017,7 +1020,7 @@ class _FeesScreenState extends State<FeesScreen> {
       child: GradientCard(
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
-            Expanded(child: MediaRow(glyph: '👨‍👩‍👧', title: f['name'] as String, subtitle: '${_FeesData.studentsOf(f)} · ${_FeesData.gradesOf(f)}')),
+            Expanded(child: ForgeContactTile(fields: [f['name'] as String, '${_FeesData.studentsOf(f)} · ${_FeesData.gradesOf(f)}'])),
             IconButton(onPressed: () => _openPanel(f), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פאנל משפחה'),
           ]),
           _gap(8),
@@ -1025,18 +1028,18 @@ class _FeesScreenState extends State<FeesScreen> {
             StatRow(label: 'שולם מתוך חיובים', value: '${shekel(paid)} / ${shekel(charged)}', fraction: charged == 0 ? (paid > 0 ? 1 : 0) : paid / charged),
             _gap(8),
             Row(children: [
-              BareStat(value: shekel(charged), label: 'חיובים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: shekel(paid), label: 'שולם', inkColor: _ok, mutedColor: _muted),
-              BareStat(value: shekel(bal), label: bal > 0 ? '= יתרה · ${_FeesData.agingDays(f)} י׳' : '= יתרה', inkColor: balColor, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: ['חיובים', shekel(charged)])),
+              Expanded(child: ForgeStatPlain(fields: ['שולם', shekel(paid)])),
+              Expanded(child: ForgeStatPlain(fields: [bal > 0 ? '= יתרה · ${_FeesData.agingDays(f)} י׳' : '= יתרה', shekel(bal)])),
             ]),
           ] else
             Row(children: [
-              BareStat(value: bal > 0 ? '🚩' : '✅', label: bal > 0 ? 'דגל-חוב (ללא-סכום)' : 'תקין', inkColor: bal > 0 ? _warning : _ok, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: [bal > 0 ? 'דגל-חוב (ללא-סכום)' : 'תקין', bal > 0 ? '🚩' : '✅'])),
             ]),
           if (_amounts) ...[
             _wrap(_facts(f)),
             _gap(8),
-            AlertBanner(glyph: act['glyph'] as String, tone: act['tone'] as int, message: act['text'] as String),
+            ForgeSectionPill(fields: [act['text'] as String, '']),
           ],
         ]),
       ),
@@ -1047,13 +1050,13 @@ class _FeesScreenState extends State<FeesScreen> {
   List<Widget> _facts(Map<String, dynamic> f) {
     final r = _FeesData.risk(f);
     return [
-      StatusChip(label: _FeesData.statusOf(f), tone: _FeesData.statusOf(f) == 'תקין' || _FeesData.statusOf(f) == 'מלגה-מלאה' ? 1 : _FeesData.statusOf(f).contains('פיגור') ? 2 : 3),
-      if (_FeesData.hasHok(f)) StatusChip(label: _FeesData.hokFlag(f) ? (_FeesData.hokActive(f) ? '💳 הו״ק ${_amounts ? shekel((f['hok'] as Map)['amount'] as num) : ''} · יום ${(f['hok'] as Map)['day']}' : '⚠️ הו״ק נכשלה') : '⏸ הו״ק מופסקת', tone: _FeesData.hokFailed(f) ? 2 : _FeesData.hokFlag(f) ? 1 : 0),
-      if (_FeesData.discountLabel(f).isNotEmpty) StatusChip(label: '🎓 ${_FeesData.discountLabel(f)}', tone: 0),
-      if (_FeesData.remindersSent(f).isNotEmpty) StatusChip(label: '🔔 ${_FeesData.remindersSent(f).length} תזכורות', tone: _FeesData.remindersSent(f).length > 2 ? 3 : 0),
-      if (_FeesData.balance(f) > 0) StatusChip(label: 'סיכון ${_FeesData.riskLabel(r)} · ${_FeesData.tierLabel(f)}', tone: r == 2 ? 2 : r == 1 ? 3 : 1),
-      if (_FeesData.lastMethod(f).isNotEmpty) StatusChip(label: '${_FeesData.lastMethod(f)} · ${fmtDate(_FeesData.lastPaymentDate(f))}', tone: 0),
-      if (f['nextNote'] != null) StatusChip(label: '📝 ${f['nextNote']}', tone: 0),
+      ForgeIntelPill(fields: [_FeesData.statusOf(f)]),
+      if (_FeesData.hasHok(f)) ForgeIntelPill(fields: [_FeesData.hokFlag(f) ? (_FeesData.hokActive(f) ? '💳 הו״ק ${_amounts ? shekel((f['hok'] as Map)['amount'] as num) : ''} · יום ${(f['hok'] as Map)['day']}' : '⚠️ הו״ק נכשלה') : '⏸ הו״ק מופסקת']),
+      if (_FeesData.discountLabel(f).isNotEmpty) ForgeIntelPill(fields: ['🎓 ${_FeesData.discountLabel(f)}']),
+      if (_FeesData.remindersSent(f).isNotEmpty) ForgeIntelPill(fields: ['🔔 ${_FeesData.remindersSent(f).length} תזכורות']),
+      if (_FeesData.balance(f) > 0) ForgeIntelPill(fields: ['סיכון ${_FeesData.riskLabel(r)} · ${_FeesData.tierLabel(f)}']),
+      if (_FeesData.lastMethod(f).isNotEmpty) ForgeIntelPill(fields: ['${_FeesData.lastMethod(f)} · ${fmtDate(_FeesData.lastPaymentDate(f))}']),
+      if (f['nextNote'] != null) ForgeIntelPill(fields: ['📝 ${f['nextNote']}']),
     ];
   }
 
@@ -1063,7 +1066,7 @@ class _FeesScreenState extends State<FeesScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       DsSection(title: '💳 הו״ק לרישום החודש · ${due.length} · ${_m(_FeesData.hokExpected(all))}', tone: 0, children: [
         if (due.isEmpty)
-          const EmptyState(glyph: '✅', message: 'כל ההו״ק הפעילות נרשמו החודש')
+          const ForgeSearchEmptyState(fields: ['כל ההו״ק הפעילות נרשמו החודש', ''])
         else ...[
           for (final f in due)
             TimelineItem(title: '${f['name']} · יום ${(f['hok'] as Map)['day']}', time: _FeesData.hokMethod(f), body: '${_m((f['hok'] as Map)['amount'] as num)} — טרם נרשם החודש'),
@@ -1071,12 +1074,12 @@ class _FeesScreenState extends State<FeesScreen> {
             _gap(8),
             // אישור-דו-שלבי: שלב-1 חימוש (הצגת-סיכום) · שלב-2 ביצוע (SoftButton danger) · ביטול
             if (!_hokArmed)
-              _wrap([SoftButton(label: '🧾 רישום-הו״ק-חודשי-מרוכז', tone: 0, onTap: () => setState(() => _hokArmed = true))], top: 0)
+              _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _hokArmed = true), child: ForgeSoftButton(fields: ['🧾 רישום-הו״ק-חודשי-מרוכז']))], top: 0)
             else ...[
-              AlertBanner(glyph: '⚠️', tone: 3, message: 'שלב 2/2: יירשמו ${due.length} תשלומי-הו״ק בסך ${_m(_FeesData.hokExpected(all))} (${due.map((f) => f['name']).join(' · ')}). לאשר?'),
+              ForgeSectionPill(fields: ['שלב 2/2: יירשמו ${due.length} תשלומי-הו״ק בסך ${_m(_FeesData.hokExpected(all))} (${due.map((f) => f['name']).join(' · ')}). לאשר?', '']),
               _wrap([
-                SoftButton(label: '✅ אשר ורשום ${due.length}', tone: 2, onTap: () => setState(() { _FeesData.runHokBatch(all, _roleName); _hokArmed = false; })),
-                SoftButton(label: 'בטל', tone: 0, onTap: () => setState(() => _hokArmed = false)),
+                GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _FeesData.runHokBatch(all, _roleName); _hokArmed = false; }), child: ForgeSoftButton(fields: ['✅ אשר ורשום ${due.length}'])),
+                GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _hokArmed = false), child: ForgeSoftButton(fields: ['בטל'])),
               ], top: 8),
             ],
           ],
@@ -1089,15 +1092,15 @@ class _FeesScreenState extends State<FeesScreen> {
             child: Row(children: [
               StatusDot(tone: _FeesData.hokFailed(f) ? 2 : _FeesData.hokFlag(f) ? 1 : 3),
               const SizedBox(width: 10),
-              Expanded(child: MediaRow(glyph: '💳', title: f['name'] as String, subtitle: '${_m((f['hok'] as Map)['amount'] as num)} · יום ${(f['hok'] as Map)['day']} · ${_FeesData.hokMethod(f)} · מ-${fmtDate((f['hok'] as Map)['startedAt'] as String?)}')),
-              StatusChip(label: _FeesData.hokFailed(f) ? 'נכשלה' : _FeesData.hokFlag(f) ? (_FeesData.hokRecorded(f) ? 'נרשמה החודש' : 'ממתינה') : 'מופסקת', tone: _FeesData.hokFailed(f) ? 2 : _FeesData.hokFlag(f) ? 1 : 0),
+              Expanded(child: ForgeContactTile(fields: [f['name'] as String, '${_m((f['hok'] as Map)['amount'] as num)} · יום ${(f['hok'] as Map)['day']} · ${_FeesData.hokMethod(f)} · מ-${fmtDate((f['hok'] as Map)['startedAt'] as String?)}'])),
+              Flexible(child: ForgeIntelPill(fields: [_FeesData.hokFailed(f) ? 'נכשלה' : _FeesData.hokFlag(f) ? (_FeesData.hokRecorded(f) ? 'נרשמה החודש' : 'ממתינה') : 'מופסקת'])),
               if (_FeesData.can(_role, 'fees.hok')) ...[
                 const SizedBox(width: 8),
-                SoftButton(label: _FeesData.hokFlag(f) ? '⏸ הפסק' : '▶ הפעל', tone: _FeesData.hokFlag(f) ? 2 : 1, onTap: () => setState(() => _FeesData.toggleHok(f, _roleName))),
+                GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _FeesData.toggleHok(f, _roleName)), child: ForgeSoftButton(fields: [_FeesData.hokFlag(f) ? '⏸ הפסק' : '▶ הפעל'])),
               ],
             ]),
           ),
-        if (withHok.isEmpty) const EmptyState(glyph: '💳', message: 'אין הוראות-קבע'),
+        if (withHok.isEmpty) const ForgeSearchEmptyState(fields: ['אין הוראות-קבע', '']),
       ]),
     ]);
   }
@@ -1107,16 +1110,16 @@ class _FeesScreenState extends State<FeesScreen> {
     final due = fs.where((f) => _FeesData.nextReminder(f) != null).toList();
     final sentAll = [for (final f in fs) for (final c in _FeesData.remindersSent(f)) {'f': f, 'c': c}]..sort((a, b) => '${(b['c'] as Map)['at']}'.compareTo('${(a['c'] as Map)['at']}'));
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const AlertBanner(glyph: '🛡', tone: 1, message: 'מגן-כבוד: תזכורות פרטיות בלבד · אין תזכורת פומבית · אין חסימת-תלמיד · מלגה-מלאה = אפס-תזכורות'),
+      const ForgeSectionPill(fields: ['מגן-כבוד: תזכורות פרטיות בלבד · אין תזכורת פומבית · אין חסימת-תלמיד · מלגה-מלאה = אפס-תזכורות', '']),
       _gap(8),
       DsSection(title: '🔔 מועד-תזכורת הגיע · ${due.length}', tone: due.isEmpty ? 1 : 3, children: [
         if (due.isEmpty)
-          const EmptyState(glyph: '🕊', message: 'אין תזכורות שמועדן הגיע')
+          const ForgeSearchEmptyState(fields: ['אין תזכורות שמועדן הגיע', ''])
         else
           for (final f in due) _reminderCard(f),
       ]),
       DsSection(title: '📜 היסטוריית-תזכורות · ${sentAll.length}', children: [
-        if (sentAll.isEmpty) const EmptyState(glyph: '📭', message: 'טרם נשלחו תזכורות') else
+        if (sentAll.isEmpty) const ForgeSearchEmptyState(fields: ['טרם נשלחו תזכורות', '']) else
           for (final x in sentAll)
             TimelineItem(title: '${(x['f'] as Map)['name']} · ${(x['c'] as Map)['grade'] ?? 'תזכורת'}', time: fmtDate((x['c'] as Map)['at'] as String?), body: 'נשלחה בפרטיות'),
       ]),
@@ -1130,8 +1133,8 @@ class _FeesScreenState extends State<FeesScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        MediaRow(glyph: '🔔', title: '${f['name']} · דרגה: $grade', subtitle: 'יתרה ${_m(_FeesData.balance(f))} · ותק ${_FeesData.agingDays(f)} י׳ · נשלחו ${_FeesData.remindersSent(f).length}'),
-        _wrap([for (final p in plan) StatusChip(label: '${p['grade']} · ${fmtDate(p['date'] as String?)}', tone: p['grade'] == grade ? 3 : 0)]),
+        ForgeContactTile(fields: ['${f['name']} · דרגה: $grade', 'יתרה ${_m(_FeesData.balance(f))} · ותק ${_FeesData.agingDays(f)} י׳ · נשלחו ${_FeesData.remindersSent(f).length}']),
+        _wrap([for (final p in plan) ForgeIntelPill(fields: ['${p['grade']} · ${fmtDate(p['date'] as String?)}'])]),
         if (_amounts) ...[
           _gap(6),
           Container(
@@ -1141,7 +1144,7 @@ class _FeesScreenState extends State<FeesScreen> {
           ),
         ],
         if (_FeesData.can(_role, 'fees.remind'))
-          _wrap([SoftButton(label: '📨 שלח תזכורת $grade (פרטי)', tone: 3, onTap: () => setState(() => _FeesData.sendReminder(f, _roleName, grade)))], top: 8),
+          _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _FeesData.sendReminder(f, _roleName, grade)), child: ForgeSoftButton(fields: ['📨 שלח תזכורת $grade (פרטי)']))], top: 8),
       ]),
     );
   }
@@ -1169,19 +1172,19 @@ class _FeesScreenState extends State<FeesScreen> {
       _gap(10),
       DsSection(title: '🗓 דוח-גזבר שבועי · מ-${fmtDate(weekAgo)} עד ${fmtDate(_FeesData.today)}', children: [
         Row(children: [
-          BareStat(value: _m(weekPaid), label: 'נגבה השבוע', inkColor: _ok, mutedColor: _muted),
-          BareStat(value: '$weekRem', label: 'תזכורות השבוע', inkColor: _ink, mutedColor: _muted),
-          BareStat(value: '${all.where(_FeesData.hokFailed).length}', label: 'הו״ק נכשלו', inkColor: all.any(_FeesData.hokFailed) ? _danger : _ok, mutedColor: _muted),
-          BareStat(value: '${all.where(_FeesData.oldDebt).length}', label: 'חוב-ותיק', inkColor: all.any(_FeesData.oldDebt) ? _danger : _ok, mutedColor: _muted),
+          Expanded(child: ForgeStatPlain(fields: ['נגבה השבוע', _m(weekPaid)])),
+          Expanded(child: ForgeStatPlain(fields: ['תזכורות השבוע', '$weekRem'])),
+          Expanded(child: ForgeStatPlain(fields: ['הו״ק נכשלו', '${all.where(_FeesData.hokFailed).length}'])),
+          Expanded(child: ForgeStatPlain(fields: ['חוב-ותיק', '${all.where(_FeesData.oldDebt).length}'])),
         ]),
       ]),
       DsSection(title: '🏁 סוף-שנה · סגירת-חשבונות', children: [
         Row(children: [
-          BareStat(value: '${all.where((f) => _FeesData.balance(f) <= 0).length}/${all.length}', label: 'משפחות סגורות', inkColor: _ink, mutedColor: _muted),
-          BareStat(value: _m(_FeesData.kOpen(all)), label: 'יתרה להעברה (carryBalance)', inkColor: _FeesData.kOpen(all) > 0 ? _warning : _ok, mutedColor: _muted),
-          BareStat(value: _m(grandTotal(all, (f) => _FeesData.credit(f as Map<String, dynamic>))), label: 'זכויות להחזר', inkColor: _acc, mutedColor: _muted),
+          Expanded(child: ForgeStatPlain(fields: ['משפחות סגורות', '${all.where((f) => _FeesData.balance(f) <= 0).length}/${all.length}'])),
+          Expanded(child: ForgeStatPlain(fields: ['יתרה להעברה (carryBalance)', _m(_FeesData.kOpen(all))])),
+          Expanded(child: ForgeStatPlain(fields: ['זכויות להחזר', _m(grandTotal(all, (f) => _FeesData.credit(f as Map<String, dynamic>)))])),
         ]),
-        const AlertBanner(glyph: '🔒', tone: 0, message: 'סגירת-שנה = העברת-יתרות ל-carryBalance של השנה-הבאה (מקום-שמור: פעולת-סוף-שנה נעולה עד אישור-הנהלה)'),
+        const ForgeSectionPill(fields: ['סגירת-שנה = העברת-יתרות ל-carryBalance של השנה-הבאה (מקום-שמור: פעולת-סוף-שנה נעולה עד אישור-הנהלה)', '']),
       ]),
       // מקום-שמור: התאמת-תשלומים-נכנסים (matching · strongMatchForCharge) — השער-החיצוני יזין את הרשימה
       DsSection(title: '🔗 התאמת-תשלומים-נכנסים לחיוב (שער-חיצוני · מקום-שמור)', children: [
@@ -1197,7 +1200,7 @@ class _FeesScreenState extends State<FeesScreen> {
   // ═══ 🧾 אודיט: כל פעולה (מי·מה·מתי) — TimelineItem ═══
   Widget _auditView() => DsSection(title: '🧾 יומן-אודיט · ${_FeesData.audit.length}', children: [
         if (_FeesData.audit.isEmpty)
-          const EmptyState(glyph: '🧾', message: 'אין פעולות עדיין — כל חיוב/תשלום/ביטול/הנחה/תזכורת יירשם כאן')
+          const ForgeSearchEmptyState(fields: ['אין פעולות עדיין — כל חיוב/תשלום/ביטול/הנחה/תזכורת יירשם כאן', ''])
         else
           for (final a in _FeesData.audit)
             TimelineItem(title: '${a['role']} · ${a['family'] == '*' ? 'כלל-המערכת' : _FeesData.families.firstWhere((f) => f['id'] == a['family'], orElse: () => const {'name': '?'})['name']}', time: fmtDate(a['date'] as String?), body: a['what'] as String),
@@ -1213,9 +1216,9 @@ class _FeesScreenState extends State<FeesScreen> {
           padding: const EdgeInsets.all(12),
           child: GlassCard(
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              MediaRow(glyph: '👨‍👩‍👧', title: f['name'] as String, subtitle: '${_FeesData.studentsOf(f)} · ${_FeesData.gradesOf(f)}'),
+              ForgeContactTile(fields: [f['name'] as String, '${_FeesData.studentsOf(f)} · ${_FeesData.gradesOf(f)}']),
               _gap(10),
-              AlertBanner(glyph: _FeesData.balance(f) > 0 ? '🚩' : '✅', tone: _FeesData.balance(f) > 0 ? 3 : 1, message: _FeesData.balance(f) > 0 ? 'דגל-חוב — פרטים וסכומים בגזברות בלבד. לא לפנות לתלמיד/ה (מגן-כבוד).' : 'תקין — אין דגל-חוב'),
+              ForgeSectionPill(fields: [_FeesData.balance(f) > 0 ? 'דגל-חוב — פרטים וסכומים בגזברות בלבד. לא לפנות לתלמיד/ה (מגן-כבוד).' : 'תקין — אין דגל-חוב', '']),
             ]),
           ),
         ),
@@ -1235,16 +1238,16 @@ class _FeesScreenState extends State<FeesScreen> {
             padding: const EdgeInsets.all(12),
             child: GlassCard(
               child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                MediaRow(glyph: '👨‍👩‍👧', title: f['name'] as String, subtitle: '${f['payer']} · ${f['phone']} · ${_FeesData.studentsOf(f)} (${_FeesData.gradesOf(f)})'),
+                ForgeContactTile(fields: [f['name'] as String, '${f['payer']} · ${f['phone']} · ${_FeesData.studentsOf(f)} (${_FeesData.gradesOf(f)})']),
                 _gap(10),
                 Row(children: [
-                  BareStat(value: _m(bal), label: bal > 0 ? 'יתרה · ותק ${_FeesData.agingDays(f)} י׳' : 'יתרה', inkColor: balColor, mutedColor: _muted),
-                  BareStat(value: _m(charged), label: 'חיובים', inkColor: _ink, mutedColor: _muted),
-                  BareStat(value: _m(paid), label: 'שולם', inkColor: _ok, mutedColor: _muted),
-                  if (_FeesData.credit(f) > 0) BareStat(value: _m(_FeesData.credit(f)), label: 'זכות', inkColor: _acc, mutedColor: _muted),
+                  Expanded(child: ForgeStatPlain(fields: [bal > 0 ? 'יתרה · ותק ${_FeesData.agingDays(f)} י׳' : 'יתרה', _m(bal)])),
+                  Expanded(child: ForgeStatPlain(fields: ['חיובים', _m(charged)])),
+                  Expanded(child: ForgeStatPlain(fields: ['שולם', _m(paid)])),
+                  if (_FeesData.credit(f) > 0) Expanded(child: ForgeStatPlain(fields: ['זכות', _m(_FeesData.credit(f))])),
                 ]),
                 _gap(8),
-                AlertBanner(glyph: actn['glyph'] as String, tone: actn['tone'] as int, message: 'הפעולה-הנכונה: ${actn['text']}'),
+                ForgeSectionPill(fields: ['הפעולה-הנכונה: ${actn['text']}', '']),
                 _gap(10),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -1267,21 +1270,21 @@ class _FeesScreenState extends State<FeesScreen> {
                 _gap(8),
                 Builder(builder: (_) {
                   final acts = <Widget>[
-                    if (_FeesData.can(_role, 'fees.charge')) SoftButton(label: '➕ חיוב', tone: 0, onTap: () => _openChargeForm(f, [f], onDone: () => setSheet(() {}))),
-                    if (_FeesData.can(_role, 'fees.pay')) SoftButton(label: '💳 רשום תשלום', tone: 1, onTap: () => _openPaymentForm(f, [f], onDone: () => setSheet(() {}))),
-                    if (_FeesData.can(_role, 'fees.pay') && bal > 0) SoftButton(label: '➗ תשלום-חלקי (½)', tone: 1, onTap: () => act(() => _FeesData.addPayment(f, _roleName, amount: (bal / 2).ceil(), method: 'מזומן', date: _FeesData.today, note: 'תשלום-חלקי'))),
-                    if (_FeesData.can(_role, 'fees.remind') && _FeesData.nextReminder(f) != null) SoftButton(label: '📨 תזכורת ${_FeesData.nextReminder(f)!['grade']}', tone: 3, onTap: () => act(() => _FeesData.sendReminder(f, _roleName, _FeesData.nextReminder(f)!['grade'] as String))),
-                    if (_FeesData.can(_role, 'fees.arrangement') && bal > 0 && !_FeesData.hasArrangement(f)) SoftButton(label: '📆 הסדר 3 תשלומים', tone: 0, onTap: () => act(() => _FeesData.setArrangement(f, _roleName, 3))),
-                    if (_FeesData.can(_role, 'fees.hok') && _FeesData.hasHok(f)) SoftButton(label: _FeesData.hokFlag(f) ? '⏸ הפסק הו״ק' : '▶ הפעל הו״ק', tone: _FeesData.hokFlag(f) ? 2 : 1, onTap: () => act(() => _FeesData.toggleHok(f, _roleName))),
-                    if (_FeesData.can(_role, 'fees.writeoff') && bal > 0 && _FeesData.oldDebt(f)) SoftButton(label: '🗂 סמן חוב-אבוד', tone: 2, onTap: () => act(() => _FeesData.writeOff(f, _roleName))),
-                    if (_FeesData.can(_role, 'fees.refund') && _FeesData.credit(f) > 0) SoftButton(label: '💸 החזר-זכות ${_m(_FeesData.credit(f))}', tone: 1, onTap: () => act(() => _FeesData.refund(f, _roleName))),
+                    if (_FeesData.can(_role, 'fees.charge')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openChargeForm(f, [f], onDone: () => setSheet(() {})), child: ForgeSoftButton(fields: ['➕ חיוב'])),
+                    if (_FeesData.can(_role, 'fees.pay')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openPaymentForm(f, [f], onDone: () => setSheet(() {})), child: ForgeSoftButton(fields: ['💳 רשום תשלום'])),
+                    if (_FeesData.can(_role, 'fees.pay') && bal > 0) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.addPayment(f, _roleName, amount: (bal / 2).ceil(), method: 'מזומן', date: _FeesData.today, note: 'תשלום-חלקי')), child: ForgeSoftButton(fields: ['➗ תשלום-חלקי (½)'])),
+                    if (_FeesData.can(_role, 'fees.remind') && _FeesData.nextReminder(f) != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.sendReminder(f, _roleName, _FeesData.nextReminder(f)!['grade'] as String)), child: ForgeSoftButton(fields: ['📨 תזכורת ${_FeesData.nextReminder(f)!['grade']}'])),
+                    if (_FeesData.can(_role, 'fees.arrangement') && bal > 0 && !_FeesData.hasArrangement(f)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.setArrangement(f, _roleName, 3)), child: ForgeSoftButton(fields: ['📆 הסדר 3 תשלומים'])),
+                    if (_FeesData.can(_role, 'fees.hok') && _FeesData.hasHok(f)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.toggleHok(f, _roleName)), child: ForgeSoftButton(fields: [_FeesData.hokFlag(f) ? '⏸ הפסק הו״ק' : '▶ הפעל הו״ק'])),
+                    if (_FeesData.can(_role, 'fees.writeoff') && bal > 0 && _FeesData.oldDebt(f)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.writeOff(f, _roleName)), child: ForgeSoftButton(fields: ['🗂 סמן חוב-אבוד'])),
+                    if (_FeesData.can(_role, 'fees.refund') && _FeesData.credit(f) > 0) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.refund(f, _roleName)), child: ForgeSoftButton(fields: ['💸 החזר-זכות ${_m(_FeesData.credit(f))}'])),
                     if ((_FeesData.can(_role, 'fees.pay') || _FeesData.can(_role, 'fees.self')) && bal > 0)
                       // שער-חיצוני (מקום-שמור): payLink מחזיר null כש-payUrl ריק ⇒ הכפתור שמור, לא מזייף קישור
-                      SoftButton(label: _FeesData.payLinkOf(f) == null ? '🔗 קישור-תשלום (שער לא-מוגדר)' : '🔗 שלח קישור-תשלום', tone: 0, onTap: _FeesData.payLinkOf(f) == null ? null : () {}),
-                    SoftButton(label: '🖨 מצב-חשבון', tone: 0, onTap: () => setSheet(() => tab = 7)),
+                      GestureDetector(behavior: HitTestBehavior.opaque, onTap: _FeesData.payLinkOf(f) == null ? null : () {}, child: ForgeSoftButton(fields: [_FeesData.payLinkOf(f) == null ? '🔗 קישור-תשלום (שער לא-מוגדר)' : '🔗 שלח קישור-תשלום'])),
+                    GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setSheet(() => tab = 7), child: ForgeSoftButton(fields: ['🖨 מצב-חשבון'])),
                   ];
                   return acts.isEmpty
-                      ? const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה', glyph: '🔒', tone: 2)
+                      ? const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה', ''])
                       : Wrap(spacing: 8, runSpacing: 8, children: acts);
                 }),
               ]),
@@ -1301,13 +1304,13 @@ class _FeesScreenState extends State<FeesScreen> {
           _gap(8),
           if (_FeesData.byType(f).isNotEmpty) DsBars(title: 'פירוק-חיובים לפי-סוג', labels: _FeesData.byType(f).keys.toList(), values: [for (final v in _FeesData.byType(f).values) v.toDouble()]),
         ],
-        _wrap([for (final m in f['members'] as List) StatusChip(label: '🎓 ${(m as Map)['first']} · ${m['grade']}', tone: 0)]),
+        _wrap([for (final m in f['members'] as List) ForgeIntelPill(fields: ['🎓 ${(m as Map)['first']} · ${m['grade']}'])]),
         _wrap(_facts(f)),
         _gap(8),
         Row(children: [
-          BareStat(value: '${_FeesData.rfm(f)}', label: 'דפוס-תשלום (RFM) · ${_FeesData.tierLabel(f)}', inkColor: _FeesData.tierKey(f) == 'red' ? _danger : _ink, mutedColor: _muted),
-          BareStat(value: '${_FeesData.trend(f)['dir'] == 'up' ? '↑' : _FeesData.trend(f)['dir'] == 'down' ? '↓' : '→'} ${_FeesData.trend(f)['pct']}%', label: 'מגמת-תשלומים (6 חודשים)', inkColor: _FeesData.trend(f)['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
-          BareStat(value: _FeesData.riskLabel(_FeesData.risk(f)), label: 'סיכון-גבייה (ותק · דפוס · מגמה)', inkColor: _FeesData.risk(f) == 2 ? _danger : _FeesData.risk(f) == 1 ? _warning : _ok, mutedColor: _muted),
+          Expanded(child: ForgeStatPlain(fields: ['דפוס-תשלום (RFM) · ${_FeesData.tierLabel(f)}', '${_FeesData.rfm(f)}'])),
+          Expanded(child: ForgeStatPlain(fields: ['מגמת-תשלומים (6 חודשים)', '${_FeesData.trend(f)['dir'] == 'up' ? '↑' : _FeesData.trend(f)['dir'] == 'down' ? '↓' : '→'} ${_FeesData.trend(f)['pct']}%'])),
+          Expanded(child: ForgeStatPlain(fields: ['סיכון-גבייה (ותק · דפוס · מגמה)', _FeesData.riskLabel(_FeesData.risk(f))])),
         ]),
       ];
 
@@ -1316,7 +1319,7 @@ class _FeesScreenState extends State<FeesScreen> {
     final cs = _FeesData.chargesOf(f);
     final dups = _FeesData.duplicateCharges(f).map((c) => c['id']).toSet();
     return [
-      if (cs.isEmpty) const EmptyState(glyph: '📭', message: 'אין חיובים למשפחה — לרשום חיוב-שנה'),
+      if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['אין חיובים למשפחה — לרשום חיוב-שנה', '']),
       for (final c in cs)
         () {
           final cancelled = c['cancelledAt'] != null || _FeesData.cancelledIds.contains(c['id']);
@@ -1328,7 +1331,7 @@ class _FeesScreenState extends State<FeesScreen> {
               body: '${cancelled ? 'בוטל: ${_FeesData.cancelReason[c['id']] ?? c['note'] ?? ''}' : _amounts ? (net != gross ? '${shekel(net)} (ברוטו ${shekel(gross)}, הנחה)' : shekel(net)) : '🔒'}${c['note'] != null && !cancelled ? ' · ${c['note']}' : ''}',
             ),
             if (!cancelled && _FeesData.can(_role, 'fees.writeoff'))
-              _wrap([SoftButton(label: '✖ בטל חיוב', tone: 2, onTap: () => act(() => _FeesData.cancelCharge(f, _roleName, c, dups.contains(c['id']) ? 'חיוב-כפול' : 'ביטול-ידני')))], top: 2),
+              _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.cancelCharge(f, _roleName, c, dups.contains(c['id']) ? 'חיוב-כפול' : 'ביטול-ידני')), child: ForgeSoftButton(fields: ['✖ בטל חיוב']))], top: 2),
           ]);
         }(),
     ];
@@ -1338,41 +1341,41 @@ class _FeesScreenState extends State<FeesScreen> {
   List<Widget> _tabPayments(Map<String, dynamic> f) {
     final ps = [..._FeesData.paymentsOf(f)]..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
     return [
-      if (ps.isEmpty) const EmptyState(glyph: '💳', message: 'אין תשלומים רשומים'),
+      if (ps.isEmpty) const ForgeSearchEmptyState(fields: ['אין תשלומים רשומים', '']),
       for (final p in ps)
         TimelineItem(
           title: '${p['method']}${p['method'] == 'הו״ק' ? ' 💳' : ''}',
           time: fmtDate(p['date'] as String?),
           body: '${_m(p['amount'] as num)}${[for (final m in _FeesData.paymentMeta) if (p[m['key']] != null) ' · ${m['prefix']}${p[m['key']]}${m['suffix']}'].join()}',
         ),
-      const AlertBanner(glyph: '🧾', tone: 0, message: 'קבלת-מס / אישור-סליקה / חשבונית = שער-חיצוני (מקום-שמור: מס׳-קבלה יואר כאן כשיגיע מהשער; המסך אינו מנפיק)'),
+      const ForgeSectionPill(fields: ['קבלת-מס / אישור-סליקה / חשבונית = שער-חיצוני (מקום-שמור: מס׳-קבלה יואר כאן כשיגיע מהשער; המסך אינו מנפיק)', '']),
     ];
   }
 
   // הו״ק: מצב-החודש (hokEffectivelyActive⊕hokRecordedThisMonth) + היסטוריית-סליקה + הפעל/הפסק
   List<Widget> _tabHok(Map<String, dynamic> f, void Function(void Function()) act) {
-    if (!_FeesData.hasHok(f)) return [const EmptyState(glyph: '💳', message: 'אין הוראת-קבע למשפחה (מקום-שמור: תוגדר בשער-הסליקה)')];
+    if (!_FeesData.hasHok(f)) return [const ForgeSearchEmptyState(fields: ['אין הוראת-קבע למשפחה (מקום-שמור: תוגדר בשער-הסליקה)', ''])];
     final h = f['hok'] as Map;
     final hist = (f['hist'] as List?) ?? const [];
     return [
       Row(children: [
         StatusDot(tone: _FeesData.hokFailed(f) ? 2 : _FeesData.hokFlag(f) ? 1 : 3),
         const SizedBox(width: 10),
-        Expanded(child: MediaRow(glyph: '💳', title: '${_m(h['amount'] as num)} · יום ${h['day']} בחודש', subtitle: '${_FeesData.hokMethod(f)} · מ-${fmtDate(h['startedAt'] as String?)}${h['kevaId'] != null ? ' · סליקה ${h['kevaId']}' : ' · ידנית'}')),
+        Expanded(child: ForgeContactTile(fields: ['${_m(h['amount'] as num)} · יום ${h['day']} בחודש', '${_FeesData.hokMethod(f)} · מ-${fmtDate(h['startedAt'] as String?)}${h['kevaId'] != null ? ' · סליקה ${h['kevaId']}' : ' · ידנית'}'])),
       ]),
       _wrap([
-        StatusChip(label: _FeesData.hokFlag(f) ? 'מסומנת פעילה' : 'מופסקת', tone: _FeesData.hokFlag(f) ? 1 : 0),
-        StatusChip(label: _FeesData.hokActive(f) ? 'סליקה חיה' : 'סליקה פסקה >2 חודשים', tone: _FeesData.hokActive(f) ? 1 : 2),
-        StatusChip(label: _FeesData.hokRecorded(f) ? 'נרשמה החודש ✅' : 'טרם נרשמה החודש', tone: _FeesData.hokRecorded(f) ? 1 : 3),
+        ForgeIntelPill(fields: [_FeesData.hokFlag(f) ? 'מסומנת פעילה' : 'מופסקת']),
+        ForgeIntelPill(fields: [_FeesData.hokActive(f) ? 'סליקה חיה' : 'סליקה פסקה >2 חודשים']),
+        ForgeIntelPill(fields: [_FeesData.hokRecorded(f) ? 'נרשמה החודש ✅' : 'טרם נרשמה החודש']),
       ]),
       if (_FeesData.hokFailed(f)) ...[
         _gap(6),
-        const AlertBanner(glyph: '⚠️', tone: 2, message: 'הו״ק נכשלה — התרעה נשלחה; ניסיון-חיוב-חוזר = שער-הסליקה (מקום-שמור). בינתיים: תזכורת עדינה'),
+        const ForgeSectionPill(fields: ['הו״ק נכשלה — התרעה נשלחה; ניסיון-חיוב-חוזר = שער-הסליקה (מקום-שמור). בינתיים: תזכורת עדינה', '']),
       ],
       _gap(6),
       Text('היסטוריית-סליקה · ${hist.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
       for (final e in hist) TimelineItem(title: '${(e as Map)['clearer']}', time: fmtDate(e['d'] as String?), body: _m(e['a'] as num)),
-      if (hist.isEmpty) const EmptyState(glyph: '📭', message: 'אין היסטוריית-סליקה (הו״ק ידנית)'),
+      if (hist.isEmpty) const ForgeSearchEmptyState(fields: ['אין היסטוריית-סליקה (הו״ק ידנית)', '']),
     ];
   }
 
@@ -1380,15 +1383,15 @@ class _FeesScreenState extends State<FeesScreen> {
   List<Widget> _tabReminders(Map<String, dynamic> f, void Function(void Function()) act) {
     final plan = _FeesData.reminderPlan(f), sent = _FeesData.remindersSent(f), nr = _FeesData.nextReminder(f);
     return [
-      if (_FeesData.fullScholarship(f)) const AlertBanner(glyph: '🎓', tone: 1, message: 'מלגה מלאה — אפס-תזכורות (מגן-כבוד)') else if (plan.isEmpty) const EmptyState(glyph: '🕊', message: 'אין חוב פתוח — אין לוח-תזכורות') else ...[
+      if (_FeesData.fullScholarship(f)) const ForgeSectionPill(fields: ['מלגה מלאה — אפס-תזכורות (מגן-כבוד)', '']) else if (plan.isEmpty) const ForgeSearchEmptyState(fields: ['אין חוב פתוח — אין לוח-תזכורות', '']) else ...[
         Text('לוח מדורג (מהחיוב-הפתוח-הוותיק ${fmtDate(_FeesData.oldestOpenDate(f))})', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
-        _wrap([for (var i = 0; i < plan.length; i++) StatusChip(label: '${i < sent.length ? '✅' : '${plan[i]['date']}'.compareTo(_FeesData.today) <= 0 ? '⏰' : '⏳'} ${plan[i]['grade']} · ${fmtDate(plan[i]['date'] as String?)}', tone: i < sent.length ? 1 : nr != null && nr['grade'] == plan[i]['grade'] ? 3 : 0)]),
-        if (nr != null && _FeesData.can(_role, 'fees.remind')) _wrap([SoftButton(label: '📨 שלח תזכורת ${nr['grade']} (פרטי)', tone: 3, onTap: () => act(() => _FeesData.sendReminder(f, _roleName, nr['grade'] as String)))], top: 8),
+        _wrap([for (var i = 0; i < plan.length; i++) ForgeIntelPill(fields: ['${i < sent.length ? '✅' : '${plan[i]['date']}'.compareTo(_FeesData.today) <= 0 ? '⏰' : '⏳'} ${plan[i]['grade']} · ${fmtDate(plan[i]['date'] as String?)}'])]),
+        if (nr != null && _FeesData.can(_role, 'fees.remind')) _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.sendReminder(f, _roleName, nr['grade'] as String)), child: ForgeSoftButton(fields: ['📨 שלח תזכורת ${nr['grade']} (פרטי)']))], top: 8),
       ],
       _gap(8),
       Text('היסטוריה · ${sent.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
       for (final c in sent) TimelineItem(title: 'תזכורת ${c['grade'] ?? ''}', time: fmtDate(c['at'] as String?), body: 'נשלחה בפרטיות'),
-      if (f['nextNote'] != null) AlertBanner(glyph: '📝', tone: 0, message: 'תגובה/מעקב: ${f['nextNote']} (${fmtDate(f['nextDate'] as String?)})'),
+      if (f['nextNote'] != null) ForgeSectionPill(fields: ['תגובה/מעקב: ${f['nextNote']} (${fmtDate(f['nextDate'] as String?)})', '']),
     ];
   }
 
@@ -1397,15 +1400,15 @@ class _FeesScreenState extends State<FeesScreen> {
     final ids = _FeesData.effectiveCriteria(f);
     return [
       Row(children: [
-        BareStat(value: '${_FeesData.discountPct(f)}%', label: 'הנחה אפקטיבית (הגבוהה מנצחת)', inkColor: _acc, mutedColor: _muted),
-        BareStat(value: _m(_FeesData.scholarshipOf(f)), label: 'שווי-ההנחה השנה', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: '${_FeesData.studentsN(f)}', label: 'אחים (הנחת-אחים אוטו)', inkColor: _ink, mutedColor: _muted),
+        Expanded(child: ForgeStatPlain(fields: ['הנחה אפקטיבית (הגבוהה מנצחת)', '${_FeesData.discountPct(f)}%'])),
+        Expanded(child: ForgeStatPlain(fields: ['שווי-ההנחה השנה', _m(_FeesData.scholarshipOf(f))])),
+        Expanded(child: ForgeStatPlain(fields: ['אחים (הנחת-אחים אוטו)', '${_FeesData.studentsN(f)}'])),
       ]),
-      _wrap([for (final c in _FeesData.criteria) StatusChip(label: '${ids.contains(c['id']) ? '✅ ' : ''}${c['label']} ${c['discountPct']}%', tone: ids.contains(c['id']) ? 1 : 0)]),
+      _wrap([for (final c in _FeesData.criteria) ForgeIntelPill(fields: ['${ids.contains(c['id']) ? '✅ ' : ''}${c['label']} ${c['discountPct']}%'])]),
       if (_FeesData.can(_role, 'fees.scholarship'))
-        _wrap([for (final c in _FeesData.criteria) if (!ids.contains(c['id'])) SoftButton(label: '🎓 הענק ${c['label']}', tone: 0, onTap: () => act(() => _FeesData.grantDiscount(f, _roleName, c['id'] as String)))], top: 8)
+        _wrap([for (final c in _FeesData.criteria) if (!ids.contains(c['id'])) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.grantDiscount(f, _roleName, c['id'] as String)), child: ForgeSoftButton(fields: ['🎓 הענק ${c['label']}']))], top: 8)
       else
-        const AlertBanner(glyph: '🔒', tone: 0, message: 'הענקת-מלגה/הנחה = הרשאת-הנהלה'),
+        const ForgeSectionPill(fields: ['הענקת-מלגה/הנחה = הרשאת-הנהלה', '']),
     ];
   }
 
@@ -1414,11 +1417,11 @@ class _FeesScreenState extends State<FeesScreen> {
     final ins = _FeesData.installments(f);
     return [
       if (ins.isEmpty) ...[
-        const EmptyState(glyph: '📆', message: 'אין הסדר-תשלומים'),
+        const ForgeSearchEmptyState(fields: ['אין הסדר-תשלומים', '']),
         if (_FeesData.can(_role, 'fees.arrangement') && _FeesData.balance(f) > 0)
-          _wrap([for (final n in const [2, 3, 6]) SoftButton(label: '📆 פריסה ל-$n', tone: 0, onTap: () => act(() => _FeesData.setArrangement(f, _roleName, n)))], top: 4),
+          _wrap([for (final n in const [2, 3, 6]) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.setArrangement(f, _roleName, n)), child: ForgeSoftButton(fields: ['📆 פריסה ל-$n']))], top: 4),
       ] else ...[
-        if (_FeesData.arrangementLate(f)) const AlertBanner(glyph: '📆', tone: 3, message: 'הסדר בפיגור — תשלום שמועדו עבר לא כוסה'),
+        if (_FeesData.arrangementLate(f)) const ForgeSectionPill(fields: ['הסדר בפיגור — תשלום שמועדו עבר לא כוסה', '']),
         for (final c in ins)
           TimelineItem(title: '${c['note'] ?? 'תשלום-הסדר'}', time: fmtDate(c['date'] as String?), body: '${_m(_FeesData.netOf(f, c))} · ${'${c['date']}'.compareTo(_FeesData.today) <= 0 ? (_FeesData.oldestOpenDate(f) != null && '${c['date']}'.compareTo(_FeesData.oldestOpenDate(f)!) >= 0 ? 'פתוח' : 'כוסה') : 'עתידי'}'),
       ],
@@ -1440,20 +1443,20 @@ class _FeesScreenState extends State<FeesScreen> {
       'סך-חיובים ${shekel(_FeesData.charged(f))} · שולם ${shekel(_FeesData.paid(f))} · יתרה ${shekel(_FeesData.balance(f))}',
     ];
     return [
-      if (!_amounts) const AlertBanner(glyph: '🔒', tone: 2, message: 'מצב-חשבון דורש הרשאת-כספים') else
+      if (!_amounts) const ForgeSectionPill(fields: ['מצב-חשבון דורש הרשאת-כספים', '']) else
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
           child: SelectableText(lines.join('\n'), style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
         ),
-      const AlertBanner(glyph: '🖨', tone: 0, message: 'הדפסה/PDF = שער-חיצוני (מקום-שמור) — הטקסט לעיל ניתן להעתקה'),
+      const ForgeSectionPill(fields: ['הדפסה/PDF = שער-חיצוני (מקום-שמור) — הטקסט לעיל ניתן להעתקה', '']),
     ];
   }
 
   List<Widget> _tabAudit(Map<String, dynamic> f) {
     final rows = _FeesData.audit.where((a) => a['family'] == f['id']).toList();
     return [
-      if (rows.isEmpty) const EmptyState(glyph: '🧾', message: 'אין פעולות למשפחה זו עדיין') else
+      if (rows.isEmpty) const ForgeSearchEmptyState(fields: ['אין פעולות למשפחה זו עדיין', '']) else
         for (final a in rows) TimelineItem(title: '${a['role']}', time: fmtDate(a['date'] as String?), body: a['what'] as String),
     ];
   }
@@ -1477,7 +1480,7 @@ class _FeesScreenState extends State<FeesScreen> {
               padding: const EdgeInsets.all(12),
               child: GlassCard(
                 child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                  const MediaRow(glyph: '➕', title: 'חיוב חדש / חיוב-מרוכז', subtitle: 'סוג · סכום · תאריך · עבור-מי — או מרוכז לכל כיתה'),
+                  const ForgeContactTile(fields: ['חיוב חדש / חיוב-מרוכז', 'סוג · סכום · תאריך · עבור-מי — או מרוכז לכל כיתה']),
                   _gap(8),
                   DsEnumField(label: 'משפחה', options: [for (final x in _FeesData.families) '${x['name']}'], value: '${f['name']}', onChanged: (v) => setSheet(() => fam = _FeesData.families.firstWhere((x) => x['name'] == v)['id'] as String)),
                   DsEnumField(label: 'עבור-מי', options: members, value: member, onChanged: (v) => setSheet(() => member = v)),
@@ -1529,7 +1532,7 @@ class _FeesScreenState extends State<FeesScreen> {
               padding: const EdgeInsets.all(12),
               child: GlassCard(
                 child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                  MediaRow(glyph: '💳', title: 'רישום תשלום', subtitle: 'יתרה נוכחית ${_m(bal)} · המסך רושם — אינו סולק'),
+                  ForgeContactTile(fields: ['רישום תשלום', 'יתרה נוכחית ${_m(bal)} · המסך רושם — אינו סולק']),
                   _gap(8),
                   DsEnumField(label: 'משפחה', options: [for (final x in _FeesData.families) '${x['name']}'], value: '${f['name']}', onChanged: (v) => setSheet(() => fam = _FeesData.families.firstWhere((x) => x['name'] == v)['id'] as String)),
                   DsEnumField(label: 'אמצעי', options: _FeesData.payMethodsSchool, value: method, onChanged: (v) => setSheet(() => method = v)),
@@ -1565,7 +1568,7 @@ class _FeesScreenState extends State<FeesScreen> {
           padding: const EdgeInsets.all(12),
           child: GlassCard(
             child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-              MediaRow(glyph: '⬇', title: 'ייצוא CSV', subtitle: '${fs.length} משפחות · ${_FeesData.csvHeader.length} עמודות (PDF = שער-חיצוני, מקום-שמור)'),
+              ForgeContactTile(fields: ['ייצוא CSV', '${fs.length} משפחות · ${_FeesData.csvHeader.length} עמודות (PDF = שער-חיצוני, מקום-שמור)']),
               _gap(10),
               Container(
                 padding: const EdgeInsets.all(10),

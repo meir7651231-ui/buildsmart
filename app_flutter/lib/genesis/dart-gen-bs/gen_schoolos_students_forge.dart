@@ -1,5 +1,5 @@
-// 🎨 schoolos_students.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatBlock · navTile=ForgeHubTile · stat=ForgeMetricTile · hero=ForgeStatBlock
-//   החלפות: stat×0 · hero×1 · keptRow×21 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_students.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile
+//   החלפות: stat×0 · hero×1 · statRow×21 · button×34 · statusChip×25 · banner×16 · emptyState×11 · mediaRow×5 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-מצב · חיבור-אותות-להכרעה · זיהוי-חריגה · הכרעה · ביצוע · אימות.
@@ -67,7 +67,10 @@ import '../dart-maor/sup-score-bins.dart'; // השוואת-שכבה: התפלג�
 import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
 import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
-import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -898,23 +901,23 @@ class _StudentsScreenState extends State<StudentsScreen> {
         Row(children: [
           Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: SegmentedSwitch(items: [for (final r in _StuData.roleDefs) r['label'] as String], selected: _role, onSelect: (i) => setState(() => _role = i)))),
           const SizedBox(width: 8),
-          StatusChip(label: 'תפקיד: ${_StuData.roleName(_role)}${_StuData.isTeacher(_role) ? ' · הכיתה שלי' : _StuData.isParent(_role) ? ' · ילדי בלבד' : ''}', tone: 0),
+          Flexible(child: ForgeIntelPill(fields: ['תפקיד: ${_StuData.roleName(_role)}${_StuData.isTeacher(_role) ? ' · הכיתה שלי' : _StuData.isParent(_role) ? ' · ילדי בלבד' : ''}'])),
         ]),
         _gap(10),
-        if (_StuData.isParent(_role)) ...[const AlertBanner(glyph: '👪', tone: 0, message: 'תצוגת-הורה: זהות · נוכחות · ציונים של ילדך בלבד. שדות-מוגנים ופעולות אינם זמינים.'), _gap(8)],
+        if (_StuData.isParent(_role)) ...[const ForgeSectionPill(fields: ['תצוגת-הורה: זהות · נוכחות · ציונים של ילדך בלבד. שדות-מוגנים ופעולות אינם זמינים.', '']), _gap(8)],
         // פס-עליון: חיפוש-מבוקר + רענון (מצב-טעינה) + רישום + ייבוא — מגודרים פר-הרשאה
         Row(children: [
           Expanded(child: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '🔄', tone: 0, onTap: _refresh)),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
           const SizedBox(width: 6),
-          if (_can('stu.add')) ...[Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '➕ תלמיד', tone: 1, onTap: () => _addForm(context))), const SizedBox(width: 6)],
-          if (_can('stu.import')) Padding(padding: const EdgeInsets.only(bottom: 12), child: SoftButton(label: '📥 ייבוא', tone: 0, onTap: () => _importForm(context))),
+          if (_can('stu.add')) ...[Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _addForm(context), child: ForgeSoftButton(fields: ['➕ תלמיד']))), const SizedBox(width: 6)],
+          if (_can('stu.import')) Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _importForm(context), child: ForgeSoftButton(fields: ['📥 ייבוא']))),
         ]),
         // מצב-מיוחד: ייבוא-בתהליך / תוצאת-ייבוא
-        if (_importing) ...[const AlertBanner(glyph: '📥', tone: 3, message: 'ייבוא בתהליך… מעבד שורות'), _gap(8)],
-        if (_rollover != null) ...[AlertBanner(glyph: '🗓', tone: 1, message: _rollover!), _gap(8)],
-        if (!_importing && _importResult != null) ...[AlertBanner(glyph: '📥', tone: 1, message: 'ייבוא הסתיים: ${_importResult!['ok']} נוספו · ${_importResult!['skipped']} נדחו'), _gap(8)],
+        if (_importing) ...[const ForgeSectionPill(fields: ['ייבוא בתהליך… מעבד שורות', '']), _gap(8)],
+        if (_rollover != null) ...[ForgeSectionPill(fields: [_rollover!, '']), _gap(8)],
+        if (!_importing && _importResult != null) ...[ForgeSectionPill(fields: ['ייבוא הסתיים: ${_importResult!['ok']} נוספו · ${_importResult!['skipped']} נדחו', '']), _gap(8)],
         // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"; המונה = ספירת-הציר על הפעילים
         Wrap(spacing: 8, runSpacing: 6, children: [
           _fchip('הכל', _locks.isEmpty, () => setState(() => _locks.clear())),
@@ -932,40 +935,40 @@ class _StudentsScreenState extends State<StudentsScreen> {
         // KPI-10 (המפרט): hero = המטרה (מי-נופל) + 10 מדדי-מצב (BareStat נושאי-ערך; חסר-נתון ⇒ '—' מקום-שמור)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatBlock(fields: ['תלמידים בסיכון-גבוה — לפעול עכשיו', '${_StuData.highN}', ''])),
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['תלמידים בסיכון-גבוה — לפעול עכשיו', '${_StuData.highN}'])),
             const SizedBox(height: 14),
             Row(children: [
-              BareStat(value: '${_StuData.students.length}', label: '🎓 סך-תלמידים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${all.length}', label: '✅ פעילים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_StuData.newN}', label: '🆕 חדשים-השנה', inkColor: _acc, mutedColor: _muted),
-              BareStat(value: '${_StuData.highN}', label: '🔴 סיכון-גבוה', inkColor: _StuData.highN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '${_StuData.midN}', label: '🟠 סיכון-בינוני', inkColor: _StuData.midN > 0 ? _warning : _ok, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: ['🎓 סך-תלמידים', '${_StuData.students.length}'])),
+              Expanded(child: ForgeStatPlain(fields: ['✅ פעילים', '${all.length}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🆕 חדשים-השנה', '${_StuData.newN}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🔴 סיכון-גבוה', '${_StuData.highN}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🟠 סיכון-בינוני', '${_StuData.midN}'])),
             ]),
             const SizedBox(height: 12),
             Row(children: [
-              BareStat(value: avgAtt == null ? '—' : '$avgAtt%', label: '📅 ממוצע-נוכחות', inkColor: (avgAtt ?? 100) < 85 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: avgGr == null ? '—' : '$avgGr', label: '📝 ממוצע-ציונים', inkColor: avgGr == null ? _muted : _ink, mutedColor: _muted), // מקום-שמור
-              BareStat(value: '${_StuData.medicalN}', label: '🩺 רפואי/צרכים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_StuData.noParentN}', label: '📵 ללא-הורה-מעודכן', inkColor: _StuData.noParentN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '${_StuData.openTicketsN}', label: '📨 פניות-פתוחות', inkColor: _StuData.openTicketsN > 0 ? _warning : _ok, mutedColor: _muted),
+              Expanded(child: ForgeStatPlain(fields: ['📅 ממוצע-נוכחות', avgAtt == null ? '—' : '$avgAtt%'])),
+              Expanded(child: ForgeStatPlain(fields: ['📝 ממוצע-ציונים', avgGr == null ? '—' : '$avgGr'])), // מקום-שמור
+              Expanded(child: ForgeStatPlain(fields: ['🩺 רפואי/צרכים', '${_StuData.medicalN}'])),
+              Expanded(child: ForgeStatPlain(fields: ['📵 ללא-הורה-מעודכן', '${_StuData.noParentN}'])),
+              Expanded(child: ForgeStatPlain(fields: ['📨 פניות-פתוחות', '${_StuData.openTicketsN}'])),
             ]),
           ]),
         ),
         _gap(8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): קפיצת-סיכון · כפולים · אישורים-פגים · ללא-הערה-90 · ימי-הולדת · אחים-חדשים — AlertBanner פר-אות
-        if (_StuData.riskJumps.isNotEmpty) ...[AlertBanner(glyph: '📈', tone: 2, message: 'קפיצת-סיכון (30 יום): ${_StuData.riskJumps.map((j) => '${(j['s'] as Map)['name']} ${j['prev']}→${j['now']}').join(' · ')}'), _gap(8)],
-        if (_StuData.duplicateGroups.any((g) => g.length > 1) && _can('stu.merge')) ...[AlertBanner(glyph: '👯', tone: 3, message: 'כפילות-חשודה: ${_StuData.duplicateGroups.where((g) => g.length > 1).map((g) => g.map((id) => _StuData.byId(id)?['name'] ?? id).join(' ≈ ')).join(' · ')} — פתח/י כרטיס ⇒ מיזוג'), _gap(8)],
-        if (_StuData.expiredConsents.isNotEmpty) ...[AlertBanner(glyph: '📄', tone: 3, message: '${_StuData.expiredConsents.length} אישורי-הורים פגו: ${_StuData.expiredConsents.map((t) => t['title']).join(' · ')}'), _gap(8)],
-        if (_StuData.noNote90.isNotEmpty && !_StuData.isParent(_role)) ...[AlertBanner(glyph: '📝', tone: 0, message: 'ללא הערת-מחנך/ת ${_StuData.noteSilentDays} יום: ${_StuData.scoped(_role, _StuData.noNote90).map((s) => s['first']).join(' · ')}'), _gap(8)],
-        if (_StuData.birthdays.isNotEmpty) ...[AlertBanner(glyph: '🎂', tone: 1, message: 'ימי-הולדת החודש: ${_StuData.scoped(_role, _StuData.birthdays).map((s) => '${s['first']} (${_StuData.fmt(s['birth'] as String?)})').join(' · ')}'), _gap(8)],
-        if (_StuData.newSiblings.isNotEmpty && !_StuData.isParent(_role)) ...[AlertBanner(glyph: '👪', tone: 0, message: 'אחים-חדשים קושרו אוטומטית: ${_StuData.newSiblings.map((s) => '${s['first']} ↔ ${_StuData.siblings(s).map((o) => o['first']).join(',')}').join(' · ')}'), _gap(8)],
+        if (_StuData.riskJumps.isNotEmpty) ...[ForgeSectionPill(fields: ['קפיצת-סיכון (30 יום): ${_StuData.riskJumps.map((j) => '${(j['s'] as Map)['name']} ${j['prev']}→${j['now']}').join(' · ')}', '']), _gap(8)],
+        if (_StuData.duplicateGroups.any((g) => g.length > 1) && _can('stu.merge')) ...[ForgeSectionPill(fields: ['כפילות-חשודה: ${_StuData.duplicateGroups.where((g) => g.length > 1).map((g) => g.map((id) => _StuData.byId(id)?['name'] ?? id).join(' ≈ ')).join(' · ')} — פתח/י כרטיס ⇒ מיזוג', '']), _gap(8)],
+        if (_StuData.expiredConsents.isNotEmpty) ...[ForgeSectionPill(fields: ['${_StuData.expiredConsents.length} אישורי-הורים פגו: ${_StuData.expiredConsents.map((t) => t['title']).join(' · ')}', '']), _gap(8)],
+        if (_StuData.noNote90.isNotEmpty && !_StuData.isParent(_role)) ...[ForgeSectionPill(fields: ['ללא הערת-מחנך/ת ${_StuData.noteSilentDays} יום: ${_StuData.scoped(_role, _StuData.noNote90).map((s) => s['first']).join(' · ')}', '']), _gap(8)],
+        if (_StuData.birthdays.isNotEmpty) ...[ForgeSectionPill(fields: ['ימי-הולדת החודש: ${_StuData.scoped(_role, _StuData.birthdays).map((s) => '${s['first']} (${_StuData.fmt(s['birth'] as String?)})').join(' · ')}', '']), _gap(8)],
+        if (_StuData.newSiblings.isNotEmpty && !_StuData.isParent(_role)) ...[ForgeSectionPill(fields: ['אחים-חדשים קושרו אוטומטית: ${_StuData.newSiblings.map((s) => '${s['first']} ↔ ${_StuData.siblings(s).map((o) => o['first']).join(',')}').join(' · ')}', '']), _gap(8)],
         // דוח-יועץ · מעבר-שנה · ייצוא — כלים-מרוכזים (מגודרים)
         Wrap(spacing: 8, runSpacing: 6, children: [
-          if (_can('stu.ticket') || _StuData.roleName(_role) == 'admin') SoftButton(label: '🧭 דוח-יועץ שבועי', tone: 0, onTap: () => _showText(context, 'דוח-יועץ/ת שבועי', _StuData.weeklyReport())),
-          if (_StuData.roleName(_role) == 'admin') SoftButton(label: '🗓 מעבר-שנה (תצוגה)', tone: 0, onTap: () => _showText(context, 'מעבר-שנה · העברת-כיתות מרוכזת (תצוגה-מקדימה)', _StuData.yearRolloverPreview().join('\n'))),
-          if (_StuData.roleName(_role) == 'admin') SoftButton(label: '🗓 בצע מעבר-שנה', tone: 2, onTap: () => setState(() { final r = _StuData.yearRolloverExecute(_who); _importResult = null; _error = null; _rollover = 'מעבר-שנה בוצע: ${r['moved']} הועברו · ${r['graduated']} בוגרים · ${r['skipped']} ללא כיתת-יעד (לא הומצאה)'; })),
-          if (_StuData.exportOk(_role)) SoftButton(label: '⬇ CSV (${visible.length})', tone: 0, onTap: () => _showText(context, 'ייצוא CSV · ${visible.length} תלמידים (BOM + חסימת-הזרקה)', _StuData.csvOf(visible))),
-          if (_StuData.exportOk(_role)) SoftButton(label: '⬇ PDF — מקום-שמור', tone: 0, onTap: () => _showText(context, 'ייצוא PDF', 'מקום-שמור: אין מנוע-PDF במדף (§20-ג) — יאיר כשיתווסף; עד אז: הדפס-כרטיס (טקסט) + CSV.')),
+          if (_can('stu.ticket') || _StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'דוח-יועץ/ת שבועי', _StuData.weeklyReport()), child: ForgeSoftButton(fields: ['🧭 דוח-יועץ שבועי'])),
+          if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'מעבר-שנה · העברת-כיתות מרוכזת (תצוגה-מקדימה)', _StuData.yearRolloverPreview().join('\n')), child: ForgeSoftButton(fields: ['🗓 מעבר-שנה (תצוגה)'])),
+          if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { final r = _StuData.yearRolloverExecute(_who); _importResult = null; _error = null; _rollover = 'מעבר-שנה בוצע: ${r['moved']} הועברו · ${r['graduated']} בוגרים · ${r['skipped']} ללא כיתת-יעד (לא הומצאה)'; }), child: ForgeSoftButton(fields: ['🗓 בצע מעבר-שנה'])),
+          if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא CSV · ${visible.length} תלמידים (BOM + חסימת-הזרקה)', _StuData.csvOf(visible)), child: ForgeSoftButton(fields: ['⬇ CSV (${visible.length})'])),
+          if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא PDF', 'מקום-שמור: אין מנוע-PDF במדף (§20-ג) — יאיר כשיתווסף; עד אז: הדפס-כרטיס (טקסט) + CSV.'), child: ForgeSoftButton(fields: ['⬇ PDF — מקום-שמור'])),
         ]),
         _gap(8),
         // בורר-מבט (🎯 טריאז' · 📋 טבלה) + בורר-דירוג (סיכון · כיתה · שם) — ארגון = פעולת-יסוד עם אטום משלה
@@ -976,13 +979,13 @@ class _StudentsScreenState extends State<StudentsScreen> {
         ]),
         _gap(10),
         // מצבי-מסך: שגיאה (AlertBanner + סגירה) · טעינה ⇒ אחרת התוכן: ריק · טבלה · טריאז'
-        if (_error != null) ...[Row(children: [Expanded(child: AlertBanner(glyph: '⚠️', tone: 2, message: _error!)), const SizedBox(width: 6), SoftButton(label: '✕', tone: 0, onTap: () => setState(() => _error = null))]), _gap(8)],
+        if (_error != null) ...[Row(children: [Expanded(child: ForgeSectionPill(fields: [_error!, ''])), const SizedBox(width: 6), Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _error = null), child: ForgeSoftButton(fields: ['✕'])))]), _gap(8)],
         if (_loading)
           _loadingView()
         else if (_StuData.students.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🎓', message: 'אין תלמידים עדיין — רשום תלמיד ראשון או ייבא'))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין תלמידים עדיין — רשום תלמיד ראשון או ייבא', '']))
         else if (visible.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: EmptyState(glyph: '🔍', message: 'אין תלמידים תואמים לחיפוש/סינון'))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין תלמידים תואמים לחיפוש/סינון', '']))
         else if (_mode == 1)
           _table(visible)
         else ...[
@@ -1015,7 +1018,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
       child: GradientCard(
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
-            Expanded(child: MediaRow(glyph: glyph, title: '${s['name']}', subtitle: '${_StuData.className(s)} · ${_StuData.teacherName(s)} · גיל ${_StuData.age(s) ?? '—'}')),
+            Expanded(child: ForgeContactTile(fields: ['${s['name']}', '${_StuData.className(s)} · ${_StuData.teacherName(s)} · גיל ${_StuData.age(s) ?? '—'}'])),
             IconButton(onPressed: () => _openPanel(s), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-תלמיד'),
           ]),
           _gap(8),
@@ -1023,15 +1026,15 @@ class _StudentsScreenState extends State<StudentsScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 8, right: 4),
             child: Wrap(spacing: 8, runSpacing: 6, children: [
-              if (!active) StatusChip(label: _StuData.status(s), tone: 0),
-              if (active && b > 0 && lead != null) StatusChip(label: 'האות: ${lead['label']} (${(lead['contribution'] as double).round()} נק׳)', tone: tone),
-              StatusChip(label: '👉 ${_StuData.action(s)}', tone: active && b > 0 ? tone : 0),
-              for (final f in _StuData.flags(s)) StatusChip(label: f, tone: 0),
-              if (_StuData.hasOpenTicket(s)) StatusChip(label: '📨 פנייה פתוחה', tone: 3),
-              if (_StuData.parentMissing(s)) const StatusChip(label: '📵 ללא-הורה-מעודכן', tone: 2),
-              if (_StuData.isNew(s)) const StatusChip(label: '🆕 חדש/ה השנה', tone: 0),
-              if (_StuData.isDupSuspect(s)) const StatusChip(label: '👯 כפילות-חשודה', tone: 3),
-              if (_StuData.feeDebt(s) && _StuData.roleName(_role) == 'admin') const StatusChip(label: '💳 חוב-גבייה', tone: 2), // מקום-שמור (גבייה⇒דגל, רק-הנהלה)
+              if (!active) ForgeIntelPill(fields: [_StuData.status(s)]),
+              if (active && b > 0 && lead != null) ForgeIntelPill(fields: ['האות: ${lead['label']} (${(lead['contribution'] as double).round()} נק׳)']),
+              ForgeIntelPill(fields: ['👉 ${_StuData.action(s)}']),
+              for (final f in _StuData.flags(s)) ForgeIntelPill(fields: [f]),
+              if (_StuData.hasOpenTicket(s)) ForgeIntelPill(fields: ['📨 פנייה פתוחה']),
+              if (_StuData.parentMissing(s)) const ForgeIntelPill(fields: ['📵 ללא-הורה-מעודכן']),
+              if (_StuData.isNew(s)) const ForgeIntelPill(fields: ['🆕 חדש/ה השנה']),
+              if (_StuData.isDupSuspect(s)) const ForgeIntelPill(fields: ['👯 כפילות-חשודה']),
+              if (_StuData.feeDebt(s) && _StuData.roleName(_role) == 'admin') const ForgeIntelPill(fields: ['💳 חוב-גבייה']), // מקום-שמור (גבייה⇒דגל, רק-הנהלה)
             ]),
           ),
         ]),
@@ -1076,7 +1079,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                     Text('${s['name']}', style: const TextStyle(color: _ink, fontSize: 19, fontWeight: FontWeight.w800)),
                     Text('${_StuData.className(s)} · ${_StuData.teacherName(s)} · גיל ${_StuData.age(s) ?? '—'} · ${s['gender'] == 'f' ? 'נ' : s['gender'] == 'm' ? 'ז' : '—'} · מס׳ ${s['id']} · ת״ז ${_can('stu.protected') ? _StuData.protectedField(_role, s, 'idNum', '${s['idNum'] ?? ''}') : _StuData.maskId(s['idNum'] as String?)}', style: const TextStyle(color: _muted, fontSize: 12.5)),
                   ])),
-                  StatusChip(label: _StuData.status(s), tone: _StuData.isActive(s) ? 1 : 0),
+                  Flexible(child: ForgeIntelPill(fields: [_StuData.status(s)])),
                 ]),
                 _gap(12),
                 // ציון-סיכון מאוחד (GaugeMeter, tone=band) + הפעולה-הנכונה-עכשיו (AlertBanner) — ההכרעה, לא רק המספר
@@ -1084,9 +1087,9 @@ class _StudentsScreenState extends State<StudentsScreen> {
                   GaugeMeter(value: r / 100, size: 150, tone: tone),
                   const SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    Row(children: [BareStat(value: '$r', label: _StuData.bandLabel(b), inkColor: b == 2 ? _danger : b == 1 ? _warning : _ok, mutedColor: _muted)]), // BareStat=Expanded ⇒ חייב Row (נתפס בבדיקת-widget)
+                    Row(children: [Expanded(child: ForgeStatPlain(fields: [_StuData.bandLabel(b), '$r']))]), // BareStat=Expanded ⇒ חייב Row (נתפס בבדיקת-widget)
                     _gap(6),
-                    AlertBanner(glyph: b == 2 ? '⏰' : b == 1 ? '📅' : '✅', tone: b == 2 ? 2 : b == 1 ? 3 : 1, message: '👉 ${_StuData.action(s)}'),
+                    ForgeSectionPill(fields: ['👉 ${_StuData.action(s)}', '']),
                   ])),
                 ]),
                 _gap(12),
@@ -1097,7 +1100,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                 const Text('פעולות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
                 _gap(8),
                 // פעולות מגודרות פר-הרשאה (canGrantedAction); אין-הרשאה ⇒ מצב נעילת-הרשאות
-                Builder(builder: (_) { final acts = _actions(ctx, s, act); return acts.isEmpty ? const AlertBanner(message: 'צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', glyph: '🔒', tone: 2) : Wrap(spacing: 8, runSpacing: 8, children: acts); }),
+                Builder(builder: (_) { final acts = _actions(ctx, s, act); return acts.isEmpty ? const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', '']) : Wrap(spacing: 8, runSpacing: 8, children: acts); }),
                 _gap(8),
               ]),
             ),
@@ -1110,7 +1113,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
   List<Widget> _kv(String k, String v) => [Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Row(children: [Text(k, style: const TextStyle(color: _muted, fontSize: 13)), const SizedBox(width: 8), Expanded(child: Text(v, style: const TextStyle(color: _ink, fontSize: 13.5, fontWeight: FontWeight.w600)))]))];
   Widget _h(String t) => Padding(padding: const EdgeInsets.only(top: 6, bottom: 6), child: Text(t, style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)));
   // מקום-שמור (חוק-7): תווית+שקע — מואר כשמגיע נתון, עד אז מוצהר ולא מזויף
-  Widget _slot(String label, String source) => AlertBanner(glyph: '▫', tone: 0, message: '$label — מקום-שמור · יאיר כשיגיע נתון ($source)');
+  Widget _slot(String label, String source) => ForgeSectionPill(fields: ['$label — מקום-שמור · יאיר כשיגיע נתון ($source)', '']);
 
   List<Widget> _tabBody(BuildContext ctx, Map<String, dynamic> s, int tab, void Function(void Function()) act) {
     switch (tab) {
@@ -1120,30 +1123,30 @@ class _StudentsScreenState extends State<StudentsScreen> {
         final ns = _StuData.notes(s);
         return [
           _h('פירוק-האותות · תרומה לציון-הסיכון (נק׳)'),
-          if (withData.isEmpty) const EmptyState(glyph: '📊', message: 'אין עדיין אותות עם נתון') else
+          if (withData.isEmpty) const ForgeSearchEmptyState(fields: ['אין עדיין אותות עם נתון', '']) else
           NeonBars(labels: [for (final x in withData) '${x['label']}'], values: [for (final x in withData) (x['contribution'] as double)], tone: _StuData.band(s) == 2 ? 2 : _StuData.band(s) == 1 ? 3 : 1),
-          if (noData.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 6, runSpacing: 6, children: [for (final x in noData) StatusChip(label: '▫ ${x['label']}: אין נתון (מקום-שמור)', tone: 0)])),
+          if (noData.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 6, runSpacing: 6, children: [for (final x in noData) ForgeIntelPill(fields: ['▫ ${x['label']}: אין נתון (מקום-שמור)'])])),
           _gap(10),
           Row(children: [
-            BareStat(value: t30['dir'] == 'flat' ? '→' : '${t30['pct'] > 0 ? '+' : ''}${t30['pct']}%', label: 'מגמה-30 (נוכחות)', inkColor: t30['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
-            BareStat(value: t90['dir'] == 'flat' ? '→' : '${t90['pct'] > 0 ? '+' : ''}${t90['pct']}%', label: 'מגמה-90 (נוכחות)', inkColor: t90['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
-            BareStat(value: '${_StuData.presentsThisMonth(s)}/${_StuData.presentsThisMonth(s) + _StuData.absencesThisMonth(s)}', label: 'נוכחות-החודש', inkColor: _ink, mutedColor: _muted),
+            Expanded(child: ForgeStatPlain(fields: ['מגמה-30 (נוכחות)', t30['dir'] == 'flat' ? '→' : '${t30['pct'] > 0 ? '+' : ''}${t30['pct']}%'])),
+            Expanded(child: ForgeStatPlain(fields: ['מגמה-90 (נוכחות)', t90['dir'] == 'flat' ? '→' : '${t90['pct'] > 0 ? '+' : ''}${t90['pct']}%'])),
+            Expanded(child: ForgeStatPlain(fields: ['נוכחות-החודש', '${_StuData.presentsThisMonth(s)}/${_StuData.presentsThisMonth(s) + _StuData.absencesThisMonth(s)}'])),
           ]),
           _gap(10),
           // השוואת-שכבה (percentile): התפלגות-הסיכון בשכבה (supScoreBins ⇒ NeonBars) + אחוזון-התלמיד
           _h('השוואת-שכבה ${_StuData.level(s)} · ${_StuData.cohort(s).length} תלמידים'),
           Row(children: [
-            BareStat(value: '${_StuData.percentile(s)}', label: 'אחוזון-סיכון בשכבה (גבוה=חמור)', inkColor: _StuData.percentile(s) >= 75 ? _danger : _ink, mutedColor: _muted),
-            BareStat(value: '${(grandTotal(_StuData.cohort(s), (o) => _StuData.risk(o as Map<String, dynamic>)) / (_StuData.cohort(s).isEmpty ? 1 : _StuData.cohort(s).length)).round()}', label: 'ממוצע-סיכון בשכבה', inkColor: _ink, mutedColor: _muted),
+            Expanded(child: ForgeStatPlain(fields: ['אחוזון-סיכון בשכבה (גבוה=חמור)', '${_StuData.percentile(s)}'])),
+            Expanded(child: ForgeStatPlain(fields: ['ממוצע-סיכון בשכבה', '${(grandTotal(_StuData.cohort(s), (o) => _StuData.risk(o as Map<String, dynamic>)) / (_StuData.cohort(s).isEmpty ? 1 : _StuData.cohort(s).length)).round()}'])),
           ]),
           if (_StuData.cohort(s).length >= 2) NeonBars(labels: const ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'], values: [for (final b in _StuData.cohortBins(s)) b.toDouble()], tone: 0),
           _gap(10),
           _h('הערות אחרונות · ${ns.length}'),
-          if (ns.isEmpty) const EmptyState(glyph: '📝', message: 'אין הערות-מחנך/ת') else for (final n in ns.take(3)) TimelineItem(title: '📝 ${n['by']}', time: '${n['date']}'.isEmpty ? 'ללא-תאריך' : _StuData.fmt('${n['date']}'), body: '${n['text']}'),
+          if (ns.isEmpty) const ForgeSearchEmptyState(fields: ['אין הערות-מחנך/ת', '']) else for (final n in ns.take(3)) TimelineItem(title: '📝 ${n['by']}', time: '${n['date']}'.isEmpty ? 'ללא-תאריך' : _StuData.fmt('${n['date']}'), body: '${n['text']}'),
           _h('דגלים'),
-          Wrap(spacing: 6, runSpacing: 6, children: [for (final f in _StuData.flags(s)) StatusChip(label: f, tone: 3), if (_StuData.flags(s).isEmpty) const StatusChip(label: 'אין דגלים', tone: 0)]),
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final f in _StuData.flags(s)) ForgeIntelPill(fields: [f]), if (_StuData.flags(s).isEmpty) const ForgeIntelPill(fields: ['אין דגלים'])]),
           _h('משפחה · פניות'),
-          MediaRow(glyph: '👪', title: '${_StuData.parentName(s)} · ${_StuData.parentMissing(s) ? '⛔ אין טלפון' : _StuData.parentPhone(s)}', subtitle: 'אחים במוסד: ${_StuData.siblings(s).isEmpty ? 'אין' : _StuData.siblings(s).map((x) => x['first']).join(' · ')} · פניות פתוחות: ${_StuData.openTasksOf(s).length}'),
+          ForgeContactTile(fields: ['${_StuData.parentName(s)} · ${_StuData.parentMissing(s) ? '⛔ אין טלפון' : _StuData.parentPhone(s)}', 'אחים במוסד: ${_StuData.siblings(s).isEmpty ? 'אין' : _StuData.siblings(s).map((x) => x['first']).join(' · ')} · פניות פתוחות: ${_StuData.openTasksOf(s).length}']),
         ];
       case 1: // אקדמי: ציונים-לפי-מקצוע (מקום-שמור) · מגמה-אקדמית (מקום-שמור) · חוגים · היסטוריית-כיתות (studentHistory) · תעודות/IEP/חונך/ציוני-חוץ (מקום-שמור)
         final g = s['grades'];
@@ -1161,53 +1164,53 @@ class _StudentsScreenState extends State<StudentsScreen> {
         final abs = _StuData.absencesOf(s)..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
         return [
           Row(children: [
-            BareStat(value: '${_StuData.presents(s)}', label: 'נוכחויות', inkColor: _ok, mutedColor: _muted),
-            BareStat(value: '${_StuData.absences(s)}', label: 'חיסורים', inkColor: _StuData.absences(s) > 0 ? _warning : _ink, mutedColor: _muted),
-            BareStat(value: '${_StuData.noshow(s)}', label: 'אי-הופעות', inkColor: _StuData.noshow(s) > 0 ? _danger : _ink, mutedColor: _muted),
-            BareStat(value: _StuData.attendance(s) == null ? '—' : '${_StuData.attendancePct(s)}%', label: 'נוכחות%', inkColor: _acc, mutedColor: _muted),
+            Expanded(child: ForgeStatPlain(fields: ['נוכחויות', '${_StuData.presents(s)}'])),
+            Expanded(child: ForgeStatPlain(fields: ['חיסורים', '${_StuData.absences(s)}'])),
+            Expanded(child: ForgeStatPlain(fields: ['אי-הופעות', '${_StuData.noshow(s)}'])),
+            Expanded(child: ForgeStatPlain(fields: ['נוכחות%', _StuData.attendance(s) == null ? '—' : '${_StuData.attendancePct(s)}%'])),
           ]),
           _gap(10),
           _h('נוכחות חודשית (%)'),
-          if (ms.isEmpty) const EmptyState(glyph: '📅', message: 'אין נתוני-נוכחות עדיין') else NeonBars(labels: ms, values: [for (final m in ms) _StuData.monthRate(s, m) * 100], tone: 0),
+          if (ms.isEmpty) const ForgeSearchEmptyState(fields: ['אין נתוני-נוכחות עדיין', '']) else NeonBars(labels: ms, values: [for (final m in ms) _StuData.monthRate(s, m) * 100], tone: 0),
           _h('חיסורים · ${abs.length}'),
-          if (abs.isEmpty) const EmptyState(glyph: '✅', message: 'אין חיסורים רשומים') else for (final a in abs.take(12)) TimelineItem(title: a['noshow'] == true ? '⛔ אי-הופעה' : '🚫 חיסור', time: _StuData.fmt(a['date'] as String?), body: '${a['reason']}${a['justified'] == true ? ' · מוצדק' : ' · לא-מוצדק'}'),
+          if (abs.isEmpty) const ForgeSearchEmptyState(fields: ['אין חיסורים רשומים', '']) else for (final a in abs.take(12)) TimelineItem(title: a['noshow'] == true ? '⛔ אי-הופעה' : '🚫 חיסור', time: _StuData.fmt(a['date'] as String?), body: '${a['reason']}${a['justified'] == true ? ' · מוצדק' : ' · לא-מוצדק'}'),
         ];
       case 3: // חברתי-רגשי: מקום-שמור + חוגים/מועדונים (מקור: Enrollment⊕Course.cat=חוג) + תפקידים/הישגים (מקום-שמור)
         final clubs = _StuData.coursesOf(s, cat: 'חוג');
         return [
           if (s['social'] is num) StatRow(label: 'מדד חברתי-רגשי (1=מצוקה)', value: '${s['social']}', fraction: (s['social'] as num).toDouble().clamp(0.0, 1.0)) else _slot('מדד חברתי-רגשי', 'שאלון/יועץ ⇒ s.social'),
           _h('מועדונים וחוגים · ${clubs.length}'),
-          if (clubs.isEmpty) const EmptyState(glyph: '🎭', message: 'לא רשום/ה לחוגים') else for (final c in clubs) MediaRow(glyph: '🎭', title: '${c['name']}', subtitle: '${_StuData.teacherOf(c['teacherId'] as String?)?['name'] ?? ''}'),
+          if (clubs.isEmpty) const ForgeSearchEmptyState(fields: ['לא רשום/ה לחוגים', '']) else for (final c in clubs) ForgeContactTile(fields: ['${c['name']}', '${_StuData.teacherOf(c['teacherId'] as String?)?['name'] ?? ''}']),
           _h('מקומות-שמורים'), _slot('תפקידים', 's.roles'), _slot('הישגים', 's.achievements'),
         ];
       case 4: // התנהגות: מקום-שמור + הערות-התנהגות מהפנקס
         final bn = _StuData.notes(s).where((n) => n['kind'] == 'behavior').toList();
         return [
-          if (s['behavior'] is num) Row(children: [BareStat(value: '${s['behavior']}', label: 'אירועי-התנהגות בחודש', inkColor: _warning, mutedColor: _muted)]) else _slot('אירועי-התנהגות', 'מודול-משמעת ⇒ s.behavior'),
+          if (s['behavior'] is num) Row(children: [Expanded(child: ForgeStatPlain(fields: ['אירועי-התנהגות בחודש', '${s['behavior']}']))]) else _slot('אירועי-התנהגות', 'מודול-משמעת ⇒ s.behavior'),
           _h('הערות-מחנך/ת לפי שנה״ל'),
           for (final e in _StuData.notesByYear(s).entries) ExpandableTile(title: '${e.key} · ${e.value.length}', body: e.value.map((n) => '${'${n['date']}'.isEmpty ? '' : '${_StuData.fmt('${n['date']}')} · '}${n['by']}: ${n['text']}').join('\n')),
           _h('הערות-התנהגות · ${bn.length}'),
-          if (bn.isEmpty) const EmptyState(glyph: '📝', message: 'אין הערות-התנהגות') else for (final n in bn) TimelineItem(title: '📝 ${n['by']}', time: _StuData.fmt('${n['date']}'), body: '${n['text']}'),
+          if (bn.isEmpty) const ForgeSearchEmptyState(fields: ['אין הערות-התנהגות', '']) else for (final n in bn) TimelineItem(title: '📝 ${n['by']}', time: _StuData.fmt('${n['date']}'), body: '${n['text']}'),
         ];
       case 5: // משפחה: הורים+קשר · כתובת · שפה · אחים · סוציו-אקונומי (מוגן) · אישורי-הורים · הסעה (מקום-שמור)
         final f = _StuData.fam(s);
         return [
-          MediaRow(glyph: '👩', title: '${f['mother']}'.isEmpty ? 'אם: —' : 'אם: ${f['mother']}', subtitle: _StuData.parentMissing(s) ? '⛔ אין טלפון-קשר' : '${_StuData.parentPhone(s)} · ${_StuData.telOf(s) ?? ''}'),
-          MediaRow(glyph: '👨', title: '${f['father']}'.isEmpty ? 'אב: —' : 'אב: ${f['father']}', subtitle: '${f['phone2']}'.isEmpty ? '' : formatIsraeliPhone(f['phone2'])),
+          ForgeContactTile(fields: ['${f['mother']}'.isEmpty ? 'אם: —' : 'אם: ${f['mother']}', _StuData.parentMissing(s) ? '⛔ אין טלפון-קשר' : '${_StuData.parentPhone(s)} · ${_StuData.telOf(s) ?? ''}']),
+          ForgeContactTile(fields: ['${f['father']}'.isEmpty ? 'אב: —' : 'אב: ${f['father']}', '${f['phone2']}'.isEmpty ? '' : formatIsraeliPhone(f['phone2'])]),
           ..._kv('כתובת', '${f['address']} ${f['city']}'.trim().isEmpty ? '—' : '${f['address']} ${f['city']}'),
           ..._kv('שפת-בית', '${f['language']}'.isEmpty ? '—' : '${f['language']}'),
           ..._kv('מצב משפחתי', '${f['maritalStatus']}'.isEmpty ? '—' : '${f['maritalStatus']}'),
           ..._kv('סטטוס-משפחה', '${f['status']}'),
           _h('אחים במוסד · ${_StuData.siblings(s).length}'),
-          if (_StuData.siblings(s).isEmpty) const StatusChip(label: 'אין אחים במוסד', tone: 0) else Wrap(spacing: 6, children: [for (final o in _StuData.siblings(s)) SoftButton(label: '🔗 ${o['first']} · ${_StuData.className(o)}', tone: 0, onTap: () { Navigator.of(ctx).pop(); _openPanel(o); })]),
+          if (_StuData.siblings(s).isEmpty) const ForgeIntelPill(fields: ['אין אחים במוסד']) else Wrap(spacing: 6, children: [for (final o in _StuData.siblings(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(ctx).pop(); _openPanel(o); }, child: ForgeSoftButton(fields: ['🔗 ${o['first']} · ${_StuData.className(o)}']))]),
           _h('מצב סוציו-אקונומי · 🔒 מוגן'),
-          if (_can('stu.protected')) Wrap(spacing: 6, children: [StatusChip(label: 'סיוע: ${_StuData.protectedField(_role, s, 'tzedaka', '${f['tzedaka']}')}', tone: 3), StatusChip(label: 'הנחה: ${_StuData.protectedField(_role, s, 'discount', '${f['discount']}'.isEmpty ? '' : '${f['discount']}%')}', tone: 3), const StatusChip(label: '👁 נרשם בלוג-חשיפה', tone: 0)])
-          else const StatusChip(label: '🔒 פרטיות-נעולה · יועץ/ת בלבד', tone: 2),
+          if (_can('stu.protected')) Wrap(spacing: 6, children: [ForgeIntelPill(fields: ['סיוע: ${_StuData.protectedField(_role, s, 'tzedaka', '${f['tzedaka']}')}']), ForgeIntelPill(fields: ['הנחה: ${_StuData.protectedField(_role, s, 'discount', '${f['discount']}'.isEmpty ? '' : '${f['discount']}%')}']), const ForgeIntelPill(fields: ['👁 נרשם בלוג-חשיפה'])])
+          else const ForgeIntelPill(fields: ['🔒 פרטיות-נעולה · יועץ/ת בלבד']),
           _h('אישורי-הורים'),
           Wrap(spacing: 6, runSpacing: 6, children: [
-            for (final c in _StuData.consentDefs) StatusChip(label: '${s[c['key']] == true ? '✅' : '✗'} ${c['label']}', tone: s[c['key']] == true ? 1 : 0),
-            StatusChip(label: 'טיולים: ${_StuData.consentSlot(s, 'trips')}', tone: _StuData.consentSlot(s, 'trips').startsWith('⛔') ? 2 : 0),
-            StatusChip(label: 'תרופות: ${_StuData.consentSlot(s, 'meds')}', tone: _StuData.consentSlot(s, 'meds').startsWith('⛔') ? 2 : 0),
+            for (final c in _StuData.consentDefs) ForgeIntelPill(fields: ['${s[c['key']] == true ? '✅' : '✗'} ${c['label']}']),
+            ForgeIntelPill(fields: ['טיולים: ${_StuData.consentSlot(s, 'trips')}']),
+            ForgeIntelPill(fields: ['תרופות: ${_StuData.consentSlot(s, 'meds')}']),
           ]),
           _gap(6), _slot('הסעה', 's.transport'),
         ];
@@ -1215,22 +1218,22 @@ class _StudentsScreenState extends State<StudentsScreen> {
         final docs = (_StuData.fam(s)['docs'] as List).cast<Map<String, dynamic>>();
         return [
           _h('מסמכים · ${docs.length}'),
-          if (docs.isEmpty) const EmptyState(glyph: '📎', message: 'אין מסמכים') else for (final d in docs) TimelineItem(title: '📎 ${d['name']}', time: _StuData.fmt(d['addedAt'] as String?)),
+          if (docs.isEmpty) const ForgeSearchEmptyState(fields: ['אין מסמכים', '']) else for (final d in docs) TimelineItem(title: '📎 ${d['name']}', time: _StuData.fmt(d['addedAt'] as String?)),
           _h('תיק-רפואי · 🔒 מוגן'),
-          if ('${s['health'] ?? ''}'.isEmpty) const StatusChip(label: 'אין רישום רפואי', tone: 0)
-          else if (_can('stu.protected')) StatusChip(label: '🩺 ${_StuData.protectedField(_role, s, 'health', '${s['health']}')} · 👁 נרשם בלוג-חשיפה', tone: 3)
-          else const StatusChip(label: '🔒 פרטיות-נעולה · קיים רישום רפואי (יועץ/ת)', tone: 2),
+          if ('${s['health'] ?? ''}'.isEmpty) const ForgeIntelPill(fields: ['אין רישום רפואי'])
+          else if (_can('stu.protected')) ForgeIntelPill(fields: ['🩺 ${_StuData.protectedField(_role, s, 'health', '${s['health']}')} · 👁 נרשם בלוג-חשיפה'])
+          else const ForgeIntelPill(fields: ['🔒 פרטיות-נעולה · קיים רישום רפואי (יועץ/ת)']),
           _gap(6), _slot('אבחונים', 's.diagnoses'), _slot('תרופות', 's.medications'),
         ];
       case 7: // ציר-זמן מאוחד
         final tl = _StuData.timeline(s);
-        return [_h('ציר-זמן · ${tl.length}'), if (tl.isEmpty) const EmptyState(glyph: '🕒', message: 'אין אירועים') else for (final e in tl) TimelineItem(title: e['title']!, time: _StuData.fmt(e['date']), body: e['body']!.isEmpty ? null : e['body'])];
+        return [_h('ציר-זמן · ${tl.length}'), if (tl.isEmpty) const ForgeSearchEmptyState(fields: ['אין אירועים', '']) else for (final e in tl) TimelineItem(title: e['title']!, time: _StuData.fmt(e['date']), body: e['body']!.isEmpty ? null : e['body'])];
       default: // אודיט: רשומות-אודיט של התלמיד (at·who·act·what)
         final au = _StuData.auditOf(s);
         return [
-          if (!_can('stu.audit') && _StuData.roleName(_role) != 'admin') const AlertBanner(glyph: '🔒', tone: 2, message: 'אודיט מלא — מנהל/ת ויועץ/ת בלבד') else ...[
-            _h('אודיט · ${au.length}'), AlertBanner(glyph: '🗄', tone: 0, message: _StuData.encryptionNote),
-            if (au.isEmpty) const EmptyState(glyph: '🧾', message: 'אין רשומות-אודיט') else for (final a in au) TimelineItem(title: '${a['act']}${a['act'] == 'expose' ? ' 👁' : ''} · ${a['who']}', time: '${a['at']}', body: '${a['what']}'),
+          if (!_can('stu.audit') && _StuData.roleName(_role) != 'admin') const ForgeSectionPill(fields: ['אודיט מלא — מנהל/ת ויועץ/ת בלבד', '']) else ...[
+            _h('אודיט · ${au.length}'), ForgeSectionPill(fields: [_StuData.encryptionNote, '']),
+            if (au.isEmpty) const ForgeSearchEmptyState(fields: ['אין רשומות-אודיט', '']) else for (final a in au) TimelineItem(title: '${a['act']}${a['act'] == 'expose' ? ' 👁' : ''} · ${a['who']}', time: '${a['at']}', body: '${a['what']}'),
           ],
         ];
     }
@@ -1241,25 +1244,25 @@ class _StudentsScreenState extends State<StudentsScreen> {
     final active = _StuData.isActive(s), st = _StuData.status(s);
     if (_StuData.isParent(_role)) return const []; // הורה: צפייה בלבד
     return [
-      if (_can('stu.edit')) SoftButton(label: '✏️ ערוך', tone: 0, onTap: () => _editForm(ctx, s, act)),
-      if (_can('stu.move')) SoftButton(label: '🏫 העבר-כיתה', tone: 0, onTap: () => _pick(ctx, 'העבר-כיתה', [for (final c in _StuData.homeroomCourses()) c['name'] as String], (v) => act(() => _StuData.moveClass(s, v, _who)))),
-      if (_can('stu.status') && active) SoftButton(label: '⏸ הקפא', tone: 3, onTap: () => act(() => _StuData.setStatus(s, 'הוקפא', _who))),
-      if (_can('stu.status') && !active) SoftButton(label: '▶ החזר לפעיל', tone: 1, onTap: () => act(() => _StuData.setStatus(s, 'פעיל', _who))),
-      if (_can('stu.status') && st != 'עזב') SoftButton(label: '🚪 סמן-עזב', tone: 2, onTap: () => act(() => _StuData.setStatus(s, 'עזב', _who))),
-      if (_can('stu.status') && st != 'בוגר') SoftButton(label: '🎓 סמן-בוגר', tone: 0, onTap: () => act(() => _StuData.setStatus(s, 'בוגר', _who))),
-      if (_can('stu.note')) SoftButton(label: '📝 הוסף-הערה', tone: 1, onTap: () => _prompt(ctx, 'הערת-מחנך/ת', 'מה קרה? מה סוכם?', (v) => act(() => _StuData.addNote(s, v, _who)))),
-      if (_can('stu.note')) SoftButton(label: '⚠ הערת-התנהגות', tone: 3, onTap: () => _prompt(ctx, 'הערת-התנהגות', 'אירוע · תגובה', (v) => act(() => _StuData.addNote(s, v, _who, kind: 'behavior')))),
-      if (_can('stu.flag')) SoftButton(label: '🚩 הוסף-דגל', tone: 3, onTap: () => _pick(ctx, 'הוסף-דגל', const ['♿ צרכים-מיוחדים', '💛 רגישות', '🩺 רפואי', '🗣 שפה', '🚌 הסעה'], (v) => act(() => _StuData.addFlag(s, v, _who)))),
-      if (_can('stu.ticket')) SoftButton(label: '📨 פתח-פנייה (יועץ/ת)', tone: 2, onTap: () => _prompt(ctx, 'פנייה ליועץ/ת', 'נושא הפנייה', (v) => act(() => _StuData.openTicket(s, 'פנייה ליועצת: ${s['name']} — $v', _who)))),
-      if (_can('stu.parentMsg')) SoftButton(label: '💬 שלח-להורה', tone: 0, onTap: () => _showText(ctx, 'הודעה להורה · ${_StuData.parentName(s)}', _StuData.waOf(s, 'שלום ${_StuData.parentName(s)}, מדברים מבית-הספר בעניין ${s['first']}. נשמח לשוחח.') ?? '⛔ אין טלפון-הורה מעודכן — לא ניתן לשלוח')),
-      if (_can('stu.meeting')) SoftButton(label: '📅 הזמן-לשיחה', tone: 0, onTap: () => _prompt(ctx, 'הזמנה לשיחה', 'תאריך (YYYY-MM-DD)', (v) => act(() => _StuData.inviteMeeting(s, 'שיחה עם הורי ${s['first']}', v, _who)))),
-      if (_can('stu.doc')) SoftButton(label: '📎 צרף-מסמך', tone: 0, onTap: () => _prompt(ctx, 'צרף-מסמך', 'שם המסמך', (v) => act(() => _StuData.attachDoc(s, v, _who)))),
-      SoftButton(label: '🖨 הדפס-כרטיס', tone: 0, onTap: () => _showText(ctx, 'כרטיס-תלמיד להדפסה', _StuData.card(s))),
-      if (_can('stu.merge')) for (final d in _StuData.dupPeers(s)) SoftButton(label: '👯 מזג ${d['id']} לכאן', tone: 3, onTap: () => act(() => _StuData.mergeDuplicate(s, d, _who))),
-      if (_StuData.roleName(_role) == 'admin') SoftButton(label: '🗑 מחק רשומה', tone: 2, onTap: () { act(() => _StuData.deleteStudent(s, _who)); Navigator.of(ctx).pop(); }),
-      if (_can('stu.consent')) SoftButton(label: '📷 אישור-מדיה: ${s['mPhotos'] == true ? 'בטל' : 'סמן'}', tone: 0, onTap: () => act(() => _StuData.toggleConsent(s, 'mPhotos', _who))),
-      if (_can('stu.consent')) SoftButton(label: '🧳 בקש אישור-טיולים', tone: 0, onTap: () => act(() => _StuData.requestConsent(s, 'trips', _who))),
-      if (_can('stu.ticket')) for (final t in _StuData.openTasksOf(s)) SoftButton(label: '✅ סגור פנייה ${t['id']}', tone: 1, onTap: () => act(() => _StuData.closeTicket(t, _who))), // תווית קצרה (גיליון ≤640px · נתפס בבדיקת-widget)
+      if (_can('stu.edit')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _editForm(ctx, s, act), child: ForgeSoftButton(fields: ['✏️ ערוך'])),
+      if (_can('stu.move')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pick(ctx, 'העבר-כיתה', [for (final c in _StuData.homeroomCourses()) c['name'] as String], (v) => act(() => _StuData.moveClass(s, v, _who))), child: ForgeSoftButton(fields: ['🏫 העבר-כיתה'])),
+      if (_can('stu.status') && active) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'הוקפא', _who)), child: ForgeSoftButton(fields: ['⏸ הקפא'])),
+      if (_can('stu.status') && !active) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'פעיל', _who)), child: ForgeSoftButton(fields: ['▶ החזר לפעיל'])),
+      if (_can('stu.status') && st != 'עזב') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'עזב', _who)), child: ForgeSoftButton(fields: ['🚪 סמן-עזב'])),
+      if (_can('stu.status') && st != 'בוגר') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'בוגר', _who)), child: ForgeSoftButton(fields: ['🎓 סמן-בוגר'])),
+      if (_can('stu.note')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הערת-מחנך/ת', 'מה קרה? מה סוכם?', (v) => act(() => _StuData.addNote(s, v, _who))), child: ForgeSoftButton(fields: ['📝 הוסף-הערה'])),
+      if (_can('stu.note')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הערת-התנהגות', 'אירוע · תגובה', (v) => act(() => _StuData.addNote(s, v, _who, kind: 'behavior'))), child: ForgeSoftButton(fields: ['⚠ הערת-התנהגות'])),
+      if (_can('stu.flag')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pick(ctx, 'הוסף-דגל', const ['♿ צרכים-מיוחדים', '💛 רגישות', '🩺 רפואי', '🗣 שפה', '🚌 הסעה'], (v) => act(() => _StuData.addFlag(s, v, _who))), child: ForgeSoftButton(fields: ['🚩 הוסף-דגל'])),
+      if (_can('stu.ticket')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'פנייה ליועץ/ת', 'נושא הפנייה', (v) => act(() => _StuData.openTicket(s, 'פנייה ליועצת: ${s['name']} — $v', _who))), child: ForgeSoftButton(fields: ['📨 פתח-פנייה (יועץ/ת)'])),
+      if (_can('stu.parentMsg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(ctx, 'הודעה להורה · ${_StuData.parentName(s)}', _StuData.waOf(s, 'שלום ${_StuData.parentName(s)}, מדברים מבית-הספר בעניין ${s['first']}. נשמח לשוחח.') ?? '⛔ אין טלפון-הורה מעודכן — לא ניתן לשלוח'), child: ForgeSoftButton(fields: ['💬 שלח-להורה'])),
+      if (_can('stu.meeting')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הזמנה לשיחה', 'תאריך (YYYY-MM-DD)', (v) => act(() => _StuData.inviteMeeting(s, 'שיחה עם הורי ${s['first']}', v, _who))), child: ForgeSoftButton(fields: ['📅 הזמן-לשיחה'])),
+      if (_can('stu.doc')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'צרף-מסמך', 'שם המסמך', (v) => act(() => _StuData.attachDoc(s, v, _who))), child: ForgeSoftButton(fields: ['📎 צרף-מסמך'])),
+      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(ctx, 'כרטיס-תלמיד להדפסה', _StuData.card(s)), child: ForgeSoftButton(fields: ['🖨 הדפס-כרטיס'])),
+      if (_can('stu.merge')) for (final d in _StuData.dupPeers(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.mergeDuplicate(s, d, _who)), child: ForgeSoftButton(fields: ['👯 מזג ${d['id']} לכאן'])),
+      if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => _StuData.deleteStudent(s, _who)); Navigator.of(ctx).pop(); }, child: ForgeSoftButton(fields: ['🗑 מחק רשומה'])),
+      if (_can('stu.consent')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.toggleConsent(s, 'mPhotos', _who)), child: ForgeSoftButton(fields: ['📷 אישור-מדיה: ${s['mPhotos'] == true ? 'בטל' : 'סמן'}'])),
+      if (_can('stu.consent')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.requestConsent(s, 'trips', _who)), child: ForgeSoftButton(fields: ['🧳 בקש אישור-טיולים'])),
+      if (_can('stu.ticket')) for (final t in _StuData.openTasksOf(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.closeTicket(t, _who)), child: ForgeSoftButton(fields: ['✅ סגור פנייה ${t['id']}'])), // תווית קצרה (גיליון ≤640px · נתפס בבדיקת-widget)
     ];
   }
 
@@ -1271,7 +1274,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
       child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         DsField(label: title, hint: hint, value: v, onChanged: (x) => v = x),
-        Row(children: [SoftButton(label: '💾 שמור', tone: 1, onTap: () { if (v.trim().isNotEmpty) { onSave(v.trim()); Navigator.of(c2).pop(); } })]),
+        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.trim().isNotEmpty) { onSave(v.trim()); Navigator.of(c2).pop(); } }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
       ])),
     ));
   }
@@ -1282,7 +1285,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
       child: GlassCard(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         DsEnumField(label: title, options: options, value: v, onChanged: (x) => setS(() => v = x)),
-        Row(children: [SoftButton(label: '💾 שמור', tone: 1, onTap: () { if (v.isNotEmpty) { onSave(v); Navigator.of(c2).pop(); } })]),
+        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.isNotEmpty) { onSave(v); Navigator.of(c2).pop(); } }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
       ])),
     )));
   }
@@ -1307,7 +1310,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
         Text('עריכה · ${s['name']}', style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
         _gap(8),
-        Row(children: [SoftButton(label: '💾 שמור', tone: 1, onTap: () { act(() { for (final k in vals.keys) { if (vals[k] != '${k == 'first' || k == 'school' ? s[k] ?? '' : f[k]}') _StuData.editField(s, k, vals[k]!, _who); } }); Navigator.of(c2).pop(); })]),
+        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() { for (final k in vals.keys) { if (vals[k] != '${k == 'first' || k == 'school' ? s[k] ?? '' : f[k]}') _StuData.editField(s, k, vals[k]!, _who); } }); Navigator.of(c2).pop(); }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
       ]))),
     ));
   }
@@ -1324,11 +1327,11 @@ class _StudentsScreenState extends State<StudentsScreen> {
         for (final k in vals.keys) DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x),
         DsEnumField(label: 'כיתה', options: classes, value: cls, onChanged: (x) => setS(() => cls = x)),
         _gap(8),
-        Row(children: [SoftButton(label: '💾 רשום', tone: 1, onTap: () {
+        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
           if (vals['first']!.trim().isEmpty || vals['last']!.trim().isEmpty) return;
           setState(() => _StuData.addStudent(first: vals['first']!.trim(), last: vals['last']!.trim(), courseName: cls, birth: vals['birth']!.trim(), parent: vals['parent']!.trim(), phone: vals['phone']!.trim(), who: _who));
           Navigator.of(c2).pop();
-        })]),
+        }, child: ForgeSoftButton(fields: ['💾 רשום'])))]),
       ]))),
     )));
   }
@@ -1341,11 +1344,11 @@ class _StudentsScreenState extends State<StudentsScreen> {
         const Text('ייבוא תלמידים (CSV)', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל תלמיד/ה', style: TextStyle(color: _muted, fontSize: 12)),
         DsField(label: 'CSV', hint: 'דנה,כהן,י׳-1 · כיתת-חינוך,2010-05-05,רונית,0501234567', value: text, onChanged: (x) => text = x),
-        Row(children: [SoftButton(label: '📥 ייבא', tone: 1, onTap: () {
+        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
           Navigator.of(c2).pop();
           setState(() { _importing = true; });
           Future.delayed(const Duration(milliseconds: 600), () { if (!mounted) return; setState(() { _importResult = _StuData.importCsv(text, _who); _importing = false; if (_importResult!['ok'] == 0) { _error = 'ייבוא נכשל: אין שורות תקינות (${_importResult!['skipped']} נדחו) — בדוק/י את עמודות-ה-CSV'; _importResult = null; } }); });
-        })]),
+        }, child: ForgeSoftButton(fields: ['📥 ייבא'])))]),
       ])),
     ));
   }

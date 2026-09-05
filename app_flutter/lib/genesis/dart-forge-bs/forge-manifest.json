@@ -1,7 +1,7 @@
 {
   "families": {
     "action": 49,
-    "card": 31,
+    "card": 32,
     "chat": 6,
     "composite": 18,
     "dataviz": 24,
@@ -18,7 +18,7 @@
     "temporal": 7,
     "text": 16
   },
-  "total": 353,
+  "total": 354,
   "generatedBy": "machtzev/ds-forge.mjs",
   "renamed": [
     {
@@ -400,7 +400,7 @@
       "cls": "Forge7AtomsText"
     }
   ],
-  "uniqueNames": 299,
+  "uniqueNames": 300,
   "atoms": [
     {
       "family": "action",
@@ -1089,6 +1089,18 @@
         "Label",
         "1,024",
         "4%"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeStatPlain",
+      "file": "stat_plain.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "248"
       ]
     },
     {

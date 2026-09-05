@@ -7,6 +7,7 @@ export 'spotlight_card.dart';
 export 'hero_card.dart';
 export 'stat_tile.dart';
 export 'metric_tile.dart';
+export 'stat_plain.dart';
 export 'kpi_box.dart';
 export 'trend_card.dart';
 export 'summary_stat_strip.dart';
