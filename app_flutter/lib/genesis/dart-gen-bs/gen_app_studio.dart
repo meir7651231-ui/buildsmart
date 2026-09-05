@@ -6,7 +6,7 @@
 //   "קריטריון זכאות להנחה" ⇒ ShopCriterion ⇐ schoolos_courses.dart (medium · שמות 3/4)
 //   "נדבות לפי חודש" ⇒ Donation ⇐ schoolos_fees.dart (strong · שמות 5/7)
 //   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: Course:∅ · Member:1 עמודות · Teacher:9 עמודות · ShopAssignment:∅ · ShopCriterion:∅ · Donation:∅
-//   G12c · תפקידי-עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · empty=ForgeSearchEmptyState · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
+//   G12c · תפקידי-עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · empty=ForgeSearchEmptyState · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
 //   G12b · עור: forge — אריח-KPI = ForgeStatPlain (card · 2 חריצים · תוכן-העיצוב ["Label","248"] ⇒ ערך בחריץ 1, תווית בחריץ 0, השאר '') — הצבה של הבעלים ב-app-golden, מאומתת מבנית
 //   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): Course:initialMetric · Member:initialMetric · Teacher:initialMetric · ShopAssignment:initialMetric · ShopCriterion:initialMetric · Donation:∅
 //   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: Course:initialPanelId · Member:initialPanelId · Teacher:initialPanelId · ShopAssignment:initialPanel · ShopCriterion:initialPanelId · Donation:initialPanelId
@@ -21,12 +21,12 @@ import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפ
 import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
 import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (מדף)
 import '../dart-data-maor/norm-search-strings.dart'; // NORM_SEARCH_T (אטום-דאטה)
-import 'gen_retarget_course_from_crs_skeb49ef.dart' show CourseScreen, CourseFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_member_from_stu_skeb49ef.dart' show MemberScreen, MemberFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_teacher_from_stu_skeb49ef.dart' show TeacherScreen, TeacherFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_shopassignment_from_tch_skeb49ef.dart' show ShopAssignmentScreen, ShopAssignmentFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_shopcriterion_from_crs_skeb49ef.dart' show ShopCriterionScreen, ShopCriterionFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_donation_from_fee_skeb49ef.dart' show DonationScreen, DonationFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_course_from_crs_skc9ebba.dart' show CourseScreen, CourseFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_member_from_stu_skc9ebba.dart' show MemberScreen, MemberFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_teacher_from_stu_skc9ebba.dart' show TeacherScreen, TeacherFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_shopassignment_from_tch_skc9ebba.dart' show ShopAssignmentScreen, ShopAssignmentFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_shopcriterion_from_crs_skc9ebba.dart' show ShopCriterionScreen, ShopCriterionFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_donation_from_fee_skc9ebba.dart' show DonationScreen, DonationFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 
 class StudioApp extends StatelessWidget {
   const StudioApp({super.key});

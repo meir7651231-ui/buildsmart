@@ -1,5 +1,5 @@
-// 🎨 schoolos_parents.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
-//   החלפות: stat×0 · hero×1 · statRow×25 · button×47 · statusChip×30 · banner×24 · emptyState×11 · mediaRow×13 · section×5 · segmented×5 · meter×1 · frame×4 · timeline×4 · field×10 · enumField×13 · dateField×2 · search×1 · pageHeader×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_parents.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
+//   החלפות: stat×0 · hero×1 · statRow×25 · button×47 · statusChip×30 · banner×24 · emptyState×11 · mediaRow×13 · section×5 · segmented×5 · meter×1 · frame×4 · timeline×4 · field×10 · enumField×13 · dateField×2 · search×1 · pageHeader×2 · table×2 · bars×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 👪 SchoolOS · הורים ותקשורת — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-PARENTS-FULL-2026-09-04.
 // מטרה: "ששום הורה לא יגלה משהו על ילדו מאוחר מדי — ושהצוות יגיע לכל הורה בערוץ הנכון,
 //         בזמן הנכון, בטון הנכון, ויידע שההודעה נקראה."
@@ -87,6 +87,8 @@ import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודו
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 const _danger = Color(0xFFF43F5E);
@@ -877,27 +879,27 @@ class _ParentsScreenState extends State<ParentsScreen> {
         ])),
         _gap(8),
         // ── מרכז-אוטומציות (פרואקטיבי): המערכת מתריעה לפני שדבר נשמט ──
-        if (_PrData.localQuiet) ...[ForgeSectionPill(fields: ['שעות-מנוחה (${QUIET_FROM}:00–${QUIET_TO}:00): הודעות יוחזקו עד הבוקר${_crisis ? ' · 🚨 משבר: שליחה מיידית' : ''}', '']), _gap(8)],
-        if (rb != null) ...[ForgeSectionPill(fields: ['מנוחה: $rb — הודעות לא-דחופות מוחזקות${_crisis ? ' · 🚨 משבר: שליחה מיידית' : ''}', '']), _gap(8)],
-        if (staleN > 0) ...[ForgeSectionPill(fields: ['$staleN הודעות לא-נקראו מעל ${_PrData.unreadAlertDays * 24} שעות — לשקול ערוץ-אחר', '']), _gap(8)],
-        if (unrespN > 0) ...[ForgeSectionPill(fields: ['$unrespN הורים לא-מגיבים ⇒ דגל-סיכון לתלמיד: ${scope.where((f) => _PrData.engagement(f) == 'unresponsive').map(_PrData.famLabel).join(' · ')}', '']), _gap(8)],
+        if (_PrData.localQuiet) ...[ForgeSectionPill(items: [['שעות-מנוחה (${QUIET_FROM}:00–${QUIET_TO}:00): הודעות יוחזקו עד הבוקר${_crisis ? ' · 🚨 משבר: שליחה מיידית' : ''}']], variants: const <int>[0]), _gap(8)],
+        if (rb != null) ...[ForgeSectionPill(items: [['מנוחה: $rb — הודעות לא-דחופות מוחזקות${_crisis ? ' · 🚨 משבר: שליחה מיידית' : ''}']], variants: const <int>[0]), _gap(8)],
+        if (staleN > 0) ...[ForgeSectionPill(items: [['$staleN הודעות לא-נקראו מעל ${_PrData.unreadAlertDays * 24} שעות — לשקול ערוץ-אחר']], variants: const <int>[0]), _gap(8)],
+        if (unrespN > 0) ...[ForgeSectionPill(items: [['$unrespN הורים לא-מגיבים ⇒ דגל-סיכון לתלמיד: ${scope.where((f) => _PrData.engagement(f) == 'unresponsive').map(_PrData.famLabel).join(' · ')}']], variants: const <int>[0]), _gap(8)],
         if (_PrData.expiringConsents.isNotEmpty) ...[
-          ForgeSectionPill(fields: ['${_PrData.expiringConsents.length} אישורים פוקעים תוך $shopExpiryWarnDays ימים: ${_PrData.expiringConsents.map((e) => e['itemName']).join(' · ')}', '']),
+          ForgeSectionPill(items: [['${_PrData.expiringConsents.length} אישורים פוקעים תוך $shopExpiryWarnDays ימים: ${_PrData.expiringConsents.map((e) => e['itemName']).join(' · ')}']], variants: const <int>[0]),
           if (_can('pr.consent') || _can('pr.consent.mark')) _wrap([for (final c in _PrData.pendingConsents.where((c) => dayDiff('${c['due']}', _PrData.today) >= -shopExpiryWarnDays)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _PrData.remindConsent(_actor, c)), child: ForgeSoftButton(fields: ['🔔 תזכורת · ${c['title']} (${_PrData.remindersOf(c)})']))]),
           _gap(8),
         ],
         if (overdueQ > 0) ...[
-          ForgeSectionPill(fields: ['$overdueQ פניות ללא-מענה מעבר לסף ⇒ העלאה-להנהלה', '']),
+          ForgeSectionPill(items: [['$overdueQ פניות ללא-מענה מעבר לסף ⇒ העלאה-להנהלה']], variants: const <int>[0]),
           _wrap([for (final q in _PrData.overdueInquiries.where((q) => !(q['escalated'] as bool) && _PrData.sensitiveOk(_role, q))) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _PrData.escalate(_actor, q)), child: ForgeSoftButton(fields: ['⬆ העלה: ${q['title']}']))]),
           _gap(8),
         ],
         if (_PrData.absencesToNotify.isNotEmpty && _can('pr.msg')) ...[
-          ForgeSectionPill(fields: ['${_PrData.absencesToNotify.length} חיסורים לא-מוצדקים (מנוכחות) ממתינים להודעה-אוטומטית להורים', '']),
+          ForgeSectionPill(items: [['${_PrData.absencesToNotify.length} חיסורים לא-מוצדקים (מנוכחות) ממתינים להודעה-אוטומטית להורים']], variants: const <int>[0]),
           _wrap([for (final a in _PrData.absencesToNotify) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _act(() => _PrData.notifyAbsence(_actor, a)), child: ForgeSoftButton(fields: ['📤 הודע · ${_PrData.famLabel(_PrData.fam(a['famId'] as String))} · ${a['date']}']))]),
           _gap(8),
         ],
         if (_PrData.summariesDue.isNotEmpty && _can('pr.meeting')) ...[
-          ForgeSectionPill(fields: ['${_PrData.summariesDue.length} פגישות הסתיימו בלי סיכום להורים', '']),
+          ForgeSectionPill(items: [['${_PrData.summariesDue.length} פגישות הסתיימו בלי סיכום להורים']], variants: const <int>[0]),
           _gap(8),
         ],
         // בורר-מבט
@@ -906,7 +908,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          ForgeSectionPill(fields: [_error!, ''])
+          ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
         else if (visible.isEmpty)
           Padding(padding: const EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: [scope.isEmpty ? 'אין הורים בהיקף שלך' : 'אין משפחות תואמות לחיפוש/סינון', '']))
         else if (_mode == 2)
@@ -919,8 +921,8 @@ class _ParentsScreenState extends State<ParentsScreen> {
               ForgeTitledSection(fields: ['${secTitle[st]} · ${buckets[st]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[for (final f in buckets[st]!) _row(f)]])),
         _gap(8),
         // מוסדי: התפלגות ערוצים/שפות (DsBars מנתונים-חיים) — מזין "בחירת-ערוץ" ו"תרגום-אוטו"
-        DsBars(title: '📡 ערוצים בפועל (מה-ההורה-עונה-לו)', labels: [for (final c in chanCounts) _PrData.channelLabel['${c[0]}'] ?? '${c[0]}'], values: [for (final c in chanCounts) (c[1] as int).toDouble()]),
-        DsBars(title: '🗣 שפות-הבית (תרגום-אוטו לכל שפה ≠ עברית)', labels: [for (final c in langCounts) '${c[0]}'], values: [for (final c in langCounts) (c[1] as int).toDouble()]),
+        ForgeBarChart(fields: ['📡 ערוצים בפועל (מה-ההורה-עונה-לו)', ''], values: (() { final _vs = [for (final c in chanCounts) (c[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+        ForgeBarChart(fields: ['🗣 שפות-הבית (תרגום-אוטו לכל שפה ≠ עברית)', ''], values: (() { final _vs = [for (final c in langCounts) (c[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       ]]);
   }
 
@@ -942,10 +944,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
   // 📋 טבלה מונחית-חוזה (columnDefs · מקום-שמור)
   Widget _table(List<Map<String, dynamic>> rows) {
     final cols = [for (final c in _PrData.columnDefs) if (_PrData.colShown(c, rows)) c];
-    return DsTable(
-      labels: [for (final c in cols) c['label'] as String],
-      rows: [for (final f in rows) [for (final c in cols) c['get'] != null ? (c['get'] as String Function(Map<String, dynamic>))(f) : '${f[c['key']] ?? '—'}']],
-    );
+    return ForgeDataGrid(bare: true, columns: [for (final c in cols) c['label'] as String], items: [for (final f in rows) [for (final c in cols) c['get'] != null ? (c['get'] as String Function(Map<String, dynamic>))(f) : '${f[c['key']] ?? '—'}']]);
   }
 
   // 📥 תיבת-הודעות: sortSupportThreads (לא-נקרא-צוות ראשון, חדש-ראשון) ⊕ BadgeCount ⊕ MediaRow
@@ -955,7 +954,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final sorted = (sortSupportThreads(ts) as List).cast<Map<String, dynamic>>();
     final noThread = fams.where((f) => _PrData.thread(f['id'] as String) == null).toList();
     return ForgeTitledSection(fields: ['📥 תיבת-הודעות · ${sorted.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-      if (sorted.isEmpty) const ForgeSearchEmptyState(fields: ['אין שיחות', '']),
+      if (sorted.isEmpty) ForgeSearchEmptyState(fields: ['אין שיחות', '']),
       for (final t in sorted)
         if (ids.contains(t['famId']))
           () {
@@ -967,7 +966,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
               child: Row(children: [
                 Expanded(child: ForgeContactTile(fields: [_PrData.famLabel(f), '${supportDayLabel('${t['lastAt']}', _PrData.today, SUPPORT_DAY_LABEL_T.cast<String, dynamic>())} ${supportMsgTime('${t['lastAt']}')} · ${supportPreview(t['lastText'], 36)}'])),
                 if (un > 0) BadgeCount(count: un),
-                if (un == 0) Flexible(child: ForgeIntelPill(fields: [byParent == 0 ? '✓✓ נקרא' : '✓ ${byParent} לא-נקרא'])),
+                if (un == 0) Flexible(child: ForgeStatusChip(items: [[byParent == 0 ? '✓✓ נקרא' : '✓ ${byParent} לא-נקרא']], variants: [const <int>[0, 1, 3, 2][(byParent == 0 ? 1 : 3) % 4]])),
                 IconButton(onPressed: () => _openPanel(f, tab: 0), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פתח שיחה'),
               ]),
             );
@@ -989,17 +988,17 @@ class _ParentsScreenState extends State<ParentsScreen> {
       IconButton(onPressed: () => _openPanel(f), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פרטים ופעולות'),
     ]);
     final chips = <Widget>[
-      ForgeIntelPill(fields: [_PrData.engagementLabel[_PrData.engagement(f)]!]),
+      ForgeStatusChip(items: [[_PrData.engagementLabel[_PrData.engagement(f)]!]], variants: [const <int>[0, 1, 3, 2][(_PrData.engagement(f) == 'active' ? 1 : _PrData.engagement(f) == 'quiet' ? 3 : 2) % 4]]),
       for (final pk in _PrData.parentKeys(f)) _contactChip(f, pk),
-      if (_PrData.unreadStale(f)) ForgeIntelPill(fields: ['👁 לא-נקרא ${dayDiff(_PrData.lastAdminAt(id)!, _PrData.today)} י׳ · $byParent']),
-      if (_PrData.hasFailed(f)) const ForgeIntelPill(fields: ['⚠️ הודעה-נכשלה']),
-      for (final c in _PrData.consentsOf(id)) if (_PrData.consentState(c) != 'received') ForgeIntelPill(fields: ['${_PrData.consentKind[c['kind']]} ${_PrData.consentLabel[_PrData.consentState(c)]}']),
-      for (final q in _PrData.inquiriesOf(id)) if ('${q['doneAt']}'.isEmpty && _PrData.sensitiveOk(_role, q)) ForgeIntelPill(fields: ['📨 ${q['title']}${_PrData.overdue(q) ? ' · חורג' : ''}${q['escalated'] == true ? ' · ⬆' : ''}']),
-      if (_PrData.feesFeed[id] != null && _can('pr.org')) ForgeIntelPill(fields: ['💳 חוב ₪${_PrData.feesFeed[id]}']),
-      if ((f['custody'] as Map?)?['restricted'] == true) const ForgeIntelPill(fields: ['⚖️ הסדר-ראייה מגביל']),
-      if (_PrData.blockedOf(f) != null) ForgeIntelPill(fields: ['🚫 ${_PrData.parent(f, _PrData.blockedOf(f)!)['role']} חסום/ה']),
-      for (final pk in _PrData.parentKeys(f)) if (_PrData.parent(f, pk)['lang'] != 'עברית') ForgeIntelPill(fields: ['🌐 תרגום-אוטו: ${_PrData.parent(f, pk)['lang']}']),
-      if (!_PrData.contactFresh(f)) ForgeIntelPill(fields: ['🕰 קשר לא-עודכן ${dayDiff('${f['contactUpdatedAt']}', _PrData.today)} י׳']),
+      if (_PrData.unreadStale(f)) ForgeStatusChip(items: [['👁 לא-נקרא ${dayDiff(_PrData.lastAdminAt(id)!, _PrData.today)} י׳ · $byParent']], variants: const <int>[3]),
+      if (_PrData.hasFailed(f)) ForgeStatusChip(items: [['⚠️ הודעה-נכשלה']], variants: const <int>[3]),
+      for (final c in _PrData.consentsOf(id)) if (_PrData.consentState(c) != 'received') ForgeStatusChip(items: [['${_PrData.consentKind[c['kind']]} ${_PrData.consentLabel[_PrData.consentState(c)]}']], variants: [const <int>[0, 1, 3, 2][(_PrData.consentState(c) == 'expired' ? 2 : 3) % 4]]),
+      for (final q in _PrData.inquiriesOf(id)) if ('${q['doneAt']}'.isEmpty && _PrData.sensitiveOk(_role, q)) ForgeStatusChip(items: [['📨 ${q['title']}${_PrData.overdue(q) ? ' · חורג' : ''}${q['escalated'] == true ? ' · ⬆' : ''}']], variants: [const <int>[0, 1, 3, 2][(_PrData.overdue(q) ? 2 : 0) % 4]]),
+      if (_PrData.feesFeed[id] != null && _can('pr.org')) ForgeStatusChip(items: [['💳 חוב ₪${_PrData.feesFeed[id]}']], variants: const <int>[2]),
+      if ((f['custody'] as Map?)?['restricted'] == true) ForgeStatusChip(items: [['⚖️ הסדר-ראייה מגביל']], variants: const <int>[2]),
+      if (_PrData.blockedOf(f) != null) ForgeStatusChip(items: [['🚫 ${_PrData.parent(f, _PrData.blockedOf(f)!)['role']} חסום/ה']], variants: const <int>[3]),
+      for (final pk in _PrData.parentKeys(f)) if (_PrData.parent(f, pk)['lang'] != 'עברית') ForgeStatusChip(items: [['🌐 תרגום-אוטו: ${_PrData.parent(f, pk)['lang']}']], variants: const <int>[0]),
+      if (!_PrData.contactFresh(f)) ForgeStatusChip(items: [['🕰 קשר לא-עודכן ${dayDiff('${f['contactUpdatedAt']}', _PrData.today)} י׳']], variants: const <int>[2]),
     ];
     final next = _PrData.columnDefs[11]['get'] as String Function(Map<String, dynamic>);
     return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -1020,7 +1019,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final st = _PrData.contactState(id, pk);
     final ch = _PrData.channelLabel[_PrData.smartChannel(f, pk)];
     final label = '${_PrData.parent(f, pk)['role']} · $ch${_PrData.channelOverridden(f, pk) ? '*' : ''} · ${st == 'ok' ? '✅' : st == 'bad' ? '⚠️ ${_PrData.contactWhy(id, pk)}' : '🔒 לא-הוזרק'}';
-    return ForgeIntelPill(fields: [label]);
+    return ForgeStatusChip(items: [[label]], variants: [const <int>[0, 1, 3, 2][(st == 'ok' ? 1 : st == 'bad' ? 2 : 0) % 4]]);
   }
 
   // ═══ פאנל הורה/שיחה-נבחר · GlassCard · 9 טאבים (SegmentedSwitch) ═══
@@ -1057,19 +1056,19 @@ class _ParentsScreenState extends State<ParentsScreen> {
             // זהות+ילדים · ערוץ+שפה+שעות — פר-הורה (זהות מוזרקת)
             for (final pk in _PrData.parentKeys(f))
               Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Wrap(spacing: 8, runSpacing: 6, children: [
-                ForgeIntelPill(fields: ['${_PrData.parent(f, pk)['role']}: ${_PrData.nameOf(id, pk) ?? '🔒 מוזרק-בהצבה'}']),
-                ForgeIntelPill(fields: ['📞 ${_PrData.phoneShown(id, pk)}']),
-                ForgeIntelPill(fields: ['📡 ${_PrData.channelLabel[_PrData.smartChannel(f, pk)]}${_PrData.channelOverridden(f, pk) ? ' (ענה-כאן, מועדף: ${_PrData.channelLabel[_PrData.parent(f, pk)['channel']]})' : ''}']),
-                ForgeIntelPill(fields: ['🗣 ${_PrData.parent(f, pk)['lang']}']),
-                ForgeIntelPill(fields: ['🕐 ${'${_PrData.parent(f, pk)['hours']}'.isEmpty ? 'שעות-נוחות: לא-הוגדר' : _PrData.parent(f, pk)['hours']}']),
-                if (_PrData.isBlocked(f, pk)) const ForgeIntelPill(fields: ['🚫 חסום/ה']),
-                if (_PrData.sendHold(f, pk) != null && !_PrData.isBlocked(f, pk)) ForgeIntelPill(fields: ['⏸ ${_PrData.sendHold(f, pk)}']),
+                ForgeStatusChip(items: [['${_PrData.parent(f, pk)['role']}: ${_PrData.nameOf(id, pk) ?? '🔒 מוזרק-בהצבה'}']], variants: const <int>[0]),
+                ForgeStatusChip(items: [['📞 ${_PrData.phoneShown(id, pk)}']], variants: [const <int>[0, 1, 3, 2][(_PrData.contactState(id, pk) == 'ok' ? 1 : _PrData.contactState(id, pk) == 'bad' ? 2 : 0) % 4]]),
+                ForgeStatusChip(items: [['📡 ${_PrData.channelLabel[_PrData.smartChannel(f, pk)]}${_PrData.channelOverridden(f, pk) ? ' (ענה-כאן, מועדף: ${_PrData.channelLabel[_PrData.parent(f, pk)['channel']]})' : ''}']], variants: const <int>[0]),
+                ForgeStatusChip(items: [['🗣 ${_PrData.parent(f, pk)['lang']}']], variants: const <int>[0]),
+                ForgeStatusChip(items: [['🕐 ${'${_PrData.parent(f, pk)['hours']}'.isEmpty ? 'שעות-נוחות: לא-הוגדר' : _PrData.parent(f, pk)['hours']}']], variants: [const <int>[0, 1, 3, 2][(_PrData.inConvenientHours(f, pk) ? 1 : 3) % 4]]),
+                if (_PrData.isBlocked(f, pk)) ForgeStatusChip(items: [['🚫 חסום/ה']], variants: const <int>[3]),
+                if (_PrData.sendHold(f, pk) != null && !_PrData.isBlocked(f, pk)) ForgeStatusChip(items: [['⏸ ${_PrData.sendHold(f, pk)}']], variants: const <int>[2]),
               ])),
-            if (f['guardian'] != null) ForgeIntelPill(fields: ['🧓 אפוטרופוס: ${f['guardian']} · ${_PrData.identity[id]?['emergencyName'] ?? '🔒 מוזרק-בהצבה'}']),
+            if (f['guardian'] != null) ForgeStatusChip(items: [['🧓 אפוטרופוס: ${f['guardian']} · ${_PrData.identity[id]?['emergencyName'] ?? '🔒 מוזרק-בהצבה'}']], variants: const <int>[0]),
             Wrap(spacing: 8, runSpacing: 6, children: [
-              ForgeIntelPill(fields: ['🆘 חירום: ${_PrData.identity[id]?['emergencyName'] ?? '🔒 מוזרק-בהצבה'}']),
-              ForgeIntelPill(fields: ['✉️ מייל: ${(_PrData.identity[id]?['email'] ?? '').isEmpty ? '🔒 מוזרק-בהצבה' : _PrData.identity[id]!['email']}']),
-              ForgeIntelPill(fields: ['📷 מדיה: ${_PrData.mediaOf(f) ? 'מאושר' : 'לא'}']),
+              ForgeStatusChip(items: [['🆘 חירום: ${_PrData.identity[id]?['emergencyName'] ?? '🔒 מוזרק-בהצבה'}']], variants: const <int>[0]),
+              ForgeStatusChip(items: [['✉️ מייל: ${(_PrData.identity[id]?['email'] ?? '').isEmpty ? '🔒 מוזרק-בהצבה' : _PrData.identity[id]!['email']}']], variants: const <int>[0]),
+              ForgeStatusChip(items: [['📷 מדיה: ${_PrData.mediaOf(f) ? 'מאושר' : 'לא'}']], variants: [const <int>[0, 1, 3, 2][(_PrData.mediaOf(f) ? 1 : 3) % 4]]),
             ]),
             _gap(10),
             // מבט-הילד (מה-שההורה-רואה): נוכחות/ציונים/חוב — הזנות-בין-מודולים
@@ -1097,7 +1096,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
                 if (_can('pr.msg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openLetter(f), child: ForgeSoftButton(fields: ['🖨 הדפס-מכתב'])),
                 if (_can('pr.msg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { for (final l in _PrData.weeklyDigest(f)) { _PrData.send(_actor, f, _PrData.parentKeys(f).first, l); } }), child: ForgeSoftButton(fields: ['📬 סיכום-שבועי'])),
               ];
-              return acts.isEmpty ? const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה', '']) : Wrap(spacing: 8, runSpacing: 8, children: acts);
+              return acts.isEmpty ? ForgeSectionPill(items: [['צפייה-בלבד — אין הרשאת-פעולה']], variants: const <int>[0]) : Wrap(spacing: 8, runSpacing: 8, children: acts);
             }),
             _gap(14),
             Align(alignment: Alignment.centerRight, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in tabs) [s]], selected: {sel}, onSelect: (i) => setSheet(() => sel = i)))),
@@ -1141,16 +1140,16 @@ class _ParentsScreenState extends State<ParentsScreen> {
       Row(children: [
         _label('שיחה · ${ms.length}'),
         const Spacer(),
-        Flexible(child: ForgeIntelPill(fields: [byParent == 0 ? '✓✓ ההורה קרא הכל' : '✓ $byParent טרם נקראו'])),
+        Flexible(child: ForgeStatusChip(items: [[byParent == 0 ? '✓✓ ההורה קרא הכל' : '✓ $byParent טרם נקראו']], variants: [const <int>[0, 1, 3, 2][(byParent == 0 ? 1 : 3) % 4]])),
       ]),
       _gap(8),
-      if (ms.isEmpty) const ForgeSearchEmptyState(fields: ['אין הודעות עדיין — פתח בהודעה-אישית', '']) else ...children,
+      if (ms.isEmpty) ForgeSearchEmptyState(fields: ['אין הודעות עדיין — פתח בהודעה-אישית', '']) else ...children,
       _gap(10),
       if (_can('pr.msg')) ...[
         ForgeDsField(state: (reply).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['מענה מהיר', ''], control: DsField(label: 'מענה מהיר', hint: 'כתוב/י הודעה…', value: reply, onChanged: onReply, bare: true)),
         _wrap([
           for (final pk in _PrData.parentKeys(f)) if (!_PrData.isBlocked(f, pk)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.send(_actor, f, pk, reply, crisis: _crisis); onReply(''); }), child: ForgeSoftButton(fields: ['📤 שלח ל${_PrData.parent(f, pk)['role']} (${_PrData.channelLabel[_PrData.smartChannel(f, pk)]})'])),
-          for (final pk in _PrData.parentKeys(f)) if (_PrData.waHrefOf(id, pk, reply) != null) ForgeIntelPill(fields: ['🔗 wa.me מוכן ל${_PrData.parent(f, pk)['role']}']),
+          for (final pk in _PrData.parentKeys(f)) if (_PrData.waHrefOf(id, pk, reply) != null) ForgeStatusChip(items: [['🔗 wa.me מוכן ל${_PrData.parent(f, pk)['role']}']], variants: const <int>[1]),
         ]),
       ],
     ]);
@@ -1162,8 +1161,8 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('אישורים · ${cs.length}'),
       _gap(6),
-      if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['אין בקשות-אישור', '']) else
-        DsTable(labels: const ['מה', 'סוג', 'נשלח', 'עד', 'סטטוס', 'תזכורות'], rows: [for (final c in cs) ['${c['title']}', _PrData.consentKind[c['kind']]!, '${c['sentAt']}', '${c['due']}', _PrData.consentLabel[_PrData.consentState(c)]!, '${_PrData.remindersOf(c)}']]),
+      if (cs.isEmpty) ForgeSearchEmptyState(fields: ['אין בקשות-אישור', '']) else
+        ForgeDataGrid(bare: true, columns: const ['מה', 'סוג', 'נשלח', 'עד', 'סטטוס', 'תזכורות'], items: [for (final c in cs) ['${c['title']}', _PrData.consentKind[c['kind']]!, '${c['sentAt']}', '${c['due']}', _PrData.consentLabel[_PrData.consentState(c)]!, '${_PrData.remindersOf(c)}']]),
       _wrap([
         for (final c in cs) if (_PrData.consentState(c) == 'pending' || _PrData.consentState(c) == 'expired') ...[
           if (_can('pr.consent.mark')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _PrData.consentStatus[c['id'] as String] = 'received'; _PrData.audit(_actor, 'אישור-התקבל', f['id'] as String, note: '${c['title']}'); }), child: ForgeSoftButton(fields: ['✅ התקבל: ${c['title']}'])),
@@ -1171,7 +1170,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
         ],
       ]),
       _gap(8),
-      const ForgeSectionPill(fields: ['מקום-שמור: חתימה-דיגיטלית-על-אישור — מאיר כשיחובר ספק-חתימה', '']),
+      ForgeSectionPill(items: [['מקום-שמור: חתימה-דיגיטלית-על-אישור — מאיר כשיחובר ספק-חתימה']], variants: const <int>[0]),
     ]);
   }
 
@@ -1182,7 +1181,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('פניות · ${qs.length}${hidden > 0 ? ' · $hidden רגישות מוסתרות' : ''}'),
       _gap(6),
-      if (qs.isEmpty) const ForgeSearchEmptyState(fields: ['אין פניות', '']),
+      if (qs.isEmpty) ForgeSearchEmptyState(fields: ['אין פניות', '']),
       for (final q in qs)
         ForgeNotifRow(items: [['${'${q['doneAt']}'.isNotEmpty ? '✅' : _PrData.overdue(q) ? '⛔' : '📨'} ${q['title']}${q['sensitive'] == true ? ' · 🔒 רגיש' : ''}${q['escalated'] == true ? ' · ⬆ הנהלה' : ''}', '${q['createdAt']} → עד ${q['due']}']]),
       _wrap([
@@ -1201,7 +1200,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('פגישות · ${ms.length}'),
       _gap(6),
-      if (ms.isEmpty) const ForgeSearchEmptyState(fields: ['אין פגישות', '']),
+      if (ms.isEmpty) ForgeSearchEmptyState(fields: ['אין פגישות', '']),
       for (final m in ms)
         ForgeNotifRow(items: [['${m['done'] == true ? '✅' : '📅'} ${m['title']}', '${m['date']} ${m['time']}']]),
       _wrap([
@@ -1249,7 +1248,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
         Expanded(child: ForgeStatPlain(fields: ['ערוץ-חלופי/לא-הוזרק', '${targets.length - reach.length}'])),
       ]),
       _gap(8),
-      if (bcasts.isEmpty) const ForgeSearchEmptyState(fields: ['טרם נשלחו הודעות-כלל', '']),
+      if (bcasts.isEmpty) ForgeSearchEmptyState(fields: ['טרם נשלחו הודעות-כלל', '']),
       for (final e in bcasts) ForgeNotifRow(items: [['${e['action']} · ${e['famId']}', '${e['at']}']]),
       _wrap([
         if (_can('pr.class')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBroadcast(cls: true), child: ForgeSoftButton(fields: ['🏫 הודעה-לכיתה'])),
@@ -1265,9 +1264,9 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(children: [_label('תצוגת-הורה'), const Spacer(), Flexible(child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final k in pks) '${_PrData.parent(f, k)['role']}']) [s]], selected: {pks.indexOf(pk)}, onSelect: (i) => onParent(pks[i])))]),
       _gap(8),
-      if (_PrData.isBlocked(f, pk)) const ForgeSectionPill(fields: ['הורה חסום — אין גישה לפורטל', ''])
+      if (_PrData.isBlocked(f, pk)) ForgeSectionPill(items: [['הורה חסום — אין גישה לפורטל']], variants: const <int>[0])
       else ...[
-        if ((f['custody'] as Map?)?['restricted'] == true) ForgeSectionPill(fields: ['הסדר-ראייה מגביל: ${_PrData.parent(f, pk)['role']} רואה ${views.map((v) => _PrData.childViewLabel[v]).join(' · ')}${views.length == _PrData.childViews.length ? ' (הכל)' : ' בלבד'}', '']),
+        if ((f['custody'] as Map?)?['restricted'] == true) ForgeSectionPill(items: [['הסדר-ראייה מגביל: ${_PrData.parent(f, pk)['role']} רואה ${views.map((v) => _PrData.childViewLabel[v]).join(' · ')}${views.length == _PrData.childViews.length ? ' (הכל)' : ' בלבד'}']], variants: const <int>[0]),
         _gap(6),
         for (final k in f['kids'] as List)
           Row(children: [
@@ -1279,7 +1278,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
         _gap(6),
         _label('המערכת · שקע-אינטגרציה (חוגים/מערכת) — מאיר כשיחובר'),
         _gap(8),
-        const ForgeSectionPill(fields: ['מקום-שמור: פורטל-מזוהה (login) · תשלום-מהפורטל · צ׳אט-חי — מאירים כשיחוברו ספקי-זהות/סליקה', '']),
+        ForgeSectionPill(items: [['מקום-שמור: פורטל-מזוהה (login) · תשלום-מהפורטל · צ׳אט-חי — מאירים כשיחוברו ספקי-זהות/סליקה']], variants: const <int>[0]),
       ],
     ]);
   }
@@ -1289,17 +1288,17 @@ class _ParentsScreenState extends State<ParentsScreen> {
     final es = _PrData.log.where((e) => e['famId'] == famId).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('לוג-שליחה · ${es.length}'),
-      if (es.isEmpty) const ForgeSearchEmptyState(fields: ['אין פעולות רשומות למשפחה בסשן זה', '']),
+      if (es.isEmpty) ForgeSearchEmptyState(fields: ['אין פעולות רשומות למשפחה בסשן זה', '']),
       for (final e in es) ForgeNotifRow(items: [['${e['action']} · ${e['status']}', '${e['at']}']]),
     ]);
   }
   Widget _auditTab() {
-    if (!_can('pr.audit') && !_can('pr.org')) return const ForgeSectionPill(fields: ['אודיט מלא — הנהלה/מזכירות בלבד', '']);
+    if (!_can('pr.audit') && !_can('pr.org')) return ForgeSectionPill(items: [['אודיט מלא — הנהלה/מזכירות בלבד']], variants: const <int>[0]);
     final lines = _PrData.auditLines();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label('אודיט · ${_PrData.log.length}'),
       for (final l in lines) Text(l, style: const TextStyle(color: _ink, fontSize: 12.5, height: 1.5)),
-      if (_PrData.log.isEmpty) const ForgeSearchEmptyState(fields: ['אין פעולות בסשן זה', '']),
+      if (_PrData.log.isEmpty) ForgeSearchEmptyState(fields: ['אין פעולות בסשן זה', '']),
     ]);
   }
 
@@ -1332,12 +1331,12 @@ class _ParentsScreenState extends State<ParentsScreen> {
         ForgeDsEnumField(fields: ['ערוץ (ברירת-מחדל: חכם = מה-ההורה-עונה-לו)'], control: DsEnumField(label: 'ערוץ (ברירת-מחדל: חכם = מה-ההורה-עונה-לו)', options: ['חכם: ${_PrData.channelLabel[_PrData.smartChannel(f, pk)]}', ..._PrData.channelLabel.values], value: channel == null ? 'חכם: ${_PrData.channelLabel[_PrData.smartChannel(f, pk)]}' : _PrData.channelLabel[channel]!, onChanged: (v) => setSheet(() => channel = v.startsWith('חכם') ? null : _PrData.channelLabel.entries.firstWhere((e) => e.value == v).key), bare: true)),
         ForgeDsEnumField(fields: ['תבנית'], control: DsEnumField(label: 'תבנית', options: ['ללא', for (final d in _PrData.templateList) d['label']!], value: tpl, onChanged: (v) => setSheet(() { tpl = v; if (v != 'ללא') text = _PrData.render(_PrData.templateList.firstWhere((d) => d['label'] == v)['key']!, {'first': '${(f['kids'] as List).first['first']}', 'date': _PrData.today, 'what': 'הטיול השנתי', 'due': '2026-09-10', 'time': '17:30', 'note': '', 'name': '${_PrData.parent(f, pk)['role']}', 'amount': '${_PrData.feesFeed[famId] ?? 0}', 'link': '—', 'absences': '${_PrData.childFeed[(f['kids'] as List).first['sid']]?['absences30'] ?? '—'}', 'avg': '${_PrData.childFeed[(f['kids'] as List).first['sid']]?['avg'] ?? '—'}'}); }), bare: true)),
         ForgeDsField(state: (text).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['הודעה (עד $supportMsgMax תווים · ${_PrData.parent(f, pk)['lang'] != 'עברית' ? 'תרגום-אוטו ל${_PrData.parent(f, pk)['lang']} — מקום-שמור' : 'עברית'})', ''], control: DsField(label: 'הודעה (עד $supportMsgMax תווים · ${_PrData.parent(f, pk)['lang'] != 'עברית' ? 'תרגום-אוטו ל${_PrData.parent(f, pk)['lang']} — מקום-שמור' : 'עברית'})', hint: 'תוכן ההודעה…', value: text, onChanged: (v) => setSheet(() => text = v), bare: true)),
-        if (hold != null) ForgeSectionPill(fields: [hold == 'הורה חסום' ? 'הורה חסום — לא ניתן לשלוח' : 'תוחזק: $hold — תישלח בחלון הבא${_can('pr.crisis') ? ' (או במצב-משבר)' : ''}', '']),
-        if (_PrData.contactState(famId, pk) != 'ok' && (channel ?? _PrData.smartChannel(f, pk)) != 'email') ForgeSectionPill(fields: ['קשר-לא-תקין (${_PrData.contactState(famId, pk) == 'none' ? 'טלפון לא-הוזרק' : _PrData.contactWhy(famId, pk)}) — השליחה תיכשל; עדכן-קשר תחילה', '']),
+        if (hold != null) ForgeSectionPill(items: [[hold == 'הורה חסום' ? 'הורה חסום — לא ניתן לשלוח' : 'תוחזק: $hold — תישלח בחלון הבא${_can('pr.crisis') ? ' (או במצב-משבר)' : ''}']], variants: [const <int>[0, 0, 0, 0][(hold == 'הורה חסום' ? 2 : 3) % 4]]),
+        if (_PrData.contactState(famId, pk) != 'ok' && (channel ?? _PrData.smartChannel(f, pk)) != 'email') ForgeSectionPill(items: [['קשר-לא-תקין (${_PrData.contactState(famId, pk) == 'none' ? 'טלפון לא-הוזרק' : _PrData.contactWhy(famId, pk)}) — השליחה תיכשל; עדכן-קשר תחילה']], variants: const <int>[0]),
         _gap(8),
         _wrap([
           GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { final st = _PrData.send(_actor, f, pk, text, channel: channel, crisis: _crisis); setSheet(() => result = st); setState(() {}); }, child: ForgeSoftButton(fields: ['📤 שלח'])),
-          if (result != null) ForgeIntelPill(fields: [{'sent': '✅ נשלח', 'queued': '⏸ מוחזק לחלון', 'failed': '⚠️ נכשל (קשר)', 'blocked': '🚫 חסום', 'empty': '✋ ריק'}[result]!]),
+          if (result != null) ForgeStatusChip(items: [[{'sent': '✅ נשלח', 'queued': '⏸ מוחזק לחלון', 'failed': '⚠️ נכשל (קשר)', 'blocked': '🚫 חסום', 'empty': '✋ ריק'}[result]!]], variants: [const <int>[0, 1, 3, 2][(result == 'sent' ? 1 : result == 'queued' ? 3 : 2) % 4]]),
         ]),
       ]);
     });
@@ -1356,9 +1355,9 @@ class _ParentsScreenState extends State<ParentsScreen> {
       _wrap([
         GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { final r = _PrData.broadcast(_actor, text, cls: cls ? target : null); setSheet(() => result = r); setState(() {}); }, child: ForgeSoftButton(fields: ['📤 שדר'])),
         if (result != null) ...[
-          ForgeIntelPill(fields: ['✅ נשלחו ${result!['sent']}']),
-          ForgeIntelPill(fields: ['⏸ מוחזקים ${result!['queued']}']),
-          ForgeIntelPill(fields: ['⚠️ נכשלו ${result!['failed']}']),
+          ForgeStatusChip(items: [['✅ נשלחו ${result!['sent']}']], variants: const <int>[1]),
+          ForgeStatusChip(items: [['⏸ מוחזקים ${result!['queued']}']], variants: const <int>[2]),
+          ForgeStatusChip(items: [['⚠️ נכשלו ${result!['failed']}']], variants: const <int>[3]),
         ],
       ]),
     ]));
@@ -1384,7 +1383,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
           _PrData.audit(_actor, 'בקשת-אישור', famId, note: '$title עד $due');
           Navigator.pop(ctx); setState(() {});
         }, child: ForgeSoftButton(fields: ['📤 שלח בקשה'])),
-        const ForgeSectionPill(fields: ['האישור עצמו נרשם כשההורה מחזיר (סמן-התקבל) — חתימה-דיגיטלית = מקום-שמור', '']),
+        ForgeSectionPill(items: [['האישור עצמו נרשם כשההורה מחזיר (סמן-התקבל) — חתימה-דיגיטלית = מקום-שמור']], variants: const <int>[0]),
       ]);
     });
   }
@@ -1443,8 +1442,8 @@ class _ParentsScreenState extends State<ParentsScreen> {
       ForgeContactTile(fields: ['עדכון-קשר', '${_PrData.famLabel(f)} · זהות = שקע-הצבה (חוק-6)']),
       for (final pk in _PrData.parentKeys(f)) ...[
         ForgeDsField(state: (draft[pk]!).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['טלפון ${_PrData.parent(f, pk)['role']}', ''], control: DsField(label: 'טלפון ${_PrData.parent(f, pk)['role']}', hint: '05x-xxxxxxx', value: draft[pk]!, onChanged: (v) => setSheet(() => draft[pk] = v), bare: true)),
-        if (draft[pk]!.trim().isNotEmpty && phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>()) != null) ForgeSectionPill(fields: [phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>())!, '']),
-        if (draft[pk]!.trim().isNotEmpty && phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>()) == null) ForgeIntelPill(fields: ['✅ ${formatIsraeliPhone(draft[pk])} · wa: ${waDigits(draft[pk]) ?? 'לא-שליח'}']),
+        if (draft[pk]!.trim().isNotEmpty && phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>()) != null) ForgeSectionPill(items: [[phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>())!]], variants: const <int>[0]),
+        if (draft[pk]!.trim().isNotEmpty && phoneIssue(draft[pk], PHONE_ISSUE_T.cast<String, dynamic>()) == null) ForgeStatusChip(items: [['✅ ${formatIsraeliPhone(draft[pk])} · wa: ${waDigits(draft[pk]) ?? 'לא-שליח'}']], variants: [const <int>[0, 1, 3, 2][(waDigits(draft[pk]) == null ? 3 : 1) % 4]]),
       ],
       ForgeDsField(state: (email).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['מייל', ''], control: DsField(label: 'מייל', hint: 'כתובת מייל', value: email, onChanged: (v) => setSheet(() => email = v), bare: true)),
       _gap(8),
@@ -1478,7 +1477,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
     _sheet((ctx, setSheet) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       ForgeContactTile(fields: ['ייצוא-לוג CSV', '${_PrData.log.length} רשומות · ${_PrData._csvHeader.length} עמודות']),
       _gap(8),
-      if (!allowed) const ForgeSectionPill(fields: ['ייצוא חסום (שער-הרשאות)', ''])
+      if (!allowed) ForgeSectionPill(items: [['ייצוא חסום (שער-הרשאות)']], variants: const <int>[0])
       else Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)), child: SelectableText(csv, textDirection: TextDirection.ltr, style: const TextStyle(color: _ink, fontSize: 12, height: 1.6))),
     ]));
   }
@@ -1495,9 +1494,9 @@ class _ParentsScreenState extends State<ParentsScreen> {
     return DsScaffold(title: 'הפורטל שלי', subtitle: '${_PrData.famLabel(f)} · ${_PrData.parent(f, pk)['role']} · ${_PrData.nameOf(id, pk) ?? '🔒 מוזרק-בהצבה'}', icon: '👁', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'הפורטל שלי', '${_PrData.famLabel(f)} · ${_PrData.parent(f, pk)['role']} · ${_PrData.nameOf(id, pk) ?? '🔒 מוזרק-בהצבה'}']), ...[
         Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final x in _PrData.roleDefs) x['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i))),
         _gap(10),
-        if (_PrData.isBlocked(f, pk)) const ForgeSectionPill(fields: ['הגישה חסומה — פנה/י למזכירות', ''])
+        if (_PrData.isBlocked(f, pk)) ForgeSectionPill(items: [['הגישה חסומה — פנה/י למזכירות']], variants: const <int>[0])
         else ...[
-          if ((f['custody'] as Map?)?['restricted'] == true) ForgeSectionPill(fields: ['לפי הסדר-הראייה מוצג: ${views.map((v) => _PrData.childViewLabel[v]).join(' · ')}', '']),
+          if ((f['custody'] as Map?)?['restricted'] == true) ForgeSectionPill(items: [['לפי הסדר-הראייה מוצג: ${views.map((v) => _PrData.childViewLabel[v]).join(' · ')}']], variants: const <int>[0]),
           _gap(8),
           ForgeTitledSection(fields: ['הילד/ה שלי', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
             for (final k in f['kids'] as List)
@@ -1507,10 +1506,10 @@ class _ParentsScreenState extends State<ParentsScreen> {
                 if (views.contains('grades')) Expanded(child: ForgeStatPlain(fields: ['📊 ממוצע', '${_PrData.childFeed[k['sid']]?['avg'] ?? '—'}'])),
                 if (views.contains('fees')) Expanded(child: ForgeStatPlain(fields: ['💳 חוב', _PrData.feesFeed[id] == null ? '✓' : '₪${_PrData.feesFeed[id]}'])),
               ]),
-            if (views.contains('fees') && _PrData.feesFeed[id] != null) const ForgeSectionPill(fields: ['תשלום-מהפורטל = מקום-שמור (מאיר כשתחובר סליקה)', '']),
+            if (views.contains('fees') && _PrData.feesFeed[id] != null) ForgeSectionPill(items: [['תשלום-מהפורטל = מקום-שמור (מאיר כשתחובר סליקה)']], variants: const <int>[0]),
           ]])),
           ForgeTitledSection(fields: ['הודעות מבית-הספר · ${ms.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-            if (ms.isEmpty) const ForgeSearchEmptyState(fields: ['אין הודעות', '']),
+            if (ms.isEmpty) ForgeSearchEmptyState(fields: ['אין הודעות', '']),
             for (final m in ms) Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: PureBubble(text: '${m['text']}', time: '${supportMsgTime('${m['at']}')}', kind: m['from'] == 'user' ? PureBubbleKind.outgoing : PureBubbleKind.incoming)),
             _wrap([
               GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { final t = _PrData.thread(id); if (t != null) _PrData.threadAdj[id] = {...t, 'unreadUser': 0}; }), child: ForgeSoftButton(fields: ['👁 סמן: קראתי'])),
@@ -1518,13 +1517,13 @@ class _ParentsScreenState extends State<ParentsScreen> {
             ]),
           ]])),
           ForgeTitledSection(fields: ['אישורים · ${cs.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-            if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['אין בקשות', '']),
+            if (cs.isEmpty) ForgeSearchEmptyState(fields: ['אין בקשות', '']),
             for (final c in cs)
               Row(children: [
                 Expanded(child: ForgeContactTile(fields: ['${c['title']}', '${_PrData.consentKind[c['kind']]} · עד ${c['due']} · ${_PrData.consentLabel[_PrData.consentState(c)]}'])),
                 if (_PrData.consentState(c) == 'pending' || _PrData.consentState(c) == 'expired') Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _PrData.consentStatus[c['id'] as String] = 'received'; _PrData.audit('parent:$pk', 'אישור-מהפורטל', id, note: '${c['title']}'); }), child: ForgeSoftButton(fields: ['✅ מאשר/ת']))),
               ]),
-            const ForgeSectionPill(fields: ['חתימה-דיגיטלית · פורטל-מזוהה · צ׳אט-חי — מקום-שמור', '']),
+            ForgeSectionPill(items: [['חתימה-דיגיטלית · פורטל-מזוהה · צ׳אט-חי — מקום-שמור']], variants: const <int>[0]),
           ]])),
         ],
       ]]);

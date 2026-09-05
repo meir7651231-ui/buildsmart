@@ -1,5 +1,5 @@
-// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
-//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×4 · statRow×25 · kpi×2 · navTile×9 · button×11 · statusChip×3 · banner×6 · emptyState×2 · mediaRow×4 · section×4 · segmented×3 · meter×3 · frame×4 · timeline×2 · search×1 · pageHeader×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
+//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×4 · statRow×25 · kpi×2 · navTile×9 · button×11 · statusChip×3 · banner×6 · emptyState×2 · mediaRow×4 · section×4 · segmented×3 · meter×3 · frame×4 · timeline×2 · search×1 · pageHeader×1 · table×1 · bars×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS — בנייה מאפס לפי THE-WAY הנכון (פעולה-ראשונה · הרכבה-תמיד).
 // כל מסך: מטרה → פעולות-יסוד הכי-מתאימות → הרכבה (תמיד כמה) → חיווט → אימות-מול-המטרה.
 // בוחרים פעולת-יסוד, לא "אטום"; האטום רק מגלם. לעולם אין אטום-אחד שמשרת מטרה מקסימלית.
@@ -58,6 +58,8 @@ import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במו
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat דורש הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -466,11 +468,11 @@ class _InventoryState extends State<_Inventory> {
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — פקיעה + מלאי-מת
         if (_InvData.expiringList.isNotEmpty) ...[
-          ForgeSectionPill(fields: ['${_InvData.expiringList.length} פוקעים תוך $shopExpiryWarnDays ימים: ${_InvData.expiringList.map((e) => e['itemName']).join(' · ')}', '']),
+          ForgeSectionPill(items: [['${_InvData.expiringList.length} פוקעים תוך $shopExpiryWarnDays ימים: ${_InvData.expiringList.map((e) => e['itemName']).join(' · ')}']], variants: const <int>[0]),
           _gap(8),
         ],
         if (_InvData.deadItems.isNotEmpty) ...[
-          ForgeSectionPill(fields: ['${_InvData.deadItems.length} מלאי-מת (איטי + מלאי-רב) · ${shekel(_InvData.deadCapital)} הון-כלוא: ${_InvData.deadItems.map((s) => s['name']).join(' · ')}', '']),
+          ForgeSectionPill(items: [['${_InvData.deadItems.length} מלאי-מת (איטי + מלאי-רב) · ${shekel(_InvData.deadCapital)} הון-כלוא: ${_InvData.deadItems.map((s) => s['name']).join(' · ')}']], variants: const <int>[0]),
           _gap(8),
         ],
         // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (כל-העמודות)
@@ -483,7 +485,7 @@ class _InventoryState extends State<_Inventory> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          ForgeSectionPill(fields: [_error!, ''])
+          ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
         else if (_mode == 2)
           _movements() // אימות: יומן-תנועות (מנוע intakeLog + TimelineItem) — לא מסונן (ציר-אמת)
         else if (shown == 0)
@@ -505,7 +507,7 @@ class _InventoryState extends State<_Inventory> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(children: [
                   Expanded(child: ForgeContactTile(fields: ['${s['name']}', '${s['sku'] ?? ''} · הופסק'])),
-                  const Flexible(child: ForgeIntelPill(fields: ['לא-פעיל'])),
+                  Flexible(child: ForgeStatusChip(items: [['לא-פעיל']], variants: const <int>[0])),
                   if (_InvData.can(_role, 'inv.toggle')) ...[
                     const SizedBox(width: 8),
                     GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _InvData.toggleActive(s)), child: ForgeSoftButton(fields: ['▶ הפעל'])),
@@ -580,7 +582,7 @@ class _InventoryState extends State<_Inventory> {
               '${s[c['key']] ?? '—'}',
         ],
     ];
-    return DsTable(labels: labels, rows: data);
+    return ForgeDataGrid(bare: true, columns: labels, items: data);
   }
 
   // תווית-סטטוס פר-פריט (הכרעה מאוחדת sev + מתחת-מינ׳/אזל) — נגזרת, אחת-לטבלה-ולסטטוס-שורה
@@ -644,14 +646,14 @@ class _InventoryState extends State<_Inventory> {
                       if (_InvData.can(_role, 'inv.toggle')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.toggleActive(s)), child: ForgeSoftButton(fields: ['⏸ השבת'])),
                     ];
                     return acts.isEmpty
-                        ? const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה', ''])
+                        ? ForgeSectionPill(items: [['צפייה-בלבד — אין הרשאת-פעולה']], variants: const <int>[0])
                         : Wrap(spacing: 8, runSpacing: 8, children: acts);
                   }),
                   _gap(16),
                   Text('תנועות הפריט · ${moves.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
                   _gap(8),
                   if (moves.isEmpty)
-                    const ForgeSearchEmptyState(fields: ['אין תנועות רשומות לפריט', ''])
+                    ForgeSearchEmptyState(fields: ['אין תנועות רשומות לפריט', ''])
                   else
                     for (final r in moves) _moveTile((r as Map)['intake'] as Map, s),
                 ])),
@@ -679,7 +681,7 @@ class _InventoryState extends State<_Inventory> {
               ForgeContactTile(fields: ['ייצוא CSV', '${items.length} פריטים · ${_InvData.csvHeaderLen} עמודות']),
               _gap(10),
               if (!allowed)
-                const ForgeSectionPill(fields: ['ייצוא חסום (שער-הרשאות)', ''])
+                ForgeSectionPill(items: [['ייצוא חסום (שער-הרשאות)']], variants: const <int>[0])
               else ...[
                 const Text('תצוגה מקדימה (BOM + חסימת-הזרקה):', style: TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
                 _gap(8),
@@ -707,7 +709,7 @@ class _InventoryState extends State<_Inventory> {
   // כל שדה-מטא שהרשומה נושאת ⇒ שבב; חסר ⇒ שקט. שדה חדש בחוזה מופיע כאן לבד (אפס-רישום-ביד).
   List<Widget> _facts(Map<String, dynamic> s) => [
         for (final f in _InvData.metaFields)
-          if (s[f['key']] != null) ForgeIntelPill(fields: ['${f['prefix']}${s[f['key']]}${f['suffix']}']),
+          if (s[f['key']] != null) ForgeStatusChip(items: [['${f['prefix']}${s[f['key']]}${f['suffix']}']], variants: const <int>[0]),
       ];
 
   Widget _wrap(List<Widget> kids, {double top = 6}) => Padding(
@@ -775,7 +777,7 @@ class _InventoryState extends State<_Inventory> {
     final price = s['price'] as int?;
     final why = _InvData.isShort(s) ? 'גירעון-הקצאה + ' : ''; // סיבת-הדחיפות המאוחדת
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      ForgeSectionPill(fields: [sev == 2 ? '$whyחייבים להזמין היום' : 'הזמן תוך $mustIn ימים', '']),
+      ForgeSectionPill(items: [[sev == 2 ? '$whyחייבים להזמין היום' : 'הזמן תוך $mustIn ימים']], variants: [const <int>[0, 0, 0, 0][(sev == 2 ? 2 : 3) % 4]]),
       _gap(),
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['במלאי', '$cur'])),
@@ -804,7 +806,7 @@ class _InventoryState extends State<_Inventory> {
     // נרמול מחווט מאטום-הלוגיקה clampScale (במקום .clamp inline)
     final suff = clampScale(left / lead, 0.0, 1.0).toDouble();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      NeonBars(labels: const ['ימים-עד-ריקון', 'זמן-אספקה'], values: [left, lead.toDouble()], tone: tone),
+      ForgeBarChart(fields: ['', ''], values: (() { final _vs = [left, lead.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(),
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['מרווח מול הקו', '${margin.round()} י׳'])),
@@ -832,7 +834,7 @@ class _InventoryState extends State<_Inventory> {
             Expanded(child: ForgeStatPlain(fields: ['מוקצה לכיתות', '$allocated'])),
             Expanded(child: ForgeStatPlain(fields: [short ? '= גירעון' : '= עודף', '$remaining'])),
           ]),
-          _wrap([for (final p in byP) ForgeIntelPill(fields: ['${(p as Map)['name']}: ${p['qty']}'])]),
+          _wrap([for (final p in byP) ForgeStatusChip(items: [['${(p as Map)['name']}: ${p['qty']}']], variants: const <int>[0])]),
         ];
       })(),
     ]);

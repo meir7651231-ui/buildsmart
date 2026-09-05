@@ -94,6 +94,8 @@ import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודו
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומים-טהורים (חוק-6: צבע=הצבה)
@@ -837,7 +839,7 @@ class _DonationScreenState extends State<DonationScreen> {
         ),
         _gap(10),
         if (!_amounts) ...[
-          const ForgeSectionPill(fields: ['נעילת-הרשאה-כספית: תפקיד זה רואה דגל-חוב בלבד — אפס-סכומים, אפס-פרטי-חוב (מגן-כבוד)', '']),
+          ForgeSectionPill(items: [['נעילת-הרשאה-כספית: תפקיד זה רואה דגל-חוב בלבד — אפס-סכומים, אפס-פרטי-חוב (מגן-כבוד)']], variants: const <int>[0]),
           _gap(8),
         ],
         // פס-עליון: חיפוש (DsSearch) · רענון · חיוב-חדש · רישום-תשלום · ייצוא — מגודרים פר-הרשאה
@@ -924,27 +926,27 @@ class _DonationScreenState extends State<DonationScreen> {
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): הו״ק-נכשלה · הסדר-בפיגור · חיוב-כפול · הו״ק-לרישום · מעקב-שעבר-מועד · חוב-לפני-טיול
         if (failed.isNotEmpty && _amounts) ...[
-          ForgeSectionPill(fields: ['${failed.length} הו״ק נכשלה (הסליקה פסקה >2 חודשים) — התרעה + ניסיון-חוזר: ${failed.map((f) => f['name']).join(' · ')}', '']),
+          ForgeSectionPill(items: [['${failed.length} הו״ק נכשלה (הסליקה פסקה >2 חודשים) — התרעה + ניסיון-חוזר: ${failed.map((f) => f['name']).join(' · ')}']], variants: const <int>[0]),
           _gap(8),
         ],
         if (late.isNotEmpty && _amounts) ...[
-          ForgeSectionPill(fields: ['${late.length} הסדר-בפיגור: ${late.map((f) => f['name']).join(' · ')}', '']),
+          ForgeSectionPill(items: [['${late.length} הסדר-בפיגור: ${late.map((f) => f['name']).join(' · ')}']], variants: const <int>[0]),
           _gap(8),
         ],
         if (dups.isNotEmpty && _amounts) ...[
-          ForgeSectionPill(fields: ['חיוב-כפול-חשוד (אותו סוג·סכום·תאריך·תלמיד): ${dups.map((f) => '${f['name']} (${_DonationData.duplicateCharges(f).map((c) => c['cat']).join(',')})').join(' · ')}', '']),
+          ForgeSectionPill(items: [['חיוב-כפול-חשוד (אותו סוג·סכום·תאריך·תלמיד): ${dups.map((f) => '${f['name']} (${_DonationData.duplicateCharges(f).map((c) => c['cat']).join(',')})').join(' · ')}']], variants: const <int>[0]),
           _gap(8),
         ],
         if (tripDebt.isNotEmpty && _amounts) ...[
-          ForgeSectionPill(fields: ['חוב לפני-טיול (התרעה-מוקדמת, לא-מניעה): ${tripDebt.map((f) => f['name']).join(' · ')}', '']),
+          ForgeSectionPill(items: [['חוב לפני-טיול (התרעה-מוקדמת, לא-מניעה): ${tripDebt.map((f) => f['name']).join(' · ')}']], variants: const <int>[0]),
           _gap(8),
         ],
         if (follow.isNotEmpty && _DonationData.can(_role, 'fees.remind')) ...[
-          ForgeSectionPill(fields: ['מעקב שעבר-מועד: ${follow.map((t) => t['title']).join(' · ')}', '']),
+          ForgeSectionPill(items: [['מעקב שעבר-מועד: ${follow.map((t) => t['title']).join(' · ')}']], variants: const <int>[0]),
           _gap(8),
         ],
         if (hokDue.isNotEmpty && _DonationData.can(_role, 'fees.hok')) ...[
-          ForgeSectionPill(fields: ['${hokDue.length} הו״ק לרישום החודש (${_m(_DonationData.hokExpected(all))}) — ראה מבט הו״ק', '']),
+          ForgeSectionPill(items: [['${hokDue.length} הו״ק לרישום החודש (${_m(_DonationData.hokExpected(all))}) — ראה מבט הו״ק']], variants: const <int>[0]),
           _gap(8),
         ],
         // בורר-מבט (SegmentedSwitch מבוקר)
@@ -958,7 +960,7 @@ class _DonationScreenState extends State<DonationScreen> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          ForgeSectionPill(fields: [_error!, ''])
+          ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
         else if (_mode == 2 && _amounts)
           _hokView(all, hokDue)
         else if (_mode == 3 && _amounts)
@@ -1017,7 +1019,7 @@ class _DonationScreenState extends State<DonationScreen> {
               '${f[c['key']] ?? '—'}',
         ],
     ];
-    return DsTable(labels: labels, rows: data);
+    return ForgeDataGrid(bare: true, columns: labels, items: data);
   }
 
   // ═══ שורת-משפחה (טריאז'): זהות ⊕ יחס-שולם (StatRow) ⊕ BareStat×3 ⊕ facts ⊕ הפעולה-הנכונה (AlertBanner) ═══
@@ -1049,7 +1051,7 @@ class _DonationScreenState extends State<DonationScreen> {
           if (_amounts) ...[
             _wrap(_facts(f)),
             _gap(8),
-            ForgeSectionPill(fields: [act['text'] as String, '']),
+            ForgeSectionPill(items: [[act['text'] as String]], variants: [const <int>[0, 0, 0, 0][(act['tone'] as int) % 4]]),
           ],
         ])),
     );
@@ -1059,13 +1061,13 @@ class _DonationScreenState extends State<DonationScreen> {
   List<Widget> _facts(Map<String, dynamic> f) {
     final r = _DonationData.risk(f);
     return [
-      ForgeIntelPill(fields: [_DonationData.statusOf(f)]),
-      if (_DonationData.hasHok(f)) ForgeIntelPill(fields: [_DonationData.hokFlag(f) ? (_DonationData.hokActive(f) ? '💳 הו״ק ${_amounts ? shekel((f['hok'] as Map)['amount'] as num) : ''} · יום ${(f['hok'] as Map)['day']}' : '⚠️ הו״ק נכשלה') : '⏸ הו״ק מופסקת']),
-      if (_DonationData.discountLabel(f).isNotEmpty) ForgeIntelPill(fields: ['🎓 ${_DonationData.discountLabel(f)}']),
-      if (_DonationData.remindersSent(f).isNotEmpty) ForgeIntelPill(fields: ['🔔 ${_DonationData.remindersSent(f).length} תזכורות']),
-      if (_DonationData.balance(f) > 0) ForgeIntelPill(fields: ['סיכון ${_DonationData.riskLabel(r)} · ${_DonationData.tierLabel(f)}']),
-      if (_DonationData.lastMethod(f).isNotEmpty) ForgeIntelPill(fields: ['${_DonationData.lastMethod(f)} · ${fmtDate(_DonationData.lastPaymentDate(f))}']),
-      if (f['nextNote'] != null) ForgeIntelPill(fields: ['📝 ${f['nextNote']}']),
+      ForgeStatusChip(items: [[_DonationData.statusOf(f)]], variants: [const <int>[0, 1, 3, 2][(_DonationData.statusOf(f) == 'תקין' || _DonationData.statusOf(f) == 'מלגה-מלאה' ? 1 : _DonationData.statusOf(f).contains('פיגור') ? 2 : 3) % 4]]),
+      if (_DonationData.hasHok(f)) ForgeStatusChip(items: [[_DonationData.hokFlag(f) ? (_DonationData.hokActive(f) ? '💳 הו״ק ${_amounts ? shekel((f['hok'] as Map)['amount'] as num) : ''} · יום ${(f['hok'] as Map)['day']}' : '⚠️ הו״ק נכשלה') : '⏸ הו״ק מופסקת']], variants: [const <int>[0, 1, 3, 2][(_DonationData.hokFailed(f) ? 2 : _DonationData.hokFlag(f) ? 1 : 0) % 4]]),
+      if (_DonationData.discountLabel(f).isNotEmpty) ForgeStatusChip(items: [['🎓 ${_DonationData.discountLabel(f)}']], variants: const <int>[0]),
+      if (_DonationData.remindersSent(f).isNotEmpty) ForgeStatusChip(items: [['🔔 ${_DonationData.remindersSent(f).length} תזכורות']], variants: [const <int>[0, 1, 3, 2][(_DonationData.remindersSent(f).length > 2 ? 3 : 0) % 4]]),
+      if (_DonationData.balance(f) > 0) ForgeStatusChip(items: [['סיכון ${_DonationData.riskLabel(r)} · ${_DonationData.tierLabel(f)}']], variants: [const <int>[0, 1, 3, 2][(r == 2 ? 2 : r == 1 ? 3 : 1) % 4]]),
+      if (_DonationData.lastMethod(f).isNotEmpty) ForgeStatusChip(items: [['${_DonationData.lastMethod(f)} · ${fmtDate(_DonationData.lastPaymentDate(f))}']], variants: const <int>[0]),
+      if (f['nextNote'] != null) ForgeStatusChip(items: [['📝 ${f['nextNote']}']], variants: const <int>[0]),
     ];
   }
 
@@ -1075,7 +1077,7 @@ class _DonationScreenState extends State<DonationScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       ForgeTitledSection(fields: ['💳 הו״ק לרישום החודש · ${due.length} · ${_m(_DonationData.hokExpected(all))}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (due.isEmpty)
-          const ForgeSearchEmptyState(fields: ['כל ההו״ק הפעילות נרשמו החודש', ''])
+          ForgeSearchEmptyState(fields: ['כל ההו״ק הפעילות נרשמו החודש', ''])
         else ...[
           for (final f in due)
             ForgeNotifRow(items: [['${f['name']} · יום ${(f['hok'] as Map)['day']}', _DonationData.hokMethod(f)]]),
@@ -1085,7 +1087,7 @@ class _DonationScreenState extends State<DonationScreen> {
             if (!_hokArmed)
               _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _hokArmed = true), child: ForgeSoftButton(fields: ['🧾 רישום-הו״ק-חודשי-מרוכז']))], top: 0)
             else ...[
-              ForgeSectionPill(fields: ['שלב 2/2: יירשמו ${due.length} תשלומי-הו״ק בסך ${_m(_DonationData.hokExpected(all))} (${due.map((f) => f['name']).join(' · ')}). לאשר?', '']),
+              ForgeSectionPill(items: [['שלב 2/2: יירשמו ${due.length} תשלומי-הו״ק בסך ${_m(_DonationData.hokExpected(all))} (${due.map((f) => f['name']).join(' · ')}). לאשר?']], variants: const <int>[0]),
               _wrap([
                 GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _DonationData.runHokBatch(all, _roleName); _hokArmed = false; }), child: ForgeSoftButton(fields: ['✅ אשר ורשום ${due.length}'])),
                 GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _hokArmed = false), child: ForgeSoftButton(fields: ['בטל'])),
@@ -1102,14 +1104,14 @@ class _DonationScreenState extends State<DonationScreen> {
               StatusDot(tone: _DonationData.hokFailed(f) ? 2 : _DonationData.hokFlag(f) ? 1 : 3),
               const SizedBox(width: 10),
               Expanded(child: ForgeContactTile(fields: [f['name'] as String, '${_m((f['hok'] as Map)['amount'] as num)} · יום ${(f['hok'] as Map)['day']} · ${_DonationData.hokMethod(f)} · מ-${fmtDate((f['hok'] as Map)['startedAt'] as String?)}'])),
-              Flexible(child: ForgeIntelPill(fields: [_DonationData.hokFailed(f) ? 'נכשלה' : _DonationData.hokFlag(f) ? (_DonationData.hokRecorded(f) ? 'נרשמה החודש' : 'ממתינה') : 'מופסקת'])),
+              Flexible(child: ForgeStatusChip(items: [[_DonationData.hokFailed(f) ? 'נכשלה' : _DonationData.hokFlag(f) ? (_DonationData.hokRecorded(f) ? 'נרשמה החודש' : 'ממתינה') : 'מופסקת']], variants: [const <int>[0, 1, 3, 2][(_DonationData.hokFailed(f) ? 2 : _DonationData.hokFlag(f) ? 1 : 0) % 4]])),
               if (_DonationData.can(_role, 'fees.hok')) ...[
                 const SizedBox(width: 8),
                 GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _DonationData.toggleHok(f, _roleName)), child: ForgeSoftButton(fields: [_DonationData.hokFlag(f) ? '⏸ הפסק' : '▶ הפעל'])),
               ],
             ]),
           ),
-        if (withHok.isEmpty) const ForgeSearchEmptyState(fields: ['אין הוראות-קבע', '']),
+        if (withHok.isEmpty) ForgeSearchEmptyState(fields: ['אין הוראות-קבע', '']),
       ]])),
     ]);
   }
@@ -1119,16 +1121,16 @@ class _DonationScreenState extends State<DonationScreen> {
     final due = fs.where((f) => _DonationData.nextReminder(f) != null).toList();
     final sentAll = [for (final f in fs) for (final c in _DonationData.remindersSent(f)) {'f': f, 'c': c}]..sort((a, b) => '${(b['c'] as Map)['at']}'.compareTo('${(a['c'] as Map)['at']}'));
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const ForgeSectionPill(fields: ['מגן-כבוד: תזכורות פרטיות בלבד · אין תזכורת פומבית · אין חסימת-תלמיד · מלגה-מלאה = אפס-תזכורות', '']),
+      ForgeSectionPill(items: [['מגן-כבוד: תזכורות פרטיות בלבד · אין תזכורת פומבית · אין חסימת-תלמיד · מלגה-מלאה = אפס-תזכורות']], variants: const <int>[0]),
       _gap(8),
       ForgeTitledSection(fields: ['🔔 מועד-תזכורת הגיע · ${due.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (due.isEmpty)
-          const ForgeSearchEmptyState(fields: ['אין תזכורות שמועדן הגיע', ''])
+          ForgeSearchEmptyState(fields: ['אין תזכורות שמועדן הגיע', ''])
         else
           for (final f in due) _reminderCard(f),
       ]])),
       ForgeTitledSection(fields: ['📜 היסטוריית-תזכורות · ${sentAll.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-        if (sentAll.isEmpty) const ForgeSearchEmptyState(fields: ['טרם נשלחו תזכורות', '']) else
+        if (sentAll.isEmpty) ForgeSearchEmptyState(fields: ['טרם נשלחו תזכורות', '']) else
           for (final x in sentAll)
             ForgeNotifRow(items: [['${(x['f'] as Map)['name']} · ${(x['c'] as Map)['grade'] ?? 'תזכורת'}', fmtDate((x['c'] as Map)['at'] as String?)]]),
       ]])),
@@ -1143,7 +1145,7 @@ class _DonationScreenState extends State<DonationScreen> {
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         ForgeContactTile(fields: ['${f['name']} · דרגה: $grade', 'יתרה ${_m(_DonationData.balance(f))} · ותק ${_DonationData.agingDays(f)} י׳ · נשלחו ${_DonationData.remindersSent(f).length}']),
-        _wrap([for (final p in plan) ForgeIntelPill(fields: ['${p['grade']} · ${fmtDate(p['date'] as String?)}'])]),
+        _wrap([for (final p in plan) ForgeStatusChip(items: [['${p['grade']} · ${fmtDate(p['date'] as String?)}']], variants: [const <int>[0, 1, 3, 2][(p['grade'] == grade ? 3 : 0) % 4]])]),
         if (_amounts) ...[
           _gap(6),
           Container(
@@ -1175,9 +1177,9 @@ class _DonationScreenState extends State<DonationScreen> {
         Expanded(child: TrendStat(value: _m(thisMonth), delta: (trend['pct'] as num).toDouble(), label: 'נגבה החודש · מגמה מול חצי-שנה')),
       ]),
       _gap(10),
-      if (_amounts) DsBars(title: 'חיובים לפי-סוג', labels: byType.keys.toList(), values: [for (final v in byType.values) v.toDouble()]),
+      if (_amounts) ForgeBarChart(fields: ['חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in byType.values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(10),
-      DsBars(title: 'משפחות לפי-סטטוס', labels: [for (final c in counts) c[0] as String], values: [for (final c in counts) (c[1] as int).toDouble()]),
+      ForgeBarChart(fields: ['משפחות לפי-סטטוס', ''], values: (() { final _vs = [for (final c in counts) (c[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(10),
       ForgeTitledSection(fields: ['🗓 דוח-גזבר שבועי · מ-${fmtDate(weekAgo)} עד ${fmtDate(_DonationData.today)}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         Row(children: [
@@ -1193,7 +1195,7 @@ class _DonationScreenState extends State<DonationScreen> {
           Expanded(child: ForgeStatPlain(fields: ['יתרה להעברה (carryBalance)', _m(_DonationData.kOpen(all))])),
           Expanded(child: ForgeStatPlain(fields: ['זכויות להחזר', _m(grandTotal(all, (f) => _DonationData.credit(f as Map<String, dynamic>)))])),
         ]),
-        const ForgeSectionPill(fields: ['סגירת-שנה = העברת-יתרות ל-carryBalance של השנה-הבאה (מקום-שמור: פעולת-סוף-שנה נעולה עד אישור-הנהלה)', '']),
+        ForgeSectionPill(items: [['סגירת-שנה = העברת-יתרות ל-carryBalance של השנה-הבאה (מקום-שמור: פעולת-סוף-שנה נעולה עד אישור-הנהלה)']], variants: const <int>[0]),
       ]])),
       // מקום-שמור: התאמת-תשלומים-נכנסים (matching · strongMatchForCharge) — השער-החיצוני יזין את הרשימה
       ForgeTitledSection(fields: ['🔗 התאמת-תשלומים-נכנסים לחיוב (שער-חיצוני · מקום-שמור)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
@@ -1209,7 +1211,7 @@ class _DonationScreenState extends State<DonationScreen> {
   // ═══ 🧾 אודיט: כל פעולה (מי·מה·מתי) — TimelineItem ═══
   Widget _auditView() => ForgeTitledSection(fields: ['🧾 יומן-אודיט · ${_DonationData.audit.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (_DonationData.audit.isEmpty)
-          const ForgeSearchEmptyState(fields: ['אין פעולות עדיין — כל חיוב/תשלום/ביטול/הנחה/תזכורת יירשם כאן', ''])
+          ForgeSearchEmptyState(fields: ['אין פעולות עדיין — כל חיוב/תשלום/ביטול/הנחה/תזכורת יירשם כאן', ''])
         else
           for (final a in _DonationData.audit)
             ForgeNotifRow(items: [['${a['role']} · ${a['family'] == '*' ? 'כלל-המערכת' : _DonationData.families.firstWhere((f) => f['id'] == a['family'], orElse: () => const {'name': '?'})['name']}', fmtDate(a['date'] as String?)]]),
@@ -1226,7 +1228,7 @@ class _DonationScreenState extends State<DonationScreen> {
           child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               ForgeContactTile(fields: [f['name'] as String, '${_DonationData.studentsOf(f)} · ${_DonationData.gradesOf(f)}']),
               _gap(10),
-              ForgeSectionPill(fields: [_DonationData.balance(f) > 0 ? 'דגל-חוב — פרטים וסכומים בגזברות בלבד. לא לפנות לתלמיד/ה (מגן-כבוד).' : 'תקין — אין דגל-חוב', '']),
+              ForgeSectionPill(items: [[_DonationData.balance(f) > 0 ? 'דגל-חוב — פרטים וסכומים בגזברות בלבד. לא לפנות לתלמיד/ה (מגן-כבוד).' : 'תקין — אין דגל-חוב']], variants: [const <int>[0, 0, 0, 0][(_DonationData.balance(f) > 0 ? 3 : 1) % 4]]),
             ])),
         ),
       );
@@ -1253,7 +1255,7 @@ class _DonationScreenState extends State<DonationScreen> {
                   if (_DonationData.credit(f) > 0) Expanded(child: ForgeStatPlain(fields: ['זכות', _m(_DonationData.credit(f))])),
                 ]),
                 _gap(8),
-                ForgeSectionPill(fields: ['הפעולה-הנכונה: ${actn['text']}', '']),
+                ForgeSectionPill(items: [['הפעולה-הנכונה: ${actn['text']}']], variants: [const <int>[0, 0, 0, 0][(actn['tone'] as int) % 4]]),
                 _gap(10),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -1290,7 +1292,7 @@ class _DonationScreenState extends State<DonationScreen> {
                     GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setSheet(() => tab = 7), child: ForgeSoftButton(fields: ['🖨 מצב-חשבון'])),
                   ];
                   return acts.isEmpty
-                      ? const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה', ''])
+                      ? ForgeSectionPill(items: [['צפייה-בלבד — אין הרשאת-פעולה']], variants: const <int>[0])
                       : Wrap(spacing: 8, runSpacing: 8, children: acts);
                 }),
               ])),
@@ -1303,13 +1305,13 @@ class _DonationScreenState extends State<DonationScreen> {
   // סקירה: השוואה (NeonBars) · יחס (StatRow) · פירוק-לפי-סוג (DsBars) · תלמידים · מדדי-דפוס (RFM·מגמה)
   List<Widget> _tabOverview(Map<String, dynamic> f, int charged, int paid, int bal) => [
         if (_amounts) ...[
-          NeonBars(labels: const ['חיובים', 'שולם', 'יתרה'], values: [charged.toDouble(), paid.toDouble(), bal.toDouble()], tone: bal > 0 ? (_DonationData.agingBand(f) == 3 ? 2 : 3) : 1),
+          ForgeBarChart(fields: ['', ''], values: (() { final _vs = [charged.toDouble(), paid.toDouble(), bal.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _gap(8),
           ForgeLinearProgressStatus(fields: ['שולם מתוך חיובים', '${shekel(paid)} / ${shekel(charged)}'], values: [charged == 0 ? 0 : paid / charged]),
           _gap(8),
-          if (_DonationData.byType(f).isNotEmpty) DsBars(title: 'פירוק-חיובים לפי-סוג', labels: _DonationData.byType(f).keys.toList(), values: [for (final v in _DonationData.byType(f).values) v.toDouble()]),
+          if (_DonationData.byType(f).isNotEmpty) ForgeBarChart(fields: ['פירוק-חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in _DonationData.byType(f).values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
         ],
-        _wrap([for (final m in f['members'] as List) ForgeIntelPill(fields: ['🎓 ${(m as Map)['first']} · ${m['grade']}'])]),
+        _wrap([for (final m in f['members'] as List) ForgeStatusChip(items: [['🎓 ${(m as Map)['first']} · ${m['grade']}']], variants: const <int>[0])]),
         _wrap(_facts(f)),
         _gap(8),
         Row(children: [
@@ -1324,7 +1326,7 @@ class _DonationScreenState extends State<DonationScreen> {
     final cs = _DonationData.chargesOf(f);
     final dups = _DonationData.duplicateCharges(f).map((c) => c['id']).toSet();
     return [
-      if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['אין חיובים למשפחה — לרשום חיוב-שנה', '']),
+      if (cs.isEmpty) ForgeSearchEmptyState(fields: ['אין חיובים למשפחה — לרשום חיוב-שנה', '']),
       for (final c in cs)
         () {
           final cancelled = c['cancelledAt'] != null || _DonationData.cancelledIds.contains(c['id']);
@@ -1342,16 +1344,16 @@ class _DonationScreenState extends State<DonationScreen> {
   List<Widget> _tabPayments(Map<String, dynamic> f) {
     final ps = [..._DonationData.paymentsOf(f)]..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
     return [
-      if (ps.isEmpty) const ForgeSearchEmptyState(fields: ['אין תשלומים רשומים', '']),
+      if (ps.isEmpty) ForgeSearchEmptyState(fields: ['אין תשלומים רשומים', '']),
       for (final p in ps)
         ForgeNotifRow(items: [['${p['method']}${p['method'] == 'הו״ק' ? ' 💳' : ''}', fmtDate(p['date'] as String?)]]),
-      const ForgeSectionPill(fields: ['קבלת-מס / אישור-סליקה / חשבונית = שער-חיצוני (מקום-שמור: מס׳-קבלה יואר כאן כשיגיע מהשער; המסך אינו מנפיק)', '']),
+      ForgeSectionPill(items: [['קבלת-מס / אישור-סליקה / חשבונית = שער-חיצוני (מקום-שמור: מס׳-קבלה יואר כאן כשיגיע מהשער; המסך אינו מנפיק)']], variants: const <int>[0]),
     ];
   }
 
   // הו״ק: מצב-החודש (hokEffectivelyActive⊕hokRecordedThisMonth) + היסטוריית-סליקה + הפעל/הפסק
   List<Widget> _tabHok(Map<String, dynamic> f, void Function(void Function()) act) {
-    if (!_DonationData.hasHok(f)) return [const ForgeSearchEmptyState(fields: ['אין הוראת-קבע למשפחה (מקום-שמור: תוגדר בשער-הסליקה)', ''])];
+    if (!_DonationData.hasHok(f)) return [ForgeSearchEmptyState(fields: ['אין הוראת-קבע למשפחה (מקום-שמור: תוגדר בשער-הסליקה)', ''])];
     final h = f['hok'] as Map;
     final hist = (f['hist'] as List?) ?? const [];
     return [
@@ -1361,18 +1363,18 @@ class _DonationScreenState extends State<DonationScreen> {
         Expanded(child: ForgeContactTile(fields: ['${_m(h['amount'] as num)} · יום ${h['day']} בחודש', '${_DonationData.hokMethod(f)} · מ-${fmtDate(h['startedAt'] as String?)}${h['kevaId'] != null ? ' · סליקה ${h['kevaId']}' : ' · ידנית'}'])),
       ]),
       _wrap([
-        ForgeIntelPill(fields: [_DonationData.hokFlag(f) ? 'מסומנת פעילה' : 'מופסקת']),
-        ForgeIntelPill(fields: [_DonationData.hokActive(f) ? 'סליקה חיה' : 'סליקה פסקה >2 חודשים']),
-        ForgeIntelPill(fields: [_DonationData.hokRecorded(f) ? 'נרשמה החודש ✅' : 'טרם נרשמה החודש']),
+        ForgeStatusChip(items: [[_DonationData.hokFlag(f) ? 'מסומנת פעילה' : 'מופסקת']], variants: [const <int>[0, 1, 3, 2][(_DonationData.hokFlag(f) ? 1 : 0) % 4]]),
+        ForgeStatusChip(items: [[_DonationData.hokActive(f) ? 'סליקה חיה' : 'סליקה פסקה >2 חודשים']], variants: [const <int>[0, 1, 3, 2][(_DonationData.hokActive(f) ? 1 : 2) % 4]]),
+        ForgeStatusChip(items: [[_DonationData.hokRecorded(f) ? 'נרשמה החודש ✅' : 'טרם נרשמה החודש']], variants: [const <int>[0, 1, 3, 2][(_DonationData.hokRecorded(f) ? 1 : 3) % 4]]),
       ]),
       if (_DonationData.hokFailed(f)) ...[
         _gap(6),
-        const ForgeSectionPill(fields: ['הו״ק נכשלה — התרעה נשלחה; ניסיון-חיוב-חוזר = שער-הסליקה (מקום-שמור). בינתיים: תזכורת עדינה', '']),
+        ForgeSectionPill(items: [['הו״ק נכשלה — התרעה נשלחה; ניסיון-חיוב-חוזר = שער-הסליקה (מקום-שמור). בינתיים: תזכורת עדינה']], variants: const <int>[0]),
       ],
       _gap(6),
       Text('היסטוריית-סליקה · ${hist.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
       for (final e in hist) ForgeNotifRow(items: [['${(e as Map)['clearer']}', fmtDate(e['d'] as String?)]]),
-      if (hist.isEmpty) const ForgeSearchEmptyState(fields: ['אין היסטוריית-סליקה (הו״ק ידנית)', '']),
+      if (hist.isEmpty) ForgeSearchEmptyState(fields: ['אין היסטוריית-סליקה (הו״ק ידנית)', '']),
     ];
   }
 
@@ -1380,15 +1382,15 @@ class _DonationScreenState extends State<DonationScreen> {
   List<Widget> _tabReminders(Map<String, dynamic> f, void Function(void Function()) act) {
     final plan = _DonationData.reminderPlan(f), sent = _DonationData.remindersSent(f), nr = _DonationData.nextReminder(f);
     return [
-      if (_DonationData.fullScholarship(f)) const ForgeSectionPill(fields: ['מלגה מלאה — אפס-תזכורות (מגן-כבוד)', '']) else if (plan.isEmpty) const ForgeSearchEmptyState(fields: ['אין חוב פתוח — אין לוח-תזכורות', '']) else ...[
+      if (_DonationData.fullScholarship(f)) ForgeSectionPill(items: [['מלגה מלאה — אפס-תזכורות (מגן-כבוד)']], variants: const <int>[0]) else if (plan.isEmpty) ForgeSearchEmptyState(fields: ['אין חוב פתוח — אין לוח-תזכורות', '']) else ...[
         Text('לוח מדורג (מהחיוב-הפתוח-הוותיק ${fmtDate(_DonationData.oldestOpenDate(f))})', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
-        _wrap([for (var i = 0; i < plan.length; i++) ForgeIntelPill(fields: ['${i < sent.length ? '✅' : '${plan[i]['date']}'.compareTo(_DonationData.today) <= 0 ? '⏰' : '⏳'} ${plan[i]['grade']} · ${fmtDate(plan[i]['date'] as String?)}'])]),
+        _wrap([for (var i = 0; i < plan.length; i++) ForgeStatusChip(items: [['${i < sent.length ? '✅' : '${plan[i]['date']}'.compareTo(_DonationData.today) <= 0 ? '⏰' : '⏳'} ${plan[i]['grade']} · ${fmtDate(plan[i]['date'] as String?)}']], variants: [const <int>[0, 1, 3, 2][(i < sent.length ? 1 : nr != null && nr['grade'] == plan[i]['grade'] ? 3 : 0) % 4]])]),
         if (nr != null && _DonationData.can(_role, 'fees.remind')) _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _DonationData.sendReminder(f, _roleName, nr['grade'] as String)), child: ForgeSoftButton(fields: ['📨 שלח תזכורת ${nr['grade']} (פרטי)']))], top: 8),
       ],
       _gap(8),
       Text('היסטוריה · ${sent.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
       for (final c in sent) ForgeNotifRow(items: [['תזכורת ${c['grade'] ?? ''}', fmtDate(c['at'] as String?)]]),
-      if (f['nextNote'] != null) ForgeSectionPill(fields: ['תגובה/מעקב: ${f['nextNote']} (${fmtDate(f['nextDate'] as String?)})', '']),
+      if (f['nextNote'] != null) ForgeSectionPill(items: [['תגובה/מעקב: ${f['nextNote']} (${fmtDate(f['nextDate'] as String?)})']], variants: const <int>[0]),
     ];
   }
 
@@ -1401,11 +1403,11 @@ class _DonationScreenState extends State<DonationScreen> {
         Expanded(child: ForgeStatPlain(fields: ['שווי-ההנחה השנה', _m(_DonationData.scholarshipOf(f))])),
         Expanded(child: ForgeStatPlain(fields: ['אחים (הנחת-אחים אוטו)', '${_DonationData.studentsN(f)}'])),
       ]),
-      _wrap([for (final c in _DonationData.criteria) ForgeIntelPill(fields: ['${ids.contains(c['id']) ? '✅ ' : ''}${c['label']} ${c['discountPct']}%'])]),
+      _wrap([for (final c in _DonationData.criteria) ForgeStatusChip(items: [['${ids.contains(c['id']) ? '✅ ' : ''}${c['label']} ${c['discountPct']}%']], variants: [const <int>[0, 1, 3, 2][(ids.contains(c['id']) ? 1 : 0) % 4]])]),
       if (_DonationData.can(_role, 'fees.scholarship'))
         _wrap([for (final c in _DonationData.criteria) if (!ids.contains(c['id'])) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _DonationData.grantDiscount(f, _roleName, c['id'] as String)), child: ForgeSoftButton(fields: ['🎓 הענק ${c['label']}']))], top: 8)
       else
-        const ForgeSectionPill(fields: ['הענקת-מלגה/הנחה = הרשאת-הנהלה', '']),
+        ForgeSectionPill(items: [['הענקת-מלגה/הנחה = הרשאת-הנהלה']], variants: const <int>[0]),
     ];
   }
 
@@ -1414,11 +1416,11 @@ class _DonationScreenState extends State<DonationScreen> {
     final ins = _DonationData.installments(f);
     return [
       if (ins.isEmpty) ...[
-        const ForgeSearchEmptyState(fields: ['אין הסדר-תשלומים', '']),
+        ForgeSearchEmptyState(fields: ['אין הסדר-תשלומים', '']),
         if (_DonationData.can(_role, 'fees.arrangement') && _DonationData.balance(f) > 0)
           _wrap([for (final n in const [2, 3, 6]) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _DonationData.setArrangement(f, _roleName, n)), child: ForgeSoftButton(fields: ['📆 פריסה ל-$n']))], top: 4),
       ] else ...[
-        if (_DonationData.arrangementLate(f)) const ForgeSectionPill(fields: ['הסדר בפיגור — תשלום שמועדו עבר לא כוסה', '']),
+        if (_DonationData.arrangementLate(f)) ForgeSectionPill(items: [['הסדר בפיגור — תשלום שמועדו עבר לא כוסה']], variants: const <int>[0]),
         for (final c in ins)
           ForgeNotifRow(items: [['${c['note'] ?? 'תשלום-הסדר'}', fmtDate(c['date'] as String?)]]),
       ],
@@ -1440,20 +1442,20 @@ class _DonationScreenState extends State<DonationScreen> {
       'סך-חיובים ${shekel(_DonationData.charged(f))} · שולם ${shekel(_DonationData.paid(f))} · יתרה ${shekel(_DonationData.balance(f))}',
     ];
     return [
-      if (!_amounts) const ForgeSectionPill(fields: ['מצב-חשבון דורש הרשאת-כספים', '']) else
+      if (!_amounts) ForgeSectionPill(items: [['מצב-חשבון דורש הרשאת-כספים']], variants: const <int>[0]) else
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(color: const Color(0xFF0C0D1E), borderRadius: BorderRadius.circular(10)),
           child: SelectableText(lines.join('\n'), style: const TextStyle(color: _ink, fontSize: 12, height: 1.6)),
         ),
-      const ForgeSectionPill(fields: ['הדפסה/PDF = שער-חיצוני (מקום-שמור) — הטקסט לעיל ניתן להעתקה', '']),
+      ForgeSectionPill(items: [['הדפסה/PDF = שער-חיצוני (מקום-שמור) — הטקסט לעיל ניתן להעתקה']], variants: const <int>[0]),
     ];
   }
 
   List<Widget> _tabAudit(Map<String, dynamic> f) {
     final rows = _DonationData.audit.where((a) => a['family'] == f['id']).toList();
     return [
-      if (rows.isEmpty) const ForgeSearchEmptyState(fields: ['אין פעולות למשפחה זו עדיין', '']) else
+      if (rows.isEmpty) ForgeSearchEmptyState(fields: ['אין פעולות למשפחה זו עדיין', '']) else
         for (final a in rows) ForgeNotifRow(items: [['${a['role']}', fmtDate(a['date'] as String?)]]),
     ];
   }
@@ -1476,7 +1478,7 @@ class _DonationScreenState extends State<DonationScreen> {
             builder: (ctx, scroll) => Padding(
               padding: const EdgeInsets.all(12),
               child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                  const ForgeContactTile(fields: ['חיוב חדש / חיוב-מרוכז', 'סוג · סכום · תאריך · עבור-מי — או מרוכז לכל כיתה']),
+                  ForgeContactTile(fields: ['חיוב חדש / חיוב-מרוכז', 'סוג · סכום · תאריך · עבור-מי — או מרוכז לכל כיתה']),
                   _gap(8),
                   ForgeDsEnumField(fields: ['משפחה'], control: DsEnumField(label: 'משפחה', options: [for (final x in _DonationData.families) '${x['name']}'], value: '${f['name']}', onChanged: (v) => setSheet(() => fam = _DonationData.families.firstWhere((x) => x['name'] == v)['id'] as String), bare: true)),
                   ForgeDsEnumField(fields: ['עבור-מי'], control: DsEnumField(label: 'עבור-מי', options: members, value: member, onChanged: (v) => setSheet(() => member = v), bare: true)),

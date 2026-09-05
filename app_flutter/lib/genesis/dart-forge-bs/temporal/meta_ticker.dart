@@ -17,12 +17,13 @@ class ForgeMetaTicker extends StatelessWidget {
   static Widget _withChild(Widget w, Widget? c) => c == null ? w : LayoutBuilder(builder: (ctx, cns) => cns.hasBoundedHeight
       ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, Expanded(child: c)])
       : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [w, c]));
+  static Widget _hide(String s, Widget w) => s.isEmpty ? const SizedBox.shrink() : w;   // G13a · חריץ-ריק ⇒ הקופסה נעלמת
   const ForgeMetaTicker({super.key, this.fields, this.child});
   @override
   Widget build(BuildContext context) {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final fonts = DsSeam.fontsOf(context);  // פונט
-    final Widget body = Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(decoration: BoxDecoration(color: skin.sunken, border: Border(top: BorderSide(color: skin.hair2, width: 1), bottom: BorderSide(color: skin.hair2, width: 1))), child: _withChild(const SizedBox.shrink(), child)), Container(padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "Meta ticker — Label · Value pairs streaming, one row, tabular. Reduced-motion parks it."), style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 11, fontFeatures: const [FontFeature.tabularFigures()]))))]);
+    final Widget body = Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(decoration: BoxDecoration(color: skin.sunken, border: Border(top: BorderSide(color: skin.hair2, width: 1), bottom: BorderSide(color: skin.hair2, width: 1))), child: _withChild(const SizedBox.shrink(), child)), _hide(_f(0, "Meta ticker — Label · Value pairs streaming, one row, tabular. Reduced-motion parks it."), Container(padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(0, "Meta ticker — Label · Value pairs streaming, one row, tabular. Reduced-motion parks it."), style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 11, fontFeatures: const [FontFeature.tabularFigures()])))))]);
     return body;
   }
 }

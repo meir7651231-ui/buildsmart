@@ -1,5 +1,5 @@
-// 🎨 schoolos_teachers.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeIntelPill · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader
-//   החלפות: stat×0 · hero×1 · statRow×17 · button×17 · statusChip×10 · banner×12 · emptyState×12 · mediaRow×6 · section×2 · segmented×6 · meter×2 · frame×4 · timeline×4 · search×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_teachers.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
+//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×6 · statRow×17 · button×17 · statusChip×10 · banner×12 · emptyState×12 · mediaRow×6 · section×2 · segmented×6 · meter×2 · frame×4 · timeline×4 · search×1 · table×2 · bars×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-עומס · זיהוי-חריגה · הכרעה (מחליף-מוצע · דחיפות-מאוחדת) · ביצוע · אימות.
@@ -55,14 +55,16 @@ import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע
 import '../dart-maor/absence-reason-chips.dart'; // סיבות-היעדרות (term-מוזרק)
 import '../dart-data-maor/absence-reason-chips-terms.dart'; // kTerms — שמות-הסיבות (אטום-דאטה)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat/FilterChipPill דורשים הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -680,7 +682,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
           ])),
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — 9 אוטומציות-המפרט
-        for (final a in _TeamData.alerts(_role)) ...[ForgeSectionPill(fields: [a['m'] as String, '']), _gap(6)],
+        for (final a in _TeamData.alerts(_role)) ...[ForgeSectionPill(items: [[a['m'] as String]], variants: [const <int>[0, 0, 0, 0][(a['tone'] as int) % 4]]), _gap(6)],
         const SizedBox(height: 4),
         // פס-עליון: חיפוש-מבוקר (DsSearch) · מורה-חדש · לוח-החלפות-היום · ייצוא (רשימה-נראית)
         Row(children: [
@@ -693,14 +695,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
           if (_TeamData.can(_role, 'team.export') && exportAllowed(false)) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport('רשימת-צוות · ${visible.length}', _TeamData.rosterCsv(visible, _TeamData.hiddenKeys(_role))), child: ForgeSoftButton(fields: ['⬇ CSV'])))],
         ]),
         // פילטרים (המפרט: 11) — צ׳יפי-חריגה (finderMatches) + תפקיד/סטטוס (SegmentedSwitch) + מקצוע/כיתה (FilterChipPill)
-        Wrap(spacing: 8, runSpacing: 6, children: [
-          _fchip('absent', '🤒 נעדר-היום · ${_TeamData.absentN}'),
-          _fchip('over', '🔥 עומס>סף · ${_TeamData.overN}'),
-          _fchip('under', '🪫 עומס<סף · ${_TeamData.underN}'),
-          _fchip('cert', '🎓 הכשרה-חסרה/פגה'),
-          _fchip('contract', '📄 חוזה-פג'),
-          _fchip('free', '🟢 זמין ב-${_TeamData.openSlot}'),
-        ]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[((('🤒 נעדר-היום · ${_TeamData.absentN}')), _locks[(('absent'))] == ('1'), () => setState(() => _locks[(('absent'))] == ('1') ? _locks.remove((('absent'))) : _locks[(('absent'))] = ('1'))), ((('🔥 עומס>סף · ${_TeamData.overN}')), _locks[(('over'))] == ('1'), () => setState(() => _locks[(('over'))] == ('1') ? _locks.remove((('over'))) : _locks[(('over'))] = ('1'))), ((('🪫 עומס<סף · ${_TeamData.underN}')), _locks[(('under'))] == ('1'), () => setState(() => _locks[(('under'))] == ('1') ? _locks.remove((('under'))) : _locks[(('under'))] = ('1'))), ((('🎓 הכשרה-חסרה/פגה')), _locks[(('cert'))] == ('1'), () => setState(() => _locks[(('cert'))] == ('1') ? _locks.remove((('cert'))) : _locks[(('cert'))] = ('1'))), ((('📄 חוזה-פג')), _locks[(('contract'))] == ('1'), () => setState(() => _locks[(('contract'))] == ('1') ? _locks.remove((('contract'))) : _locks[(('contract'))] = ('1'))), ((('🟢 זמין ב-${_TeamData.openSlot}')), _locks[(('free'))] == ('1'), () => setState(() => _locks[(('free'))] == ('1') ? _locks.remove((('free'))) : _locks[(('free'))] = ('1')))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         const SizedBox(height: 8),
         Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['כל תפקיד', 'מחנך', 'מקצועי', 'סייע', 'הנהלה']) [s]], selected: {_segIdx('role', const ['homeroom', 'subject', 'aide', 'mgmt'])}, onSelect: (i) => _segSet('role', const ['homeroom', 'subject', 'aide', 'mgmt'], i))),
         const SizedBox(height: 6),
@@ -726,7 +721,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          ForgeSectionPill(fields: [_error!, ''])
+          ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
         else if (_TeamData.staff.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין צוות — הוסף מורה ראשון/ה', '']))
         else if (_mode == 2)
@@ -847,9 +842,9 @@ class _TeachersScreenState extends State<TeachersScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Wrap(spacing: 8, runSpacing: 6, children: [
         for (final f in _TeamData.metaFields)
-          if (t[f['key']] != null) ForgeIntelPill(fields: ['${f['prefix']}${f['key'] == 'preferredSub' ? _TeamData.nameOf(t[f['key']] as String) : f['key']!.contains('Date') || f['key'] == 'contractEnd' ? fmtDate('${t[f['key']]}') : t[f['key']]}${f['suffix']}']),
-        for (final r in (t['extraRoles'] as List)) ForgeIntelPill(fields: ['🎖 $r']),
-        for (final c in (t['constraints'] as List)) ForgeIntelPill(fields: ['⛔ $c']),
+          if (t[f['key']] != null) ForgeStatusChip(items: [['${f['prefix']}${f['key'] == 'preferredSub' ? _TeamData.nameOf(t[f['key']] as String) : f['key']!.contains('Date') || f['key'] == 'contractEnd' ? fmtDate('${t[f['key']]}') : t[f['key']]}${f['suffix']}']], variants: const <int>[0]),
+        for (final r in (t['extraRoles'] as List)) ForgeStatusChip(items: [['🎖 $r']], variants: const <int>[1]),
+        for (final c in (t['constraints'] as List)) ForgeStatusChip(items: [['⛔ $c']], variants: const <int>[2]),
       ]),
       _gap(10),
       Text('זמינות שבועית · ${days.length} ימים', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
@@ -858,11 +853,11 @@ class _TeachersScreenState extends State<TeachersScreen> {
         for (final d in days) DsChip(label: '${dayNames[d]} ${av[d]![0]}–${av[d]![1]}', tone: 0),
         if (days.isEmpty) const DsChip(label: 'אין חלונות-זמינות (חופשה/עזב)', tone: 2),
       ]),
-      if ('${t['notes']}'.isNotEmpty && !_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), ForgeSectionPill(fields: ['הערת-הנהלה (מוגן): ${t['notes']}', ''])],
-      if (_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), const ForgeSectionPill(fields: ['הערות-הנהלה מוגנות — למנהל/ת בלבד', ''])],
+      if ('${t['notes']}'.isNotEmpty && !_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), ForgeSectionPill(items: [['הערת-הנהלה (מוגן): ${t['notes']}']], variants: const <int>[0])],
+      if (_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), ForgeSectionPill(items: [['הערות-הנהלה מוגנות — למנהל/ת בלבד']], variants: const <int>[0])],
       if (_TeamData.balanceFor(t) != null) ...[
         _gap(10),
-        ForgeSectionPill(fields: ['הצעת-איזון: להעביר ${_TeamData.balanceFor(t)!['course']['name']} מ-${_TeamData.balanceFor(t)!['from']['name']} (עמוס-מדי) לכאן', '']),
+        ForgeSectionPill(items: [['הצעת-איזון: להעביר ${_TeamData.balanceFor(t)!['course']['name']} מ-${_TeamData.balanceFor(t)!['from']['name']} (עמוס-מדי) לכאן']], variants: const <int>[0]),
       ],
     ]);
   }
@@ -878,9 +873,9 @@ class _TeachersScreenState extends State<TeachersScreen> {
     }
     final times = grid.keys.toList()..sort((a, b) => (timeToMin(a) as num).compareTo(timeToMin(b) as num));
     const days = [0, 1, 2, 3, 4, 5];
-    if (times.isEmpty) return const ForgeSearchEmptyState(fields: ['אין שיעורים במערכת', '']);
+    if (times.isEmpty) return ForgeSearchEmptyState(fields: ['אין שיעורים במערכת', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      DsTable(labels: ['שעה', for (final d in days) dayNames[d]], rows: [for (final tm in times) [tm, for (final d in days) grid[tm]![d] ?? '—']]),
+      ForgeDataGrid(bare: true, columns: ['שעה', for (final d in days) dayNames[d]], items: [for (final tm in times) [tm, for (final d in days) grid[tm]![d] ?? '—']]),
       _gap(6),
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['רצועות-שעה', '${times.length}'])),
@@ -895,7 +890,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
     final cs = _TeamData.coursesOf(t);
     final bal = _TeamData.balanceFor(t);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      if (cs.isEmpty) const ForgeSearchEmptyState(fields: ['לא הוקצו חוגים', '']),
+      if (cs.isEmpty) ForgeSearchEmptyState(fields: ['לא הוקצו חוגים', '']),
       for (final c in cs)
         ForgeContactTile(fields: ['${c['name']} · חדר ${c['roomId']}', '${(sessionsOf(c) as List).length} מפגשים/שבוע · ${(sessionsOf(c) as List).map((s) => '${dayNames[s['day'] as int]} ${s['time']}').join(' · ')}']),
       if (bal != null && _TeamData.can(_role, 'team.assign')) ...[
@@ -913,14 +908,14 @@ class _TeachersScreenState extends State<TeachersScreen> {
     final base = DateTime.parse('${_TeamData.today}T12:00:00');
     final labels = [for (var i = 3; i >= 0; i--) () { final m = DateTime(base.year, base.month - i); return '${m.month}/${m.year % 100}'; }()];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      NeonBars(labels: labels, values: [for (final v in monthly) v.toDouble()], tone: _TeamData.frequentAbsentee(t) ? 2 : 1),
+      ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final v in monthly) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(6),
       Wrap(spacing: 8, children: [
-        ForgeIntelPill(fields: ['מגמה: ${trend['dir'] == 'up' ? '↑ עולה' : trend['dir'] == 'down' ? '↓ יורדת' : '→ יציבה'} ${trend['pct']}%']),
-        if (_TeamData.frequentAbsentee(t)) const ForgeIntelPill(fields: ['דפוס-היעדרות — לשיחת-תמיכה']),
+        ForgeStatusChip(items: [['מגמה: ${trend['dir'] == 'up' ? '↑ עולה' : trend['dir'] == 'down' ? '↓ יורדת' : '→ יציבה'} ${trend['pct']}%']], variants: [const <int>[0, 1, 3, 2][(trend['dir'] == 'up' ? 2 : 1) % 4]]),
+        if (_TeamData.frequentAbsentee(t)) ForgeStatusChip(items: [['דפוס-היעדרות — לשיחת-תמיכה']], variants: const <int>[2]),
       ]),
       _gap(10),
-      if (list.isEmpty) const ForgeSearchEmptyState(fields: ['אין היעדרויות רשומות', '']),
+      if (list.isEmpty) ForgeSearchEmptyState(fields: ['אין היעדרויות רשומות', '']),
       for (final a in list)
         ForgeNotifRow(items: [['🤒 ${_TeamData.reasonOf(a['reason'] as String)}', fmtDate(a['date'] as String)]]),
     ]);
@@ -929,7 +924,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
   // החלפות: ביצע/קיבל (TimelineItem)
   Widget _subsOf(Map<String, dynamic> t) {
     final mine = _TeamData.subs.where((s) => s['subId'] == t['id'] || s['absentId'] == t['id']).toList()..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
-    if (mine.isEmpty) return const ForgeSearchEmptyState(fields: ['אין החלפות', '']);
+    if (mine.isEmpty) return ForgeSearchEmptyState(fields: ['אין החלפות', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       for (final s in mine)
         ForgeNotifRow(items: [['${s['subId'] == t['id'] ? '🟢 ביצע/ה' : '🟠 קיבל/ה'} · ${_TeamData.courseById(s['courseId'] as String)?['name']}', '${fmtDate(s['date'] as String)}${s['time'] != null ? ' ${s['time']}' : ''}']]),
@@ -939,19 +934,19 @@ class _TeachersScreenState extends State<TeachersScreen> {
   // ביצועי-כיתות (מקום-שמור · §20-ג): מאיר רק כשמוזרם classPerf {labels, values, monthly} ממודולי נוכחות/תלמידים
   Widget _performance(Map<String, dynamic> t) {
     final perf = t['classPerf'] as Map<String, dynamic>?;
-    if (perf == null) return const ForgeSearchEmptyState(fields: ['מקום-שמור: נוכחות/ציוני-כיתותיו יאירו כשיוזרמו ממודולי נוכחות ותלמידים (לא מזייפים)', '']);
+    if (perf == null) return ForgeSearchEmptyState(fields: ['מקום-שמור: נוכחות/ציוני-כיתותיו יאירו כשיוזרמו ממודולי נוכחות ותלמידים (לא מזייפים)', '']);
     final trend = trendFromScan({'monthly': perf['monthly']});
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      NeonBars(labels: (perf['labels'] as List).cast<String>(), values: (perf['values'] as List).map((v) => (v as num).toDouble()).toList(), tone: trend['dir'] == 'down' ? 2 : 1),
+      ForgeBarChart(fields: ['', ''], values: (() { final _vs = (perf['values'] as List).map((v) => (v as num).toDouble()).toList(); final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(6),
-      ForgeIntelPill(fields: ['מגמה ${trend['dir']} ${trend['pct']}%']),
+      ForgeStatusChip(items: [['מגמה ${trend['dir']} ${trend['pct']}%']], variants: [const <int>[0, 1, 3, 2][(trend['dir'] == 'down' ? 2 : 1) % 4]]),
     ]);
   }
 
   // הכשרות+תוקף: MediaRow ⊕ StatusChip(certExpiryStatus)
   Widget _certs(Map<String, dynamic> t) {
     final cs = _TeamData.certsOf(t);
-    if (cs.isEmpty) return const ForgeSearchEmptyState(fields: ['אין הכשרות רשומות — הכשרה-חסרה', '']);
+    if (cs.isEmpty) return ForgeSearchEmptyState(fields: ['אין הכשרות רשומות — הכשרה-חסרה', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       for (final c in cs)
         Padding(
@@ -960,7 +955,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
             Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${c['issuer']} · תוקף ${fmtDate(c['expiry'] as String)}'])),
             () {
               final st = _TeamData.certStatus(c);
-              return Flexible(child: ForgeIntelPill(fields: [st == CertExpiryStatus.expired ? 'פג' : st == CertExpiryStatus.expiringSoon ? 'פג בקרוב' : 'בתוקף']));
+              return Flexible(child: ForgeStatusChip(items: [[st == CertExpiryStatus.expired ? 'פג' : st == CertExpiryStatus.expiringSoon ? 'פג בקרוב' : 'בתוקף']], variants: [const <int>[0, 1, 3, 2][(st == CertExpiryStatus.expired ? 2 : st == CertExpiryStatus.expiringSoon ? 3 : 1) % 4]]));
             }(),
           ]),
         ),
@@ -970,14 +965,14 @@ class _TeachersScreenState extends State<TeachersScreen> {
   // מסמכים (מקום-שמור): רשומות שנרשמו ב"צרף-מסמך"; אין ⇒ ריק-אמת
   Widget _docs(Map<String, dynamic> t) {
     final ds = _TeamData.docs[t['id']] ?? const [];
-    if (ds.isEmpty) return const ForgeSearchEmptyState(fields: ['אין מסמכים — צרף-מסמך ירשום כאן (אחסון-קבצים = מקום-שמור להצבה)', '']);
+    if (ds.isEmpty) return ForgeSearchEmptyState(fields: ['אין מסמכים — צרף-מסמך ירשום כאן (אחסון-קבצים = מקום-שמור להצבה)', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final d in ds) ForgeNotifRow(items: [['📎 ${d['name']}', fmtDate(d['date'] as String)]])]);
   }
 
   // אודיט: כל פעולה שנרשמה בפנקס (מי·מה·מתי) — TimelineItem
   Widget _audit(Map<String, dynamic> t) {
     final rows = _TeamData.audit.where((a) => a['target'] == t['name'] || '${a['target']}'.contains('${t['name']}')).toList();
-    if (rows.isEmpty) return const ForgeSearchEmptyState(fields: ['אין רישומי-אודיט למורה זה', '']);
+    if (rows.isEmpty) return ForgeSearchEmptyState(fields: ['אין רישומי-אודיט למורה זה', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) ForgeNotifRow(items: [['${a['what']}', fmtDate(a['date'] as String)]])]);
   }
 
@@ -998,12 +993,12 @@ class _TeachersScreenState extends State<TeachersScreen> {
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Wrap(spacing: 8, runSpacing: 8, children: acts),
-      if (acts.length <= 1) ...[_gap(8), const ForgeSectionPill(fields: ['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה', ''])],
+      if (acts.length <= 1) ...[_gap(8), ForgeSectionPill(items: [['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה']], variants: const <int>[0])],
       _gap(8),
       if (!_TeamData.can(r, 'team.contact'))
-        const ForgeSectionPill(fields: ['שלח-הודעה: פרטי-קשר מוסתרים לתפקיד זה (הרשאה)', ''])
+        ForgeSectionPill(items: [['שלח-הודעה: פרטי-קשר מוסתרים לתפקיד זה (הרשאה)']], variants: const <int>[0])
       else if (t['contact'] == null)
-        const ForgeSectionPill(fields: ['שלח-הודעה: פרטי-קשר מוזרקים בהצבה (חוק-6) — מקום-שמור, מאיר כשיוזרק contact', ''])
+        ForgeSectionPill(items: [['שלח-הודעה: פרטי-קשר מוזרקים בהצבה (חוק-6) — מקום-שמור, מאיר כשיוזרק contact']], variants: const <int>[0])
       else
         Wrap(children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.log(_who, 'שליחת-הודעה', t['name'] as String)), child: ForgeSoftButton(fields: ['💬 שלח-הודעה']))]),
       _gap(8),
@@ -1016,7 +1011,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
           for (var i = 0; i < reasons.length; i++) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _TeamData.markAbsent(t, keys[i], _who)), child: ForgeSoftButton(fields: [reasons[i]])),
         ]),
       ] else
-        const ForgeSectionPill(fields: ['מסומן/ת נעדר/ת היום — שיעורי-היום נרשמו בלוח-ההחלפות', '']),
+        ForgeSectionPill(items: [['מסומן/ת נעדר/ת היום — שיעורי-היום נרשמו בלוח-ההחלפות']], variants: const <int>[0]),
     ]);
   }
 
@@ -1034,7 +1029,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
               ForgeContactTile(fields: [title, 'CSV · BOM + חסימת-הזרקה · PDF = מקום-שמור (מנוע-PDF בהצבה)']),
               _gap(8),
               if (!exportAllowed(false))
-                const ForgeSectionPill(fields: ['ייצוא חסום (שער-יציאת-מידע)', ''])
+                ForgeSectionPill(items: [['ייצוא חסום (שער-יציאת-מידע)']], variants: const <int>[0])
               else
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -1050,7 +1045,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
   // 📋 מבט-טבלה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid (מזייף int rows).
   Widget _table(List<Map<String, dynamic>> rows) {
     final cols = [for (final c in _TeamData.columnDefs) if (_TeamData.colShown(c, rows, _TeamData.hiddenKeys(_role))) c];
-    return DsTable(labels: [for (final c in cols) c['label'] as String], rows: [for (final t in rows) [for (final c in cols) _TeamData.cell(c, t)]]);
+    return ForgeDataGrid(bare: true, columns: [for (final c in cols) c['label'] as String], items: [for (final t in rows) [for (final c in cols) _TeamData.cell(c, t)]]);
   }
 
   // 🔁 לוח-החלפות-היום (זיהוי-חריגה ⇒ הכרעה ⇒ ביצוע): DsBoard (תפר-דאטה: stages+records+onMove) ⊕ candidates
@@ -1061,7 +1056,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
     final overdue = _TeamData.subs.where((s) => _TeamData.subOverdue(s)).length;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       if (today.isEmpty)
-        const ForgeSearchEmptyState(fields: ['אין החלפות להיום — כל השיעורים מכוסים', ''])
+        ForgeSearchEmptyState(fields: ['אין החלפות להיום — כל השיעורים מכוסים', ''])
       else ...[
         DsBoard(
           stages: const ['🔴 ללא-מחליף', '🟠 הוצע', '✅ אושר'],
@@ -1070,11 +1065,11 @@ class _TeachersScreenState extends State<TeachersScreen> {
           titleOf: (r) => r['title']!,
           onMove: (id, to) { if (_TeamData.can(_role, 'team.sub')) setState(() => _TeamData.moveSub(id, to, _who)); },
         ),
-        if (overdue > 0) ...[_gap(8), ForgeSectionPill(fields: ['$overdue החלפות פתוחות שעבר מועדן', ''])],
+        if (overdue > 0) ...[_gap(8), ForgeSectionPill(items: [['$overdue החלפות פתוחות שעבר מועדן']], variants: const <int>[0])],
         _gap(10),
         // הצעת-מחליף אוטומטית פר-שיעור-פתוח: המועמד-הראשון = מועדף/עומס-נמוך; אין ⇒ אמת (לא מזייפים מחליף)
         ForgeTitledSection(fields: ['🧭 מחליף מוצע · ${open.length} שיעורים פתוחים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-          if (open.isEmpty) const ForgeSearchEmptyState(fields: ['כל שיעורי-היום מכוסים', ''])
+          if (open.isEmpty) ForgeSearchEmptyState(fields: ['כל שיעורי-היום מכוסים', ''])
           else for (final s in open) _subRow(s),
         ]])),
       ],
@@ -1091,9 +1086,9 @@ class _TeachersScreenState extends State<TeachersScreen> {
         ForgeContactTile(fields: ['${s['time'] ?? ''} · ${c['name']} · ${c['roomId']}', 'במקום ${_TeamData.nameOf(s['absentId'] as String)} · ${s['stage'] == 1 ? 'הוצע: ${chosen?['name']}' : 'ללא-מחליף'}']),
         _gap(6),
         if (cands.isEmpty)
-          const ForgeSectionPill(fields: ['אין מחליף זמין (מקצוע+חלון-זמינות+פנוי-בסלוט) — נדרשת הכרעה ידנית', ''])
+          ForgeSectionPill(items: [['אין מחליף זמין (מקצוע+חלון-זמינות+פנוי-בסלוט) — נדרשת הכרעה ידנית']], variants: const <int>[0])
         else if (!_TeamData.can(_role, 'team.sub'))
-          Wrap(spacing: 8, children: [for (final t in cands.take(3)) ForgeIntelPill(fields: ['${t['name']} · ${_TeamData.loadPct(t)}%'])])
+          Wrap(spacing: 8, children: [for (final t in cands.take(3)) ForgeStatusChip(items: [['${t['name']} · ${_TeamData.loadPct(t)}%']], variants: const <int>[0])])
         else
           Wrap(spacing: 8, runSpacing: 6, children: [
             for (final t in cands.take(3))
@@ -1128,8 +1123,8 @@ class _TeachersScreenState extends State<TeachersScreen> {
           if (sev >= 1 || st != 'active') ...[
             _gap(8),
             Wrap(spacing: 8, runSpacing: 6, children: [
-              if (st != 'active') ForgeIntelPill(fields: [_TeamData.statusLabel[st] ?? st]),
-              if (_TeamData.why(t).isNotEmpty) ForgeIntelPill(fields: [_TeamData.why(t)]),
+              if (st != 'active') ForgeStatusChip(items: [[_TeamData.statusLabel[st] ?? st]], variants: const <int>[0]),
+              if (_TeamData.why(t).isNotEmpty) ForgeStatusChip(items: [[_TeamData.why(t)]], variants: [const <int>[0, 1, 3, 2][(sev == 3 ? 2 : sev == 2 ? 3 : 0) % 4]]),
             ]),
           ],
         ])),
