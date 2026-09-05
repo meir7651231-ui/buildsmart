@@ -1,0 +1,24 @@
+{
+  "_": "כוונת-מוֹשֶׁן → עוטף/אטום. presets=חד-שוט-כניסה (ds_anim); אטומי-repeat קיימים במדף.",
+  "entrance": {
+    "fade": "FadeInView",
+    "slideUp": "SlideUpView",
+    "scaleIn": "ScaleInView",
+    "slideIn": "SlideInView",
+    "rise": "RiseView"
+  },
+  "emphasis": {
+    "pulse": "glow_pulse",
+    "shimmer": "shimmer_skeleton",
+    "sweep": "gradient_sweep"
+  },
+  "he": {
+    "הופעה": "FadeInView",
+    "החלקה": "SlideUpView",
+    "הגדלה": "ScaleInView",
+    "כניסה": "SlideUpView",
+    "פעימה": "glow_pulse",
+    "נצנוץ": "shimmer_skeleton",
+    "הירו": "RiseView"
+  }
+}

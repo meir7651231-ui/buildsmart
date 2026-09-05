@@ -1,0 +1,54 @@
+name: genesis-preview
+
+# 🧪 תצוגת-המחצב: בונה את האפליקציה עם GENESIS_SCREENS=true ומעלה ל-
+#   https://meir7651231-ui.github.io/buildsmart/genesis/
+# בלי-לגעת בדפים-החיים: checkout של gh-pages הקיים + הוספת/החלפת התיקייה genesis/ בלבד,
+# ‏push רגיל (לא-force). הפריסה-מ-main עלולה לדרוס בעתיד (force) — מריצים-שוב וזה חוזר.
+on:
+  push:
+    branches: ["claude/mah-kora-0by8kw"]
+    paths: [".github/workflows/genesis-preview.yml", "app_flutter/lib/genesis/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Deps + version
+        run: |
+          cd app_flutter && flutter pub get && cd ..
+          bash scripts/gen_version.sh
+
+      - name: Build web (המתג דלוק)
+        working-directory: app_flutter
+        # ‏GENESIS_ONLY: הקישור מציג רק את מה-שהמנועים-בנו (הגלריה כשורש) — בלי האפליקציה-המקורית
+        run: flutter build web --release --base-href "/buildsmart/genesis/" --dart-define=GENESIS_SCREENS=true --dart-define=GENESIS_ONLY=true --dart-define=KB_GLOBAL=true
+
+      - name: Publish to gh-pages/genesis (additive — לא נוגע בשאר-האתר)
+        run: |
+          git clone --depth 1 --branch gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+          rm -rf /tmp/pages/genesis
+          mkdir -p /tmp/pages/genesis
+          cp -r app_flutter/build/web/. /tmp/pages/genesis/
+          cd /tmp/pages
+          git config user.name "genesis-preview"
+          git config user.email "actions@github.com"
+          git add genesis
+          git commit -m "🧪 genesis preview @ ${GITHUB_SHA::8}" || echo "no changes"
+          git push origin gh-pages

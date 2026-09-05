@@ -1,0 +1,23 @@
+// 📦 דאטה · תוכן-שהורם ע"י data-lift מ-screens__manager_dashboard_screen — verbatim מהמקור, אל תערוך ידנית.
+const String advance_button_fallback = 'קדם שלב ›';
+const String app_settings_body_label = 'תוספת משלוח אקספרס';
+const String app_settings_body_label2 = 'מסגרת אשראי לקבלן';
+const String app_settings_body_label3 = 'שיעור מע״מ';
+const String app_settings_body_text = 'המע״מ קבוע לפי חוק (';
+const String app_settings_body_text2 = '%). תוספת האקספרס והאשראי נראים מיד בעגלת הקבלן.';
+const String manage_intro_fallback = '🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.';
+const String manager_dashboard_count_badge_label = 'ממתינים לאישור: ';
+const String manager_dashboard_credit_bar_label = 'ניצול אשראי ';
+const String manage_section_title2 = 'מקטע ניהול';
+const String manage_section_body = 'פותח/סוגר מקטע ניהול באקורדיון (מקטע אחד פתוח בכל רגע). חל על כל המקטעים: אישורי עובדים, בקשות חופשה, קטגוריות, הגדרות אפליקציה, עץ מוצרים, מותגים, בדיקות רגרסיה ושיוך תפקידים.';
+const String manage_section_label = 'ממתינים לאישור: ';
+const String product_tree_body_fallback = 'עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.';
+const String product_tree_body_label = 'מוצרים בעץ';
+const String product_tree_body_label2 = 'קטגוריות';
+const String product_tree_body_text = 'כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי).';
+const String regression_body_fallback = 'הרצת חבילת בדיקות הרגרסיה המלאה (קטלוג · מאתר · מנוע תאימות · state · ניווט) על המכשיר.';
+const String regression_body_title = 'בדיקות רגרסיה';
+const String regression_body_body = 'פותח את מרכז בדיקות הרגרסיה (כלי פיתוח). קיים רק בבילד debug.';
+const String regression_body_fallback2 = '🔬 פתח מרכז בדיקות רגרסיה';
+const String sheet_advance_button_title = 'קדם לשלב הבא';
+const String sheet_advance_button_body = 'מקדם את ההזמנה לשלב הבא ישירות מתוך גיליון הפרטים. אותה עקיפת-מנהל כמו ׳קדם שלב׳ ברשימה; השלב מתעדכן בכל הלוחות.';

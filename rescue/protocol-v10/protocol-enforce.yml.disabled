@@ -1,0 +1,493 @@
+name: Protocol Enforcement
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  R1 / v4 — CI IS THE ONLY UN-SKIPPABLE LAYER, and it now:
+#   K1  scans the WHOLE resulting TREE (git ls-tree -r HEAD → --tree), not just
+#       the BASE…HEAD touched files. Establishes a CLEAN-TREE baseline; never
+#       assumes the merge-base was clean. FAIL-CLOSED if a push changed refs but
+#       the diff-set is empty (push-to-main empty-diff / incremental-not-whole).
+#   K2  runs the engine + gate-runner + registry from a TRUSTED ref
+#       (origin/main), NOT the PR/pushed branch's own copy, so an attacker cannot
+#       ship a stubbed engine that judges itself. (Full anchor still needs
+#       branch-protection + CODEOWNERS on main — see THE WALL in PROTOCOL_V4.md.)
+#   K3  RUNS the gate-runner to produce a GENUINE runtime ledger and diffs it
+#       against gates.tsv (no more `cp enforced claimed` self-comparison).
+#   K4  integrity-pins the hooks + workflows themselves (content-hash, not
+#       existence / grep -q job-name).
+#   K6  captures engine RCs explicitly under set +e so crash-vs-finding is real
+#       and tree-mode always runs.
+#
+#  Triggers: push AND pull_request to BOTH whats-happening AND main. No
+#  branch-scoping inside the job (the suite runs regardless of branch).
+# ═══════════════════════════════════════════════════════════════════════════
+
+on:
+  push:
+    branches:
+      - 'claude/whats-happening-LyY9G'
+      - main
+  pull_request:
+    branches:
+      - 'claude/whats-happening-LyY9G'
+      - main
+
+# K7 / DX6 (v7) — ONE real Flutter version, reconciled local==CI==ship.
+#   The previous 3.44.0 pin was a LATENT CI WALL: no such stable Flutter release
+#   exists/installs, so CI could never go green. The single installable SDK here
+#   is 3.29.3 (Dart 3.7.2) — the same version local dev runs. We pin ALL workflows
+#   AND the version-parity gate to 3.29.3 so "passes CI" == "ships" == "passes
+#   locally" with no silent divergence. (No security loss: the version-parity gate
+#   still BLOCKS any workflow that drifts off the single pinned version.)
+env:
+  FLUTTER_VERSION: '3.29.3'
+  ENFORCEMENT_FLUTTER: '3.29.3'
+  TRUSTED_REF: 'origin/main'   # K2 — engine/runner/registry come from HERE
+  GIT_REPLACE_REF_BASE: ''     # belt-and-suspenders: ignore replace refs globally
+
+jobs:
+  protocol-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history — need the merge-base + the trusted ref)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── K2: materialise the TRUSTED engine/runner/registry from origin/main ──
+      # An attacker who stubs tool/protocol_check.dart in their PR cannot make CI
+      # judge them with the stub: we judge with origin/main's copy. If a file is
+      # absent on the trusted ref (genuine bootstrap, before this lands on main),
+      # we fall back to the checked-out copy WITH a loud notice. Once merged to
+      # main + protected, the trusted path is authoritative.
+      - name: K2 — fetch trusted engine/runner/registry from origin/main
+        id: trusted
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main >/dev/null 2>&1 || echo "::warning::could not fetch origin/main"
+          mkdir -p .trusted/tool .trusted/protocol .trusted/githooks
+          fetched_all=1
+          pull() { # <repo-path> <dest>
+            local src="$1" dst="$2"
+            if git --no-replace-objects cat-file -e "${TRUSTED_REF}:${src}" 2>/dev/null; then
+              git --no-replace-objects show "${TRUSTED_REF}:${src}" > "$dst"
+              echo "  trusted: $src ← ${TRUSTED_REF}"
+            else
+              echo "::warning::trusted ref ${TRUSTED_REF} lacks $src — BOOTSTRAP fallback to PR copy"
+              if [[ -f "$src" ]]; then cp "$src" "$dst"; else echo "::error::$src missing in PR too"; exit 1; fi
+              fetched_all=0
+            fi
+          }
+          pull app_flutter/tool/protocol_check.dart           .trusted/tool/protocol_check.dart
+          pull app_flutter/tool/protocol_check_selftest.dart  .trusted/tool/protocol_check_selftest.dart
+          pull protocol/gates.tsv                              .trusted/protocol/gates.tsv
+          pull .githooks/pre-commit                            .trusted/githooks/pre-commit
+          # S4 — also fetch the trusted pre-push + commit-msg + workflows + pins so
+          # K4/S3 can compare the PR copies against the TRUSTED origin/main copies.
+          pull .githooks/pre-push                              .trusted/githooks/pre-push
+          pull .githooks/commit-msg                            .trusted/githooks/commit-msg
+          pull .github/workflows/protocol-enforce.yml          .trusted/workflows/protocol-enforce.yml
+          pull .github/workflows/deploy.yml                    .trusted/workflows/deploy.yml
+          pull protocol/pins.sha256                            .trusted/protocol/pins.sha256
+          echo "trusted_complete=$fetched_all" >> "$GITHUB_OUTPUT"
+          # The engine is a `part`-based 2-file program; place the selftest beside it.
+          ls -l .trusted/tool
+
+      # ── S1: the bootstrap fallback is NO LONGER silent or unbounded ──
+      # v4 computed fetched_all but NEVER read it: when origin/main lacked the
+      # engine, CI silently fell back to the PR copy (a `::warning::`, not a block)
+      # so a STUBBED PR engine could ship. v5 reads trusted_complete and FAILS
+      # CLOSED unless this is an explicitly-marked one-time BOOTSTRAP (the protocol
+      # is not yet seeded on main). The exception is a repo VARIABLE `BOOTSTRAP=1`
+      # (vars.BOOTSTRAP) — an admin must set it deliberately, and remove it once the
+      # protocol lands on main. Absent that marker, an incomplete trusted fetch is a
+      # HARD failure (no silent stub-judges-itself path).
+      - name: S1 — trusted-fetch completeness (fail closed unless BOOTSTRAP)
+        env:
+          BOOTSTRAP_VAR: ${{ vars.BOOTSTRAP }}
+        run: |
+          set -euo pipefail
+          complete='${{ steps.trusted.outputs.trusted_complete }}'
+          echo "trusted_complete=$complete  BOOTSTRAP=${BOOTSTRAP_VAR:-<unset>}"
+          if [[ "$complete" == "1" ]]; then
+            echo "✅ S1: trusted engine/runner/registry fully materialised from origin/main"
+            exit 0
+          fi
+          # Incomplete fetch (origin/main lacks a protocol file).
+          if [[ "${BOOTSTRAP_VAR:-}" == "1" ]]; then
+            echo "::warning::S1 BOOTSTRAP=1 — trusted ref incomplete; PR-copy fallback ALLOWED this ONE time. Remove vars.BOOTSTRAP once the protocol is on main."
+            exit 0
+          fi
+          echo "::error::S1 FAIL-CLOSED — origin/main is missing a protocol file and BOOTSTRAP is not set. CI will NOT judge a PR with its OWN (untrusted) engine copy. Seed the protocol on main, or set vars.BOOTSTRAP=1 for a one-time bootstrap."
+          exit 1
+
+      - name: K1/K6 — compute base, touched set, and the WHOLE tree (fail-closed)
+        id: diffset
+        run: |
+          set -euo pipefail
+          # Base differs for PR vs push.
+          if [[ -n "${{ github.event.pull_request.base.sha }}" ]]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            git fetch --no-tags origin main >/dev/null 2>&1 || true
+            BASE=$(git merge-base origin/main HEAD 2>/dev/null || git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)
+          fi
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          HEAD_SHA=$(git rev-parse HEAD)
+          echo "head=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          # Touched paths in the resulting tree (BASE…HEAD). --no-replace-objects
+          # so a planted `git replace` cannot launder a malicious blob past us.
+          # H1 (v6): -c core.quotePath=false so a non-ASCII (e.g. Hebrew) filename
+          # is emitted as its TRUE UTF-8 path, not a C-quoted `"…\NNN…"` string the
+          # engine's `git show` could not resolve → silent skip → forbidden ship.
+          git -c core.quotePath=false --no-replace-objects diff --name-only "$BASE...HEAD" > /tmp/touched.txt || true
+          # K1 — the WHOLE resulting tree (every tracked file), the clean-tree
+          # baseline. We never assume the merge-base was clean. (H1: quotePath=false.)
+          git -c core.quotePath=false --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
+          # V10-B — ls-tree WITH the MODE column (drop --name-only) so the engine
+          # can SEE 120000 (symlink) / 160000 (gitlink/submodule) entries and
+          # fail closed on the whole-tree-scan SKIP class (submodule/symlink/LFS).
+          git -c core.quotePath=false --no-replace-objects ls-tree -r HEAD > /tmp/tree_entries.txt
+          echo "── touched vs $BASE ──"; cat /tmp/touched.txt || true
+          echo "── tree size ──"; wc -l /tmp/tree_all.txt
+          # K1 FAIL-CLOSED: a push that MOVED the ref but yields an EMPTY diff-set
+          # is suspicious (history rewrite / replace-ref laundering / merge that
+          # GitHub reports with no file delta). For a push (not PR) with a real
+          # before-sha, require a non-empty diff-set OR fail closed.
+          BEFORE='${{ github.event.before }}'
+          IS_PR='${{ github.event_name }}'
+          if [[ "$IS_PR" == "push" && -n "$BEFORE" && "$BEFORE" != "0000000000000000000000000000000000000000" ]]; then
+            if [[ "$BEFORE" != "$HEAD_SHA" ]] && [[ ! -s /tmp/touched.txt ]]; then
+              echo "::error::push changed refs ($BEFORE → $HEAD_SHA) but the diff-set is EMPTY — fail closed (K1)"
+              exit 1
+            fi
+          fi
+          echo "✅ diff-set/tree computed (K1 fail-closed armed)"
+
+      - name: Setup Flutter (pinned — K7 ship version)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Install dependencies
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
+      # ── K7: one SHIP Flutter version across all workflows ──
+      - name: Gate — Flutter version parity across workflows
+        run: |
+          set -euo pipefail
+          want='${{ env.FLUTTER_VERSION }}'
+          fail=0
+          check() {
+            local f="$1" found
+            found=$(grep -oE "flutter-version:?[[:space:]]*['\"]?[0-9]+\.[0-9]+\.[0-9]+" "$f" 2>/dev/null \
+                      | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | sort -u)
+            if [[ -z "$found" ]]; then echo "  $f: (no pin)"; return; fi
+            while IFS= read -r v; do
+              if [[ "$v" != "$want" ]]; then echo "❌ $f pins Flutter $v, expected $want"; fail=1
+              else echo "  ✅ $f pins $v"; fi
+            done <<< "$found"
+          }
+          for wf in .github/workflows/protocol-enforce.yml \
+                    .github/workflows/deploy.yml \
+                    .github/workflows/android-package.yml \
+                    .github/workflows/catalog-qa.yml; do
+            [[ -f "$wf" ]] && check "$wf"
+          done
+          [[ "$fail" -eq 0 ]] || { echo "Flutter version drift — pin ALL workflows to $want"; exit 1; }
+
+      # ── K2/R6: prove the TRUSTED engine is intact and its logic works ──
+      - name: Gate — trusted content-engine self-test (blocking)
+        run: dart run .trusted/tool/protocol_check.dart --self-test
+
+      # ── K4: integrity-pin the engine/registry/scripts AND the hooks+workflows ──
+      # Content-hash, not existence / grep -q. A gutted-but-executable hook or a
+      # neutered workflow fails HERE because its sha256 no longer matches the pin.
+      - name: K4 — integrity pins (engine + registry + scripts + hooks + workflows)
+        run: |
+          set -euo pipefail
+          if [[ ! -f protocol/pins.sha256 ]]; then
+            echo "::error::protocol/pins.sha256 absent — cannot verify integrity (fail closed)"; exit 1
+          fi
+          fail=0; seen=0
+          while read -r want path; do
+            [[ -z "${want:-}" || "$want" == \#* ]] && continue
+            seen=$((seen+1))
+            if [[ ! -f "$path" ]]; then echo "❌ pinned file missing: $path"; fail=1; continue; fi
+            have=$(sha256sum "$path" | awk '{print $1}')
+            if [[ "$have" != "$want" ]]; then echo "❌ integrity: $path changed vs pin ($have != $want)"; fail=1; fi
+          done < protocol/pins.sha256
+          # The hooks + BOTH workflows MUST be pinned (K4) — assert their presence
+          # in the pin file, so deleting their pin lines cannot un-protect them.
+          for must in .githooks/pre-commit .githooks/pre-push .githooks/commit-msg \
+                      .github/workflows/protocol-enforce.yml .github/workflows/deploy.yml; do
+            grep -qF "  $must" protocol/pins.sha256 || { echo "❌ $must is not integrity-pinned (K4)"; fail=1; }
+          done
+          [[ "$fail" -eq 0 && "$seen" -ge 5 ]] || { echo "integrity FAILED"; exit 1; }
+          echo "✅ integrity pins OK ($seen files, hooks+workflows pinned)"
+
+      # ── S3: defeat the K4 self-consistency re-pin BYPASS ──
+      # v4's K4 verified the PR's pinned files against the PR's OWN pins.sha256 —
+      # so an attacker could gut .githooks/pre-commit, run update_pins.sh, commit
+      # the new pins.sha256, and K4 passed (the pin and the file are both the
+      # tampered PR copy; `.trusted/githooks/pre-commit` was fetched but DEAD —
+      # never executed or compared). v5 compares the PR's hooks/workflows/pins
+      # against the TRUSTED origin/main copies (fetched in K2). A mismatch is a
+      # CHANGE to a protocol-critical file; on a PR that is only legitimate via
+      # CODEOWNERS review on main (THE WALL half — see PROTOCOL_V5.md). Here we
+      # FAIL on any drift unless the change is explicitly acknowledged by a repo
+      # variable PROTOCOL_CHANGE_OK=1 (an admin sets it for a reviewed protocol PR).
+      # We also RUN the trusted pre-commit's --self-test-equivalent by executing the
+      # TRUSTED engine (already done in the self-test step) — the .trusted hook set
+      # is no longer a dead fetch: it is the comparison baseline.
+      - name: S3 — hooks/workflows/pins match the TRUSTED origin/main (no re-pin bypass)
+        env:
+          PROTOCOL_CHANGE_OK: ${{ vars.PROTOCOL_CHANGE_OK }}
+          BOOTSTRAP_VAR: ${{ vars.BOOTSTRAP }}
+        run: |
+          set -euo pipefail
+          # If we are bootstrapping (origin/main has no protocol yet) there is no
+          # trusted baseline to compare against — skip with a notice (S1 governs).
+          if [[ "${BOOTSTRAP_VAR:-}" == "1" ]]; then
+            echo "::warning::S3 skipped — BOOTSTRAP=1 (no trusted baseline on main yet)"; exit 0
+          fi
+          drift=0
+          cmp_one() { # <pr-path> <trusted-path> <label>
+            local pr="$1" tr="$2" label="$3"
+            if [[ ! -f "$tr" ]]; then
+              echo "::error::S3 trusted copy missing for $label ($tr) — fail closed"; drift=1; return
+            fi
+            if [[ ! -f "$pr" ]]; then
+              echo "::error::S3 PR copy missing for $label ($pr)"; drift=1; return
+            fi
+            if ! diff -q "$tr" "$pr" >/dev/null 2>&1; then
+              echo "❌ S3 DRIFT: $label differs from trusted origin/main"
+              diff "$tr" "$pr" | head -40 || true
+              drift=1
+            else
+              echo "  ✅ $label matches trusted origin/main"
+            fi
+          }
+          cmp_one .githooks/pre-commit   .trusted/githooks/pre-commit   ".githooks/pre-commit"
+          cmp_one .githooks/pre-push     .trusted/githooks/pre-push     ".githooks/pre-push"
+          cmp_one .githooks/commit-msg   .trusted/githooks/commit-msg   ".githooks/commit-msg"
+          cmp_one .github/workflows/protocol-enforce.yml .trusted/workflows/protocol-enforce.yml ".github/workflows/protocol-enforce.yml"
+          cmp_one .github/workflows/deploy.yml           .trusted/workflows/deploy.yml           ".github/workflows/deploy.yml"
+          cmp_one protocol/pins.sha256   .trusted/protocol/pins.sha256  "protocol/pins.sha256"
+          if [[ "$drift" -eq 0 ]]; then
+            echo "✅ S3: hooks/workflows/pins identical to trusted origin/main — no re-pin bypass"
+            exit 0
+          fi
+          # Drift detected. A LEGITIMATE protocol change reaches main only through a
+          # CODEOWNERS-reviewed PR (THE WALL). In CI we additionally require an
+          # explicit admin acknowledgement so a gut-and-re-pin PR cannot self-approve.
+          if [[ "${PROTOCOL_CHANGE_OK:-}" == "1" ]]; then
+            echo "::warning::S3 drift ACK'd via vars.PROTOCOL_CHANGE_OK=1 (reviewed protocol change). CODEOWNERS on main is the binding control."
+            exit 0
+          fi
+          echo "::error::S3 — a protocol-critical file (hook/workflow/pins) differs from trusted origin/main and is NOT acknowledged. A re-pin (update_pins.sh + commit pins.sha256) does NOT bypass this: the baseline is origin/main, not the PR. Land the change via a CODEOWNERS-reviewed PR, or set vars.PROTOCOL_CHANGE_OK=1 for a reviewed protocol PR."
+          exit 1
+
+      # ── S3b: the trusted pre-commit hook is no longer a DEAD fetch — RUN it ──
+      # We execute the TRUSTED pre-commit in audit mode to produce the registry
+      # ledger from the origin/main runner (not the PR's), feeding K3 below. This
+      # is what makes the fetched `.trusted/githooks/pre-commit` load-bearing.
+      - name: S3b — produce the K3 ledger from the TRUSTED runner (not the PR copy)
+        id: trustedledger
+        env:
+          BOOTSTRAP_VAR: ${{ vars.BOOTSTRAP }}
+        run: |
+          set -euo pipefail
+          LEDGER="$GITHUB_WORKSPACE/.trusted_ran.txt"
+          # Use the trusted hook if we have a full trusted set; else (bootstrap) the
+          # PR copy, governed by S1.
+          HOOK=".trusted/githooks/pre-commit"
+          if [[ ! -s "$HOOK" || "${BOOTSTRAP_VAR:-}" == "1" ]]; then
+            echo "::warning::S3b using PR pre-commit (bootstrap or trusted hook absent)"
+            HOOK=".githooks/pre-commit"
+          fi
+          chmod +x "$HOOK" || true
+          PROTOCOL_AUDIT_MODE=1 PROTOCOL_AUDIT_LEDGER="$LEDGER" bash "$HOOK" >/tmp/trusted_audit.log 2>&1 || true
+          if [[ ! -s "$LEDGER" ]]; then
+            echo "::error::S3b trusted runner produced an EMPTY ledger — runner stubbed? (fail closed)"
+            tail -40 /tmp/trusted_audit.log || true
+            exit 1
+          fi
+          echo "ledger=$LEDGER" >> "$GITHUB_OUTPUT"
+          echo "✅ S3b: K3 ledger produced by the TRUSTED runner ($(wc -l < "$LEDGER") ids)"
+
+      # ── K1/K2/K6: TRUSTED engine over the WHOLE resulting tree ──
+      # We scan EVERY tracked file (tree_all), not just touched, with the TRUSTED
+      # engine. RCs are captured explicitly under `set +e` (K6) so a crash is
+      # distinct from a finding and tree-mode ALWAYS runs.
+      - name: K1 — trusted content engine over the WHOLE tree (+ touched diff)
+        working-directory: app_flutter
+        run: |
+          set -euo pipefail
+          TRUSTED="$GITHUB_WORKSPACE/.trusted/tool/protocol_check.dart"
+          # Repo-relative names for the engine's path scoping.
+          sed 's#^app_flutter/##' /tmp/touched.txt > /tmp/touched_rel.txt || true
+          cp /tmp/touched.txt /tmp/touched_abs.txt
+          cp /tmp/tree_all.txt /tmp/tree_abs.txt
+          cp /tmp/tree_entries.txt /tmp/tree_entries_abs.txt   # V10-B: mode-bearing
+          # (a) DIFF mode over the BASE…HEAD added lines (catches new violations
+          #     with their exact line, incl. positional gates 62/63/65/95).
+          git --no-replace-objects diff "${{ steps.diffset.outputs.base }}...HEAD" > /tmp/fulldiff.txt || true
+          set +e   # K6: capture RCs, do not let a non-zero abort the script
+          dart run "$TRUSTED" \
+            --diff /tmp/fulldiff.txt \
+            --names /tmp/touched_abs.txt \
+            --stuck-log knowledge/stuck_log.md
+          DIFF_RC=$?
+          # (b) WHOLE-TREE mode (K1): scan the post-image of EVERY tracked file
+          #     from HEAD. This is the clean-tree baseline; --show fetches blobs
+          #     with --no-replace-objects so a planted replace ref cannot hide content.
+          #     H1: the engine ALSO injects core.quotePath=false in its internal
+          #     `git show`; the names file is already unquoted (diffset step).
+          # V10-B: feed --tree-entries (mode-bearing ls-tree) so the engine sees
+          # 120000/160000 entries and fails closed on the submodule/symlink/LFS
+          # silent-skip class. (No --allow-gitlink: a gitlink fails closed unless
+          # an admin adds an explicit allowlist here.)
+          dart run "$TRUSTED" \
+            --tree \
+            --tree-entries /tmp/tree_entries_abs.txt \
+            --show "git --no-replace-objects show HEAD:" \
+            --stuck-log knowledge/stuck_log.md | tee /tmp/tree_out.txt
+          TREE_RC=${PIPESTATUS[0]}
+          set -e
+          echo "DIFF_RC=$DIFF_RC TREE_RC=$TREE_RC"
+          # H3 (v6): rc 3 == files-fed-vs-files-scanned RECONCILIATION FAIL — some
+          # tracked file in the tree could not be fetched+decoded (quote/decode/
+          # missing-blob/git-error) and was therefore NOT scanned. This is the
+          # whole silent-skip CLASS — fail closed loudly, naming the skipped files.
+          if [[ "$TREE_RC" -eq 3 || "$DIFF_RC" -eq 3 ]]; then
+            echo "::error::H3 reconciliation FAILED — a tracked file was FED but NOT scanned (silent-skip class). Engine output:"
+            grep -E 'H3 reconciliation|unscanned' /tmp/tree_out.txt || true
+            exit 1
+          fi
+          # K6: exit code 2 == ERR findings; anything else (1/127/139) == engine
+          # crash/tamper — both are failures, but we report which.
+          if [[ "$DIFF_RC" -eq 2 || "$TREE_RC" -eq 2 ]]; then
+            echo "::error::content engine found ERR-level findings in the resulting tree (DIFF_RC=$DIFF_RC TREE_RC=$TREE_RC)"; exit 1
+          fi
+          if [[ "$DIFF_RC" -ne 0 || "$TREE_RC" -ne 0 ]]; then
+            echo "::error::content engine CRASHED (non-0/2 rc: DIFF_RC=$DIFF_RC TREE_RC=$TREE_RC) — fail closed"; exit 1
+          fi
+          # H3 belt at the CI level: assert the engine's reconciliation line is
+          # present and reports fed==scanned (a stubbed engine that never scanned
+          # would NOT print this OK line → fail closed).
+          if ! grep -qE '^OK\treg\tH3 reconciliation: fed==scanned==[0-9]+' /tmp/tree_out.txt; then
+            echo "::error::H3 reconciliation line ABSENT from tree-mode output — engine did not confirm fed==scanned (fail closed)"; exit 1
+          fi
+          FED_SCANNED=$(grep -oE 'fed==scanned==[0-9]+' /tmp/tree_out.txt | grep -oE '[0-9]+$' | head -1)
+          echo "✅ trusted content engine clean over the WHOLE tree (H3: fed==scanned==$FED_SCANNED)"
+
+      # ── K3: REAL registry⇄runtime parity by RUNNING the gate-runner ──
+      # No more `cp enforced claimed`. We invoke the pre-commit gate-runner in its
+      # AUDIT mode (PROTOCOL_AUDIT_MODE=1) which executes every gate's body over a
+      # forced-applicable synthetic context and prints a GENUINE `ran <id>` ledger
+      # AFTER each check runs. That ledger is diffed against gates.tsv(enforced).
+      # A gate whose CHECK is deleted but whose `ran` was left behind no longer
+      # records (ran is emitted AFTER the check) → parity catches it.
+      - name: K3 — real registry parity (run the gate-runner, diff vs gates.tsv)
+        run: |
+          set -euo pipefail
+          TRUSTED_ENGINE="$GITHUB_WORKSPACE/.trusted/tool/protocol_check.dart"
+          TRUSTED_REG="$GITHUB_WORKSPACE/.trusted/protocol/gates.tsv"
+          # 1) Genuine runtime ledger — produced by the TRUSTED runner in S3b (not
+          #    the PR copy). This closes the K3 "run the PR's own runner" gap.
+          LEDGER='${{ steps.trustedledger.outputs.ledger }}'
+          if [[ -z "$LEDGER" || ! -s "$LEDGER" ]]; then
+            echo "::error::K3 trusted ledger from S3b missing/empty (fail closed)"; exit 1
+          fi
+          sort -u "$LEDGER" > /tmp/ran.txt
+          echo "── runtime ledger (ran ids) ──"; cat /tmp/ran.txt
+          # 2) Enforced ids from the TRUSTED registry.
+          awk -F'\t' 'NF>=9 && $8=="enforced" {print $1}' "$TRUSTED_REG" | sort -u > /tmp/enforced.txt
+          # 3) The engine emits its own RAN ids — they must be ⊆ enforced (no orphan).
+          EMPTY=$(mktemp); : > "$EMPTY"
+          ( cd app_flutter && dart run "$TRUSTED_ENGINE" --diff "$EMPTY" --emit-ran 2>/dev/null ) \
+            | grep '^RAN' | cut -f2 | sort -u > /tmp/engine_ran.txt
+          # 4) Malformed-row detection via the engine (returns 2 on a bad tsv).
+          ( cd app_flutter && dart run "$TRUSTED_ENGINE" \
+              --verify-registry --emitted /tmp/ran.txt --registry "$TRUSTED_REG" ) || {
+            echo "::error::registry⇄runtime parity FAILED or registry malformed (K3)"; exit 1; }
+          # 5) Belt: every enforced id appeared in the runtime ledger.
+          if comm -23 /tmp/enforced.txt /tmp/ran.txt | grep -q .; then
+            echo "::error::enforced gate(s) that did NOT run (deleted-but-registered?):"
+            comm -23 /tmp/enforced.txt /tmp/ran.txt; exit 1
+          fi
+          # 6) Engine ids ⊆ enforced.
+          if comm -23 /tmp/engine_ran.txt /tmp/enforced.txt | grep -q .; then
+            echo "::error::engine emits an id missing from the registry:"; comm -23 /tmp/engine_ran.txt /tmp/enforced.txt; exit 1
+          fi
+          echo "✅ REAL registry⇄runtime parity (ran ledger == enforced; engine ⊆ enforced)"
+
+      # ── structural presence (kept as a CHEAP belt; integrity is the real lock) ──
+      - name: Gate — structural protections present
+        run: |
+          set -euo pipefail
+          fail=0
+          must() { [[ -e "$1" ]] || { echo "❌ missing $1"; fail=1; }; }
+          must .githooks/pre-commit
+          must .githooks/pre-push
+          must .githooks/commit-msg
+          must .claude/settings.json
+          must .claude/hooks/pre-tool.sh
+          must .github/workflows/protocol-enforce.yml
+          must .github/workflows/deploy.yml
+          must protocol/gates.tsv
+          must protocol/pins.sha256
+          must app_flutter/tool/protocol_check.dart
+          [[ -x .githooks/pre-commit ]] || { echo "❌ pre-commit not executable"; fail=1; }
+          if git --no-replace-objects ls-files | grep -qE '(^|/)\.(env|emergency_token|allow_protocol_edit|allow_push_main|allow_master_protocol_edit)$'; then
+            echo "❌ a bypass/secret file is tracked"; fail=1
+          fi
+          [[ "$fail" -eq 0 ]] || exit 1
+          echo "✅ structural protections intact"
+
+      - name: Gate — Flutter analyze (errors fatal always; warnings fatal for CHANGED files)
+        working-directory: app_flutter
+        run: |
+          set -euo pipefail
+          ANALYZE=$(flutter analyze --no-pub 2>&1 || true)
+          if echo "$ANALYZE" | grep -qE "^error •"; then
+            echo "❌ analyze errors:"; echo "$ANALYZE" | grep -E "^error •"; exit 1
+          fi
+          sed 's#^app_flutter/##' /tmp/touched.txt | grep -E '\.dart$' > /tmp/touched_dart.txt || true
+          if [[ -s /tmp/touched_dart.txt ]]; then
+            HIT=0
+            while IFS= read -r f; do
+              [[ -z "$f" ]] && continue
+              if echo "$ANALYZE" | grep -E "^warning •" | grep -qF "$f"; then
+                echo "$ANALYZE" | grep -E "^warning •" | grep -F "$f"; HIT=1
+              fi
+            done < /tmp/touched_dart.txt
+            [[ "$HIT" -eq 0 ]] || { echo "❌ analyze warnings in changed files (fatal)"; exit 1; }
+          fi
+          echo "✅ analyze: 0 errors; no warnings in changed files"
+
+      - name: Gate — All tests green
+        working-directory: app_flutter
+        run: flutter test --no-pub --concurrency=4
+
+      - name: Gate — Web build succeeds
+        working-directory: app_flutter
+        run: flutter build web --release --no-pub
+
+      - name: Gate — Versions synced (version.g.dart ↔ STATUS)
+        working-directory: app_flutter
+        run: |
+          set -euo pipefail
+          V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart | head -1)
+          V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md | head -1)
+          [[ "$V_GEN" == "$V_STATUS" ]] || { echo "❌ Version drift: $V_GEN vs $V_STATUS"; exit 1; }
+          echo "✅ Versions synced ($V_GEN)"
+
+      - name: "Gate — Android release build (release enforces permissions — לקח בנצי)"
+        working-directory: app_flutter
+        run: flutter build appbundle --release --no-pub

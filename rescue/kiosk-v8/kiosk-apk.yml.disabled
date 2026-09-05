@@ -1,0 +1,76 @@
+name: Build Kiosk APK
+
+on:
+  push:
+    branches:
+      - claude/hebrew-greeting-qoCnG
+    paths:
+      - 'kiosk-video-app/**'
+      - '.github/workflows/kiosk-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 8.5
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
+
+      # The placeholder video is not committed (binary). If no real video
+      # has been pushed yet, generate a 5s test pattern so the build works.
+      - name: Ensure video.mp4 exists
+        working-directory: kiosk-video-app
+        run: |
+          mkdir -p app/src/main/res/raw
+          if [ ! -f app/src/main/res/raw/video.mp4 ]; then
+            echo "No video.mp4 in repo — generating test-pattern placeholder"
+            sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+            ffmpeg -y -f lavfi -i testsrc2=size=1280x720:rate=24:duration=5 \
+              -c:v libx264 -pix_fmt yuv420p -preset fast -crf 28 \
+              -movflags +faststart -an app/src/main/res/raw/video.mp4
+          else
+            echo "Using committed video.mp4 ($(du -h app/src/main/res/raw/video.mp4 | cut -f1))"
+          fi
+
+      - name: Decode signing keystore
+        working-directory: kiosk-video-app
+        run: base64 -d signing/kiosk.jks.b64 > signing/kiosk.jks
+
+      - name: Build release APK
+        working-directory: kiosk-video-app
+        env:
+          KIOSK_KEYSTORE: ${{ github.workspace }}/kiosk-video-app/signing/kiosk.jks
+        run: gradle assembleRelease --no-daemon
+
+      - name: Rename APK
+        run: cp kiosk-video-app/app/build/outputs/apk/release/app-release.apk kiosk-video.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiosk-video-apk
+          path: kiosk-video.apk
+
+      - name: Publish APK as GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="kiosk-v${{ github.run_number }}"
+          gh release create "$TAG" kiosk-video.apk \
+            --title "Kiosk Video APK build ${{ github.run_number }}" \
+            --notes "APK אוטומטי מ-commit ${{ github.sha }}. הורד את kiosk-video.apk והתקן על הטאבלט. הוראות מלאות ב-kiosk-video-app/README.md" \
+            --target "${{ github.sha }}"

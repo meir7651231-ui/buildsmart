@@ -1,0 +1,4 @@
+// 📚 אטום-דאטה · שקעי-build-course-daily-rows — חולץ ע"י purify-dart (מבצע-המאה) מאמת-הקרקע של בדיקת-ה-JS.
+// מהות-המוצא: ערכי-השקעים של buildCourseDailyRows — זהים ביט-לביט לצד-ה-JS (new/atoms/build-course-daily-rows.test.mjs).
+const List<String> buildCourseDailyRows_DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+const Map<String, dynamic> buildCourseDailyRows_T2 = {'k1': 'תאריך עברי', 'k2': 'תאריך לועזי', 'k3': 'יום', 'k4': 'קבוצה/שעה', 'k5': 'סטטוס יום', 'k6': 'תלמידה פעילה', 'k7': 'entity.family', 'k8': 'משפחה', 'k9': 'סטטוס נוכחות', 'k10': 'קבוצה', 'k11': 'wait', 'k12': 'ended', 'k13': 'אין רשומות', 'k14': 'paused', 'k15': 'מוקפא', 'k16': 'מתקיים', 'k17': 'לא הופיעה', 'k18': 'חיסור', 'k19': 'פעיל', 'k20': 'הדוח נקטע ב-', 'k21': ' ימי מפגש — בדקו את תאריך הסיום של ה', 'k22': 'entity.course', 'k23': 'חוג', 'k24': 500};
