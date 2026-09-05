@@ -1,5 +1,5 @@
 // 🎨 schoolos_teachers.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
-//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×6 · statRow×17 · button×17 · statusChip×10 · banner×12 · emptyState×12 · mediaRow×6 · section×2 · segmented×6 · meter×2 · frame×4 · timeline×4 · search×1 · table×2 · bars×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+//   החלפות: stat×0 · hero×1 · chipRow×3 · chip×8 · statRow×17 · button×17 · statusChip×12 · banner×12 · emptyState×12 · mediaRow×6 · section×2 · segmented×6 · meter×2 · frame×4 · timeline×4 · search×1 · table×2 · bars×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-עומס · זיהוי-חריגה · הכרעה (מחליף-מוצע · דחיפות-מאוחדת) · ביצוע · אימות.
@@ -701,9 +701,9 @@ class _TeachersScreenState extends State<TeachersScreen> {
         const SizedBox(height: 6),
         Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['כל סטטוס', 'פעיל', 'חופשה', 'חל״ת', 'עזב']) [s]], selected: {_segIdx('status', const ['active', 'leave', 'unpaid', 'left'])}, onSelect: (i) => _segSet('status', const ['active', 'leave', 'unpaid', 'left'], i))),
         const SizedBox(height: 8),
-        Wrap(spacing: 8, runSpacing: 6, children: [for (final sj in _TeamData.allSubjects) _vchip('subject', sj, '📚 $sj')]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final sj in _TeamData.allSubjects) (('📚 $sj'), _locks[('subject')] == (sj), () => setState(() => _locks[('subject')] == (sj) ? _locks.remove(('subject')) : _locks[('subject')] = (sj)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         const SizedBox(height: 6),
-        Wrap(spacing: 8, runSpacing: 6, children: [for (final c in _TeamData.allClasses.take(10)) _vchip('cls', c, '🏫 $c')]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final c in _TeamData.allClasses.take(10)) (('🏫 $c'), _locks[('cls')] == (c), () => setState(() => _locks[('cls')] == (c) ? _locks.remove(('cls')) : _locks[('cls')] = (c)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         const SizedBox(height: 10),
         // מיון (המפרט: עומס · חיסורים · כיתות) — SegmentedSwitch מבוקר
         Align(
@@ -850,8 +850,8 @@ class _TeachersScreenState extends State<TeachersScreen> {
       Text('זמינות שבועית · ${days.length} ימים', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
       _gap(6),
       Wrap(spacing: 8, runSpacing: 6, children: [
-        for (final d in days) DsChip(label: '${dayNames[d]} ${av[d]![0]}–${av[d]![1]}', tone: 0),
-        if (days.isEmpty) const DsChip(label: 'אין חלונות-זמינות (חופשה/עזב)', tone: 2),
+        for (final d in days) ForgeStatusChip(items: [['${dayNames[d]} ${av[d]![0]}–${av[d]![1]}']], variants: const <int>[0]),
+        if (days.isEmpty) ForgeStatusChip(items: [['אין חלונות-זמינות (חופשה/עזב)']], variants: const <int>[3]),
       ]),
       if ('${t['notes']}'.isNotEmpty && !_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), ForgeSectionPill(items: [['הערת-הנהלה (מוגן): ${t['notes']}']], variants: const <int>[0])],
       if (_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), ForgeSectionPill(items: [['הערות-הנהלה מוגנות — למנהל/ת בלבד']], variants: const <int>[0])],

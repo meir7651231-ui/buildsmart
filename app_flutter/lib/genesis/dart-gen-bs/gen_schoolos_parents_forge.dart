@@ -1,5 +1,5 @@
 // 🎨 schoolos_parents.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
-//   החלפות: stat×0 · hero×1 · statRow×25 · button×47 · statusChip×30 · banner×24 · emptyState×11 · mediaRow×13 · section×5 · segmented×5 · meter×1 · frame×4 · timeline×4 · field×10 · enumField×13 · dateField×2 · search×1 · pageHeader×2 · table×2 · bars×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×1 · statRow×25 · button×47 · statusChip×30 · banner×24 · emptyState×11 · mediaRow×13 · section×5 · segmented×5 · meter×1 · frame×4 · timeline×4 · field×10 · enumField×13 · dateField×2 · search×1 · pageHeader×2 · table×2 · bars×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 👪 SchoolOS · הורים ותקשורת — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-PARENTS-FULL-2026-09-04.
 // מטרה: "ששום הורה לא יגלה משהו על ילדו מאוחר מדי — ושהצוות יגיע לכל הורה בערוץ הנכון,
 //         בזמן הנכון, בטון הנכון, ויידע שההודעה נקראה."
@@ -79,12 +79,12 @@ import '../dart-data-maor/block-reason-strings.dart'; // BLOCK_REASON_T
 import '../dart-data-maor/phone-issue-strings.dart'; // PHONE_ISSUE_T
 import '../dart-data-maor/support-day-label-strings.dart'; // SUPPORT_DAY_LABEL_T
 import '../dart/digest_lines.dart'; // סיכום (urgent/approvals/vacations) — term מוזרק ⇒ סיכום-שבועי-להורה
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
@@ -842,9 +842,7 @@ class _ParentsScreenState extends State<ParentsScreen> {
         ]),
         _gap(8),
         // צ׳יפי-חריגה (finderMatches) + צירי-כיתה/ערוץ/שפה
-        Wrap(spacing: 8, runSpacing: 6, children: [
-          for (final d in _PrData.filterDefs) _fchip(d['axis']!, d['label']!),
-        ]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final d in _PrData.filterDefs) ((d['label']!), _filter == (d['axis']!), () => setState(() => _filter = (d['axis']!)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         _gap(6),
         Wrap(spacing: 8, runSpacing: 6, children: [
           SizedBox(width: 150, child: ForgeDsEnumField(fields: ['כיתה'], control: DsEnumField(label: 'כיתה', options: ['הכל', ..._PrData.allClasses], value: _cls ?? 'הכל', onChanged: (v) => setState(() => _cls = v == 'הכל' ? null : v), bare: true))),

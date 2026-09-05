@@ -1,5 +1,5 @@
 // 🎨 schoolos_fees.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
-//   החלפות: stat×0 · hero×2 · statRow×31 · button×23 · statusChip×15 · banner×23 · emptyState×14 · mediaRow×9 · section×9 · segmented×3 · meter×3 · frame×8 · timeline×10 · field×2 · enumField×7 · numberField×2 · dateField×2 · search×1 · pageHeader×1 · table×1 · bars×4 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+//   החלפות: stat×0 · hero×2 · chipRow×1 · chip×3 · statRow×31 · button×25 · statusChip×15 · banner×23 · emptyState×14 · mediaRow×9 · section×9 · segmented×3 · meter×3 · frame×8 · timeline×10 · field×2 · enumField×7 · numberField×2 · dateField×2 · search×1 · pageHeader×1 · table×1 · bars×4 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
 //         מה נגבה, מה חסר ומה בסיכון — בלי לבייש איש."
@@ -82,12 +82,12 @@ import '../dart-data-maor/hok-recorded-this-month-sockets.dart' as skHokRec;
 import '../dart-data-maor/hok-method-label-terms.dart' as tdHokMethod;
 import '../dart-data-maor/tier-of-terms.dart' as tdTier;
 import '../dart-data-maor/overdue-contact-task-drafts-sockets.dart' as skOverdue;
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
@@ -847,23 +847,7 @@ class _FeesScreenState extends State<FeesScreen> {
           ],
         ]),
         // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"
-        Wrap(spacing: 8, runSpacing: 6, children: [
-          _fchip(0, 'הכל'),
-          _fchip(1, '🚩 דגל-חוב · $inDebt'),
-          if (_amounts) ...[
-          _fchip(2, '⏰ ותק>${_FeesData.oldDebtDays} · $oldN'),
-          _fchip(3, '💳 הו״ק · ${all.where(_FeesData.hokFlag).length}'),
-          _fchip(4, '🎓 מלגה/הנחה · ${all.where((f) => _FeesData.discountPct(f) > 0).length}'),
-          _fchip(5, '🔕 ללא-תזכורת · ${all.where((f) => _FeesData.balance(f) > 0 && _FeesData.remindersSent(f).isEmpty).length}'),
-          _fchip(6, '🔔 תזכורת>2 · ${all.where((f) => _FeesData.remindersSent(f).length > 2).length}'),
-          _fchip(7, '📆 הסדר · ${all.where(_FeesData.hasArrangement).length}'),
-          _fchip(8, '⚠️ בסיכון · ${all.where((f) => _FeesData.risk(f) >= 1).length}'),
-          FilterChipPill(
-            label: _filtersOpen ? '▲ פילטרים' : '▼ פילטרים (כיתה·חוג·סוג·אמצעי·שנה·סטטוס)', selected: _filtersOpen, onTap: () => setState(() => _filtersOpen = !_filtersOpen),
-            activeFillColor: const Color(0xFF2A2D4A), surfaceColor: const Color(0xFF14162E), activeTextColor: _ink, inkColor: _ink, outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
-          ),
-          ],
-        ]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[(('הכל'), _chip == (0), () => setState(() => _chip = (0))), (('🚩 דגל-חוב · $inDebt'), _chip == (1), () => setState(() => _chip = (1))), if (_amounts) ...[(('⏰ ותק>${_FeesData.oldDebtDays} · $oldN'), _chip == (2), () => setState(() => _chip = (2))), (('💳 הו״ק · ${all.where(_FeesData.hokFlag).length}'), _chip == (3), () => setState(() => _chip = (3))), (('🎓 מלגה/הנחה · ${all.where((f) => _FeesData.discountPct(f) > 0).length}'), _chip == (4), () => setState(() => _chip = (4))), (('🔕 ללא-תזכורת · ${all.where((f) => _FeesData.balance(f) > 0 && _FeesData.remindersSent(f).isEmpty).length}'), _chip == (5), () => setState(() => _chip = (5))), (('🔔 תזכורת>2 · ${all.where((f) => _FeesData.remindersSent(f).length > 2).length}'), _chip == (6), () => setState(() => _chip = (6))), (('📆 הסדר · ${all.where(_FeesData.hasArrangement).length}'), _chip == (7), () => setState(() => _chip = (7))), (('⚠️ בסיכון · ${all.where((f) => _FeesData.risk(f) >= 1).length}'), _chip == (8), () => setState(() => _chip = (8))), (_filtersOpen ? '▲ פילטרים' : '▼ פילטרים (כיתה·חוג·סוג·אמצעי·שנה·סטטוס)', _filtersOpen, () => setState(() => _filtersOpen = !_filtersOpen))]]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         if (_filtersOpen) ...[
           _gap(8),
           // פילטרי-ערך (DsEnumField מבוקר ⇒ נעילת-ציר ב-finderMatches): כיתה · חוג · סוג-חיוב · אמצעי · שנה · סטטוס
@@ -1475,7 +1459,7 @@ class _FeesScreenState extends State<FeesScreen> {
                   _gap(6),
                   ForgeDsEnumField(fields: ['חיוב-מרוכז לכיתה (אופציונלי)'], control: DsEnumField(label: 'חיוב-מרוכז לכיתה (אופציונלי)', options: ['', ...grades], value: bulk, onChanged: (v) => setSheet(() => bulk = v), bare: true)),
                   _gap(10),
-                  DsPrimaryButton(label: bulk.isEmpty ? 'שמור חיוב' : 'חיוב-מרוכז לכל $bulk', onTap: () {
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
                     final a = int.tryParse(amount.trim()) ?? 0;
                     if (a <= 0) return;
                     if (bulk.isEmpty) {
@@ -1490,7 +1474,7 @@ class _FeesScreenState extends State<FeesScreen> {
                     Navigator.of(ctx).pop();
                     setState(() {});
                     onDone?.call();
-                  }),
+                  }, child: ForgeSoftButton(fields: [bulk.isEmpty ? 'שמור חיוב' : 'חיוב-מרוכז לכל $bulk'])),
                 ])),
             ),
           ),
@@ -1522,14 +1506,14 @@ class _FeesScreenState extends State<FeesScreen> {
                   ForgeDsDateFieldInput(fields: ['תאריך'], control: DsDateField(label: 'תאריך', value: date, onChanged: (v) => setSheet(() => date = v), bare: true)),
                   ForgeDsField(state: (note).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['הערה / אסמכתא', ''], control: DsField(label: 'הערה / אסמכתא', hint: 'אסמכתת-העברה (לא מס׳-קבלה)', value: note, onChanged: (v) => note = v, bare: true)),
                   _gap(10),
-                  DsPrimaryButton(label: 'רשום תשלום', onTap: () {
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
                     final a = amount.trim().isEmpty ? bal : (int.tryParse(amount.trim()) ?? 0);
                     if (a <= 0) return;
                     _FeesData.addPayment(f, _roleName, amount: a, method: method, date: date, note: note);
                     Navigator.of(ctx).pop();
                     setState(() {});
                     onDone?.call();
-                  }),
+                  }, child: ForgeSoftButton(fields: ['רשום תשלום'])),
                 ])),
             ),
           ),

@@ -1,5 +1,5 @@
 // 🎨 schoolos_rooms.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
-//   החלפות: stat×0 · hero×1 · statRow×17 · button×32 · statusChip×9 · banner×16 · emptyState×12 · mediaRow×9 · section×5 · segmented×7 · meter×1 · frame×8 · timeline×6 · field×2 · search×1 · table×1 · bars×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×10 · statRow×17 · button×32 · statusChip×9 · banner×16 · emptyState×12 · mediaRow×9 · section×5 · segmented×7 · meter×1 · frame×8 · timeline×6 · field×2 · search×1 · table×1 · bars×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: RoomsScreen.
 //
@@ -78,12 +78,12 @@ import '../dart-maor/ics-escape.dart'; // ייצוא iCal: escaping לפי RFC55
 import '../dart-maor/fold-ics-line.dart'; // ייצוא iCal: קיפול-שורות 75 בייט (מדף)
 import '../dart-maor/day-letters.dart'; // אותיות-הימים (א׳…ו׳) — בורר-יום קומפקטי
 import '../dart-data-maor/day-letters-terms.dart' as day_letters_terms; // שקע-המונחים של dayLetters (אטום-דאטה)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
@@ -772,19 +772,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           ],
         ]),
         // צ׳יפי-סינון (FilterChipPill ⊕ finderMatches) — 11 צירי-המפרט; סוג = מקום-שמור (מואר כשיגיע נתון)
-        Wrap(spacing: 8, runSpacing: 6, children: [
-          for (final b in _RoomsData.buildings) _fchip('building', b, '🏢 $b'),
-          for (final f in _RoomsData.floors) _fchip('floor', f, '🪜 $f'),
-          for (final t in _RoomsData.types) _fchip('type', t, '🏷 $t'),
-          for (final n in _RoomsData.capSteps) FilterChipPill(label: '👥 ≥$n', selected: _locks['cap$n'] == '1', onTap: () => _setCap(_locks['cap$n'] == '1' ? null : n), activeFillColor: _acc, surfaceColor: const Color(0xFF14162E), activeTextColor: const Color(0xFF0B0B15), inkColor: _ink, outlineColor: const Color(0xFF2A2D4A), pillRadius: 999),
-          for (final k in _RoomsData.eqKeys) _bchip('eq:$k', '🧰 יש $k'),
-          FilterChipPill(label: '🟢 פנוי-במשבצת $_slotHour', selected: _freeAtOn, onTap: () => _setFreeAt(!_freeAtOn), activeFillColor: _ok, surfaceColor: const Color(0xFF14162E), activeTextColor: const Color(0xFF0B0B15), inkColor: _ink, outlineColor: const Color(0xFF2A2D4A), pillRadius: 999),
-          _bchip('busy', '🔴 תפוס-עכשיו'),
-          _bchip('fault', '🔧 תקלה-פתוחה'),
-          _bchip('under', '🪑 ניצולת<${_RoomsData.utilFloor}%'),
-          _bchip('access', '♿ נגיש'),
-          if (_locks.isNotEmpty || _q.isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _locks.clear(); _q = ''; }), child: ForgeSoftButton(fields: ['✖ נקה (${visible.length}/${rooms.length})'])),
-        ]),
+        Wrap(spacing: 8, runSpacing: 6, children: [Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final b in _RoomsData.buildings) (('🏢 $b'), _locks[('building')] == (b), () => setState(() => _locks[('building')] == (b) ? _locks.remove(('building')) : _locks[('building')] = (b))), for (final f in _RoomsData.floors) (('🪜 $f'), _locks[('floor')] == (f), () => setState(() => _locks[('floor')] == (f) ? _locks.remove(('floor')) : _locks[('floor')] = (f))), for (final t in _RoomsData.types) (('🏷 $t'), _locks[('type')] == (t), () => setState(() => _locks[('type')] == (t) ? _locks.remove(('type')) : _locks[('type')] = (t))), for (final n in _RoomsData.capSteps) ('👥 ≥$n', _locks['cap$n'] == '1', () => _setCap(_locks['cap$n'] == '1' ? null : n)), for (final k in _RoomsData.eqKeys) ((('🧰 יש $k')), _locks[(('eq:$k'))] == ('1'), () => setState(() => _locks[(('eq:$k'))] == ('1') ? _locks.remove((('eq:$k'))) : _locks[(('eq:$k'))] = ('1'))), ('🟢 פנוי-במשבצת $_slotHour', _freeAtOn, () => _setFreeAt(!_freeAtOn)), ((('🔴 תפוס-עכשיו')), _locks[(('busy'))] == ('1'), () => setState(() => _locks[(('busy'))] == ('1') ? _locks.remove((('busy'))) : _locks[(('busy'))] = ('1'))), ((('🔧 תקלה-פתוחה')), _locks[(('fault'))] == ('1'), () => setState(() => _locks[(('fault'))] == ('1') ? _locks.remove((('fault'))) : _locks[(('fault'))] = ('1'))), ((('🪑 ניצולת<${_RoomsData.utilFloor}%')), _locks[(('under'))] == ('1'), () => setState(() => _locks[(('under'))] == ('1') ? _locks.remove((('under'))) : _locks[(('under'))] = ('1'))), ((('♿ נגיש')), _locks[(('access'))] == ('1'), () => setState(() => _locks[(('access'))] == ('1') ? _locks.remove((('access'))) : _locks[(('access'))] = ('1')))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }), if (_locks.isNotEmpty || _q.isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _locks.clear(); _q = ''; }), child: ForgeSoftButton(fields: ['✖ נקה (${visible.length}/${rooms.length})']))]),
         if (_freeAtOn && hoursAll.isNotEmpty) ...[
           const SizedBox(height: 6),
           Align(alignment: Alignment.centerRight, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in hoursAll) [s]], selected: {hoursAll.indexOf(_slotHour).clamp(0, hoursAll.length - 1)}, onSelect: (i) => setState(() => _slotHour = hoursAll[i])))),

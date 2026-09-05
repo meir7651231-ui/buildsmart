@@ -1,7 +1,7 @@
 // 🎯 ShopAssignmentScreen — retarget של schoolos_teachers.dart לישות ShopAssignment (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity ShopAssignment
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 18 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · status⇒status(name) · notes⇒notes(name) · name⇒∅(reserved) · role⇒∅(reserved) · subjects⇒redemptions(unique) · homeroom⇒∅(reserved) · contractHours⇒∅(reserved) · contractType⇒∅(reserved) · startDate⇒since(unique) · availability⇒∅(reserved) · constraints⇒∅(reserved) · preferredSub⇒∅(reserved(4 מועמדים)) · extraRoles⇒∅(reserved) · certs⇒∅(reserved) · issuer⇒∅(reserved) · expiry⇒∅(reserved) · attendance⇒∅(reserved) · absences⇒∅(reserved) · reason⇒∅(reserved) · date⇒∅(reserved) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved)
-//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×17 (ב-Row, Expanded) · פנימיים: button×19 statusChip×12 banner×16 emptyState×12 mediaRow×6 · StatHero⇒ForgeStatPlain ×1 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
+//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×17 (ב-Row, Expanded) · פנימיים: button×19 statusChip×14 banner×16 emptyState×12 mediaRow×6 · StatHero⇒ForgeStatPlain ×1 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
 //   תפר-עובדות (G9b): ShopAssignmentFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
 //   שדות-ShopAssignment בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): productId, famId, memberId, criterionIds · תוויות: מונחי teacher (מורה/—) ⇒ ShopAssignment (שיוך/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopAssignment
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
@@ -728,9 +728,9 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         const SizedBox(height: 6),
         Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['כל סטטוס', 'פעיל', 'חופשה', 'חל״ת', 'עזב']) [s]], selected: {_segIdx('status', const ['active', 'leave', 'unpaid', 'left'])}, onSelect: (i) => _segSet('status', const ['active', 'leave', 'unpaid', 'left'], i))),
         const SizedBox(height: 8),
-        Wrap(spacing: 8, runSpacing: 6, children: [for (final sj in _TeamData.allSubjects) _vchip('subject', sj, '📚 $sj')]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final sj in _TeamData.allSubjects) (('📚 $sj'), _locks[('subject')] == (sj), () => setState(() => _locks[('subject')] == (sj) ? _locks.remove(('subject')) : _locks[('subject')] = (sj)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         const SizedBox(height: 6),
-        Wrap(spacing: 8, runSpacing: 6, children: [for (final c in _TeamData.allClasses.take(10)) _vchip('cls', c, '🏫 $c')]),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final c in _TeamData.allClasses.take(10)) (('🏫 $c'), _locks[('cls')] == (c), () => setState(() => _locks[('cls')] == (c) ? _locks.remove(('cls')) : _locks[('cls')] = (c)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         const SizedBox(height: 10),
         // מיון (המפרט: עומס · חיסורים · כיתות) — SegmentedSwitch מבוקר
         Align(
@@ -888,8 +888,8 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
       Text('זמינות שבועית · ${days.length} ימים', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
       _gap(6),
       Wrap(spacing: 8, runSpacing: 6, children: [
-        for (final d in days) DsChip(label: '${dayNames[d]} ${av[d]![0]}–${av[d]![1]}', tone: 0),
-        if (days.isEmpty) const DsChip(label: 'אין חלונות-זמינות (חופשה/עזב)', tone: 2),
+        for (final d in days) ForgeStatusChip(items: [['${dayNames[d]} ${av[d]![0]}–${av[d]![1]}']], variants: const <int>[0]),
+        if (days.isEmpty) ForgeStatusChip(items: [['אין חלונות-זמינות (חופשה/עזב)']], variants: const <int>[3]),
       ]),
       if ('${t['notes']}'.isNotEmpty && !_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), ForgeSectionPill(items: [['הערת-הנהלה (מוגן): ${t['notes']}']], variants: const <int>[0])],
       if (_TeamData.hiddenKeys(_role).contains('notes')) ...[_gap(10), ForgeSectionPill(items: [['הערות-הנהלה מוגנות — למנהל/ת בלבד']], variants: const <int>[0])],

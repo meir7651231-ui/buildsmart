@@ -1071,17 +1071,15 @@ class _CourseScreenState extends State<CourseScreen> {
         if (_adv) ...[
           _gap(8),
           // צירי-ממד: תחום (countBy) · מורה · חדר · יום · שעה · שכבה — נעילה-אחת פר-ציר, AND בין צירים
-          Wrap(spacing: 8, runSpacing: 6, children: [
-            for (final cc in _CourseData.catCounts(live)) if ('${cc[0]}'.isNotEmpty) _fchip('cat', '${cc[0]}', '🗂 ${cc[0]} · ${cc[1]}'),
-          ]),
+          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final cc in _CourseData.catCounts(live)) if ('${cc[0]}'.isNotEmpty) (('🗂 ${cc[0]} · ${cc[1]}'), ((_locks[('cat')] ?? '') == ('${cc[0]}')), () => setState(() { if (('${cc[0]}').isEmpty || ((_locks[('cat')] ?? '') == ('${cc[0]}'))) { _locks.remove(('cat')); } else { _locks[('cat')] = ('${cc[0]}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
           _gap(6),
-          Wrap(spacing: 8, runSpacing: 6, children: [for (final t in _CourseData.teachers) _fchip('teacher', '${t['id']}', '👩‍🏫 ${t['name']}')]),
+          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final t in _CourseData.teachers) (('👩‍🏫 ${t['name']}'), ((_locks[('teacher')] ?? '') == ('${t['id']}')), () => setState(() { if (('${t['id']}').isEmpty || ((_locks[('teacher')] ?? '') == ('${t['id']}'))) { _locks.remove(('teacher')); } else { _locks[('teacher')] = ('${t['id']}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
           _gap(6),
-          Wrap(spacing: 8, runSpacing: 6, children: [for (final r in _CourseData.rooms) _fchip('room', '${r['id']}', '🚪 ${r['name']}')]),
+          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final r in _CourseData.rooms) (('🚪 ${r['name']}'), ((_locks[('room')] ?? '') == ('${r['id']}')), () => setState(() { if (('${r['id']}').isEmpty || ((_locks[('room')] ?? '') == ('${r['id']}'))) { _locks.remove(('room')); } else { _locks[('room')] = ('${r['id']}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
           _gap(6),
           Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (var dd = 0; dd < 6; dd++) (('📅 ${dayNames[dd]}'), ((_locks[('day')] ?? '') == ('$dd')), () => setState(() { if (('$dd').isEmpty || ((_locks[('day')] ?? '') == ('$dd'))) { _locks.remove(('day')); } else { _locks[('day')] = ('$dd'); } })), for (final h in _CourseData.gridHours(_CourseData.liveCourses)) (('🕐 ${_CourseData.hm(h)}'), ((_locks[('hour')] ?? '') == ('${h ~/ 60}')), () => setState(() { if (('${h ~/ 60}').isEmpty || ((_locks[('hour')] ?? '') == ('${h ~/ 60}'))) { _locks.remove(('hour')); } else { _locks[('hour')] = ('${h ~/ 60}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
           _gap(6),
-          Wrap(spacing: 8, runSpacing: 6, children: [for (final g in gradeOrder.sublist(1, 9)) _fchip('grade', g, '🎒 $g')]),
+          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final g in gradeOrder.sublist(1, 9)) (('🎒 $g'), ((_locks[('grade')] ?? '') == (g)), () => setState(() { if ((g).isEmpty || ((_locks[('grade')] ?? '') == (g))) { _locks.remove(('grade')); } else { _locks[('grade')] = (g); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         ],
         if (_msg != null) ...[_gap(8), ForgeSectionPill(items: [[_msg!]], variants: [const <int>[0, 0, 0, 0][(_msgTone) % 4]])],
         _gap(12),
