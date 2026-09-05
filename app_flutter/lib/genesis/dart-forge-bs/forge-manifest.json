@@ -1,0 +1,4635 @@
+{
+  "families": {
+    "action": 49,
+    "card": 31,
+    "chat": 6,
+    "composite": 18,
+    "dataviz": 24,
+    "feedback": 26,
+    "header": 27,
+    "input": 27,
+    "list": 16,
+    "media": 27,
+    "motion": 8,
+    "nav": 12,
+    "selection": 26,
+    "spatial": 6,
+    "status": 27,
+    "temporal": 7,
+    "text": 16
+  },
+  "total": 353,
+  "generatedBy": "machtzev/ds-forge.mjs",
+  "renamed": [
+    {
+      "name": "SummaryStatStrip",
+      "family": "composite",
+      "first": "card",
+      "file": "summary_stat_strip_composite.dart",
+      "cls": "ForgeSummaryStatStripComposite"
+    },
+    {
+      "name": "9 atoms",
+      "family": "dataviz",
+      "first": "card",
+      "file": "9_atoms_dataviz.dart",
+      "cls": "Forge9AtomsDataviz"
+    },
+    {
+      "name": "6 atoms",
+      "family": "dataviz",
+      "first": "card",
+      "file": "6_atoms_dataviz.dart",
+      "cls": "Forge6AtomsDataviz"
+    },
+    {
+      "name": "5 atoms",
+      "family": "feedback",
+      "first": "dataviz",
+      "file": "5_atoms_feedback.dart",
+      "cls": "Forge5AtomsFeedback"
+    },
+    {
+      "name": "6 atoms",
+      "family": "feedback",
+      "first": "card",
+      "file": "6_atoms_feedback.dart",
+      "cls": "Forge6AtomsFeedback"
+    },
+    {
+      "name": "LinearProgress",
+      "family": "feedback",
+      "first": "dataviz",
+      "file": "linear_progress_feedback.dart",
+      "cls": "ForgeLinearProgressFeedback"
+    },
+    {
+      "name": "ProgressRing",
+      "family": "feedback",
+      "first": "dataviz",
+      "file": "progress_ring_feedback.dart",
+      "cls": "ForgeProgressRingFeedback"
+    },
+    {
+      "name": "6 atoms",
+      "family": "header",
+      "first": "card",
+      "file": "6_atoms_header.dart",
+      "cls": "Forge6AtomsHeader"
+    },
+    {
+      "name": "GradientHeroCard",
+      "family": "header",
+      "first": "card",
+      "file": "gradient_hero_card_header.dart",
+      "cls": "ForgeGradientHeroCardHeader"
+    },
+    {
+      "name": "WizardHeader",
+      "family": "header",
+      "first": "composite",
+      "file": "wizard_header_header.dart",
+      "cls": "ForgeWizardHeaderHeader"
+    },
+    {
+      "name": "ProfileCard",
+      "family": "header",
+      "first": "card",
+      "file": "profile_card_header.dart",
+      "cls": "ForgeProfileCardHeader"
+    },
+    {
+      "name": "DsDateField",
+      "family": "input",
+      "first": "header",
+      "file": "ds_date_field_input.dart",
+      "cls": "ForgeDsDateFieldInput"
+    },
+    {
+      "name": "4 atoms",
+      "family": "input",
+      "first": "feedback",
+      "file": "4_atoms_input.dart",
+      "cls": "Forge4AtomsInput"
+    },
+    {
+      "name": "ProfileRow",
+      "family": "list",
+      "first": "header",
+      "file": "profile_row_list.dart",
+      "cls": "ForgeProfileRowList"
+    },
+    {
+      "name": "7 atoms",
+      "family": "list",
+      "first": "dataviz",
+      "file": "7_atoms_list.dart",
+      "cls": "Forge7AtomsList"
+    },
+    {
+      "name": "5 atoms",
+      "family": "list",
+      "first": "dataviz",
+      "file": "5_atoms_list.dart",
+      "cls": "Forge5AtomsList"
+    },
+    {
+      "name": "SwitchRow",
+      "family": "list",
+      "first": "action",
+      "file": "switch_row_list.dart",
+      "cls": "ForgeSwitchRowList"
+    },
+    {
+      "name": "4 atoms",
+      "family": "list",
+      "first": "feedback",
+      "file": "4_atoms_list.dart",
+      "cls": "Forge4AtomsList"
+    },
+    {
+      "name": "6 atoms",
+      "family": "list",
+      "first": "card",
+      "file": "6_atoms_list.dart",
+      "cls": "Forge6AtomsList"
+    },
+    {
+      "name": "StoryRing",
+      "family": "media",
+      "first": "feedback",
+      "file": "story_ring_media.dart",
+      "cls": "ForgeStoryRingMedia"
+    },
+    {
+      "name": "GalleryAllBtn",
+      "family": "media",
+      "first": "action",
+      "file": "gallery_all_btn_media.dart",
+      "cls": "ForgeGalleryAllBtnMedia"
+    },
+    {
+      "name": "SegmentedPillToggle",
+      "family": "nav",
+      "first": "action",
+      "file": "segmented_pill_toggle_nav.dart",
+      "cls": "ForgeSegmentedPillToggleNav"
+    },
+    {
+      "name": "ImageFacePager",
+      "family": "nav",
+      "first": "media",
+      "file": "image_face_pager_nav.dart",
+      "cls": "ForgeImageFacePagerNav"
+    },
+    {
+      "name": "FabMenu",
+      "family": "nav",
+      "first": "action",
+      "file": "fab_menu_nav.dart",
+      "cls": "ForgeFabMenuNav"
+    },
+    {
+      "name": "CheckRow",
+      "family": "selection",
+      "first": "list",
+      "file": "check_row_selection.dart",
+      "cls": "ForgeCheckRowSelection"
+    },
+    {
+      "name": "PickerOptionsPanel",
+      "family": "selection",
+      "first": "input",
+      "file": "picker_options_panel_selection.dart",
+      "cls": "ForgePickerOptionsPanelSelection"
+    },
+    {
+      "name": "PickerOption",
+      "family": "selection",
+      "first": "input",
+      "file": "picker_option_selection.dart",
+      "cls": "ForgePickerOptionSelection"
+    },
+    {
+      "name": "4 atoms",
+      "family": "selection",
+      "first": "feedback",
+      "file": "4_atoms_selection.dart",
+      "cls": "Forge4AtomsSelection"
+    },
+    {
+      "name": "SwitchRow",
+      "family": "selection",
+      "first": "action",
+      "file": "switch_row_selection.dart",
+      "cls": "ForgeSwitchRowSelection"
+    },
+    {
+      "name": "AnimatedToggle",
+      "family": "selection",
+      "first": "action",
+      "file": "animated_toggle_selection.dart",
+      "cls": "ForgeAnimatedToggleSelection"
+    },
+    {
+      "name": "SettingsSwitchRow",
+      "family": "selection",
+      "first": "action",
+      "file": "settings_switch_row_selection.dart",
+      "cls": "ForgeSettingsSwitchRowSelection"
+    },
+    {
+      "name": "6 atoms",
+      "family": "selection",
+      "first": "card",
+      "file": "6_atoms_selection.dart",
+      "cls": "Forge6AtomsSelection"
+    },
+    {
+      "name": "UnitSegmentToggle",
+      "family": "selection",
+      "first": "action",
+      "file": "unit_segment_toggle_selection.dart",
+      "cls": "ForgeUnitSegmentToggleSelection"
+    },
+    {
+      "name": "SegmentedPillToggle",
+      "family": "selection",
+      "first": "action",
+      "file": "segmented_pill_toggle_selection.dart",
+      "cls": "ForgeSegmentedPillToggleSelection"
+    },
+    {
+      "name": "SegPicker",
+      "family": "selection",
+      "first": "input",
+      "file": "seg_picker_selection.dart",
+      "cls": "ForgeSegPickerSelection"
+    },
+    {
+      "name": "TagInput",
+      "family": "selection",
+      "first": "input",
+      "file": "tag_input_selection.dart",
+      "cls": "ForgeTagInputSelection"
+    },
+    {
+      "name": "RatingBars",
+      "family": "selection",
+      "first": "dataviz",
+      "file": "rating_bars_selection.dart",
+      "cls": "ForgeRatingBarsSelection"
+    },
+    {
+      "name": "5 atoms",
+      "family": "selection",
+      "first": "dataviz",
+      "file": "5_atoms_selection.dart",
+      "cls": "Forge5AtomsSelection"
+    },
+    {
+      "name": "9 atoms",
+      "family": "status",
+      "first": "card",
+      "file": "9_atoms_status.dart",
+      "cls": "Forge9AtomsStatus"
+    },
+    {
+      "name": "StatusDot",
+      "family": "status",
+      "first": "card",
+      "file": "status_dot_status.dart",
+      "cls": "ForgeStatusDotStatus"
+    },
+    {
+      "name": "LiveStatusDot",
+      "family": "status",
+      "first": "card",
+      "file": "live_status_dot_status.dart",
+      "cls": "ForgeLiveStatusDotStatus"
+    },
+    {
+      "name": "LiveStatusPill",
+      "family": "status",
+      "first": "card",
+      "file": "live_status_pill_status.dart",
+      "cls": "ForgeLiveStatusPillStatus"
+    },
+    {
+      "name": "PulsingStatus",
+      "family": "status",
+      "first": "card",
+      "file": "pulsing_status_status.dart",
+      "cls": "ForgePulsingStatusStatus"
+    },
+    {
+      "name": "6 atoms",
+      "family": "status",
+      "first": "card",
+      "file": "6_atoms_status.dart",
+      "cls": "Forge6AtomsStatus"
+    },
+    {
+      "name": "NotifyBadge",
+      "family": "status",
+      "first": "feedback",
+      "file": "notify_badge_status.dart",
+      "cls": "ForgeNotifyBadgeStatus"
+    },
+    {
+      "name": "DraftBadge",
+      "family": "status",
+      "first": "feedback",
+      "file": "draft_badge_status.dart",
+      "cls": "ForgeDraftBadgeStatus"
+    },
+    {
+      "name": "5 atoms",
+      "family": "status",
+      "first": "dataviz",
+      "file": "5_atoms_status.dart",
+      "cls": "Forge5AtomsStatus"
+    },
+    {
+      "name": "LinearProgress",
+      "family": "status",
+      "first": "dataviz",
+      "file": "linear_progress_status.dart",
+      "cls": "ForgeLinearProgressStatus"
+    },
+    {
+      "name": "4 atoms",
+      "family": "status",
+      "first": "feedback",
+      "file": "4_atoms_status.dart",
+      "cls": "Forge4AtomsStatus"
+    },
+    {
+      "name": "RadialGauge",
+      "family": "status",
+      "first": "dataviz",
+      "file": "radial_gauge_status.dart",
+      "cls": "ForgeRadialGaugeStatus"
+    },
+    {
+      "name": "ProgressRing",
+      "family": "status",
+      "first": "dataviz",
+      "file": "progress_ring_status.dart",
+      "cls": "ForgeProgressRingStatus"
+    },
+    {
+      "name": "StatTile",
+      "family": "status",
+      "first": "card",
+      "file": "stat_tile_status.dart",
+      "cls": "ForgeStatTileStatus"
+    },
+    {
+      "name": "LinkRow",
+      "family": "text",
+      "first": "list",
+      "file": "link_row_text.dart",
+      "cls": "ForgeLinkRowText"
+    },
+    {
+      "name": "7 atoms",
+      "family": "text",
+      "first": "dataviz",
+      "file": "7_atoms_text.dart",
+      "cls": "Forge7AtomsText"
+    }
+  ],
+  "uniqueNames": 299,
+  "atoms": [
+    {
+      "family": "action",
+      "cls": "ForgePrimaryBtn",
+      "file": "primary_btn.dart",
+      "seam": "fields",
+      "states": true,
+      "fieldSlots": 11,
+      "fieldDemo": [
+        "Action",
+        "default",
+        "Action",
+        "hover",
+        "Action",
+        "focus",
+        "Action",
+        "selected",
+        "Action",
+        "disabled",
+        "loading"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeActionButton",
+      "file": "action_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeFilledCtaButton",
+      "file": "filled_cta_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSubmitButton",
+      "file": "submit_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSendReportButton",
+      "file": "send_report_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeAddTradeButton",
+      "file": "add_trade_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeQuickActionButton",
+      "file": "quick_action_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeGalleryAllBtn",
+      "file": "gallery_all_btn.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSheetAdvanceButton",
+      "file": "sheet_advance_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "Forge18Atoms",
+      "file": "18_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 20,
+      "fieldDemo": [
+        "Action",
+        "INHERIT PRIMARYBTN →",
+        "ProposePrimaryBtn",
+        "DsPrimaryButton",
+        "AssignButton",
+        "GateButton",
+        "ApprovalButton",
+        "DecideButton",
+        "AdvanceButton",
+        "NewTaskButton",
+        "ProposeTaskButton",
+        "EquipmentButton",
+        "VehicleButton",
+        "LocationButton",
+        "LogButton",
+        "AiCardBtn",
+        "BigButton",
+        "WorkerTaskDetailSheetPrimaryBtn",
+        "WorkerEquipmentChecklistSheetPrimaryBtn",
+        "CourierAttendanceSendReportButton"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSaveDraftButton",
+      "file": "save_draft_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeOutlinedActionButton",
+      "file": "outlined_action_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeLinkBtn",
+      "file": "link_btn.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action →"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSoftButton",
+      "file": "soft_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeGoldButton",
+      "file": "gold_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeGlassButton",
+      "file": "glass_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeNeonButton",
+      "file": "neon_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeGradButton",
+      "file": "grad_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeGradientPulseButton",
+      "file": "gradient_pulse_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgePillButton",
+      "file": "pill_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgePillCtaButton",
+      "file": "pill_cta_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeCourierFormsPillButton",
+      "file": "courier_forms_pill_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeWorkerFormsPillButton",
+      "file": "worker_forms_pill_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeTradeBuilderAccessoryRuleEditorPillButton",
+      "file": "trade_builder_accessory_rule_editor_pill_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeCardBtn",
+      "file": "card_btn.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSiteHubCardBtn",
+      "file": "site_hub_card_btn.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgePortalTileButton",
+      "file": "portal_tile_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeRippleButton",
+      "file": "ripple_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeMagneticButton",
+      "file": "magnetic_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Action"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeCircleCloseButton",
+      "file": "circle_close_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "action",
+      "cls": "ForgeShutterButton",
+      "file": "shutter_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "action",
+      "cls": "ForgeStepBtn",
+      "file": "step_btn.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "−",
+        "2",
+        "+"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeStoreStepBtn",
+      "file": "store_step_btn.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "QTY",
+        "−",
+        "1",
+        "+"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeMiniQtyBtn",
+      "file": "mini_qty_btn.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "−",
+        "3",
+        "+"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeCircleFab",
+      "file": "circle_fab.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "＋"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeCartFabButton",
+      "file": "cart_fab_button.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "2"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeFabAction",
+      "file": "fab_action.dart",
+      "seam": "zero",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "action",
+      "cls": "ForgeFabMenu",
+      "file": "fab_menu.dart",
+      "seam": "zero",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "action",
+      "cls": "ForgePremiumToggle",
+      "file": "premium_toggle.dart",
+      "seam": "fields",
+      "states": true,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "on",
+        "off",
+        "focus",
+        "disabled"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeAnimatedToggle",
+      "file": "animated_toggle.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSwitchRow",
+      "file": "switch_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "canonical"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSettingsSwitchRow",
+      "file": "settings_switch_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "on"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeNotifSettingsSwitchRow",
+      "file": "notif_settings_switch_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "off"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeChatSettingsSwitchRow",
+      "file": "chat_settings_switch_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "on"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeCourierSettingsSwitchRow",
+      "file": "courier_settings_switch_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "disabled"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSegmentedSwitch",
+      "file": "segmented_switch.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "action",
+      "cls": "ForgeUnitSegmentToggle",
+      "file": "unit_segment_toggle.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeSegmentedPillToggle",
+      "file": "segmented_pill_toggle.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "action",
+      "cls": "ForgeDsToggleTile",
+      "file": "ds_toggle_tile.dart",
+      "seam": "zero",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "card",
+      "cls": "ForgeFlatCard",
+      "file": "flat_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "FLAT",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeSectionCard",
+      "file": "section_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "ELEVATED",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeOutlinedCardSection",
+      "file": "outlined_card_section.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "OUTLINED",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeGlassCard",
+      "file": "glass_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "GLASS",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeGradientHeroCard",
+      "file": "gradient_hero_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "GRADIENT",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeSpotlightCard",
+      "file": "spotlight_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "SPOTLIGHT · HOVER",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeHeroCard",
+      "file": "hero_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "HERO",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeStatTile",
+      "file": "stat_tile.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "248",
+        "12%"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeMetricTile",
+      "file": "metric_tile.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "1,024",
+        "4%"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeKpiBox",
+      "file": "kpi_box.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "card",
+      "cls": "ForgeTrendCard",
+      "file": "trend_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label",
+        "7.4",
+        "k",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeSummaryStatStrip",
+      "file": "summary_stat_strip.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "card",
+      "cls": "Forge11Atoms",
+      "file": "11_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 13,
+      "fieldDemo": [
+        "42",
+        "INHERIT STATTILE →",
+        "Stat",
+        "DsStat",
+        "BareStat",
+        "RStat",
+        "SStat",
+        "TodayStat",
+        "IntelStat",
+        "StatBlock",
+        "StatsCard",
+        "WorkerAppStat",
+        "WorkerProfileStat"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeDsRecordCard",
+      "file": "ds_record_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 8,
+      "fieldDemo": [
+        "L",
+        "Label",
+        "Meta",
+        "LIVE",
+        "Label",
+        "248",
+        "Label",
+        "1,024"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeProfileCard",
+      "file": "profile_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "L",
+        "Label",
+        "Meta",
+        "Label",
+        "Meta",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeProductCard",
+      "file": "product_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "248"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "Forge9Atoms",
+      "file": "9_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 11,
+      "fieldDemo": [
+        "L",
+        "INHERIT DSRECORDCARD →",
+        "OrderCard",
+        "CustomerCard",
+        "SupplierTile",
+        "SummaryCard",
+        "ProposalCard",
+        "ApprovalCard",
+        "PenaltyCard",
+        "VacationRequestCard",
+        "DeliveryOptionCard"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeHubTile",
+      "file": "hub_tile.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeGridHubCard",
+      "file": "grid_hub_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeContactTile",
+      "file": "contact_tile.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "Forge6Atoms",
+      "file": "6_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "INHERIT HUBTILE →",
+        "DsNavTile",
+        "CategoryTile",
+        "ServiceTile",
+        "ConnectorTile",
+        "AccessoryTile",
+        "SiteHubCaCard"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeAccordionPanel",
+      "file": "accordion_panel.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 5,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Meta",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeAccordionSectionCard",
+      "file": "accordion_section_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgePriceEstimatePanel",
+      "file": "price_estimate_panel.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "Label",
+        "248",
+        "Label",
+        "92",
+        "Label",
+        "340"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeStripPanelFrame",
+      "file": "strip_panel_frame.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeStatusDot",
+      "file": "status_dot.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeLiveStatusDot",
+      "file": "live_status_dot.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeLiveStatusPill",
+      "file": "live_status_pill.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "LIVE"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgePulsingStatus",
+      "file": "pulsing_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label · Meta"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeFlipCard",
+      "file": "flip_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label"
+      ]
+    },
+    {
+      "family": "card",
+      "cls": "ForgeRevealCard",
+      "file": "reveal_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label"
+      ]
+    },
+    {
+      "family": "chat",
+      "cls": "ForgeMessageThread",
+      "file": "message_thread.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 10,
+      "fieldDemo": [
+        "Meta",
+        "Label · Value",
+        "14:31",
+        "Label",
+        "14:32 ",
+        "META",
+        "Label",
+        "14:36",
+        "Label · Value · Meta",
+        "14:38 "
+      ]
+    },
+    {
+      "family": "chat",
+      "cls": "ForgeBubbleStates",
+      "file": "bubble_states.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "Label",
+        "14:20",
+        "INCOMING",
+        "Label",
+        "14:21 ",
+        "OUTGOING",
+        "Label",
+        "now",
+        "SENDING"
+      ]
+    },
+    {
+      "family": "chat",
+      "cls": "ForgeTypingIndicator",
+      "file": "typing_indicator.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "three dots breathe · reduced-motion parks them"
+      ]
+    },
+    {
+      "family": "chat",
+      "cls": "ForgeComposer",
+      "file": "composer.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "chat",
+      "cls": "ForgeQuickReply",
+      "file": "quick_reply.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Value",
+        "Label"
+      ]
+    },
+    {
+      "family": "chat",
+      "cls": "ForgeDeliveryTicks",
+      "file": "delivery_ticks.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label ",
+        "SENT",
+        "DELIVERED",
+        "READ"
+      ]
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeFormCard",
+      "file": "form_card.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeSignInForm",
+      "file": "sign_in_form.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeQuickAddForm",
+      "file": "quick_add_form.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "Forge8Assemblies",
+      "file": "8_assemblies.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "INHERIT FORMCARD →",
+        "FamilyForm",
+        "CourseForm",
+        "SupporterForm",
+        "DonationModal",
+        "RoomForm",
+        "ManageModal",
+        "CallbackModal",
+        "IntakePanel"
+      ]
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeFilterBar",
+      "file": "filter_bar.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeFilterToolbar",
+      "file": "filter_toolbar.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeWizardHeader",
+      "file": "wizard_header.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeWizardStep",
+      "file": "wizard_step.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeRequestComposer",
+      "file": "request_composer.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeReplyComposer",
+      "file": "reply_composer.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeCartSummaryCard",
+      "file": "cart_summary_card.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeSummaryCard",
+      "file": "summary_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 10,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "Label",
+        "248",
+        "Label",
+        "1,024",
+        "Label",
+        "92%",
+        "Label",
+        "340"
+      ]
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeSettingsGroup",
+      "file": "settings_group.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "Label",
+        "Meta · preferences",
+        "Label",
+        "Meta",
+        "Label",
+        "Meta",
+        "Label",
+        "Meta",
+        "Option"
+      ]
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeStripGroupCard",
+      "file": "strip_group_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "Label",
+        "Meta",
+        "Value",
+        "Label",
+        "Meta",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "composite",
+      "cls": "Forge6RowAtoms",
+      "file": "6_row_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "INHERIT SETTINGSGROUP →",
+        "SettingsSwitchRow",
+        "SettingsSectionTile",
+        "SettingsRadioGroupRow",
+        "SettingsTimeRow",
+        "SettingsActionRow",
+        "RegressionPanelCheckRow"
+      ]
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeSplitControl",
+      "file": "split_control.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeStatClusterCard",
+      "file": "stat_cluster_card.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "composite",
+      "cls": "ForgeSummaryStatStripComposite",
+      "file": "summary_stat_strip_composite.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeBarChart",
+      "file": "bar_chart.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "12%"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeRatingBars",
+      "file": "rating_bars.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "248"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeStackedBarGroup",
+      "file": "stacked_bar_group.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "Forge9AtomsDataviz",
+      "file": "9_atoms_dataviz.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 10,
+      "fieldDemo": [
+        "INHERIT BARCHART →",
+        "BarChart",
+        "Bar",
+        "RatingBars",
+        "WaveformBars",
+        "GanttBar",
+        "CreditBar",
+        "ManagerDashboardCreditBar",
+        "AiBar",
+        "IntelBar"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeAreaChart",
+      "file": "area_chart.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "7.4",
+        "k"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeTrendChart",
+      "file": "trend_chart.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeStepAreaChart",
+      "file": "step_area_chart.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "92",
+        "%"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "Forge7Atoms",
+      "file": "7_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 8,
+      "fieldDemo": [
+        "INHERIT LINECHART →",
+        "LineSpark",
+        "TrendChart",
+        "AreaChart",
+        "Timeline",
+        "OrderTimeline",
+        "DecisionLine",
+        "PipelineRow"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeDonutChart",
+      "file": "donut_chart.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgePieChart",
+      "file": "pie_chart.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeRadialGauge",
+      "file": "radial_gauge.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeProgressRing",
+      "file": "progress_ring.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "Forge5Atoms",
+      "file": "5_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "INHERIT DONUTCHART →",
+        "DonutChart",
+        "RadialGauge",
+        "ProgressRing",
+        "RadarChart",
+        "StoryRing"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeLineSpark",
+      "file": "line_spark.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeWaveformBars",
+      "file": "waveform_bars.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "1,024"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeSparkArea",
+      "file": "spark_area.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "21%"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeHeatGrid",
+      "file": "heat_grid.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeIntensityStrip",
+      "file": "intensity_strip.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "low",
+        "high"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeLinearProgress",
+      "file": "linear_progress.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeSegmentedMeter",
+      "file": "segmented_meter.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "Label",
+        "7 / 10",
+        "Label",
+        "4 / 10",
+        "Label",
+        "9 / 10"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "Forge6AtomsDataviz",
+      "file": "6_atoms_dataviz.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "INHERIT LINEARPROGRESS →",
+        "LinearProgress",
+        "ProgressStatRow",
+        "CreditBar",
+        "RatingBars",
+        "SegmentedMeter",
+        "ManagerDashboardCreditBar"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeChartLegend",
+      "file": "chart_legend.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeLegendRow",
+      "file": "legend_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 5,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Label",
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "dataviz",
+      "cls": "ForgeStatBlock",
+      "file": "stat_block.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "248",
+        "12% Meta"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeSnackToast",
+      "file": "snack_toast.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "DOCKED · OVER CONTENT",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeAlertBanner",
+      "file": "alert_banner.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 8,
+      "fieldDemo": [
+        "Label",
+        "info · morphs with theme",
+        "Label",
+        "success · fixed green",
+        "Label",
+        "warning · fixed amber",
+        "Label",
+        "error · fixed red"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "Forge5AtomsFeedback",
+      "file": "5_atoms_feedback.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "Label",
+        "INHERIT ALERTBANNER →",
+        "TintedBanner",
+        "CoinBanner",
+        "QuickReplyBanner",
+        "RecommendedKitBanner",
+        "PersonaPickingSheetBanner"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeModalDialog",
+      "file": "modal_dialog.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 5,
+      "fieldDemo": [
+        "MODAL · OVER SCRIM",
+        "Label",
+        "Meta",
+        "Action",
+        "Action"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeConfirmDialog",
+      "file": "confirm_dialog.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "Action",
+        "Action"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeConsentDialog",
+      "file": "consent_dialog.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label",
+        "Meta · consent",
+        "Label",
+        "Action"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeRuleInspectDialog",
+      "file": "rule_inspect_dialog.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "Meta · rule",
+        "Action"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeSlideSheet",
+      "file": "slide_sheet.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "RISES FROM BOTTOM",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "Forge6AtomsFeedback",
+      "file": "6_atoms_feedback.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "INHERIT SLIDESHEET →",
+        "SheetScaffold",
+        "StoreSheetScaffold",
+        "SnoozeSheet",
+        "SichaSheet",
+        "SheetTile",
+        "SheetStatTile"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeTooltipBubble",
+      "file": "tooltip_bubble.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "TooltipBubble",
+        "FIELDS"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeEmptyHint",
+      "file": "empty_hint.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label · hint",
+        "EmptyHint",
+        "FIELDS"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeZoomHint",
+      "file": "zoom_hint.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "ZoomHint",
+        "FIELDS"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeEmptyState",
+      "file": "empty_state.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "Action"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeAnimatedEmpty",
+      "file": "animated_empty.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeSearchEmptyState",
+      "file": "search_empty_state.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta · no results"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "Forge10Atoms",
+      "file": "10_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 11,
+      "fieldDemo": [
+        "INHERIT EMPTYSTATE →",
+        "DsEmpty",
+        "Empty",
+        "CaEmpty",
+        "EmptyProducts",
+        "EmptyConnectors",
+        "EmptyAccessories",
+        "EmptySection",
+        "JourneyEmpty",
+        "StoreEmptyState",
+        "RoleRequestsInboxEmpty"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeShimmerSkeleton",
+      "file": "shimmer_skeleton.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeSkeletonCard",
+      "file": "skeleton_card.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeLinearProgressFeedback",
+      "file": "linear_progress_feedback.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "62%"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeProgressRingFeedback",
+      "file": "progress_ring_feedback.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "65%"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeOrbitSpinner",
+      "file": "orbit_spinner.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeDotsLoader",
+      "file": "dots_loader.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeStoryRing",
+      "file": "story_ring.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeNotifyBadge",
+      "file": "notify_badge.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "3"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "ForgeDraftBadge",
+      "file": "draft_badge.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "DRAFT",
+        "WIP",
+        "LIVE"
+      ]
+    },
+    {
+      "family": "feedback",
+      "cls": "Forge4Atoms",
+      "file": "4_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "9",
+        "INHERIT COUNTBADGE →",
+        "CatalogCountBadge",
+        "ManagerDashboardCountBadge",
+        "NotifyBadge",
+        "ZoomHintBadge"
+      ]
+    },
+    {
+      "family": "header",
+      "cls": "ForgePageHeader",
+      "file": "page_header.dart",
+      "seam": "title+actions",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeDetailHeader",
+      "file": "detail_header.dart",
+      "seam": "title+actions",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeCenteredPageHeader",
+      "file": "centered_page_header.dart",
+      "seam": "title",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeTitledSection",
+      "file": "titled_section.dart",
+      "seam": "title+actions",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeSectionHeader",
+      "file": "section_header.dart",
+      "seam": "title+link",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeSectionTitle",
+      "file": "section_title.dart",
+      "seam": "title+link",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeEmojiSectionTitle",
+      "file": "emoji_section_title.dart",
+      "seam": "title",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeLensGroupHeader",
+      "file": "lens_group_header.dart",
+      "seam": "title+link",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "Forge6AtomsHeader",
+      "file": "6_atoms_header.dart",
+      "seam": "title+link",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeStickyHeader",
+      "file": "sticky_header.dart",
+      "seam": "sticky",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeHeroHeader",
+      "file": "hero_header.dart",
+      "seam": "title+cta",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeGradientHeroCardHeader",
+      "file": "gradient_hero_card_header.dart",
+      "seam": "title+cta",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeSmartProjectHero",
+      "file": "smart_project_hero.dart",
+      "seam": "title",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeBrandHeader",
+      "file": "brand_header.dart",
+      "seam": "mark+nav",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeBrandListRow",
+      "file": "brand_list_row.dart",
+      "seam": "mark",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeStoreSupplierHeader",
+      "file": "store_supplier_header.dart",
+      "seam": "mark",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeWizardHeaderHeader",
+      "file": "wizard_header_header.dart",
+      "seam": "progress",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeStepProgressHeader",
+      "file": "step_progress_header.dart",
+      "seam": "progress",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeSheetHeader",
+      "file": "sheet_header.dart",
+      "seam": "title",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeModalHeader",
+      "file": "modal_header.dart",
+      "seam": "title",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeProfileHeaderRow",
+      "file": "profile_header_row.dart",
+      "seam": "avatar+meta",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeProfileCardHeader",
+      "file": "profile_card_header.dart",
+      "seam": "avatar+meta",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeProfileRow",
+      "file": "profile_row.dart",
+      "seam": "avatar",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeDateHeader",
+      "file": "date_header.dart",
+      "seam": "divider",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeDateChip",
+      "file": "date_chip.dart",
+      "seam": "date",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeDatePills",
+      "file": "date_pills.dart",
+      "seam": "date",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "header",
+      "cls": "ForgeDsDateField",
+      "file": "ds_date_field.dart",
+      "seam": "divider",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeDsField",
+      "file": "ds_field.dart",
+      "seam": "self",
+      "states": true,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeField",
+      "file": "field.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeLabeledField",
+      "file": "labeled_field.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta · helper"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgeFieldRow",
+      "file": "field_row.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeFieldLabel",
+      "file": "field_label.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "*",
+        "Meta · required label atom"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgePremiumField",
+      "file": "premium_field.dart",
+      "seam": "fields",
+      "states": true,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgeGlowField",
+      "file": "glow_field.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgeDsDateFieldInput",
+      "file": "ds_date_field_input.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeDsNumberField",
+      "file": "ds_number_field.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeDsEnumField",
+      "file": "ds_enum_field.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeDsSearch",
+      "file": "ds_search.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeSearchField",
+      "file": "search_field.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeInputBar",
+      "file": "input_bar.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeNumberStepper",
+      "file": "number_stepper.dart",
+      "seam": "fields",
+      "states": true,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "−",
+        "2",
+        "+",
+        "−",
+        "3",
+        "+",
+        "−",
+        "0",
+        "+"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgeQtyStepperBox",
+      "file": "qty_stepper_box.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "+",
+        "4",
+        "−"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgeSmartQtyStepper",
+      "file": "smart_qty_stepper.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "−",
+        "1",
+        "+",
+        "+5",
+        "+10",
+        "Max"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "Forge4AtomsInput",
+      "file": "4_atoms_input.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 8,
+      "fieldDemo": [
+        "−",
+        "2",
+        "+",
+        "INHERIT NUMBERSTEPPER →",
+        "QtyStepper",
+        "StoreSmartQtyStepper",
+        "NumberRow",
+        "SettingsNumberRow"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgeGlowSlider",
+      "file": "glow_slider.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "58"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgeDualRange",
+      "file": "dual_range.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeSegPicker",
+      "file": "seg_picker.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgePickerOption",
+      "file": "picker_option.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgePickerOptionChip",
+      "file": "picker_option_chip.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgePickerOptionsPanel",
+      "file": "picker_options_panel.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgeTagInput",
+      "file": "tag_input.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeOtpInput",
+      "file": "otp_input.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "2",
+        "6"
+      ]
+    },
+    {
+      "family": "input",
+      "cls": "ForgePinPad",
+      "file": "pin_pad.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "input",
+      "cls": "ForgeWheelPicker",
+      "file": "wheel_picker.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "list",
+      "cls": "ForgeNumberRow",
+      "file": "number_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "Label",
+        "248",
+        "Label",
+        "1,024",
+        "Label",
+        "14"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeProfileRowList",
+      "file": "profile_row_list.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 11,
+      "fieldDemo": [
+        "L",
+        "Label",
+        "Meta",
+        "L",
+        "Label",
+        "Meta",
+        "OK",
+        "L",
+        "Label",
+        "Meta",
+        "92"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "Forge7AtomsList",
+      "file": "7_atoms_list.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "L",
+        "INHERIT PROFILEROW →",
+        "ContactRow",
+        "SupplierTile",
+        "CustomerRow",
+        "CourierAttendanceTableRow",
+        "SiteRow",
+        "VacationRow",
+        "HomeShellMenuRow"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeActionRow",
+      "file": "action_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "Action",
+        "Label",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "Forge5AtomsList",
+      "file": "5_atoms_list.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "INHERIT ACTIONROW →",
+        "SettingsActionRow",
+        "ChatSettingsActionRow",
+        "StoreSettingsActionRow",
+        "ManageRow",
+        "StockRow"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeSwitchRowList",
+      "file": "switch_row_list.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 5,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "Label",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "Forge4AtomsList",
+      "file": "4_atoms_list.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 5,
+      "fieldDemo": [
+        "INHERIT SWITCHROW →",
+        "DsToggleTile",
+        "NotifSettingsSwitchRow",
+        "ChatSettingsSwitchRow",
+        "CourierSettingsSwitchRow"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeLinkRow",
+      "file": "link_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "Forge6AtomsList",
+      "file": "6_atoms_list.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "INHERIT LINKROW →",
+        "DsNavTile",
+        "SectionTile",
+        "NotifSettingsSectionTile",
+        "StoreSettingsSectionTile",
+        "ChatSettingsSectionTile",
+        "SubRow"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeKvRow",
+      "file": "kv_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 8,
+      "fieldDemo": [
+        "Label",
+        "248",
+        "Label",
+        "+ 12%",
+        "Label",
+        "- 4%",
+        "Label",
+        "1,024"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "Forge8Atoms",
+      "file": "8_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 10,
+      "fieldDemo": [
+        "42",
+        "INHERIT KVROW →",
+        "KvLine",
+        "FinRow",
+        "ThrRow",
+        "RewardsHubFinRow",
+        "StoreSummaryLine",
+        "WorkerReportsTabKvRow",
+        "DecisionLine",
+        "SpecialtyDerivedRow"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeCheckRow",
+      "file": "check_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "Label",
+        "248",
+        "Label",
+        "Meta",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "Forge2Atoms",
+      "file": "2_atoms.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "INHERIT CHECKROW →",
+        "RegressionPanelCheckRow",
+        "FacetRow"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeNotifRow",
+      "file": "notif_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "Label",
+        "Meta",
+        "Label",
+        "Meta",
+        "3",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeSwipeRow",
+      "file": "swipe_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 10,
+      "fieldDemo": [
+        "Action",
+        "Label",
+        "Meta",
+        "248",
+        "Action",
+        "Label",
+        "Meta",
+        "HOVER / TAP A ROW TO REVEAL THE TRAILING ACTION",
+        "SwipeRow · live reveal",
+        "FIELDS"
+      ]
+    },
+    {
+      "family": "list",
+      "cls": "ForgeManageRow",
+      "file": "manage_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 15,
+      "fieldDemo": [
+        "L",
+        "Label",
+        "Meta",
+        "Action",
+        "Label",
+        "Action",
+        "L",
+        "Label",
+        "Meta",
+        "Action",
+        "Label",
+        "Action",
+        "TAP ⋯ TO OPEN · CLICK OUTSIDE TO CLOSE",
+        "ManageRow · overflow menu",
+        "FIELDS"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeAvatar",
+      "file": "avatar.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeAvatarStatus",
+      "file": "avatar_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "L",
+        "L",
+        "L"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeAvatarRing",
+      "file": "avatar_ring.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "L",
+        "L"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeProfileAvatar",
+      "file": "profile_avatar.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "L"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeAvatarStack",
+      "file": "avatar_stack.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeAvatarGroup",
+      "file": "avatar_group.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeFacePileGroup",
+      "file": "face_pile_group.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeStoryRingMedia",
+      "file": "story_ring_media.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "L",
+        "L"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeStoryReel",
+      "file": "story_reel.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeThumbnail",
+      "file": "thumbnail.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeImageTile",
+      "file": "image_tile.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeProofThumb",
+      "file": "proof_thumb.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeMediaThumb",
+      "file": "media_thumb.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeThumbStrip",
+      "file": "thumb_strip.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeImageFacePager",
+      "file": "image_face_pager.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeCoverBanner",
+      "file": "cover_banner.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeProfileCover",
+      "file": "profile_cover.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "L",
+        "Label",
+        "Meta"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeHeroCoverMark",
+      "file": "hero_cover_mark.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeLogoMark",
+      "file": "logo_mark.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "META"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeBrandMark",
+      "file": "brand_mark.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeGalleryGrid",
+      "file": "gallery_grid.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeGalleryMosaic",
+      "file": "gallery_mosaic.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeGalleryAllBtnMedia",
+      "file": "gallery_all_btn_media.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "media",
+      "cls": "ForgeThumbPlaceholder",
+      "file": "thumb_placeholder.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "no media"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeMediaPlaceholder",
+      "file": "media_placeholder.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "empty"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "ForgeAvatarFallback",
+      "file": "avatar_fallback.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "L",
+        "no avatar"
+      ]
+    },
+    {
+      "family": "media",
+      "cls": "Forge12Atoms",
+      "file": "12_atoms.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "motion",
+      "cls": "ForgeAuroraField",
+      "file": "aurora_field.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "AURORA"
+      ]
+    },
+    {
+      "family": "motion",
+      "cls": "ForgeParticleField",
+      "file": "particle_field.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "PARTICLES"
+      ]
+    },
+    {
+      "family": "motion",
+      "cls": "ForgeGenerativeCanvas",
+      "file": "generative_canvas.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "ORGANISM"
+      ]
+    },
+    {
+      "family": "motion",
+      "cls": "ForgeGlowPulse",
+      "file": "glow_pulse.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "motion",
+      "cls": "ForgeGradientSweep",
+      "file": "gradient_sweep.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "motion",
+      "cls": "ForgeParallaxTilt",
+      "file": "parallax_tilt.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "motion",
+      "cls": "ForgeTypeWriter",
+      "file": "type_writer.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "motion",
+      "cls": "ForgeConfettiBurst",
+      "file": "confetti_burst.dart",
+      "seam": "self",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeAnimatedTabs",
+      "file": "animated_tabs.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeSegmentedPillToggleNav",
+      "file": "segmented_pill_toggle_nav.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeStockTab",
+      "file": "stock_tab.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeBreadcrumbTrail",
+      "file": "breadcrumb_trail.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeHopBreadcrumb",
+      "file": "hop_breadcrumb.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeMenuRow",
+      "file": "menu_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeHomeShellMenuRow",
+      "file": "home_shell_menu_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label",
+        "⌘K",
+        "Label",
+        "⌘H"
+      ]
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeWorkerNav",
+      "file": "worker_nav.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeDsNavTile",
+      "file": "ds_nav_tile.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeActionChipRail",
+      "file": "action_chip_rail.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeImageFacePagerNav",
+      "file": "image_face_pager_nav.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "nav",
+      "cls": "ForgeFabMenuNav",
+      "file": "fab_menu_nav.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "closed",
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeCheckRowSelection",
+      "file": "check_row_selection.dart",
+      "seam": "state",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgePendingCheckRow",
+      "file": "pending_check_row.dart",
+      "seam": "state",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeCheckPop",
+      "file": "check_pop.dart",
+      "seam": "state",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeRegressionPanelCheckRow",
+      "file": "regression_panel_check_row.dart",
+      "seam": "state",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgePickerOptionsPanelSelection",
+      "file": "picker_options_panel_selection.dart",
+      "seam": "group",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgePickerOptionSelection",
+      "file": "picker_option_selection.dart",
+      "seam": "group",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "Forge4AtomsSelection",
+      "file": "4_atoms_selection.dart",
+      "seam": "group",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeSwitchRowSelection",
+      "file": "switch_row_selection.dart",
+      "seam": "state",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeAnimatedToggleSelection",
+      "file": "animated_toggle_selection.dart",
+      "seam": "state",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeSettingsSwitchRowSelection",
+      "file": "settings_switch_row_selection.dart",
+      "seam": "state",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeFacetChip",
+      "file": "facet_chip.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgePresetChip",
+      "file": "preset_chip.dart",
+      "seam": "choice",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeMustChip",
+      "file": "must_chip.dart",
+      "seam": "choice",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "Forge6AtomsSelection",
+      "file": "6_atoms_selection.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeUnitSegmentToggleSelection",
+      "file": "unit_segment_toggle_selection.dart",
+      "seam": "exclusive",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeSegmentedPillToggleSelection",
+      "file": "segmented_pill_toggle_selection.dart",
+      "seam": "exclusive",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeSegPickerSelection",
+      "file": "seg_picker_selection.dart",
+      "seam": "exclusive",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeTagInputSelection",
+      "file": "tag_input_selection.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeTintedTag",
+      "file": "tinted_tag.dart",
+      "seam": "token",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeTagDetailRow",
+      "file": "tag_detail_row.dart",
+      "seam": "token",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeStarRating",
+      "file": "star_rating.dart",
+      "seam": "value",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeRatingBarsSelection",
+      "file": "rating_bars_selection.dart",
+      "seam": "value",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeDropSelect",
+      "file": "drop_select.dart",
+      "seam": "value",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "ForgeDsChip",
+      "file": "ds_chip.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "Forge14Atoms",
+      "file": "14_atoms.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "selection",
+      "cls": "Forge5AtomsSelection",
+      "file": "5_atoms_selection.dart",
+      "seam": "state",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "spatial",
+      "cls": "ForgeMapSurface",
+      "file": "map_surface.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "spatial",
+      "cls": "ForgeMarkerStates",
+      "file": "marker_states.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "DEFAULT",
+        "SELECTED",
+        "CLUSTER",
+        "DISABLED"
+      ]
+    },
+    {
+      "family": "spatial",
+      "cls": "ForgeDataTable",
+      "file": "data_table.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 24,
+      "fieldDemo": [
+        "LABEL",
+        "VALUE",
+        "META",
+        "STATUS",
+        "Label",
+        "1,024",
+        "Meta",
+        "Label",
+        "Label",
+        "512",
+        "Meta",
+        "Label",
+        "Label",
+        "248",
+        "Meta",
+        "Label",
+        "Label",
+        "92",
+        "Meta",
+        "Label",
+        "Label",
+        "37",
+        "Meta",
+        "Label"
+      ]
+    },
+    {
+      "family": "spatial",
+      "cls": "ForgeSortHeaderStates",
+      "file": "sort_header_states.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 6,
+      "fieldDemo": [
+        "VALUE",
+        "UNSORTED",
+        "VALUE",
+        "ASCENDING",
+        "VALUE",
+        "DESCENDING"
+      ]
+    },
+    {
+      "family": "spatial",
+      "cls": "ForgeMinimap",
+      "file": "minimap.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "spatial",
+      "cls": "ForgeTreeGrid",
+      "file": "tree_grid.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 12,
+      "fieldDemo": [
+        "Label",
+        "1,024",
+        "Label",
+        "640",
+        "Label",
+        "248",
+        "Label",
+        "392",
+        "Label",
+        "384",
+        "Label",
+        "240"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeStatusChip",
+      "file": "status_chip.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "status",
+      "cls": "ForgeStatusDotChip",
+      "file": "status_dot_chip.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeHierarchyChipPill",
+      "file": "hierarchy_chip_pill.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "Forge9AtomsStatus",
+      "file": "9_atoms_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 11,
+      "fieldDemo": [
+        "Label",
+        "INHERIT STATUSCHIP →",
+        "Pill",
+        "BadgePill",
+        "CaPill",
+        "StorePill",
+        "IntelPill",
+        "RewardsHubPill",
+        "SectionPill",
+        "FilterChipPill",
+        "DraftBadge"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeStatusDotStatus",
+      "file": "status_dot_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeLiveStatusDotStatus",
+      "file": "live_status_dot_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeLiveStatusPillStatus",
+      "file": "live_status_pill_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "LIVE"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgePulsingStatusStatus",
+      "file": "pulsing_status_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label · Meta"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "Forge6AtomsStatus",
+      "file": "6_atoms_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "INHERIT STATUSDOT →",
+        "Dot",
+        "LiveDot",
+        "StatusDotChip",
+        "MaterialDots",
+        "DotsLoader",
+        "BadgedIcon"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeNotifyBadgeStatus",
+      "file": "notify_badge_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "8",
+        "24"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeCountBadge",
+      "file": "count_badge.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "status",
+      "cls": "ForgeTintedBadgeRow",
+      "file": "tinted_badge_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "LABEL 3",
+        "LABEL 12",
+        "LABEL 99+"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeDraftBadgeStatus",
+      "file": "draft_badge_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "DRAFT",
+        "WIP"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "Forge5AtomsStatus",
+      "file": "5_atoms_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "5",
+        "INHERIT NOTIFYBADGE →",
+        "CatalogCountBadge",
+        "ManagerDashboardCountBadge",
+        "CatalogConfigCountBadge",
+        "ZoomHintBadge",
+        "HomeShellBadgedIcon"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeSeverityChip",
+      "file": "severity_chip.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "status",
+      "cls": "ForgeLinearProgressStatus",
+      "file": "linear_progress_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "72%"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeMeter",
+      "file": "meter.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "94%"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeProgressStatRow",
+      "file": "progress_stat_row.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "4 / 6"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "Forge4AtomsStatus",
+      "file": "4_atoms_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 5,
+      "fieldDemo": [
+        "INHERIT LINEARPROGRESS →",
+        "ProgressStatRow",
+        "MaterialDots",
+        "CapacityBar",
+        "BudgetMeter"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeRadialGaugeStatus",
+      "file": "radial_gauge_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "72",
+        "LABEL"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeProgressRingStatus",
+      "file": "progress_ring_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "65",
+        "80"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeScoreBandChip",
+      "file": "score_band_chip.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 5,
+      "fieldDemo": [
+        "76",
+        "0",
+        "40",
+        "70",
+        "100"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeStagePill",
+      "file": "stage_pill.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "status",
+      "cls": "ForgeSectionPill",
+      "file": "section_pill.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "Label",
+        "Label"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeTrendIndicator",
+      "file": "trend_indicator.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "12%",
+        "4%",
+        "0%"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeIntelPill",
+      "file": "intel_pill.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Label"
+      ]
+    },
+    {
+      "family": "status",
+      "cls": "ForgeStatTileStatus",
+      "file": "stat_tile_status.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 3,
+      "fieldDemo": [
+        "Label",
+        "248",
+        "8%"
+      ]
+    },
+    {
+      "family": "temporal",
+      "cls": "ForgeMiniCalendar",
+      "file": "mini_calendar.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "Label",
+        "2026",
+        "א",
+        "ב",
+        "ג",
+        "ד",
+        "ה",
+        "ו",
+        "ש"
+      ]
+    },
+    {
+      "family": "temporal",
+      "cls": "ForgeRangePicker",
+      "file": "range_picker.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "א",
+        "ב",
+        "ג",
+        "ד",
+        "ה",
+        "ו",
+        "ש"
+      ]
+    },
+    {
+      "family": "temporal",
+      "cls": "ForgeWeekStripDateCellTheater",
+      "file": "week_strip_date_cell_theater.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 10,
+      "fieldDemo": [
+        "12",
+        "DEFAULT",
+        "14",
+        "TODAY",
+        "18",
+        "SELECTED",
+        "21",
+        "EVENT",
+        "30",
+        "DISABLED"
+      ]
+    },
+    {
+      "family": "temporal",
+      "cls": "ForgeTimeSlot",
+      "file": "time_slot.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "temporal",
+      "cls": "ForgeCountdownTimer",
+      "file": "countdown_timer.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 11,
+      "fieldDemo": [
+        "02",
+        "DAYS",
+        ":",
+        "08",
+        "HRS",
+        ":",
+        "45",
+        "MIN",
+        ":",
+        "09",
+        "SEC"
+      ]
+    },
+    {
+      "family": "temporal",
+      "cls": "ForgeLiveClockRelativeTime",
+      "file": "live_clock_relative_time.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "14:32:07",
+        "Label · Meta",
+        "RELATIVETIME · ",
+        "META"
+      ]
+    },
+    {
+      "family": "temporal",
+      "cls": "ForgeMetaTicker",
+      "file": "meta_ticker.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "Meta ticker — Label · Value pairs streaming, one row, tabular. Reduced-motion parks it."
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeTypeScale",
+      "file": "type_scale.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "text",
+      "cls": "ForgeVoicePair",
+      "file": "voice_pair.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "text",
+      "cls": "ForgePullQuote",
+      "file": "pull_quote.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "”",
+        "הטיפוגרפיה היא הקול של הממשק לפני שאמרנו מילה — הסולם, המשקל והמרווח מכריעים מה נקרא ראשון.",
+        "“",
+        "META · LABEL"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeCodeBlock",
+      "file": "code_block.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 13,
+      "fieldDemo": [
+        "// tokens",
+        "const",
+        " scale = ",
+        "ramp",
+        "(",
+        "\"1.25\"",
+        ");",
+        "return",
+        " scale.",
+        "step",
+        "(",
+        "\"body\"",
+        ");"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeLinkRowText",
+      "file": "link_row_text.dart",
+      "seam": "collection",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "text",
+      "cls": "ForgeBulletList",
+      "file": "bullet_list.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 4,
+      "fieldDemo": [
+        "Label",
+        " — לורם איפסום דולור סיט אמט קונסקטורר.",
+        "אדיפיסינג אלית, שורה שנייה ברוחב נוח.",
+        "Meta · פריט שלישי קצר."
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeNumberedList",
+      "file": "numbered_list.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 7,
+      "fieldDemo": [
+        "1",
+        "Label",
+        " — שלב ראשון בתהליך.",
+        "2",
+        "שלב שני, טקסט ממשיך בשורה נוחה.",
+        "3",
+        "Meta · שלב שלישי."
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeGradientText",
+      "file": "gradient_text.dart",
+      "seam": "series",
+      "states": false,
+      "fieldSlots": 0,
+      "fieldDemo": []
+    },
+    {
+      "family": "text",
+      "cls": "ForgeMarquee",
+      "file": "marquee.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 12,
+      "fieldDemo": [
+        "LABEL · ",
+        "PURE",
+        " · META",
+        "TYPE · ",
+        "SCALE",
+        " · VOICE",
+        "LABEL · ",
+        "PURE",
+        " · META",
+        "TYPE · ",
+        "SCALE",
+        " · VOICE"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeOverline",
+      "file": "overline.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "OVERLINE · META"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeEyebrow",
+      "file": "eyebrow.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "EYEBROW · LABEL"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeSectionLabel",
+      "file": "section_label.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "SECTION · LABEL"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "Forge7AtomsText",
+      "file": "7_atoms_text.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "ABC · 123",
+        "INHERIT OVERLINE →",
+        "Eyebrow",
+        "Overline",
+        "SectionLabel",
+        "SectionTitle",
+        "CaSubTitle",
+        "FieldLabel",
+        "EmojiSectionTitle"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeEmphasisText",
+      "file": "emphasis_text.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 9,
+      "fieldDemo": [
+        "טקסט ראשי בדגש",
+        " נושא את המשקל, ",
+        "טקסט משני מוסר הקשר",
+        ", ו",
+        "טקסט עמום נושא מטא-דאטה",
+        " בשוליים — שלוש דרגות מאותו טוקן.",
+        "--ink",
+        "--mut",
+        "--faint"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeTruncOne",
+      "file": "trunc_one.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "SINGLE-LINE · ELLIPSIS",
+        "לורם איפסום דולור סיט אמט קונסקטורר אדיפיסינג אלית נתונים בזרם"
+      ]
+    },
+    {
+      "family": "text",
+      "cls": "ForgeTruncClamp",
+      "file": "trunc_clamp.dart",
+      "seam": "fields",
+      "states": false,
+      "fieldSlots": 2,
+      "fieldDemo": [
+        "2-LINE · CLAMP",
+        "לורם איפסום דולור סיט אמט, קונסקטורר אדיפיסינג אלית. נתונים נטענים בזרם והשורה נחתכת בגבול השני בדיוק כאן."
+      ]
+    }
+  ]
+}

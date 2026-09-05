@@ -1,6 +1,7 @@
 // 🎯 CourseScreen — retarget של schoolos_courses.dart לישות Course (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity Course
 //   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 23 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 3 · חוזה-מנוע (לא משתנה) 1
 //   id⇒id(name) · name⇒name(name) · teacherId⇒teacherId(name) · roomId⇒roomId(name) · cat⇒cat(name) · semester⇒semester(name) · sector⇒sector(name) · start⇒start(name) · end⇒end(name) · sessions⇒sessions(name) · time⇒time(name) · maxStudents⇒maxStudents(name) · price⇒price(name) · gender⇒gender(name) · ageMin⇒ageMin(name) · ageMax⇒ageMax(name) · gradeMin⇒gradeMin(name) · gradeMax⇒gradeMax(name) · description⇒description(name) · notes⇒notes(name) · files⇒files(name) · perLesson⇒perLesson(name) · lessonPrice⇒lessonPrice(name) · day⇒∅(engine-contract) · label⇒∅(reserved(6 מועמדים)) · kind⇒∅(reserved(6 מועמדים)) · data⇒∅(reserved(6 מועמדים))
+//   עור-forge (G12c): BareStat⇒ForgeMetricTile ×20 · StatHero⇒ForgeStatBlock ×1 — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
 //   תפר-עובדות (G9b): CourseFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher · שורות-מדד (G10a) kpiActive/kpiFull/kpiNoTeacher · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
 //   שדות-Course בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): price1, price2, price1Name, price2Name, price3, price3Name, model, size, weekday, audience, img, lessonPrice1, lessonPrice2, lessonPrice3, year, prevYearId · תוויות: מונחי course (חוג/—) ⇒ Course (חוג/—) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Course
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
@@ -79,6 +80,8 @@ import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM — מנ�
 import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) — מנוע-אמת ממאור
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע — מנוע-אמת ממאור
 import '../dart-maor/ics-escape.dart'; // ייצוא iCal: הגנת-טקסט-ICS — מנוע-אמת ממאור
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -1086,21 +1089,21 @@ class _CourseScreenState extends State<CourseScreen> {
         // KPI-10: hero=התנגשויות (המטרה: "אף שיבוץ לא יתנגש") + 9 מדדי-מצב (BareStat נושאי-ערך-אמת)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            StatHero(value: '$clashes', label: 'התנגשויות (מורה/חדר/תלמיד)'),
+            ForgeStatBlock(fields: ['התנגשויות (מורה/חדר/תלמיד)', '$clashes', '']),
             _gap(14),
             Row(children: [
-              BareStat(value: '${_CourseData.kpiActive}', label: '📚 פעילים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_CourseData.kpiLessonsWeek}', label: '🗓 שיעורים-השבוע', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_CourseData.kpiEnrolled}', label: '🎓 רשומים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_CourseData.kpiOccupancyPct}%', label: '📈 תפוסה-ממוצ׳', inkColor: _CourseData.kpiOccupancyPct >= 80 ? _ok : _acc, mutedColor: _muted),
-              BareStat(value: '${_CourseData.kpiFull}', label: '🈵 מלאים', inkColor: _warning, mutedColor: _muted),
+              ForgeMetricTile(fields: ['📚 פעילים', '${_CourseData.kpiActive}', '']),
+              ForgeMetricTile(fields: ['🗓 שיעורים-השבוע', '${_CourseData.kpiLessonsWeek}', '']),
+              ForgeMetricTile(fields: ['🎓 רשומים', '${_CourseData.kpiEnrolled}', '']),
+              ForgeMetricTile(fields: ['📈 תפוסה-ממוצ׳', '${_CourseData.kpiOccupancyPct}%', '']),
+              ForgeMetricTile(fields: ['🈵 מלאים', '${_CourseData.kpiFull}', '']),
             ]),
             _gap(12),
             Row(children: [
-              BareStat(value: '${_CourseData.kpiWaiting}', label: '⏳ בהמתנה', inkColor: _CourseData.kpiWaiting > 0 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: '${_CourseData.kpiNoTeacher}', label: '🚫 ללא-מורה', inkColor: _CourseData.kpiNoTeacher > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: _CourseData.kpiBelowMinKnown ? '${_CourseData.kpiBelowMin}' : '—', label: '📉 מתחת-מינ׳', inkColor: _CourseData.kpiBelowMin > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: shekel(_CourseData.kpiDebt.toInt()), label: '💳 חוב-פתוח', inkColor: _CourseData.kpiDebt > 0 ? _warning : _ok, mutedColor: _muted),
+              ForgeMetricTile(fields: ['⏳ בהמתנה', '${_CourseData.kpiWaiting}', '']),
+              ForgeMetricTile(fields: ['🚫 ללא-מורה', '${_CourseData.kpiNoTeacher}', '']),
+              ForgeMetricTile(fields: ['📉 מתחת-מינ׳', _CourseData.kpiBelowMinKnown ? '${_CourseData.kpiBelowMin}' : '—', '']),
+              ForgeMetricTile(fields: ['💳 חוב-פתוח', shekel(_CourseData.kpiDebt.toInt()), '']),
             ]),
           ]),
         ),
@@ -1150,9 +1153,9 @@ class _CourseScreenState extends State<CourseScreen> {
       DsSection(title: '🤖 אוטומציות · ${hl.length + rem.length + bm.length + pr.length + noRoomCs.length + noTeacherCs.length + clashRooms.length + demand.length} אותות', children: [
         // דוח-ניצולת (BareStat×3 — עובדות): חדרים · עומס-מורים · חגים-קרובים
         Row(children: [
-          BareStat(value: '${_CourseData.avgRoomUtilPct}%', label: '🚪 ניצולת-חדרים', inkColor: _CourseData.avgRoomUtilPct < 30 ? _warning : _ok, mutedColor: _muted),
-          BareStat(value: _CourseData.avgTeacherLoad.toStringAsFixed(1), label: '👩‍🏫 מפגשים/מורה/שבוע', inkColor: _ink, mutedColor: _muted),
-          BareStat(value: '${_CourseData.upcomingHolidayList.length}', label: '🕎 חגים ב-45 ימים', inkColor: _ink, mutedColor: _muted),
+          ForgeMetricTile(fields: ['🚪 ניצולת-חדרים', '${_CourseData.avgRoomUtilPct}%', '']),
+          ForgeMetricTile(fields: ['👩‍🏫 מפגשים/מורה/שבוע', _CourseData.avgTeacherLoad.toStringAsFixed(1), '']),
+          ForgeMetricTile(fields: ['🕎 חגים ב-45 ימים', '${_CourseData.upcomingHolidayList.length}', '']),
         ]),
         _gap(8),
         // סנכרון-לוח: שיעורים על חג ⇒ ביטול-אוטו (+הודעה דרך שלח-הודעה)
@@ -1419,11 +1422,11 @@ class _CourseScreenState extends State<CourseScreen> {
       StatRow(label: 'תפוסה מול קיבולת', value: '${_CourseData.enrolled(c)} מתוך ${_CourseData.capacity(c)}', fraction: _CourseData.occupancy(c)),
       _gap(8),
       Row(children: [
-        BareStat(value: '${_CourseData.enrolled(c)}', label: 'רשומים', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: '${_CourseData.waitlist(c).length}', label: 'בהמתנה', inkColor: _CourseData.waitlist(c).isEmpty ? _ink : _warning, mutedColor: _muted),
-        BareStat(value: _CourseData.minToOpen(c) == null ? '—' : '${_CourseData.minToOpen(c)}', label: 'מינ׳-לפתיחה', inkColor: _CourseData.belowMin(c) ? _danger : _ink, mutedColor: _muted),
-        BareStat(value: c['perLesson'] == true ? '${shekel(c['lessonPrice'])}/ש׳' : shekel(c['price']), label: 'מחיר', inkColor: _acc, mutedColor: _muted),
-        BareStat(value: _CourseData.trendLabel(c), label: 'מגמת-הרשמה', inkColor: _CourseData.trend(c)['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
+        ForgeMetricTile(fields: ['רשומים', '${_CourseData.enrolled(c)}', '']),
+        ForgeMetricTile(fields: ['בהמתנה', '${_CourseData.waitlist(c).length}', '']),
+        ForgeMetricTile(fields: ['מינ׳-לפתיחה', _CourseData.minToOpen(c) == null ? '—' : '${_CourseData.minToOpen(c)}', '']),
+        ForgeMetricTile(fields: ['מחיר', c['perLesson'] == true ? '${shekel(c['lessonPrice'])}/ש׳' : shekel(c['price']), '']),
+        ForgeMetricTile(fields: ['מגמת-הרשמה', _CourseData.trendLabel(c), '']),
       ]),
       _gap(6),
       MediaRow(glyph: '🚪', title: _CourseData.roomOf(c)?['name'] ?? 'ללא-חדר', subtitle: _CourseData.roomLabel(c)), // roomInfoLabel (מנוע) — טקסט-ארוך ⇒ שורה, לא שבב
@@ -1650,9 +1653,9 @@ class _CourseScreenState extends State<CourseScreen> {
     final exp = _CourseData.courseExpected(c), col = _CourseData.courseCollected(c), debt = _CourseData.courseDebt(c);
     return [
       Row(children: [
-        BareStat(value: shekel(exp.toInt()), label: 'צפוי (Σ totalDue)', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: shekel(col.toInt()), label: 'נגבה (Σ payments)', inkColor: _ok, mutedColor: _muted),
-        BareStat(value: shekel(debt.toInt()), label: 'חוב-פתוח', inkColor: debt > 0 ? _danger : _ok, mutedColor: _muted),
+        ForgeMetricTile(fields: ['צפוי (Σ totalDue)', shekel(exp.toInt()), '']),
+        ForgeMetricTile(fields: ['נגבה (Σ payments)', shekel(col.toInt()), '']),
+        ForgeMetricTile(fields: ['חוב-פתוח', shekel(debt.toInt()), '']),
       ]),
       _gap(8),
       StatRow(label: 'גבייה מול צפוי', value: exp == 0 ? '—' : '${(col / exp * 100).clamp(0, 100).round()}%', fraction: exp == 0 ? 0 : (col / exp).clamp(0.0, 1.0)),

@@ -6,6 +6,8 @@
 //   "פריטי קטלוג במלאי" ⇒ ShopItem ⇐ schoolos_courses.dart (strong · שמות 4/13)
 //   ⚪ "רשימת ספקים עם מחירים" ⇒ אין מונח-ישות במשפט — מקום-שמור (אין המצאה)
 //   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: Volunteer:∅ · Donation:∅ · Room:∅ · Family:5 עמודות · ShopItem:∅
+//   G12c · תפקידי-עור: DS
+//   G12b · עור: DS (KpiTile) — ברירת-מחדל, ביט-זהה
 //   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): Volunteer:∅ · Donation:∅ · Room:initialMetric · Family:initialMetric · ShopItem:initialMetric
 //   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: Volunteer:initialPanelId · Donation:initialPanelId · Room:initialPanelId · Family:initialPanelId · ShopItem:initialPanelId
 //   G9b · KPI-רכזת נגזר: כל אריח = <E>Facts של המודול (count חי של הזרע · hero = המדד שהזהב הכריז/צבע-סכנה) — אפס ערך מומצא: VolunteerFacts.count · DonationFacts.count · RoomFacts.unavailableN · FamilyFacts.highN · ShopItemFacts.kpiNoTeacher

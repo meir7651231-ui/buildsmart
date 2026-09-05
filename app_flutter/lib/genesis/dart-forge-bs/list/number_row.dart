@@ -1,0 +1,22 @@
+// 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "list" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
+// machtzev/pure/list-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
+import 'package:flutter/material.dart';
+import '../../dart-ui-bs/ds/ds_seam.dart';
+
+/// NumberRow — seam:fields · 6 חריצים
+class ForgeNumberRow extends StatelessWidget {
+  /// תפר-דאטה (G12a): 6 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  final List<String>? fields;
+  static const int fieldSlots = 6;
+  static const List<String> fieldDemo = <String>["Label", "248", "Label", "1,024", "Label", "14"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
+  const ForgeNumberRow({super.key, this.fields});
+  @override
+  Widget build(BuildContext context) {
+    final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(15)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Container(constraints: const BoxConstraints(minHeight: 52), padding: const EdgeInsets.fromLTRB(15, 12, 15, 12), decoration: BoxDecoration(border: Border(bottom: BorderSide(color: skin.hair, width: 1))), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 12, children: [Expanded(child: Text(_f(0, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13.5, fontWeight: FontWeight.w600, height: 1.25, leadingDistribution: TextLeadingDistribution.even))), Flexible(child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(1, "248"), style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 13, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false)))])), Container(constraints: const BoxConstraints(minHeight: 52), padding: const EdgeInsets.fromLTRB(15, 12, 15, 12), decoration: BoxDecoration(border: Border(bottom: BorderSide(color: skin.hair, width: 1))), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 12, children: [Expanded(child: Text(_f(2, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13.5, fontWeight: FontWeight.w600, height: 1.25, leadingDistribution: TextLeadingDistribution.even))), Flexible(child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(3, "1,024"), style: TextStyle(color: theme.aHi, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 13, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false)))])), Container(constraints: const BoxConstraints(minHeight: 52), padding: const EdgeInsets.fromLTRB(15, 12, 15, 12), decoration: BoxDecoration(border: Border(bottom: BorderSide(color: skin.hair, width: 1))), child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, spacing: 12, children: [Expanded(child: Text(_f(4, "Label"), style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13.5, fontWeight: FontWeight.w600, height: 1.25, leadingDistribution: TextLeadingDistribution.even))), Flexible(child: Directionality(textDirection: TextDirection.ltr, child: Text(_f(5, "14"), style: TextStyle(color: skin.mut, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 13, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false)))]))]));
+  }
+}

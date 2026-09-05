@@ -1,6 +1,7 @@
 // 🎯 ShopCriterionScreen — retarget של schoolos_courses.dart לישות ShopCriterion (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity ShopCriterion
 //   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 11 · חוזה-מנוע (לא משתנה) 12
 //   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · teacherId⇒∅(engine-contract) · roomId⇒∅(engine-contract) · start⇒∅(engine-contract) · end⇒∅(engine-contract) · sessions⇒∅(engine-contract) · time⇒∅(engine-contract) · gender⇒∅(engine-contract) · ageMin⇒∅(engine-contract) · ageMax⇒∅(engine-contract) · gradeMin⇒∅(engine-contract) · gradeMax⇒∅(engine-contract) · day⇒∅(engine-contract) · cat⇒∅(reserved) · semester⇒∅(reserved) · sector⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒discountPct(unique) · price⇒∅(reserved) · description⇒∅(reserved) · files⇒∅(reserved) · kind⇒∅(reserved) · data⇒∅(reserved) · perLesson⇒∅(reserved) · lessonPrice⇒∅(reserved)
+//   עור-forge (G12c): BareStat⇒ForgeMetricTile ×20 · StatHero⇒ForgeStatBlock ×1 — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
 //   תפר-עובדות (G9b): ShopCriterionFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher · שורות-מדד (G10a) kpiActive/kpiFull/kpiNoTeacher · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
 //   שדות-ShopCriterion בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): — · תוויות: מונחי course (חוג/—) ⇒ ShopCriterion (קריטריון/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopCriterion
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
@@ -79,6 +80,8 @@ import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM — מנ�
 import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) — מנוע-אמת ממאור
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע — מנוע-אמת ממאור
 import '../dart-maor/ics-escape.dart'; // ייצוא iCal: הגנת-טקסט-ICS — מנוע-אמת ממאור
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -1069,21 +1072,21 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         // KPI-10: hero=התנגשויות (המטרה: "אף שיבוץ לא יתנגש") + 9 מדדי-מצב (BareStat נושאי-ערך-אמת)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            StatHero(value: '$clashes', label: 'התנגשויות (מורה/חדר/תלמיד)'),
+            ForgeStatBlock(fields: ['התנגשויות (מורה/חדר/תלמיד)', '$clashes', '']),
             _gap(14),
             Row(children: [
-              BareStat(value: '${_ShopCriterionData.kpiActive}', label: '📚 פעילים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_ShopCriterionData.kpiLessonsWeek}', label: '🗓 שיעורים-השבוע', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_ShopCriterionData.kpiEnrolled}', label: '🎓 רשומים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_ShopCriterionData.kpiOccupancyPct}%', label: '📈 תפוסה-ממוצ׳', inkColor: _ShopCriterionData.kpiOccupancyPct >= 80 ? _ok : _acc, mutedColor: _muted),
-              BareStat(value: '${_ShopCriterionData.kpiFull}', label: '🈵 מלאים', inkColor: _warning, mutedColor: _muted),
+              ForgeMetricTile(fields: ['📚 פעילים', '${_ShopCriterionData.kpiActive}', '']),
+              ForgeMetricTile(fields: ['🗓 שיעורים-השבוע', '${_ShopCriterionData.kpiLessonsWeek}', '']),
+              ForgeMetricTile(fields: ['🎓 רשומים', '${_ShopCriterionData.kpiEnrolled}', '']),
+              ForgeMetricTile(fields: ['📈 תפוסה-ממוצ׳', '${_ShopCriterionData.kpiOccupancyPct}%', '']),
+              ForgeMetricTile(fields: ['🈵 מלאים', '${_ShopCriterionData.kpiFull}', '']),
             ]),
             _gap(12),
             Row(children: [
-              BareStat(value: '${_ShopCriterionData.kpiWaiting}', label: '⏳ בהמתנה', inkColor: _ShopCriterionData.kpiWaiting > 0 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: '${_ShopCriterionData.kpiNoTeacher}', label: '🚫 ללא-מורה', inkColor: _ShopCriterionData.kpiNoTeacher > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: _ShopCriterionData.kpiBelowMinKnown ? '${_ShopCriterionData.kpiBelowMin}' : '—', label: '📉 מתחת-מינ׳', inkColor: _ShopCriterionData.kpiBelowMin > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: shekel(_ShopCriterionData.kpiDebt.toInt()), label: '💳 חוב-פתוח', inkColor: _ShopCriterionData.kpiDebt > 0 ? _warning : _ok, mutedColor: _muted),
+              ForgeMetricTile(fields: ['⏳ בהמתנה', '${_ShopCriterionData.kpiWaiting}', '']),
+              ForgeMetricTile(fields: ['🚫 ללא-מורה', '${_ShopCriterionData.kpiNoTeacher}', '']),
+              ForgeMetricTile(fields: ['📉 מתחת-מינ׳', _ShopCriterionData.kpiBelowMinKnown ? '${_ShopCriterionData.kpiBelowMin}' : '—', '']),
+              ForgeMetricTile(fields: ['💳 חוב-פתוח', shekel(_ShopCriterionData.kpiDebt.toInt()), '']),
             ]),
           ]),
         ),
@@ -1133,9 +1136,9 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       DsSection(title: '🤖 אוטומציות · ${hl.length + rem.length + bm.length + pr.length + noRoomCs.length + noTeacherCs.length + clashRooms.length + demand.length} אותות', children: [
         // דוח-ניצולת (BareStat×3 — עובדות): חדרים · עומס-מורים · חגים-קרובים
         Row(children: [
-          BareStat(value: '${_ShopCriterionData.avgRoomUtilPct}%', label: '🚪 ניצולת-חדרים', inkColor: _ShopCriterionData.avgRoomUtilPct < 30 ? _warning : _ok, mutedColor: _muted),
-          BareStat(value: _ShopCriterionData.avgTeacherLoad.toStringAsFixed(1), label: '👩‍🏫 מפגשים/מורה/שבוע', inkColor: _ink, mutedColor: _muted),
-          BareStat(value: '${_ShopCriterionData.upcomingHolidayList.length}', label: '🕎 חגים ב-45 ימים', inkColor: _ink, mutedColor: _muted),
+          ForgeMetricTile(fields: ['🚪 ניצולת-חדרים', '${_ShopCriterionData.avgRoomUtilPct}%', '']),
+          ForgeMetricTile(fields: ['👩‍🏫 מפגשים/מורה/שבוע', _ShopCriterionData.avgTeacherLoad.toStringAsFixed(1), '']),
+          ForgeMetricTile(fields: ['🕎 חגים ב-45 ימים', '${_ShopCriterionData.upcomingHolidayList.length}', '']),
         ]),
         _gap(8),
         // סנכרון-לוח: שיעורים על חג ⇒ ביטול-אוטו (+הודעה דרך שלח-הודעה)
@@ -1402,11 +1405,11 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       StatRow(label: 'תפוסה מול קיבולת', value: '${_ShopCriterionData.enrolled(c)} מתוך ${_ShopCriterionData.capacity(c)}', fraction: _ShopCriterionData.occupancy(c)),
       _gap(8),
       Row(children: [
-        BareStat(value: '${_ShopCriterionData.enrolled(c)}', label: 'רשומים', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: '${_ShopCriterionData.waitlist(c).length}', label: 'בהמתנה', inkColor: _ShopCriterionData.waitlist(c).isEmpty ? _ink : _warning, mutedColor: _muted),
-        BareStat(value: _ShopCriterionData.minToOpen(c) == null ? '—' : '${_ShopCriterionData.minToOpen(c)}', label: 'מינ׳-לפתיחה', inkColor: _ShopCriterionData.belowMin(c) ? _danger : _ink, mutedColor: _muted),
-        BareStat(value: c['perLesson'] == true ? '${shekel(c['lessonPrice'])}/ש׳' : shekel(c['price']), label: 'מחיר', inkColor: _acc, mutedColor: _muted),
-        BareStat(value: _ShopCriterionData.trendLabel(c), label: 'מגמת-הרשמה', inkColor: _ShopCriterionData.trend(c)['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
+        ForgeMetricTile(fields: ['רשומים', '${_ShopCriterionData.enrolled(c)}', '']),
+        ForgeMetricTile(fields: ['בהמתנה', '${_ShopCriterionData.waitlist(c).length}', '']),
+        ForgeMetricTile(fields: ['מינ׳-לפתיחה', _ShopCriterionData.minToOpen(c) == null ? '—' : '${_ShopCriterionData.minToOpen(c)}', '']),
+        ForgeMetricTile(fields: ['מחיר', c['perLesson'] == true ? '${shekel(c['lessonPrice'])}/ש׳' : shekel(c['price']), '']),
+        ForgeMetricTile(fields: ['מגמת-הרשמה', _ShopCriterionData.trendLabel(c), '']),
       ]),
       _gap(6),
       MediaRow(glyph: '🚪', title: _ShopCriterionData.roomOf(c)?['name'] ?? 'ללא-חדר', subtitle: _ShopCriterionData.roomLabel(c)), // roomInfoLabel (מנוע) — טקסט-ארוך ⇒ שורה, לא שבב
@@ -1633,9 +1636,9 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     final exp = _ShopCriterionData.courseExpected(c), col = _ShopCriterionData.courseCollected(c), debt = _ShopCriterionData.courseDebt(c);
     return [
       Row(children: [
-        BareStat(value: shekel(exp.toInt()), label: 'צפוי (Σ totalDue)', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: shekel(col.toInt()), label: 'נגבה (Σ payments)', inkColor: _ok, mutedColor: _muted),
-        BareStat(value: shekel(debt.toInt()), label: 'חוב-פתוח', inkColor: debt > 0 ? _danger : _ok, mutedColor: _muted),
+        ForgeMetricTile(fields: ['צפוי (Σ totalDue)', shekel(exp.toInt()), '']),
+        ForgeMetricTile(fields: ['נגבה (Σ payments)', shekel(col.toInt()), '']),
+        ForgeMetricTile(fields: ['חוב-פתוח', shekel(debt.toInt()), '']),
       ]),
       _gap(8),
       StatRow(label: 'גבייה מול צפוי', value: exp == 0 ? '—' : '${(col / exp * 100).clamp(0, 100).round()}%', fraction: exp == 0 ? 0 : (col / exp).clamp(0.0, 1.0)),

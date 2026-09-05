@@ -1,6 +1,7 @@
 // 🎯 ShopAssignmentScreen — retarget של schoolos_teachers.dart לישות ShopAssignment (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity ShopAssignment
 //   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 18 · חוזה-מנוע (לא משתנה) 0
 //   id⇒id(name) · status⇒status(name) · notes⇒notes(name) · name⇒∅(reserved) · role⇒∅(reserved) · subjects⇒redemptions(unique) · homeroom⇒∅(reserved) · contractHours⇒∅(reserved) · contractType⇒∅(reserved) · startDate⇒since(unique) · availability⇒∅(reserved) · constraints⇒∅(reserved) · preferredSub⇒∅(reserved(4 מועמדים)) · extraRoles⇒∅(reserved) · certs⇒∅(reserved) · issuer⇒∅(reserved) · expiry⇒∅(reserved) · attendance⇒∅(reserved) · absences⇒∅(reserved) · reason⇒∅(reserved) · date⇒∅(reserved) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved)
+//   עור-forge (G12c): BareStat⇒ForgeMetricTile ×17 · StatHero⇒ForgeStatBlock ×1 — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
 //   תפר-עובדות (G9b): ShopAssignmentFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
 //   שדות-ShopAssignment בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): productId, famId, memberId, criterionIds · תוויות: מונחי teacher (מורה/—) ⇒ ShopAssignment (שיוך/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopAssignment
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
@@ -59,6 +60,8 @@ import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מי
 import '../dart-maor/absence-reason-chips.dart'; // סיבות-היעדרות (term-מוזרק)
 import '../dart-data-maor/absence-reason-chips-terms.dart'; // kTerms — שמות-הסיבות (אטום-דאטה)
 import 'gen_core_shopassignment.dart'; // G6c · הגרעין-מהסכמה של ShopAssignment (מצבים · מעבר · חוקים · ערוצים)
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (BareStat/FilterChipPill דורשים הזרקת-צבע — חוק-6: צבע=הצבה, לא ציור)
@@ -679,22 +682,22 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
         // KPI-10: hero=שיעורים-ללא-מורה-היום (המטרה) + 10 מדדי-מצב (BareStat נושאי-ערך-אמת)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            StatHero(value: '$uncovered', label: 'שיעורים ללא שיוך היום'),
+            ForgeStatBlock(fields: ['שיעורים ללא שיוך היום', '$uncovered', '']),
             const SizedBox(height: 14),
             Row(children: [
-              BareStat(value: '${_TeamData.staff.length}', label: '👥 סך-צוות', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${all.length}', label: '✅ פעילים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_TeamData.absentN}', label: '🤒 נעדרים היום', inkColor: _TeamData.absentN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '$uncovered', label: '🚨 ללא-שיוך', inkColor: uncovered > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '${_TeamData.openSubs}', label: '🔁 החלפות פתוחות', inkColor: _TeamData.openSubs > 0 ? _warning : _ok, mutedColor: _muted),
+              ForgeMetricTile(fields: ['👥 סך-צוות', '${_TeamData.staff.length}', '']),
+              ForgeMetricTile(fields: ['✅ פעילים', '${all.length}', '']),
+              ForgeMetricTile(fields: ['🤒 נעדרים היום', '${_TeamData.absentN}', '']),
+              ForgeMetricTile(fields: ['🚨 ללא-שיוך', '$uncovered', '']),
+              ForgeMetricTile(fields: ['🔁 החלפות פתוחות', '${_TeamData.openSubs}', '']),
             ]),
             const SizedBox(height: 12),
             Row(children: [
-              BareStat(value: _TeamData.avgHours.toStringAsFixed(1), label: '⚖️ עומס ממוצע ש׳/שב׳', inkColor: _acc, mutedColor: _muted),
-              BareStat(value: '${_TeamData.overN}', label: '🔥 עמוסים-מדי', inkColor: _TeamData.overN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '${_TeamData.underN}', label: '🪫 בתת-עומס', inkColor: _TeamData.underN > 0 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: '${_TeamData.contractsN}', label: '📄 חוזים פגים החודש', inkColor: _TeamData.contractsN > 0 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: '${_TeamData.certsN}', label: '🎓 הכשרות חסרות', inkColor: _TeamData.certsN > 0 ? _danger : _ok, mutedColor: _muted),
+              ForgeMetricTile(fields: ['⚖️ עומס ממוצע ש׳/שב׳', _TeamData.avgHours.toStringAsFixed(1), '']),
+              ForgeMetricTile(fields: ['🔥 עמוסים-מדי', '${_TeamData.overN}', '']),
+              ForgeMetricTile(fields: ['🪫 בתת-עומס', '${_TeamData.underN}', '']),
+              ForgeMetricTile(fields: ['📄 חוזים פגים החודש', '${_TeamData.contractsN}', '']),
+              ForgeMetricTile(fields: ['🎓 הכשרות חסרות', '${_TeamData.certsN}', '']),
             ]),
           ]),
         ),
@@ -833,10 +836,10 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
                   StatRow(label: 'עומס מול חוזה', value: '${_TeamData.hoursWeek(t).round()} מתוך ${_TeamData.contractHours(t)} ש׳ · ${_TeamData.loadPct(t)}%', fraction: (_TeamData.loadPct(t) / 100).clamp(0.0, 1.0)),
                   _gap(10),
                   Row(children: [
-                    BareStat(value: '${_TeamData.coursesOf(t).length}', label: 'חוגים', inkColor: _ink, mutedColor: _muted),
-                    BareStat(value: '${_TeamData.sessionsWeek(t)}', label: 'שיעורים/שבוע', inkColor: _ink, mutedColor: _muted),
-                    BareStat(value: '${_TeamData.absencesMonth(t)}', label: 'היעדרויות החודש', inkColor: _TeamData.absencesMonth(t) > 0 ? _warning : _ok, mutedColor: _muted),
-                    BareStat(value: '${_TeamData.subsDone(t)}/${_TeamData.subsReceived(t)}', label: 'החלפות ביצע/קיבל', inkColor: _acc, mutedColor: _muted),
+                    ForgeMetricTile(fields: ['חוגים', '${_TeamData.coursesOf(t).length}', '']),
+                    ForgeMetricTile(fields: ['שיעורים/שבוע', '${_TeamData.sessionsWeek(t)}', '']),
+                    ForgeMetricTile(fields: ['היעדרויות החודש', '${_TeamData.absencesMonth(t)}', '']),
+                    ForgeMetricTile(fields: ['החלפות ביצע/קיבל', '${_TeamData.subsDone(t)}/${_TeamData.subsReceived(t)}', '']),
                   ]),
                   _gap(12),
                   // 9 טאבים ב-3 שורות של SegmentedSwitch (Row-מבוקר; 4+ פריטים גולשים ברוחב-הגיליון — נתפס בבדיקת-widget)
@@ -916,9 +919,9 @@ class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
       DsTable(labels: ['שעה', for (final d in days) dayNames[d]], rows: [for (final tm in times) [tm, for (final d in days) grid[tm]![d] ?? '—']]),
       _gap(6),
       Row(children: [
-        BareStat(value: '${times.length}', label: 'רצועות-שעה', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: '${_TeamData.sessionsWeek(t)}', label: 'שיעורים/שבוע', inkColor: _ink, mutedColor: _muted),
-        BareStat(value: minToHM((timeToMin(times.first) as num).toInt(), (n) => n.toString().padLeft(2, '0')), label: 'שיעור-ראשון', inkColor: _acc, mutedColor: _muted),
+        ForgeMetricTile(fields: ['רצועות-שעה', '${times.length}', '']),
+        ForgeMetricTile(fields: ['שיעורים/שבוע', '${_TeamData.sessionsWeek(t)}', '']),
+        ForgeMetricTile(fields: ['שיעור-ראשון', minToHM((timeToMin(times.first) as num).toInt(), (n) => n.toString().padLeft(2, '0')), '']),
       ]),
     ]);
   }

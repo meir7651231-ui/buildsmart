@@ -1,6 +1,7 @@
 // 🎯 MemberScreen — retarget של schoolos_students.dart לישות Member (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Member
 //   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 16 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 12 · חוזה-מנוע (לא משתנה) 5
 //   id⇒id(name) · phone⇒phone(name) · phone2⇒phone2(name) · notes⇒notes(name) · first⇒first(name) · gender⇒gender(name) · birth⇒birth(name) · idNum⇒idNum(name) · school⇒school(name) · grade⇒grade(name) · health⇒health(name) · mSefach⇒mSefach(name) · mInvite⇒mInvite(name) · mRecommend⇒mRecommend(name) · mPhotos⇒mPhotos(name) · mVideos⇒mVideos(name) · name⇒∅(engine-contract) · status⇒∅(engine-contract) · createdAt⇒∅(engine-contract) · docs⇒∅(engine-contract) · members⇒∅(engine-contract) · father⇒∅(reserved) · mother⇒∅(reserved) · email⇒∅(reserved) · city⇒∅(reserved) · address⇒∅(reserved) · language⇒∅(reserved) · maritalStatus⇒∅(reserved) · tzedaka⇒∅(reserved) · discount⇒∅(reserved) · addedAt⇒∅(reserved) · cred⇒∅(reserved) · log⇒∅(reserved)
+//   עור-forge (G12c): BareStat⇒ForgeMetricTile ×21 · StatHero⇒ForgeStatBlock ×1 — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
 //   תפר-עובדות (G9b): MemberFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה db (families/members · 1 עמודות-שמורות)
 //   שדות-Member בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): isParent · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Member (בן/בת משפחה/בני משפחה) · 13 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Member
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
@@ -70,6 +71,8 @@ import '../dart-maor/sup-score-bins.dart'; // השוואת-שכבה: התפלג�
 import '../dart-maor/to-csv.dart'; // ייצוא: שורות⇒CSV+BOM (מדף)
 import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא (חוסם CSV-injection) (מדף)
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע (מדף)
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה, לא ציור)
@@ -952,22 +955,22 @@ class _MemberScreenState extends State<MemberScreen> {
         // KPI-10 (המפרט): hero = המטרה (מי-נופל) + 10 מדדי-מצב (BareStat נושאי-ערך; חסר-נתון ⇒ '—' מקום-שמור)
         GradientCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            StatHero(value: '${_StuData.highN}', label: 'בני משפחה בסיכון-גבוה — לפעול עכשיו'),
+            ForgeStatBlock(fields: ['בני משפחה בסיכון-גבוה — לפעול עכשיו', '${_StuData.highN}', '']),
             const SizedBox(height: 14),
             Row(children: [
-              BareStat(value: '${_StuData.students.length}', label: '🎓 סך-בני משפחה', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${all.length}', label: '✅ פעילים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_StuData.newN}', label: '🆕 חדשים-השנה', inkColor: _acc, mutedColor: _muted),
-              BareStat(value: '${_StuData.highN}', label: '🔴 סיכון-גבוה', inkColor: _StuData.highN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '${_StuData.midN}', label: '🟠 סיכון-בינוני', inkColor: _StuData.midN > 0 ? _warning : _ok, mutedColor: _muted),
+              ForgeMetricTile(fields: ['🎓 סך-בני משפחה', '${_StuData.students.length}', '']),
+              ForgeMetricTile(fields: ['✅ פעילים', '${all.length}', '']),
+              ForgeMetricTile(fields: ['🆕 חדשים-השנה', '${_StuData.newN}', '']),
+              ForgeMetricTile(fields: ['🔴 סיכון-גבוה', '${_StuData.highN}', '']),
+              ForgeMetricTile(fields: ['🟠 סיכון-בינוני', '${_StuData.midN}', '']),
             ]),
             const SizedBox(height: 12),
             Row(children: [
-              BareStat(value: avgAtt == null ? '—' : '$avgAtt%', label: '📅 ממוצע-נוכחות', inkColor: (avgAtt ?? 100) < 85 ? _warning : _ok, mutedColor: _muted),
-              BareStat(value: avgGr == null ? '—' : '$avgGr', label: '📝 ממוצע-ציונים', inkColor: avgGr == null ? _muted : _ink, mutedColor: _muted), // מקום-שמור
-              BareStat(value: '${_StuData.medicalN}', label: '🩺 רפואי/צרכים', inkColor: _ink, mutedColor: _muted),
-              BareStat(value: '${_StuData.noParentN}', label: '📵 ללא-הורה-מעודכן', inkColor: _StuData.noParentN > 0 ? _danger : _ok, mutedColor: _muted),
-              BareStat(value: '${_StuData.openTicketsN}', label: '📨 פניות-פתוחות', inkColor: _StuData.openTicketsN > 0 ? _warning : _ok, mutedColor: _muted),
+              ForgeMetricTile(fields: ['📅 ממוצע-נוכחות', avgAtt == null ? '—' : '$avgAtt%', '']),
+              ForgeMetricTile(fields: ['📝 ממוצע-ציונים', avgGr == null ? '—' : '$avgGr', '']), // מקום-שמור
+              ForgeMetricTile(fields: ['🩺 רפואי/צרכים', '${_StuData.medicalN}', '']),
+              ForgeMetricTile(fields: ['📵 ללא-הורה-מעודכן', '${_StuData.noParentN}', '']),
+              ForgeMetricTile(fields: ['📨 פניות-פתוחות', '${_StuData.openTicketsN}', '']),
             ]),
           ]),
         ),
@@ -1104,7 +1107,7 @@ class _MemberScreenState extends State<MemberScreen> {
                   GaugeMeter(value: r / 100, size: 150, tone: tone),
                   const SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    Row(children: [BareStat(value: '$r', label: _StuData.bandLabel(b), inkColor: b == 2 ? _danger : b == 1 ? _warning : _ok, mutedColor: _muted)]), // BareStat=Expanded ⇒ חייב Row (נתפס בבדיקת-widget)
+                    Row(children: [ForgeMetricTile(fields: [_StuData.bandLabel(b), '$r', ''])]), // BareStat=Expanded ⇒ חייב Row (נתפס בבדיקת-widget)
                     _gap(6),
                     AlertBanner(glyph: b == 2 ? '⏰' : b == 1 ? '📅' : '✅', tone: b == 2 ? 2 : b == 1 ? 3 : 1, message: '👉 ${_StuData.action(s)}'),
                   ])),
@@ -1145,16 +1148,16 @@ class _MemberScreenState extends State<MemberScreen> {
           if (noData.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 6, runSpacing: 6, children: [for (final x in noData) StatusChip(label: '▫ ${x['label']}: אין נתון (מקום-שמור)', tone: 0)])),
           _gap(10),
           Row(children: [
-            BareStat(value: t30['dir'] == 'flat' ? '→' : '${t30['pct'] > 0 ? '+' : ''}${t30['pct']}%', label: 'מגמה-30 (נוכחות)', inkColor: t30['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
-            BareStat(value: t90['dir'] == 'flat' ? '→' : '${t90['pct'] > 0 ? '+' : ''}${t90['pct']}%', label: 'מגמה-90 (נוכחות)', inkColor: t90['dir'] == 'down' ? _danger : _ok, mutedColor: _muted),
-            BareStat(value: '${_StuData.presentsThisMonth(s)}/${_StuData.presentsThisMonth(s) + _StuData.absencesThisMonth(s)}', label: 'נוכחות-החודש', inkColor: _ink, mutedColor: _muted),
+            ForgeMetricTile(fields: ['מגמה-30 (נוכחות)', t30['dir'] == 'flat' ? '→' : '${t30['pct'] > 0 ? '+' : ''}${t30['pct']}%', '']),
+            ForgeMetricTile(fields: ['מגמה-90 (נוכחות)', t90['dir'] == 'flat' ? '→' : '${t90['pct'] > 0 ? '+' : ''}${t90['pct']}%', '']),
+            ForgeMetricTile(fields: ['נוכחות-החודש', '${_StuData.presentsThisMonth(s)}/${_StuData.presentsThisMonth(s) + _StuData.absencesThisMonth(s)}', '']),
           ]),
           _gap(10),
           // השוואת-שכבה (percentile): התפלגות-הסיכון בשכבה (supScoreBins ⇒ NeonBars) + אחוזון-התלמיד
           _h('השוואת-שכבה ${_StuData.level(s)} · ${_StuData.cohort(s).length} בני משפחה'),
           Row(children: [
-            BareStat(value: '${_StuData.percentile(s)}', label: 'אחוזון-סיכון בשכבה (גבוה=חמור)', inkColor: _StuData.percentile(s) >= 75 ? _danger : _ink, mutedColor: _muted),
-            BareStat(value: '${(grandTotal(_StuData.cohort(s), (o) => _StuData.risk(o as Map<String, dynamic>)) / (_StuData.cohort(s).isEmpty ? 1 : _StuData.cohort(s).length)).round()}', label: 'ממוצע-סיכון בשכבה', inkColor: _ink, mutedColor: _muted),
+            ForgeMetricTile(fields: ['אחוזון-סיכון בשכבה (גבוה=חמור)', '${_StuData.percentile(s)}', '']),
+            ForgeMetricTile(fields: ['ממוצע-סיכון בשכבה', '${(grandTotal(_StuData.cohort(s), (o) => _StuData.risk(o as Map<String, dynamic>)) / (_StuData.cohort(s).isEmpty ? 1 : _StuData.cohort(s).length)).round()}', '']),
           ]),
           if (_StuData.cohort(s).length >= 2) NeonBars(labels: const ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'], values: [for (final b in _StuData.cohortBins(s)) b.toDouble()], tone: 0),
           _gap(10),
@@ -1181,10 +1184,10 @@ class _MemberScreenState extends State<MemberScreen> {
         final abs = _StuData.absencesOf(s)..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
         return [
           Row(children: [
-            BareStat(value: '${_StuData.presents(s)}', label: 'נוכחויות', inkColor: _ok, mutedColor: _muted),
-            BareStat(value: '${_StuData.absences(s)}', label: 'חיסורים', inkColor: _StuData.absences(s) > 0 ? _warning : _ink, mutedColor: _muted),
-            BareStat(value: '${_StuData.noshow(s)}', label: 'אי-הופעות', inkColor: _StuData.noshow(s) > 0 ? _danger : _ink, mutedColor: _muted),
-            BareStat(value: _StuData.attendance(s) == null ? '—' : '${_StuData.attendancePct(s)}%', label: 'נוכחות%', inkColor: _acc, mutedColor: _muted),
+            ForgeMetricTile(fields: ['נוכחויות', '${_StuData.presents(s)}', '']),
+            ForgeMetricTile(fields: ['חיסורים', '${_StuData.absences(s)}', '']),
+            ForgeMetricTile(fields: ['אי-הופעות', '${_StuData.noshow(s)}', '']),
+            ForgeMetricTile(fields: ['נוכחות%', _StuData.attendance(s) == null ? '—' : '${_StuData.attendancePct(s)}%', '']),
           ]),
           _gap(10),
           _h('נוכחות חודשית (%)'),
@@ -1203,7 +1206,7 @@ class _MemberScreenState extends State<MemberScreen> {
       case 4: // התנהגות: מקום-שמור + הערות-התנהגות מהפנקס
         final bn = _StuData.notes(s).where((n) => n['kind'] == 'behavior').toList();
         return [
-          if (s['behavior'] is num) Row(children: [BareStat(value: '${s['behavior']}', label: 'אירועי-התנהגות בחודש', inkColor: _warning, mutedColor: _muted)]) else _slot('אירועי-התנהגות', 'מודול-משמעת ⇒ s.behavior'),
+          if (s['behavior'] is num) Row(children: [ForgeMetricTile(fields: ['אירועי-התנהגות בחודש', '${s['behavior']}', ''])]) else _slot('אירועי-התנהגות', 'מודול-משמעת ⇒ s.behavior'),
           _h('הערות-מחנך/ת לפי שנה״ל'),
           for (final e in _StuData.notesByYear(s).entries) ExpandableTile(title: '${e.key} · ${e.value.length}', body: e.value.map((n) => '${'${n['date']}'.isEmpty ? '' : '${_StuData.fmt('${n['date']}')} · '}${n['by']}: ${n['text']}').join('\n')),
           _h('הערות-התנהגות · ${bn.length}'),

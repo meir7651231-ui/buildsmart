@@ -1,0 +1,17 @@
+// 🔨 אטום-Dart מחושל (forge) · משפחת-Pure "selection" · מחולל ע"י machtzev/ds-forge.mjs ממקור-האמת
+// machtzev/pure/selection-family.html (אל תערוך ידנית — regen). לובש עיצוב מהחריץ בלבד (DsSeam.skinOf/of/fontsOf,
+// חוק-5/6): אפס צבע-קבוע. תוכן Label/Value/Meta.
+import 'package:flutter/material.dart';
+import '../../dart-ui-bs/ds/ds_seam.dart';
+
+/// AnimatedToggle — seam:state
+class ForgeAnimatedToggleSelection extends StatelessWidget {
+  const ForgeAnimatedToggleSelection({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
+    final theme = DsSeam.of(context);       // אקצנט (מורף)
+    final fonts = DsSeam.fontsOf(context);  // פונט
+    return Container(constraints: const BoxConstraints(minHeight: 130), padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(15)), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, spacing: 11, children: [Container(constraints: const BoxConstraints(minHeight: 44), child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 12, children: [Text.rich(TextSpan(children: [TextSpan(text: "Label", style: TextStyle(color: skin.ink, fontFamily: fonts.he, fontSize: 13)), TextSpan(text: "Meta", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10))])), Container(width: 46, height: 26, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: const SizedBox.shrink()), Positioned(top: 2, right: 2, width: 20, child: Container(width: 20, height: 20, decoration: BoxDecoration(color: const Color(0xFF0A0A0C), borderRadius: BorderRadius.circular(999), boxShadow: [BoxShadow(color: const Color(0x80000000), offset: const Offset(0, 2), blurRadius: 5, spreadRadius: 0)])))]))])), Container(constraints: const BoxConstraints(minHeight: 44), child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, spacing: 12, children: [Text.rich(TextSpan(children: [TextSpan(text: "Label", style: TextStyle(color: skin.faint, fontFamily: fonts.he, fontSize: 13)), TextSpan(text: "Meta · locked", style: TextStyle(color: skin.faint, fontFamily: fonts.grotesk, fontFamilyFallback: [fonts.he], fontSize: 10))])), Opacity(opacity: 0.42, child: Container(width: 46, height: 26, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.aHi, theme.a], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(999)), child: Stack(clipBehavior: Clip.none, children: [Positioned.fill(child: const SizedBox.shrink()), Positioned(top: 2, right: 2, width: 20, child: Container(width: 20, height: 20, decoration: BoxDecoration(color: const Color(0xFF0A0A0C), borderRadius: BorderRadius.circular(999), boxShadow: [BoxShadow(color: const Color(0x80000000), offset: const Offset(0, 2), blurRadius: 5, spreadRadius: 0)])))])))]))]));
+  }
+}
