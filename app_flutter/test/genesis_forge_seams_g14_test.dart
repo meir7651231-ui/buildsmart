@@ -2,6 +2,7 @@
 // הבאג: DsCalendar לא יכל להתחלף (בגלריה היה רק MiniCalendar דקורטיבי), ולבאנר/כפתור לא היו וריאנטי-טון ⇒ צבעי-המצב של ה-DS אבדו (5.9).
 import 'package:buildsmart/genesis/dart-forge-bs/action/tone_button.dart';
 import 'package:buildsmart/genesis/dart-forge-bs/feedback/tone_banner.dart';
+import 'package:buildsmart/genesis/dart-forge-bs/spatial/kanban_board.dart';
 import 'package:buildsmart/genesis/dart-forge-bs/temporal/event_calendar.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_calendar.dart';
 import 'package:flutter/material.dart';
@@ -54,5 +55,15 @@ void main() {
     await t.tap(find.text('שמור')); await t.pump();
     expect(taps, 1);
     expect(find.text('Action'), findsNothing);
+  });
+  testWidgets('KanbanBoard · עמודות כפריטים [שלב, מונה, ...כרטיסים] · הקשה על כרטיס ⇒ onCell(i,j) · הקשה-ארוכה ⇒ onCellLong', (t) async {
+    final taps = <String>[];
+    await t.pumpWidget(host(ForgeKanbanBoard(bare: true, items: const [['בריף', '2', 'אתר לעמותה', 'אפליקציה'], ['ביצוע', '1', 'לוגו'], ['מסירה', '0']], onCell: (i, j) => taps.add('tap $i/$j'), onCellLong: (i, j) => taps.add('long $i/$j'))));
+    expect(t.takeException(), isNull);
+    for (final s in ['בריף', 'ביצוע', 'מסירה', 'אתר לעמותה', 'לוגו', '2', '1', '0']) { expect(find.text(s), findsOneWidget, reason: s); }
+    expect(find.text('Label'), findsNothing);
+    await t.tap(find.text('אפליקציה')); await t.pump();
+    await t.longPress(find.text('לוגו')); await t.pump();
+    expect(taps, ['tap 0/1', 'long 1/0']);
   });
 }

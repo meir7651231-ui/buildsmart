@@ -1,5 +1,9 @@
-// 🎨 schoolos_teachers.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar · board=ForgeKanbanBoard
-//   החלפות: stat×0 · hero×1 · chipRow×3 · chip×8 · statRow×17 · button×17 · statusChip×12 · banner×12 · emptyState×12 · mediaRow×6 · section×2 · segmented×6 · meter×2 · frame×4 · timeline×4 · search×1 · table×2 · bars×2 · board×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎯 ShopAssignmentScreen — retarget של schoolos_teachers.dart לישות ShopAssignment (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_teachers.dart --entity ShopAssignment
+//   זרע-ראשי: roster (מועמדים: roster(22/23) courses(8/11) subsSeed(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 18 · חוזה-מנוע (לא משתנה) 0
+//   id⇒id(name) · status⇒status(name) · notes⇒notes(name) · name⇒∅(reserved) · role⇒∅(reserved) · subjects⇒redemptions(unique) · homeroom⇒∅(reserved) · contractHours⇒∅(reserved) · contractType⇒∅(reserved) · startDate⇒since(unique) · availability⇒∅(reserved) · constraints⇒∅(reserved) · preferredSub⇒∅(reserved(4 מועמדים)) · extraRoles⇒∅(reserved) · certs⇒∅(reserved) · issuer⇒∅(reserved) · expiry⇒∅(reserved) · attendance⇒∅(reserved) · absences⇒∅(reserved) · reason⇒∅(reserved) · date⇒∅(reserved) · inTs⇒∅(reserved) · contractEnd⇒∅(reserved)
+//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×17 (ב-Row, Expanded) · פנימיים: button×19 statusChip×14 banner×16 emptyState×12 mediaRow×6 · StatHero⇒ForgeStatPlain ×1 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
+//   תפר-עובדות (G9b): ShopAssignmentFacts · count=roster.length (static-const) · מדדים 6 · hero=absentN · שורות-מדד (G10a) openSubs/overN/underN/contractsN/certsN · תפר-כניסה initialPanel · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
+//   שדות-ShopAssignment בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): productId, famId, memberId, criterionIds · תוויות: מונחי teacher (מורה/—) ⇒ ShopAssignment (שיוך/—) · 11 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopAssignment
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-עומס · זיהוי-חריגה · הכרעה (מחליף-מוצע · דחיפות-מאוחדת) · ביצוע · אימות.
@@ -55,6 +59,7 @@ import '../dart-maor/csv-escape.dart'; // ייצוא: הגנת-תא
 import '../dart-maor/export-allowed.dart'; // ייצוא: שער-יציאת-מידע
 import '../dart-maor/absence-reason-chips.dart'; // סיבות-היעדרות (term-מוזרק)
 import '../dart-data-maor/absence-reason-chips-terms.dart'; // kTerms — שמות-הסיבות (אטום-דאטה)
+import 'gen_core_shopassignment.dart'; // G6c · הגרעין-מהסכמה של ShopAssignment (מצבים · מעבר · חוקים · ערוצים)
 import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
@@ -91,37 +96,37 @@ class _TeamData {
   static const underPct = 70; // סף תת-עומס: שעות < 70% מהחוזה
   static const frequentAbsences = 3; // דפוס: ≥3 היעדרויות ב-4 חודשים או מגמה עולה
 
-  // roster — זהות-תצוגה = שמות-דמו בדויים; בהצבה מוזרק roster אמיתי דרך TeachersScreen(roster:) (חוק-6).
+  // roster — זהות-תצוגה = שמות-דמו בדויים; בהצבה מוזרק roster אמיתי דרך ShopAssignmentScreen(roster:) (חוק-6).
   static const roster = <Map<String, dynamic>>[
-    {'id': 't1', 'name': 'יעל ברק', 'role': 'homeroom', 'subjects': ['מתמטיקה'], 'homeroom': ['י-1'], 'contractHours': 24, 'contractType': 'קבוע', 'startDate': '2014-09-01', 'status': 'active',
+    {'id': 't1', 'name': 'יעל ברק', 'role': 'homeroom', 'redemptions': ['מתמטיקה'], 'homeroom': ['י-1'], 'contractHours': 24, 'contractType': 'קבוע', 'since': '2014-09-01', 'status': 'active',
       'availability': {0: ['08:00', '15:00'], 1: ['08:00', '15:00'], 2: ['08:00', '15:00'], 3: ['08:00', '15:00'], 4: ['08:00', '13:00']}, 'constraints': ['לא-בשישי'], 'preferredSub': 't7', 'extraRoles': ['ריכוז-שכבה י׳'],
       'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2030-06-30'}, {'name': 'עזרה-ראשונה', 'issuer': 'מד״א', 'expiry': '2026-09-20'}],
       'attendance': <Map<String, dynamic>>[], 'absences': [{'date': '2026-09-03', 'reason': 'mchlh'}, {'date': '2026-05-12', 'reason': 'ayrva-mshpchty'}], 'notes': 'מועמדת לריכוז-פדגוגי בתשפ״ז'},
-    {'id': 't2', 'name': 'דוד כהן', 'role': 'subject', 'subjects': ['מתמטיקה', 'פיזיקה'], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'קבוע', 'startDate': '2019-09-01', 'status': 'active',
+    {'id': 't2', 'name': 'דוד כהן', 'role': 'subject', 'redemptions': ['מתמטיקה', 'פיזיקה'], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'קבוע', 'since': '2019-09-01', 'status': 'active',
       'availability': {0: ['08:00', '16:00'], 1: ['08:00', '16:00'], 2: ['08:00', '16:00'], 3: ['08:00', '16:00'], 4: ['08:00', '16:00']}, 'constraints': <String>[], 'preferredSub': 't7', 'extraRoles': <String>[],
       'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2029-08-31'}],
       'attendance': [{'date': '2026-09-03', 'inTs': '07:41'}], 'absences': [{'date': '2026-09-01', 'reason': 'mchlh'}, {'date': '2026-08-25', 'reason': 'mchlh'}, {'date': '2026-08-18', 'reason': 'nsyah'}, {'date': '2026-07-02', 'reason': 'mchlh'}, {'date': '2026-06-10', 'reason': 'shmchh'}], 'notes': ''},
-    {'id': 't3', 'name': 'נועה לוי', 'role': 'subject', 'subjects': ['אנגלית'], 'homeroom': <String>[], 'contractHours': 18, 'contractType': 'זמני', 'contractEnd': '2026-09-25', 'startDate': '2025-09-01', 'status': 'active',
+    {'id': 't3', 'name': 'נועה לוי', 'role': 'subject', 'redemptions': ['אנגלית'], 'homeroom': <String>[], 'contractHours': 18, 'contractType': 'זמני', 'contractEnd': '2026-09-25', 'since': '2025-09-01', 'status': 'active',
       'availability': {0: ['08:00', '14:00'], 2: ['08:00', '14:00'], 4: ['08:00', '14:00']}, 'constraints': ['לא-בשני-ורביעי'], 'extraRoles': <String>[],
       'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2031-06-30'}],
       'attendance': [{'date': '2026-09-03', 'inTs': '07:55'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
-    {'id': 't4', 'name': 'אמיר חדד', 'role': 'aide', 'subjects': ['סיוע-לימודי'], 'homeroom': <String>[], 'contractHours': 30, 'contractType': 'קבוע', 'startDate': '2021-09-01', 'status': 'active',
+    {'id': 't4', 'name': 'אמיר חדד', 'role': 'aide', 'redemptions': ['סיוע-לימודי'], 'homeroom': <String>[], 'contractHours': 30, 'contractType': 'קבוע', 'since': '2021-09-01', 'status': 'active',
       'availability': {0: ['08:00', '15:00'], 1: ['08:00', '15:00'], 2: ['08:00', '15:00'], 3: ['08:00', '15:00'], 4: ['08:00', '15:00']}, 'constraints': <String>[], 'extraRoles': <String>[],
       'certs': [{'name': 'סייע-פדגוגי', 'issuer': 'משרד החינוך', 'expiry': '2026-05-01'}],
       'attendance': [{'date': '2026-09-03', 'inTs': '07:50'}], 'absences': [{'date': '2026-08-30', 'reason': 'mzg-avvyr'}], 'notes': ''},
-    {'id': 't5', 'name': 'רות אזולאי', 'role': 'homeroom', 'subjects': ['היסטוריה', 'אזרחות'], 'homeroom': ['ט-2'], 'contractHours': 22, 'contractType': 'קבוע', 'startDate': '2010-09-01', 'status': 'active',
+    {'id': 't5', 'name': 'רות אזולאי', 'role': 'homeroom', 'redemptions': ['היסטוריה', 'אזרחות'], 'homeroom': ['ט-2'], 'contractHours': 22, 'contractType': 'קבוע', 'since': '2010-09-01', 'status': 'active',
       'availability': {0: ['08:00', '15:00'], 1: ['08:00', '15:00'], 2: ['08:00', '15:00'], 3: ['08:00', '15:00'], 4: ['08:00', '15:00']}, 'constraints': <String>[], 'preferredSub': 't1', 'extraRoles': ['יועצת'],
       'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2028-06-30'}, {'name': 'ייעוץ-חינוכי', 'issuer': 'אונ׳ ת״א', 'expiry': '2027-12-31'}],
       'attendance': [{'date': '2026-09-03', 'inTs': '07:38'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
-    {'id': 't6', 'name': 'מיכל שרון', 'role': 'subject', 'subjects': ['אנגלית'], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'קבוע', 'startDate': '2017-09-01', 'status': 'leave',
+    {'id': 't6', 'name': 'מיכל שרון', 'role': 'subject', 'redemptions': ['אנגלית'], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'קבוע', 'since': '2017-09-01', 'status': 'leave',
       'availability': <int, List<String>>{}, 'constraints': <String>[], 'extraRoles': <String>[],
       'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2029-06-30'}],
       'attendance': <Map<String, dynamic>>[], 'absences': <Map<String, dynamic>>[], 'notes': 'חופשת-לידה עד 2027-01'},
-    {'id': 't7', 'name': 'יוסי מזרחי', 'role': 'mgmt', 'subjects': ['מתמטיקה'], 'homeroom': <String>[], 'contractHours': 8, 'contractType': 'קבוע', 'startDate': '2008-09-01', 'status': 'active',
+    {'id': 't7', 'name': 'יוסי מזרחי', 'role': 'mgmt', 'redemptions': ['מתמטיקה'], 'homeroom': <String>[], 'contractHours': 8, 'contractType': 'קבוע', 'since': '2008-09-01', 'status': 'active',
       'availability': {0: ['07:30', '16:00'], 1: ['07:30', '16:00'], 2: ['07:30', '16:00'], 3: ['07:30', '16:00'], 4: ['07:30', '16:00']}, 'constraints': <String>[], 'extraRoles': ['סגן-מנהל'],
       'certs': [{'name': 'תעודת-הוראה', 'issuer': 'משרד החינוך', 'expiry': '2027-06-30'}, {'name': 'ניהול-חינוכי', 'issuer': 'אבני-ראשה', 'expiry': '2026-10-01'}],
       'attendance': [{'date': '2026-09-03', 'inTs': '07:20'}], 'absences': <Map<String, dynamic>>[], 'notes': ''},
-    {'id': 't8', 'name': 'שרה פרץ', 'role': 'subject', 'subjects': ['ביולוגיה'], 'homeroom': <String>[], 'contractHours': 16, 'contractType': 'שעתי', 'startDate': '2020-09-01', 'status': 'left',
+    {'id': 't8', 'name': 'שרה פרץ', 'role': 'subject', 'redemptions': ['ביולוגיה'], 'homeroom': <String>[], 'contractHours': 16, 'contractType': 'שעתי', 'since': '2020-09-01', 'status': 'left',
       'availability': <int, List<String>>{}, 'constraints': <String>[], 'extraRoles': <String>[],
       'certs': <Map<String, dynamic>>[], 'attendance': <Map<String, dynamic>>[], 'absences': <Map<String, dynamic>>[], 'notes': 'סיימה 2026-06-30'},
   ];
@@ -170,7 +175,7 @@ class _TeamData {
   static String nameOf(String? id) => id == null ? '—' : (byId(id)?['name'] as String? ?? id);
   static const roleLabel = {'homeroom': 'מחנך/ת', 'subject': 'מקצועי/ת', 'aide': 'סייע/ת', 'mgmt': 'הנהלה'};
   static const statusLabel = {'active': 'פעיל', 'leave': 'חופשה', 'unpaid': 'חל״ת', 'left': 'עזב/ה'};
-  static List<String> subjects(Map<String, dynamic> t) => [...(t['subjects'] as List).cast<String>(), ...extraSubjects[t['id']] ?? const []];
+  static List<String> subjects(Map<String, dynamic> t) => [...(t['redemptions'] as List).cast<String>(), ...extraSubjects[t['id']] ?? const []];
   static bool isActive(Map<String, dynamic> t) => statusOf(t) == 'active';
   static bool isGone(Map<String, dynamic> t) => statusOf(t) == 'left';
   static int weekdayOf(String iso) => DateTime.parse('${iso}T12:00:00').weekday % 7; // JS getDay: 0=ראשון
@@ -227,7 +232,7 @@ class _TeamData {
   static num? contractDays(Map<String, dynamic> t) => t['contractEnd'] == null ? null : -dayDiff(t['contractEnd'] as String, today);
   static bool contractEndsMonth(Map<String, dynamic> t) => t['contractEnd'] != null && presentsInMonth([t['contractEnd']], today) > 0;
   static bool contractExpired(Map<String, dynamic> t) => (contractDays(t) ?? 1) < 0;
-  static int? tenure(Map<String, dynamic> t) => ageOf(t['startDate'] as String?, _now); // ותק בשנים (ageOf מהמדף)
+  static int? tenure(Map<String, dynamic> t) => ageOf(t['since'] as String?, _now); // ותק בשנים (ageOf מהמדף)
 
   // ─── שיעורים-ללא-מורה היום + לוח-החלפות (זיהוי-חריגה ⇒ הכרעה ⇒ ביצוע) ───
   static final List<Map<String, dynamic>> subs = [...subsSeed.map((s) => Map<String, dynamic>.from(s))];
@@ -261,6 +266,7 @@ class _TeamData {
   static List<Map<String, dynamic>> get todaySubs => subs.where((s) => s['date'] == today).toList()..sort((a, b) => '${a['time'] ?? ''}'.compareTo('${b['time'] ?? ''}'));
   static List<Map<String, dynamic>> get uncoveredToday => todaySubs.where((s) => (s['stage'] as int) < 2).toList();
   static int get openSubs => subs.where((s) => (s['stage'] as int) < 2).length;
+  static List<Map<String, dynamic>> get rowsOf_openSubs => subs.where((s) => (s['stage'] as int) < 2).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד openSubs (מהצורה של ה-getter, לא מילון)
   static bool subOverdue(Map<String, dynamic> s) => taskOverdue({'due': s['date'], 'doneAt': (s['stage'] as int) == 2 ? s['date'] : null}, today); // מדף
   static int subsDone(Map<String, dynamic> t) => subs.where((s) => s['subId'] == t['id'] && s['stage'] == 2).length;
   static int subsReceived(Map<String, dynamic> t) => subs.where((s) => s['absentId'] == t['id'] && s['stage'] == 2).length;
@@ -318,9 +324,13 @@ class _TeamData {
   static int get absentN => active.where(absentToday).length + everyone.where((t) => statusOf(t) == 'leave' || statusOf(t) == 'unpaid').length;
   static double get avgHours => active.isEmpty ? 0 : grandTotal(active, (t) => hoursWeek(t as Map<String, dynamic>)) / active.length;
   static int get overN => active.where(overLoad).length;
+  static List<Map<String, dynamic>> get rowsOf_overN => active.where(overLoad).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד overN (מהצורה של ה-getter, לא מילון)
   static int get underN => active.where(underLoad).length;
+  static List<Map<String, dynamic>> get rowsOf_underN => active.where(underLoad).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד underN (מהצורה של ה-getter, לא מילון)
   static int get contractsN => staff.where(contractEndsMonth).length;
+  static List<Map<String, dynamic>> get rowsOf_contractsN => staff.where(contractEndsMonth).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד contractsN (מהצורה של ה-getter, לא מילון)
   static int get certsN => active.where(certMissing).length;
+  static List<Map<String, dynamic>> get rowsOf_certsN => active.where(certMissing).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד certsN (מהצורה של ה-getter, לא מילון)
   static List<List<Object>> get byRole => countBy(staff, (t) => roleLabel[roleOf_(t as Map<String, dynamic>)] ?? roleOf_(t)); // מדף
 
   // ═══ איתור (הכרעה 23-ג) = DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch — לא `.contains` שטוח ═══
@@ -366,6 +376,10 @@ class _TeamData {
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשרשומה נושאת ערך, חסר ⇒ שקט. photo/contact/classAttendance/updatedAt
   //   אין להם מקור-אמת/מוזרקים-בהצבה (חוק-6) ⇒ מקום-שמור: הזרקת-שדה ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של ShopAssignment (G5h · חוק-7): 3 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'productId', 'label': 'productId'}, // G5h · מקום-שמור: שדה-ShopAssignment מהסכמה (Id) — מאיר כשהנתון מוזרם
+    {'key': 'famId', 'label': 'famId'}, // G5h · מקום-שמור: שדה-ShopAssignment מהסכמה (Id) — מאיר כשהנתון מוזרם
+    {'key': 'memberId', 'label': 'memberId'}, // G5h · מקום-שמור: שדה-ShopAssignment מהסכמה (Id | '') — מאיר כשהנתון מוזרם
     {'key': 'photo', 'label': 'תמונה'},                                                                  // מקום-שמור (WorkerCert.photo)
     {'label': 'שם', 'get': (Map<String, dynamic> t) => '${t['name']}'},
     {'label': 'תפקיד', 'get': (Map<String, dynamic> t) => roleLabel[roleOf_(t)] ?? roleOf_(t)},
@@ -388,7 +402,7 @@ class _TeamData {
   static const metaFields = <Map<String, String>>[
     {'key': 'contractType', 'prefix': '📄 חוזה ', 'suffix': ''},
     {'key': 'contractEnd', 'prefix': '⏳ סיום ', 'suffix': ''},
-    {'key': 'startDate', 'prefix': '🗓 מ-', 'suffix': ''},
+    {'key': 'since', 'prefix': '🗓 מ-', 'suffix': ''},
     {'key': 'preferredSub', 'prefix': '⭐ מחליף-מועדף: ', 'suffix': ''},
     {'key': 'photo', 'prefix': '🖼 ', 'suffix': ''},            // מקום-שמור
     {'key': 'contact', 'prefix': '📞 ', 'suffix': ''},          // מקום-שמור · חוק-6
@@ -417,7 +431,7 @@ class _TeamData {
   static List<Map<String, dynamic>> alerts(int role) {
     final out = <Map<String, dynamic>>[];
     final unc = uncoveredToday;
-    if (unc.isNotEmpty) out.add({'g': '🚨', 'tone': 2, 'm': '${unc.length} שיעורים ללא מורה היום: ${unc.map((s) => '${s['time']} ${courseById(s['courseId'] as String)?['cls']}').join(' · ')} — ${unc.where((s) => candidates(s).isNotEmpty).length} עם מחליף-מוצע'});
+    if (unc.isNotEmpty) out.add({'g': '🚨', 'tone': 2, 'm': '${unc.length} שיעורים ללא שיוך היום: ${unc.map((s) => '${s['time']} ${courseById(s['courseId'] as String)?['cls']}').join(' · ')} — ${unc.where((s) => candidates(s).isNotEmpty).length} עם מחליף-מוצע'});
     final over = active.where(overLoad).toList();
     if (over.isNotEmpty) out.add({'g': '🔥', 'tone': 3, 'm': 'עומס-יתר: ${over.map((t) => '${t['name']} ${loadPct(t)}%').join(' · ')}'});
     final under = active.where(underLoad).toList();
@@ -471,7 +485,7 @@ class _TeamData {
     {'label': '👑 מנהל/ת', 'principal': 'p:mgr', 'config': {'adminEmails': ['p:mgr']}},
     {'label': '🧭 רכז/ת', 'principal': 'p:coord', 'config': {'features': {'team.assign': true, 'team.sub': true, 'team.avail': true, 'team.absence': true, 'team.export': true}}},
     {'label': '🗂 מזכירות', 'principal': 'p:sec', 'config': {'features': {'team.add': true, 'team.docs': true, 'team.absence': true, 'team.export': true, 'team.contact': true}}},
-    {'label': '👩‍🏫 מורה', 'principal': 'p:t2', 'config': {'roles': {'teachers': {'p:t2': 't2'}}, 'features': {'team.absence': true, 'team.avail': true, 'team.cert': true}}},
+    {'label': '👩‍🏫 שיוך', 'principal': 'p:t2', 'config': {'roles': {'teachers': {'p:t2': 't2'}}, 'features': {'team.absence': true, 'team.avail': true, 'team.cert': true}}},
     {'label': '💰 כספים', 'principal': 'p:fin', 'config': {'features': {'team.salary': true, 'team.contract': true, 'team.export': true}}},
     {'label': '👁 צפייה', 'principal': 'p:view', 'config': <String, dynamic>{}},
   ];
@@ -562,9 +576,9 @@ class _TeamData {
   static int _seq = 0;
   static void addTeacher(String who) { // מורה-חדש: רשומה בצורת-החוזה; זהות = מקום-שמור להזרקה (חוק-6)
     _seq++;
-    added.add({'id': 'n$_seq', 'name': 'מורה חדש/ה $_seq', 'role': 'subject', 'subjects': <String>[], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'זמני', 'startDate': today, 'status': 'active',
+    added.add({'id': 'n$_seq', 'name': 'שיוך חדש/ה $_seq', 'role': 'subject', 'redemptions': <String>[], 'homeroom': <String>[], 'contractHours': 20, 'contractType': 'זמני', 'since': today, 'status': 'active',
       'availability': <int, List<String>>{}, 'constraints': <String>[], 'extraRoles': <String>[], 'certs': <Map<String, dynamic>>[], 'attendance': <Map<String, dynamic>>[], 'absences': <Map<String, dynamic>>[], 'notes': ''});
-    log(who, 'מורה-חדש (ממתין לפרטים)', 'n$_seq');
+    log(who, 'שיוך-חדש (ממתין לפרטים)', 'n$_seq');
   }
   static void markAbsent(Map<String, dynamic> t, String reason, String who) {
     if (absentOn(t, today)) return;
@@ -591,16 +605,19 @@ class _TeamData {
 }
 
 // ═══════════ המסך · מחלקה ציבורית יחידה (const · ללא main) ═══════════
-class TeachersScreen extends StatefulWidget {
-  const TeachersScreen({super.key, this.initialMode = 0, this.initialPanel, this.initialTab = 0}); // שקעי-הזרקה לתצוגה-מקדימה/בדיקה: מבט · כרטיס-פתוח · טאב
+class ShopAssignmentScreen extends StatefulWidget {
+  const ShopAssignmentScreen({this.initialMetric, super.key, this.initialMode = 0, this.initialPanel, this.initialTab = 0}); // שקעי-הזרקה לתצוגה-מקדימה/בדיקה: מבט · כרטיס-פתוח · טאב
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (ShopAssignmentFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
   final int initialMode;
   final String? initialPanel; // מזהה-מורה שכרטיסו נפתח אחרי הפריים-הראשון
   final int initialTab;
   @override
-  State<TeachersScreen> createState() => _TeachersScreenState();
+  State<ShopAssignmentScreen> createState() => _ShopAssignmentScreenState();
 }
 
-class _TeachersScreenState extends State<TeachersScreen> {
+  String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
+class _ShopAssignmentScreenState extends State<ShopAssignmentScreen> {
+  final Map<String, String> _coreState = {}; // G6d · פנקס-מצבי-הגרעין לפי id — overlay על הזרע (הזרע const; אין כתיבה אליו)
   int _sort = 0; // 0=⚖️ עומס · 1=🤒 חיסורים · 2=🏫 כיתות
   final Map<String, int> _tab = {}; // טאב-נבחר פר-מורה (חיווט SegmentedSwitch→תצוגה)
   static const _tabNames = ['סקירה', 'מערכת', 'כיתות', 'היעדרויות', 'החלפות', 'ביצועים', 'הכשרות', 'מסמכים', 'אודיט'];
@@ -615,6 +632,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
   @override
   void initState() {
     super.initState();
+    _metric = widget.initialMetric != null && ShopAssignmentFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
     _mode = widget.initialMode;
     _TeamData.syncUncovered();
     final p = widget.initialPanel == null ? null : _TeamData.byId(widget.initialPanel!);
@@ -640,19 +658,28 @@ class _TeachersScreenState extends State<TeachersScreen> {
       }
     });
     // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches — פייפליין אחד לטריאז'/טבלה/ייצוא
-    final visible = _TeamData.filter(_TeamData.search(ranked, _q), _locks);
+    final visibleAll = _TeamData.filter(_TeamData.search(ranked, _q), _locks);
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => ShopAssignmentFacts.heroRows(_metric!).any((h) => '${h[ShopAssignmentFacts.idKey] ?? h['id']}' == '${r[ShopAssignmentFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-דחיפות-מאוחדת (sev)
     final buckets = <int, List<Map<String, dynamic>>>{3: [], 2: [], 1: [], 0: [], -1: []};
     for (final t in visible) {
       buckets[_TeamData.sev(t)]!.add(t);
     }
-    const secTitle = {3: '🔴 שיעור-ללא-מורה היום', 2: '🟠 דורש-טיפול', 1: '🟡 לתשומת-לב', 0: '🟢 תקין', -1: '⏸ לא-פעיל/חופשה'};
+    const secTitle = {3: '🔴 שיעור-ללא-שיוך היום', 2: '🟠 דורש-טיפול', 1: '🟡 לתשומת-לב', 0: '🟢 תקין', -1: '⏸ לא-פעיל/חופשה'};
     const secTone = {3: 2, 2: 3, 1: 3, 0: 1, -1: 0};
     return DsScaffold(
       title: 'מורים וצוות',
       subtitle: '${_TeamData.staff.length} אנשי-צוות · ${_TeamData.byRole.map((r) => '${r[0]} ${r[1]}').join(' · ')}',
       icon: '👩‍🏫',
       children: [
+        // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
+        if (_metric != null) ForgeToneBanner(items: [['מסונן למדד: ${ShopAssignmentFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}']], variants: const <int>[1]),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeToneButton(items: [['✖ בטל סינון-מדד']], variants: const <int>[3]))),
+        // ═══ הגרעין-מהסכמה (G6c): ShopAssignmentCore — מצבים חצובים ⊕ מעבר מאטום-המדף ⊕ חוקים/ערוצים — לא מומצא, לא מצויר-ביד ═══
+        ForgeTitledSection(fields: ['🧠 מחזור-חיים · ${ShopAssignmentCore.term} (גרעין)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+          Wrap(spacing: 6, runSpacing: 6, children: [for (final s in ShopAssignmentCore.states) ForgeStatusChip(items: [[s]], variants: [const <int>[0, 1, 3, 2][(s == ShopAssignmentCore.states.first ? 1 : 0) % 4]])]),
+          ForgeToneBanner(items: [['הבא אחרי ${ShopAssignmentCore.states.first}: ${ShopAssignmentCore.next(ShopAssignmentCore.states.first) ?? 'סופי'} · ${ShopAssignmentCore.rules.length} חוקים · ${ShopAssignmentCore.channels.length} ערוצים · ${ShopAssignmentCore.relations.length} יחסים']], variants: const <int>[0]),
+        ]])),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — roleOf⊕teacherIdOf⊕canGrantedAction מגדרים פעולות/עמודות/רשומות
         //   6 תפקידים ב-2 שורות של SegmentedSwitch (Row-מבוקר; 6 פריטים גולשים ברוחב-המסך — נתפס בבדיקת-widget)
         for (var r = 0; r < 2; r++) ...[
@@ -662,13 +689,13 @@ class _TeachersScreenState extends State<TeachersScreen> {
         _gap(4),
         // KPI-10: hero=שיעורים-ללא-מורה-היום (המטרה) + 10 מדדי-מצב (BareStat נושאי-ערך-אמת)
         ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['שיעורים ללא מורה היום', '$uncovered'])),
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['שיעורים ללא שיוך היום', '$uncovered'])),
             const SizedBox(height: 14),
             Row(children: [
               Expanded(child: ForgeStatPlain(fields: ['👥 סך-צוות', '${_TeamData.staff.length}'])),
               Expanded(child: ForgeStatPlain(fields: ['✅ פעילים', '${all.length}'])),
               Expanded(child: ForgeStatPlain(fields: ['🤒 נעדרים היום', '${_TeamData.absentN}'])),
-              Expanded(child: ForgeStatPlain(fields: ['🚨 ללא-מורה', '$uncovered'])),
+              Expanded(child: ForgeStatPlain(fields: ['🚨 ללא-שיוך', '$uncovered'])),
               Expanded(child: ForgeStatPlain(fields: ['🔁 החלפות פתוחות', '${_TeamData.openSubs}'])),
             ]),
             const SizedBox(height: 12),
@@ -689,7 +716,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
           Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0]))),
-          if (_TeamData.can(_role, 'team.add')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _TeamData.addTeacher(_who)), child: ForgeToneButton(items: [['➕ מורה']], variants: const <int>[0])))],
+          if (_TeamData.can(_role, 'team.add')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _TeamData.addTeacher(_who)), child: ForgeToneButton(items: [['➕ שיוך']], variants: const <int>[0])))],
           const SizedBox(width: 6),
           Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _mode = 2), child: ForgeToneButton(items: [['🔁 היום']], variants: [const <int>[0, 1, 3, 2][(_TeamData.uncoveredToday.isEmpty ? 0 : 2) % 4]]))),
           if (_TeamData.can(_role, 'team.export') && exportAllowed(false)) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport('רשימת-צוות · ${visible.length}', _TeamData.rosterCsv(visible, _TeamData.hiddenKeys(_role))), child: ForgeToneButton(items: [['⬇ CSV']], variants: const <int>[0])))],
@@ -723,7 +750,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
         else if (_error != null)
           ForgeToneBanner(items: [[_error!]], variants: const <int>[3])
         else if (_TeamData.staff.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין צוות — הוסף מורה ראשון/ה', '']))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין צוות — הוסף שיוך ראשון/ה', '']))
         else if (_mode == 2)
           _subsBoard()
         else if (visible.isEmpty)
@@ -787,6 +814,17 @@ class _TeachersScreenState extends State<TeachersScreen> {
             builder: (ctx, scroll) => Padding(
               padding: const EdgeInsets.all(12),
               child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
+                  // ═══ הגרעין על הרשומה (G6d): מצב-הרשומה ⊕ ShopAssignmentCore.next ⊕ פנקס-overlay — מצב שאינו במחזור-החיים החצוב מדווח כפער, לא מתוקן בשקט ═══
+                  Builder(builder: (_) {
+                    final cur = _coreState['${t['id']}'] ?? '${t['status'] ?? ShopAssignmentCore.states.first}';
+                    if (!ShopAssignmentCore.states.contains(cur)) return ForgeToneBanner(items: [['מצב הרשומה "$cur" אינו במחזור-החיים החצוב (${ShopAssignmentCore.states.join('→')}) — פער זרע/סכמה, מקום-שמור']], variants: const <int>[2]);
+                    final nx = ShopAssignmentCore.next(cur);
+                    return ForgeTitledSection(fields: ['🧠 מחזור-חיים · רשומה (גרעין)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+                      Wrap(spacing: 6, runSpacing: 6, children: [for (final st in ShopAssignmentCore.states) ForgeStatusChip(items: [[st]], variants: [const <int>[0, 1, 3, 2][(st == cur ? 1 : 0) % 4]])]),
+                      ForgeToneBanner(items: [[nx == null ? 'מצב-סופי: $cur' : 'הבא אחרי $cur: $nx']], variants: const <int>[0]),
+                      GestureDetector(behavior: HitTestBehavior.opaque, onTap: nx == null ? null : () => act(() => _coreState['${t['id']}'] = nx), child: ForgeToneButton(items: [[nx == null ? 'אין מעבר' : 'קדם מצב ⇒ $nx']])),
+                    ]]));
+                  }),
                   Row(children: [
                     PremiumAvatar(name: t['name'] as String, size: 56, status: _TeamData.absentToday(t) ? AvatarStatus.busy : _TeamData.presentToday(t) ? AvatarStatus.online : AvatarStatus.none),
                     const SizedBox(width: 10),
@@ -972,7 +1010,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
   // אודיט: כל פעולה שנרשמה בפנקס (מי·מה·מתי) — TimelineItem
   Widget _audit(Map<String, dynamic> t) {
     final rows = _TeamData.audit.where((a) => a['target'] == t['name'] || '${a['target']}'.contains('${t['name']}')).toList();
-    if (rows.isEmpty) return ForgeSearchEmptyState(fields: ['אין רישומי-אודיט למורה זה', '']);
+    if (rows.isEmpty) return ForgeSearchEmptyState(fields: ['אין רישומי-אודיט לשיוך זה', '']);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in rows) ForgeNotifRow(items: [['${a['what']}', fmtDate(a['date'] as String)]])]);
   }
 
@@ -1107,7 +1145,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
             PremiumAvatar(name: t['name'] as String, size: 44, status: avatarStatus),
             const SizedBox(width: 10),
             // MediaRow בולע את הקליק (InkWell פנימי no-op) ⇒ כפתור-שברון נפרד כשקע-הפתיחה
-            IconButton(onPressed: () => _openPanel(t), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-מורה ופעולות'),
+            IconButton(onPressed: () => _openPanel(t), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'כרטיס-שיוך ופעולות'),
             Expanded(
               child: ForgeContactTile(fields: ['${t['name']} · ${_TeamData.roleLabel[t['role']]}', '${_TeamData.subjects(t).join(' · ')}${(t['homeroom'] as List).isNotEmpty ? ' · מחנך/ת ${(t['homeroom'] as List).join(',')}' : ''} · ${_TeamData.coursesOf(t).length} חוגים']),
             ),
@@ -1124,4 +1162,21 @@ class _TeachersScreenState extends State<TeachersScreen> {
         ])),
     );
   }
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): ShopAssignmentFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class ShopAssignmentFacts {
+  static const String entity = 'ShopAssignment';
+  static const String label = 'שיוך'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _TeamData.roster.length; // רשומות הזרע-הראשי "roster" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'absentN', 'label': '🤒 נעדרים היום', 'tone': 'danger'}, {'key': 'openSubs', 'label': '🔁 החלפות פתוחות', 'tone': 'plain'}, {'key': 'overN', 'label': '🔥 עמוסים-מדי', 'tone': 'danger'}, {'key': 'underN', 'label': '🪫 בתת-עומס', 'tone': 'plain'}, {'key': 'contractsN', 'label': '📄 חוזים פגים החודש', 'tone': 'plain'}, {'key': 'certsN', 'label': '🎓 הכשרות חסרות', 'tone': 'danger'}]; // 6 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
+  static Map<String, String> get metrics => <String, String>{'absentN': '${_TeamData.absentN}', 'openSubs': '${_TeamData.openSubs}', 'overN': '${_TeamData.overN}', 'underN': '${_TeamData.underN}', 'contractsN': '${_TeamData.contractsN}', 'certsN': '${_TeamData.certsN}'};
+  static const String heroKey = 'absentN'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => '🤒 נעדרים היום';
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => _TeamData.roster; // כל רשומות הזרע-הראשי (static-const)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['openSubs', 'overN', 'underN', 'contractsN', 'certsN']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'openSubs': return _TeamData.rowsOf_openSubs; case 'overN': return _TeamData.rowsOf_overN; case 'underN': return _TeamData.rowsOf_underN; case 'contractsN': return _TeamData.rowsOf_contractsN; case 'certsN': return _TeamData.rowsOf_certsN; default: return const []; } } // G10a · 5 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

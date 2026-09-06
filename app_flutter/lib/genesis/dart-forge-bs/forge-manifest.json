@@ -13,12 +13,12 @@
     "motion": 8,
     "nav": 12,
     "selection": 26,
-    "spatial": 7,
+    "spatial": 8,
     "status": 27,
     "temporal": 8,
     "text": 16
   },
-  "total": 358,
+  "total": 359,
   "generatedBy": "machtzev/ds-forge.mjs",
   "renamed": [
     {
@@ -400,7 +400,7 @@
       "cls": "Forge7AtomsText"
     }
   ],
-  "uniqueNames": 304,
+  "uniqueNames": 305,
   "atoms": [
     {
       "family": "action",
@@ -8005,6 +8005,43 @@
     },
     {
       "family": "spatial",
+      "cls": "ForgeKanbanBoard",
+      "file": "kanban_board.dart",
+      "seam": "collection",
+      "states": false,
+      "stateIds": null,
+      "fieldSlots": 12,
+      "fieldDemo": [
+        "Label",
+        "3",
+        "Label",
+        "Label",
+        "Label",
+        "Label",
+        "2",
+        "Label",
+        "Label",
+        "Label",
+        "1",
+        "Label"
+      ],
+      "child": true,
+      "bare": true,
+      "control": false,
+      "actions": 0,
+      "items": {
+        "slots": 5,
+        "demo": 3,
+        "selectable": false,
+        "selected": false,
+        "cells": 3,
+        "variants": null
+      },
+      "columns": 0,
+      "values": 0
+    },
+    {
+      "family": "spatial",
       "cls": "ForgeSortHeaderStates",
       "file": "sort_header_states.dart",
       "seam": "fields",
@@ -8510,7 +8547,7 @@
         "demo": 4,
         "selectable": false,
         "selected": false,
-        "cells": 0,
+        "cells": 4,
         "variants": [
           "tone-ok",
           "tone-warn",
