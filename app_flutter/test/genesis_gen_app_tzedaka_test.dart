@@ -1,14 +1,15 @@
 // מחולל ע"י machtzev/generator/app-from-sentences.mjs — בדיקת-ניווט של TzedakaApp: בית ⇒ כל מודול מרונדר וחוזר, אפס-חריגות
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_tzedaka.dart';
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzbox_from_tch.dart' show TzBoxScreen, TzBoxFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzcampaign_from_crs.dart' show TzCampaignScreen, TzCampaignFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopproduct_from_rm.dart' show ShopProductScreen, ShopProductFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopstore_from_stu.dart' show ShopStoreScreen, ShopStoreFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_teacher_from_stu.dart' show TeacherScreen, TeacherFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_enrollment_from_fee.dart' show EnrollmentScreen, EnrollmentFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_supporter_from_fee.dart' show SupporterScreen, SupporterFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzbox_from_tch_sk1fce5c.dart' show TzBoxScreen, TzBoxFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzcampaign_from_crs_sk1fce5c.dart' show TzCampaignScreen, TzCampaignFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopproduct_from_rm_sk1fce5c.dart' show ShopProductScreen, ShopProductFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopstore_from_stu_sk1fce5c.dart' show ShopStoreScreen, ShopStoreFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_teacher_from_stu_sk1fce5c.dart' show TeacherScreen, TeacherFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_enrollment_from_fee_sk1fce5c.dart' show EnrollmentScreen, EnrollmentFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_supporter_from_fee_sk1fce5c.dart' show SupporterScreen, SupporterFacts;
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/premium/feedback/empty_state.dart';
+import 'package:buildsmart/genesis/dart-forge-bs/card/card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,7 +17,7 @@ void main() {
   testWidgets('TzedakaApp · בית: 7 אריחים', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DsNavTile), findsNWidgets(7)); expect(tester.takeException(), isNull);
+    expect(find.byType(ForgeHubTile), findsNWidgets(7)); expect(tester.takeException(), isNull);
     expect(find.text('7/7'), findsWidgets); // KPI מסכים-מחוברים = עובדה (נראים/כולם)
     expect(TzBoxFacts.metricDefs.length, TzBoxFacts.metrics.length); expect(TzBoxFacts.heroKey == 'count' || TzBoxFacts.metrics.containsKey(TzBoxFacts.heroKey), isTrue); // TzBox: תפר-העובדות עקבי
     expect(find.text(TzBoxFacts.hero), findsWidgets); expect(find.text(TzBoxFacts.heroLabel), findsWidgets); // ה-hero של TzBox מרונדר ברכזת מהביטוי-החי, לא מליטרל
@@ -44,11 +45,11 @@ void main() {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(find.byType(TextField).first, 'קופה'); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DsNavTile), findsNWidgets(1)); expect(find.text('1/7'), findsWidgets); expect(tester.takeException(), isNull);
+    expect(find.byType(ForgeHubTile), findsNWidgets(1)); expect(find.text('1/7'), findsWidgets); expect(tester.takeException(), isNull);
     await tester.enterText(find.byType(TextField).first, 'zzqqxx'); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DsNavTile), findsNothing); expect(find.byType(EmptyState), findsOneWidget); expect(find.text('0/7'), findsWidgets);
+    expect(find.byType(ForgeHubTile), findsNothing); expect(find.byType(EmptyState), findsOneWidget); expect(find.text('0/7'), findsWidgets);
     await tester.enterText(find.byType(TextField).first, ''); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DsNavTile), findsNWidgets(7)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
+    expect(find.byType(ForgeHubTile), findsNWidgets(7)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
   });
   testWidgets('TzedakaApp · הזרקת-שורה ⇒ עמודת-מקום-שמור "specialty" של Teacher מאירה (G5h)', (tester) async {
     tester.view.physicalSize = const Size(1400, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
@@ -138,48 +139,48 @@ void main() {
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('קופה').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(TzBoxScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('TzedakaApp · בית ⇒ מבצע (TzCampaign) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('מבצע').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(TzCampaignScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('TzedakaApp · בית ⇒ מוצר (ShopProduct) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('מוצר').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(ShopProductScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('TzedakaApp · בית ⇒ חנות (ShopStore) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('חנות').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(ShopStoreScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('TzedakaApp · בית ⇒ מורה (Teacher) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('מורה').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(TeacherScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('TzedakaApp · בית ⇒ שיבוצים (Enrollment) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('שיבוצים').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(EnrollmentScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('TzedakaApp · בית ⇒ תורם (Supporter) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('תורם').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(SupporterScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
 }

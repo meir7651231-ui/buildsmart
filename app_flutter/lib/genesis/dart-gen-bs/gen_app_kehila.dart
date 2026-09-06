@@ -7,26 +7,26 @@
 //   "תלמידים לפי גיל" ⇒ Member ⇐ schoolos_students.dart (strong · שמות 16/17)
 //   ⚪ "רשימת ספקים עם מחירים" ⇒ אין מונח-ישות במשפט — מקום-שמור (אין המצאה)
 //   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: Volunteer:∅ · Donation:∅ · Room:∅ · Family:5 עמודות · ShopItem:∅ · Member:1 עמודות
-//   G12c · תפקידי-עור: DS
-//   G12b · עור: DS (KpiTile) — ברירת-מחדל, ביט-זהה
+//   G12c · תפקידי-עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar · board=ForgeKanbanBoard
+//   G12b · עור: forge — אריח-KPI = ForgeStatPlain (card · 2 חריצים · תוכן-העיצוב ["Label","248"] ⇒ ערך בחריץ 1, תווית בחריץ 0, השאר '') — הצבה של הבעלים ב-app-golden, מאומתת מבנית
 //   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): Volunteer:∅ · Donation:∅ · Room:initialMetric · Family:initialMetric · ShopItem:initialMetric · Member:initialMetric
 //   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: Volunteer:initialPanelId · Donation:initialPanelId · Room:initialPanelId · Family:initialPanelId · ShopItem:initialPanelId · Member:initialPanelId
 //   G9b · KPI-רכזת נגזר: כל אריח = <E>Facts של המודול (count חי של הזרע · hero = המדד שהזהב הכריז/צבע-סכנה) — אפס ערך מומצא: VolunteerFacts.count · DonationFacts.count · RoomFacts.unavailableN · FamilyFacts.highN · ShopItemFacts.kpiNoTeacher · MemberFacts.highN
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
-import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
+import '../dart-forge-bs/card/card.dart'; // G12b/c · עור-forge
 import '../dart-ui-bs/ds/ds_search.dart'; // איתור: חיפוש-מבוקר (value+onChanged)
 import '../dart-ui-bs/premium/feedback/empty_state.dart'; // אין-תוצאות
 import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפי-ציון (מדף)
 import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
 import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (מדף)
 import '../dart-data-maor/norm-search-strings.dart'; // NORM_SEARCH_T (אטום-דאטה)
-import 'gen_retarget_volunteer_from_fee.dart' show VolunteerScreen, VolunteerFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_donation_from_fee.dart' show DonationScreen, DonationFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_room_from_rm.dart' show RoomScreen, RoomFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_family_from_stu.dart' show FamilyScreen, FamilyFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_shopitem_from_crs.dart' show ShopItemScreen, ShopItemFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_member_from_stu.dart' show MemberScreen, MemberFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_volunteer_from_fee_sk1fce5c.dart' show VolunteerScreen, VolunteerFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_donation_from_fee_sk1fce5c.dart' show DonationScreen, DonationFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_room_from_rm_sk1fce5c.dart' show RoomScreen, RoomFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_family_from_stu_sk1fce5c.dart' show FamilyScreen, FamilyFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_shopitem_from_crs_sk1fce5c.dart' show ShopItemScreen, ShopItemFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_member_from_stu_sk1fce5c.dart' show MemberScreen, MemberFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 
 class KehilaApp extends StatelessWidget {
   const KehilaApp({super.key});
@@ -67,22 +67,22 @@ class _KehilaHubScreenState extends State<KehilaHubScreen> {
       DsSearch(value: _q, onChanged: (v) => setState(() => _q = v)),
       const SizedBox(height: 8),
       Wrap(spacing: 12, runSpacing: 12, children: [ // KPI-רכזת (G9b): עובדות-אמת בלבד — כמו _Home של הזהב (מסכים-מחוברים + הדחוף של כל מודול)
-        SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: '${vis.length}/${modules.length}', label: 'מסכים מחוברים')),
-        if (vis.contains(0)) GestureDetector(key: const ValueKey('hero-Volunteer'), onTap: () { final id = VolunteerFacts.heroFirstId; _go(context, id == null ? const VolunteerScreen() : VolunteerScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: VolunteerFacts.hero, label: VolunteerFacts.heroLabel))), // Volunteer · אין מדדים ⇒ count · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
-        if (vis.contains(1)) GestureDetector(key: const ValueKey('hero-Donation'), onTap: () { final id = DonationFacts.heroFirstId; _go(context, id == null ? const DonationScreen() : DonationScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: DonationFacts.hero, label: DonationFacts.heroLabel))), // Donation · אין מדדים ⇒ count · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
-        if (vis.contains(2)) GestureDetector(key: const ValueKey('hero-Room'), onTap: () { final id = RoomFacts.heroFirstId; _go(context, id == null ? const RoomScreen() : RoomScreen(initialPanelId: id, initialMetric: RoomFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: RoomFacts.hero, label: RoomFacts.heroLabel))), // Room · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
-        if (vis.contains(3)) GestureDetector(key: const ValueKey('hero-Family'), onTap: () { final id = FamilyFacts.heroFirstId; _go(context, id == null ? const FamilyScreen() : FamilyScreen(initialPanelId: id, initialMetric: FamilyFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: FamilyFacts.hero, label: FamilyFacts.heroLabel))), // Family · ה-StatHero של הזהב (המטרה המוצהרת) · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
-        if (vis.contains(4)) GestureDetector(key: const ValueKey('hero-ShopItem'), onTap: () { final id = ShopItemFacts.heroFirstId; _go(context, id == null ? const ShopItemScreen() : ShopItemScreen(initialPanelId: id, initialMetric: ShopItemFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: ShopItemFacts.hero, label: ShopItemFacts.heroLabel))), // ShopItem · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
-        if (vis.contains(5)) GestureDetector(key: const ValueKey('hero-Member'), onTap: () { final id = MemberFacts.heroFirstId; _go(context, id == null ? const MemberScreen() : MemberScreen(initialPanelId: id, initialMetric: MemberFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: MemberFacts.hero, label: MemberFacts.heroLabel))), // Member · ה-StatHero של הזהב (המטרה המוצהרת) · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        SizedBox(width: 168, child: ForgeStatPlain(fields: ['מסכים מחוברים', '${vis.length}/${modules.length}'])),
+        if (vis.contains(0)) GestureDetector(key: const ValueKey('hero-Volunteer'), onTap: () { final id = VolunteerFacts.heroFirstId; _go(context, id == null ? const VolunteerScreen() : VolunteerScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: ForgeStatPlain(fields: [VolunteerFacts.heroLabel, VolunteerFacts.hero]))), // Volunteer · אין מדדים ⇒ count · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(1)) GestureDetector(key: const ValueKey('hero-Donation'), onTap: () { final id = DonationFacts.heroFirstId; _go(context, id == null ? const DonationScreen() : DonationScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: ForgeStatPlain(fields: [DonationFacts.heroLabel, DonationFacts.hero]))), // Donation · אין מדדים ⇒ count · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(2)) GestureDetector(key: const ValueKey('hero-Room'), onTap: () { final id = RoomFacts.heroFirstId; _go(context, id == null ? const RoomScreen() : RoomScreen(initialPanelId: id, initialMetric: RoomFacts.heroKey)); }, child: SizedBox(width: 168, child: ForgeStatPlain(fields: [RoomFacts.heroLabel, RoomFacts.hero]))), // Room · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(3)) GestureDetector(key: const ValueKey('hero-Family'), onTap: () { final id = FamilyFacts.heroFirstId; _go(context, id == null ? const FamilyScreen() : FamilyScreen(initialPanelId: id, initialMetric: FamilyFacts.heroKey)); }, child: SizedBox(width: 168, child: ForgeStatPlain(fields: [FamilyFacts.heroLabel, FamilyFacts.hero]))), // Family · ה-StatHero של הזהב (המטרה המוצהרת) · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(4)) GestureDetector(key: const ValueKey('hero-ShopItem'), onTap: () { final id = ShopItemFacts.heroFirstId; _go(context, id == null ? const ShopItemScreen() : ShopItemScreen(initialPanelId: id, initialMetric: ShopItemFacts.heroKey)); }, child: SizedBox(width: 168, child: ForgeStatPlain(fields: [ShopItemFacts.heroLabel, ShopItemFacts.hero]))), // ShopItem · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(5)) GestureDetector(key: const ValueKey('hero-Member'), onTap: () { final id = MemberFacts.heroFirstId; _go(context, id == null ? const MemberScreen() : MemberScreen(initialPanelId: id, initialMetric: MemberFacts.heroKey)); }, child: SizedBox(width: 168, child: ForgeStatPlain(fields: [MemberFacts.heroLabel, MemberFacts.hero]))), // Member · ה-StatHero של הזהב (המטרה המוצהרת) · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
       ]),
       const SizedBox(height: 8),
       if (vis.isEmpty) const EmptyState(glyph: '🔍', message: 'אין מודול שתואם לחיפוש') else DsSection(title: 'כלים · ${vis.length}', children: [
-        if (vis.contains(0)) DsNavTile(glyph: '🧬', title: 'מתנדבים', sub: '${VolunteerFacts.count} ${VolunteerFacts.label} · ניהול מתנדבים עם טלפון ואזור', onTap: () => _go(context, const VolunteerScreen())),
-        if (vis.contains(1)) DsNavTile(glyph: '🧬', title: 'תרומות', sub: '${DonationFacts.count} ${DonationFacts.label} · רשימת תרומות לפי תאריך וסכום', onTap: () => _go(context, const DonationScreen())),
-        if (vis.contains(2)) DsNavTile(glyph: '🧬', title: 'חדרים', sub: '${RoomFacts.count} ${RoomFacts.label} · מעקב חדרים ושעות', onTap: () => _go(context, const RoomScreen())),
-        if (vis.contains(3)) DsNavTile(glyph: '🧬', title: 'משפחה', sub: '${FamilyFacts.count} ${FamilyFacts.label} · מסך משפחות עם כתובת', onTap: () => _go(context, const FamilyScreen())),
-        if (vis.contains(4)) DsNavTile(glyph: '🧬', title: 'פריט', sub: '${ShopItemFacts.count} ${ShopItemFacts.label} · פריטי קטלוג במלאי', onTap: () => _go(context, const ShopItemScreen())),
-        if (vis.contains(5)) DsNavTile(glyph: '🧬', title: 'בני משפחה', sub: '${MemberFacts.count} ${MemberFacts.label} · תלמידים לפי גיל', onTap: () => _go(context, const MemberScreen())),
+        if (vis.contains(0)) GestureDetector(key: const ValueKey('nav-Volunteer'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const VolunteerScreen()), child: ForgeHubTile(fields: ['מתנדבים', '${VolunteerFacts.count} ${VolunteerFacts.label} · ניהול מתנדבים עם טלפון ואזור'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(1)) GestureDetector(key: const ValueKey('nav-Donation'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const DonationScreen()), child: ForgeHubTile(fields: ['תרומות', '${DonationFacts.count} ${DonationFacts.label} · רשימת תרומות לפי תאריך וסכום'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(2)) GestureDetector(key: const ValueKey('nav-Room'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const RoomScreen()), child: ForgeHubTile(fields: ['חדרים', '${RoomFacts.count} ${RoomFacts.label} · מעקב חדרים ושעות'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(3)) GestureDetector(key: const ValueKey('nav-Family'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const FamilyScreen()), child: ForgeHubTile(fields: ['משפחה', '${FamilyFacts.count} ${FamilyFacts.label} · מסך משפחות עם כתובת'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(4)) GestureDetector(key: const ValueKey('nav-ShopItem'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ShopItemScreen()), child: ForgeHubTile(fields: ['פריט', '${ShopItemFacts.count} ${ShopItemFacts.label} · פריטי קטלוג במלאי'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(5)) GestureDetector(key: const ValueKey('nav-Member'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const MemberScreen()), child: ForgeHubTile(fields: ['בני משפחה', '${MemberFacts.count} ${MemberFacts.label} · תלמידים לפי גיל'])), // אריח-ניווט forge (G12c)
       ]),
     ]);
   }

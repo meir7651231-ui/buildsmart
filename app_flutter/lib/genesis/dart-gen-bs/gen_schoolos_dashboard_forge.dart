@@ -1,5 +1,5 @@
 // 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar · board=ForgeKanbanBoard
-//   החלפות: stat×0 · hero×1 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · section×15 · segmented×1 · meter×3 · frame×5 · timeline×3 · search×1 · pageHeader×1 · table×1 · bars×5 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+//   החלפות: stat×0 · hero×1 · chipRow×3 · chip×10 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · section×15 · segmented×1 · meter×3 · frame×5 · timeline×3 · search×1 · pageHeader×1 · table×1 · bars×5 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 📊 SchoolOS · לוח-הנהלה (DASHBOARD) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-DASHBOARD-FULL-2026-09-04.
 // 🎯 המטרה: שהמנהל/ת יפתח את הבוקר ותוך 30 שניות יידע: מה דורש-החלטה היום · מה בסיכון · מה מגמתי · מה הפעולה-הראשונה.
 // 🔒 גבול-חרוט: הלוח = נגזרת-טהורה של כל המודולים. אפס נתון-חדש, אפס-כתיבה. המודולים מוזרקים כשקעי-קלט
@@ -63,12 +63,12 @@ import '../dart-maor/heb-parts.dart'; // תאריך-עברי מ-DateTime
 import '../dart-maor/holidays.dart'; // טבלת-החגים (דאטה)
 import '../dart-maor/upcoming-holidays.dart'; // חגים-קרובים בחלון-ימים
 import '../dart/band.dart'; // דירוג: 3-פסים לפי ספים (value≥high⇒2 · ≥mid⇒1 · אחרת 0)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
@@ -634,25 +634,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ]),
         // ── צ׳יפי-חריגה (finderMatches · AND): מודול (עם מונה) · דחיפות · SLA · סטטוס · אחראי ──
         if (!summary) ...[
-          _wrap([
-            for (final m in d.modules)
-              if (d.live(m['id'] as String) && _DashData.seesModule(_role, m['id'] as String))
-                _fchip('module', m['id'] as String, '${m['glyph']} ${m['label']} · ${all.where((t) => t['module'] == m['id']).length}'),
-          ], top: 0),
-          _wrap([
-            _fchip('sev', '2', '🔴 דחוף · ${all.where((t) => d.sev(t) == 2).length}'),
-            _fchip('sev', '1', '🟠 בסיכון · ${all.where((t) => d.sev(t) == 1).length}'),
-            _fchip('sla', '1', '⛔ SLA-פרוץ · ${all.where((t) => d.slaBreached(t) && !d.isDone(t)).length}'),
-            _fchip('status', 'פתוח', '📂 פתוחות'),
-            _fchip('status', 'בוצע', '✅ בוצעו'),
-            _fchip('status', 'הואצל', '🤝 הואצלו'),
-            for (final o in countBy(all, (t) => '${(t as Map)['owner']}')) _fchip('owner', o[0] as String, '👤 ${o[0]} · ${o[1]}'),
-          ]),
+          _wrap([Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final m in d.modules) if (d.live(m['id'] as String) && _DashData.seesModule(_role, m['id'] as String)) (('${m['glyph']} ${m['label']} · ${all.where((t) => t['module'] == m['id']).length}'), _locks[('module')] == (m['id'] as String), () => setState(() => _locks[('module')] == (m['id'] as String) ? _locks.remove(('module')) : _locks[('module')] = (m['id'] as String)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); })], top: 0),
+          _wrap([Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[(('🔴 דחוף · ${all.where((t) => d.sev(t) == 2).length}'), _locks[('sev')] == ('2'), () => setState(() => _locks[('sev')] == ('2') ? _locks.remove(('sev')) : _locks[('sev')] = ('2'))), (('🟠 בסיכון · ${all.where((t) => d.sev(t) == 1).length}'), _locks[('sev')] == ('1'), () => setState(() => _locks[('sev')] == ('1') ? _locks.remove(('sev')) : _locks[('sev')] = ('1'))), (('⛔ SLA-פרוץ · ${all.where((t) => d.slaBreached(t) && !d.isDone(t)).length}'), _locks[('sla')] == ('1'), () => setState(() => _locks[('sla')] == ('1') ? _locks.remove(('sla')) : _locks[('sla')] = ('1'))), (('📂 פתוחות'), _locks[('status')] == ('פתוח'), () => setState(() => _locks[('status')] == ('פתוח') ? _locks.remove(('status')) : _locks[('status')] = ('פתוח'))), (('✅ בוצעו'), _locks[('status')] == ('בוצע'), () => setState(() => _locks[('status')] == ('בוצע') ? _locks.remove(('status')) : _locks[('status')] = ('בוצע'))), (('🤝 הואצלו'), _locks[('status')] == ('הואצל'), () => setState(() => _locks[('status')] == ('הואצל') ? _locks.remove(('status')) : _locks[('status')] = ('הואצל'))), for (final o in countBy(all, (t) => '${(t as Map)['owner']}')) (('👤 ${o[0]} · ${o[1]}'), _locks[('owner')] == (o[0] as String), () => setState(() => _locks[('owner')] == (o[0] as String) ? _locks.remove(('owner')) : _locks[('owner')] = (o[0] as String)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); })]),
           // סוג-משימה (kind-prefix · SLA-פר-סוג) + שכבה (מקום-שמור: מאיר רק כשיש משימות עם grade)
-          _wrap([
-            for (final k in countBy(all, (t) => _DashData.kindOf(t as Map<String, dynamic>))) _fchip('kind', k[0] as String, '🏷 ${_DashData.kindLabel(k[0] as String)} · ${k[1]} · SLA ${d.slaDays[k[0]] ?? 5}י׳'),
-            for (final g in countBy(all.where((t) => t['grade'] != null).toList(), (t) => '${(t as Map)['grade']}')) _fchip('grade', g[0] as String, '🏫 שכבה ${g[0]} · ${g[1]}'),
-          ]),
+          _wrap([Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final k in countBy(all, (t) => _DashData.kindOf(t as Map<String, dynamic>))) (('🏷 ${_DashData.kindLabel(k[0] as String)} · ${k[1]} · SLA ${d.slaDays[k[0]] ?? 5}י׳'), _locks[('kind')] == (k[0] as String), () => setState(() => _locks[('kind')] == (k[0] as String) ? _locks.remove(('kind')) : _locks[('kind')] = (k[0] as String))), for (final g in countBy(all.where((t) => t['grade'] != null).toList(), (t) => '${(t as Map)['grade']}')) (('🏫 שכבה ${g[0]} · ${g[1]}'), _locks[('grade')] == (g[0] as String), () => setState(() => _locks[('grade')] == (g[0] as String) ? _locks.remove(('grade')) : _locks[('grade')] = (g[0] as String)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); })]),
           const SizedBox(height: 12),
         ],
         // ── מצבי-מסך שמורים: טעינה · שגיאה-כללית · שגיאה-במודול-אחד (הלוח ממשיך) · מודול-לא-מופעל · יום-חופש · אזעקה ──

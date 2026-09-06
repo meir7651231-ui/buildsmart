@@ -1,9 +1,9 @@
-// 🎯 TeacherScreen — retarget של schoolos_students.dart לישות Teacher (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Teacher
-//   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 8 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 19 · חוזה-מנוע (לא משתנה) 4
-//   id⇒id(name) · name⇒name(name) · phone⇒phone(name) · phone2⇒phone2(name) · email⇒email(name) · address⇒address(name) · notes⇒notes(name) · idNum⇒idNum(name) · status⇒∅(engine-contract) · createdAt⇒∅(engine-contract) · docs⇒∅(engine-contract) · members⇒∅(engine-contract) · father⇒∅(reserved(6 מועמדים)) · mother⇒∅(reserved(6 מועמדים)) · city⇒∅(reserved(6 מועמדים)) · language⇒∅(reserved(6 מועמדים)) · maritalStatus⇒∅(reserved(6 מועמדים)) · tzedaka⇒∅(reserved(6 מועמדים)) · discount⇒∅(reserved(6 מועמדים)) · addedAt⇒startDate(unique) · cred⇒∅(reserved) · log⇒∅(reserved) · first⇒∅(reserved(6 מועמדים)) · gender⇒∅(reserved(6 מועמדים)) · birth⇒∅(reserved) · school⇒∅(reserved(6 מועמדים)) · grade⇒∅(reserved(6 מועמדים)) · health⇒∅(reserved(6 מועמדים)) · mSefach⇒payToOther(unique) · mInvite⇒∅(reserved) · mRecommend⇒∅(reserved) · mPhotos⇒∅(reserved) · mVideos⇒∅(reserved)
+// 🎯 ShopStoreScreen — retarget של schoolos_students.dart לישות ShopStore (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity ShopStore
+//   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 22 · חוזה-מנוע (לא משתנה) 5
+//   id⇒id(name) · name⇒name(name) · phone⇒phone(name) · notes⇒notes(name) · phone2⇒∅(engine-contract) · status⇒∅(engine-contract) · createdAt⇒∅(engine-contract) · docs⇒∅(engine-contract) · members⇒∅(engine-contract) · father⇒contact(unique) · mother⇒∅(reserved) · email⇒∅(reserved) · city⇒∅(reserved) · address⇒∅(reserved) · language⇒∅(reserved) · maritalStatus⇒∅(reserved) · tzedaka⇒∅(reserved) · discount⇒∅(reserved) · addedAt⇒∅(reserved) · cred⇒∅(reserved) · log⇒∅(reserved) · first⇒∅(reserved) · gender⇒∅(reserved) · birth⇒∅(reserved) · idNum⇒∅(reserved) · school⇒∅(reserved) · grade⇒∅(reserved) · health⇒∅(reserved) · mSefach⇒active(unique) · mInvite⇒∅(reserved) · mRecommend⇒∅(reserved) · mPhotos⇒∅(reserved) · mVideos⇒∅(reserved)
 //   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×21 (ב-Row, Expanded) · פנימיים: button×35 statusChip×25 banner×17 emptyState×11 mediaRow×5 · StatHero⇒ForgeStatPlain ×1 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
-//   תפר-עובדות (G9b): TeacherFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה db (families/members · 9 עמודות-שמורות)
-//   שדות-Teacher בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): specialty, payRate, payMethod, payeeName, payeePhone, payeeIdNum, bankName, bankBranch, bankAccount · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Teacher (מורה/—) · 2 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Teacher
+//   תפר-עובדות (G9b): ShopStoreFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה db (families/members · 0 עמודות-שמורות)
+//   שדות-ShopStore בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): — · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ ShopStore (חנות/—) · 2 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopStore
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-מצב · חיבור-אותות-להכרעה · זיהוי-חריגה · הכרעה · ביצוע · אימות.
@@ -132,48 +132,48 @@ class _StuData {
         ],
         // משפחה = Family (schema-fields) · ילד = Member. שדות-אמת בלבד.
         'families': <Map<String, dynamic>>[
-          {'id': 'f1', 'name': 'שמעוני', 'father': 'אבי', 'mother': 'דנה', 'phone': '0528811223', 'phone2': '0528811224', 'email': '', 'city': 'חולון', 'address': 'הבנים 12', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2024-08-20',
-            'docs': [{'id': 'd1', 'name': 'טופס-רישום-2024.pdf', 'startDate': '2024-08-20'}, {'id': 'd2', 'name': 'אישור-מדיה-חתום.pdf', 'startDate': '2025-09-02'}], 'cred': {'score': 0, 'log': []},
+          {'id': 'f1', 'name': 'שמעוני', 'contact': 'אבי', 'mother': 'דנה', 'phone': '0528811223', 'phone2': '0528811224', 'email': '', 'city': 'חולון', 'address': 'הבנים 12', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2024-08-20',
+            'docs': [{'id': 'd1', 'name': 'טופס-רישום-2024.pdf', 'addedAt': '2024-08-20'}, {'id': 'd2', 'name': 'אישור-מדיה-חתום.pdf', 'addedAt': '2025-09-02'}], 'cred': {'score': 0, 'log': []},
             'members': [
-              {'id': 'm1', 'first': 'רון', 'gender': 'm', 'birth': '2010-11-03', 'idNum': '210079190', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'י', 'health': '', 'payToOther': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': false, 'notes': 'מוסח בשיעורי-בוקר; מגיב טוב לעידוד.'},
-              {'id': 'm2', 'first': 'נועה', 'gender': 'f', 'birth': '2013-09-12', 'idNum': '210134623', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'ז', 'health': '', 'payToOther': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': ''},
+              {'id': 'm1', 'first': 'רון', 'gender': 'm', 'birth': '2010-11-03', 'idNum': '210079190', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'י', 'health': '', 'active': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': false, 'notes': 'מוסח בשיעורי-בוקר; מגיב טוב לעידוד.'},
+              {'id': 'm2', 'first': 'נועה', 'gender': 'f', 'birth': '2013-09-12', 'idNum': '210134623', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'ז', 'health': '', 'active': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': ''},
             ]},
-          {'id': 'f2', 'name': 'אוחיון', 'father': '', 'mother': 'שרית', 'phone': '0543322110', 'phone2': '', 'email': '', 'city': 'בת-ים', 'address': 'רוטשילד 4', 'language': 'צרפתית', 'maritalStatus': 'גרושה', 'status': 'active', 'tzedaka': 'מלגה', 'discount': '50', 'notes': 'אם יחידנית · עובדת במשמרות', 'createdAt': '2023-08-15',
-            'docs': [{'id': 'd3', 'name': 'אישור-מלגה.pdf', 'startDate': '2025-10-01'}], 'cred': {'score': 0, 'log': []},
+          {'id': 'f2', 'name': 'אוחיון', 'contact': '', 'mother': 'שרית', 'phone': '0543322110', 'phone2': '', 'email': '', 'city': 'בת-ים', 'address': 'רוטשילד 4', 'language': 'צרפתית', 'maritalStatus': 'גרושה', 'status': 'active', 'tzedaka': 'מלגה', 'discount': '50', 'notes': 'אם יחידנית · עובדת במשמרות', 'createdAt': '2023-08-15',
+            'docs': [{'id': 'd3', 'name': 'אישור-מלגה.pdf', 'addedAt': '2025-10-01'}], 'cred': {'score': 0, 'log': []},
             'members': [
-              {'id': 'm3', 'first': 'ליאור', 'gender': 'm', 'birth': '2011-05-20', 'idNum': '210205894', 'phone': '0551234567', 'school': 'תיכון עתיד', 'grade': 'ט', 'health': 'אסתמה — משאף בתיק', 'payToOther': true, 'mInvite': true, 'mRecommend': false, 'mPhotos': false, 'mVideos': false, 'notes': 'נעדר הרבה מאז יוני; לבדוק מול הבית.'},
+              {'id': 'm3', 'first': 'ליאור', 'gender': 'm', 'birth': '2011-05-20', 'idNum': '210205894', 'phone': '0551234567', 'school': 'תיכון עתיד', 'grade': 'ט', 'health': 'אסתמה — משאף בתיק', 'active': true, 'mInvite': true, 'mRecommend': false, 'mPhotos': false, 'mVideos': false, 'notes': 'נעדר הרבה מאז יוני; לבדוק מול הבית.'},
             ]},
-          {'id': 'f3', 'name': 'נחום', 'father': 'משה', 'mother': 'אורית', 'phone': '', 'phone2': '', 'email': '', 'city': 'ראשון-לציון', 'address': 'הרצל 88', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2022-09-01',
+          {'id': 'f3', 'name': 'נחום', 'contact': 'משה', 'mother': 'אורית', 'phone': '', 'phone2': '', 'email': '', 'city': 'ראשון-לציון', 'address': 'הרצל 88', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2022-09-01',
             'docs': [], 'cred': {'score': 0, 'log': []},
             'members': [
-              {'id': 'm4', 'first': 'הדר', 'gender': 'f', 'birth': '2012-02-14', 'idNum': '210261327', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'ח', 'health': '', 'payToOther': true, 'mInvite': false, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': ''},
+              {'id': 'm4', 'first': 'הדר', 'gender': 'f', 'birth': '2012-02-14', 'idNum': '210261327', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'ח', 'health': '', 'active': true, 'mInvite': false, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': ''},
             ]},
-          {'id': 'f4', 'name': 'ביטון', 'father': 'יעקב', 'mother': 'רחל', 'phone': '0507712345', 'phone2': '', 'email': '', 'city': 'חולון', 'address': 'סוקולוב 3', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2021-08-30',
-            'docs': [{'id': 'd4', 'name': 'תעודת-סיום-יב.pdf', 'startDate': '2026-06-25'}], 'cred': {'score': 0, 'log': []},
+          {'id': 'f4', 'name': 'ביטון', 'contact': 'יעקב', 'mother': 'רחל', 'phone': '0507712345', 'phone2': '', 'email': '', 'city': 'חולון', 'address': 'סוקולוב 3', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2021-08-30',
+            'docs': [{'id': 'd4', 'name': 'תעודת-סיום-יב.pdf', 'addedAt': '2026-06-25'}], 'cred': {'score': 0, 'log': []},
             'members': [
-              {'id': 'm5', 'first': 'מאיה', 'gender': 'f', 'birth': '2010-07-08', 'idNum': '210324679', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'י', 'health': '', 'payToOther': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': 'מובילה חברתית בכיתה.'},
-              {'id': 'm6', 'first': 'עומר', 'gender': 'm', 'birth': '2008-03-30', 'idNum': '210395950', 'phone': '0521239876', 'school': 'תיכון עתיד', 'grade': 'יב', 'health': '', 'payToOther': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': ''},
+              {'id': 'm5', 'first': 'מאיה', 'gender': 'f', 'birth': '2010-07-08', 'idNum': '210324679', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'י', 'health': '', 'active': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': 'מובילה חברתית בכיתה.'},
+              {'id': 'm6', 'first': 'עומר', 'gender': 'm', 'birth': '2008-03-30', 'idNum': '210395950', 'phone': '0521239876', 'school': 'תיכון עתיד', 'grade': 'יב', 'health': '', 'active': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': ''},
             ]},
-          {'id': 'f5', 'name': 'לוי', 'father': 'אייל', 'mother': 'טל', 'phone': '0539988776', 'phone2': '', 'email': '', 'city': 'חולון', 'address': 'ויצמן 21', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'pending', 'tzedaka': '', 'discount': '', 'notes': 'משפחה חדשה — עברו מעיר אחרת', 'createdAt': '2026-08-25',
-            'docs': [{'id': 'd5', 'name': 'טופס-רישום-2026.pdf', 'startDate': '2026-08-25'}], 'cred': {'score': 0, 'log': []},
+          {'id': 'f5', 'name': 'לוי', 'contact': 'אייל', 'mother': 'טל', 'phone': '0539988776', 'phone2': '', 'email': '', 'city': 'חולון', 'address': 'ויצמן 21', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'pending', 'tzedaka': '', 'discount': '', 'notes': 'משפחה חדשה — עברו מעיר אחרת', 'createdAt': '2026-08-25',
+            'docs': [{'id': 'd5', 'name': 'טופס-רישום-2026.pdf', 'addedAt': '2026-08-25'}], 'cred': {'score': 0, 'log': []},
             'members': [
-              {'id': 'm7', 'first': 'נועה', 'gender': 'f', 'birth': '2010-09-25', 'idNum': '210467221', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'י', 'health': '', 'payToOther': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': false, 'mVideos': false, 'notes': ''},
+              {'id': 'm7', 'first': 'נועה', 'gender': 'f', 'birth': '2010-09-25', 'idNum': '210467221', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'י', 'health': '', 'active': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': false, 'mVideos': false, 'notes': ''},
             ]},
           // רשומה-כפולה חשודה (ייבוא): אותו טלפון + אותו שם-ילד + אותה לידה ⇒ זיהוי-כפולים (findDuplicateGroups)
-          {'id': 'f6', 'name': 'לוי', 'father': '', 'mother': 'טל', 'phone': '0539988776', 'phone2': '', 'email': '', 'city': 'חולון', 'address': '', 'language': '', 'maritalStatus': '', 'status': 'pending', 'tzedaka': '', 'discount': '', 'notes': 'נוצר מייבוא-CSV 2.9', 'createdAt': '2026-09-02',
+          {'id': 'f6', 'name': 'לוי', 'contact': '', 'mother': 'טל', 'phone': '0539988776', 'phone2': '', 'email': '', 'city': 'חולון', 'address': '', 'language': '', 'maritalStatus': '', 'status': 'pending', 'tzedaka': '', 'discount': '', 'notes': 'נוצר מייבוא-CSV 2.9', 'createdAt': '2026-09-02',
             'docs': [], 'cred': {'score': 0, 'log': []},
             'members': [
-              {'id': 'm8', 'first': 'נועה', 'gender': 'f', 'birth': '2010-09-25', 'idNum': '', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'י', 'health': '', 'payToOther': false, 'mInvite': false, 'mRecommend': false, 'mPhotos': false, 'mVideos': false, 'notes': ''},
+              {'id': 'm8', 'first': 'נועה', 'gender': 'f', 'birth': '2010-09-25', 'idNum': '', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'י', 'health': '', 'active': false, 'mInvite': false, 'mRecommend': false, 'mPhotos': false, 'mVideos': false, 'notes': ''},
             ]},
-          {'id': 'f7', 'name': 'מזרחי', 'father': 'שלמה', 'mother': 'לימור', 'phone': '0581122334', 'phone2': '', 'email': '', 'city': 'בת-ים', 'address': 'בלפור 9', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'inactive', 'tzedaka': '', 'discount': '', 'notes': 'עברו לירושלים 3/2026', 'createdAt': '2022-08-28',
+          {'id': 'f7', 'name': 'מזרחי', 'contact': 'שלמה', 'mother': 'לימור', 'phone': '0581122334', 'phone2': '', 'email': '', 'city': 'בת-ים', 'address': 'בלפור 9', 'language': 'עברית', 'maritalStatus': 'נשואים', 'status': 'inactive', 'tzedaka': '', 'discount': '', 'notes': 'עברו לירושלים 3/2026', 'createdAt': '2022-08-28',
             'docs': [], 'cred': {'score': 0, 'log': []},
             'members': [
-              {'id': 'm9', 'first': 'יובל', 'gender': 'm', 'birth': '2011-12-01', 'idNum': '210538492', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'ט', 'health': '', 'payToOther': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': ''},
+              {'id': 'm9', 'first': 'יובל', 'gender': 'm', 'birth': '2011-12-01', 'idNum': '210538492', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'ט', 'health': '', 'active': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': true, 'notes': ''},
             ]},
-          {'id': 'f8', 'name': 'כהן', 'father': 'רועי', 'mother': 'שירה', 'phone': '0526677889', 'phone2': '', 'email': '', 'city': 'ראשון-לציון', 'address': 'ז׳בוטינסקי 40', 'language': 'רוסית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2024-08-18',
+          {'id': 'f8', 'name': 'כהן', 'contact': 'רועי', 'mother': 'שירה', 'phone': '0526677889', 'phone2': '', 'email': '', 'city': 'ראשון-לציון', 'address': 'ז׳בוטינסקי 40', 'language': 'רוסית', 'maritalStatus': 'נשואים', 'status': 'active', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': '2024-08-18',
             'docs': [], 'cred': {'score': 0, 'log': []},
             'members': [
-              {'id': 'm10', 'first': 'איתי', 'gender': 'm', 'birth': '2012-06-17', 'idNum': '210665196', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'ח', 'health': 'אלרגיה לבוטנים (אפיפן)', 'payToOther': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': false, 'notes': 'הוקפא לחודש — אשפוז; חוזר 1.10'},
+              {'id': 'm10', 'first': 'איתי', 'gender': 'm', 'birth': '2012-06-17', 'idNum': '210665196', 'phone': '', 'school': 'תיכון עתיד', 'grade': 'ח', 'health': 'אלרגיה לבוטנים (אפיפן)', 'active': true, 'mInvite': true, 'mRecommend': true, 'mPhotos': true, 'mVideos': false, 'notes': 'הוקפא לחודש — אשפוז; חוזר 1.10'},
             ]},
         ],
         // רישום = Enrollment: memberId · courseId · status(active/paused/ended/wait) · presents[] · absences[] · enrolledAt · endedAt · renewedToId
@@ -335,7 +335,7 @@ class _StuData {
   static Map<String, dynamic> fam(Map<String, dynamic> s) => s['family'] as Map<String, dynamic>;
   static String parentName(Map<String, dynamic> s) {
     final f = fam(s);
-    final m = (f['mother'] as String?) ?? '', d = (f['father'] as String?) ?? '';
+    final m = (f['mother'] as String?) ?? '', d = (f['contact'] as String?) ?? '';
     return m.isNotEmpty ? m : d.isNotEmpty ? d : '—';
   }
   static String parentPhone(Map<String, dynamic> s) => formatIsraeliPhone(fam(s)['phone'] ?? '');
@@ -495,16 +495,6 @@ class _StuData {
   //   הוספת שדה לרשומה (photo/grades/…) ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static int roleCtx = 0; // התפקיד-הפעיל (מוזרק מהמסך לפני רינדור-טבלה)
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
-    // ═══ חוזה-העמודות של Teacher (G5h · חוק-7): 9 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
-    {'key': 'specialty', 'label': 'specialty'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה (string) — מאיר כשהנתון מוזרם
-    {'key': 'payRate', 'label': 'payRate'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה (number) — מאיר כשהנתון מוזרם
-    {'key': 'payMethod', 'label': 'payMethod'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה ('cash' | 'salary' | 'check' | '') — מאיר כשהנתון מוזרם
-    {'key': 'payeeName', 'label': 'payeeName'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה (string) — מאיר כשהנתון מוזרם
-    {'key': 'payeePhone', 'label': 'payeePhone'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה (string) — מאיר כשהנתון מוזרם
-    {'key': 'payeeIdNum', 'label': 'payeeIdNum'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה (string) — מאיר כשהנתון מוזרם
-    {'key': 'bankName', 'label': 'bankName'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה (string) — מאיר כשהנתון מוזרם
-    {'key': 'bankBranch', 'label': 'bankBranch'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה (string) — מאיר כשהנתון מוזרם
-    {'key': 'bankAccount', 'label': 'bankAccount'}, // G5h · מקום-שמור: שדה-Teacher מהסכמה (string) — מאיר כשהנתון מוזרם
     {'key': 'photo', 'label': 'תמונה'},                                                   // מקום-שמור (ImageProvider/URL)
     {'label': 'שם-מלא', 'get': (Map<String, dynamic> s) => '${s['name']}'},
     {'label': 'מס׳', 'get': (Map<String, dynamic> s) => '${s['id']}'},
@@ -558,7 +548,7 @@ class _StuData {
     log(who, 'meeting', '${s['id']} · הזמנה: $title ($date)');
   }
   static void attachDoc(Map<String, dynamic> s, String name, String who) {
-    (fam(s)['docs'] as List).add({'id': 'd-${_seq + 1}', 'name': name, 'startDate': today});
+    (fam(s)['docs'] as List).add({'id': 'd-${_seq + 1}', 'name': name, 'addedAt': today});
     log(who, 'doc', '${s['id']} · מסמך: $name');
   }
   static void deleteStudent(Map<String, dynamic> s, String who) { // מחיקה (מנהל/ת בלבד · המפרט): הסרת Member + רישומיו; משפחה ריקה מוסרת; נרשם באודיט
@@ -589,7 +579,7 @@ class _StuData {
     log(who, 'move', '${s['id']} · הועבר/ה ל-${className(s)}');
   }
   static void editField(Map<String, dynamic> s, String key, String value, String who) { // עריכה = כתיבה לשדה-האמת (Member/Family)
-    if (const {'phone', 'city', 'address', 'language', 'mother', 'father', 'email'}.contains(key)) { fam(s)[key] = value; } else { s[key] = value; }
+    if (const {'phone', 'city', 'address', 'language', 'mother', 'contact', 'email'}.contains(key)) { fam(s)[key] = value; } else { s[key] = value; }
     if (key == 'first') { s['name'] = '$value ${s['last']}'; }
     log(who, 'edit', '${s['id']} · $key');
   }
@@ -618,8 +608,8 @@ class _StuData {
     _seq++;
     final c = homeroomCourses().where((c) => c['name'] == courseName).toList();
     final fid = 'f-new-$_seq', mid = 'm-new-$_seq';
-    (db['families'] as List).add({'id': fid, 'name': last, 'father': '', 'mother': parent, 'phone': phone, 'phone2': '', 'email': '', 'city': '', 'address': '', 'language': '', 'maritalStatus': '', 'status': 'pending', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': today, 'docs': [], 'cred': {'score': 0, 'log': []},
-      'members': [{'id': mid, 'first': first, 'gender': '', 'birth': birth, 'idNum': '', 'phone': '', 'school': '', 'grade': c.isEmpty ? '' : (c.first['gradeMin'] ?? ''), 'health': '', 'payToOther': false, 'mInvite': false, 'mRecommend': false, 'mPhotos': false, 'mVideos': false, 'notes': ''}]});
+    (db['families'] as List).add({'id': fid, 'name': last, 'contact': '', 'mother': parent, 'phone': phone, 'phone2': '', 'email': '', 'city': '', 'address': '', 'language': '', 'maritalStatus': '', 'status': 'pending', 'tzedaka': '', 'discount': '', 'notes': '', 'createdAt': today, 'docs': [], 'cred': {'score': 0, 'log': []},
+      'members': [{'id': mid, 'first': first, 'gender': '', 'birth': birth, 'idNum': '', 'phone': '', 'school': '', 'grade': c.isEmpty ? '' : (c.first['gradeMin'] ?? ''), 'health': '', 'active': false, 'mInvite': false, 'mRecommend': false, 'mPhotos': false, 'mVideos': false, 'notes': ''}]});
     if (c.isNotEmpty) (db['enrollments'] as List).add({'id': 'e-new-$_seq', 'memberId': mid, 'courseId': c.first['id'], 'status': 'active', 'enrolledAt': today, 'group': '', 'note': '', 'presents': [], 'absences': []});
     _cache = null;
     log(who, 'add', '$mid · רישום: $first $last');
@@ -657,7 +647,7 @@ class _StuData {
       for (final t in tasksOf(s)) {'date': '${t['createdAt']}', 'title': '📨 ${t['title']}', 'body': '${t['doneAt'] ?? ''}'.isEmpty ? 'פתוח · יעד ${fmt(t['due'] as String?)}' : 'נסגר ${fmt(t['doneAt'] as String?)}'},
       for (final n in notes(s)) if ('${n['date']}'.isNotEmpty) {'date': '${n['date']}', 'title': '📝 הערה · ${n['by']}', 'body': '${n['text']}'},
       for (final a in absencesOf(s)) {'date': '${a['date']}', 'title': a['noshow'] == true ? '⛔ אי-הופעה' : '🚫 חיסור', 'body': '${a['reason']}${a['justified'] == true ? ' · מוצדק' : ''}'},
-      for (final d in (fam(s)['docs'] as List).cast<Map<String, dynamic>>()) {'date': '${d['startDate']}', 'title': '📎 ${d['name']}', 'body': ''},
+      for (final d in (fam(s)['docs'] as List).cast<Map<String, dynamic>>()) {'date': '${d['addedAt']}', 'title': '📎 ${d['name']}', 'body': ''},
     ];
     out.sort((a, b) => b['date']!.compareTo(a['date']!));
     return out;
@@ -866,9 +856,9 @@ class _StuData {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════
-class TeacherScreen extends StatefulWidget {
-  const TeacherScreen({this.initialMetric, this.initialPanelId, super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
-  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (TeacherFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
+class ShopStoreScreen extends StatefulWidget {
+  const ShopStoreScreen({this.initialMetric, this.initialPanelId, super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (ShopStoreFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
   final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   final Map<String, dynamic>? db;
   /// אינטגרציה לוח-הנהלה⇒מונים: המונים של המודול (המנהל מחווט; אין ייבוא-בין-מודולים)
@@ -877,11 +867,11 @@ class TeacherScreen extends StatefulWidget {
         'noParent': _StuData.noParentN, 'openTickets': _StuData.openTicketsN, 'medical': _StuData.medicalN, 'avgAttendance': _StuData.avgAttendance ?? -1, 'avgGrades': _StuData.avgGrades ?? -1,
       };
   @override
-  State<TeacherScreen> createState() => _TeacherScreenState();
+  State<ShopStoreScreen> createState() => _ShopStoreScreenState();
 }
 
   String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
-class _TeacherScreenState extends State<TeacherScreen> {
+class _ShopStoreScreenState extends State<ShopStoreScreen> {
   String _q = ''; // איתור (DsSearch)
   int _mode = 0; // 0=🎯 טריאז' (קיבוץ-פר-סיכון) · 1=📋 טבלה (columnDefs) — SegmentedSwitch→תצוגה
   int _sort = 0; // 0=סיכון · 1=כיתה · 2=שם — SegmentedSwitch→דירוג
@@ -897,13 +887,13 @@ class _TeacherScreenState extends State<TeacherScreen> {
   @override
   void initState() {
     super.initState();
-    _metric = widget.initialMetric != null && TeacherFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
-    final p0 = widget.initialPanelId == null ? null : TeacherFacts.byId(widget.initialPanelId!); // G10a
+    _metric = widget.initialMetric != null && ShopStoreFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
+    final p0 = widget.initialPanelId == null ? null : ShopStoreFacts.byId(widget.initialPanelId!); // G10a
     if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
     if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset();
   }
   @override
-  void didUpdateWidget(covariant TeacherScreen old) { // שקע-קלט מתחלף ⇒ דאטה חדשה (נתפס בבדיקת-widget: pumpWidget מעדכן State, לא initState)
+  void didUpdateWidget(covariant ShopStoreScreen old) { // שקע-קלט מתחלף ⇒ דאטה חדשה (נתפס בבדיקת-widget: pumpWidget מעדכן State, לא initState)
     super.didUpdateWidget(old);
     if (!identical(old.db, widget.db)) { if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset(); _locks.clear(); _q = ''; }
   }
@@ -923,7 +913,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
     // דירוג (מיון-נבחר) ⇒ הנראים (פעילים); לא-פעילים בסקשן-ארכיון נפרד
     // איתור⊕חריגה (23-ג): search=smartFilter⊕smartScore⊕normSearch · filter=finderMatches. הפייפליין מזין טריאז' וטבלה וארכיון.
     final visibleAll = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
-    final visible = _metric == null ? visibleAll : visibleAll.where((r) => TeacherFacts.heroRows(_metric!).any((h) => '${h[TeacherFacts.idKey] ?? h['id']}' == '${r[TeacherFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => ShopStoreFacts.heroRows(_metric!).any((h) => '${h[ShopStoreFacts.idKey] ?? h['id']}' == '${r[ShopStoreFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     final inactiveVisible = _StuData.filter(_StuData.search(_StuData.sorted(_StuData.scoped(_role, _StuData.inactive), _sort), _q), _locks);
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: []};
     for (final s in visible) { buckets[_StuData.band(s)]!.add(s); }
@@ -931,8 +921,8 @@ class _TeacherScreenState extends State<TeacherScreen> {
       title: 'תלמידים', subtitle: '${_StuData.students.length} תלמידים · ${_StuData.byClass().length} כיתות · ${_StuData.highN} בסיכון-גבוה', icon: '🎓',
       children: [
         // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
-        if (_metric != null) ForgeSectionPill(items: [['מסונן למדד: ${TeacherFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}']], variants: const <int>[0]),
-        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeSoftButton(fields: ['✖ בטל סינון-מדד']))),
+        if (_metric != null) ForgeToneBanner(items: [['מסונן למדד: ${ShopStoreFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}']], variants: const <int>[1]),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeToneButton(items: [['✖ בטל סינון-מדד']], variants: const <int>[3]))),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות+נראות פר-תפקיד (roleOf⊕canGrantedAction⊕scope)
         Row(children: [
           Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _StuData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i)))),
@@ -940,20 +930,20 @@ class _TeacherScreenState extends State<TeacherScreen> {
           Flexible(child: ForgeStatusChip(items: [['תפקיד: ${_StuData.roleName(_role)}${_StuData.isTeacher(_role) ? ' · הכיתה שלי' : _StuData.isParent(_role) ? ' · ילדי בלבד' : ''}']], variants: const <int>[0])),
         ]),
         _gap(10),
-        if (_StuData.isParent(_role)) ...[ForgeSectionPill(items: [['תצוגת-הורה: זהות · נוכחות · ציונים של ילדך בלבד. שדות-מוגנים ופעולות אינם זמינים.']], variants: const <int>[0]), _gap(8)],
+        if (_StuData.isParent(_role)) ...[ForgeToneBanner(items: [['תצוגת-הורה: זהות · נוכחות · ציונים של ילדך בלבד. שדות-מוגנים ופעולות אינם זמינים.']], variants: const <int>[0]), _gap(8)],
         // פס-עליון: חיפוש-מבוקר + רענון (מצב-טעינה) + רישום + ייבוא — מגודרים פר-הרשאה
         Row(children: [
           Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0]))),
           const SizedBox(width: 6),
-          if (_can('stu.add')) ...[Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _addForm(context), child: ForgeSoftButton(fields: ['➕ תלמיד']))), const SizedBox(width: 6)],
-          if (_can('stu.import')) Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _importForm(context), child: ForgeSoftButton(fields: ['📥 ייבוא']))),
+          if (_can('stu.add')) ...[Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _addForm(context), child: ForgeToneButton(items: [['➕ תלמיד']], variants: const <int>[1]))), const SizedBox(width: 6)],
+          if (_can('stu.import')) Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _importForm(context), child: ForgeToneButton(items: [['📥 ייבוא']], variants: const <int>[0]))),
         ]),
         // מצב-מיוחד: ייבוא-בתהליך / תוצאת-ייבוא
-        if (_importing) ...[ForgeSectionPill(items: [['ייבוא בתהליך… מעבד שורות']], variants: const <int>[0]), _gap(8)],
-        if (_rollover != null) ...[ForgeSectionPill(items: [[_rollover!]], variants: const <int>[0]), _gap(8)],
-        if (!_importing && _importResult != null) ...[ForgeSectionPill(items: [['ייבוא הסתיים: ${_importResult!['ok']} נוספו · ${_importResult!['skipped']} נדחו']], variants: const <int>[0]), _gap(8)],
+        if (_importing) ...[ForgeToneBanner(items: [['ייבוא בתהליך… מעבד שורות']], variants: const <int>[2]), _gap(8)],
+        if (_rollover != null) ...[ForgeToneBanner(items: [[_rollover!]], variants: const <int>[1]), _gap(8)],
+        if (!_importing && _importResult != null) ...[ForgeToneBanner(items: [['ייבוא הסתיים: ${_importResult!['ok']} נוספו · ${_importResult!['skipped']} נדחו']], variants: const <int>[1]), _gap(8)],
         // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"; המונה = ספירת-הציר על הפעילים
         Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[(('הכל'), (_locks.isEmpty), (() => setState(() => _locks.clear()))), for (final c in _StuData.quickChips) (('${c['label']} · ${_StuData.countAxis(all, c['axis']!, c['value']!)}'), (_locks[c['axis']] == c['value']), (() => setState(() { if (_locks[c['axis']] == c['value']) { _locks.remove(c['axis']); } else { _locks[c['axis']!] = c['value']!; } }))), ((_filtersOpen ? '⚙ פילטרים ▴' : '⚙ פילטרים ▾'), (_filtersOpen), (() => setState(() => _filtersOpen = !_filtersOpen)))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         if (_filtersOpen) Row(children: [
@@ -984,19 +974,19 @@ class _TeacherScreenState extends State<TeacherScreen> {
           ])),
         _gap(8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): קפיצת-סיכון · כפולים · אישורים-פגים · ללא-הערה-90 · ימי-הולדת · אחים-חדשים — AlertBanner פר-אות
-        if (_StuData.riskJumps.isNotEmpty) ...[ForgeSectionPill(items: [['קפיצת-סיכון (30 יום): ${_StuData.riskJumps.map((j) => '${(j['s'] as Map)['name']} ${j['prev']}→${j['now']}').join(' · ')}']], variants: const <int>[0]), _gap(8)],
-        if (_StuData.duplicateGroups.any((g) => g.length > 1) && _can('stu.merge')) ...[ForgeSectionPill(items: [['כפילות-חשודה: ${_StuData.duplicateGroups.where((g) => g.length > 1).map((g) => g.map((id) => _StuData.byId(id)?['name'] ?? id).join(' ≈ ')).join(' · ')} — פתח/י כרטיס ⇒ מיזוג']], variants: const <int>[0]), _gap(8)],
-        if (_StuData.expiredConsents.isNotEmpty) ...[ForgeSectionPill(items: [['${_StuData.expiredConsents.length} אישורי-הורים פגו: ${_StuData.expiredConsents.map((t) => t['title']).join(' · ')}']], variants: const <int>[0]), _gap(8)],
-        if (_StuData.noNote90.isNotEmpty && !_StuData.isParent(_role)) ...[ForgeSectionPill(items: [['ללא הערת-מחנך/ת ${_StuData.noteSilentDays} יום: ${_StuData.scoped(_role, _StuData.noNote90).map((s) => s['first']).join(' · ')}']], variants: const <int>[0]), _gap(8)],
-        if (_StuData.birthdays.isNotEmpty) ...[ForgeSectionPill(items: [['ימי-הולדת החודש: ${_StuData.scoped(_role, _StuData.birthdays).map((s) => '${s['first']} (${_StuData.fmt(s['birth'] as String?)})').join(' · ')}']], variants: const <int>[0]), _gap(8)],
-        if (_StuData.newSiblings.isNotEmpty && !_StuData.isParent(_role)) ...[ForgeSectionPill(items: [['אחים-חדשים קושרו אוטומטית: ${_StuData.newSiblings.map((s) => '${s['first']} ↔ ${_StuData.siblings(s).map((o) => o['first']).join(',')}').join(' · ')}']], variants: const <int>[0]), _gap(8)],
+        if (_StuData.riskJumps.isNotEmpty) ...[ForgeToneBanner(items: [['קפיצת-סיכון (30 יום): ${_StuData.riskJumps.map((j) => '${(j['s'] as Map)['name']} ${j['prev']}→${j['now']}').join(' · ')}']], variants: const <int>[3]), _gap(8)],
+        if (_StuData.duplicateGroups.any((g) => g.length > 1) && _can('stu.merge')) ...[ForgeToneBanner(items: [['כפילות-חשודה: ${_StuData.duplicateGroups.where((g) => g.length > 1).map((g) => g.map((id) => _StuData.byId(id)?['name'] ?? id).join(' ≈ ')).join(' · ')} — פתח/י כרטיס ⇒ מיזוג']], variants: const <int>[2]), _gap(8)],
+        if (_StuData.expiredConsents.isNotEmpty) ...[ForgeToneBanner(items: [['${_StuData.expiredConsents.length} אישורי-הורים פגו: ${_StuData.expiredConsents.map((t) => t['title']).join(' · ')}']], variants: const <int>[2]), _gap(8)],
+        if (_StuData.noNote90.isNotEmpty && !_StuData.isParent(_role)) ...[ForgeToneBanner(items: [['ללא הערת-מחנך/ת ${_StuData.noteSilentDays} יום: ${_StuData.scoped(_role, _StuData.noNote90).map((s) => s['first']).join(' · ')}']], variants: const <int>[0]), _gap(8)],
+        if (_StuData.birthdays.isNotEmpty) ...[ForgeToneBanner(items: [['ימי-הולדת החודש: ${_StuData.scoped(_role, _StuData.birthdays).map((s) => '${s['first']} (${_StuData.fmt(s['birth'] as String?)})').join(' · ')}']], variants: const <int>[1]), _gap(8)],
+        if (_StuData.newSiblings.isNotEmpty && !_StuData.isParent(_role)) ...[ForgeToneBanner(items: [['אחים-חדשים קושרו אוטומטית: ${_StuData.newSiblings.map((s) => '${s['first']} ↔ ${_StuData.siblings(s).map((o) => o['first']).join(',')}').join(' · ')}']], variants: const <int>[0]), _gap(8)],
         // דוח-יועץ · מעבר-שנה · ייצוא — כלים-מרוכזים (מגודרים)
         Wrap(spacing: 8, runSpacing: 6, children: [
-          if (_can('stu.ticket') || _StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'דוח-יועץ/ת שבועי', _StuData.weeklyReport()), child: ForgeSoftButton(fields: ['🧭 דוח-יועץ שבועי'])),
-          if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'מעבר-שנה · העברת-כיתות מרוכזת (תצוגה-מקדימה)', _StuData.yearRolloverPreview().join('\n')), child: ForgeSoftButton(fields: ['🗓 מעבר-שנה (תצוגה)'])),
-          if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { final r = _StuData.yearRolloverExecute(_who); _importResult = null; _error = null; _rollover = 'מעבר-שנה בוצע: ${r['moved']} הועברו · ${r['graduated']} בוגרים · ${r['skipped']} ללא כיתת-יעד (לא הומצאה)'; }), child: ForgeSoftButton(fields: ['🗓 בצע מעבר-שנה'])),
-          if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא CSV · ${visible.length} תלמידים (BOM + חסימת-הזרקה)', _StuData.csvOf(visible)), child: ForgeSoftButton(fields: ['⬇ CSV (${visible.length})'])),
-          if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא PDF', 'מקום-שמור: אין מנוע-PDF במדף (§20-ג) — יאיר כשיתווסף; עד אז: הדפס-כרטיס (טקסט) + CSV.'), child: ForgeSoftButton(fields: ['⬇ PDF — מקום-שמור'])),
+          if (_can('stu.ticket') || _StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'דוח-יועץ/ת שבועי', _StuData.weeklyReport()), child: ForgeToneButton(items: [['🧭 דוח-יועץ שבועי']], variants: const <int>[0])),
+          if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'מעבר-שנה · העברת-כיתות מרוכזת (תצוגה-מקדימה)', _StuData.yearRolloverPreview().join('\n')), child: ForgeToneButton(items: [['🗓 מעבר-שנה (תצוגה)']], variants: const <int>[0])),
+          if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { final r = _StuData.yearRolloverExecute(_who); _importResult = null; _error = null; _rollover = 'מעבר-שנה בוצע: ${r['moved']} הועברו · ${r['graduated']} בוגרים · ${r['skipped']} ללא כיתת-יעד (לא הומצאה)'; }), child: ForgeToneButton(items: [['🗓 בצע מעבר-שנה']], variants: const <int>[3])),
+          if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא CSV · ${visible.length} תלמידים (BOM + חסימת-הזרקה)', _StuData.csvOf(visible)), child: ForgeToneButton(items: [['⬇ CSV (${visible.length})']], variants: const <int>[0])),
+          if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא PDF', 'מקום-שמור: אין מנוע-PDF במדף (§20-ג) — יאיר כשיתווסף; עד אז: הדפס-כרטיס (טקסט) + CSV.'), child: ForgeToneButton(items: [['⬇ PDF — מקום-שמור']], variants: const <int>[0])),
         ]),
         _gap(8),
         // בורר-מבט (🎯 טריאז' · 📋 טבלה) + בורר-דירוג (סיכון · כיתה · שם) — ארגון = פעולת-יסוד עם אטום משלה
@@ -1007,7 +997,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
         ]),
         _gap(10),
         // מצבי-מסך: שגיאה (AlertBanner + סגירה) · טעינה ⇒ אחרת התוכן: ריק · טבלה · טריאז'
-        if (_error != null) ...[Row(children: [Expanded(child: ForgeSectionPill(items: [[_error!]], variants: const <int>[0])), const SizedBox(width: 6), Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _error = null), child: ForgeSoftButton(fields: ['✕'])))]), _gap(8)],
+        if (_error != null) ...[Row(children: [Expanded(child: ForgeToneBanner(items: [[_error!]], variants: const <int>[3])), const SizedBox(width: 6), Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _error = null), child: ForgeToneButton(items: [['✕']], variants: const <int>[0])))]), _gap(8)],
         if (_loading)
           _loadingView()
         else if (_StuData.students.isEmpty)
@@ -1114,7 +1104,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                     Row(children: [Expanded(child: ForgeStatPlain(fields: [_StuData.bandLabel(b), '$r']))]), // BareStat=Expanded ⇒ חייב Row (נתפס בבדיקת-widget)
                     _gap(6),
-                    ForgeSectionPill(items: [['👉 ${_StuData.action(s)}']], variants: [const <int>[0, 0, 0, 0][(b == 2 ? 2 : b == 1 ? 3 : 1) % 4]]),
+                    ForgeToneBanner(items: [['👉 ${_StuData.action(s)}']], variants: [const <int>[0, 1, 3, 2][(b == 2 ? 2 : b == 1 ? 3 : 1) % 4]]),
                   ])),
                 ]),
                 _gap(12),
@@ -1125,7 +1115,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
                 const Text('פעולות', style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
                 _gap(8),
                 // פעולות מגודרות פר-הרשאה (canGrantedAction); אין-הרשאה ⇒ מצב נעילת-הרשאות
-                Builder(builder: (_) { final acts = _actions(ctx, s, act); return acts.isEmpty ? ForgeSectionPill(items: [['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה']], variants: const <int>[0]) : Wrap(spacing: 8, runSpacing: 8, children: acts); }),
+                Builder(builder: (_) { final acts = _actions(ctx, s, act); return acts.isEmpty ? ForgeToneBanner(items: [['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה']], variants: const <int>[3]) : Wrap(spacing: 8, runSpacing: 8, children: acts); }),
                 _gap(8),
               ])),
           ),
@@ -1137,7 +1127,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
   List<Widget> _kv(String k, String v) => [Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Row(children: [Text(k, style: const TextStyle(color: _muted, fontSize: 13)), const SizedBox(width: 8), Expanded(child: Text(v, style: const TextStyle(color: _ink, fontSize: 13.5, fontWeight: FontWeight.w600)))]))];
   Widget _h(String t) => Padding(padding: const EdgeInsets.only(top: 6, bottom: 6), child: Text(t, style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)));
   // מקום-שמור (חוק-7): תווית+שקע — מואר כשמגיע נתון, עד אז מוצהר ולא מזויף
-  Widget _slot(String label, String source) => ForgeSectionPill(items: [['$label — מקום-שמור · יאיר כשיגיע נתון ($source)']], variants: const <int>[0]);
+  Widget _slot(String label, String source) => ForgeToneBanner(items: [['$label — מקום-שמור · יאיר כשיגיע נתון ($source)']], variants: const <int>[0]);
 
   List<Widget> _tabBody(BuildContext ctx, Map<String, dynamic> s, int tab, void Function(void Function()) act) {
     switch (tab) {
@@ -1220,13 +1210,13 @@ class _TeacherScreenState extends State<TeacherScreen> {
         final f = _StuData.fam(s);
         return [
           ForgeContactTile(fields: ['${f['mother']}'.isEmpty ? 'אם: —' : 'אם: ${f['mother']}', _StuData.parentMissing(s) ? '⛔ אין טלפון-קשר' : '${_StuData.parentPhone(s)} · ${_StuData.telOf(s) ?? ''}']),
-          ForgeContactTile(fields: ['${f['father']}'.isEmpty ? 'אב: —' : 'אב: ${f['father']}', '${f['phone2']}'.isEmpty ? '' : formatIsraeliPhone(f['phone2'])]),
+          ForgeContactTile(fields: ['${f['contact']}'.isEmpty ? 'אב: —' : 'אב: ${f['contact']}', '${f['phone2']}'.isEmpty ? '' : formatIsraeliPhone(f['phone2'])]),
           ..._kv('כתובת', '${f['address']} ${f['city']}'.trim().isEmpty ? '—' : '${f['address']} ${f['city']}'),
           ..._kv('שפת-בית', '${f['language']}'.isEmpty ? '—' : '${f['language']}'),
           ..._kv('מצב משפחתי', '${f['maritalStatus']}'.isEmpty ? '—' : '${f['maritalStatus']}'),
           ..._kv('סטטוס-משפחה', '${f['status']}'),
           _h('אחים במוסד · ${_StuData.siblings(s).length}'),
-          if (_StuData.siblings(s).isEmpty) ForgeStatusChip(items: [['אין אחים במוסד']], variants: const <int>[0]) else Wrap(spacing: 6, children: [for (final o in _StuData.siblings(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(ctx).pop(); _openPanel(o); }, child: ForgeSoftButton(fields: ['🔗 ${o['first']} · ${_StuData.className(o)}']))]),
+          if (_StuData.siblings(s).isEmpty) ForgeStatusChip(items: [['אין אחים במוסד']], variants: const <int>[0]) else Wrap(spacing: 6, children: [for (final o in _StuData.siblings(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(ctx).pop(); _openPanel(o); }, child: ForgeToneButton(items: [['🔗 ${o['first']} · ${_StuData.className(o)}']], variants: const <int>[0]))]),
           _h('מצב סוציו-אקונומי · 🔒 מוגן'),
           if (_can('stu.protected')) Wrap(spacing: 6, children: [ForgeStatusChip(items: [['סיוע: ${_StuData.protectedField(_role, s, 'tzedaka', '${f['tzedaka']}')}']], variants: const <int>[2]), ForgeStatusChip(items: [['הנחה: ${_StuData.protectedField(_role, s, 'discount', '${f['discount']}'.isEmpty ? '' : '${f['discount']}%')}']], variants: const <int>[2]), ForgeStatusChip(items: [['👁 נרשם בלוג-חשיפה']], variants: const <int>[0])])
           else ForgeStatusChip(items: [['🔒 פרטיות-נעולה · יועץ/ת בלבד']], variants: const <int>[3]),
@@ -1242,7 +1232,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
         final docs = (_StuData.fam(s)['docs'] as List).cast<Map<String, dynamic>>();
         return [
           _h('מסמכים · ${docs.length}'),
-          if (docs.isEmpty) ForgeSearchEmptyState(fields: ['אין מסמכים', '']) else for (final d in docs) ForgeNotifRow(items: [['📎 ${d['name']}', _StuData.fmt(d['startDate'] as String?)]]),
+          if (docs.isEmpty) ForgeSearchEmptyState(fields: ['אין מסמכים', '']) else for (final d in docs) ForgeNotifRow(items: [['📎 ${d['name']}', _StuData.fmt(d['addedAt'] as String?)]]),
           _h('תיק-רפואי · 🔒 מוגן'),
           if ('${s['health'] ?? ''}'.isEmpty) ForgeStatusChip(items: [['אין רישום רפואי']], variants: const <int>[0])
           else if (_can('stu.protected')) ForgeStatusChip(items: [['🩺 ${_StuData.protectedField(_role, s, 'health', '${s['health']}')} · 👁 נרשם בלוג-חשיפה']], variants: const <int>[2])
@@ -1255,8 +1245,8 @@ class _TeacherScreenState extends State<TeacherScreen> {
       default: // אודיט: רשומות-אודיט של התלמיד (at·who·act·what)
         final au = _StuData.auditOf(s);
         return [
-          if (!_can('stu.audit') && _StuData.roleName(_role) != 'admin') ForgeSectionPill(items: [['אודיט מלא — מנהל/ת ויועץ/ת בלבד']], variants: const <int>[0]) else ...[
-            _h('אודיט · ${au.length}'), ForgeSectionPill(items: [[_StuData.encryptionNote]], variants: const <int>[0]),
+          if (!_can('stu.audit') && _StuData.roleName(_role) != 'admin') ForgeToneBanner(items: [['אודיט מלא — מנהל/ת ויועץ/ת בלבד']], variants: const <int>[3]) else ...[
+            _h('אודיט · ${au.length}'), ForgeToneBanner(items: [[_StuData.encryptionNote]], variants: const <int>[0]),
             if (au.isEmpty) ForgeSearchEmptyState(fields: ['אין רשומות-אודיט', '']) else for (final a in au) ForgeNotifRow(items: [['${a['act']}${a['act'] == 'expose' ? ' 👁' : ''} · ${a['who']}', '${a['at']}']]),
           ],
         ];
@@ -1268,25 +1258,25 @@ class _TeacherScreenState extends State<TeacherScreen> {
     final active = _StuData.isActive(s), st = _StuData.status(s);
     if (_StuData.isParent(_role)) return const []; // הורה: צפייה בלבד
     return [
-      if (_can('stu.edit')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _editForm(ctx, s, act), child: ForgeSoftButton(fields: ['✏️ ערוך'])),
-      if (_can('stu.move')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pick(ctx, 'העבר-כיתה', [for (final c in _StuData.homeroomCourses()) c['name'] as String], (v) => act(() => _StuData.moveClass(s, v, _who))), child: ForgeSoftButton(fields: ['🏫 העבר-כיתה'])),
-      if (_can('stu.status') && active) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'הוקפא', _who)), child: ForgeSoftButton(fields: ['⏸ הקפא'])),
-      if (_can('stu.status') && !active) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'פעיל', _who)), child: ForgeSoftButton(fields: ['▶ החזר לפעיל'])),
-      if (_can('stu.status') && st != 'עזב') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'עזב', _who)), child: ForgeSoftButton(fields: ['🚪 סמן-עזב'])),
-      if (_can('stu.status') && st != 'בוגר') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'בוגר', _who)), child: ForgeSoftButton(fields: ['🎓 סמן-בוגר'])),
-      if (_can('stu.note')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הערת-מחנך/ת', 'מה קרה? מה סוכם?', (v) => act(() => _StuData.addNote(s, v, _who))), child: ForgeSoftButton(fields: ['📝 הוסף-הערה'])),
-      if (_can('stu.note')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הערת-התנהגות', 'אירוע · תגובה', (v) => act(() => _StuData.addNote(s, v, _who, kind: 'behavior'))), child: ForgeSoftButton(fields: ['⚠ הערת-התנהגות'])),
-      if (_can('stu.flag')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pick(ctx, 'הוסף-דגל', const ['♿ צרכים-מיוחדים', '💛 רגישות', '🩺 רפואי', '🗣 שפה', '🚌 הסעה'], (v) => act(() => _StuData.addFlag(s, v, _who))), child: ForgeSoftButton(fields: ['🚩 הוסף-דגל'])),
-      if (_can('stu.ticket')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'פנייה ליועץ/ת', 'נושא הפנייה', (v) => act(() => _StuData.openTicket(s, 'פנייה ליועצת: ${s['name']} — $v', _who))), child: ForgeSoftButton(fields: ['📨 פתח-פנייה (יועץ/ת)'])),
-      if (_can('stu.parentMsg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(ctx, 'הודעה להורה · ${_StuData.parentName(s)}', _StuData.waOf(s, 'שלום ${_StuData.parentName(s)}, מדברים מבית-הספר בעניין ${s['first']}. נשמח לשוחח.') ?? '⛔ אין טלפון-הורה מעודכן — לא ניתן לשלוח'), child: ForgeSoftButton(fields: ['💬 שלח-להורה'])),
-      if (_can('stu.meeting')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הזמנה לשיחה', 'תאריך (YYYY-MM-DD)', (v) => act(() => _StuData.inviteMeeting(s, 'שיחה עם הורי ${s['first']}', v, _who))), child: ForgeSoftButton(fields: ['📅 הזמן-לשיחה'])),
-      if (_can('stu.doc')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'צרף-מסמך', 'שם המסמך', (v) => act(() => _StuData.attachDoc(s, v, _who))), child: ForgeSoftButton(fields: ['📎 צרף-מסמך'])),
-      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(ctx, 'כרטיס-תלמיד להדפסה', _StuData.card(s)), child: ForgeSoftButton(fields: ['🖨 הדפס-כרטיס'])),
-      if (_can('stu.merge')) for (final d in _StuData.dupPeers(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.mergeDuplicate(s, d, _who)), child: ForgeSoftButton(fields: ['👯 מזג ${d['id']} לכאן'])),
-      if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => _StuData.deleteStudent(s, _who)); Navigator.of(ctx).pop(); }, child: ForgeSoftButton(fields: ['🗑 מחק רשומה'])),
-      if (_can('stu.consent')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.toggleConsent(s, 'mPhotos', _who)), child: ForgeSoftButton(fields: ['📷 אישור-מדיה: ${s['mPhotos'] == true ? 'בטל' : 'סמן'}'])),
-      if (_can('stu.consent')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.requestConsent(s, 'trips', _who)), child: ForgeSoftButton(fields: ['🧳 בקש אישור-טיולים'])),
-      if (_can('stu.ticket')) for (final t in _StuData.openTasksOf(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.closeTicket(t, _who)), child: ForgeSoftButton(fields: ['✅ סגור פנייה ${t['id']}'])), // תווית קצרה (גיליון ≤640px · נתפס בבדיקת-widget)
+      if (_can('stu.edit')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _editForm(ctx, s, act), child: ForgeToneButton(items: [['✏️ ערוך']], variants: const <int>[0])),
+      if (_can('stu.move')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pick(ctx, 'העבר-כיתה', [for (final c in _StuData.homeroomCourses()) c['name'] as String], (v) => act(() => _StuData.moveClass(s, v, _who))), child: ForgeToneButton(items: [['🏫 העבר-כיתה']], variants: const <int>[0])),
+      if (_can('stu.status') && active) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'הוקפא', _who)), child: ForgeToneButton(items: [['⏸ הקפא']], variants: const <int>[2])),
+      if (_can('stu.status') && !active) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'פעיל', _who)), child: ForgeToneButton(items: [['▶ החזר לפעיל']], variants: const <int>[1])),
+      if (_can('stu.status') && st != 'עזב') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'עזב', _who)), child: ForgeToneButton(items: [['🚪 סמן-עזב']], variants: const <int>[3])),
+      if (_can('stu.status') && st != 'בוגר') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.setStatus(s, 'בוגר', _who)), child: ForgeToneButton(items: [['🎓 סמן-בוגר']], variants: const <int>[0])),
+      if (_can('stu.note')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הערת-מחנך/ת', 'מה קרה? מה סוכם?', (v) => act(() => _StuData.addNote(s, v, _who))), child: ForgeToneButton(items: [['📝 הוסף-הערה']], variants: const <int>[1])),
+      if (_can('stu.note')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הערת-התנהגות', 'אירוע · תגובה', (v) => act(() => _StuData.addNote(s, v, _who, kind: 'behavior'))), child: ForgeToneButton(items: [['⚠ הערת-התנהגות']], variants: const <int>[2])),
+      if (_can('stu.flag')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pick(ctx, 'הוסף-דגל', const ['♿ צרכים-מיוחדים', '💛 רגישות', '🩺 רפואי', '🗣 שפה', '🚌 הסעה'], (v) => act(() => _StuData.addFlag(s, v, _who))), child: ForgeToneButton(items: [['🚩 הוסף-דגל']], variants: const <int>[2])),
+      if (_can('stu.ticket')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'פנייה ליועץ/ת', 'נושא הפנייה', (v) => act(() => _StuData.openTicket(s, 'פנייה ליועצת: ${s['name']} — $v', _who))), child: ForgeToneButton(items: [['📨 פתח-פנייה (יועץ/ת)']], variants: const <int>[3])),
+      if (_can('stu.parentMsg')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(ctx, 'הודעה להורה · ${_StuData.parentName(s)}', _StuData.waOf(s, 'שלום ${_StuData.parentName(s)}, מדברים מבית-הספר בעניין ${s['first']}. נשמח לשוחח.') ?? '⛔ אין טלפון-הורה מעודכן — לא ניתן לשלוח'), child: ForgeToneButton(items: [['💬 שלח-להורה']], variants: const <int>[0])),
+      if (_can('stu.meeting')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'הזמנה לשיחה', 'תאריך (YYYY-MM-DD)', (v) => act(() => _StuData.inviteMeeting(s, 'שיחה עם הורי ${s['first']}', v, _who))), child: ForgeToneButton(items: [['📅 הזמן-לשיחה']], variants: const <int>[0])),
+      if (_can('stu.doc')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _prompt(ctx, 'צרף-מסמך', 'שם המסמך', (v) => act(() => _StuData.attachDoc(s, v, _who))), child: ForgeToneButton(items: [['📎 צרף-מסמך']], variants: const <int>[0])),
+      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(ctx, 'כרטיס-תלמיד להדפסה', _StuData.card(s)), child: ForgeToneButton(items: [['🖨 הדפס-כרטיס']], variants: const <int>[0])),
+      if (_can('stu.merge')) for (final d in _StuData.dupPeers(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.mergeDuplicate(s, d, _who)), child: ForgeToneButton(items: [['👯 מזג ${d['id']} לכאן']], variants: const <int>[2])),
+      if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => _StuData.deleteStudent(s, _who)); Navigator.of(ctx).pop(); }, child: ForgeToneButton(items: [['🗑 מחק רשומה']], variants: const <int>[3])),
+      if (_can('stu.consent')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.toggleConsent(s, 'mPhotos', _who)), child: ForgeToneButton(items: [['📷 אישור-מדיה: ${s['mPhotos'] == true ? 'בטל' : 'סמן'}']], variants: const <int>[0])),
+      if (_can('stu.consent')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.requestConsent(s, 'trips', _who)), child: ForgeToneButton(items: [['🧳 בקש אישור-טיולים']], variants: const <int>[0])),
+      if (_can('stu.ticket')) for (final t in _StuData.openTasksOf(s)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _StuData.closeTicket(t, _who)), child: ForgeToneButton(items: [['✅ סגור פנייה ${t['id']}']], variants: const <int>[1])), // תווית קצרה (גיליון ≤640px · נתפס בבדיקת-widget)
     ];
   }
 
@@ -1298,7 +1288,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
       child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         ForgeDsField(state: (v).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [title, ''], control: DsField(label: title, hint: hint, value: v, onChanged: (x) => v = x, bare: true)),
-        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.trim().isNotEmpty) { onSave(v.trim()); Navigator.of(c2).pop(); } }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
+        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.trim().isNotEmpty) { onSave(v.trim()); Navigator.of(c2).pop(); } }, child: ForgeToneButton(items: [['💾 שמור']], variants: const <int>[1])))]),
       ])),
     ));
   }
@@ -1309,7 +1299,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
       child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(title, style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         ForgeDsEnumField(fields: [title], control: DsEnumField(label: title, options: options, value: v, onChanged: (x) => setS(() => v = x), bare: true)),
-        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.isNotEmpty) { onSave(v); Navigator.of(c2).pop(); } }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
+        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { if (v.isNotEmpty) { onSave(v); Navigator.of(c2).pop(); } }, child: ForgeToneButton(items: [['💾 שמור']], variants: const <int>[1])))]),
       ])),
     )));
   }
@@ -1326,15 +1316,15 @@ class _TeacherScreenState extends State<TeacherScreen> {
   // עריכה: שדות-אמת (Member.first/phone/school · Family.mother/father/phone/city/address/language)
   void _editForm(BuildContext ctx, Map<String, dynamic> s, void Function(void Function()) act) {
     final f = _StuData.fam(s);
-    final vals = <String, String>{'first': '${s['first']}', 'school': '${s['school'] ?? ''}', 'mother': '${f['mother']}', 'father': '${f['father']}', 'phone': '${f['phone']}', 'city': '${f['city']}', 'address': '${f['address']}', 'language': '${f['language']}'};
-    const labels = {'first': 'שם פרטי', 'school': 'בית-ספר', 'mother': 'אם', 'father': 'אב', 'phone': 'טלפון-הורה', 'city': 'ישוב', 'address': 'כתובת', 'language': 'שפת-בית'};
+    final vals = <String, String>{'first': '${s['first']}', 'school': '${s['school'] ?? ''}', 'mother': '${f['mother']}', 'contact': '${f['contact']}', 'phone': '${f['phone']}', 'city': '${f['city']}', 'address': '${f['address']}', 'language': '${f['language']}'};
+    const labels = {'first': 'שם פרטי', 'school': 'בית-ספר', 'mother': 'אם', 'contact': 'אב', 'phone': 'טלפון-הורה', 'city': 'ישוב', 'address': 'כתובת', 'language': 'שפת-בית'};
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => DraggableScrollableSheet(
       initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
       builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
         Text('עריכה · ${s['name']}', style: const TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         for (final k in vals.keys) ForgeDsField(state: (vals[k]!).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [labels[k]!, ''], control: DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x, bare: true)),
         _gap(8),
-        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() { for (final k in vals.keys) { if (vals[k] != '${k == 'first' || k == 'school' ? s[k] ?? '' : f[k]}') _StuData.editField(s, k, vals[k]!, _who); } }); Navigator.of(c2).pop(); }, child: ForgeSoftButton(fields: ['💾 שמור'])))]),
+        Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() { for (final k in vals.keys) { if (vals[k] != '${k == 'first' || k == 'school' ? s[k] ?? '' : f[k]}') _StuData.editField(s, k, vals[k]!, _who); } }); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['💾 שמור']], variants: const <int>[1])))]),
       ]))),
     ));
   }
@@ -1347,7 +1337,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => StatefulBuilder(builder: (c2, setS) => DraggableScrollableSheet(
       initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
       builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-        const Text('רישום מורה חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        const Text('רישום חנות חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         for (final k in vals.keys) ForgeDsField(state: (vals[k]!).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [labels[k]!, ''], control: DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x, bare: true)),
         ForgeDsEnumField(fields: ['כיתה'], control: DsEnumField(label: 'כיתה', options: classes, value: cls, onChanged: (x) => setS(() => cls = x), bare: true)),
         _gap(8),
@@ -1355,7 +1345,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
           if (vals['first']!.trim().isEmpty || vals['last']!.trim().isEmpty) return;
           setState(() => _StuData.addStudent(first: vals['first']!.trim(), last: vals['last']!.trim(), courseName: cls, birth: vals['birth']!.trim(), parent: vals['parent']!.trim(), phone: vals['phone']!.trim(), who: _who));
           Navigator.of(c2).pop();
-        }, child: ForgeSoftButton(fields: ['💾 רשום'])))]),
+        }, child: ForgeToneButton(items: [['💾 רשום']], variants: const <int>[1])))]),
       ]))),
     )));
   }
@@ -1366,13 +1356,13 @@ class _TeacherScreenState extends State<TeacherScreen> {
       padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(c2).viewInsets.bottom + 12),
       child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Text('ייבוא תלמידים (CSV)', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
-        const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל מורה', style: TextStyle(color: _muted, fontSize: 12)),
+        const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל חנות', style: TextStyle(color: _muted, fontSize: 12)),
         ForgeDsField(state: (text).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['CSV', ''], control: DsField(label: 'CSV', hint: 'דנה,כהן,י׳-1 · כיתת-חינוך,2010-05-05,רונית,0501234567', value: text, onChanged: (x) => text = x, bare: true)),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
           Navigator.of(c2).pop();
           setState(() { _importing = true; });
           Future.delayed(const Duration(milliseconds: 600), () { if (!mounted) return; setState(() { _importResult = _StuData.importCsv(text, _who); _importing = false; if (_importResult!['ok'] == 0) { _error = 'ייבוא נכשל: אין שורות תקינות (${_importResult!['skipped']} נדחו) — בדוק/י את עמודות-ה-CSV'; _importResult = null; } }); });
-        }, child: ForgeSoftButton(fields: ['📥 ייבא'])))]),
+        }, child: ForgeToneButton(items: [['📥 ייבא']], variants: const <int>[1])))]),
       ])),
     ));
   }
@@ -1394,10 +1384,10 @@ class _TeacherScreenState extends State<TeacherScreen> {
       );
 }
 
-// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): TeacherFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
-class TeacherFacts {
-  static const String entity = 'Teacher';
-  static const String label = 'מורה'; // מונח-הישות מ-entity-terms (דאטה)
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): ShopStoreFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class ShopStoreFacts {
+  static const String entity = 'ShopStore';
+  static const String label = 'חנות'; // מונח-הישות מ-entity-terms (דאטה)
   static int get count => ((_StuData.db['families'] as List?)?.length ?? 0); // רשומות הזרע-הראשי "families" (seed-db)
   static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'highN', 'label': '🔴 סיכון-גבוה', 'tone': 'danger'}, {'key': 'newN', 'label': '🆕 חדשים-השנה', 'tone': 'plain'}, {'key': 'midN', 'label': '🟠 סיכון-בינוני', 'tone': 'plain'}, {'key': 'medicalN', 'label': '🩺 רפואי/צרכים', 'tone': 'plain'}, {'key': 'noParentN', 'label': '📵 ללא-הורה-מעודכן', 'tone': 'danger'}, {'key': 'openTicketsN', 'label': '📨 פניות-פתוחות', 'tone': 'plain'}]; // 6 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
   static Map<String, String> get metrics => <String, String>{'highN': '${_StuData.highN}', 'newN': '${_StuData.newN}', 'midN': '${_StuData.midN}', 'medicalN': '${_StuData.medicalN}', 'noParentN': '${_StuData.noParentN}', 'openTicketsN': '${_StuData.openTicketsN}'};
@@ -1413,6 +1403,6 @@ class TeacherFacts {
   static Map<String, dynamic> seed() => _StuData.seed();
   static const String seedList = 'families';
   static const String? rowList = 'members'; // null ⇒ רשומת-המסך = רשומת-הזרע עצמה
-  static const List<String> reservedColumns = <String>['specialty', 'payRate', 'payMethod', 'payeeName', 'payeePhone', 'payeeIdNum', 'bankName', 'bankBranch', 'bankAccount'];
+  static const List<String> reservedColumns = <String>[];
   static const String? tableView = '📋 טבלה'; // תווית-המבט שמגלה את הטבלה (null ⇒ הטבלה תמיד גלויה)
 }

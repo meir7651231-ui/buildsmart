@@ -1,15 +1,15 @@
-// 🎯 ShopCriterionScreen — retarget של schoolos_courses.dart לישות ShopCriterion (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity ShopCriterion
-//   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 3 · ערוץ 0 · טיפוס-יחיד 1 · מקום-שמור 11 · חוזה-מנוע (לא משתנה) 12
-//   id⇒id(name) · name⇒name(name) · notes⇒notes(name) · teacherId⇒∅(engine-contract) · roomId⇒∅(engine-contract) · start⇒∅(engine-contract) · end⇒∅(engine-contract) · sessions⇒∅(engine-contract) · time⇒∅(engine-contract) · gender⇒∅(engine-contract) · ageMin⇒∅(engine-contract) · ageMax⇒∅(engine-contract) · gradeMin⇒∅(engine-contract) · gradeMax⇒∅(engine-contract) · day⇒∅(engine-contract) · cat⇒∅(reserved) · semester⇒∅(reserved) · sector⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒discountPct(unique) · price⇒∅(reserved) · description⇒∅(reserved) · files⇒∅(reserved) · kind⇒∅(reserved) · data⇒∅(reserved) · perLesson⇒∅(reserved) · lessonPrice⇒∅(reserved)
+// 🎯 TzCampaignScreen — retarget של schoolos_courses.dart לישות TzCampaign (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_courses.dart --entity TzCampaign
+//   זרע-ראשי: courses (מועמדים: courses(23/27) enrollments(10/18) rooms(9/12) families(8/8) teachers(6/6)) · מיפוי שם 5 · ערוץ 0 · טיפוס-יחיד 2 · מקום-שמור 10 · חוזה-מנוע (לא משתנה) 10
+//   id⇒id(name) · name⇒name(name) · start⇒start(name) · end⇒end(name) · notes⇒notes(name) · teacherId⇒∅(engine-contract) · roomId⇒∅(engine-contract) · sessions⇒∅(engine-contract) · time⇒∅(engine-contract) · gender⇒∅(engine-contract) · ageMin⇒∅(engine-contract) · ageMax⇒∅(engine-contract) · gradeMin⇒∅(engine-contract) · gradeMax⇒∅(engine-contract) · day⇒∅(engine-contract) · cat⇒∅(reserved) · semester⇒∅(reserved) · sector⇒∅(reserved) · label⇒∅(reserved) · maxStudents⇒goal(unique) · price⇒∅(reserved) · description⇒∅(reserved) · files⇒∅(reserved) · kind⇒∅(reserved) · data⇒∅(reserved) · perLesson⇒active(unique) · lessonPrice⇒∅(reserved)
 //   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×20 (ב-Row, Expanded) · פנימיים: button×32 statusChip×10 banner×15 emptyState×18 mediaRow×12 · StatHero⇒ForgeStatPlain ×1 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
-//   תפר-עובדות (G9b): ShopCriterionFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher · שורות-מדד (G10a) kpiActive/kpiFull/kpiNoTeacher · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
-//   שדות-ShopCriterion בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): — · תוויות: מונחי course (חוג/—) ⇒ ShopCriterion (קריטריון/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopCriterion
+//   תפר-עובדות (G9b): TzCampaignFacts · count=courses.length (static-const) · מדדים 8 · hero=kpiNoTeacher · שורות-מדד (G10a) kpiActive/kpiFull/kpiNoTeacher · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
+//   שדות-TzCampaign בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): — · תוויות: מונחי course (חוג/—) ⇒ TzCampaign (מבצע/—) · 21 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של TzCampaign
 // 📚 SchoolOS · חוגים ומערכת-שעות (COURSES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT · "מה"): knowledge/SPEC-COURSES-FULL-2026-09-04.md · הסטנדרט: מסך-המלאי (schoolos.dart).
 // 🎯 המטרה: "שכל שיעור יקרה — עם מורה, בחדר, לתלמידים הנכונים, בזמן — ושאף שיבוץ לא יתנגש ואף מקום לא יתבזבז."
 // פעולות-היסוד (צעד-2, לא אזורי-מפרט): איתור · הערכת-תפוסה · זיהוי-חריגה (התנגשות/ללא-מורה/ללא-חדר/מלא/מתחת-מינ׳)
 //   · הכרעה (דחיפות-מאוחדת) · ביצוע (שיבוץ/העלאה/הקצאה/ביטול/סיום/שכפול) · אימות (היסטוריה/גבייה/ייצוא).
-// מחלקה ציבורית יחידה: ShopCriterionScreen (const, ללא main) — המנהל מחבר ניווט-ביתי.
+// מחלקה ציבורית יחידה: TzCampaignScreen (const, ללא main) — המנהל מחבר ניווט-ביתי.
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/bare_stat.dart'; // עובדה-אטומית (ערך+תווית, צבע מוזרק) — לא StatBlock המזייף
@@ -108,7 +108,7 @@ const _warning = Color(0xFFF59E0B);
 //   Member: id·first·gender·birth·grade · Family: id·name·members[] · OrgEvent: id·title·date·time·roomId·done
 //   ⛔ ללא-מקור-אמת ⇒ **מקום-שמור** (שקע בחוזה, מאיר כשיגיע נתון), לא זיוף: code · minStudents · equipment ·
 //      prerequisites · substituteTeacherId · online · certificate · cancelPolicy · syllabus · recordings · grades.
-class _ShopCriterionData {
+class _TzCampaignData {
   static const today = '2026-09-04'; // תאריך-הזרקה דטרמיניסטי (VERIFY: אין DateTime.now במנוע)
 
   static const teachers = <Map<String, dynamic>>[
@@ -126,28 +126,28 @@ class _ShopCriterionData {
   // חוגים — sessions בצורת CourseSession {day(0=ראשון..6),time,label}. תאריכים ISO. semester = semesterOptions ממאור.
   static const courses = <Map<String, dynamic>>[
     {'id': 'c1', 'name': 'גיטרה מתחילים', 'teacherId': 't1', 'roomId': 'r1', 'cat': 'מוזיקה', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
-      'sessions': [{'day': 0, 'time': '16:00', 'label': ''}], 'discountPct': 12, 'price': 220, 'gender': 'all', 'ageMin': 9, 'ageMax': 12, 'gradeMin': 'ד', 'gradeMax': 'ו',
+      'sessions': [{'day': 0, 'time': '16:00', 'label': ''}], 'goal': 12, 'price': 220, 'gender': 'all', 'ageMin': 9, 'ageMax': 12, 'gradeMin': 'ד', 'gradeMax': 'ו',
       'description': 'יסודות הגיטרה הקלאסית', 'notes': '', 'files': [{'id': 'f1', 'name': 'ספר-אקורדים.pdf', 'kind': 'file', 'data': ''}]},
     {'id': 'c2', 'name': 'רובוטיקה', 'teacherId': 't2', 'roomId': 'r2', 'cat': 'מדעים', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
-      'sessions': [{'day': 1, 'time': '16:00', 'label': ''}, {'day': 3, 'time': '16:00', 'label': ''}], 'discountPct': 10, 'price': 320, 'gender': 'all', 'ageMin': 10, 'ageMax': 14, 'gradeMin': 'ה', 'gradeMax': 'ח',
+      'sessions': [{'day': 1, 'time': '16:00', 'label': ''}, {'day': 3, 'time': '16:00', 'label': ''}], 'goal': 10, 'price': 320, 'gender': 'all', 'ageMin': 10, 'ageMax': 14, 'gradeMin': 'ה', 'gradeMax': 'ח',
       'description': 'בניית רובוטים ותכנות', 'notes': 'דורש מחשב נייד', 'files': <Map<String, dynamic>>[]},
     {'id': 'c3', 'name': 'ציור וקרמיקה', 'teacherId': 't3', 'roomId': 'r3', 'cat': 'אומנות', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-01-31',
-      'sessions': [{'day': 2, 'time': '15:00', 'label': ''}], 'discountPct': 8, 'price': 180, 'gender': 'all', 'ageMin': 7, 'ageMax': 11, 'gradeMin': 'ב', 'gradeMax': 'ה',
+      'sessions': [{'day': 2, 'time': '15:00', 'label': ''}], 'goal': 8, 'price': 180, 'gender': 'all', 'ageMin': 7, 'ageMax': 11, 'gradeMin': 'ב', 'gradeMax': 'ה',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[]},
     {'id': 'c4', 'name': 'כדורסל', 'teacherId': 't4', 'roomId': 'r4', 'cat': 'ספורט', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
-      'sessions': [{'day': 1, 'time': '16:00', 'label': ''}], 'discountPct': 15, 'price': 150, 'gender': 'all', 'ageMin': 9, 'ageMax': 13, 'gradeMin': 'ד', 'gradeMax': 'ז',
-      'description': '', 'notes': '', 'files': <Map<String, dynamic>>[], 'perLesson': true, 'lessonPrice': 40},
+      'sessions': [{'day': 1, 'time': '16:00', 'label': ''}], 'goal': 15, 'price': 150, 'gender': 'all', 'ageMin': 9, 'ageMax': 13, 'gradeMin': 'ד', 'gradeMax': 'ז',
+      'description': '', 'notes': '', 'files': <Map<String, dynamic>>[], 'active': true, 'lessonPrice': 40},
     {'id': 'c5', 'name': 'מקהלה', 'teacherId': 't1', 'roomId': 'r1', 'cat': 'מוזיקה', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
-      'sessions': [{'day': 0, 'time': '16:00', 'label': ''}], 'discountPct': 25, 'price': 120, 'gender': 'all', 'ageMin': 8, 'ageMax': 14, 'gradeMin': 'ג', 'gradeMax': 'ח',
+      'sessions': [{'day': 0, 'time': '16:00', 'label': ''}], 'goal': 25, 'price': 120, 'gender': 'all', 'ageMin': 8, 'ageMax': 14, 'gradeMin': 'ג', 'gradeMax': 'ח',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[]}, // ⚠️ מתנגש עם c1: אותה מורה + אותו חדר + אותו slot
     {'id': 'c6', 'name': 'שחמט', 'teacherId': '', 'roomId': 'r3', 'cat': 'חשיבה', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-01-31',
-      'sessions': [{'day': 4, 'time': '15:00', 'label': ''}], 'discountPct': 12, 'price': 140, 'gender': 'all', 'ageMin': 7, 'ageMax': 13, 'gradeMin': 'ב', 'gradeMax': 'ז',
-      'description': '', 'notes': '', 'files': <Map<String, dynamic>>[], 'perLesson': true, 'lessonPrice': 35}, // ללא-מורה · מתחת-מינ׳-כלכלי
+      'sessions': [{'day': 4, 'time': '15:00', 'label': ''}], 'goal': 12, 'price': 140, 'gender': 'all', 'ageMin': 7, 'ageMax': 13, 'gradeMin': 'ב', 'gradeMax': 'ז',
+      'description': '', 'notes': '', 'files': <Map<String, dynamic>>[], 'active': true, 'lessonPrice': 35}, // ללא-מורה · מתחת-מינ׳-כלכלי
     {'id': 'c7', 'name': 'תיאטרון', 'teacherId': 't3', 'roomId': 'r3', 'cat': 'אומנות', 'semester': 'שנתי', 'sector': 'כללי', 'start': '2026-09-01', 'end': '2027-06-30',
-      'sessions': [{'day': 2, 'time': '17:00', 'label': ''}], 'discountPct': 14, 'price': 190, 'gender': 'all', 'ageMin': 10, 'ageMax': 14, 'gradeMin': 'ה', 'gradeMax': 'ח',
+      'sessions': [{'day': 2, 'time': '17:00', 'label': ''}], 'goal': 14, 'price': 190, 'gender': 'all', 'ageMin': 10, 'ageMax': 14, 'gradeMin': 'ה', 'gradeMax': 'ח',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[]},
     {'id': 'c8', 'name': 'אנגלית מדוברת (קיץ)', 'teacherId': 't2', 'roomId': 'r2', 'cat': 'שפות', 'semester': 'חצי שנתי', 'sector': 'כללי', 'start': '2026-07-01', 'end': '2026-08-20',
-      'sessions': [{'day': 3, 'time': '10:00', 'label': ''}], 'discountPct': 12, 'price': 200, 'gender': 'all', 'ageMin': 9, 'ageMax': 13, 'gradeMin': 'ד', 'gradeMax': 'ז',
+      'sessions': [{'day': 3, 'time': '10:00', 'label': ''}], 'goal': 12, 'price': 200, 'gender': 'all', 'ageMin': 9, 'ageMax': 13, 'gradeMin': 'ד', 'gradeMax': 'ז',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[]}, // הסתיים (end < today)
   ];
   // משפחות+חברים בצורת-האמת (Family.members[Member]) — שם-תצוגה = first + שם-משפחה
@@ -257,7 +257,7 @@ class _ShopCriterionData {
 
   // ─── הערכת-תפוסה (פעולת-יסוד · מנועי-מדף) ───
   static int enrolled(Map<String, dynamic> c) => enrollCount(db, c['id']); // מנוע-אמת: לא wait/ended
-  static int capacity(Map<String, dynamic> c) => (c['discountPct'] as int?) ?? 0;
+  static int capacity(Map<String, dynamic> c) => (c['goal'] as int?) ?? 0;
   static List<Map<String, dynamic>> waitlist(Map<String, dynamic> c) => (waitlistFor(allEnrollments, c['id']) as List).cast<Map<String, dynamic>>();
   static bool isFull(Map<String, dynamic> c) => capacity(c) > 0 && enrolled(c) >= capacity(c);
   static double occupancy(Map<String, dynamic> c) => capacity(c) == 0 ? 0 : enrolled(c) / capacity(c);
@@ -269,7 +269,7 @@ class _ShopCriterionData {
   //   נקודת-איזון = ⌈(שכר-מורה-לשיעור + עלות-חדר-לשיעור) ÷ מחיר-לשיעור⌉ — רק כשכל שלושת המקורות באותה יחידה
   //   (perLesson+lessonPrice של Course · payRate של Teacher · rate של Room — כולם שדות-אמת). אחרת ⇒ null (שקט, לא זיוף).
   static int? breakEven(Map<String, dynamic> c) {
-    if (c['perLesson'] != true) return null;
+    if (c['active'] != true) return null;
     final lp = (c['lessonPrice'] as num?) ?? 0;
     if (lp <= 0) return null;
     final pay = (teacherOf(c)?['payRate'] as num?) ?? 0;
@@ -442,7 +442,7 @@ class _ShopCriterionData {
   //   נגזרת(get)=תמיד-מוצגת · שדה(key בלי get)=מוארת רק כשחוג נושא ערך, חסר ⇒ שקט (אפס-זיוף).
   //   'code' אין במאור ⇒ מקום-שמור: הוספת {'code': …} לחוג ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
-    {'label': 'שם-קריטריון', 'get': (Map<String, dynamic> c) => '${c['name']}'},
+    {'label': 'שם-מבצע', 'get': (Map<String, dynamic> c) => '${c['name']}'},
     {'key': 'code', 'label': 'קוד'},                                                   // מקום-שמור
     {'label': 'תחום', 'get': (Map<String, dynamic> c) => '${c['cat'] ?? '—'}'},
     {'label': 'מורה', 'get': (Map<String, dynamic> c) => '${teacherOf(c)?['name'] ?? '—'}'},
@@ -456,7 +456,7 @@ class _ShopCriterionData {
     {'label': 'תפוסה%', 'get': (Map<String, dynamic> c) => '${(occupancy(c) * 100).round()}%'},
     {'label': 'המתנה', 'get': (Map<String, dynamic> c) => '${waitlist(c).length}'},
     {'label': 'מינ׳-לפתיחה', 'get': (Map<String, dynamic> c) => minToOpen(c) == null ? '—' : '${minToOpen(c)}${c['minStudents'] == null ? ' (איזון)' : ''}'},
-    {'label': 'מחיר', 'get': (Map<String, dynamic> c) => c['perLesson'] == true ? '${shekel(c['lessonPrice'])}/שיעור' : shekel(c['price'])},
+    {'label': 'מחיר', 'get': (Map<String, dynamic> c) => c['active'] == true ? '${shekel(c['lessonPrice'])}/שיעור' : shekel(c['price'])},
     {'label': 'חוב-פתוח', 'get': (Map<String, dynamic> c) => shekel(courseDebt(c).toInt())},
     {'key': '__status', 'label': 'סטטוס'},
     {'label': 'מגמת-הרשמה', 'get': (Map<String, dynamic> c) => trendLabel(c)},
@@ -491,7 +491,7 @@ class _ShopCriterionData {
   }
   static Map<String, dynamic> _newEnrollment(Map<String, dynamic> c, dynamic memberId, String status) => {
         'id': nextId('e-new-'), 'memberId': memberId, 'courseId': c['id'], 'status': status, 'enrolledAt': today, 'group': '',
-        'totalDue': c['perLesson'] == true ? 0 : ((c['price'] as num?) ?? 0) * 10, 'dueDate': '', 'note': '', 'payments': <Map<String, dynamic>>[],
+        'totalDue': c['active'] == true ? 0 : ((c['price'] as num?) ?? 0) * 10, 'dueDate': '', 'note': '', 'payments': <Map<String, dynamic>>[],
         'presents': <String>[], 'absences': <Map<String, dynamic>>[],
       };
   // 🎓 שבץ-תלמיד: קדם ⊕ התנגשות ⊕ קיבולת ⇒ enrolled / waitlisted / blocked
@@ -536,7 +536,7 @@ class _ShopCriterionData {
   // ⬆ העלה-מהמתנה (ידני): נחסם כשהחוג מלא
   static String promote(Map<String, dynamic> e, String who) {
     final c = courseById(e['courseId'])!;
-    if (isFull(c)) return 'blocked:הקריטריון מלא (${enrolled(c)}/${capacity(c)}) — הסר תלמיד או הגדל קיבולת';
+    if (isFull(c)) return 'blocked:המבצע מלא (${enrolled(c)}/${capacity(c)}) — הסר תלמיד או הגדל קיבולת';
     final clash = clashReason(c, e['memberId']);
     if (clash != null) return 'blocked:התנגשות — ${memberName(e['memberId'])} $clash';
     statusOverride[e['id'] as String] = 'active';
@@ -556,7 +556,7 @@ class _ShopCriterionData {
     return liveCourses.any((o) => o['id'] != c['id'] && o[key] == id && '$id'.isNotEmpty && _sameSlot(sim, o));
   }
   static String assignTeacher(Map<String, dynamic> c, dynamic tid, String who) {
-    if (_wouldClash(c, 'teacherId', tid)) return 'blocked:התנגשות-מורה — ${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} מלמד/ת קריטריון-אחר באותו slot';
+    if (_wouldClash(c, 'teacherId', tid)) return 'blocked:התנגשות-מורה — ${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} מלמד/ת מבצע-אחר באותו slot';
     courseOverride[c['id'] as String] = {...?courseOverride[c['id']], 'teacherId': tid};
     log(who, 'הקצאת-מורה', '${teachers.where((t) => t['id'] == tid).firstOrNull?['name']} ⇐ ${c['name']}', c['id'] as String);
     return 'assigned';
@@ -588,13 +588,13 @@ class _ShopCriterionData {
     for (final e in liveEnrollmentsOf(c)) {
       statusOverride[e['id'] as String] = 'ended';
     }
-    log(who, 'סיום-קריטריון', '${c['name']} · ${liveEnrollmentsOf(c).length} הרשמות נסגרו', c['id'] as String);
+    log(who, 'סיום-מבצע', '${c['name']} · ${liveEnrollmentsOf(c).length} הרשמות נסגרו', c['id'] as String);
   }
   // ✏️ ערוך: שם / קיבולת (הגדלת-קיבולת ⇒ העלאה-אוטומטית מהמתנה)
   static void edit(Map<String, dynamic> c, String key, dynamic value, String who) {
     courseOverride[c['id'] as String] = {...?courseOverride[c['id']], key: value};
     log(who, 'עריכה', '$key=$value ⇐ ${c['name']}', c['id'] as String);
-    if (key == 'discountPct' && autoPromote) {
+    if (key == 'goal' && autoPromote) {
       while (promoteNext(courseById(c['id'])!, 'אוטומציה') != null) {}
     }
   }
@@ -602,7 +602,7 @@ class _ShopCriterionData {
   static Map<String, dynamic> duplicate(Map<String, dynamic> c, String who) {
     final copy = duplicateCourse(c, nextId('c-copy-'), {'start': c['start'], 'end': c['end']}, term: (k) => k == 'avtk' ? ' (עותק)' : k);
     extraCourses.add(copy);
-    log(who, 'שכפול-קריטריון', '${copy['name']}', copy['id'] as String);
+    log(who, 'שכפול-מבצע', '${copy['name']}', copy['id'] as String);
     return copy;
   }
   // 📑 שכפל-סמסטר/שנה (nextYearCourseDraft⊕nextYearDates⊕academicYearLabel ממאור) — "חכם": מסמן טיוטות בלי-מורה/בלי-חדר-פעיל
@@ -626,12 +626,12 @@ class _ShopCriterionData {
   static Map<String, dynamic> newCourse(String who) {
     final dates = defaultCourseDates(today);
     final c = <String, dynamic>{
-      'id': nextId('c-new-'), 'name': 'קריטריון חדש', 'teacherId': '', 'roomId': '', 'cat': '', 'semester': '', 'sector': 'כללי', // semester ריק = "סמסטר לא-מוגדר" עד שנבחר
-      'start': dates['start'], 'end': dates['end'], 'sessions': <Map<String, dynamic>>[], 'discountPct': 0, 'price': 0, 'gender': 'all',
+      'id': nextId('c-new-'), 'name': 'מבצע חדש', 'teacherId': '', 'roomId': '', 'cat': '', 'semester': '', 'sector': 'כללי', // semester ריק = "סמסטר לא-מוגדר" עד שנבחר
+      'start': dates['start'], 'end': dates['end'], 'sessions': <Map<String, dynamic>>[], 'goal': 0, 'price': 0, 'gender': 'all',
       'description': '', 'notes': '', 'files': <Map<String, dynamic>>[],
     };
     extraCourses.add(c);
-    log(who, 'קריטריון-חדש', '${c['name']} · ${dates['start']}–${dates['end']}', c['id'] as String);
+    log(who, 'מבצע-חדש', '${c['name']} · ${dates['start']}–${dates['end']}', c['id'] as String);
     return c;
   }
   // 💬 שלח-הודעה-לחוג: קישור-WhatsApp פר-משפחה (waLink⊕waDigits ממאור) — הזהות (טלפון) מוזרקת מהדאטה, לא באטום
@@ -810,7 +810,7 @@ class _ShopCriterionData {
     for (final e in liveEnrollmentsOf(c)) {
       statusOverride[e['id'] as String] = 'ended';
     }
-    log(who, 'ביטול-קריטריון', '${c['name']}', c['id'] as String);
+    log(who, 'ביטול-מבצע', '${c['name']}', c['id'] as String);
   }
   // סמסטר-לא-מוגדר: חוג בלי semester תקין (מצב-מיוחד)
   static bool semesterUndefined(Map<String, dynamic> c) => !semesterOptions.contains(c['semester']);
@@ -950,22 +950,22 @@ class _ShopCriterionData {
   static num get kpiDebt => grandTotal(liveCourses, (c) => courseDebt(c as Map<String, dynamic>));
 }
 
-// ═══════════ המסך · ShopCriterionScreen (const · ללא main · המנהל מחבר ניווט) ═══════════
-class ShopCriterionScreen extends StatefulWidget {
-  const ShopCriterionScreen({this.initialMetric, this.initialPanelId, super.key});
-  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (ShopCriterionFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
+// ═══════════ המסך · TzCampaignScreen (const · ללא main · המנהל מחבר ניווט) ═══════════
+class TzCampaignScreen extends StatefulWidget {
+  const TzCampaignScreen({this.initialMetric, this.initialPanelId, super.key});
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (TzCampaignFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
   final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   @override
-  State<ShopCriterionScreen> createState() => _ShopCriterionScreenState();
+  State<TzCampaignScreen> createState() => _TzCampaignScreenState();
 }
 
   String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
-class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
+class _TzCampaignScreenState extends State<TzCampaignScreen> {
   @override
   void initState() {
     super.initState();
-    _metric = widget.initialMetric != null && ShopCriterionFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
-    final p0 = widget.initialPanelId == null ? null : ShopCriterionFacts.byId(widget.initialPanelId!); // G10a
+    _metric = widget.initialMetric != null && TzCampaignFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
+    final p0 = widget.initialPanelId == null ? null : TzCampaignFacts.byId(widget.initialPanelId!); // G10a
     if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
   }
   int _view = 0; // 0=📅 גריד-שבועי · 1=📋 רשימה · 2=👩‍🏫 פר-מורה · 3=🚪 פר-חדר (SegmentedSwitch→תצוגה)
@@ -982,40 +982,40 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
   String? _msg; // תוצאת-פעולה אחרונה (AlertBanner)
   int _msgTone = 1;
   bool _edit = false; // מצב-עריכה (DsField/DsNumberField)
-  String get _who => _ShopCriterionData.roleDefs[_role]['label'] as String; // זהות-הפועל = התפקיד-הנבחר (חוק-6: מוזרקת)
-  bool _can(String key) => _ShopCriterionData.can(_role, key);
+  String get _who => _TzCampaignData.roleDefs[_role]['label'] as String; // זהות-הפועל = התפקיד-הנבחר (חוק-6: מוזרקת)
+  bool _can(String key) => _TzCampaignData.can(_role, key);
 
   @override
   Widget build(BuildContext context) {
     // גידור-תצוגה לפי תפקיד (roleOf⊕teacherIdOf): מורה רואה את החוגים-שלו · הורה את המערכת-שלי · אחרים הכל
-    final live = _ShopCriterionData.scopeFor(_role, _ShopCriterionData.bySemester(_ShopCriterionData.liveCourses, _sem));
-    final clashes = _ShopCriterionData.kpiClashes;
-    final semEmpty = _sem > 0 && _ShopCriterionData.bySemester(_ShopCriterionData.liveCourses, _sem).isEmpty; // מצב: סמסטר לא-מוגדר/ריק
+    final live = _TzCampaignData.scopeFor(_role, _TzCampaignData.bySemester(_TzCampaignData.liveCourses, _sem));
+    final clashes = _TzCampaignData.kpiClashes;
+    final semEmpty = _sem > 0 && _TzCampaignData.bySemester(_TzCampaignData.liveCourses, _sem).isEmpty; // מצב: סמסטר לא-מוגדר/ריק
     // איתור⊕חריגה (23-ג): search=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filter=finderMatches (AND על נעילות).
     //   'ended' מסנן מכל-החוגים (גם הסתיימו); אחרת מהחיים. הפייפליין רץ פעם-אחת ומזין גריד/רשימה/פר-מורה/פר-חדר.
-    final base = _locks['state'] == 'ended' ? _ShopCriterionData.scopeFor(_role, _ShopCriterionData.bySemester(_ShopCriterionData.allCourses, _sem)) : live;
-    final visibleAll = _ShopCriterionData.filter(_ShopCriterionData.search(base, _q), _locks);
-    final visible = _metric == null ? visibleAll : visibleAll.where((r) => ShopCriterionFacts.heroRows(_metric!).any((h) => '${h[ShopCriterionFacts.idKey] ?? h['id']}' == '${r[ShopCriterionFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
+    final base = _locks['state'] == 'ended' ? _TzCampaignData.scopeFor(_role, _TzCampaignData.bySemester(_TzCampaignData.allCourses, _sem)) : live;
+    final visibleAll = _TzCampaignData.filter(_TzCampaignData.search(base, _q), _locks);
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => TzCampaignFacts.heroRows(_metric!).any((h) => '${h[TzCampaignFacts.idKey] ?? h['id']}' == '${r[TzCampaignFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     // דירוג לפי דחיפות-מאוחדת (התנגשות ראשונה), ואז לפי תפוסה-יורדת
     final ranked = [...visible]..sort((a, b) {
-        final s = _ShopCriterionData.sev(b).compareTo(_ShopCriterionData.sev(a));
-        return s != 0 ? s : _ShopCriterionData.occupancy(b).compareTo(_ShopCriterionData.occupancy(a));
+        final s = _TzCampaignData.sev(b).compareTo(_TzCampaignData.sev(a));
+        return s != 0 ? s : _TzCampaignData.occupancy(b).compareTo(_TzCampaignData.occupancy(a));
       });
     // טריאז' — פעולת-יסוד "הכרעה" מקבצת פר-דחיפות (3 התנגשות · 2 ללא-מורה/חדר · 1 מתחת-מינ׳ · 0 תקין · -1 הסתיים)
     final buckets = <int, List<Map<String, dynamic>>>{3: [], 2: [], 1: [], 0: [], -1: []};
     for (final c in ranked) {
-      buckets[_ShopCriterionData.sev(c)]!.add(c);
+      buckets[_TzCampaignData.sev(c)]!.add(c);
     }
     const secTitle = {3: '⚠️ התנגשות — חוסם', 2: '🚫 ללא-מורה / ללא-חדר', 1: '📉 מתחת-למינימום', 0: '🟢 תקין', -1: '🏁 הסתיימו / בוטלו'};
     const secTone = {3: 2, 2: 2, 1: 3, 0: 1, -1: 0};
-    return DsScaffold(title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_ShopCriterionData.teachers.length} מורים · ${_ShopCriterionData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'חוגים ומערכת', '${live.length} חוגים חיים · ${_ShopCriterionData.teachers.length} מורים · ${_ShopCriterionData.rooms.where((r) => r['active'] == true).length} חדרים']), ...[
+    return DsScaffold(title: 'חוגים ומערכת', subtitle: '${live.length} חוגים חיים · ${_TzCampaignData.teachers.length} מורים · ${_TzCampaignData.rooms.where((r) => r['active'] == true).length} חדרים', icon: '📚', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'חוגים ומערכת', '${live.length} חוגים חיים · ${_TzCampaignData.teachers.length} מורים · ${_TzCampaignData.rooms.where((r) => r['active'] == true).length} חדרים']), ...[
         // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
-        if (_metric != null) ForgeSectionPill(items: [['מסונן למדד: ${ShopCriterionFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}']], variants: const <int>[0]),
-        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeSoftButton(fields: ['✖ בטל סינון-מדד']))),
+        if (_metric != null) ForgeToneBanner(items: [['מסונן למדד: ${TzCampaignFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}']], variants: const <int>[1]),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeToneButton(items: [['✖ בטל סינון-מדד']], variants: const <int>[3]))),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות ותצוגה פר-תפקיד (roleOf⊕canGrantedAction⊕teacherIdOf)
         Align(
           alignment: Alignment.centerRight,
-          child: FittedBox(fit: BoxFit.scaleDown, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _ShopCriterionData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() { _role = i; _locks.clear(); }))),
+          child: FittedBox(fit: BoxFit.scaleDown, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _TzCampaignData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() { _role = i; _locks.clear(); }))),
         ),
         _gap(8),
         // פס-עליון: בורר-שבוע/סמסטר + בורר-תצוגה (SegmentedSwitch מבוקר ×3) — ארגון = פעולת-יסוד עם אטום משלה
@@ -1032,130 +1032,130 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         // פס-עליון · פעולות-גלובליות: חוג-חדש (defaultCourseDates) · שכפל-סמסטר (nextYearCourseDraft) · הדפס-מערכת
         Wrap(spacing: 8, runSpacing: 6, children: [
           // רענון — מדגים את מצב-הטעינה השמור (חיבור-אסינק אמיתי יאיר אותו זהה)
-          GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄'])),
-          if (_can('crs.new')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _act(() => _ShopCriterionData.newCourse(_who), 'נוצר קריטריון-חדש (ללא-מורה/ללא-חדר — שבץ בפאנל)'), child: ForgeSoftButton(fields: ['➕ קריטריון-חדש'])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0])),
+          if (_can('crs.new')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _act(() => _TzCampaignData.newCourse(_who), 'נוצר מבצע-חדש (ללא-מורה/ללא-חדר — שבץ בפאנל)'), child: ForgeToneButton(items: [['➕ מבצע-חדש']], variants: const <int>[1])),
           if (_can('crs.duplicate')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
-            final r = _ShopCriterionData.duplicateSemester(_sem, _who);
+            final r = _TzCampaignData.duplicateSemester(_sem, _who);
             _flash('שכפול-סמסטר: ${r['created']} טיוטות לשנה-הבאה · ${r['flagged']} דורשות מורה/חדר', r['flagged']! > 0 ? 3 : 1);
-          }, child: ForgeSoftButton(fields: ['📑 שכפל-סמסטר'])),
-          if (_can('crs.print')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openPrint(live), child: ForgeSoftButton(fields: ['🖨 הדפס-מערכת'])),
-          if (_ShopCriterionData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible), child: ForgeSoftButton(fields: ['⬇ ייצוא'])),
-          ForgeStatusChip(items: [['תפקיד: ${_ShopCriterionData.roleName(_role)}${_ShopCriterionData.myTeacherId(_role) != null ? ' · החוגים-שלי' : _ShopCriterionData.myFamilyId(_role) != null ? ' · המערכת-שלי' : ''}']], variants: const <int>[0]),
+          }, child: ForgeToneButton(items: [['📑 שכפל-סמסטר']], variants: const <int>[0])),
+          if (_can('crs.print')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openPrint(live), child: ForgeToneButton(items: [['🖨 הדפס-מערכת']], variants: const <int>[0])),
+          if (_TzCampaignData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible), child: ForgeToneButton(items: [['⬇ ייצוא']], variants: const <int>[0])),
+          ForgeStatusChip(items: [['תפקיד: ${_TzCampaignData.roleName(_role)}${_TzCampaignData.myTeacherId(_role) != null ? ' · החוגים-שלי' : _TzCampaignData.myFamilyId(_role) != null ? ' · המערכת-שלי' : ''}']], variants: const <int>[0]),
         ]),
         _gap(6),
         // איתור: חיפוש-מבוקר (DsSearch → smartFilter⊕smartScore⊕normSearch) + סינון-מתקדם
         Row(children: [
           Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _adv = !_adv), child: ForgeSoftButton(fields: [_adv ? '🔎 פחות' : '🔎 סינון']))),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _adv = !_adv), child: ForgeToneButton(items: [[_adv ? '🔎 פחות' : '🔎 סינון']], variants: [const <int>[0, 1, 3, 2][(_locks.keys.any((k) => k != 'state') ? 1 : 0) % 4]]))),
         ]),
         // חריגה: צ׳יפי-מצב (FilterChipPill ⊕ finderMatches) עם מונים-אמת
-        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[(('הכל · ${live.length}'), ((_locks[('state')] ?? '') == ('')), () => setState(() { if (('').isEmpty || ((_locks[('state')] ?? '') == (''))) { _locks.remove(('state')); } else { _locks[('state')] = (''); } })), for (final st in _ShopCriterionData.stateChips) (('${st[1]} · ${_ShopCriterionData.countState(st[0] == 'ended' ? _ShopCriterionData.bySemester(_ShopCriterionData.allCourses, _sem) : live, st[0])}'), ((_locks[('state')] ?? '') == (st[0])), () => setState(() { if ((st[0]).isEmpty || ((_locks[('state')] ?? '') == (st[0]))) { _locks.remove(('state')); } else { _locks[('state')] = (st[0]); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[(('הכל · ${live.length}'), ((_locks[('state')] ?? '') == ('')), () => setState(() { if (('').isEmpty || ((_locks[('state')] ?? '') == (''))) { _locks.remove(('state')); } else { _locks[('state')] = (''); } })), for (final st in _TzCampaignData.stateChips) (('${st[1]} · ${_TzCampaignData.countState(st[0] == 'ended' ? _TzCampaignData.bySemester(_TzCampaignData.allCourses, _sem) : live, st[0])}'), ((_locks[('state')] ?? '') == (st[0])), () => setState(() { if ((st[0]).isEmpty || ((_locks[('state')] ?? '') == (st[0]))) { _locks.remove(('state')); } else { _locks[('state')] = (st[0]); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         if (_adv) ...[
           _gap(8),
           // צירי-ממד: תחום (countBy) · מורה · חדר · יום · שעה · שכבה — נעילה-אחת פר-ציר, AND בין צירים
-          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final cc in _ShopCriterionData.catCounts(live)) if ('${cc[0]}'.isNotEmpty) (('🗂 ${cc[0]} · ${cc[1]}'), ((_locks[('cat')] ?? '') == ('${cc[0]}')), () => setState(() { if (('${cc[0]}').isEmpty || ((_locks[('cat')] ?? '') == ('${cc[0]}'))) { _locks.remove(('cat')); } else { _locks[('cat')] = ('${cc[0]}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
+          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final cc in _TzCampaignData.catCounts(live)) if ('${cc[0]}'.isNotEmpty) (('🗂 ${cc[0]} · ${cc[1]}'), ((_locks[('cat')] ?? '') == ('${cc[0]}')), () => setState(() { if (('${cc[0]}').isEmpty || ((_locks[('cat')] ?? '') == ('${cc[0]}'))) { _locks.remove(('cat')); } else { _locks[('cat')] = ('${cc[0]}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
           _gap(6),
-          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final t in _ShopCriterionData.teachers) (('👩‍🏫 ${t['name']}'), ((_locks[('teacher')] ?? '') == ('${t['id']}')), () => setState(() { if (('${t['id']}').isEmpty || ((_locks[('teacher')] ?? '') == ('${t['id']}'))) { _locks.remove(('teacher')); } else { _locks[('teacher')] = ('${t['id']}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
+          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final t in _TzCampaignData.teachers) (('👩‍🏫 ${t['name']}'), ((_locks[('teacher')] ?? '') == ('${t['id']}')), () => setState(() { if (('${t['id']}').isEmpty || ((_locks[('teacher')] ?? '') == ('${t['id']}'))) { _locks.remove(('teacher')); } else { _locks[('teacher')] = ('${t['id']}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
           _gap(6),
-          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final r in _ShopCriterionData.rooms) (('🚪 ${r['name']}'), ((_locks[('room')] ?? '') == ('${r['id']}')), () => setState(() { if (('${r['id']}').isEmpty || ((_locks[('room')] ?? '') == ('${r['id']}'))) { _locks.remove(('room')); } else { _locks[('room')] = ('${r['id']}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
+          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final r in _TzCampaignData.rooms) (('🚪 ${r['name']}'), ((_locks[('room')] ?? '') == ('${r['id']}')), () => setState(() { if (('${r['id']}').isEmpty || ((_locks[('room')] ?? '') == ('${r['id']}'))) { _locks.remove(('room')); } else { _locks[('room')] = ('${r['id']}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
           _gap(6),
-          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (var dd = 0; dd < 6; dd++) (('📅 ${dayNames[dd]}'), ((_locks[('day')] ?? '') == ('$dd')), () => setState(() { if (('$dd').isEmpty || ((_locks[('day')] ?? '') == ('$dd'))) { _locks.remove(('day')); } else { _locks[('day')] = ('$dd'); } })), for (final h in _ShopCriterionData.gridHours(_ShopCriterionData.liveCourses)) (('🕐 ${_ShopCriterionData.hm(h)}'), ((_locks[('hour')] ?? '') == ('${h ~/ 60}')), () => setState(() { if (('${h ~/ 60}').isEmpty || ((_locks[('hour')] ?? '') == ('${h ~/ 60}'))) { _locks.remove(('hour')); } else { _locks[('hour')] = ('${h ~/ 60}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
+          Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (var dd = 0; dd < 6; dd++) (('📅 ${dayNames[dd]}'), ((_locks[('day')] ?? '') == ('$dd')), () => setState(() { if (('$dd').isEmpty || ((_locks[('day')] ?? '') == ('$dd'))) { _locks.remove(('day')); } else { _locks[('day')] = ('$dd'); } })), for (final h in _TzCampaignData.gridHours(_TzCampaignData.liveCourses)) (('🕐 ${_TzCampaignData.hm(h)}'), ((_locks[('hour')] ?? '') == ('${h ~/ 60}')), () => setState(() { if (('${h ~/ 60}').isEmpty || ((_locks[('hour')] ?? '') == ('${h ~/ 60}'))) { _locks.remove(('hour')); } else { _locks[('hour')] = ('${h ~/ 60}'); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
           _gap(6),
           Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final g in gradeOrder.sublist(1, 9)) (('🎒 $g'), ((_locks[('grade')] ?? '') == (g)), () => setState(() { if ((g).isEmpty || ((_locks[('grade')] ?? '') == (g))) { _locks.remove(('grade')); } else { _locks[('grade')] = (g); } }))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
         ],
-        if (_msg != null) ...[_gap(8), ForgeSectionPill(items: [[_msg!]], variants: [const <int>[0, 0, 0, 0][(_msgTone) % 4]])],
+        if (_msg != null) ...[_gap(8), ForgeToneBanner(items: [[_msg!]], variants: [const <int>[0, 1, 3, 2][(_msgTone) % 4]])],
         _gap(12),
         // KPI-10: hero=התנגשויות (המטרה: "אף שיבוץ לא יתנגש") + 9 מדדי-מצב (BareStat נושאי-ערך-אמת)
         ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['התנגשויות (מורה/חדר/תלמיד)', '$clashes'])),
             _gap(14),
             Row(children: [
-              Expanded(child: ForgeStatPlain(fields: ['📚 פעילים', '${_ShopCriterionData.kpiActive}'])),
-              Expanded(child: ForgeStatPlain(fields: ['🗓 שיעורים-השבוע', '${_ShopCriterionData.kpiLessonsWeek}'])),
-              Expanded(child: ForgeStatPlain(fields: ['🎓 רשומים', '${_ShopCriterionData.kpiEnrolled}'])),
-              Expanded(child: ForgeStatPlain(fields: ['📈 תפוסה-ממוצ׳', '${_ShopCriterionData.kpiOccupancyPct}%'])),
-              Expanded(child: ForgeStatPlain(fields: ['🈵 מלאים', '${_ShopCriterionData.kpiFull}'])),
+              Expanded(child: ForgeStatPlain(fields: ['📚 פעילים', '${_TzCampaignData.kpiActive}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🗓 שיעורים-השבוע', '${_TzCampaignData.kpiLessonsWeek}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🎓 רשומים', '${_TzCampaignData.kpiEnrolled}'])),
+              Expanded(child: ForgeStatPlain(fields: ['📈 תפוסה-ממוצ׳', '${_TzCampaignData.kpiOccupancyPct}%'])),
+              Expanded(child: ForgeStatPlain(fields: ['🈵 מלאים', '${_TzCampaignData.kpiFull}'])),
             ]),
             _gap(12),
             Row(children: [
-              Expanded(child: ForgeStatPlain(fields: ['⏳ בהמתנה', '${_ShopCriterionData.kpiWaiting}'])),
-              Expanded(child: ForgeStatPlain(fields: ['🚫 ללא-מורה', '${_ShopCriterionData.kpiNoTeacher}'])),
-              Expanded(child: ForgeStatPlain(fields: ['📉 מתחת-מינ׳', _ShopCriterionData.kpiBelowMinKnown ? '${_ShopCriterionData.kpiBelowMin}' : '—'])),
-              Expanded(child: ForgeStatPlain(fields: ['💳 חוב-פתוח', shekel(_ShopCriterionData.kpiDebt.toInt())])),
+              Expanded(child: ForgeStatPlain(fields: ['⏳ בהמתנה', '${_TzCampaignData.kpiWaiting}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🚫 ללא-מורה', '${_TzCampaignData.kpiNoTeacher}'])),
+              Expanded(child: ForgeStatPlain(fields: ['📉 מתחת-מינ׳', _TzCampaignData.kpiBelowMinKnown ? '${_TzCampaignData.kpiBelowMin}' : '—'])),
+              Expanded(child: ForgeStatPlain(fields: ['💳 חוב-פתוח', shekel(_TzCampaignData.kpiDebt.toInt())])),
             ]),
           ])),
         _gap(10),
         // 🤖 מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה ומציעה לפני שדבר נשמט — כל התראה = מנוע ⊕ AlertBanner ⊕ פעולה
-        if (!_loading && _ShopCriterionData.myFamilyId(_role) == null) ..._automations(live),
+        if (!_loading && _TzCampaignData.myFamilyId(_role) == null) ..._automations(live),
         // מצבי-מסך שמורים (מקום-שמור): טעינה + שגיאה מאירים במצב-אמת; סמסטר-ריק; אין-חוגים; אחרת התוכן הרגיל.
         if (_loading)
           _loadingView()
         else if (_error != null)
-          ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
+          ForgeToneBanner(items: [[_error!]], variants: const <int>[3])
         else if (semEmpty)
           ForgeSearchEmptyState(fields: ['סמסטר "${semesterOptions[_sem - 1]}" לא מוגדר — אין חוגים משובצים בו', ''])
         else if (live.isEmpty)
-          ForgeSearchEmptyState(fields: [_ShopCriterionData.myTeacherId(_role) != null ? 'אין חוגים משובצים למורה זה' : _ShopCriterionData.myFamilyId(_role) != null ? 'אין חוגים למשפחה — הירשמו מהקטלוג' : 'אין חוגים — צור קריטריון-חדש או שכפל סמסטר', ''])
+          ForgeSearchEmptyState(fields: [_TzCampaignData.myTeacherId(_role) != null ? 'אין חוגים משובצים למורה זה' : _TzCampaignData.myFamilyId(_role) != null ? 'אין חוגים למשפחה — הירשמו מהקטלוג' : 'אין חוגים — צור מבצע-חדש או שכפל סמסטר', ''])
         else if (visible.isEmpty)
           const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין חוגים תואמים לחיפוש/סינון', '']))
         else if (_view == 1)
-          ForgeTitledSection(fields: ['📋 רשימת-חוגים · ${visible.length} · ${_ShopCriterionData.columnDefs.where((c) => _ShopCriterionData.colShown(c, visible)).length} עמודות', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_table(ranked)]]))
+          ForgeTitledSection(fields: ['📋 רשימת-חוגים · ${visible.length} · ${_TzCampaignData.columnDefs.where((c) => _TzCampaignData.colShown(c, visible)).length} עמודות', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_table(ranked)]]))
         else if (_view == 2)
           ..._byTeacher(visible)
         else if (_view == 3)
           ..._byRoom(visible)
         else ...[
-          ForgeTitledSection(fields: ['📅 מערכת-שעות · ${_week == 0 ? 'השבוע' : 'שבוע הבא'} (${_ShopCriterionData.isoOfDay(0, _week)} – ${_ShopCriterionData.isoOfDay(5, _week)})', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_grid(visible)]])),
+          ForgeTitledSection(fields: ['📅 מערכת-שעות · ${_week == 0 ? 'השבוע' : 'שבוע הבא'} (${_TzCampaignData.isoOfDay(0, _week)} – ${_TzCampaignData.isoOfDay(5, _week)})', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_grid(visible)]])),
           for (final st in const [3, 2, 1, 0, -1])
             if (buckets[st]!.isNotEmpty)
               ForgeTitledSection(fields: ['${secTitle[st]} · ${buckets[st]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[for (final c in buckets[st]!) _row(c)]])),
         ],
         // הורה + הרשמה-עצמית מופעלת: קטלוג-חוגים פתוחים להרשמה (wait ⇒ רכז מאשר). כל בדיקות-הקדם/התנגשות חלות.
-        if (_can('crs.self') && _ShopCriterionData.myFamilyId(_role) != null && !_loading) ..._selfCatalog(),
+        if (_can('crs.self') && _TzCampaignData.myFamilyId(_role) != null && !_loading) ..._selfCatalog(),
       ]]);
   }
 
   // מרכז-אוטומציות: חג⇒ביטול · מתחת-מינ׳ · חדר/מורה-חלופי · המתנה-עם-מקום · תזכורות · ביקוש · ניצולת
   List<Widget> _automations(List<Map<String, dynamic>> live) {
-    final hl = _ShopCriterionData.holidayLessons();
-    final rem = _ShopCriterionData.reminders();
-    final bm = _ShopCriterionData.belowMinAlerts;
-    final pr = _ShopCriterionData.promotable;
-    final noRoomCs = live.where(_ShopCriterionData.noRoom).toList(), noTeacherCs = live.where(_ShopCriterionData.noTeacher).toList();
-    final clashRooms = live.where((c) => _ShopCriterionData.clashesOf(c).any((k) => k['kind'] == 'room')).toList();
-    final demand = _ShopCriterionData.demandSignals;
+    final hl = _TzCampaignData.holidayLessons();
+    final rem = _TzCampaignData.reminders();
+    final bm = _TzCampaignData.belowMinAlerts;
+    final pr = _TzCampaignData.promotable;
+    final noRoomCs = live.where(_TzCampaignData.noRoom).toList(), noTeacherCs = live.where(_TzCampaignData.noTeacher).toList();
+    final clashRooms = live.where((c) => _TzCampaignData.clashesOf(c).any((k) => k['kind'] == 'room')).toList();
+    final demand = _TzCampaignData.demandSignals;
     Widget withAction(Widget banner, Widget? action) => action == null ? banner : Row(children: [Expanded(child: banner), const SizedBox(width: 6), action]);
     return [
       ForgeTitledSection(fields: ['🤖 אוטומציות · ${hl.length + rem.length + bm.length + pr.length + noRoomCs.length + noTeacherCs.length + clashRooms.length + demand.length} אותות', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         // דוח-ניצולת (BareStat×3 — עובדות): חדרים · עומס-מורים · חגים-קרובים
         Row(children: [
-          Expanded(child: ForgeStatPlain(fields: ['🚪 ניצולת-חדרים', '${_ShopCriterionData.avgRoomUtilPct}%'])),
-          Expanded(child: ForgeStatPlain(fields: ['👩‍🏫 מפגשים/מורה/שבוע', _ShopCriterionData.avgTeacherLoad.toStringAsFixed(1)])),
-          Expanded(child: ForgeStatPlain(fields: ['🕎 חגים ב-45 ימים', '${_ShopCriterionData.upcomingHolidayList.length}'])),
+          Expanded(child: ForgeStatPlain(fields: ['🚪 ניצולת-חדרים', '${_TzCampaignData.avgRoomUtilPct}%'])),
+          Expanded(child: ForgeStatPlain(fields: ['👩‍🏫 מפגשים/מורה/שבוע', _TzCampaignData.avgTeacherLoad.toStringAsFixed(1)])),
+          Expanded(child: ForgeStatPlain(fields: ['🕎 חגים ב-45 ימים', '${_TzCampaignData.upcomingHolidayList.length}'])),
         ]),
         _gap(8),
         // סנכרון-לוח: שיעורים על חג ⇒ ביטול-אוטו (+הודעה דרך שלח-הודעה)
         if (hl.isNotEmpty) withAction(
-          ForgeSectionPill(items: [['${hl.length} שיעורים נופלים בחג: ${hl.map((h) => '${(h['course'] as Map)['name']} ${h['iso']} (${h['name']})').join(' · ')}']], variants: const <int>[0]),
-          _can('crs.cancel') ? GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _act(() => _ShopCriterionData.autoCancelHolidays('אוטומציה'), '${hl.length} שיעורי-חג בוטלו אוטומטית — שלח הודעה למשפחות מהפאנל'), child: ForgeSoftButton(fields: ['✖ בטל-אוטו'])) : null),
+          ForgeToneBanner(items: [['${hl.length} שיעורים נופלים בחג: ${hl.map((h) => '${(h['course'] as Map)['name']} ${h['iso']} (${h['name']})').join(' · ')}']], variants: const <int>[2]),
+          _can('crs.cancel') ? GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _act(() => _TzCampaignData.autoCancelHolidays('אוטומציה'), '${hl.length} שיעורי-חג בוטלו אוטומטית — שלח הודעה למשפחות מהפאנל'), child: ForgeToneButton(items: [['✖ בטל-אוטו']], variants: const <int>[2])) : null),
         // מתחת-מינימום X ימים לפני/אחרי פתיחה — התרעה כלכלית
         for (final c in bm)
-          ForgeSectionPill(items: [['${c['name']}: ${_ShopCriterionData.enrolled(c)} רשומים מול מינ׳ ${_ShopCriterionData.minToOpen(c)} · ${_ShopCriterionData.daysToStart(c) >= 0 ? 'מתחיל בעוד ${_ShopCriterionData.daysToStart(c)} ימים' : 'התחיל לפני ${-_ShopCriterionData.daysToStart(c)} ימים'} — לא-כלכלי']], variants: const <int>[0]),
+          ForgeToneBanner(items: [['${c['name']}: ${_TzCampaignData.enrolled(c)} רשומים מול מינ׳ ${_TzCampaignData.minToOpen(c)} · ${_TzCampaignData.daysToStart(c) >= 0 ? 'מתחיל בעוד ${_TzCampaignData.daysToStart(c)} ימים' : 'התחיל לפני ${-_TzCampaignData.daysToStart(c)} ימים'} — לא-כלכלי']], variants: const <int>[3]),
         // הצעת-חדר-חלופי: ללא-חדר / התנגשות-חדר ⇒ חדרים פנויים ב-slot
         for (final c in [...noRoomCs, ...clashRooms])
-          ForgeSectionPill(items: [['${c['name']} — ${_ShopCriterionData.noRoom(c) ? 'ללא-חדר' : 'התנגשות-חדר'} · חדר חלופי: ${_ShopCriterionData.freeRooms(c).isEmpty ? 'אין חדר פנוי ב-slot' : _ShopCriterionData.freeRooms(c).map((r) => '${r['name']} (${r['cap']})').join(' / ')}']], variants: const <int>[0]),
+          ForgeToneBanner(items: [['${c['name']} — ${_TzCampaignData.noRoom(c) ? 'ללא-חדר' : 'התנגשות-חדר'} · חדר חלופי: ${_TzCampaignData.freeRooms(c).isEmpty ? 'אין חדר פנוי ב-slot' : _TzCampaignData.freeRooms(c).map((r) => '${r['name']} (${r['cap']})').join(' / ')}']], variants: const <int>[2]),
         // הצעת-מורה-מחליף: ללא-מורה ⇒ מורים פנויים ב-slot (התמחות תואמת קודם)
         for (final c in noTeacherCs)
-          ForgeSectionPill(items: [['${c['name']} — ללא-מורה · מורה חלופי: ${_ShopCriterionData.freeTeachers(c).isEmpty ? 'אין מורה פנוי ב-slot' : _ShopCriterionData.freeTeachers(c).map((t) => '${t['name']}${t['specialty'] == c['cat'] ? ' ✓' : ''}').join(' / ')}']], variants: const <int>[0]),
+          ForgeToneBanner(items: [['${c['name']} — ללא-מורה · מורה חלופי: ${_TzCampaignData.freeTeachers(c).isEmpty ? 'אין מורה פנוי ב-slot' : _TzCampaignData.freeTeachers(c).map((t) => '${t['name']}${t['specialty'] == c['cat'] ? ' ✓' : ''}').join(' / ')}']], variants: const <int>[2]),
         // המתנה-עם-מקום ⇒ העלאה
         for (final c in pr) withAction(
-          ForgeSectionPill(items: [['${c['name']}: ${_ShopCriterionData.waitlist(c).length} ממתינים ויש ${_ShopCriterionData.capacity(c) - _ShopCriterionData.enrolled(c)} מקומות פנויים']], variants: const <int>[0]),
-          _can('crs.waitlist') ? GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _act(() { while (_ShopCriterionData.promoteNext(c, 'אוטומציה') != null) {} }, 'הממתינים הועלו'), child: ForgeSoftButton(fields: ['⬆ העלה'])) : null),
+          ForgeToneBanner(items: [['${c['name']}: ${_TzCampaignData.waitlist(c).length} ממתינים ויש ${_TzCampaignData.capacity(c) - _TzCampaignData.enrolled(c)} מקומות פנויים']], variants: const <int>[2]),
+          _can('crs.waitlist') ? GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _act(() { while (_TzCampaignData.promoteNext(c, 'אוטומציה') != null) {} }, 'הממתינים הועלו'), child: ForgeToneButton(items: [['⬆ העלה']], variants: const <int>[1])) : null),
         // תזכורות 48h
-        if (rem.isNotEmpty) ForgeSectionPill(items: [['תזכורת ל-48 השעות הקרובות: ${rem.map((r) => '${(r['course'] as Map)['name']} ${_ShopCriterionData._iso(r['dt'] as DateTime)} ${_ShopCriterionData.hm((r['dt'] as DateTime).hour * 60 + (r['dt'] as DateTime).minute)} (${_ShopCriterionData.liveEnrollmentsOf(r['course'] as Map<String, dynamic>).length} משפחות)').join(' · ')} — שלח-הודעה מהפאנל']], variants: const <int>[0]),
+        if (rem.isNotEmpty) ForgeToneBanner(items: [['תזכורת ל-48 השעות הקרובות: ${rem.map((r) => '${(r['course'] as Map)['name']} ${_TzCampaignData._iso(r['dt'] as DateTime)} ${_TzCampaignData.hm((r['dt'] as DateTime).hour * 60 + (r['dt'] as DateTime).minute)} (${_TzCampaignData.liveEnrollmentsOf(r['course'] as Map<String, dynamic>).length} משפחות)').join(' · ')} — שלח-הודעה מהפאנל']], variants: const <int>[0]),
         // תחזית-ביקוש (אות-נוכחי; היסטוריה רב-סמסטרית = מקום-שמור)
-        if (demand.isNotEmpty) ForgeSectionPill(items: [['ביקוש לסמסטר-הבא: ${demand.map((c) => '${c['name']} (${_ShopCriterionData.isFull(c) ? 'מלא' : ''}${_ShopCriterionData.waitlist(c).isNotEmpty ? ' +${_ShopCriterionData.waitlist(c).length} ממתינים' : ''}${_ShopCriterionData.trend(c)['dir'] == 'up' ? ' ↑' : ''})').join(' · ')} ⇒ שקול קבוצה נוספת']], variants: const <int>[0]),
+        if (demand.isNotEmpty) ForgeToneBanner(items: [['ביקוש לסמסטר-הבא: ${demand.map((c) => '${c['name']} (${_TzCampaignData.isFull(c) ? 'מלא' : ''}${_TzCampaignData.waitlist(c).isNotEmpty ? ' +${_TzCampaignData.waitlist(c).length} ממתינים' : ''}${_TzCampaignData.trend(c)['dir'] == 'up' ? ' ↑' : ''})').join(' · ')} ⇒ שקול קבוצה נוספת']], variants: const <int>[1]),
         if (hl.isEmpty && bm.isEmpty && pr.isEmpty && noRoomCs.isEmpty && noTeacherCs.isEmpty && clashRooms.isEmpty && rem.isEmpty && demand.isEmpty)
           ForgeSearchEmptyState(fields: ['אין אותות — המערכת מסודרת', '']),
       ]])),
@@ -1179,18 +1179,18 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // קטלוג להרשמה-עצמית (הורה): חוגים-חיים שאין בהם חבר-משפחה · כפתור פר-תלמיד ⇒ selfEnroll (wait)
   List<Widget> _selfCatalog() {
-    final fam = _ShopCriterionData.families.where((f) => f['id'] == _ShopCriterionData.myFamilyId(_role)).firstOrNull;
+    final fam = _TzCampaignData.families.where((f) => f['id'] == _TzCampaignData.myFamilyId(_role)).firstOrNull;
     if (fam == null) return const [];
-    final mine = _ShopCriterionData.familyCourses(_ShopCriterionData.liveCourses, fam['id'] as String).map((c) => c['id']).toSet();
-    final open = _ShopCriterionData.bySemester(_ShopCriterionData.liveCourses, _sem).where((c) => !mine.contains(c['id'])).toList();
+    final mine = _TzCampaignData.familyCourses(_TzCampaignData.liveCourses, fam['id'] as String).map((c) => c['id']).toSet();
+    final open = _TzCampaignData.bySemester(_TzCampaignData.liveCourses, _sem).where((c) => !mine.contains(c['id'])).toList();
     return [
       ForgeTitledSection(fields: ['🛒 הרשמה-עצמית · ${open.length} חוגים פתוחים (רכז/ת מאשר/ת)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (open.isEmpty) ForgeSearchEmptyState(fields: ['אין חוגים נוספים להרשמה', '']),
         for (final c in open)
           Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [
-            Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${_ShopCriterionData.sessionsLabel(c)} · ${_ShopCriterionData.enrolled(c)}/${_ShopCriterionData.capacity(c)} · שכבות ${c['gradeMin']}–${c['gradeMax']}'])),
+            Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${_TzCampaignData.sessionsLabel(c)} · ${_TzCampaignData.enrolled(c)}/${_TzCampaignData.capacity(c)} · שכבות ${c['gradeMin']}–${c['gradeMax']}'])),
             for (final m in (fam['members'] as List))
-              Padding(padding: const EdgeInsets.only(left: 4), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _result(_ShopCriterionData.selfEnroll(c, m['id'], _who), 'נרשם/ה — ממתין לאישור')), child: ForgeSoftButton(fields: ['➕ ${m['first']}']))),
+              Padding(padding: const EdgeInsets.only(left: 4), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _result(_TzCampaignData.selfEnroll(c, m['id'], _who), 'נרשם/ה — ממתין לאישור')), child: ForgeToneButton(items: [['➕ ${m['first']}']], variants: [const <int>[0, 1, 3, 2][(_TzCampaignData.fitReason(c, _TzCampaignData.memberOf(m['id'])!) == null ? 1 : 3) % 4]]))),
           ])),
       ]])),
     ];
@@ -1198,7 +1198,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // 📅 גריד-מערכת-שעות: Table (ימים×שעות) · תא = StatusChip-לחיץ פר-חוג (tone=דחיפות) · מבוטל=✖ · ריק=שקט
   Widget _grid(List<Map<String, dynamic>> cs) {
-    final hours = _ShopCriterionData.gridHours(cs);
+    final hours = _TzCampaignData.gridHours(cs);
     if (hours.isEmpty) return ForgeSearchEmptyState(fields: ['אין מפגשים משובצים', '']);
     const days = [0, 1, 2, 3, 4, 5];
     TableRow row(List<Widget> cells) => TableRow(children: [for (final w in cells) Padding(padding: const EdgeInsets.all(3), child: w)]);
@@ -1212,14 +1212,14 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         children: [
           row([
             const SizedBox.shrink(),
-            for (final dd in days) Center(child: Text('${dayNames[dd]}\n${_ShopCriterionData.isoOfDay(dd, _week).substring(5)}', textAlign: TextAlign.center, style: const TextStyle(color: _ink, fontSize: 12, fontWeight: FontWeight.w800))),
+            for (final dd in days) Center(child: Text('${dayNames[dd]}\n${_TzCampaignData.isoOfDay(dd, _week).substring(5)}', textAlign: TextAlign.center, style: const TextStyle(color: _ink, fontSize: 12, fontWeight: FontWeight.w800))),
           ]),
           for (final h in hours)
             row([
-              Center(child: Text(_ShopCriterionData.hm(h), style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700))),
+              Center(child: Text(_TzCampaignData.hm(h), style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700))),
               for (final dd in days)
                 Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  for (final c in _ShopCriterionData.inCell(cs, dd, h)) _cell(c, _ShopCriterionData.isoOfDay(dd, _week)),
+                  for (final c in _TzCampaignData.inCell(cs, dd, h)) _cell(c, _TzCampaignData.isoOfDay(dd, _week)),
                 ]),
             ]),
         ],
@@ -1228,9 +1228,9 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
   }
 
   Widget _cell(Map<String, dynamic> c, String iso) {
-    final cancelled = _ShopCriterionData.isCancelled(c, iso);
-    final sev = _ShopCriterionData.sev(c);
-    final tone = cancelled ? 0 : sev >= 2 ? 2 : sev == 1 || _ShopCriterionData.isFull(c) ? 3 : 1;
+    final cancelled = _TzCampaignData.isCancelled(c, iso);
+    final sev = _TzCampaignData.sev(c);
+    final tone = cancelled ? 0 : sev >= 2 ? 2 : sev == 1 || _TzCampaignData.isFull(c) ? 3 : 1;
     return Padding(
       padding: const EdgeInsets.only(bottom: 3),
       child: InkWell(
@@ -1239,7 +1239,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
         child: FittedBox(
           fit: BoxFit.scaleDown,
           alignment: AlignmentDirectional.centerStart,
-          child: ForgeStatusChip(items: [['${cancelled ? '✖ ' : ''}${c['name']} ${_ShopCriterionData.enrolled(c)}/${_ShopCriterionData.capacity(c)}']], variants: [const <int>[0, 1, 3, 2][(tone) % 4]]),
+          child: ForgeStatusChip(items: [['${cancelled ? '✖ ' : ''}${c['name']} ${_TzCampaignData.enrolled(c)}/${_TzCampaignData.capacity(c)}']], variants: [const <int>[0, 1, 3, 2][(tone) % 4]]),
         ),
       ),
     );
@@ -1247,13 +1247,13 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // 📋 מבט-רשימה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid.
   Widget _table(List<Map<String, dynamic>> rows) {
-    final cols = [for (final c in _ShopCriterionData.columnDefs) if (_ShopCriterionData.colShown(c, rows)) c];
+    final cols = [for (final c in _TzCampaignData.columnDefs) if (_TzCampaignData.colShown(c, rows)) c];
     return ForgeDataGrid(bare: true, columns: [for (final c in cols) c['label'] as String], items: [
         for (final r in rows)
           [
             for (final c in cols)
               if (c['key'] == '__status')
-                _ShopCriterionData.statusLabel(r)
+                _TzCampaignData.statusLabel(r)
               else if (c['get'] != null)
                 (c['get'] as String Function(Map<String, dynamic>))(r)
               else
@@ -1264,12 +1264,12 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // 👩‍🏫 פר-מורה: coursesOfTeacher (מנוע) ⊕ עומס = מפגשים/שבוע (BareStat) · סקשן "ללא-מורה" בנפרד (חריגה)
   List<Widget> _byTeacher(List<Map<String, dynamic>> live) {
-    final orphan = live.where(_ShopCriterionData.noTeacher).toList();
+    final orphan = live.where(_TzCampaignData.noTeacher).toList();
     return [
-      for (final t in _ShopCriterionData.teachers)
+      for (final t in _TzCampaignData.teachers)
         () {
           final cs = live.where((c) => c['teacherId'] == t['id']).toList(); // הרשימה-הנראית (אחרי איתור+חריגה); coursesOfTeacher = אותו מנוע על כל-החיים
-          return ForgeTitledSection(fields: ['👩‍🏫 ${t['name']} · ${t['specialty']}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: ForgeStatusChip(items: [['${cs.length} חוגים · ${_ShopCriterionData.weeklyOf(cs)} מפגשים/שבוע']], variants: [const <int>[0, 1, 3, 2][(cs.isEmpty ? 0 : 1) % 4]])), ...cs.isEmpty ? [ForgeSearchEmptyState(fields: ['אין חוגים למורה זה', ''])] : [for (final c in cs) _row(c)]]));
+          return ForgeTitledSection(fields: ['👩‍🏫 ${t['name']} · ${t['specialty']}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: ForgeStatusChip(items: [['${cs.length} חוגים · ${_TzCampaignData.weeklyOf(cs)} מפגשים/שבוע']], variants: [const <int>[0, 1, 3, 2][(cs.isEmpty ? 0 : 1) % 4]])), ...cs.isEmpty ? [ForgeSearchEmptyState(fields: ['אין חוגים למורה זה', ''])] : [for (final c in cs) _row(c)]]));
         }(),
       if (orphan.isNotEmpty) ForgeTitledSection(fields: ['🚫 ללא-מורה · ${orphan.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[for (final c in orphan) _row(c)]])),
     ];
@@ -1277,13 +1277,13 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // 🚪 פר-חדר: weeklyRoomSessions (מנוע) ⊕ קיבולת-משבצות ⇒ ניצולת (StatRow) · חדר-לא-פעיל = חריגה
   List<Widget> _byRoom(List<Map<String, dynamic>> live) => [
-        for (final r in _ShopCriterionData.rooms)
+        for (final r in _TzCampaignData.rooms)
           () {
             final cs = live.where((c) => c['roomId'] == r['id']).toList(); // הרשימה-הנראית (אחרי איתור+חריגה)
             final active = r['active'] == true;
-            final weekly = _ShopCriterionData.roomWeekly(r), cap = _ShopCriterionData.roomSlotsPerWeek(r);
+            final weekly = _TzCampaignData.roomWeekly(r), cap = _TzCampaignData.roomSlotsPerWeek(r);
             return ForgeTitledSection(fields: ['🚪 ${r['name']} · ${r['location']} · קיבולת ${r['cap']}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: ForgeStatusChip(items: [[active ? '${r['from']}–${r['to']} · ${r['slot']} דק׳' : 'לא-פעיל']], variants: [const <int>[0, 1, 3, 2][(active ? 0 : 2) % 4]])), ...[
-                ForgeLinearProgressStatus(fields: ['ניצולת שבועית', '$weekly מתוך $cap משבצות'], values: [_ShopCriterionData.roomUtil(r)]),
+                ForgeLinearProgressStatus(fields: ['ניצולת שבועית', '$weekly מתוך $cap משבצות'], values: [_TzCampaignData.roomUtil(r)]),
                 _gap(6),
                 if (cs.isEmpty) ForgeSearchEmptyState(fields: ['אין חוגים בחדר', '']) else for (final c in cs) _row(c),
               ]]));
@@ -1302,15 +1302,15 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
   }
 
   Widget _row(Map<String, dynamic> c) {
-    final t = _ShopCriterionData.teacherOf(c), r = _ShopCriterionData.roomOf(c);
-    final sev = _ShopCriterionData.sev(c);
-    final tone = sev >= 2 ? 2 : sev == 1 ? 3 : _ShopCriterionData.isFull(c) ? 3 : 1;
+    final t = _TzCampaignData.teacherOf(c), r = _TzCampaignData.roomOf(c);
+    final sev = _TzCampaignData.sev(c);
+    final tone = sev >= 2 ? 2 : sev == 1 ? 3 : _TzCampaignData.isFull(c) ? 3 : 1;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(children: [
-        Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${t?['name'] ?? '—'} · ${r?['name'] ?? '—'} · ${_ShopCriterionData.sessionsLabel(c)} · ${_ShopCriterionData.enrolled(c)}/${_ShopCriterionData.capacity(c)}'])),
-        Flexible(child: ForgeStatusChip(items: [[_ShopCriterionData.statusLabel(c)]], variants: [const <int>[0, 1, 3, 2][(tone) % 4]])),
-        if (_ShopCriterionData.waitlist(c).isNotEmpty) ...[const SizedBox(width: 6), ForgeStatusChip(items: [['⏳ ${_ShopCriterionData.waitlist(c).length}']], variants: const <int>[0])],
+        Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${t?['name'] ?? '—'} · ${r?['name'] ?? '—'} · ${_TzCampaignData.sessionsLabel(c)} · ${_TzCampaignData.enrolled(c)}/${_TzCampaignData.capacity(c)}'])),
+        Flexible(child: ForgeStatusChip(items: [[_TzCampaignData.statusLabel(c)]], variants: [const <int>[0, 1, 3, 2][(tone) % 4]])),
+        if (_TzCampaignData.waitlist(c).isNotEmpty) ...[const SizedBox(width: 6), ForgeStatusChip(items: [['⏳ ${_TzCampaignData.waitlist(c).length}']], variants: const <int>[0])],
         // MediaRow בולע את הקליק (InkWell פנימי no-op) ⇒ כפתור-שברון נפרד כשקע-הבחירה
         IconButton(onPressed: () => _openPanel(c), icon: const Icon(Icons.chevron_left, color: _acc, size: 24), tooltip: 'פרטים ופעולות'),
       ]),
@@ -1322,7 +1322,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
   // תוצאת-מנוע ⇒ הודעה+tone (blocked=אדום · wait=כתום · אחרת ירוק)
   void _result(String r, String okMsg) {
     if (r.startsWith('blocked:')) return _flash('נחסם: ${r.substring(8)}', 2);
-    if (r == 'waitlisted') return _flash('הקריטריון מלא ⇒ נוסף לרשימת-ההמתנה', 3);
+    if (r == 'waitlisted') return _flash('המבצע מלא ⇒ נוסף לרשימת-ההמתנה', 3);
     if (r == 'pending') return _flash('ההרשמה נרשמה כבקשה — ממתינה לאישור רכז/ת (המתנה)', 3);
     if (r.startsWith('removed+promoted:')) return _flash('הוסר · מקום התפנה ⇒ ${r.substring(17)} הועלה/תה מההמתנה אוטומטית', 1);
     _flash(okMsg, 1);
@@ -1335,7 +1335,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
         void both(void Function() f) { f(); setSheet(() {}); setState(() {}); }
-        final c = _ShopCriterionData.courseById(c0['id']) ?? c0; // מצב-חי (אחרי overrides)
+        final c = _TzCampaignData.courseById(c0['id']) ?? c0; // מצב-חי (אחרי overrides)
         return DraggableScrollableSheet(
           initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
           builder: (ctx, scroll) => Padding(
@@ -1344,8 +1344,8 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
               textDirection: TextDirection.rtl,
               child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
                   Row(children: [
-                    Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${_ShopCriterionData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_ShopCriterionData.roomOf(c)?['name'] ?? 'ללא-חדר'} · ${_ShopCriterionData.sessionsLabel(c)}'])),
-                    Flexible(child: ForgeStatusChip(items: [[_ShopCriterionData.statusLabel(c)]], variants: [const <int>[0, 1, 3, 2][(_ShopCriterionData.sev(c) >= 2 ? 2 : _ShopCriterionData.sev(c) == 1 ? 3 : 1) % 4]])),
+                    Expanded(child: ForgeContactTile(fields: ['${c['name']}', '${_TzCampaignData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_TzCampaignData.roomOf(c)?['name'] ?? 'ללא-חדר'} · ${_TzCampaignData.sessionsLabel(c)}'])),
+                    Flexible(child: ForgeStatusChip(items: [[_TzCampaignData.statusLabel(c)]], variants: [const <int>[0, 1, 3, 2][(_TzCampaignData.sev(c) >= 2 ? 2 : _TzCampaignData.sev(c) == 1 ? 3 : 1) % 4]])),
                   ]),
                   _gap(8),
                   // 9 טאבים בשתי שורות-SegmentedSwitch (שורה-אחת גלשה מ-800px ⇒ טאב לא-נגיש · הרנדר תפס)
@@ -1354,7 +1354,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
                     FittedBox(fit: BoxFit.scaleDown, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['גבייה', 'חומרים', 'היסטוריה', 'אודיט']) [s]], selected: {_tab >= 5 ? _tab - 5 : -1}, onSelect: (i) => both(() { _tab = i + 5; _pick = null; }))),
                   ]),
                   _gap(10),
-                  if (_msg != null) ...[ForgeSectionPill(items: [[_msg!]], variants: [const <int>[0, 0, 0, 0][(_msgTone) % 4]]), _gap(8)],
+                  if (_msg != null) ...[ForgeToneBanner(items: [[_msg!]], variants: [const <int>[0, 1, 3, 2][(_msgTone) % 4]]), _gap(8)],
                   ...switch (_tab) {
                     1 => _tabEnrolled(c, both),
                     2 => _tabWaitlist(c, both),
@@ -1378,73 +1378,73 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // ── סקירה: תפוסה-מול-קיבולת (StatRow) · עובדות (BareStat/StatusChip) · התנגשויות (AlertBanner אדום) · שיעורים-הבאים · פעולות ──
   List<Widget> _tabOverview(Map<String, dynamic> c, void Function(void Function()) both) {
-    final clashes = _ShopCriterionData.clashesOf(c);
-    final next = _ShopCriterionData.upcoming(c, 3);
+    final clashes = _TzCampaignData.clashesOf(c);
+    final next = _TzCampaignData.upcoming(c, 3);
     return [
-      ForgeLinearProgressStatus(fields: ['תפוסה מול קיבולת', '${_ShopCriterionData.enrolled(c)} מתוך ${_ShopCriterionData.capacity(c)}'], values: [_ShopCriterionData.occupancy(c)]),
+      ForgeLinearProgressStatus(fields: ['תפוסה מול קיבולת', '${_TzCampaignData.enrolled(c)} מתוך ${_TzCampaignData.capacity(c)}'], values: [_TzCampaignData.occupancy(c)]),
       _gap(8),
       Row(children: [
-        Expanded(child: ForgeStatPlain(fields: ['רשומים', '${_ShopCriterionData.enrolled(c)}'])),
-        Expanded(child: ForgeStatPlain(fields: ['בהמתנה', '${_ShopCriterionData.waitlist(c).length}'])),
-        Expanded(child: ForgeStatPlain(fields: ['מינ׳-לפתיחה', _ShopCriterionData.minToOpen(c) == null ? '—' : '${_ShopCriterionData.minToOpen(c)}'])),
-        Expanded(child: ForgeStatPlain(fields: ['מחיר', c['perLesson'] == true ? '${shekel(c['lessonPrice'])}/ש׳' : shekel(c['price'])])),
-        Expanded(child: ForgeStatPlain(fields: ['מגמת-הרשמה', _ShopCriterionData.trendLabel(c)])),
+        Expanded(child: ForgeStatPlain(fields: ['רשומים', '${_TzCampaignData.enrolled(c)}'])),
+        Expanded(child: ForgeStatPlain(fields: ['בהמתנה', '${_TzCampaignData.waitlist(c).length}'])),
+        Expanded(child: ForgeStatPlain(fields: ['מינ׳-לפתיחה', _TzCampaignData.minToOpen(c) == null ? '—' : '${_TzCampaignData.minToOpen(c)}'])),
+        Expanded(child: ForgeStatPlain(fields: ['מחיר', c['active'] == true ? '${shekel(c['lessonPrice'])}/ש׳' : shekel(c['price'])])),
+        Expanded(child: ForgeStatPlain(fields: ['מגמת-הרשמה', _TzCampaignData.trendLabel(c)])),
       ]),
       _gap(6),
-      ForgeContactTile(fields: [_ShopCriterionData.roomOf(c)?['name'] ?? 'ללא-חדר', _ShopCriterionData.roomLabel(c)]), // roomInfoLabel (מנוע) — טקסט-ארוך ⇒ שורה, לא שבב
+      ForgeContactTile(fields: [_TzCampaignData.roomOf(c)?['name'] ?? 'ללא-חדר', _TzCampaignData.roomLabel(c)]), // roomInfoLabel (מנוע) — טקסט-ארוך ⇒ שורה, לא שבב
       Wrap(spacing: 8, runSpacing: 6, children: [
-        if (_ShopCriterionData.roomlessReason(c) != null) _chip('⚠️ ${_ShopCriterionData.roomlessReason(c)}', 2),
-        if (_ShopCriterionData.noTeacher(c)) _chip('🚫 ללא-מורה — הקצה מורה', 2),
+        if (_TzCampaignData.roomlessReason(c) != null) _chip('⚠️ ${_TzCampaignData.roomlessReason(c)}', 2),
+        if (_TzCampaignData.noTeacher(c)) _chip('🚫 ללא-מורה — הקצה מורה', 2),
         ..._facts(c),
       ]),
       if (clashes.isNotEmpty) ...[
         _h('⚠️ התנגשויות · ${clashes.length} (חוסמות-שיבוץ)'),
-        for (final k in clashes) ForgeSectionPill(items: [['${k['detail']} — ${k['with']}']], variants: const <int>[0]),
+        for (final k in clashes) ForgeToneBanner(items: [['${k['detail']} — ${k['with']}']], variants: const <int>[3]),
       ],
-      if (_ShopCriterionData.noRoom(c) || _ShopCriterionData.clashesOf(c).any((k) => k['kind'] == 'room')) ...[
+      if (_TzCampaignData.noRoom(c) || _TzCampaignData.clashesOf(c).any((k) => k['kind'] == 'room')) ...[
         _h('🚪 חדרים פנויים ב-slot (הצעת-חדר-חלופי)'),
         Wrap(spacing: 6, runSpacing: 6, children: [
-          if (_ShopCriterionData.freeRooms(c).isEmpty) ForgeStatusChip(items: [['אין חדר פנוי']], variants: const <int>[3]),
-          for (final r in _ShopCriterionData.freeRooms(c))
-            if (_can('crs.assignRoom')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_ShopCriterionData.assignRoom(c, r['id'], _who), '${r['name']} הוקצה')), child: ForgeSoftButton(fields: ['🚪 ${r['name']} (${r['cap']})'])) else _chip('🚪 ${r['name']}', 0),
+          if (_TzCampaignData.freeRooms(c).isEmpty) ForgeStatusChip(items: [['אין חדר פנוי']], variants: const <int>[3]),
+          for (final r in _TzCampaignData.freeRooms(c))
+            if (_can('crs.assignRoom')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_TzCampaignData.assignRoom(c, r['id'], _who), '${r['name']} הוקצה')), child: ForgeToneButton(items: [['🚪 ${r['name']} (${r['cap']})']], variants: const <int>[1])) else _chip('🚪 ${r['name']}', 0),
         ]),
       ],
-      if (_ShopCriterionData.noTeacher(c) || _ShopCriterionData.clashesOf(c).any((k) => k['kind'] == 'teacher')) ...[
+      if (_TzCampaignData.noTeacher(c) || _TzCampaignData.clashesOf(c).any((k) => k['kind'] == 'teacher')) ...[
         _h('👩‍🏫 מורים פנויים ב-slot (הצעת-מורה-חלופי · ✓ התמחות תואמת)'),
         Wrap(spacing: 6, runSpacing: 6, children: [
-          if (_ShopCriterionData.freeTeachers(c).isEmpty) ForgeStatusChip(items: [['אין מורה פנוי']], variants: const <int>[3]),
-          for (final t in _ShopCriterionData.freeTeachers(c))
-            if (_can('crs.assignTeacher')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_ShopCriterionData.assignTeacher(c, t['id'], _who), '${t['name']} הוקצה/תה')), child: ForgeSoftButton(fields: ['${t['name']}${t['specialty'] == c['cat'] ? ' ✓' : ''}'])) else _chip('${t['name']}', 0),
+          if (_TzCampaignData.freeTeachers(c).isEmpty) ForgeStatusChip(items: [['אין מורה פנוי']], variants: const <int>[3]),
+          for (final t in _TzCampaignData.freeTeachers(c))
+            if (_can('crs.assignTeacher')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_TzCampaignData.assignTeacher(c, t['id'], _who), '${t['name']} הוקצה/תה')), child: ForgeToneButton(items: [['${t['name']}${t['specialty'] == c['cat'] ? ' ✓' : ''}']], variants: [const <int>[0, 1, 3, 2][(t['specialty'] == c['cat'] ? 1 : 0) % 4]])) else _chip('${t['name']}', 0),
         ]),
       ],
-      if (_ShopCriterionData.belowMin(c)) ForgeSectionPill(items: [['מתחת-למינימום: ${_ShopCriterionData.enrolled(c)} רשומים מול ${_ShopCriterionData.minToOpen(c)} (${c['minStudents'] == null ? 'נקודת-איזון: שכר-מורה+חדר ÷ מחיר-לשיעור' : 'מינימום-מוגדר'}) — לא-כלכלי']], variants: const <int>[0]),
+      if (_TzCampaignData.belowMin(c)) ForgeToneBanner(items: [['מתחת-למינימום: ${_TzCampaignData.enrolled(c)} רשומים מול ${_TzCampaignData.minToOpen(c)} (${c['minStudents'] == null ? 'נקודת-איזון: שכר-מורה+חדר ÷ מחיר-לשיעור' : 'מינימום-מוגדר'}) — לא-כלכלי']], variants: const <int>[2]),
       _h('📅 השיעורים הבאים'),
       if (next.isEmpty) ForgeSearchEmptyState(fields: ['אין מפגשים משובצים', '']) else for (final dt in next) _lessonTile(c, dt, both),
-      _h('פעולות · ${_ShopCriterionData.roleDefs[_role]['label']}'),
+      _h('פעולות · ${_TzCampaignData.roleDefs[_role]['label']}'),
       // פעולות מגודרות פר-הרשאה (canGrantedAction); אין-הרשאה ⇒ מצב נעילת-הרשאות (AlertBanner)
       Builder(builder: (_) {
         final acts = <Widget>[
-          if (_can('crs.enroll')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'enroll' ? null : 'enroll'), child: ForgeSoftButton(fields: ['🎓 שבץ-תלמיד'])),
-          if (_can('crs.waitlist')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite'), child: ForgeSoftButton(fields: ['⏳ הזמן-להמתנה'])),
-          if (_can('crs.assignTeacher')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'teacher' ? null : 'teacher'), child: ForgeSoftButton(fields: ['👩‍🏫 הקצה-מורה'])),
-          if (_can('crs.assignTeacher')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'sub' ? null : 'sub'), child: ForgeSoftButton(fields: ['🔄 מורה-מחליף (חד-פעמי)'])),
-          if (_can('crs.assignRoom')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'room' ? null : 'room'), child: ForgeSoftButton(fields: ['🚪 הקצה-חדר'])),
-          if (_can('crs.edit')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _edit = !_edit), child: ForgeSoftButton(fields: ['✏️ ערוך'])),
-          if (_can('crs.duplicate')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { final cp = _ShopCriterionData.duplicate(c, _who); _flash('נוצר ${cp['name']} — יורש slot ⇒ בדוק התנגשות והקצה מחדש', 3); }), child: ForgeSoftButton(fields: ['📄 שכפל-קריטריון'])),
-          if (_can('crs.message')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'message' ? null : 'message'), child: ForgeSoftButton(fields: ['💬 שלח-הודעה'])),
-          if (_can('crs.end')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _ShopCriterionData.endCourse(c, _who); _flash('${c['name']} הסתיים — ההרשמות נסגרו', 3); }), child: ForgeSoftButton(fields: ['🏁 סיים-קריטריון'])),
-          if (_can('crs.end')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _ShopCriterionData.cancelCourse(c, _who); _flash('${c['name']} בוטל', 3); }), child: ForgeSoftButton(fields: ['⛔ בטל-קריטריון'])),
+          if (_can('crs.enroll')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'enroll' ? null : 'enroll'), child: ForgeToneButton(items: [['🎓 שבץ-תלמיד']], variants: const <int>[1])),
+          if (_can('crs.waitlist')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite'), child: ForgeToneButton(items: [['⏳ הזמן-להמתנה']], variants: const <int>[0])),
+          if (_can('crs.assignTeacher')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'teacher' ? null : 'teacher'), child: ForgeToneButton(items: [['👩‍🏫 הקצה-מורה']], variants: [const <int>[0, 1, 3, 2][(_TzCampaignData.noTeacher(c) ? 2 : 0) % 4]])),
+          if (_can('crs.assignTeacher')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'sub' ? null : 'sub'), child: ForgeToneButton(items: [['🔄 מורה-מחליף (חד-פעמי)']], variants: const <int>[0])),
+          if (_can('crs.assignRoom')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'room' ? null : 'room'), child: ForgeToneButton(items: [['🚪 הקצה-חדר']], variants: [const <int>[0, 1, 3, 2][(_TzCampaignData.noRoom(c) ? 2 : 0) % 4]])),
+          if (_can('crs.edit')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _edit = !_edit), child: ForgeToneButton(items: [['✏️ ערוך']], variants: const <int>[0])),
+          if (_can('crs.duplicate')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { final cp = _TzCampaignData.duplicate(c, _who); _flash('נוצר ${cp['name']} — יורש slot ⇒ בדוק התנגשות והקצה מחדש', 3); }), child: ForgeToneButton(items: [['📄 שכפל-מבצע']], variants: const <int>[0])),
+          if (_can('crs.message')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'message' ? null : 'message'), child: ForgeToneButton(items: [['💬 שלח-הודעה']], variants: const <int>[0])),
+          if (_can('crs.end')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _TzCampaignData.endCourse(c, _who); _flash('${c['name']} הסתיים — ההרשמות נסגרו', 3); }), child: ForgeToneButton(items: [['🏁 סיים-מבצע']], variants: const <int>[3])),
+          if (_can('crs.end')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _TzCampaignData.cancelCourse(c, _who); _flash('${c['name']} בוטל', 3); }), child: ForgeToneButton(items: [['⛔ בטל-מבצע']], variants: const <int>[3])),
         ];
         return acts.isEmpty
-            ? ForgeSectionPill(items: [['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה']], variants: const <int>[0])
+            ? ForgeToneBanner(items: [['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה']], variants: const <int>[3])
             : Wrap(spacing: 8, runSpacing: 8, children: acts);
       }),
       _gap(8),
       ..._picker(c, both),
       if (_edit) ...[
         _h('✏️ עריכה (שם · קיבולת — הגדלת-קיבולת מעלה מהמתנה אוטומטית)'),
-        ForgeDsField(state: ('${c['name']}').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['שם-קריטריון', ''], control: DsField(label: 'שם-קריטריון', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _ShopCriterionData.edit(c, 'name', v, _who)), bare: true)),
-        ForgeDsNumberField(fields: ['קיבולת (maxStudents)'], control: DsNumberField(label: 'קיבולת (maxStudents)', value: '${_ShopCriterionData.capacity(c)}', onChanged: (v) { final n = int.tryParse(v); if (n != null) both(() => _ShopCriterionData.edit(c, 'discountPct', n, _who)); }, bare: true)),
+        ForgeDsField(state: ('${c['name']}').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['שם-מבצע', ''], control: DsField(label: 'שם-מבצע', hint: 'שם', value: '${c['name']}', onChanged: (v) => both(() => _TzCampaignData.edit(c, 'name', v, _who)), bare: true)),
+        ForgeDsNumberField(fields: ['קיבולת (maxStudents)'], control: DsNumberField(label: 'קיבולת (maxStudents)', value: '${_TzCampaignData.capacity(c)}', onChanged: (v) { final n = int.tryParse(v); if (n != null) both(() => _TzCampaignData.edit(c, 'goal', n, _who)); }, bare: true)),
       ],
     ];
   }
@@ -1454,23 +1454,23 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     final p = _pick;
     if (p == null) return const [];
     if (p == 'enroll' || p == 'invite') {
-      final cands = _ShopCriterionData.candidates(c);
+      final cands = _TzCampaignData.candidates(c);
       return [
         _h(p == 'enroll' ? '🎓 בחר תלמיד לשיבוץ (קדם ⊕ התנגשות ⊕ קיבולת נבדקים)' : '⏳ בחר תלמיד להזמנה-להמתנה'),
         if (cands.isEmpty) ForgeSearchEmptyState(fields: ['כל התלמידים כבר רשומים/ממתינים', ''])
         else Wrap(spacing: 6, runSpacing: 6, children: [
           for (final m in cands)
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _pick = null; _result(p == 'enroll' ? _ShopCriterionData.enroll(c, m['id'], _who) : _ShopCriterionData.invite(c, m['id'], _who), '${m['first']} שובץ/ה ל-${c['name']}'); }), child: ForgeSoftButton(fields: ['${m['first']} ${m['famName']} · ${m['grade']}'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _pick = null; _result(p == 'enroll' ? _TzCampaignData.enroll(c, m['id'], _who) : _TzCampaignData.invite(c, m['id'], _who), '${m['first']} שובץ/ה ל-${c['name']}'); }), child: ForgeToneButton(items: [['${m['first']} ${m['famName']} · ${m['grade']}']], variants: [const <int>[0, 1, 3, 2][(_TzCampaignData.fitReason(c, m) == null ? 0 : 3) % 4]])),
         ]),
       ];
     }
     if (p == 'teacher' || p == 'sub') {
-      final iso = _ShopCriterionData.upcoming(c, 1).isEmpty ? _ShopCriterionData.today : _ShopCriterionData._iso(_ShopCriterionData.upcoming(c, 1).first);
+      final iso = _TzCampaignData.upcoming(c, 1).isEmpty ? _TzCampaignData.today : _TzCampaignData._iso(_TzCampaignData.upcoming(c, 1).first);
       return [
         _h(p == 'teacher' ? '👩‍🏫 בחר מורה (התנגשות חוסמת)' : '🔄 מורה-מחליף לשיעור $iso'),
         Wrap(spacing: 6, runSpacing: 6, children: [
-          for (final t in _ShopCriterionData.teachers)
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _pick = null; if (p == 'teacher') { _result(_ShopCriterionData.assignTeacher(c, t['id'], _who), '${t['name']} הוקצה/תה ל-${c['name']}'); } else { _ShopCriterionData.substitute(c, iso, t['id'], _who); _flash('${t['name']} מחליף/ה ב-$iso', 1); } }), child: ForgeSoftButton(fields: ['${t['name']} · ${t['specialty']}'])),
+          for (final t in _TzCampaignData.teachers)
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _pick = null; if (p == 'teacher') { _result(_TzCampaignData.assignTeacher(c, t['id'], _who), '${t['name']} הוקצה/תה ל-${c['name']}'); } else { _TzCampaignData.substitute(c, iso, t['id'], _who); _flash('${t['name']} מחליף/ה ב-$iso', 1); } }), child: ForgeToneButton(items: [['${t['name']} · ${t['specialty']}']], variants: [const <int>[0, 1, 3, 2][(t['id'] == c['teacherId'] ? 1 : 0) % 4]])),
         ]),
       ];
     }
@@ -1478,26 +1478,26 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       return [
         _h('🚪 בחר חדר (תפוס באותו slot ⇒ נחסם)'),
         Wrap(spacing: 6, runSpacing: 6, children: [
-          for (final r in _ShopCriterionData.rooms.where((r) => r['active'] == true))
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _pick = null; _result(_ShopCriterionData.assignRoom(c, r['id'], _who), '${r['name']} הוקצה ל-${c['name']}'); }), child: ForgeSoftButton(fields: ['${r['name']} · ${r['cap']} · ${r['slot']} דק׳'])),
+          for (final r in _TzCampaignData.rooms.where((r) => r['active'] == true))
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _pick = null; _result(_TzCampaignData.assignRoom(c, r['id'], _who), '${r['name']} הוקצה ל-${c['name']}'); }), child: ForgeToneButton(items: [['${r['name']} · ${r['cap']} · ${r['slot']} דק׳']], variants: [const <int>[0, 1, 3, 2][(r['id'] == c['roomId'] ? 1 : (r['cap'] as int) < _TzCampaignData.capacity(c) ? 3 : 0) % 4]])),
         ]),
       ];
     }
     if (p == 'message') {
-      final links = _ShopCriterionData.waLinks(c, 'שלום, הודעה מקריטריון ${c['name']}: ');
+      final links = _TzCampaignData.waLinks(c, 'שלום, הודעה ממבצע ${c['name']}: ');
       return [
         _h('💬 קישורי-WhatsApp למשפחות הנרשמים (waLink)'),
         if (links.isEmpty) ForgeSearchEmptyState(fields: ['אין נרשמים-חיים', '']) else for (final l in links) ForgeContactTile(fields: [l['name']!, l['href']!]),
       ];
     }
     if (p.startsWith('move:')) {
-      final e = _ShopCriterionData.enrollmentById(p.substring(5));
+      final e = _TzCampaignData.enrollmentById(p.substring(5));
       if (e == null) return const [];
       return [
-        _h('🔁 העבר את ${_ShopCriterionData.memberName(e['memberId'])} אל…'),
+        _h('🔁 העבר את ${_TzCampaignData.memberName(e['memberId'])} אל…'),
         Wrap(spacing: 6, runSpacing: 6, children: [
-          for (final t in _ShopCriterionData.liveCourses.where((t) => t['id'] != c['id']))
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _pick = null; _result(_ShopCriterionData.move(e, t, _who), 'הועבר/ה ל-${t['name']}'); }), child: ForgeSoftButton(fields: ['${t['name']} ${_ShopCriterionData.enrolled(t)}/${_ShopCriterionData.capacity(t)}'])),
+          for (final t in _TzCampaignData.liveCourses.where((t) => t['id'] != c['id']))
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _pick = null; _result(_TzCampaignData.move(e, t, _who), 'הועבר/ה ל-${t['name']}'); }), child: ForgeToneButton(items: [['${t['name']} ${_TzCampaignData.enrolled(t)}/${_TzCampaignData.capacity(t)}']], variants: [const <int>[0, 1, 3, 2][(_TzCampaignData.isFull(t) ? 3 : 0) % 4]])),
         ]),
       ];
     }
@@ -1506,32 +1506,32 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // שיעור-בודד (TimelineItem): תאריך · מורה (מחליף?) · חדר · מבוטל? + בטל/שחזר
   Widget _lessonTile(Map<String, dynamic> c, DateTime dt, void Function(void Function()) both) {
-    final iso = _ShopCriterionData._iso(dt);
-    final cancelled = _ShopCriterionData.isCancelled(c, iso);
-    final sub = _ShopCriterionData.substitutes['${c['id']}|$iso'];
-    final subName = sub == null ? null : _ShopCriterionData.teachers.where((t) => t['id'] == sub).firstOrNull?['name'];
+    final iso = _TzCampaignData._iso(dt);
+    final cancelled = _TzCampaignData.isCancelled(c, iso);
+    final sub = _TzCampaignData.substitutes['${c['id']}|$iso'];
+    final subName = sub == null ? null : _TzCampaignData.teachers.where((t) => t['id'] == sub).firstOrNull?['name'];
     return Row(children: [
-      Expanded(child: ForgeNotifRow(items: [['${cancelled ? '✖ מבוטל · ' : ''}${dayNames[dt.weekday % 7]} ${_ShopCriterionData.hm(dt.hour * 60 + dt.minute)}${_ShopCriterionData.holidayName(dt) != null ? ' · 🕎 ${_ShopCriterionData.holidayName(dt)}' : ''}', iso]])),
-      if (_can('crs.cancel')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _ShopCriterionData.cancelSession(c, iso, _who); _flash(cancelled ? 'השיעור $iso שוחזר' : 'השיעור $iso בוטל', cancelled ? 1 : 3); }), child: ForgeSoftButton(fields: [cancelled ? '↩ שחזר' : '✖ בטל']))),
+      Expanded(child: ForgeNotifRow(items: [['${cancelled ? '✖ מבוטל · ' : ''}${dayNames[dt.weekday % 7]} ${_TzCampaignData.hm(dt.hour * 60 + dt.minute)}${_TzCampaignData.holidayName(dt) != null ? ' · 🕎 ${_TzCampaignData.holidayName(dt)}' : ''}', iso]])),
+      if (_can('crs.cancel')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() { _TzCampaignData.cancelSession(c, iso, _who); _flash(cancelled ? 'השיעור $iso שוחזר' : 'השיעור $iso בוטל', cancelled ? 1 : 3); }), child: ForgeToneButton(items: [[cancelled ? '↩ שחזר' : '✖ בטל']], variants: [const <int>[0, 1, 3, 2][(cancelled ? 1 : 2) % 4]]))),
     ]);
   }
 
   // ── נרשמים: שם · סטטוס (enrollStatusMeta) · תשלום (enrollmentPaidStatus) · חוב (payBal) · הסר/העבר ──
   List<Widget> _tabEnrolled(Map<String, dynamic> c, void Function(void Function()) both) {
-    final es = _ShopCriterionData.liveEnrollmentsOf(c);
+    final es = _TzCampaignData.liveEnrollmentsOf(c);
     return [
-      _h('🎓 נרשמים · ${es.length} מתוך ${_ShopCriterionData.capacity(c)}'),
+      _h('🎓 נרשמים · ${es.length} מתוך ${_TzCampaignData.capacity(c)}'),
       if (es.isEmpty) ForgeSearchEmptyState(fields: ['אין נרשמים — שבץ תלמיד מהסקירה', '']),
       for (final e in es) ...[
         Row(children: [
-          Expanded(child: ForgeContactTile(fields: [_ShopCriterionData.memberName(e['memberId']), '${_ShopCriterionData.enrollStatusLabel(e)} · ${_ShopCriterionData.paidLabel(e)}${_ShopCriterionData.debtOf(e) > 0 ? ' · חוב ${shekel(_ShopCriterionData.debtOf(e).toInt())}' : ''} · נרשם/ה ${e['enrolledAt']}'])),
-          if (_can('crs.move')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'move:${e['id']}' ? null : 'move:${e['id']}'), child: ForgeSoftButton(fields: ['🔁']))),
+          Expanded(child: ForgeContactTile(fields: [_TzCampaignData.memberName(e['memberId']), '${_TzCampaignData.enrollStatusLabel(e)} · ${_TzCampaignData.paidLabel(e)}${_TzCampaignData.debtOf(e) > 0 ? ' · חוב ${shekel(_TzCampaignData.debtOf(e).toInt())}' : ''} · נרשם/ה ${e['enrolledAt']}'])),
+          if (_can('crs.move')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'move:${e['id']}' ? null : 'move:${e['id']}'), child: ForgeToneButton(items: [['🔁']], variants: const <int>[0]))),
           const SizedBox(width: 4),
-          if (_can('crs.remove')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_ShopCriterionData.remove(e, _who), '${_ShopCriterionData.memberName(e['memberId'])} הוסר/ה')), child: ForgeSoftButton(fields: ['➖ הסר']))),
+          if (_can('crs.remove')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_TzCampaignData.remove(e, _who), '${_TzCampaignData.memberName(e['memberId'])} הוסר/ה')), child: ForgeToneButton(items: [['➖ הסר']], variants: const <int>[3]))),
         ]),
         // המקום-השמור של ההרשמה (חוק-7): tier/group/renew (אמת) · scholarship (מקום-שמור) — לולאה גנרית מעל enrollMetaFields
         Wrap(spacing: 6, runSpacing: 4, children: [
-          for (final f in _ShopCriterionData.enrollMetaFields)
+          for (final f in _TzCampaignData.enrollMetaFields)
             if (e[f['key']] != null && '${e[f['key']]}'.trim().isNotEmpty) _chip('${f['prefix']}${e[f['key']]}${f['suffix']}', 0),
         ]),
         if (_pick == 'move:${e['id']}') ..._picker(c, both),
@@ -1541,25 +1541,25 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // ── המתנה: סדר-אמת (waitlistFor לפי enrolledAt) · העלה (נחסם כשמלא) · הזמן-להמתנה ──
   List<Widget> _tabWaitlist(Map<String, dynamic> c, void Function(void Function()) both) {
-    final w = _ShopCriterionData.waitlist(c);
+    final w = _TzCampaignData.waitlist(c);
     return [
       Row(children: [
-        Expanded(child: _h('⏳ רשימת-המתנה · ${w.length} · ${_ShopCriterionData.isFull(c) ? 'החוג מלא' : '${_ShopCriterionData.capacity(c) - _ShopCriterionData.enrolled(c)} מקומות פנויים'}')),
-        if (_can('crs.waitlist')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite'), child: ForgeSoftButton(fields: ['⏳ הזמן-להמתנה']))),
+        Expanded(child: _h('⏳ רשימת-המתנה · ${w.length} · ${_TzCampaignData.isFull(c) ? 'החוג מלא' : '${_TzCampaignData.capacity(c) - _TzCampaignData.enrolled(c)} מקומות פנויים'}')),
+        if (_can('crs.waitlist')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _pick = _pick == 'invite' ? null : 'invite'), child: ForgeToneButton(items: [['⏳ הזמן-להמתנה']], variants: const <int>[0]))),
       ]),
       ..._picker(c, both),
       if (w.isEmpty) ForgeSearchEmptyState(fields: ['אין ממתינים', '']),
       for (var i = 0; i < w.length; i++)
         Row(children: [
-          Expanded(child: ForgeContactTile(fields: [_ShopCriterionData.memberName(w[i]['memberId']), 'ממתין/ה מ-${w[i]['enrolledAt']}${_ShopCriterionData.clashReason(c, w[i]['memberId']) != null ? ' · ⚠️ התנגשות' : ''}'])),
-          if (_can('crs.waitlist')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_ShopCriterionData.promote(w[i], _who), '${_ShopCriterionData.memberName(w[i]['memberId'])} הועלה/תה מההמתנה')), child: ForgeSoftButton(fields: ['⬆ העלה']))),
+          Expanded(child: ForgeContactTile(fields: [_TzCampaignData.memberName(w[i]['memberId']), 'ממתין/ה מ-${w[i]['enrolledAt']}${_TzCampaignData.clashReason(c, w[i]['memberId']) != null ? ' · ⚠️ התנגשות' : ''}'])),
+          if (_can('crs.waitlist')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_TzCampaignData.promote(w[i], _who), '${_TzCampaignData.memberName(w[i]['memberId'])} הועלה/תה מההמתנה')), child: ForgeToneButton(items: [['⬆ העלה']], variants: [const <int>[0, 1, 3, 2][(_TzCampaignData.isFull(c) ? 3 : 1) % 4]]))),
           const SizedBox(width: 4),
-          if (_can('crs.waitlist')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_ShopCriterionData.remove(w[i], _who), 'הוסר/ה מההמתנה')), child: ForgeSoftButton(fields: ['➖']))),
+          if (_can('crs.waitlist')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => both(() => _result(_TzCampaignData.remove(w[i], _who), 'הוסר/ה מההמתנה')), child: ForgeToneButton(items: [['➖']], variants: const <int>[3]))),
         ]),
       _gap(6),
       Row(children: [
         Expanded(child: Text('העלאה-אוטומטית כשמתפנה מקום', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700))),
-        Flexible(child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['פועל', 'כבוי']) [s]], selected: {_ShopCriterionData.autoPromote ? 0 : 1}, onSelect: (i) => both(() => _ShopCriterionData.autoPromote = i == 0))),
+        Flexible(child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['פועל', 'כבוי']) [s]], selected: {_TzCampaignData.autoPromote ? 0 : 1}, onSelect: (i) => both(() => _TzCampaignData.autoPromote = i == 0))),
       ]),
     ];
   }
@@ -1567,10 +1567,10 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
   // ── מערכת: המפגשים-הקבועים (TimelineItem) + 6 השיעורים-הבאים עם בטל/שחזר ──
   List<Widget> _tabSchedule(Map<String, dynamic> c, void Function(void Function()) both) {
     final ss = sessionsOf(c) as List;
-    final next = _ShopCriterionData.upcoming(c, 6);
+    final next = _TzCampaignData.upcoming(c, 6);
     return [
       _h('🗓 מפגשים קבועים · ${ss.length}/שבוע · ${c['start']}–${c['end']}'),
-      if (!_ShopCriterionData.hasSessions(c)) ForgeSearchEmptyState(fields: ['אין מפגשים קבועים — הגדר יום+שעה (מקום-שמור: עורך-מפגשים)', '']),
+      if (!_TzCampaignData.hasSessions(c)) ForgeSearchEmptyState(fields: ['אין מפגשים קבועים — הגדר יום+שעה (מקום-שמור: עורך-מפגשים)', '']),
       for (final s in ss) if (s['day'] is int) ForgeNotifRow(items: [['${dayNames[s['day'] as int]} ${s['time']}', '${(s['label'] ?? '') == '' ? 'קבוצה יחידה' : s['label']}']]),
       _h('📅 השיעורים הבאים · ${next.length}'),
       if (next.isEmpty) ForgeSearchEmptyState(fields: ['אין מפגשים משובצים', '']) else for (final dt in next) _lessonTile(c, dt, both),
@@ -1579,18 +1579,18 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // ── נוכחות: שיעור-נוכחות של החוג (StatRow) + פר-נרשם (enrollSummary: נוכחויות/חיסורים/noshow/אחרון · presentsInMonth) ──
   List<Widget> _tabAttendance(Map<String, dynamic> c) {
-    final es = _ShopCriterionData.liveEnrollmentsOf(c);
-    final rate = _ShopCriterionData.attendanceRate(c);
+    final es = _TzCampaignData.liveEnrollmentsOf(c);
+    final rate = _TzCampaignData.attendanceRate(c);
     return [
-      ForgeLinearProgressStatus(fields: ['נוכחות-הקריטריון (נוכח ÷ (נוכח+נעדר))', '${(rate * 100).round()}%'], values: [rate]),
+      ForgeLinearProgressStatus(fields: ['נוכחות-המבצע (נוכח ÷ (נוכח+נעדר))', '${(rate * 100).round()}%'], values: [rate]),
       _gap(8),
       if (es.isEmpty) ForgeSearchEmptyState(fields: ['אין נרשמים', '']),
       for (final e in es)
         () {
-          final sm = _ShopCriterionData.summary(e);
+          final sm = _TzCampaignData.summary(e);
           final tot = (sm['presents'] as int) + (sm['absences'] as int);
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            ForgeLinearProgressStatus(fields: [_ShopCriterionData.memberName(e['memberId']), '${sm['presents']}/$tot · החודש ${_ShopCriterionData.presentsThisMonth(e)}'], values: [tot == 0 ? 0 : (sm['presents'] as int) / tot]),
+            ForgeLinearProgressStatus(fields: [_TzCampaignData.memberName(e['memberId']), '${sm['presents']}/$tot · החודש ${_TzCampaignData.presentsThisMonth(e)}'], values: [tot == 0 ? 0 : (sm['presents'] as int) / tot]),
             Padding(padding: const EdgeInsets.only(top: 4, bottom: 8), child: Wrap(spacing: 6, children: [
               if ((sm['noshow'] as int) > 0) _chip('👻 noshow ${sm['noshow']}', 2),
               if ('${sm['lastPresent']}'.isNotEmpty) _chip('🕐 אחרון ${sm['lastPresent']}', 0),
@@ -1603,8 +1603,8 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // ── גבייה-פר-חוג: נגבה/צפוי/חוב (BareStat) · StatRow · פר-נרשם paid/partial/unpaid ──
   List<Widget> _tabFees(Map<String, dynamic> c) {
-    final es = _ShopCriterionData.liveEnrollmentsOf(c);
-    final exp = _ShopCriterionData.courseExpected(c), col = _ShopCriterionData.courseCollected(c), debt = _ShopCriterionData.courseDebt(c);
+    final es = _TzCampaignData.liveEnrollmentsOf(c);
+    final exp = _TzCampaignData.courseExpected(c), col = _TzCampaignData.courseCollected(c), debt = _TzCampaignData.courseDebt(c);
     return [
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['צפוי (Σ totalDue)', shekel(exp.toInt())])),
@@ -1615,7 +1615,7 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       ForgeLinearProgressStatus(fields: ['גבייה מול צפוי', exp == 0 ? '—' : '${(col / exp * 100).clamp(0, 100).round()}%'], values: [exp == 0 ? 0 : (col / exp).clamp(0.0, 1.0)]),
       _gap(8),
       for (final e in es)
-        ForgeContactTile(fields: [_ShopCriterionData.memberName(e['memberId']), '${_ShopCriterionData.paidLabel(e)} · שולם ${shekel(paidOf(e).toInt())} מתוך ${shekel(((e['totalDue'] as num?) ?? 0).toInt())}${_ShopCriterionData.debtOf(e) > 0 ? ' · חוב ${shekel(_ShopCriterionData.debtOf(e).toInt())}' : ''}${'${e['dueDate'] ?? ''}'.isNotEmpty ? ' · לתשלום עד ${e['dueDate']}' : ''}']),
+        ForgeContactTile(fields: [_TzCampaignData.memberName(e['memberId']), '${_TzCampaignData.paidLabel(e)} · שולם ${shekel(paidOf(e).toInt())} מתוך ${shekel(((e['totalDue'] as num?) ?? 0).toInt())}${_TzCampaignData.debtOf(e) > 0 ? ' · חוב ${shekel(_TzCampaignData.debtOf(e).toInt())}' : ''}${'${e['dueDate'] ?? ''}'.isNotEmpty ? ' · לתשלום עד ${e['dueDate']}' : ''}']),
     ];
   }
 
@@ -1626,24 +1626,24 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
       _h('📎 חומרי-לימוד · ${files.length}'),
       if (files.isEmpty) ForgeSearchEmptyState(fields: ['אין חומרים מצורפים', '']),
       for (final f in files) ForgeContactTile(fields: ['${f['name']}', '${f['kind']}${f['size'] != null ? ' · ${f['size']} B' : ''}']),
-      for (final ph in const [['syllabus', '📘 סילבוס'], ['recordings', '🎥 הקלטות'], ['grades', '🏅 ציונים-פר-קריטריון']])
+      for (final ph in const [['syllabus', '📘 סילבוס'], ['recordings', '🎥 הקלטות'], ['grades', '🏅 ציונים-פר-מבצע']])
         if (c[ph[0]] != null) ForgeContactTile(fields: [ph[1], '${c[ph[0]]}']),
     ];
   }
 
   // ── היסטוריה (פר-חוג) / אודיט (כל המסך) — רשומות בצורת AuditEntry {at, who, act, what} ⇒ TimelineItem ──
   List<Widget> _tabHistory(Map<String, dynamic> c, bool all) {
-    final rows = all ? _ShopCriterionData.history : _ShopCriterionData.history.where((h) => h['courseId'] == c['id']).toList();
+    final rows = all ? _TzCampaignData.history : _TzCampaignData.history.where((h) => h['courseId'] == c['id']).toList();
     return [
       _h(all ? '🧾 אודיט · ${rows.length} פעולות במסך' : '🕓 היסטוריה · ${rows.length}'),
-      if (rows.isEmpty) ForgeSearchEmptyState(fields: [all ? 'אין פעולות עדיין' : 'אין היסטוריה לקריטריון', '']),
+      if (rows.isEmpty) ForgeSearchEmptyState(fields: [all ? 'אין פעולות עדיין' : 'אין היסטוריה למבצע', '']),
       for (final h in rows) ForgeNotifRow(items: [['${h['act']} · ${h['who']}', '${h['at']}']]),
     ];
   }
 
   // המקום-השמור (חוק-7): לולאה גנרית מעל metaFields — שדה קיים ⇒ שבב; חסר ⇒ שקט
   List<Widget> _facts(Map<String, dynamic> c) => [
-        for (final f in _ShopCriterionData.metaFields)
+        for (final f in _TzCampaignData.metaFields)
           if (c[f['key']] != null && '${c[f['key']]}'.trim().isNotEmpty) _chip('${f['prefix']}${c[f['key']]}${f['suffix']}', 0),
       ];
   // שבב-עובדה בטוח-לרוחב: טקסט ארוך מתכווץ (FittedBox) במקום לגלוש — StatusChip לבדו אינו עוטף
@@ -1655,20 +1655,20 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
     showModalBottomSheet<void>(
       context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
-        final text = fmt == 0 ? _ShopCriterionData.csvOf(cs) : fmt == 1 ? _ShopCriterionData.icsOf(cs) : '';
+        final text = fmt == 0 ? _TzCampaignData.csvOf(cs) : fmt == 1 ? _TzCampaignData.icsOf(cs) : '';
         return DraggableScrollableSheet(
           initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.92, expand: false,
           builder: (ctx, scroll) => Padding(
             padding: const EdgeInsets.all(12),
             child: Directionality(textDirection: TextDirection.rtl, child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                ForgeContactTile(fields: ['ייצוא', '${cs.length} חוגים · ${_ShopCriterionData.csvRows(cs).first.length} עמודות · שער-ייצוא פתוח']),
+                ForgeContactTile(fields: ['ייצוא', '${cs.length} חוגים · ${_TzCampaignData.csvRows(cs).first.length} עמודות · שער-ייצוא פתוח']),
                 _gap(8),
                 ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['CSV', 'iCal', 'PDF']) [s]], selected: {fmt}, onSelect: (i) => setSheet(() => fmt = i)),
                 _gap(10),
                 if (fmt == 2)
-                  ForgeSectionPill(items: [['PDF — מקום-שמור: דורש שער-פלטפורמה (מנוע-PDF/הדפסה). השורות מוכנות ב-🖨 הדפס-מערכת; ההורדה תואר כשהשער יחובר.']], variants: const <int>[0])
+                  ForgeToneBanner(items: [['PDF — מקום-שמור: דורש שער-פלטפורמה (מנוע-PDF/הדפסה). השורות מוכנות ב-🖨 הדפס-מערכת; ההורדה תואר כשהשער יחובר.']], variants: const <int>[2])
                 else ...[
-                  Text(fmt == 0 ? 'תצוגה מקדימה (BOM + חסימת-הזרקה):' : 'תצוגה מקדימה (VCALENDAR · 6 שיעורים-הבאים פר-קריטריון · מבוטל=CANCELLED):', style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
+                  Text(fmt == 0 ? 'תצוגה מקדימה (BOM + חסימת-הזרקה):' : 'תצוגה מקדימה (VCALENDAR · 6 שיעורים-הבאים פר-מבצע · מבוטל=CANCELLED):', style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
                   _gap(8),
                   Container(
                     padding: const EdgeInsets.all(10),
@@ -1685,13 +1685,13 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
 
   // 🖨 הדפס-מערכת: תצוגת-הדפסה טקסטואלית של השבוע (SelectableText) — ההורדה/הדפסה חסומות בסנדבוקס
   void _openPrint(List<Map<String, dynamic>> cs) {
-    final lines = <String>['מערכת-שעות · שבוע ${_ShopCriterionData.isoOfDay(0, _week)} – ${_ShopCriterionData.isoOfDay(5, _week)}', ''];
+    final lines = <String>['מערכת-שעות · שבוע ${_TzCampaignData.isoOfDay(0, _week)} – ${_TzCampaignData.isoOfDay(5, _week)}', ''];
     for (var day = 0; day < 6; day++) {
-      final iso = _ShopCriterionData.isoOfDay(day, _week);
+      final iso = _TzCampaignData.isoOfDay(day, _week);
       final items = <String>[];
-      for (final h in _ShopCriterionData.gridHours(cs)) {
-        for (final c in _ShopCriterionData.inCell(cs, day, h)) {
-          items.add('  ${_ShopCriterionData.hm(h)}  ${c['name']}${_ShopCriterionData.isCancelled(c, iso) ? ' (מבוטל)' : ''} — ${_ShopCriterionData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_ShopCriterionData.roomOf(c)?['name'] ?? 'ללא-חדר'} · ${_ShopCriterionData.enrolled(c)}/${_ShopCriterionData.capacity(c)}');
+      for (final h in _TzCampaignData.gridHours(cs)) {
+        for (final c in _TzCampaignData.inCell(cs, day, h)) {
+          items.add('  ${_TzCampaignData.hm(h)}  ${c['name']}${_TzCampaignData.isCancelled(c, iso) ? ' (מבוטל)' : ''} — ${_TzCampaignData.teacherOf(c)?['name'] ?? 'ללא-מורה'} · ${_TzCampaignData.roomOf(c)?['name'] ?? 'ללא-חדר'} · ${_TzCampaignData.enrolled(c)}/${_TzCampaignData.capacity(c)}');
         }
       }
       lines.add('${dayNames[day]} $iso${items.isEmpty ? ' — אין שיעורים' : ''}');
@@ -1720,19 +1720,19 @@ class _ShopCriterionScreenState extends State<ShopCriterionScreen> {
   Widget _gap([double h = 10]) => SizedBox(height: h);
 }
 
-// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): ShopCriterionFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
-class ShopCriterionFacts {
-  static const String entity = 'ShopCriterion';
-  static const String label = 'קריטריון'; // מונח-הישות מ-entity-terms (דאטה)
-  static int get count => _ShopCriterionData.courses.length; // רשומות הזרע-הראשי "courses" (static-const)
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): TzCampaignFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class TzCampaignFacts {
+  static const String entity = 'TzCampaign';
+  static const String label = 'מבצע'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _TzCampaignData.courses.length; // רשומות הזרע-הראשי "courses" (static-const)
   static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'kpiActive', 'label': '📚 פעילים', 'tone': 'plain'}, {'key': 'kpiLessonsWeek', 'label': '🗓 שיעורים-השבוע', 'tone': 'plain'}, {'key': 'kpiEnrolled', 'label': '🎓 רשומים', 'tone': 'plain'}, {'key': 'kpiOccupancyPct', 'label': '📈 תפוסה-ממוצ׳', 'tone': 'plain'}, {'key': 'kpiFull', 'label': '🈵 מלאים', 'tone': 'plain'}, {'key': 'kpiWaiting', 'label': '⏳ בהמתנה', 'tone': 'plain'}, {'key': 'kpiNoTeacher', 'label': '🚫 ללא-מורה', 'tone': 'danger'}, {'key': 'avgRoomUtilPct', 'label': '🚪 ניצולת-חדרים', 'tone': 'plain'}]; // 8 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
-  static Map<String, String> get metrics => <String, String>{'kpiActive': '${_ShopCriterionData.kpiActive}', 'kpiLessonsWeek': '${_ShopCriterionData.kpiLessonsWeek}', 'kpiEnrolled': '${_ShopCriterionData.kpiEnrolled}', 'kpiOccupancyPct': '${_ShopCriterionData.kpiOccupancyPct}%', 'kpiFull': '${_ShopCriterionData.kpiFull}', 'kpiWaiting': '${_ShopCriterionData.kpiWaiting}', 'kpiNoTeacher': '${_ShopCriterionData.kpiNoTeacher}', 'avgRoomUtilPct': '${_ShopCriterionData.avgRoomUtilPct}%'};
+  static Map<String, String> get metrics => <String, String>{'kpiActive': '${_TzCampaignData.kpiActive}', 'kpiLessonsWeek': '${_TzCampaignData.kpiLessonsWeek}', 'kpiEnrolled': '${_TzCampaignData.kpiEnrolled}', 'kpiOccupancyPct': '${_TzCampaignData.kpiOccupancyPct}%', 'kpiFull': '${_TzCampaignData.kpiFull}', 'kpiWaiting': '${_TzCampaignData.kpiWaiting}', 'kpiNoTeacher': '${_TzCampaignData.kpiNoTeacher}', 'avgRoomUtilPct': '${_TzCampaignData.avgRoomUtilPct}%'};
   static const String heroKey = 'kpiNoTeacher'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
   static String get hero => metrics[heroKey] ?? '$count';
   static String get heroLabel => '🚫 ללא-מורה';
   static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
-  static List<Map<String, dynamic>> get rows => _ShopCriterionData.courses; // כל רשומות הזרע-הראשי (static-const)
+  static List<Map<String, dynamic>> get rows => _TzCampaignData.courses; // כל רשומות הזרע-הראשי (static-const)
   static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['kpiActive', 'kpiFull', 'kpiNoTeacher']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
-  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'kpiActive': return _ShopCriterionData.rowsOf_kpiActive; case 'kpiFull': return _ShopCriterionData.rowsOf_kpiFull; case 'kpiNoTeacher': return _ShopCriterionData.rowsOf_kpiNoTeacher; default: return const []; } } // G10a · 3 מדדים עם שורות (צורת X.where(P).length)
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'kpiActive': return _TzCampaignData.rowsOf_kpiActive; case 'kpiFull': return _TzCampaignData.rowsOf_kpiFull; case 'kpiNoTeacher': return _TzCampaignData.rowsOf_kpiNoTeacher; default: return const []; } } // G10a · 3 מדדים עם שורות (צורת X.where(P).length)
   static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }
