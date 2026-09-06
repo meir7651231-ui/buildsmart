@@ -24,7 +24,7 @@
 /// criterion is selected), excluding families already holding an active
 /// assignment to `excludeProductId`. Each result narrows to {famId,name,memberIds}.
 List<Map<String, dynamic>> eligibleFamilies(
-    Map db, List criterionIds, dynamic excludeProductId) {
+    Map db, List criterionIds, String excludeProductId) {
   final families = (db['families'] as List);
   final shopAssignments = (db['shopAssignments'] as List);
   return families

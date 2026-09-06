@@ -24,7 +24,7 @@
 Map<String, dynamic> setEmployeeOverride(
   Map org,
   String email,
-  dynamic override,
+  Map<String, dynamic> override,
   String Function(String) normEmail,
 ) {
   final e = normEmail(email);

@@ -43,7 +43,7 @@ String _jsTrim(String s) {
 
 /// מפתח-הפירוק של תומך: ‏forWho הגזום; ריק/רווחים/חסר/null ⇒ sharedSupKey.
 /// המרה נאמנת-ביט של new/atoms/sup-key-of.mjs (‏supKeyOf).
-dynamic supKeyOf(dynamic sp, dynamic sharedSupKey) {
+String supKeyOf(Map<String, dynamic> sp, String sharedSupKey) {
   final String f = _jsTrim((sp['forWho'] ?? '') as String);
   return f.isEmpty ? sharedSupKey : f;
 }

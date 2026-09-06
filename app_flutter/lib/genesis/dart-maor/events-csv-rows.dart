@@ -22,11 +22,11 @@ String _fmtD(dynamic iso) {
   return '$d/$m/$y';
 }
 
-List<List<dynamic>> eventsCsvRows(dynamic db,
-  dynamic config,
+List<List<dynamic>> eventsCsvRows(Map<String, dynamic> db,
+  Map<String, dynamic>? config,
   dynamic termOf,
   dynamic hebDateFull,
-  dynamic evMeta, Map<String, String> T2) {
+  Map<String, dynamic> evMeta, Map<String, String> T2) {
   final Map<String, String> _priorityLabel = {
   'green': T2['k1']!,
   'orange': T2['k2']!,

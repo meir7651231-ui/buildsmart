@@ -90,7 +90,7 @@ num _jsNumberPart(Object? s) {
 /// מצב-החדרים ברגע נתון: לכל חדר **פעיל** ⇒ ‏{room, busyWith} — ‏busyWith = החוג
 /// הראשון שמפגש שלו בחדר חל באותו יום-שבוע והשעה בתוך ‏[start, start+slot)
 /// (‏slot = ‏room.slot או 60). ‏sessionsOf — שקע: המפגשים-בפועל של חוג (חוק-1).
-List<dynamic> roomsNow(dynamic db, DateTime now, dynamic sessionsOf) {
+List<dynamic> roomsNow(Map<String, dynamic> db, DateTime now, dynamic sessionsOf) {
   final day = now.weekday % 7; // JS getDay(): 0=ראשון..6=שבת
   final mins = now.hour * 60 + now.minute;
 

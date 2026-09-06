@@ -11,7 +11,7 @@ bool _truthy(dynamic v) {
   return true;
 }
 
-dynamic wizardStepError(dynamic step, dynamic s, dynamic Function(dynamic, dynamic, dynamic, dynamic, dynamic, dynamic) signUpError, Map<String, String> T) {
+String? wizardStepError(num step, Map<String, dynamic> s, dynamic Function(dynamic, dynamic, dynamic, dynamic, dynamic, dynamic) signUpError, Map<String, String> T) {
   switch (step) {
     case 0:
       return _truthy(s['industry']) ? null : T['k1']!;

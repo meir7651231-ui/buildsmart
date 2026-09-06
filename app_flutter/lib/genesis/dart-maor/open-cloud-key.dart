@@ -20,7 +20,7 @@
 /// (env, secret, via) verbatim to the [openDek] socket and returns its result
 /// as-is — the same reference / the same Future, including null on a wrong
 /// secret. Verbatim behaviour of the JS source `openCloudKey`.
-dynamic openCloudKey(
+Map<String, dynamic> openCloudKey(
   Object? env,
   Object? secret,
   Object? via,

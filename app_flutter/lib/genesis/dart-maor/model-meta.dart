@@ -23,7 +23,7 @@
 
 /// Label + pricing-track colors for a course, verbatim port of
 /// new/atoms/model-meta.mjs (`modelMeta`). Unknown model ⇒ 'מנוי חודשי'.
-Map<String, dynamic> modelMeta(dynamic c, Map<String, String> T) {
+Map<String, dynamic> modelMeta(Map<String, dynamic> c, Map<String, String> T) {
   if (c['model'] == 'punch') {
     return {
       'label': T['k2']! + _jsStrField(c, 'size') + T['k3']!,

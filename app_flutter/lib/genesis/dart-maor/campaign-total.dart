@@ -22,7 +22,7 @@ bool _isFinite(dynamic x) => x is num && x.isFinite;
 /// Sums `amount` across every collection (over all boxes) whose `campaignId`
 /// matches. Non-finite amounts are skipped (contribute 0). Verbatim behaviour of
 /// the JS source `campaignTotal`.
-num campaignTotal(dynamic boxes, dynamic campaignId) {
+num campaignTotal(List<dynamic> boxes, String campaignId) {
   num sum = 0;
   for (final b in boxes as Iterable) {
     for (final c in (b as Map)['collections'] as Iterable) {

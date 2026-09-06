@@ -27,7 +27,7 @@
 /// injected as sockets (Law 1/3). termOf is called ONLY when config is provided.
 List<List<String>> deliveriesCsvRows(
   Map<String, dynamic> db,
-  dynamic config,
+  Map<String, dynamic>? config,
   String Function(dynamic config, String key, String fallback) termOf,
   String Function(dynamic status) statusLabel,
  {required String Function(String) term}) {

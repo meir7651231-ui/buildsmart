@@ -25,7 +25,7 @@ num _orOne(dynamic x) {
 }
 
 /// מספר-שיעורים בתקופת-תמחור. התנהגות זהה-ביט למקור-ה-JS `lessonsInTerm`.
-num lessonsInTerm(dynamic freq, dynamic unit, dynamic term, [dynamic months = 1]) {
+num lessonsInTerm(num freq, String unit, String term, [num? months = 1]) {
   final num f = max<num>(0, (freq is num && freq.isFinite) ? freq : 0);
   final num perWeek = unit == 'week' ? f : f / WEEKS_PER_MONTH;
   final num perMonth = unit == 'month' ? f : f * WEEKS_PER_MONTH;

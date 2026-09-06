@@ -43,7 +43,7 @@ String _esTrim(String s) {
 
 /// Verbatim port of new/atoms/wa-delivery-text.mjs (`waDeliveryText`).
 /// renderTemplate(cfg, key, vars) ⇒ String · orgOf(orgName) ⇒ String — injected sockets.
-dynamic waDeliveryText(dynamic orgName, dynamic famName, dynamic cfg,
+String waDeliveryText(String orgName, String famName, Map<String, dynamic>? cfg,
     dynamic renderTemplate, dynamic orgOf, Map<String, String> T) {
   return renderTemplate(cfg, 'wa.delivery', {
     'name': _esTrim(T['k2']! + (famName as String)),

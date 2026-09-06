@@ -18,6 +18,6 @@
 /// Is data-layer supporter enforcement explicitly enabled? Off-by-default —
 /// verbatim behavior of the JS source new/atoms/sup-enforce-on.mjs:
 /// only an explicit boolean `true` under 'supporterEnforce' turns it on.
-bool supEnforceOn(dynamic cfg) {
+bool supEnforceOn(Map<String, dynamic> cfg) {
   return cfg['supporterEnforce'] == true;
 }

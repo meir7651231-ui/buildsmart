@@ -8,7 +8,7 @@
 bool _rqTruthy(dynamic v) =>
     !(v == null || v == false || v == '' || (v is num && (v == 0 || v.isNaN)));
 
-Map<String, dynamic> revertPatch(dynamic stage, dynamic stageIndex) {
+Map<String, dynamic> revertPatch(String stage, dynamic stageIndex) {
   final patch = <String, dynamic>{'stage': stage};
   if (_rqTruthy(stageIndex(stage) < stageIndex('answer'))) {
     patch['answerPushed'] = false;

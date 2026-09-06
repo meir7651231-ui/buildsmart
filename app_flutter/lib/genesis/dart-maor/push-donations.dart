@@ -33,8 +33,8 @@ bool _truthy(dynamic v) =>
 /// All neighbours are injected sockets (law-1); side-effects flow only through [fs].
 Future<void> pushDonations(
   Map diff,
-  dynamic dek,
-  dynamic db,
+  String? dek,
+  Map<String, dynamic> db,
   String Function() scopedDonations,
   dynamic fs,
   Future<Map> Function(Map, dynamic)? encryptDoc,

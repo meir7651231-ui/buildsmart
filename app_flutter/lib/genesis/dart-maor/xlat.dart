@@ -12,7 +12,7 @@ bool _rqTruthy(dynamic v) =>
 bool _falsy(dynamic v) =>
     v == null || v == false || v == '' || (v is num && (v == 0 || v.isNaN));
 
-List<dynamic> expandQuery(dynamic q, dynamic Function(dynamic) norm, {required Map<String, dynamic> xlatTable}) {
+List<dynamic> expandQuery(String q, dynamic Function(dynamic) norm, {required Map<String, dynamic> xlatTable}) {
   final nq = norm(q);
   final out = <dynamic>[q];
   if (_falsy(nq)) return out;

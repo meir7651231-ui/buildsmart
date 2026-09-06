@@ -28,7 +28,7 @@ bool _isIntegerNum(dynamic v) =>
 
 /// כרטיס-אמון לוועד: מאגד את האורקלים לרשימת-בדיקות + ציון משוקלל-חומרה,
 /// דרגה A–F ומוכנות-להפעלה. המרה נאמנה של new/atoms/trust-report.mjs.
-Map<String, dynamic> trustReport(dynamic bundle, Map<String, dynamic> T, [dynamic opt = const <String, dynamic>{},
+Map<String, dynamic> trustReport(Map<String, dynamic> bundle, Map<String, dynamic> T, [dynamic opt = const <String, dynamic>{},
     dynamic eng = const <String, dynamic>{}]) {
   final featureOn = eng['featureOn'];
   final auditRoutes = eng['auditRoutes'];

@@ -99,9 +99,9 @@ Map<String, dynamic> _withSkey(Object? skey, dynamic inner) {
 /// of the JS source new/atoms/push-diff.mjs.
 Future<void> pushDiff(
   Map<dynamic, dynamic> diff,
-  dynamic dek,
+  String? dek,
   Map<dynamic, dynamic> supKeyBySpId,
-  dynamic db,
+  Map<String, dynamic> db,
   ScopedCol scopedCol,
   PushDiffFs fs,
   EncryptDoc encryptDoc,

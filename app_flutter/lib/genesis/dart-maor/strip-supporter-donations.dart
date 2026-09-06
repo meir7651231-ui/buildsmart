@@ -54,7 +54,7 @@ Map<dynamic, dynamic> _spreadObj(dynamic data) {
 /// Everything else — other collections, null data, sibling fields — passes by
 /// reference. Pure, no mutation. Verbatim port of
 /// new/atoms/strip-supporter-donations.mjs (`stripSupporterDonations`).
-Map<dynamic, dynamic> stripSupporterDonations(dynamic diff) {
+Map<dynamic, dynamic> stripSupporterDonations(Map<String, dynamic> diff) {
   final sets = (_get(diff, 'sets') as List)
       .map((s) {
         final data = _get(s, 'data');

@@ -38,10 +38,10 @@ String _orStr(dynamic v, String fb) => (v is String && v.isNotEmpty) ? v : fb;
 /// Neighbour calls termOf/tierOf/famLiveEnrollments/STATUS_META injected as sockets
 /// (Law 1/3). Verbatim behaviour of new/atoms/finder-axis-value.mjs (`finderAxisValue`).
 String finderAxisValue(
-  dynamic db,
+  Map<String, dynamic> db,
   Map<String, dynamic> f,
   String axis,
-  dynamic config, {
+  Map<String, dynamic>? config, {
   required String Function(dynamic config, String key, String fallback) termOf,
   required Map<String, dynamic> Function(num score) tierOf,
   required List<dynamic> Function(dynamic db, Map<String, dynamic> f)

@@ -21,7 +21,7 @@ const List<String> _ayinStages = ['new', 'lead', 'eyes', 'answer', 'done'];
 
 /// Verbatim port of new/atoms/stage-index.mjs (`stageIndex`).
 /// Index of [stage] in the fixed funnel order; unknown stage ⇒ 0 (not -1).
-int stageIndex(dynamic stage) {
+int stageIndex(String stage) {
   // שקול ל-AYIN_STAGES.indexOf(stage) של JS: === איבר-איבר, ‎-1 אם אין.
   var i = -1;
   for (var k = 0; k < _ayinStages.length; k++) {

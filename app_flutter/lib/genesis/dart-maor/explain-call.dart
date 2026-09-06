@@ -86,7 +86,7 @@ String _pathValue(List path, String prefix, int cut, String fallback) {
 /// {outcome, reason, summary, lines, sim} — [sim] is the exact object the socket
 /// returned (identity), summary = lines.join(' '). [simulateCall] and [featureOn]
 /// are injected sockets (Law 1/3 — no internal imports).
-Map<String, dynamic> explainCall(dynamic tenant,
+Map<String, dynamic> explainCall(Map<String, dynamic> tenant,
   Map<String, dynamic> call,
   Map<String, dynamic> opts,
   Map<String, dynamic> Function(dynamic tenant, Map<String, dynamic> call, Map<String, dynamic> opts) simulateCall,

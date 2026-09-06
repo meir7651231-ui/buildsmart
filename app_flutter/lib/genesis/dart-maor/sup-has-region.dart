@@ -17,7 +17,7 @@
 /// Does the supporter have at least one phone row in the requested region?
 /// Verbatim port of new/atoms/sup-has-region.mjs (`supHasRegion`); the neighbour
 /// call `allSupPhones` is injected as a socket: (sp) => List of rows with 'region'.
-bool supHasRegion(dynamic sp, dynamic region, dynamic allSupPhones) {
+bool supHasRegion(Map<String, dynamic> sp, String region, dynamic allSupPhones) {
   final rows = allSupPhones(sp) as List;
   for (final r in rows) {
     if ((r as Map)['region'] == region) return true;

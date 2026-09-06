@@ -26,8 +26,8 @@ typedef SupKeyMapOf = dynamic Function(dynamic supporters);
 /// also keeps skey on enforced collections). Verbatim behaviour of the JS source
 /// new/atoms/encrypt-existing-cloud.mjs.
 Future<void> encryptExistingCloud(
-  dynamic db,
-  dynamic dek,
+  Map<String, dynamic> db,
+  Map<String, dynamic> dek,
   PushDiff pushDiff,
   FullDbDiff fullDbDiff,
   SupKeyMapOf supKeyMapOf,

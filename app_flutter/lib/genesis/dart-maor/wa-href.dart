@@ -13,7 +13,7 @@ bool _jsTruthy(dynamic v) {
   return true;
 }
 
-dynamic waHref(dynamic phone, dynamic text, dynamic appScheme,
+Map<String, dynamic>? waHref(String phone, String text, bool appScheme,
     dynamic Function(dynamic, dynamic) waAppLink,
     dynamic Function(dynamic, dynamic) waLink) {
   final href =

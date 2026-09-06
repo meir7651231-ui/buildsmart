@@ -21,7 +21,7 @@ int _cmp(String a, String b) {
 
 List<Map<String, dynamic>> openTasksFor(
   List<Map<String, dynamic>> tasks,
-  dynamic identity,
+  String identity,
   String Function(dynamic) taskIdentity,
 ) {
   final me = taskIdentity(identity);

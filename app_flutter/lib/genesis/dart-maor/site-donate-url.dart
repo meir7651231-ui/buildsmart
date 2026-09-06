@@ -46,7 +46,7 @@ bool _truthy(dynamic v) {
 /// site.donateUrl (non-empty string only), falling back to
 /// integrations.payments.payUrl (non-empty string only), else null.
 /// Verbatim port of new/atoms/site-donate-url.mjs (`siteDonateUrl`).
-dynamic siteDonateUrl(dynamic config) {
+String? siteDonateUrl(Map<String, dynamic> config) {
   final direct = _get(_getT(config, 'site'), 'donateUrl');
   if (direct is String && direct.isNotEmpty) return direct;
   final pay = _get(_getT(config, 'integrations'), 'payments');

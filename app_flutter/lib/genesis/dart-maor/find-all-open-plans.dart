@@ -14,7 +14,7 @@ bool _truthy(dynamic v) {
   return true;
 }
 
-List<dynamic> findAllOpenPlans(dynamic db) {
+List<dynamic> findAllOpenPlans(Map<String, dynamic> db) {
   final out = <dynamic>[];
 
   // supporters: sup.plannedCharges || []  (מערך-ריק נשאר מערך-ריק; חסר/null ⇒ [])

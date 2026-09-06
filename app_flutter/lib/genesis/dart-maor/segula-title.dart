@@ -10,7 +10,7 @@
 //     שלם-double בטווח [2^53,1e21) ⇒ עשרוני-מלא בלי ".0" (התיקון — FIXES.md).
 //   r = אובייקט {day, final} ⇒ ‏Map ב-Dart; מפתח-חסר = undefined של JS ⇒ 'undefined' (חוק-2).
 
-String segulaTitle(dynamic name, dynamic r, dynamic target, {required String Function(String) term}) {
+String segulaTitle(String? name, Map<String, dynamic> r, num target, {required String Function(String) term}) {
   final dynamic rFinal = (r is Map && r.containsKey('final')) ? r['final'] : null;
   final dynamic rDay =
       (r is Map) ? (r.containsKey('day') ? r['day'] : _undef) : null;

@@ -45,7 +45,7 @@ String _jsTrim(String s) {
 /// 'address, city' (both trimmed, empties filtered — one part left ⇒ it alone, no
 /// comma). Missing family, or family with neither address nor city ⇒ skipped.
 /// Verbatim port of new/atoms/volunteer-route-stops.mjs (`volunteerRouteStops`).
-List<String> volunteerRouteStops(dynamic db, dynamic dayId, dynamic volunteerId) {
+List<String> volunteerRouteStops(Map<String, dynamic> db, String dayId, String volunteerId) {
   final out = <String>[];
   for (final d in (db as Map)['deliveries'] as List) {
     final dm = d as Map;

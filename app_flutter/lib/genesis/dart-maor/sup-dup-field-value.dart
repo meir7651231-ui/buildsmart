@@ -102,7 +102,7 @@ dynamic _atIdx(dynamic arr, dynamic idx) {
 /// ערך-השדה הנבחר במיזוג כפולי-תורמים — התנהגות זהה-ביט למקור-ה-JS.
 /// עריכה-ידנית גוברת (גם '' — מחיקה-מכוונת, ‎!= null); אחרת הבחירה (pick — גם 0);
 /// אחרת הרשומה הראשונה שיש לה ערך (findIndex על def.get); אף אחת ⇒ sups[0].
-dynamic supDupFieldValue(dynamic sups, dynamic def, dynamic pick, dynamic edit) {
+String supDupFieldValue(List<Map<String, dynamic>> sups, Map<String, dynamic> def, Map<String, dynamic> pick, Map<String, dynamic> edit) {
   final edited = edit[def['key']];
   if (edited != null) return edited;
   final idx = pick[def['key']] ?? _findIndexTruthy(sups, def['get']);

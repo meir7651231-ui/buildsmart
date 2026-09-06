@@ -80,7 +80,7 @@ num? _parseLocalMidnightMs(String s) {
 
 /// התקדמות-קמפיין של האתר-הציבורי: יעד/נאסף/אחוז-חסום-ומעוגל/מטבע/ימים-נותרו/הצגה.
 /// ‏c = Map (אובייקט-הקונפיג) או null/חסר; ‏nowMs = שקע-הזמן (מילישניות).
-Map<String, dynamic> campaignProgress(dynamic c, dynamic nowMs) {
+Map<String, dynamic> campaignProgress(Map<String, dynamic>? c, num nowMs) {
   final rawGoal = c == null ? null : c['goal'];
   final rawRaised = c == null ? null : c['raised'];
   final num goal = (rawGoal is num && rawGoal > 0) ? rawGoal : 0;

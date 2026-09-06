@@ -2,7 +2,7 @@
 /// המרה נאמנה מ-new/atoms/dup-field-value.mjs (חוק-4: המקור קדוש).
 /// המנוע פספס: def הוא רשומה (key+get) ⇒ גישת-מפה לא property-access;
 /// ו-findIndex של JS בודק truthiness של הערך ⇒ Dart indexWhere דורש bool (כלל-7).
-dynamic dupFieldValue(List fams, Map def, Map pick, Map edit) {
+String dupFieldValue(List fams, Map def, Map pick, Map edit) {
   final key = def['key'];
   final get = def['get'] as dynamic Function(dynamic);
   final edited = edit[key];

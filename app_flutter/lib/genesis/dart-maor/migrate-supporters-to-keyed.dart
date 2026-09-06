@@ -81,7 +81,7 @@ Map<String, dynamic> _withSkey(Object? skey, dynamic inner) {
 Future<int> migrateSupportersToKeyed(
   List<dynamic> supporters,
   List<dynamic> events,
-  dynamic dek,
+  Map<String, dynamic>? dek,
   MigrateIo io,
 ) async {
   final db = io.requireDb();

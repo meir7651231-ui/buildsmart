@@ -30,7 +30,7 @@ bool _truthy(dynamic v) {
 
 /// Thank-you-letter prompt builder (AI add-on) — verbatim port of
 /// new/atoms/thanks-prompt.mjs (`thanksPrompt`). Optional lines only when supplied.
-String thanksPrompt(dynamic inp, Map<String, String> T) {
+String thanksPrompt(Map<String, dynamic> inp, Map<String, String> T) {
   return [
     T['k1']! +
         (_truthy(inp['orgName']) ? inp['orgName'].toString() : T['k2']!) +

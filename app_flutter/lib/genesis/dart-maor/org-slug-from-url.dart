@@ -73,7 +73,7 @@ String? _firstQueryParam(String search, String key) {
 
 /// ‏slug מ-‎?org=<slug>‎ — פריסה אחת משרתת אינסוף לקוחות. התנהגות verbatim של
 /// new/atoms/org-slug-from-url.mjs: רק ‏^[a-z0-9-]{2,40}$ מוחזר; כל השאר ⇒ null.
-dynamic orgSlugFromUrl(dynamic search) {
+String? orgSlugFromUrl(String? search) {
   try {
     final slug = _firstQueryParam(search == null ? '' : search.toString(), 'org');
     if (slug == null || slug.isEmpty) return null; // truthiness של JS (חוק-7)

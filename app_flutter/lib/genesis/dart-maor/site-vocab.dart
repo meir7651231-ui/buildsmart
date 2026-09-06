@@ -6,7 +6,7 @@
 // אנגלית רק כש-lang=='en' (השוואת-זהות כמו ===); כל שפה אחרת ⇒ עברית.
 // סדר-המפתחות במפה = סדר-ההכנסה של המקור (LinkedHashMap ≡ סדר-אובייקט-JS —
 // אין כאן מפתחות דמויי-שלם, כלל-14 לא נדרש).
-dynamic siteVocab(dynamic commercial, dynamic lang, {required String Function(String) term}) {
+Map<String, dynamic> siteVocab(bool commercial, String lang, {required String Function(String) term}) {
   final en = lang == 'en';
   // truthiness של JS על commercial (כלל-7): בחוזה commercial הוא boolean,
   // אך נשמרת סמנטיקת if(x) של JS לקצוות.

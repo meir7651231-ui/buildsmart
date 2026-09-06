@@ -14,7 +14,7 @@ num _jsRound(num x) {
 }
 
 Map<String, dynamic> weightedQuote(
-    dynamic c, dynamic opts, dynamic lessonPriceForTier, dynamic lessonsInTerm) {
+    Map<String, dynamic> c, Map<String, dynamic> opts, dynamic lessonPriceForTier, dynamic lessonsInTerm) {
   final perLesson = lessonPriceForTier(c, opts['tier']);
   final raw = lessonsInTerm(opts['freq'], opts['unit'], opts['term'], opts['months']);
   return {

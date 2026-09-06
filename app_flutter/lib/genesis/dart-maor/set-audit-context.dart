@@ -76,7 +76,7 @@ String _jsLower(String s) {
 /// uid passes through untouched, email is normalised (JS trim + JS
 /// toLowerCase), canRead passes through. Returns a fresh Map every call —
 /// no shared state (the module-variable assignment stayed in the box).
-dynamic setAuditContext(dynamic uid, dynamic email, dynamic canRead) {
+Map<String, dynamic> setAuditContext(String uid, String email, bool canRead) {
   return {
     'auditUid': uid,
     'auditEmail': _jsLower(_jsTrim(email as String)),

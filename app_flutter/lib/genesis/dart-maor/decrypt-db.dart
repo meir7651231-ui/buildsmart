@@ -25,7 +25,7 @@ typedef AesDec = Future<List<int>> Function(dynamic key, dynamic blob);
 /// Verbatim port of the JS source new/atoms/decrypt-db.mjs (`decryptDb`):
 /// hands `env.data` to the AES socket, then UTF-8-decodes the returned bytes
 /// to the plaintext JSON. A throwing socket rejects the future (not swallowed).
-Future<String> decryptDb(dynamic env, dynamic dek, AesDec aesDec) async {
+Future<String> decryptDb(Map<String, dynamic> env, Map<String, dynamic>? dek, AesDec aesDec) async {
   return _utf8Decode(await aesDec(dek, (env as dynamic).data));
 }
 

@@ -3,8 +3,8 @@
 /// השכנים printReceipt/downloadReceipt הוזרקו כשקעים (חוק-1 — אפס import פנימי).
 /// המקור מחזיר undefined ⇒ ב-Dart פונקציית void (אין ערך-החזרה).
 void deliverReceipt(
-  dynamic o,
-  dynamic fmt,
+  Map<String, dynamic> o,
+  String? fmt,
   void Function(dynamic) printReceipt,
   void Function(dynamic) downloadReceipt,
 ) {

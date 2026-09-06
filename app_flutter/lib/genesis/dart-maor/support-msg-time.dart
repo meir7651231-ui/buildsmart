@@ -69,7 +69,7 @@ List<int>? _jsLocalHourMinute(String s) {
 }
 
 /// חוט · supportMsgTime — "HH:MM" בפורמט he-IL, או '' לקלט לא-תקין.
-dynamic supportMsgTime(dynamic at) {
+String supportMsgTime(String at) {
   final String raw = at as String;
   final s = raw.contains('T') ? raw : raw + 'T12:00:00';
   final hm = _jsLocalHourMinute(s);

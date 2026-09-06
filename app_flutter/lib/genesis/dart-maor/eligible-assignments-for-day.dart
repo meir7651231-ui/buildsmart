@@ -18,7 +18,7 @@
 /// Verbatim behaviour of the JS source `eligibleAssignmentsForDay`: builds the
 /// set of assignmentIds delivered on `dayId`, returns active assignments whose id
 /// is not in that set. Returned elements are the exact source objects (no copy).
-List eligibleAssignmentsForDay(Map db, dynamic dayId) {
+List eligibleAssignmentsForDay(Map db, String dayId) {
   final deliveries = (db['deliveries'] as List);
   final taken = deliveries
       .where((d) => d['dayId'] == dayId)

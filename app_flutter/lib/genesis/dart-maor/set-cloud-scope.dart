@@ -17,6 +17,6 @@
 /// Cloud org-scope value — verbatim behavior of the JS source
 /// new/atoms/set-cloud-scope.mjs. Returns a fresh {slug, cloudRoot} map;
 /// the module-variable assignment and the safe default live in the box, not here.
-Map<String, dynamic> setCloudScope(dynamic slug, dynamic cloudRoot) {
+Map<String, dynamic> setCloudScope(String slug, bool cloudRoot) {
   return {'slug': slug, 'cloudRoot': cloudRoot};
 }

@@ -28,7 +28,7 @@ final RegExp _yudVav = RegExp(r'[יו]');
 /// both sides (query length >= 3, not all-digits, skeleton length >= 2).
 /// Returns 58 when the rule fires, otherwise null. Verbatim behaviour of the
 /// JS source new/atoms/rule-skeleton.mjs.
-dynamic ruleSkeleton(dynamic nq, dynamic nt) {
+num? ruleSkeleton(String nq, String nt) {
   if ((nq.length as int) < 3 || _allDigits.hasMatch(nq as String)) return null;
   final sq = nq.replaceAll(_yudVav, '');
   final st = (nt as String).replaceAll(_yudVav, '');

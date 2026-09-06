@@ -25,7 +25,7 @@ bool _falsy(dynamic v) =>
 
 /// פתיחת קמפיין-חיוג: דדופ (מופע-ראשון מנצח) + סינון-falsy; הסדר המקורי נשמר.
 /// מחזיר {name, startedAt, queue, total, log:[]} — התנהגות זהה למקור-ה-JS.
-dynamic startCampaign(dynamic name, dynamic ids, dynamic iso) {
+Map<String, dynamic> startCampaign(String name, List<dynamic> ids, String iso) {
   final seen = <dynamic>{};
   final queue = <dynamic>[];
   for (final id in (ids as Iterable)) {

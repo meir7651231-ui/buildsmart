@@ -115,7 +115,7 @@ List<dynamic> _jsSlice0(List<dynamic> list, dynamic end) {
 /// שער-חיטוי: רק פריטים שעוברים את שקע-האימות וגם length <= photoMaxLen,
 /// חתוך ל-photoMax הראשונים. לא-מערך ⇒ [].
 List<dynamic> sanitizePhotos(dynamic raw, dynamic isDataImage,
-    [dynamic photoMaxLen = 460000, dynamic photoMax = 5]) {
+    [num? photoMaxLen = 460000, dynamic photoMax = 5]) {
   if (raw is! List) return [];
   final kept = raw.where((x) {
     if (!_jsTruthy(isDataImage(x))) return false; // && קצר-חשמלי כמו במקור

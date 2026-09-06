@@ -8,7 +8,7 @@
 ///  · !done[key] ⇒ _falsy (כלל-המרה 7): truthiness של JS ≠ Dart — falsy = null/false/0/''/NaN.
 ///  · .filter → .where(...).toList() כדי שיהיה אינדקסבל (JS filter מחזיר מערך).
 List<dynamic> liveSuggestions(
-    dynamic db, dynamic todayIso, dynamic config, dynamic suggestions) {
+    Map<String, dynamic> db, String todayIso, Map<String, dynamic>? config, dynamic suggestions) {
   final done = db['attnDone'] ?? {};
   final result = suggestions(db, todayIso, config) as List;
   return result.where((s) => _falsy(done[s['key']])).toList();

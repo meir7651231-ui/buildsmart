@@ -17,6 +17,6 @@
 /// Derive the template-key list from the template definitions, in
 /// definition order (duplicates preserved).
 /// Verbatim port of new/atoms/template-keys.mjs (`templateKeys`).
-dynamic templateKeys(dynamic defs) {
+List<dynamic> templateKeys(List<dynamic> defs) {
   return (defs as List).map((d) => d['key']).toList();
 }

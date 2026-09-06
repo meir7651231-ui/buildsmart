@@ -29,7 +29,7 @@
 /// Verbatim port of new/atoms/new-supporter-from-row.mjs (`newSupporterFromRow`);
 /// the neighbour calls fixPhone + mergeHist are injected as sockets (Law 1/3).
 Map<String, dynamic> newSupporterFromRow(
-  dynamic id,
+  String id,
   Map<String, dynamic> row,
   String Function(String) fixPhone,
   List Function(List existing, List incoming) mergeHist,

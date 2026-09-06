@@ -17,7 +17,7 @@
 /// Hebrew month label -> Intl English month name (calendar 'hebrew');
 /// unknown label -> null. Exact-character match (Hebrew geresh U+05F3 only).
 /// Verbatim behaviour of the JS source new/atoms/month-en-of.mjs.
-String? monthEnOf(dynamic he, {required List<dynamic> months}) {
+String? monthEnOf(String he, {required List<dynamic> months}) {
   for (final m in months) {
     if (m[1] == he) return m[0] as String?;
   }

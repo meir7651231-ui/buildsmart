@@ -43,7 +43,7 @@ bool _falsy(dynamic v) {
 /// are injected as sockets (Law 1/3).
 List<Map<String, dynamic>> needsCare(Map<String, dynamic> db,
   String todayIso,
-  dynamic config,
+  Map<String, dynamic>? config,
   List<dynamic> Function(String todayIso, int dueDays) upcomingHolidays,
   int? Function(Map<String, dynamic> db, dynamic itemId) itemRemaining,
   int? Function(dynamic compId, dynamic productId, dynamic assignments, dynamic stock)

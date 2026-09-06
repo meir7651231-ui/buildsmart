@@ -19,7 +19,7 @@
 /// Whether two navigation locations are identical: equal on all three of
 /// view, selFamilyId, selCourseId (extra fields ignored). Verbatim port of
 /// new/atoms/same-loc.mjs (pure, zero sockets).
-bool sameLoc(dynamic a, dynamic b) {
+bool sameLoc(Map<String, dynamic> a, Map<String, dynamic> b) {
   return a['view'] == b['view'] &&
       a['selFamilyId'] == b['selFamilyId'] &&
       a['selCourseId'] == b['selCourseId'];

@@ -35,8 +35,8 @@ bool _falsy(dynamic v) {
 /// Cloud-over-static org-config merge — verbatim behavior of the JS source
 /// new/atoms/resolve-org-config.mjs. `normalizeConfig` is an injected socket
 /// ((raw) => cfg|null — the sanitizer neighbour), never imported.
-dynamic resolveOrgConfig(
-  dynamic staticCfg,
+Map<String, dynamic> resolveOrgConfig(
+  Map<String, dynamic> staticCfg,
   dynamic cloudRaw,
   dynamic Function(dynamic) normalizeConfig,
 ) {

@@ -117,7 +117,7 @@ Object? _deUndef(Object? v) => identical(v, _undefined) ? null : v;
 
 /// מיזוג כל אירועי-הכסף של תומכת לרשימת-תצוגה אחת, ממוינת מהחדש לישן.
 /// התנהגות זהה-ביט למקור-ה-JS `supDonEvents` (new/atoms/sup-don-events.mjs).
-List<Map<String, dynamic>> supDonEvents(dynamic sp, Map<String, String> T2, [dynamic Function(String key, String fallback)? term]) {
+List<Map<String, dynamic>> supDonEvents(Map<String, dynamic> sp, Map<String, String> T2, [dynamic Function(String key, String fallback)? term]) {
   // ‏const T = (k, fb) => (term ? term(k, fb) : fb) — פונקציה תמיד truthy ב-JS.
   dynamic T(String k, String fb) => term != null ? term(k, fb) : fb;
 

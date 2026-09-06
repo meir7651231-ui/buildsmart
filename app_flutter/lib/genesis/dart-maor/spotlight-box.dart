@@ -146,7 +146,7 @@ num _jsMin(num a, num b) {
 /// חלון-ה-spotlight של הסיור סביב מלבן-אלמנט — התנהגות verbatim של
 /// new/atoms/spotlight-box.mjs (חוק-4). מלבן falsy או במידות ≤0 ⇒ null;
 /// אחרת ריפוד pad סביב, הצמדת left/top ל-0 וחיתוך width/height ל-viewport.
-dynamic spotlightBox(dynamic rect, dynamic vw, dynamic vh, [dynamic pad = 10]) {
+Map<String, dynamic>? spotlightBox(Map<String, dynamic>? rect, num vw, num vh, [num? pad = 10]) {
   // if (!rect || rect.width <= 0 || rect.height <= 0) return null;
   // short-circuit כמו-JS: rect falsy ⇒ אין גישת-שדה כלל.
   if (_falsy(rect)) return null;

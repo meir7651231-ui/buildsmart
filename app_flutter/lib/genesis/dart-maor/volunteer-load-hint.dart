@@ -4,7 +4,7 @@
 // (undefined≡null בהשוואה-רופפת ⇒ מפתח-חסר-במפה ⇒ null ⇒ אותו ענף; כלל-2 לא-נדרש
 // כאן במכוון כי המקור משתמש ב-== ולא ב-===). ‏count >= max — השוואה מספרית ישירה.
 // שקע: deliveriesOfVolunteer(db, volId, dayId) ⇒ List (חוק-1).
-Map<String, dynamic> volunteerLoadHint(dynamic db, dynamic vol, dynamic dayId,
+Map<String, dynamic> volunteerLoadHint(Map<String, dynamic> db, Map<String, dynamic> vol, String dayId,
     List<dynamic> Function(dynamic, dynamic, dynamic) deliveriesOfVolunteer) {
   final count = deliveriesOfVolunteer(db, vol['id'], dayId).length;
   final max = vol['maxDeliveries'];

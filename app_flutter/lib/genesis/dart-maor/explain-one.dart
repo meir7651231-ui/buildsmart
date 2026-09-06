@@ -19,10 +19,10 @@
 /// Verbatim behaviour of the JS source `explainOne`. Injected neighbours are the
 /// four function sockets; tenant/validation/result objects are Maps.
 Map<String, dynamic> explainOne(
-  dynamic tc,
-  dynamic orgName,
-  dynamic tenantId,
-  dynamic call,
+  Map<String, dynamic> tc,
+  String orgName,
+  String tenantId,
+  Map<String, dynamic> call,
   dynamic telephonyToTenant,
   dynamic validateTenant,
   dynamic explainCall,

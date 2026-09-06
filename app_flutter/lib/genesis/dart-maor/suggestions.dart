@@ -107,9 +107,9 @@ dynamic _find(dynamic list, bool Function(dynamic) pred) {
 
 /// המנוע: 4 כללים ⇒ רשימת-הצעות {key,emoji,title,detail,famId?,courseId?,act}.
 /// ‏sockets = {termOf, moduleOn, upcomingHoliday, ageAt} — שקעי-השכנים המוזרקים.
-List<dynamic> suggestions(dynamic db,
-  dynamic todayIso,
-  dynamic config,
+List<dynamic> suggestions(Map<String, dynamic> db,
+  String todayIso,
+  Map<String, dynamic>? config,
   Map<String, dynamic> sockets, Map<String, dynamic> T2) {
   final dynamic termOf = sockets['termOf'];
   final dynamic moduleOn = sockets['moduleOn'];

@@ -29,7 +29,7 @@
 bool _rqTruthy(dynamic v) =>
     !(v == null || v == false || v == '' || (v is num && (v == 0 || v.isNaN)));
 
-dynamic ruleTypo(dynamic nq, dynamic nt, dynamic distance) {
+num? ruleTypo(String nq, String nt, dynamic distance) {
   if (_rqTruthy(nq.length < 3) || RegExp(r'^\d+$').hasMatch(((nq) as String))) return null;
   final max = _rqTruthy(nt.length >= 6) ? 2 : 1;
   final d = distance(nq, nt);

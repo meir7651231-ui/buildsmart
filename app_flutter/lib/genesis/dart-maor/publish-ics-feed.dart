@@ -54,9 +54,9 @@ bool _truthy(Object? v) {
 /// the UTF-8 byte limit, writing nothing. Verbatim behaviour of the JS source
 /// new/atoms/publish-ics-feed.mjs.
 Future<dynamic> publishIcsFeed(
-  dynamic slug,
-  dynamic ics,
-  dynamic opts, {
+  String slug,
+  String ics,
+  Map<String, dynamic>? opts, {
   required ReadToken readToken,
   required MintToken mintToken,
   required WriteFeed writeFeed,

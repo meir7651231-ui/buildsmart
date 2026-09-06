@@ -50,7 +50,7 @@ dynamic _keyOf(dynamic m) {
 /// are kept as two distinct entries — faithful to JS Map null↔undefined keys.
 /// The sink `allMembers` is called exactly once with the injected `db`.
 /// Verbatim behaviour of the JS source `nameIndex`.
-dynamic nameIndex(dynamic db, dynamic allMembers) {
+dynamic nameIndex(Map<String, dynamic> db, dynamic allMembers) {
   final map = <dynamic, dynamic>{};
   for (final m in ((allMembers(db)) as Iterable)) {
     map[_keyOf(m)] = m;

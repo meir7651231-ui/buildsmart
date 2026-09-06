@@ -3,7 +3,7 @@
 /// מוצא: maor/src/lib/config.ts:90-92. אפס import של אטום אחר.
 /// JS: `cfg.telephony?.enabled === true` — optional-chaining ⇒ חסר=false;
 /// ‏=== מחמיר ⇒ רק boolean true מדליק ('true' מחרוזת = כבוי).
-bool telephonyOn(dynamic cfg) {
+bool telephonyOn(Map<String, dynamic> cfg) {
   final t = (cfg is Map) ? cfg['telephony'] : null;
   return t is Map && t['enabled'] == true;
 }

@@ -20,7 +20,7 @@
 /// (`enabled != false` — missing means active; flag-contract: only false disables).
 /// Verbatim port of new/atoms/public-site-on.mjs. `featureOn` is an injected socket.
 bool publicSiteOn(
-  dynamic cfg,
+  Map<String, dynamic> cfg,
   bool Function(dynamic cfg, String key) featureOn,
 ) {
   return featureOn(cfg, 'shell.publicsite') &&

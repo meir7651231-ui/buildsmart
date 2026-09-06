@@ -21,6 +21,6 @@
 /// unknown language ⇒ the `he` dictionary; key missing in the language ⇒ the
 /// Hebrew value; missing there too ⇒ ''. Verbatim behaviour of the JS source
 /// new/atoms/site-ui.mjs.
-dynamic siteUi(dynamic lang, dynamic key, dynamic uiLabels) {
+String siteUi(String lang, String key, Map<String, dynamic> uiLabels) {
   return (uiLabels[lang] ?? uiLabels['he'])[key] ?? uiLabels['he'][key] ?? '';
 }

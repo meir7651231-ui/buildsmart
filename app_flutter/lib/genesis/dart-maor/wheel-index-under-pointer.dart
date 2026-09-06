@@ -47,7 +47,7 @@ double _floor(double x) => x.isFinite ? x.floorToDouble() : x;
 
 /// מקור: maor/src/components/courses/lib.ts:592-598 —
 /// wheelIndexUnderPointer(rot, n): האינדקס שמתחת-למצביע בגלגל מסתובב.
-dynamic wheelIndexUnderPointer(dynamic rot, dynamic n) {
+num wheelIndexUnderPointer(String rot, String n) {
   final nN = _toNum(n);
   // JS: n <= 1 — השוואה מספרית; NaN <= 1 כוזב בשתי השפות.
   if (nN <= 1) return 0;

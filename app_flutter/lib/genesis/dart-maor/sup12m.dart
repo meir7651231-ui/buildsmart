@@ -20,7 +20,7 @@ bool _jsTruthy(dynamic v) {
 /// String(n).padStart(2,'0') של JS.
 String _p2(dynamic n) => n.toString().padLeft(2, '0');
 
-dynamic sup12m(dynamic supporters, dynamic todayIso, dynamic supLast) {
+num sup12m(List<dynamic> supporters, String todayIso, dynamic supLast) {
   // ‏new Date(todayIso+'T12:00:00') — צורת תאריך-שעה עם 'T' בלי אזור ⇒ זמן מקומי,
   // ואז ‏setDate(getDate()-365): נרמול-לוח גרגוריאני (זהה בבנאי-DateTime של Dart).
   final d0 = DateTime.parse((todayIso as String) + 'T12:00:00');

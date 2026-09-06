@@ -19,7 +19,7 @@
 /// active-only products; otherwise a shallow copy of all products (source order).
 /// The neighbour [smartFilter] is injected as a socket (Law-1) and applied over the
 /// base with a term-extractor yielding [name, desc]. Verbatim behaviour of the JS source.
-dynamic filterProducts(
+List<Map<String, dynamic>> filterProducts(
   List products,
   Object? q,
   Object? onlyActive,

@@ -35,7 +35,7 @@ List<Map<String, dynamic>> buildSlots(
   Map<String, dynamic> db,
   Map<String, dynamic> room,
   String iso,
-  dynamic blocked,
+  String? blocked,
   Map<String, dynamic> config,
   num Function(dynamic t) timeToMin,
   String Function(dynamic min) minToHM,

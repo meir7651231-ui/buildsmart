@@ -9,9 +9,9 @@
 //   • _falsy מכבד את כל ה-falsy של JS (null/false/''/0/NaN) — לא רק ריק-מחרוזת.
 List<Map<String, dynamic>> filterAyinBoard(
   List<Map<String, dynamic>> items,
-  dynamic q,
-  dynamic status,
-  dynamic stage,
+  String q,
+  String? status,
+  String? stage,
   String Function(dynamic) normSearch,
 ) {
   final nq = normSearch(q);

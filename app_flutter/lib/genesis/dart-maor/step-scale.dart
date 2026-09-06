@@ -27,7 +27,7 @@
 
 /// One zoom step up/down with the legacy round-to-tenth. Verbatim behaviour of
 /// the JS source new/atoms/step-scale.mjs (double-clamp + Math.round(x*10)/10).
-dynamic stepScale(dynamic v, dynamic dir, dynamic clampScale,
+num stepScale(num v, num dir, dynamic clampScale,
     [dynamic step = 0.1]) {
   final double d = _toNum(dir);
   final double s = _toNum(step);

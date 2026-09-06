@@ -25,8 +25,8 @@ bool _falsy(dynamic v) {
 /// Deliveries assigned to a volunteer, optionally narrowed to one distribution day.
 /// Verbatim port of new/atoms/deliveries-of-volunteer.mjs (`deliveriesOfVolunteer`).
 List<Map<String, dynamic>> deliveriesOfVolunteer(
-    Map<String, dynamic> db, dynamic volId,
-    [dynamic dayId]) {
+    Map<String, dynamic> db, String volId,
+    [String? dayId]) {
   final List deliveries = db['deliveries'] as List;
   return deliveries
       .cast<Map<String, dynamic>>()

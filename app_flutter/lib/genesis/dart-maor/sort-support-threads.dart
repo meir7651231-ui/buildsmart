@@ -80,7 +80,7 @@ int _cmpLastAt(dynamic la, dynamic lb) {
 
 /// חוט · sortSupportThreads — עותק ממוין: חוטים עם לא-נקרא-מנהל ראשונים,
 /// בתוך כל קבוצה lastAt יורד (חדש-ראשון); שוויון ⇒ סדר-מקורי (יציבות-JS).
-dynamic sortSupportThreads(dynamic threads) {
+List<dynamic> sortSupportThreads(dynamic threads) {
   final list = _spreadToList(threads);
   // decorate-sort-undecorate (חוק-1): אינדקס-מקורי כשובר-שוויון ⇒ יציבות-JS.
   final idx = List<int>.generate(list.length, (i) => i);

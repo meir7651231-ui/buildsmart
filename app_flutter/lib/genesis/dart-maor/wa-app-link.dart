@@ -11,7 +11,7 @@
 ///  • ‏`encodeURIComponent` ⇒ ‏Uri.encodeComponent (dart:core) — אותה קבוצת-תווים
 ///    בדיוק (ECMA-262: אלפאנומרי + ‎-_.!~*'()‎ לא-מקודדים, hex-רבתי, UTF-8).
 /// אפס-import (dart:core בלבד).
-String? waAppLink(dynamic phone, dynamic text, dynamic Function(dynamic) waDigits) {
+String? waAppLink(String phone, String text, dynamic Function(dynamic) waDigits) {
   final digits = waDigits(phone);
   if (_jsFalsy(digits)) return null;
   final t = _jsTrim(text as String);

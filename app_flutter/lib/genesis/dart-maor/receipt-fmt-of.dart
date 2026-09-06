@@ -22,8 +22,8 @@
 /// only when the 'core.receipt.pdf' flag is on (via [featureOn]); off ⇒ null
 /// (emergency switch), without mutating the saved choice.
 /// Verbatim behaviour of the JS source `receiptFmtOf`.
-dynamic receiptFmtOf(
-  dynamic config,
+String? receiptFmtOf(
+  Map<String, dynamic> config,
   Map ui,
   bool Function(dynamic config, String key) featureOn,
 ) {

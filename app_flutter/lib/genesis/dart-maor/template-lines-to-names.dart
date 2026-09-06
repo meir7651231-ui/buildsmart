@@ -83,7 +83,7 @@ double _jsNum(dynamic v) {
 /// שורות-תבנית ⇒ פריטי-BOQ: ‏qty→eyes (float64; שבור/אפס⇒0 דרך `|| 0`) ·
 /// ‏done:false · ‏rate רק כשחיובי (מפתח-חסר, לא null — חוק-2; הערך המקורי
 /// verbatim, לא מומר) · ריקי-שם מסולקים · ‏i של nextId = האינדקס אחרי הסינון.
-List<dynamic> templateLinesToNames(dynamic lines, dynamic nextId) {
+List<dynamic> templateLinesToNames(List<Map<String, dynamic>> lines, dynamic nextId) {
   final out = <dynamic>[];
   var i = 0;
   for (final l in (lines as List)) {

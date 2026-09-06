@@ -14,7 +14,7 @@
 //  · Math.round של JS = חצי-כלפי-+∞ (‏-0.5⇒0), בעוד ‏.round() של Dart = חצי-הרחק-
 //    מאפס וזורק על אינסוף ⇒ שקע _jsRound (floor + השוואת-שארית; ‏0.49999999999999994⇒0).
 //  · העיגול פעם-אחת על הסכום הכולל — לא פר-פריט (559.7 ⇒ 560).
-num warehouseValue(dynamic warehouse) {
+num warehouseValue(List<dynamic> warehouse) {
   double sum = 0;
   for (final w in (warehouse as List)) {
     final row = w is Map ? w : const {};

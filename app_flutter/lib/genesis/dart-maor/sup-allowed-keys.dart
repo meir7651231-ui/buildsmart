@@ -53,7 +53,7 @@ String _jsTrim(String s) {
 /// with the shared key appended last (Firestore `in` caps at 30 ⇒ 29 + shared).
 /// Verbatim port of new/atoms/sup-allowed-keys.mjs (`supAllowedKeys`); the neighbour
 /// constant SHARED_SUP_KEY is injected as the `sharedKey` socket (Law 1).
-List<dynamic> supAllowedKeys(dynamic allowed, dynamic sharedKey) {
+List<dynamic> supAllowedKeys(List<dynamic> allowed, String sharedKey) {
   final seen = <String>{};
   final clean = <String>[];
   for (final s in allowed as List) {

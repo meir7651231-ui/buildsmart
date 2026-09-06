@@ -3,7 +3,7 @@
 /// שקע: stageLabel(cfg, st) ⇒ תווית-השלב; a = פרטי-ה"עין" (stage/answerPushed).
 /// אפס import (רק dart-core). התנהגות זהה-לחלוטין ל-JS.
 String ayinAdvanceLabel(
-  dynamic cfg,
+  Map<String, dynamic> cfg,
   Map<String, dynamic> a,
   String Function(dynamic cfg, String st) stageLabel,
  {required String Function(String) term}) {

@@ -31,8 +31,8 @@ bool _falsy(Object? v) {
 /// payload with the password + recovery key, then open the DEK. A falsy DEK
 /// throws a Hebrew error. Verbatim behaviour of the JS source
 /// new/atoms/create-cloud-key.mjs.
-Future<Map<String, dynamic>> createCloudKey(dynamic password,
-  dynamic recoveryKey,
+Future<Map<String, dynamic>> createCloudKey(String password,
+  String recoveryKey,
   EncryptDb encryptDb,
   OpenDek openDek, Map<String, String> T) async {
   final env = await encryptDb('', password, recoveryKey);

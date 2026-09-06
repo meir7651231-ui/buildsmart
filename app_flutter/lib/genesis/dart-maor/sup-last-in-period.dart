@@ -26,7 +26,7 @@
 /// Verbatim behaviour of the JS source new/atoms/sup-last-in-period.mjs.
 /// [supLast] is an injected socket (חוק-1): sp ⇒ ISO string of the last
 /// donation, '' when none.
-bool supLastInPeriod(dynamic sp, dynamic year, dynamic month, dynamic supLast) {
+bool supLastInPeriod(Map<String, dynamic> sp, num? year, num? month, dynamic supLast) {
   if (year == null && month == null) return true;
   final dynamic iso = supLast(sp);
   if (_falsy(iso)) return false;

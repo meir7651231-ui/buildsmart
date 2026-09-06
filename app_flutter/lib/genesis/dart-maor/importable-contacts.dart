@@ -15,7 +15,7 @@ bool _truthy(dynamic v) {
 /// שקילה מלאה ל-JS: `parseVcards(text).filter((c) => !isJunkContact(c))`.
 /// מחזיר List (כמו מערך JS מ-`.filter`), שומר-סדר ושומר-רפרנסים.
 List<dynamic> importableContacts(
-  dynamic text,
+  String text,
   dynamic Function(dynamic) parseVcards,
   dynamic Function(dynamic) isJunkContact,
 ) {

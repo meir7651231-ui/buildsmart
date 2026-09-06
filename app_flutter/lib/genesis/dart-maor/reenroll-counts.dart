@@ -19,7 +19,7 @@
 
 /// עובר על [rows] וסופר total + פילוח החלטות (yes/no/hold/undecided) + renewed.
 /// פורט ביט-זהה של new/atoms/reenroll-counts.mjs (`reenrollCounts`).
-Map<String, int> reenrollCounts(dynamic rows) {
+Map<String, int> reenrollCounts(String rows) {
   final c = <String, int>{
     'total': 0,
     'yes': 0,

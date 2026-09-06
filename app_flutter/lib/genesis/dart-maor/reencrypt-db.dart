@@ -31,8 +31,8 @@ typedef AesEnc = dynamic Function(dynamic dek, List<int> bytes);
 /// keeps the input envelope as-is and replaces only `data` with the AES socket's
 /// encryption of the UTF-8-encoded JSON. Spread copy — no input mutation.
 Future<Map<String, dynamic>> reencryptDb(
-  dynamic env,
-  dynamic dek,
+  Map<String, dynamic> env,
+  String dek,
   String json,
   AesEnc aesEnc,
 ) async {

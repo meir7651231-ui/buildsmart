@@ -31,7 +31,7 @@
 /// המיפוי-הפשוט של Dart, כך שהנקודה-העילית לא נבלעת.
 String _jsLower(String s) => s.replaceAll('İ', 'i̇').toLowerCase();
 
-dynamic slugify(dynamic orgName, dynamic taken, {required Map<String, dynamic> heb2lat}) {
+String slugify(String orgName, List<dynamic> taken, {required Map<String, dynamic> heb2lat}) {
   final lower = _jsLower((orgName as String).trim());
   final lat =
       lower.runes.map((r) {

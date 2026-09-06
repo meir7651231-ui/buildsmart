@@ -124,7 +124,7 @@ bool _jsGte(dynamic v, num rhs) {
 }
 
 /// חוט · sup-tier — התנהגות זהת-ביט ל-new/atoms/sup-tier.mjs.
-Map<String, String> supTier(dynamic sc, Map<String, dynamic> T) {
+Map<String, String> supTier(String sc, Map<String, dynamic> T) {
   if (_jsGte(sc, 800)) {
     return {'label': (T['k1'] as String), 'bg': '#fdf3dd', 'c': '#9a6414', 'dot': '#f3c76b'};
   }

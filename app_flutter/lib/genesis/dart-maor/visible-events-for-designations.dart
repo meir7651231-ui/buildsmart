@@ -7,7 +7,7 @@ bool _falsy(dynamic v) =>
     v == null || v == false || v == '' || (v is num && (v == 0 || v.isNaN));
 
 List<dynamic> visibleEventsForDesignations(List<dynamic> events, List<dynamic> supporters,
-    dynamic allowed, bool Function(dynamic, dynamic) isSupVisible) {
+    List<dynamic>? allowed, bool Function(dynamic, dynamic) isSupVisible) {
   if (_falsy(allowed) || (allowed as List).isEmpty) return events;
   final byId = <dynamic, dynamic>{};
   for (final s in supporters) {

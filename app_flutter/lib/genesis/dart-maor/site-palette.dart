@@ -127,7 +127,7 @@ String _rgbStr(List<int> rgb) => '${rgb[0]},${rgb[1]},${rgb[2]}';
 /// גוזר משפחת-פלטה מלאה (12 שדות) מצבע-הדגשה; אין accent / ריק-רווחים /
 /// hex לא-תקין ⇒ fallbackPalette כמות-שהוא (אותה הפניה — ביט-זהה).
 /// פורט-verbatim של sitePalette מ-new/atoms/site-palette.mjs.
-dynamic sitePalette(dynamic accent, dynamic fallbackPalette) {
+Map<String, dynamic> sitePalette(String? accent, Map<String, dynamic> fallbackPalette) {
   // JS: accent && accent.trim() ? hexToRgb(accent) : null (כלל-7 — truthiness)
   final base = (accent != null && (accent as String).trim().isNotEmpty)
       ? _hexToRgb(accent)

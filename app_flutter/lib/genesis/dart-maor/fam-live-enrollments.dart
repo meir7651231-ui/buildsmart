@@ -3,8 +3,8 @@
 // השכן famEnrollments מוזרק כשקע (חוק-1 — אפס import פנימי). אפס-import (dart-core בלבד).
 // null (סטטוס-חסר) ≠ 'ended'/'wait' בדיוק כמו undefined ב-JS ⇒ נשאר חי.
 List<Map<String, dynamic>> famLiveEnrollments(
-  dynamic db,
-  dynamic fam,
+  Map<String, dynamic> db,
+  Map<String, dynamic> fam,
   List<Map<String, dynamic>> Function(dynamic db, dynamic fam) famEnrollments,
 ) {
   return famEnrollments(db, fam)

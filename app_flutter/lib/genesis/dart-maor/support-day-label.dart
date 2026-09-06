@@ -37,7 +37,7 @@ DateTime? _parseV8Local(String iso, Map<String, dynamic> T) {
   return DateTime(year, mon, day, hour, min, sec);
 }
 
-dynamic supportDayLabel(dynamic at, dynamic todayIso, Map<String, dynamic> T) {
+String supportDayLabel(String at, String todayIso, Map<String, dynamic> T) {
   final day = _slice10(at as String);
   if (day == todayIso) return (T['k1'] as String);
   // אתמול = יום-אחד לפני todayIso (חישוב על ה-ISO, צהריים מקומי).

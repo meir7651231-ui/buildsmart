@@ -52,7 +52,7 @@ String _jsLower(String s) {
   return out.toString();
 }
 
-dynamic toTenantId(dynamic slug, dynamic orgName) {
+String toTenantId(String slug, String orgName) {
   final String src = (_truthy(slug) && slug != 'default')
       ? slug as String
       : (_truthy(orgName) ? orgName as String : 'org');

@@ -16,4 +16,4 @@
 /// Single scoring rule: exact match. Returns 100 when the normalised term
 /// equals the normalised query, otherwise null. Verbatim behaviour of the
 /// JS source new/atoms/rule-exact.mjs.
-dynamic ruleExact(dynamic nq, dynamic nt) => (nt == nq ? 100 : null);
+num? ruleExact(String nq, String nt) => (nt == nq ? 100 : null);

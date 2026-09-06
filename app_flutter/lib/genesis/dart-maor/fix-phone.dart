@@ -11,6 +11,6 @@
 //   `dynamic fixPhone(dynamic p, dynamic formatIsraeliPhone)` — הודקה החתימה לשקע-פונקציה
 //   מפורש (`String Function(dynamic)`) כדי לשקף שהשקע נקרא כפונקציה. אין locale/getMonth/
 //   מוטביליות/truthiness לתקן — כל אלו חיים בשקע המוזרק, לא באטום-המאציל.
-String fixPhone(dynamic p, String Function(dynamic) formatIsraeliPhone) {
+String fixPhone(String p, String Function(dynamic) formatIsraeliPhone) {
   return formatIsraeliPhone(p);
 }

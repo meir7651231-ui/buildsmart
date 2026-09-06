@@ -28,7 +28,7 @@ double _noonMs(String datePart) {
   return DateTime(y, mo, d, 12).millisecondsSinceEpoch.toDouble(); // יום-גולש 01-31 מגלגל, כמו V8
 }
 
-dynamic taskStatsFor(dynamic tasks, dynamic identity, dynamic todayIso,
+Map<String, dynamic> taskStatsFor(List<dynamic> tasks, String identity, String todayIso,
     dynamic taskIdentity, dynamic taskOverdue) {
   final me = taskIdentity(identity);
   final mine =

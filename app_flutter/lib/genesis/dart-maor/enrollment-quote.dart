@@ -22,7 +22,7 @@
 
 /// תמחור-משוקלל מתוך שדות-שיבוץ: null אם החוג אינו פר-שיעור או חסר freq/freqUnit/term;
 /// אחרת מאציל ל-weightedQuote עם נירמול-הארגומנטים (tier חסר/ריק ⇒ '').
-dynamic enrollmentQuote(
+Map<String, dynamic>? enrollmentQuote(
   Map c,
   Map e,
   dynamic Function(Map, Map) weightedQuote,

@@ -5,8 +5,8 @@
 ///
 /// פאריטי-JS: losers.reduce(acc,l => merge(acc,l), keeper) ⇒ List.fold.
 /// losers ריק ⇒ מוחזר ה-keeper עצמו (identical) — כמו-שהוא, אפס קריאות-שקע.
-dynamic mergeSupportersGroup(
-  dynamic keeper,
+Map<String, dynamic> mergeSupportersGroup(
+  Map<String, dynamic> keeper,
   List losers,
   dynamic Function(dynamic acc, dynamic loser) mergeSupporterInto,
 ) {

@@ -20,7 +20,7 @@
 
 /// JS: `const t=(raw||'').trim(); if(!t) return null;
 ///      try{const u=new URL(t); return u.protocol==='https:'?u.toString():null}catch{return null}`
-String? safeHttpsUrl(dynamic raw) {
+String? safeHttpsUrl(String raw) {
   // (raw||'') — ‏null/undefined/'' ⇒ ''; ‏''.trim() ריק ⇒ null.
   final t = ((raw ?? '') as String).trim();
   if (t.isEmpty) return null;

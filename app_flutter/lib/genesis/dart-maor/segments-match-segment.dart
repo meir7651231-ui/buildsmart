@@ -12,7 +12,7 @@
 /// [cockpitAtRisk]; the rest evaluate inline. Verbatim port of
 /// new/atoms/segments-match-segment.mjs (`matchSegment`).
 bool matchSegment(
-  dynamic sp,
+  Map<String, dynamic> sp,
   String key,
   List supporters,
   String todayIso, {

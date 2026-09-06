@@ -46,7 +46,7 @@ dynamic _field(dynamic a, String k) => a is Map ? a[k] : null;
 /// Parse a JSON string of accessibility preferences into four boolean flags.
 /// Empty, null, or malformed input yields all-false silently — never throws.
 /// Verbatim behaviour of the JS source new/atoms/parse-acc.mjs.
-Map<String, bool> parseAcc(dynamic raw) {
+Map<String, bool> parseAcc(String? raw) {
   Map<String, bool> off() =>
       {'contrast': false, 'noanim': false, 'links': false, 'spacing': false};
   if (raw == null || raw == '') return off();

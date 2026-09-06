@@ -57,7 +57,7 @@ bool _jsTrimNonEmpty(String s) {
 /// Resolve a localized text: requested language ⇒ Hebrew ('he') ⇒ first
 /// non-blank value in [siteLangs] order. A plain string passes through as-is;
 /// null / empty map ⇒ ''. Verbatim behaviour of new/atoms/resolve-localized.mjs.
-String resolveLocalized(dynamic t, dynamic lang) {
+String resolveLocalized(dynamic t, String lang) {
   if (t == null) return '';
   if (t is String) return t;
   final dynamic pick = t is Map ? t[lang] : null;

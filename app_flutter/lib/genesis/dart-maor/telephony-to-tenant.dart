@@ -42,7 +42,7 @@ String _jsTrim(String s) {
   return s.substring(start, end);
 }
 
-Map<String, dynamic> telephonyToTenant(dynamic tc, dynamic orgName, dynamic tenantId, Map<String, dynamic> T) {
+Map<String, dynamic> telephonyToTenant(Map<String, dynamic> tc, String orgName, String tenantId, Map<String, dynamic> T) {
   var gw = 0;
   final rawNumbers = (tc['numbers'] ?? []) as List;
   final numbers = <Map<String, dynamic>>[];

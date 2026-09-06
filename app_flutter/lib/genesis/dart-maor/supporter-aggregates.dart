@@ -13,7 +13,7 @@ bool _truthy(dynamic v) {
 /// Number.isFinite של JS: מספר-סופי בלבד (מחרוזת/NaN/Infinity/חסר ⇒ false).
 bool _isFiniteNum(dynamic v) => v is num && v.isFinite;
 
-dynamic supporterAggregates(dynamic sp) {
+Map<String, dynamic> supporterAggregates(Map<String, dynamic> sp) {
   final donsRaw = (sp is Map) ? sp['donations'] : null;
   final List dons = (donsRaw is List) ? donsRaw : [];
   double ils = 0; // אריתמטיקת-JS = float64 (חוק 17)

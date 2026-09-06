@@ -12,7 +12,7 @@ String _jsNumStr(dynamic n) {
   return '$n';
 }
 
-dynamic termLabel(dynamic term, dynamic months, dynamic terms, Map<String, String> T) {
+String termLabel(String term, num? months, List<Map<String, dynamic>> terms, Map<String, String> T) {
   if (term == 'months') {
     // JS: ‏months && months > 0 — ‏null/undefined/0/NaN כוזבים ⇒ 1 (חוק-7);
     // ‏months > 0 כבר מכסה 0/NaN/שלילי, כך שנותר רק לוודא שזה מספר.

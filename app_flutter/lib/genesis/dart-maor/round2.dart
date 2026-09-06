@@ -21,7 +21,7 @@
 /// Money rounding to two decimals — verbatim behaviour of the JS source
 /// new/atoms/round2.mjs: `Math.round(x * 100) / 100`, including the floating
 /// edge (2.675 ⇒ 2.68) and JS half-toward-+∞ rounding.
-dynamic round2(dynamic x) => _jsMathRound((x as num).toDouble() * 100) / 100;
+num round2(num x) => _jsMathRound((x as num).toDouble() * 100) / 100;
 
 /// שיקוף מדויק של ‏ECMAScript `Math.round`: חצי כלפי +∞; ‏NaN/±∞ עוברים
 /// כמו-שהם; ‏שארית<0.5 ⇒ floor (גם 0.49999999999999994⇒0); תוצאה 0 מקלט

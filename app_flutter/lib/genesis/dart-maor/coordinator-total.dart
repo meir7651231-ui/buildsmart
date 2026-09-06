@@ -23,7 +23,7 @@
 /// from 0 (an unknown coordinator or an empty list yields 0). Verbatim behaviour
 /// of the JS source `coordinatorTotal`.
 num coordinatorTotal(
-  dynamic boxes,
+  List<dynamic> boxes,
   Object? coordId,
   Iterable Function(dynamic boxes, Object? coordId) coordinatorBoxes,
   num Function(dynamic box) boxTotal,

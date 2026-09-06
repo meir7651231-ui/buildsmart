@@ -23,7 +23,7 @@
 /// injected supKeyOf socket. Verbatim port of new/atoms/sup-key-map-of.mjs
 /// (`supKeyMapOf`); the neighbour call `supKeyOf` is injected as a socket (Law 1).
 Map<dynamic, dynamic> supKeyMapOf(
-  dynamic supporters,
+  List<dynamic> supporters,
   dynamic Function(dynamic) supKeyOf,
 ) {
   final m = <dynamic, dynamic>{};

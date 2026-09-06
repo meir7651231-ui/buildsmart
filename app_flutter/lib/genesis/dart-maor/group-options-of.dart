@@ -31,7 +31,7 @@ bool _truthy(Object? x) {
 
 /// אפשרויות שיוך-קבוצה. מחזיר [] אם למפגש יחיד (או פחות); אחרת {'v','t'} לכל מפגש.
 /// התנהגות verbatim של המקור groupOptionsOf ב-JS.
-List<dynamic> groupOptionsOf(dynamic c,
+List<dynamic> groupOptionsOf(Map<String, dynamic> c,
   dynamic Function(dynamic) sessionsOf,
   dynamic Function(dynamic, int) groupLabelOf,
   List<dynamic> dayNames, Map<String, String> T) {

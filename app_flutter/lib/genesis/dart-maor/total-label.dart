@@ -48,7 +48,7 @@ String _toLocaleStringHeIL(dynamic v) {
 }
 
 /// "₪1,200 + $300" · מטבע יחיד כשהשני אפס · "—" כשאין כלום.
-dynamic totalLabel(dynamic sp, dynamic supIls, dynamic supUsd) {
+String totalLabel(Map<String, dynamic> sp, dynamic supIls, dynamic supUsd) {
   final i = supIls(sp);
   final u = supUsd(sp);
   final ils = _truthy(i) ? '₪${_toLocaleStringHeIL(i)}' : '';

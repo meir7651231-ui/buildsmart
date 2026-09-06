@@ -115,7 +115,7 @@ DateTime _parseIso(String iso) {
 
 /// בונה שורות-CSV לדו"ח-מותאם. פלט: List של שורות; שורה[0]=כותרות, השאר=נתונים.
 /// התנהגות זהה-ביט למקור-ה-JS `buildCustomExport`.
-List<List<String>> buildCustomExport(dynamic cfg,
+List<List<String>> buildCustomExport(Map<String, dynamic> cfg,
   Map db,
   String target,
   Map range,

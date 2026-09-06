@@ -19,7 +19,7 @@
 /// Returns the deliveries in [db] belonging to distribution-day [dayId], in source
 /// order, each element the exact same reference (no object copy). New outer list.
 /// Verbatim behaviour of the JS source `deliveriesOfDay` (an array `.filter`).
-List<dynamic> deliveriesOfDay(Map<String, dynamic> db, dynamic dayId) {
+List<dynamic> deliveriesOfDay(Map<String, dynamic> db, String dayId) {
   final deliveries = db['deliveries'] as List<dynamic>;
   return deliveries.where((d) => (d as Map)['dayId'] == dayId).toList();
 }

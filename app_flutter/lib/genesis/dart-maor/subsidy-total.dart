@@ -23,6 +23,6 @@
 /// Pure difference; both aggregates are injected sinks. `assignments` is passed
 /// through to both sinks as-is (same reference). May return 0 or negative —
 /// verbatim behaviour of the JS source `subsidyTotal`.
-dynamic subsidyTotal(dynamic assignments, dynamic givenValue, dynamic collectedPaid) {
+num subsidyTotal(List<dynamic> assignments, dynamic givenValue, dynamic collectedPaid) {
   return givenValue(assignments) - collectedPaid(assignments);
 }

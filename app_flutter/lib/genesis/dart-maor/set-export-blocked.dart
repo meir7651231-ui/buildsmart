@@ -3,6 +3,6 @@
 /// ב-JS ‏`onBlocked ?? null` מנרמל undefined⇒null; ב-Dart אין undefined —
 /// היעדר-ארגומנט = null (חוק-2), ולכן ההעברה כמות-שהיא שקולה-ביט.
 /// ההתרעה עוברת בזהות-הפניה ולעולם אינה נקראת (הקריאה שייכת ל-guardExport).
-Map<String, dynamic> setExportBlocked(dynamic isBlocked, [dynamic onBlocked]) {
+Map<String, dynamic> setExportBlocked(bool isBlocked, [dynamic onBlocked]) {
   return {'blocked': isBlocked, 'notify': onBlocked};
 }

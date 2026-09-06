@@ -7,7 +7,7 @@
 ///  • Math.floor על חילוק-double: `(amount / ilsPerPoint).floor()`.
 ///  • Math.round נאמן: `(x + 0.5).floor()` = Math.round גם לשליליים.
 num collectionScoreDelta(
-  dynamic box,
+  Map<String, dynamic> box,
   String date,
   num amount,
   String Function(dynamic) lastCollectionIso, [
