@@ -9,7 +9,7 @@ import '../dart-ui-bs/premium/actions/soft_button.dart';
 
 /// דאטה-הגרעין של DialLogEntry — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts · ציבורי: מסכי-הישות (retarget) מייבאים ומשתמשים (G6c)
 class DialLogEntryCore {
-  static const term = 'DialLogEntry';
+  static const term = 'חיוג';
   static const states = <String>['donated', 'noanswer', 'refused', 'callback', 'done', 'skip'];
   static String? next(String s) { final i = states.indexOf(s); return i < 0 || i + 1 >= states.length ? null : states[i + 1]; } // הצבה: סדר-ההצהרה (אין אטום-מעבר לישות זו) — חוק-7
   static const relations = <List<String>>[];

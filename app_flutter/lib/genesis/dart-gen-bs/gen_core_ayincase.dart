@@ -12,7 +12,7 @@ import '../dart-maor/ayin-stages.dart'; // דאטה-מדף: סדר-השלבים
 
 /// דאטה-הגרעין של AyinCase — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts · ציבורי: מסכי-הישות (retarget) מייבאים ומשתמשים (G6c)
 class AyinCaseCore {
-  static const term = 'AyinCase';
+  static const term = 'תיק';
   static const states = <String>['new', 'lead', 'eyes', 'answer', 'done'];
   static String? next(String s) => nextStage(s, stageIndex, ayinStages);
   static const relations = <List<String>>[];

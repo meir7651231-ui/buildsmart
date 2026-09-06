@@ -10,7 +10,7 @@ import '../dart-maor/advance-status.dart'; // מנוע-מדף: המצב הבא (
 
 /// דאטה-הגרעין של Delivery — נגזר, לא מומצא; המצבים בסדר-ההצהרה של domain.ts · ציבורי: מסכי-הישות (retarget) מייבאים ומשתמשים (G6c)
 class DeliveryCore {
-  static const term = 'Delivery';
+  static const term = 'מסירה';
   static const states = <String>['pickup', 'enroute', 'delivered'];
   static String? next(String s) { final n = advanceStatus(s); return n == s ? null : n; }
   static const relations = <List<String>>[['dayId', 'DistributionDay', 'suffix'], ['assignmentId', 'ShopAssignment', 'suffix'], ['volunteerId', 'Volunteer', 'name'], ['familyId', 'Family', 'name']];
