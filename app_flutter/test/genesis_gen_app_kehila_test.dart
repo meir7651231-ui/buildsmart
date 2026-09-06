@@ -5,17 +5,18 @@ import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee.da
 import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_room_from_rm.dart' show RoomScreen, RoomFacts;
 import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_family_from_stu.dart' show FamilyScreen, FamilyFacts;
 import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopitem_from_crs.dart' show ShopItemScreen, ShopItemFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu.dart' show MemberScreen, MemberFacts;
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/premium/feedback/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('KehilaApp · בית: 5 אריחים', (tester) async {
+  testWidgets('KehilaApp · בית: 6 אריחים', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DsNavTile), findsNWidgets(5)); expect(tester.takeException(), isNull);
-    expect(find.text('5/5'), findsWidgets); // KPI מסכים-מחוברים = עובדה (נראים/כולם)
+    expect(find.byType(DsNavTile), findsNWidgets(6)); expect(tester.takeException(), isNull);
+    expect(find.text('6/6'), findsWidgets); // KPI מסכים-מחוברים = עובדה (נראים/כולם)
     expect(VolunteerFacts.metricDefs.length, VolunteerFacts.metrics.length); expect(VolunteerFacts.heroKey == 'count' || VolunteerFacts.metrics.containsKey(VolunteerFacts.heroKey), isTrue); // Volunteer: תפר-העובדות עקבי
     expect(find.text(VolunteerFacts.hero), findsWidgets); expect(find.text(VolunteerFacts.heroLabel), findsWidgets); // ה-hero של Volunteer מרונדר ברכזת מהביטוי-החי, לא מליטרל
     expect(find.textContaining('${VolunteerFacts.count} ${VolunteerFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (families · static-const)
@@ -31,16 +32,19 @@ void main() {
     expect(ShopItemFacts.metricDefs.length, ShopItemFacts.metrics.length); expect(ShopItemFacts.heroKey == 'count' || ShopItemFacts.metrics.containsKey(ShopItemFacts.heroKey), isTrue); // ShopItem: תפר-העובדות עקבי
     expect(find.text(ShopItemFacts.hero), findsWidgets); expect(find.text(ShopItemFacts.heroLabel), findsWidgets); // ה-hero של ShopItem מרונדר ברכזת מהביטוי-החי, לא מליטרל
     expect(find.textContaining('${ShopItemFacts.count} ${ShopItemFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (courses · static-const)
+    expect(MemberFacts.metricDefs.length, MemberFacts.metrics.length); expect(MemberFacts.heroKey == 'count' || MemberFacts.metrics.containsKey(MemberFacts.heroKey), isTrue); // Member: תפר-העובדות עקבי
+    expect(find.text(MemberFacts.hero), findsWidgets); expect(find.text(MemberFacts.heroLabel), findsWidgets); // ה-hero של Member מרונדר ברכזת מהביטוי-החי, לא מליטרל
+    expect(find.textContaining('${MemberFacts.count} ${MemberFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (families · seed-db)
   });
-  testWidgets('KehilaApp · חיפוש-רכזת נגזר: "מתנדבים" ⇒ 1/5 · ג׳יבריש ⇒ EmptyState · ריק ⇒ הכול', (tester) async {
+  testWidgets('KehilaApp · חיפוש-רכזת נגזר: "מתנדבים" ⇒ 1/6 · ג׳יבריש ⇒ EmptyState · ריק ⇒ הכול', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(find.byType(TextField).first, 'מתנדבים'); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DsNavTile), findsNWidgets(1)); expect(find.text('1/5'), findsWidgets); expect(tester.takeException(), isNull);
+    expect(find.byType(DsNavTile), findsNWidgets(1)); expect(find.text('1/6'), findsWidgets); expect(tester.takeException(), isNull);
     await tester.enterText(find.byType(TextField).first, 'zzqqxx'); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DsNavTile), findsNothing); expect(find.byType(EmptyState), findsOneWidget); expect(find.text('0/5'), findsWidgets);
+    expect(find.byType(DsNavTile), findsNothing); expect(find.byType(EmptyState), findsOneWidget); expect(find.text('0/6'), findsWidgets);
     await tester.enterText(find.byType(TextField).first, ''); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DsNavTile), findsNWidgets(5)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
+    expect(find.byType(DsNavTile), findsNWidgets(6)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
   });
   testWidgets('KehilaApp · הזרקת-שורה ⇒ עמודת-מקום-שמור "fatherId" של Family מאירה (G5h)', (tester) async {
     tester.view.physicalSize = const Size(1400, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
@@ -52,6 +56,19 @@ void main() {
     final row = FamilyFacts.rowList == null ? seedRow : (seedRow[FamilyFacts.rowList!] as List).first as Map<String, dynamic>;
     row[key] = 'מוזרק-$key';
     await tester.pumpWidget(MaterialApp(home: FamilyScreen(db: db))); await tester.pump(const Duration(milliseconds: 300)); await showTable();
+    expect(find.text(key), findsWidgets); // כותרת-העמודה = שם-השדה (G5h) — מאירה כשהנתון זרם
+    expect(find.text('מוזרק-$key'), findsWidgets); expect(tester.takeException(), isNull);
+  });
+  testWidgets('KehilaApp · הזרקת-שורה ⇒ עמודת-מקום-שמור "isParent" של Member מאירה (G5h)', (tester) async {
+    tester.view.physicalSize = const Size(1400, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    final key = MemberFacts.reservedColumns.first;
+    await tester.pumpWidget(const MaterialApp(home: MemberScreen())); await tester.pump(const Duration(milliseconds: 300));
+    Future<void> showTable() async { final v = MemberFacts.tableView; if (v != null) { await tester.tap(find.text(v).first); await tester.pump(const Duration(milliseconds: 300)); } } // המבט שמגלה את הטבלה (מהזהב)
+    await showTable(); expect(find.text(key), findsNothing); // בלי נתון — העמודה כבויה (חוק-7)
+    final db = MemberFacts.seed(); final seedRow = (db[MemberFacts.seedList] as List).first as Map<String, dynamic>;
+    final row = MemberFacts.rowList == null ? seedRow : (seedRow[MemberFacts.rowList!] as List).first as Map<String, dynamic>;
+    row[key] = 'מוזרק-$key';
+    await tester.pumpWidget(MaterialApp(home: MemberScreen(db: db))); await tester.pump(const Duration(milliseconds: 300)); await showTable();
     expect(find.text(key), findsWidgets); // כותרת-העמודה = שם-השדה (G5h) — מאירה כשהנתון זרם
     expect(find.text('מוזרק-$key'), findsWidgets); expect(tester.takeException(), isNull);
   });
@@ -105,39 +122,56 @@ void main() {
     // ignore: avoid_print
     print('hero-jump ShopItem: id=$id rows=${ShopItemFacts.heroRows(ShopItemFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
   });
+  testWidgets('KehilaApp · אריח-hero ⇒ בני משפחה (Member) נפתח על רשומת-ה-hero', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('hero-Member'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(MemberScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = MemberFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); expect(find.textContaining('מסונן למדד'), findsOneWidget); expect(find.textContaining('· ${MemberFacts.heroRows(MemberFacts.heroKey).length} מתוך'), findsOneWidget); }
+    // ignore: avoid_print
+    print('hero-jump Member: id=$id rows=${MemberFacts.heroRows(MemberFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+  });
   testWidgets('KehilaApp · בית ⇒ מתנדבים (Volunteer) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('מתנדבים').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(VolunteerScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(5)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ תרומות (Donation) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('תרומות').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(DonationScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(5)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ חדרים (Room) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('חדרים').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(RoomScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(5)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ משפחה (Family) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('משפחה').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(FamilyScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(5)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ פריט (ShopItem) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('פריט').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(ShopItemScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(5)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+  });
+  testWidgets('KehilaApp · בית ⇒ בני משפחה (Member) מרונדר וחוזר', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
+    await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('בני משפחה').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(MemberScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
 }

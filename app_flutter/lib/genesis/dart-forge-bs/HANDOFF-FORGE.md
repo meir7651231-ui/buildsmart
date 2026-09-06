@@ -1,10 +1,14 @@
 # HANDOFF-FORGE — ספריית-האטומים המעוצבת (Pure→Flutter)
 
-> **לסשן שעובד על בנייה-חכמה (buildsmart):** יש ספריית-UI חדשה של **353 ווידג'טים
+> **לסשן שעובד על בנייה-חכמה (buildsmart):** יש ספריית-UI חדשה של **359 ווידג'טים
 > פיקסל-נאמנים** ל-Pure HTML, מחוללים ממנוע `ds-forge`. **הרכב מסכים מהם — אל תבנה UI מאפס.**
 
+## תפרי-דאטה (G13–G14, 5–6.9.2026) — האטומים אינם ציור בלבד
+כל אטום מקבל שקעים שנגזרו מצורת-ה-HTML של Pure (בלי מילון): `fields` (חריצי-טקסט) · `items/selected/onSelect` (אחים-זהים ⇒ רשימה; `items[i][j]` תאים · `columns` · `variants`+`variantIds` לטונים) · `values` (מילוי-אחוז ובארי-SVG) · `control` (שדה-חי במקום ציור-ה-input) · `onAction(k)` (כפתור/קישור) · `child` (תוכן בתוך המסגרת) · `bare` (ליבת-בקרה בלי מסגרת-הגלריה) · `onCell/onCellLong`. **null ⇒ תוכן-הגלריה ביט-זהה.** אטומי-דאטה חדשים במקור-Pure: `StatPlain` · `DataGrid` · `EventCalendar` · `KanbanBoard` · `ToneBanner` · `ToneButton`.
+המחולל (`retarget.mjs skinPass`) מחליף 26 סוגי-DS באטומי-forge לפי `skin`-JSON (+`toneMap`); ההתנהגות נשארת של ה-DS. הרצה מלאה: `node machtzev/generator/ship.mjs --msg "…"` בגנסיס. דוח: `knowledge/CLOSED-GENMAX-G13-2026-09-05.md`.
+
 ## מה זה
-- **353 אטומי-Dart** (`StatelessWidget`) ב-17 משפחות, נאמנים למקור-ה-HTML (ביקורת-פיקסל: 353/353
+- **359 אטומי-Dart** (`StatelessWidget`) ב-17 משפחות, נאמנים למקור-ה-HTML (ביקורת-פיקסל: 353/353
   מרונדרים · ממוצע-דיף אמיתי ~1.75% · אפס-קריסות).
 - כל אטום **לובש עיצוב מהחריץ בלבד** (`DsSeam`) — אפס צבע-קבוע (חוק-5/6). מתאים לכל ערכת-נושא/וורטיקל.
 - מקור-האמת: `machtzev/ds-forge.mjs` בריפו **genesis** (`-ai-chat-server`). האטומים כאן **מחוללים** —
@@ -63,7 +67,7 @@ PureScope(
 
 ---
 
-## קטלוג מלא (353 אטומים)
+## קטלוג מלא (359 אטומים · הקטלוג החי: `forge-manifest.json`)
 
 ### action — כפתורים · טוגלים · FAB · סגמנטים · שורות-מתג  `import .../dart-forge-bs/action/action.dart`
 

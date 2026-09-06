@@ -1,17 +1,17 @@
 // 🏗️ TzedakaApp — אפליקציה ממשפטים (GENMAX·G9 · §22): 7 מודולים · מחולל דטרמיניסטי: app-from-sentences.mjs (sentence⇒entity⇒pickModule⇒retarget) — כל מודול חצוב מהזהב, לא נכתב
-//   "קופות צדקה לפי רכז" ⇒ TzCoordinator ⇐ schoolos_fees.dart (strong · שמות 5/10)
+//   "קופות צדקה לפי רכז" ⇒ TzBox ⇐ schoolos_teachers.dart (medium · שמות 3/9)
 //   "מבצע גיוס עם יעד" ⇒ TzCampaign ⇐ schoolos_courses.dart (strong · שמות 5/7)
 //   "מוצר עם מחיר ומלאי" ⇒ ShopProduct ⇐ schoolos_rooms.dart (strong · שמות 4/7)
 //   "חנות שותפה עם כתובת" ⇒ ShopStore ⇐ schoolos_students.dart (strong · שמות 4/6)
 //   "מורה עם שעות ושיעורים" ⇒ Teacher ⇐ schoolos_students.dart (strong · שמות 8/19)
 //   "שיבוצים של השנה" ⇒ Enrollment ⇐ schoolos_fees.dart (strong · שמות 4/26)
 //   "תורמים לפי סכום" ⇒ Supporter ⇐ schoolos_fees.dart (strong · שמות 11/24)
-//   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: TzCoordinator:∅ · TzCampaign:∅ · ShopProduct:∅ · ShopStore:0 עמודות · Teacher:9 עמודות · Enrollment:∅ · Supporter:∅
+//   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: TzBox:∅ · TzCampaign:∅ · ShopProduct:∅ · ShopStore:0 עמודות · Teacher:9 עמודות · Enrollment:∅ · Supporter:∅
 //   G12c · תפקידי-עור: DS
 //   G12b · עור: DS (KpiTile) — ברירת-מחדל, ביט-זהה
-//   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): TzCoordinator:∅ · TzCampaign:initialMetric · ShopProduct:initialMetric · ShopStore:initialMetric · Teacher:initialMetric · Enrollment:∅ · Supporter:∅
-//   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: TzCoordinator:initialPanelId · TzCampaign:initialPanelId · ShopProduct:initialPanelId · ShopStore:initialPanelId · Teacher:initialPanelId · Enrollment:initialPanelId · Supporter:initialPanelId
-//   G9b · KPI-רכזת נגזר: כל אריח = <E>Facts של המודול (count חי של הזרע · hero = המדד שהזהב הכריז/צבע-סכנה) — אפס ערך מומצא: TzCoordinatorFacts.count · TzCampaignFacts.kpiNoTeacher · ShopProductFacts.unavailableN · ShopStoreFacts.highN · TeacherFacts.highN · EnrollmentFacts.count · SupporterFacts.count
+//   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): TzBox:initialMetric · TzCampaign:initialMetric · ShopProduct:initialMetric · ShopStore:initialMetric · Teacher:initialMetric · Enrollment:∅ · Supporter:∅
+//   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: TzBox:initialPanel · TzCampaign:initialPanelId · ShopProduct:initialPanelId · ShopStore:initialPanelId · Teacher:initialPanelId · Enrollment:initialPanelId · Supporter:initialPanelId
+//   G9b · KPI-רכזת נגזר: כל אריח = <E>Facts של המודול (count חי של הזרע · hero = המדד שהזהב הכריז/צבע-סכנה) — אפס ערך מומצא: TzBoxFacts.absentN · TzCampaignFacts.kpiNoTeacher · ShopProductFacts.unavailableN · ShopStoreFacts.highN · TeacherFacts.highN · EnrollmentFacts.count · SupporterFacts.count
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
@@ -21,7 +21,7 @@ import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפ
 import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
 import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (מדף)
 import '../dart-data-maor/norm-search-strings.dart'; // NORM_SEARCH_T (אטום-דאטה)
-import 'gen_retarget_tzcoordinator_from_fee.dart' show TzCoordinatorScreen, TzCoordinatorFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_tzbox_from_tch.dart' show TzBoxScreen, TzBoxFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 import 'gen_retarget_tzcampaign_from_crs.dart' show TzCampaignScreen, TzCampaignFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 import 'gen_retarget_shopproduct_from_rm.dart' show ShopProductScreen, ShopProductFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 import 'gen_retarget_shopstore_from_stu.dart' show ShopStoreScreen, ShopStoreFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
@@ -43,7 +43,7 @@ class TzedakaHubScreen extends StatefulWidget {
 
 class _TzedakaHubScreenState extends State<TzedakaHubScreen> {
   static void _go(BuildContext c, Widget screen) => Navigator.push(c, MaterialPageRoute(builder: (_) => screen));
-  static const modules = <String>['רכז', 'מבצע', 'מוצר', 'חנות', 'מורה', 'שיבוצים', 'תורם']; // 7 מסכים מחווטים
+  static const modules = <String>['קופה', 'מבצע', 'מוצר', 'חנות', 'מורה', 'שיבוצים', 'תורם']; // 7 מסכים מחווטים
   String _q = ''; // חיפוש-רכזת נגזר (G9c): DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch — צורת-האיתור של הזהב (23-ג), לא .contains שטוח
   static String _norm(dynamic q) => normSearch(q, NORM_SEARCH_T);
   static Iterable _expand(dynamic q, dynamic norm) => [norm(q)];
@@ -52,7 +52,7 @@ class _TzedakaHubScreenState extends State<TzedakaHubScreen> {
   static bool _hasQuery(dynamic q) => (q as String).trim().isNotEmpty;
   // שורות-החיפוש = נגזרת של תפר-העובדות: כותרת · מונח-הישות · המשפט · תוויות-המדדים — אפס דאטה-חדש
   static final rows = <Map<String, dynamic>>[
-    {'i': 0, 'title': 'רכז', 'label': TzCoordinatorFacts.label, 'text': 'קופות צדקה לפי רכז', 'terms': [for (final d in TzCoordinatorFacts.metricDefs) '${d['label']}']},
+    {'i': 0, 'title': 'קופה', 'label': TzBoxFacts.label, 'text': 'קופות צדקה לפי רכז', 'terms': [for (final d in TzBoxFacts.metricDefs) '${d['label']}']},
     {'i': 1, 'title': 'מבצע', 'label': TzCampaignFacts.label, 'text': 'מבצע גיוס עם יעד', 'terms': [for (final d in TzCampaignFacts.metricDefs) '${d['label']}']},
     {'i': 2, 'title': 'מוצר', 'label': ShopProductFacts.label, 'text': 'מוצר עם מחיר ומלאי', 'terms': [for (final d in ShopProductFacts.metricDefs) '${d['label']}']},
     {'i': 3, 'title': 'חנות', 'label': ShopStoreFacts.label, 'text': 'חנות שותפה עם כתובת', 'terms': [for (final d in ShopStoreFacts.metricDefs) '${d['label']}']},
@@ -70,7 +70,7 @@ class _TzedakaHubScreenState extends State<TzedakaHubScreen> {
       const SizedBox(height: 8),
       Wrap(spacing: 12, runSpacing: 12, children: [ // KPI-רכזת (G9b): עובדות-אמת בלבד — כמו _Home של הזהב (מסכים-מחוברים + הדחוף של כל מודול)
         SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: '${vis.length}/${modules.length}', label: 'מסכים מחוברים')),
-        if (vis.contains(0)) GestureDetector(key: const ValueKey('hero-TzCoordinator'), onTap: () { final id = TzCoordinatorFacts.heroFirstId; _go(context, id == null ? const TzCoordinatorScreen() : TzCoordinatorScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: TzCoordinatorFacts.hero, label: TzCoordinatorFacts.heroLabel))), // TzCoordinator · אין מדדים ⇒ count · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(0)) GestureDetector(key: const ValueKey('hero-TzBox'), onTap: () { final id = TzBoxFacts.heroFirstId; _go(context, id == null ? const TzBoxScreen() : TzBoxScreen(initialPanel: id, initialMetric: TzBoxFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: TzBoxFacts.hero, label: TzBoxFacts.heroLabel))), // TzBox · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
         if (vis.contains(1)) GestureDetector(key: const ValueKey('hero-TzCampaign'), onTap: () { final id = TzCampaignFacts.heroFirstId; _go(context, id == null ? const TzCampaignScreen() : TzCampaignScreen(initialPanelId: id, initialMetric: TzCampaignFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: TzCampaignFacts.hero, label: TzCampaignFacts.heroLabel))), // TzCampaign · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
         if (vis.contains(2)) GestureDetector(key: const ValueKey('hero-ShopProduct'), onTap: () { final id = ShopProductFacts.heroFirstId; _go(context, id == null ? const ShopProductScreen() : ShopProductScreen(initialPanelId: id, initialMetric: ShopProductFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: ShopProductFacts.hero, label: ShopProductFacts.heroLabel))), // ShopProduct · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
         if (vis.contains(3)) GestureDetector(key: const ValueKey('hero-ShopStore'), onTap: () { final id = ShopStoreFacts.heroFirstId; _go(context, id == null ? const ShopStoreScreen() : ShopStoreScreen(initialPanelId: id, initialMetric: ShopStoreFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: ShopStoreFacts.hero, label: ShopStoreFacts.heroLabel))), // ShopStore · ה-StatHero של הזהב (המטרה המוצהרת) · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
@@ -80,7 +80,7 @@ class _TzedakaHubScreenState extends State<TzedakaHubScreen> {
       ]),
       const SizedBox(height: 8),
       if (vis.isEmpty) const EmptyState(glyph: '🔍', message: 'אין מודול שתואם לחיפוש') else DsSection(title: 'כלים · ${vis.length}', children: [
-        if (vis.contains(0)) DsNavTile(glyph: '🧬', title: 'רכז', sub: '${TzCoordinatorFacts.count} ${TzCoordinatorFacts.label} · קופות צדקה לפי רכז', onTap: () => _go(context, const TzCoordinatorScreen())),
+        if (vis.contains(0)) DsNavTile(glyph: '🧬', title: 'קופה', sub: '${TzBoxFacts.count} ${TzBoxFacts.label} · קופות צדקה לפי רכז', onTap: () => _go(context, const TzBoxScreen())),
         if (vis.contains(1)) DsNavTile(glyph: '🧬', title: 'מבצע', sub: '${TzCampaignFacts.count} ${TzCampaignFacts.label} · מבצע גיוס עם יעד', onTap: () => _go(context, const TzCampaignScreen())),
         if (vis.contains(2)) DsNavTile(glyph: '🧬', title: 'מוצר', sub: '${ShopProductFacts.count} ${ShopProductFacts.label} · מוצר עם מחיר ומלאי', onTap: () => _go(context, const ShopProductScreen())),
         if (vis.contains(3)) DsNavTile(glyph: '🧬', title: 'חנות', sub: '${ShopStoreFacts.count} ${ShopStoreFacts.label} · חנות שותפה עם כתובת', onTap: () => _go(context, const ShopStoreScreen())),

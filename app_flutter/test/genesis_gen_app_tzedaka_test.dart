@@ -1,6 +1,6 @@
 // מחולל ע"י machtzev/generator/app-from-sentences.mjs — בדיקת-ניווט של TzedakaApp: בית ⇒ כל מודול מרונדר וחוזר, אפס-חריגות
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_tzedaka.dart';
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzcoordinator_from_fee.dart' show TzCoordinatorScreen, TzCoordinatorFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzbox_from_tch.dart' show TzBoxScreen, TzBoxFacts;
 import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzcampaign_from_crs.dart' show TzCampaignScreen, TzCampaignFacts;
 import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopproduct_from_rm.dart' show ShopProductScreen, ShopProductFacts;
 import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopstore_from_stu.dart' show ShopStoreScreen, ShopStoreFacts;
@@ -18,9 +18,9 @@ void main() {
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(DsNavTile), findsNWidgets(7)); expect(tester.takeException(), isNull);
     expect(find.text('7/7'), findsWidgets); // KPI מסכים-מחוברים = עובדה (נראים/כולם)
-    expect(TzCoordinatorFacts.metricDefs.length, TzCoordinatorFacts.metrics.length); expect(TzCoordinatorFacts.heroKey == 'count' || TzCoordinatorFacts.metrics.containsKey(TzCoordinatorFacts.heroKey), isTrue); // TzCoordinator: תפר-העובדות עקבי
-    expect(find.text(TzCoordinatorFacts.hero), findsWidgets); expect(find.text(TzCoordinatorFacts.heroLabel), findsWidgets); // ה-hero של TzCoordinator מרונדר ברכזת מהביטוי-החי, לא מליטרל
-    expect(find.textContaining('${TzCoordinatorFacts.count} ${TzCoordinatorFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (families · static-const)
+    expect(TzBoxFacts.metricDefs.length, TzBoxFacts.metrics.length); expect(TzBoxFacts.heroKey == 'count' || TzBoxFacts.metrics.containsKey(TzBoxFacts.heroKey), isTrue); // TzBox: תפר-העובדות עקבי
+    expect(find.text(TzBoxFacts.hero), findsWidgets); expect(find.text(TzBoxFacts.heroLabel), findsWidgets); // ה-hero של TzBox מרונדר ברכזת מהביטוי-החי, לא מליטרל
+    expect(find.textContaining('${TzBoxFacts.count} ${TzBoxFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (roster · static-const)
     expect(TzCampaignFacts.metricDefs.length, TzCampaignFacts.metrics.length); expect(TzCampaignFacts.heroKey == 'count' || TzCampaignFacts.metrics.containsKey(TzCampaignFacts.heroKey), isTrue); // TzCampaign: תפר-העובדות עקבי
     expect(find.text(TzCampaignFacts.hero), findsWidgets); expect(find.text(TzCampaignFacts.heroLabel), findsWidgets); // ה-hero של TzCampaign מרונדר ברכזת מהביטוי-החי, לא מליטרל
     expect(find.textContaining('${TzCampaignFacts.count} ${TzCampaignFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (courses · static-const)
@@ -40,10 +40,10 @@ void main() {
     expect(find.text(SupporterFacts.hero), findsWidgets); expect(find.text(SupporterFacts.heroLabel), findsWidgets); // ה-hero של Supporter מרונדר ברכזת מהביטוי-החי, לא מליטרל
     expect(find.textContaining('${SupporterFacts.count} ${SupporterFacts.label}'), findsOneWidget); // count חי של הזרע-הראשי (families · static-const)
   });
-  testWidgets('TzedakaApp · חיפוש-רכזת נגזר: "רכז" ⇒ 1/7 · ג׳יבריש ⇒ EmptyState · ריק ⇒ הכול', (tester) async {
+  testWidgets('TzedakaApp · חיפוש-רכזת נגזר: "קופה" ⇒ 1/7 · ג׳יבריש ⇒ EmptyState · ריק ⇒ הכול', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
-    await tester.enterText(find.byType(TextField).first, 'רכז'); await tester.pump(const Duration(milliseconds: 300));
+    await tester.enterText(find.byType(TextField).first, 'קופה'); await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(DsNavTile), findsNWidgets(1)); expect(find.text('1/7'), findsWidgets); expect(tester.takeException(), isNull);
     await tester.enterText(find.byType(TextField).first, 'zzqqxx'); await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(DsNavTile), findsNothing); expect(find.byType(EmptyState), findsOneWidget); expect(find.text('0/7'), findsWidgets);
@@ -63,15 +63,15 @@ void main() {
     expect(find.text(key), findsWidgets); // כותרת-העמודה = שם-השדה (G5h) — מאירה כשהנתון זרם
     expect(find.text('מוזרק-$key'), findsWidgets); expect(tester.takeException(), isNull);
   });
-  testWidgets('TzedakaApp · אריח-hero ⇒ רכז (TzCoordinator) נפתח על רשומת-ה-hero', (tester) async {
+  testWidgets('TzedakaApp · אריח-hero ⇒ קופה (TzBox) נפתח על רשומת-ה-hero + מקטע-הגרעין על הרשומה', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.byKey(const ValueKey('hero-TzCoordinator'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
-    expect(find.byType(TzCoordinatorScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    final id = TzCoordinatorFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
-    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); }
+    await tester.tap(find.byKey(const ValueKey('hero-TzBox'))); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(TzBoxScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    final id = TzBoxFacts.heroFirstId; // null ⇒ ל-hero אין שורות (מדד בלי צורת where, או 0) — המסך נפתח רגיל; אחרת הכרטיס פתוח
+    if (id != null) { expect(find.byType(BottomSheet), findsOneWidget); expect(find.textContaining('מחזור-חיים · רשומה'), findsWidgets); expect(find.textContaining('מסונן למדד'), findsOneWidget); expect(find.textContaining('· ${TzBoxFacts.heroRows(TzBoxFacts.heroKey).length} מתוך'), findsOneWidget); }
     // ignore: avoid_print
-    print('hero-jump TzCoordinator: id=$id rows=${TzCoordinatorFacts.heroRows(TzCoordinatorFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
+    print('hero-jump TzBox: id=$id rows=${TzBoxFacts.heroRows(TzBoxFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
   });
   testWidgets('TzedakaApp · אריח-hero ⇒ מבצע (TzCampaign) נפתח על רשומת-ה-hero', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
@@ -133,11 +133,11 @@ void main() {
     // ignore: avoid_print
     print('hero-jump Supporter: id=$id rows=${SupporterFacts.heroRows(SupporterFacts.heroKey).length} panel=${find.byType(BottomSheet).evaluate().length}');
   });
-  testWidgets('TzedakaApp · בית ⇒ רכז (TzCoordinator) מרונדר וחוזר', (tester) async {
+  testWidgets('TzedakaApp · בית ⇒ קופה (TzBox) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const TzedakaApp()); await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.text('רכז').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
-    expect(find.byType(TzCoordinatorScreen), findsOneWidget); expect(tester.takeException(), isNull);
+    await tester.tap(find.text('קופה').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(TzBoxScreen), findsOneWidget); expect(tester.takeException(), isNull);
     tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(DsNavTile), findsNWidgets(7)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('TzedakaApp · בית ⇒ מבצע (TzCampaign) מרונדר וחוזר', (tester) async {

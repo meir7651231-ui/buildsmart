@@ -1,16 +1,17 @@
-// 🏗️ KehilaApp — אפליקציה ממשפטים (GENMAX·G9 · §22): 5 מודולים · מחולל דטרמיניסטי: app-from-sentences.mjs (sentence⇒entity⇒pickModule⇒retarget) — כל מודול חצוב מהזהב, לא נכתב
+// 🏗️ KehilaApp — אפליקציה ממשפטים (GENMAX·G9 · §22): 6 מודולים · מחולל דטרמיניסטי: app-from-sentences.mjs (sentence⇒entity⇒pickModule⇒retarget) — כל מודול חצוב מהזהב, לא נכתב
 //   "ניהול מתנדבים עם טלפון ואזור" ⇒ Volunteer ⇐ schoolos_fees.dart (strong · שמות 5/8)
 //   "רשימת תרומות לפי תאריך וסכום" ⇒ Donation ⇐ schoolos_fees.dart (strong · שמות 5/7)
 //   "מעקב חדרים ושעות" ⇒ Room ⇐ schoolos_rooms.dart (strong · שמות 11/12)
 //   "מסך משפחות עם כתובת" ⇒ Family ⇐ schoolos_students.dart (strong · שמות 19/25)
 //   "פריטי קטלוג במלאי" ⇒ ShopItem ⇐ schoolos_courses.dart (strong · שמות 4/13)
+//   "תלמידים לפי גיל" ⇒ Member ⇐ schoolos_students.dart (strong · שמות 16/17)
 //   ⚪ "רשימת ספקים עם מחירים" ⇒ אין מונח-ישות במשפט — מקום-שמור (אין המצאה)
-//   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: Volunteer:∅ · Donation:∅ · Room:∅ · Family:5 עמודות · ShopItem:∅
+//   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: Volunteer:∅ · Donation:∅ · Room:∅ · Family:5 עמודות · ShopItem:∅ · Member:1 עמודות
 //   G12c · תפקידי-עור: DS
 //   G12b · עור: DS (KpiTile) — ברירת-מחדל, ביט-זהה
-//   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): Volunteer:∅ · Donation:∅ · Room:initialMetric · Family:initialMetric · ShopItem:initialMetric
-//   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: Volunteer:initialPanelId · Donation:initialPanelId · Room:initialPanelId · Family:initialPanelId · ShopItem:initialPanelId
-//   G9b · KPI-רכזת נגזר: כל אריח = <E>Facts של המודול (count חי של הזרע · hero = המדד שהזהב הכריז/צבע-סכנה) — אפס ערך מומצא: VolunteerFacts.count · DonationFacts.count · RoomFacts.unavailableN · FamilyFacts.highN · ShopItemFacts.kpiNoTeacher
+//   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): Volunteer:∅ · Donation:∅ · Room:initialMetric · Family:initialMetric · ShopItem:initialMetric · Member:initialMetric
+//   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: Volunteer:initialPanelId · Donation:initialPanelId · Room:initialPanelId · Family:initialPanelId · ShopItem:initialPanelId · Member:initialPanelId
+//   G9b · KPI-רכזת נגזר: כל אריח = <E>Facts של המודול (count חי של הזרע · hero = המדד שהזהב הכריז/צבע-סכנה) — אפס ערך מומצא: VolunteerFacts.count · DonationFacts.count · RoomFacts.unavailableN · FamilyFacts.highN · ShopItemFacts.kpiNoTeacher · MemberFacts.highN
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/premium/dataviz/kpi_tile.dart';
@@ -25,6 +26,7 @@ import 'gen_retarget_donation_from_fee.dart' show DonationScreen, DonationFacts;
 import 'gen_retarget_room_from_rm.dart' show RoomScreen, RoomFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 import 'gen_retarget_family_from_stu.dart' show FamilyScreen, FamilyFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 import 'gen_retarget_shopitem_from_crs.dart' show ShopItemScreen, ShopItemFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_member_from_stu.dart' show MemberScreen, MemberFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 
 class KehilaApp extends StatelessWidget {
   const KehilaApp({super.key});
@@ -40,7 +42,7 @@ class KehilaHubScreen extends StatefulWidget {
 
 class _KehilaHubScreenState extends State<KehilaHubScreen> {
   static void _go(BuildContext c, Widget screen) => Navigator.push(c, MaterialPageRoute(builder: (_) => screen));
-  static const modules = <String>['מתנדבים', 'תרומות', 'חדרים', 'משפחה', 'פריט']; // 5 מסכים מחווטים
+  static const modules = <String>['מתנדבים', 'תרומות', 'חדרים', 'משפחה', 'פריט', 'בני משפחה']; // 6 מסכים מחווטים
   String _q = ''; // חיפוש-רכזת נגזר (G9c): DsSearch ⊕ smartFilter ⊕ smartScore ⊕ normSearch — צורת-האיתור של הזהב (23-ג), לא .contains שטוח
   static String _norm(dynamic q) => normSearch(q, NORM_SEARCH_T);
   static Iterable _expand(dynamic q, dynamic norm) => [norm(q)];
@@ -54,13 +56,14 @@ class _KehilaHubScreenState extends State<KehilaHubScreen> {
     {'i': 2, 'title': 'חדרים', 'label': RoomFacts.label, 'text': 'מעקב חדרים ושעות', 'terms': [for (final d in RoomFacts.metricDefs) '${d['label']}']},
     {'i': 3, 'title': 'משפחה', 'label': FamilyFacts.label, 'text': 'מסך משפחות עם כתובת', 'terms': [for (final d in FamilyFacts.metricDefs) '${d['label']}']},
     {'i': 4, 'title': 'פריט', 'label': ShopItemFacts.label, 'text': 'פריטי קטלוג במלאי', 'terms': [for (final d in ShopItemFacts.metricDefs) '${d['label']}']},
+    {'i': 5, 'title': 'בני משפחה', 'label': MemberFacts.label, 'text': 'תלמידים לפי גיל', 'terms': [for (final d in MemberFacts.metricDefs) '${d['label']}']},
   ];
   static List<String> termsOf(Map<String, dynamic> r) => ['${r['title']}', '${r['label']}', '${r['text']}', ...(r['terms'] as List).cast<String>()];
   static List<Map<String, dynamic>> searchModules(List<Map<String, dynamic>> rs, String q) => (smartFilter(q, rs, (it) => termsOf(it as Map<String, dynamic>), _hasQuery, _scoreOf) as List).cast<Map<String, dynamic>>();
   @override
   Widget build(BuildContext context) {
     final vis = searchModules(rows, _q).map((r) => r['i'] as int).toSet();
-    return DsScaffold(title: 'Kehila', subtitle: '5 מודולים ממשפטים · כל אחד חצוב מהזהב', icon: '🧬', children: [
+    return DsScaffold(title: 'Kehila', subtitle: '6 מודולים ממשפטים · כל אחד חצוב מהזהב', icon: '🧬', children: [
       DsSearch(value: _q, onChanged: (v) => setState(() => _q = v)),
       const SizedBox(height: 8),
       Wrap(spacing: 12, runSpacing: 12, children: [ // KPI-רכזת (G9b): עובדות-אמת בלבד — כמו _Home של הזהב (מסכים-מחוברים + הדחוף של כל מודול)
@@ -70,6 +73,7 @@ class _KehilaHubScreenState extends State<KehilaHubScreen> {
         if (vis.contains(2)) GestureDetector(key: const ValueKey('hero-Room'), onTap: () { final id = RoomFacts.heroFirstId; _go(context, id == null ? const RoomScreen() : RoomScreen(initialPanelId: id, initialMetric: RoomFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: RoomFacts.hero, label: RoomFacts.heroLabel))), // Room · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
         if (vis.contains(3)) GestureDetector(key: const ValueKey('hero-Family'), onTap: () { final id = FamilyFacts.heroFirstId; _go(context, id == null ? const FamilyScreen() : FamilyScreen(initialPanelId: id, initialMetric: FamilyFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: FamilyFacts.hero, label: FamilyFacts.heroLabel))), // Family · ה-StatHero של הזהב (המטרה המוצהרת) · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
         if (vis.contains(4)) GestureDetector(key: const ValueKey('hero-ShopItem'), onTap: () { final id = ShopItemFacts.heroFirstId; _go(context, id == null ? const ShopItemScreen() : ShopItemScreen(initialPanelId: id, initialMetric: ShopItemFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: ShopItemFacts.hero, label: ShopItemFacts.heroLabel))), // ShopItem · המדד הראשון שהזהב צובע-סכנה כשאינו-אפס · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
+        if (vis.contains(5)) GestureDetector(key: const ValueKey('hero-Member'), onTap: () { final id = MemberFacts.heroFirstId; _go(context, id == null ? const MemberScreen() : MemberScreen(initialPanelId: id, initialMetric: MemberFacts.heroKey)); }, child: SizedBox(width: 168, child: KpiTile(glyph: '🧬', value: MemberFacts.hero, label: MemberFacts.heroLabel))), // Member · ה-StatHero של הזהב (המטרה המוצהרת) · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
       ]),
       const SizedBox(height: 8),
       if (vis.isEmpty) const EmptyState(glyph: '🔍', message: 'אין מודול שתואם לחיפוש') else DsSection(title: 'כלים · ${vis.length}', children: [
@@ -78,6 +82,7 @@ class _KehilaHubScreenState extends State<KehilaHubScreen> {
         if (vis.contains(2)) DsNavTile(glyph: '🧬', title: 'חדרים', sub: '${RoomFacts.count} ${RoomFacts.label} · מעקב חדרים ושעות', onTap: () => _go(context, const RoomScreen())),
         if (vis.contains(3)) DsNavTile(glyph: '🧬', title: 'משפחה', sub: '${FamilyFacts.count} ${FamilyFacts.label} · מסך משפחות עם כתובת', onTap: () => _go(context, const FamilyScreen())),
         if (vis.contains(4)) DsNavTile(glyph: '🧬', title: 'פריט', sub: '${ShopItemFacts.count} ${ShopItemFacts.label} · פריטי קטלוג במלאי', onTap: () => _go(context, const ShopItemScreen())),
+        if (vis.contains(5)) DsNavTile(glyph: '🧬', title: 'בני משפחה', sub: '${MemberFacts.count} ${MemberFacts.label} · תלמידים לפי גיל', onTap: () => _go(context, const MemberScreen())),
       ]),
     ]);
   }
