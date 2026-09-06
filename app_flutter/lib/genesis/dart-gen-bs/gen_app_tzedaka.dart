@@ -7,7 +7,7 @@
 //   "שיבוצים של השנה" ⇒ Enrollment ⇐ schoolos_fees.dart (strong · שמות 4/26)
 //   "תורמים לפי סכום" ⇒ Supporter ⇐ schoolos_fees.dart (strong · שמות 11/24)
 //   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: TzBox:∅ · TzCampaign:∅ · ShopProduct:∅ · ShopStore:0 עמודות · Teacher:9 עמודות · Enrollment:∅ · Supporter:∅
-//   G12c · תפקידי-עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar · board=ForgeKanbanBoard
+//   G12c · תפקידי-עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   G12b · עור: forge — אריח-KPI = ForgeStatPlain (card · 2 חריצים · תוכן-העיצוב ["Label","248"] ⇒ ערך בחריץ 1, תווית בחריץ 0, השאר '') — הצבה של הבעלים ב-app-golden, מאומתת מבנית
 //   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): TzBox:initialMetric · TzCampaign:initialMetric · ShopProduct:initialMetric · ShopStore:initialMetric · Teacher:initialMetric · Enrollment:∅ · Supporter:∅
 //   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: TzBox:initialPanel · TzCampaign:initialPanelId · ShopProduct:initialPanelId · ShopStore:initialPanelId · Teacher:initialPanelId · Enrollment:initialPanelId · Supporter:initialPanelId
@@ -15,19 +15,20 @@
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-forge-bs/card/card.dart'; // G12b/c · עור-forge
+import '../dart-forge-bs/feedback/feedback.dart'; // G12b/c · עור-forge
 import '../dart-ui-bs/ds/ds_search.dart'; // איתור: חיפוש-מבוקר (value+onChanged)
 import '../dart-ui-bs/premium/feedback/empty_state.dart'; // אין-תוצאות
 import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפי-ציון (מדף)
 import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
 import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (מדף)
 import '../dart-data-maor/norm-search-strings.dart'; // NORM_SEARCH_T (אטום-דאטה)
-import 'gen_retarget_tzbox_from_tch_sk1fce5c.dart' show TzBoxScreen, TzBoxFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_tzcampaign_from_crs_sk1fce5c.dart' show TzCampaignScreen, TzCampaignFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_shopproduct_from_rm_sk1fce5c.dart' show ShopProductScreen, ShopProductFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_shopstore_from_stu_sk1fce5c.dart' show ShopStoreScreen, ShopStoreFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_teacher_from_stu_sk1fce5c.dart' show TeacherScreen, TeacherFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_enrollment_from_fee_sk1fce5c.dart' show EnrollmentScreen, EnrollmentFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_supporter_from_fee_sk1fce5c.dart' show SupporterScreen, SupporterFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_tzbox_from_tch_skeda887.dart' show TzBoxScreen, TzBoxFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_tzcampaign_from_crs_skeda887.dart' show TzCampaignScreen, TzCampaignFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_shopproduct_from_rm_skeda887.dart' show ShopProductScreen, ShopProductFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_shopstore_from_stu_skeda887.dart' show ShopStoreScreen, ShopStoreFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_teacher_from_stu_skeda887.dart' show TeacherScreen, TeacherFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_enrollment_from_fee_skeda887.dart' show EnrollmentScreen, EnrollmentFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_supporter_from_fee_skeda887.dart' show SupporterScreen, SupporterFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 
 class TzedakaApp extends StatelessWidget {
   const TzedakaApp({super.key});
@@ -79,14 +80,14 @@ class _TzedakaHubScreenState extends State<TzedakaHubScreen> {
         if (vis.contains(6)) GestureDetector(key: const ValueKey('hero-Supporter'), onTap: () { final id = SupporterFacts.heroFirstId; _go(context, id == null ? const SupporterScreen() : SupporterScreen(initialPanelId: id)); }, child: SizedBox(width: 168, child: ForgeStatPlain(fields: [SupporterFacts.heroLabel, SupporterFacts.hero]))), // Supporter · אין מדדים ⇒ count · טאפ ⇒ המודול פתוח על רשומת-ה-hero הראשונה (G10a)
       ]),
       const SizedBox(height: 8),
-      if (vis.isEmpty) const EmptyState(glyph: '🔍', message: 'אין מודול שתואם לחיפוש') else DsSection(title: 'כלים · ${vis.length}', children: [
-        if (vis.contains(0)) GestureDetector(key: const ValueKey('nav-TzBox'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const TzBoxScreen()), child: ForgeHubTile(fields: ['קופה', '${TzBoxFacts.count} ${TzBoxFacts.label} · קופות צדקה לפי רכז'])), // אריח-ניווט forge (G12c)
-        if (vis.contains(1)) GestureDetector(key: const ValueKey('nav-TzCampaign'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const TzCampaignScreen()), child: ForgeHubTile(fields: ['מבצע', '${TzCampaignFacts.count} ${TzCampaignFacts.label} · מבצע גיוס עם יעד'])), // אריח-ניווט forge (G12c)
-        if (vis.contains(2)) GestureDetector(key: const ValueKey('nav-ShopProduct'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ShopProductScreen()), child: ForgeHubTile(fields: ['מוצר', '${ShopProductFacts.count} ${ShopProductFacts.label} · מוצר עם מחיר ומלאי'])), // אריח-ניווט forge (G12c)
-        if (vis.contains(3)) GestureDetector(key: const ValueKey('nav-ShopStore'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ShopStoreScreen()), child: ForgeHubTile(fields: ['חנות', '${ShopStoreFacts.count} ${ShopStoreFacts.label} · חנות שותפה עם כתובת'])), // אריח-ניווט forge (G12c)
-        if (vis.contains(4)) GestureDetector(key: const ValueKey('nav-Teacher'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const TeacherScreen()), child: ForgeHubTile(fields: ['מורה', '${TeacherFacts.count} ${TeacherFacts.label} · מורה עם שעות ושיעורים'])), // אריח-ניווט forge (G12c)
-        if (vis.contains(5)) GestureDetector(key: const ValueKey('nav-Enrollment'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const EnrollmentScreen()), child: ForgeHubTile(fields: ['שיבוצים', '${EnrollmentFacts.count} ${EnrollmentFacts.label} · שיבוצים של השנה'])), // אריח-ניווט forge (G12c)
-        if (vis.contains(6)) GestureDetector(key: const ValueKey('nav-Supporter'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const SupporterScreen()), child: ForgeHubTile(fields: ['תורם', '${SupporterFacts.count} ${SupporterFacts.label} · תורמים לפי סכום'])), // אריח-ניווט forge (G12c)
+      if (vis.isEmpty) ForgeAnimatedEmpty(fields: ['אין מודול שתואם לחיפוש', 'נסה מילה אחרת']) else DsSection(title: 'כלים · ${vis.length}', children: [
+        if (vis.contains(0)) GestureDetector(key: const ValueKey('nav-TzBox'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const TzBoxScreen()), child: ForgeGridHubCard(fields: ['קופה', '${TzBoxFacts.count} ${TzBoxFacts.label} · קופות צדקה לפי רכז'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(1)) GestureDetector(key: const ValueKey('nav-TzCampaign'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const TzCampaignScreen()), child: ForgeGridHubCard(fields: ['מבצע', '${TzCampaignFacts.count} ${TzCampaignFacts.label} · מבצע גיוס עם יעד'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(2)) GestureDetector(key: const ValueKey('nav-ShopProduct'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ShopProductScreen()), child: ForgeGridHubCard(fields: ['מוצר', '${ShopProductFacts.count} ${ShopProductFacts.label} · מוצר עם מחיר ומלאי'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(3)) GestureDetector(key: const ValueKey('nav-ShopStore'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ShopStoreScreen()), child: ForgeGridHubCard(fields: ['חנות', '${ShopStoreFacts.count} ${ShopStoreFacts.label} · חנות שותפה עם כתובת'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(4)) GestureDetector(key: const ValueKey('nav-Teacher'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const TeacherScreen()), child: ForgeGridHubCard(fields: ['מורה', '${TeacherFacts.count} ${TeacherFacts.label} · מורה עם שעות ושיעורים'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(5)) GestureDetector(key: const ValueKey('nav-Enrollment'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const EnrollmentScreen()), child: ForgeGridHubCard(fields: ['שיבוצים', '${EnrollmentFacts.count} ${EnrollmentFacts.label} · שיבוצים של השנה'])), // אריח-ניווט forge (G12c)
+        if (vis.contains(6)) GestureDetector(key: const ValueKey('nav-Supporter'), behavior: HitTestBehavior.opaque, onTap: () => _go(context, const SupporterScreen()), child: ForgeGridHubCard(fields: ['תורם', '${SupporterFacts.count} ${SupporterFacts.label} · תורמים לפי סכום'])), // אריח-ניווט forge (G12c)
       ]),
     ]);
   }

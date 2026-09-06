@@ -1,14 +1,15 @@
 // מחולל ע"י machtzev/generator/app-from-sentences.mjs — בדיקת-ניווט של KehilaApp: בית ⇒ כל מודול מרונדר וחוזר, אפס-חריגות
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_kehila.dart';
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_volunteer_from_fee_sk1fce5c.dart' show VolunteerScreen, VolunteerFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee_sk1fce5c.dart' show DonationScreen, DonationFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_room_from_rm_sk1fce5c.dart' show RoomScreen, RoomFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_family_from_stu_sk1fce5c.dart' show FamilyScreen, FamilyFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopitem_from_crs_sk1fce5c.dart' show ShopItemScreen, ShopItemFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu_sk1fce5c.dart' show MemberScreen, MemberFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_volunteer_from_fee_skeda887.dart' show VolunteerScreen, VolunteerFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee_skeda887.dart' show DonationScreen, DonationFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_room_from_rm_skeda887.dart' show RoomScreen, RoomFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_family_from_stu_skeda887.dart' show FamilyScreen, FamilyFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopitem_from_crs_skeda887.dart' show ShopItemScreen, ShopItemFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu_skeda887.dart' show MemberScreen, MemberFacts;
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/premium/feedback/empty_state.dart';
 import 'package:buildsmart/genesis/dart-forge-bs/card/card.dart';
+import 'package:buildsmart/genesis/dart-forge-bs/feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,7 +17,7 @@ void main() {
   testWidgets('KehilaApp · בית: 6 אריחים', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(ForgeHubTile), findsNWidgets(6)); expect(tester.takeException(), isNull);
+    expect(find.byType(ForgeGridHubCard), findsNWidgets(6)); expect(tester.takeException(), isNull);
     expect(find.text('6/6'), findsWidgets); // KPI מסכים-מחוברים = עובדה (נראים/כולם)
     expect(VolunteerFacts.metricDefs.length, VolunteerFacts.metrics.length); expect(VolunteerFacts.heroKey == 'count' || VolunteerFacts.metrics.containsKey(VolunteerFacts.heroKey), isTrue); // Volunteer: תפר-העובדות עקבי
     expect(find.text(VolunteerFacts.hero), findsWidgets); expect(find.text(VolunteerFacts.heroLabel), findsWidgets); // ה-hero של Volunteer מרונדר ברכזת מהביטוי-החי, לא מליטרל
@@ -41,11 +42,11 @@ void main() {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(find.byType(TextField).first, 'מתנדבים'); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(ForgeHubTile), findsNWidgets(1)); expect(find.text('1/6'), findsWidgets); expect(tester.takeException(), isNull);
+    expect(find.byType(ForgeGridHubCard), findsNWidgets(1)); expect(find.text('1/6'), findsWidgets); expect(tester.takeException(), isNull);
     await tester.enterText(find.byType(TextField).first, 'zzqqxx'); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(ForgeHubTile), findsNothing); expect(find.byType(EmptyState), findsOneWidget); expect(find.text('0/6'), findsWidgets);
+    expect(find.byType(ForgeGridHubCard), findsNothing); expect(find.byType(ForgeAnimatedEmpty), findsOneWidget); expect(find.text('0/6'), findsWidgets);
     await tester.enterText(find.byType(TextField).first, ''); await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(ForgeHubTile), findsNWidgets(6)); expect(find.byType(EmptyState), findsNothing); expect(tester.takeException(), isNull);
+    expect(find.byType(ForgeGridHubCard), findsNWidgets(6)); expect(find.byType(ForgeAnimatedEmpty), findsNothing); expect(tester.takeException(), isNull);
   });
   testWidgets('KehilaApp · הזרקת-שורה ⇒ עמודת-מקום-שמור "fatherId" של Family מאירה (G5h)', (tester) async {
     tester.view.physicalSize = const Size(1400, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
@@ -138,41 +139,41 @@ void main() {
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('מתנדבים').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(VolunteerScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeGridHubCard), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ תרומות (Donation) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('תרומות').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(DonationScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeGridHubCard), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ חדרים (Room) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('חדרים').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(RoomScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeGridHubCard), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ משפחה (Family) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('משפחה').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(FamilyScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeGridHubCard), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ פריט (ShopItem) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('פריט').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(ShopItemScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeGridHubCard), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
   testWidgets('KehilaApp · בית ⇒ בני משפחה (Member) מרונדר וחוזר', (tester) async {
     tester.view.physicalSize = const Size(800, 2400); tester.view.devicePixelRatio = 1.0; addTearDown(tester.view.reset);
     await tester.pumpWidget(const KehilaApp()); await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('בני משפחה').last); await tester.pump(); await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(MemberScreen), findsOneWidget); expect(tester.takeException(), isNull);
-    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeHubTile), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop(); await tester.pump(); await tester.pump(const Duration(milliseconds: 600)); expect(find.byType(ForgeGridHubCard), findsNWidgets(6)); // DsScaffold ללא AppBar ⇒ pop דרך ה-Navigator, לא pageBack
   });
 }

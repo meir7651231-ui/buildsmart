@@ -1,4 +1,4 @@
-// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar · board=ForgeKanbanBoard
+// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×1 · chip×4 · statRow×25 · kpi×2 · navTile×9 · button×11 · statusChip×3 · banner×6 · emptyState×2 · mediaRow×4 · section×4 · segmented×3 · meter×3 · frame×4 · timeline×2 · search×1 · pageHeader×1 · table×1 · bars×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS — בנייה מאפס לפי THE-WAY הנכון (פעולה-ראשונה · הרכבה-תמיד).
 // כל מסך: מטרה → פעולות-יסוד הכי-מתאימות → הרכבה (תמיד כמה) → חיווט → אימות-מול-המטרה.
@@ -99,15 +99,15 @@ class _Home extends StatelessWidget {
           ]),
           const SizedBox(height: 8),
           ForgeTitledSection(fields: ['כלים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const DashboardScreen()), child: ForgeHubTile(fields: ['לוח-הנהלה', 'מה דורש החלטה היום — נגזרת של כל המודולים'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const StudentsScreen()), child: ForgeHubTile(fields: ['תלמידים', 'תיק-תלמיד · סיכון · שיבוץ · מעבר-שנה'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const AttendanceScreen()), child: ForgeHubTile(fields: ['נוכחות', 'מי חסר עכשיו · חיסורים · השלמות'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const CoursesScreen()), child: ForgeHubTile(fields: ['חוגים ומערכת', 'תפוסה · המתנה · מערכת-שעות'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const TeachersScreen()), child: ForgeHubTile(fields: ['מורים', 'עומס · חלון-פנוי · תפקידים'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const RoomsScreen()), child: ForgeHubTile(fields: ['חדרים', 'יומן-חדרים · התנגשויות · שיבוץ-מחדש'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const FeesScreen()), child: ForgeHubTile(fields: ['גבייה', 'חובות · הסדרים · תזכורות (אפס-קבלה)'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ParentsScreen()), child: ForgeHubTile(fields: ['הורים', 'קשר · שידור · הסכמות'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const _Inventory()), child: ForgeHubTile(fields: ['מלאי', 'ימים-עד-ריקון מול אספקה — שלא ייגמר'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const DashboardScreen()), child: ForgeGridHubCard(fields: ['לוח-הנהלה', 'מה דורש החלטה היום — נגזרת של כל המודולים'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const StudentsScreen()), child: ForgeGridHubCard(fields: ['תלמידים', 'תיק-תלמיד · סיכון · שיבוץ · מעבר-שנה'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const AttendanceScreen()), child: ForgeGridHubCard(fields: ['נוכחות', 'מי חסר עכשיו · חיסורים · השלמות'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const CoursesScreen()), child: ForgeGridHubCard(fields: ['חוגים ומערכת', 'תפוסה · המתנה · מערכת-שעות'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const TeachersScreen()), child: ForgeGridHubCard(fields: ['מורים', 'עומס · חלון-פנוי · תפקידים'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const RoomsScreen()), child: ForgeGridHubCard(fields: ['חדרים', 'יומן-חדרים · התנגשויות · שיבוץ-מחדש'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const FeesScreen()), child: ForgeGridHubCard(fields: ['גבייה', 'חובות · הסדרים · תזכורות (אפס-קבלה)'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const ParentsScreen()), child: ForgeGridHubCard(fields: ['הורים', 'קשר · שידור · הסכמות'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _go(context, const _Inventory()), child: ForgeGridHubCard(fields: ['מלאי', 'ימים-עד-ריקון מול אספקה — שלא ייגמר'])),
           ]])),
         ]]);
 }
@@ -425,7 +425,7 @@ class _InventoryState extends State<_Inventory> {
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות פר-תפקיד (roleOf⊕canGrantedAction)
         Align(
           alignment: Alignment.centerRight,
-          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _InvData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i)),
+          child: ForgeSegPickerSelection(bare: true, items: [for (final s in [for (final r in _InvData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i)),
         ),
         _gap(10),
         // פס-עליון: חיפוש-מבוקר (DsSearch) + יצירה + ייצוא — מגודרים פר-הרשאה (canGrantedAction)
@@ -478,7 +478,7 @@ class _InventoryState extends State<_Inventory> {
         // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (כל-העמודות)
         Align(
           alignment: Alignment.centerRight,
-          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['🎯 חכם', '📋 טבלה', '📜 תנועות']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i)),
+          child: ForgeSegPickerSelection(bare: true, items: [for (final s in const ['🎯 חכם', '📋 טבלה', '📜 תנועות']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i)),
         ),
         const SizedBox(height: 10),
         // מצבי-מסך שמורים (מקום-שמור): טעינה + שגיאה מאירים במצב-אמת; אחרת התוכן הרגיל.
@@ -489,7 +489,7 @@ class _InventoryState extends State<_Inventory> {
         else if (_mode == 2)
           _movements() // אימות: יומן-תנועות (מנוע intakeLog + TimelineItem) — לא מסונן (ציר-אמת)
         else if (shown == 0)
-          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין פריטים תואמים לחיפוש/סינון', '']))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeAnimatedEmpty(fields: ['אין פריטים תואמים לחיפוש/סינון', '']))
         else if (_mode == 1)
           _table(visible)
         else
@@ -653,7 +653,7 @@ class _InventoryState extends State<_Inventory> {
                   Text('תנועות הפריט · ${moves.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
                   _gap(8),
                   if (moves.isEmpty)
-                    ForgeSearchEmptyState(fields: ['אין תנועות רשומות לפריט', ''])
+                    ForgeAnimatedEmpty(fields: ['אין תנועות רשומות לפריט', ''])
                   else
                     for (final r in moves) _moveTile((r as Map)['intake'] as Map, s),
                 ])),
@@ -762,7 +762,7 @@ class _InventoryState extends State<_Inventory> {
       _gap(10),
       Align(
         alignment: Alignment.centerRight,
-        child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['🎯 החלטה', '📊 ניתוח', '📦 מלאי']) [s]], selected: {sel}, onSelect: (i) => setState(() => _seg[name] = i)),
+        child: ForgeSegPickerSelection(bare: true, items: [for (final s in const ['🎯 החלטה', '📊 ניתוח', '📦 מלאי']) [s]], selected: {sel}, onSelect: (i) => setState(() => _seg[name] = i)),
       ),
       _gap(12),
       view,

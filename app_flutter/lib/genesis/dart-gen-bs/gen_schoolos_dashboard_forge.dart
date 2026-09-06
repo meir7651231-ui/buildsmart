@@ -1,4 +1,4 @@
-// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar · board=ForgeKanbanBoard
+// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×3 · chip×10 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · section×15 · segmented×1 · meter×3 · frame×5 · timeline×3 · search×1 · pageHeader×1 · table×1 · bars×5 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 📊 SchoolOS · לוח-הנהלה (DASHBOARD) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-DASHBOARD-FULL-2026-09-04.
 // 🎯 המטרה: שהמנהל/ת יפתח את הבוקר ותוך 30 שניות יידע: מה דורש-החלטה היום · מה בסיכון · מה מגמתי · מה הפעולה-הראשונה.
@@ -572,7 +572,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
   Widget _seg(List<String> items, int sel, ValueChanged<int> on) => Align(
         alignment: Alignment.centerRight,
-        child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in items) [s]], selected: {sel}, onSelect: on)),
+        child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegPickerSelection(bare: true, items: [for (final s in items) [s]], selected: {sel}, onSelect: on)),
       );
   Widget _wrap(List<Widget> kids, {double top = 6}) => Padding(padding: EdgeInsets.only(top: top, right: 4), child: Wrap(spacing: 8, runSpacing: 6, children: kids));
   Widget _title(String s) => Text(s, style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800));
@@ -695,11 +695,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ]),
         _gap(10),
         if (holiday != null)
-          ForgeSearchEmptyState(fields: ['יום-חופש — התור מוקפא. ה-KPI וההתרעות למעלה נשארים חיים.', ''])
+          ForgeAnimatedEmpty(fields: ['יום-חופש — התור מוקפא. ה-KPI וההתרעות למעלה נשארים חיים.', ''])
         else if (d.tasks.isEmpty)
-          ForgeSearchEmptyState(fields: ['אין משימות פתוחות — בוקר ירוק!', ''])
+          ForgeAnimatedEmpty(fields: ['אין משימות פתוחות — בוקר ירוק!', ''])
         else if (visible.isEmpty)
-          ForgeSearchEmptyState(fields: [d.inRange(d.forRole(d.tasks, _role), _range).isEmpty ? 'תקופה-ללא-דאטה: אין משימות עד ${d.rangeText(_range)}' : 'אין משימות תואמות לחיפוש/סינון', ''])
+          ForgeAnimatedEmpty(fields: [d.inRange(d.forRole(d.tasks, _role), _range).isEmpty ? 'תקופה-ללא-דאטה: אין משימות עד ${d.rangeText(_range)}' : 'אין משימות תואמות לחיפוש/סינון', ''])
         else if (_mode == 1)
           _table(visible)
         else
@@ -773,7 +773,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         () {
           final s = d.series(mod, key);
           final tr = d.trend(mod, key);
-          if (s == null || tr == null) return ForgeTitledSection(fields: [label, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[ForgeSearchEmptyState(fields: ['תקופה-ללא-דאטה / מודול לא-זמין — מקום-שמור', ''])]]));
+          if (s == null || tr == null) return ForgeTitledSection(fields: [label, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[ForgeAnimatedEmpty(fields: ['תקופה-ללא-דאטה / מודול לא-זמין — מקום-שמור', ''])]]));
           final goal = d.goal(goalKey);
           String mLabel(int i) => i == s.length - 1 ? 'החודש' : 'לפני ${s.length - 1 - i} ח׳';
           final dir = tr['dir'];
@@ -799,7 +799,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final out = d.gradeOutliers('attendancePct');
     final att = d.kpiValue(d.kpiDefs[1]), col = d.kpiValue(d.kpiDefs[6]), risk = d.kpiValue(d.kpiDefs[2]);
     Widget vs(String label, num? now, num? last, {bool pct = false, bool lowerBetter = false}) {
-      if (now == null || last == null) return ForgeSearchEmptyState(fields: ['אין נתון-השוואה — מקום-שמור', '']);
+      if (now == null || last == null) return ForgeAnimatedEmpty(fields: ['אין נתון-השוואה — מקום-שמור', '']);
       final delta = now - last;
       final good = lowerBetter ? delta <= 0 : delta >= 0;
       String f(num v) => pct ? '${v.toStringAsFixed(1)}%' : v.toStringAsFixed(0);
@@ -811,7 +811,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
     return [
       ForgeTitledSection(fields: ['⚖️ נוכחות לפי שכבה · ${g.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-        if (g.isEmpty) ForgeSearchEmptyState(fields: ['אין נתוני-שכבות — מקום-שמור', ''])
+        if (g.isEmpty) ForgeAnimatedEmpty(fields: ['אין נתוני-שכבות — מקום-שמור', ''])
         else ...[
           ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final x in g) (x['attendancePct'] as num).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _wrap([for (final x in out) ForgeStatusChip(items: [['⚠️ שכבה ${x['name']}: ${x['attendancePct']}% (z=${(x['z'] as num).toStringAsFixed(1)}) — חריגה-סטטיסטית']], variants: const <int>[3])]),
@@ -853,7 +853,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           () {
             final goal = d.goal(g.$1);
             final now = g.$3;
-            if (goal == null || now == null) return ForgeTitledSection(fields: [g.$2, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[ForgeSearchEmptyState(fields: ['אין יעד/נתון — מקום-שמור', ''])]]));
+            if (goal == null || now == null) return ForgeTitledSection(fields: [g.$2, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[ForgeAnimatedEmpty(fields: ['אין יעד/נתון — מקום-שמור', ''])]]));
             final frac = g.$4 ? (now == 0 ? 1.0 : (goal / now).clamp(0.0, 1.0)) : (goal == 0 ? 1.0 : (now / goal).clamp(0.0, 1.0));
             final met = g.$4 ? now <= goal : now >= goal;
             final f30 = g.$4 ? d.forecast(g.$1 == 'riskCount' ? 'students' : 'fees', g.$1, 1) : d.forecast(g.$1 == 'attendancePct' ? 'attendance' : 'fees', g.$1, 1);
@@ -912,7 +912,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ];
     return [
       ForgeTitledSection(fields: ['🔔 התרעות · ${items.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-        if (items.isEmpty) ForgeSearchEmptyState(fields: ['אין התרעות פעילות', ''])
+        if (items.isEmpty) ForgeAnimatedEmpty(fields: ['אין התרעות פעילות', ''])
         else for (final w in items) Padding(padding: const EdgeInsets.only(bottom: 8), child: w),
       ]])),
     ];
@@ -943,7 +943,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // ═══ טאב-8 · אודיט: יומן-פעולות-הלוח (TimelineItem) — מצב-בלבד, המודולים לא נכתבו ═══
   List<Widget> _auditTab() => [
         ForgeTitledSection(fields: ['📜 אודיט · ${d.audit.length} פעולות-לוח (אפס-כתיבה למודולים)', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-          if (d.audit.isEmpty) ForgeSearchEmptyState(fields: ['טרם בוצעו פעולות בלוח בסשן זה', ''])
+          if (d.audit.isEmpty) ForgeAnimatedEmpty(fields: ['טרם בוצעו פעולות בלוח בסשן זה', ''])
           else for (final a in d.audit) ForgeNotifRow(items: [[a['what']!, fmtDate(a['iso'])]]),
         ]])),
       ];
@@ -998,7 +998,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _gap(16),
                 _title('היסטוריה · ${hist.length}'),
                 _gap(8),
-                if (hist.isEmpty) ForgeSearchEmptyState(fields: ['אין היסטוריה רשומה במודול-המקור', ''])
+                if (hist.isEmpty) ForgeAnimatedEmpty(fields: ['אין היסטוריה רשומה במודול-המקור', ''])
                 else for (final h in hist) ForgeNotifRow(items: [['${(h as Map)['what']}', fmtDate('${h['iso']}')]]),
               ])),
           ),

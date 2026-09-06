@@ -1,4 +1,4 @@
-// 🎨 schoolos_fees.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar · board=ForgeKanbanBoard
+// 🎨 schoolos_fees.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×2 · chipRow×1 · chip×3 · statRow×31 · button×25 · statusChip×15 · banner×23 · emptyState×14 · mediaRow×9 · section×9 · segmented×3 · meter×3 · frame×8 · timeline×10 · field×2 · enumField×7 · numberField×2 · dateField×2 · search×1 · pageHeader×1 · table×1 · bars×4 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
@@ -821,7 +821,7 @@ class _FeesScreenState extends State<FeesScreen> {
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות (roleOf⊕canGrantedAction)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _FeesData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() { _role = i; _hokArmed = false; })),
+          child: ForgeSegPickerSelection(bare: true, items: [for (final s in [for (final r in _FeesData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() { _role = i; _hokArmed = false; })),
         ),
         _gap(10),
         if (!_amounts) ...[
@@ -923,7 +923,7 @@ class _FeesScreenState extends State<FeesScreen> {
         if (_amounts)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['🎯 חייבים', '📋 טבלה', '💳 הו״ק', '🔔 תזכורות', '📊 דוחות', '🧾 אודיט']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i)),
+            child: ForgeSegPickerSelection(bare: true, items: [for (final s in const ['🎯 חייבים', '📋 טבלה', '💳 הו״ק', '🔔 תזכורות', '📊 דוחות', '🧾 אודיט']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i)),
           ),
         const SizedBox(height: 10),
         // מצבי-מסך שמורים: טעינה · שגיאה · ריק
@@ -940,9 +940,9 @@ class _FeesScreenState extends State<FeesScreen> {
         else if (_mode == 5 && _amounts)
           _auditView()
         else if (all.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין משפחות/חיובים — התחל בחיוב-שנה', '']))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeAnimatedEmpty(fields: ['אין משפחות/חיובים — התחל בחיוב-שנה', '']))
         else if (visible.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין משפחות תואמות לחיפוש/סינון', '']))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeAnimatedEmpty(fields: ['אין משפחות תואמות לחיפוש/סינון', '']))
         else if (_mode == 1 && _amounts)
           _table(visible)
         else
@@ -1047,7 +1047,7 @@ class _FeesScreenState extends State<FeesScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       ForgeTitledSection(fields: ['💳 הו״ק לרישום החודש · ${due.length} · ${_m(_FeesData.hokExpected(all))}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (due.isEmpty)
-          ForgeSearchEmptyState(fields: ['כל ההו״ק הפעילות נרשמו החודש', ''])
+          ForgeAnimatedEmpty(fields: ['כל ההו״ק הפעילות נרשמו החודש', ''])
         else ...[
           for (final f in due)
             ForgeNotifRow(items: [['${f['name']} · יום ${(f['hok'] as Map)['day']}', _FeesData.hokMethod(f)]]),
@@ -1081,7 +1081,7 @@ class _FeesScreenState extends State<FeesScreen> {
               ],
             ]),
           ),
-        if (withHok.isEmpty) ForgeSearchEmptyState(fields: ['אין הוראות-קבע', '']),
+        if (withHok.isEmpty) ForgeAnimatedEmpty(fields: ['אין הוראות-קבע', '']),
       ]])),
     ]);
   }
@@ -1095,12 +1095,12 @@ class _FeesScreenState extends State<FeesScreen> {
       _gap(8),
       ForgeTitledSection(fields: ['🔔 מועד-תזכורת הגיע · ${due.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (due.isEmpty)
-          ForgeSearchEmptyState(fields: ['אין תזכורות שמועדן הגיע', ''])
+          ForgeAnimatedEmpty(fields: ['אין תזכורות שמועדן הגיע', ''])
         else
           for (final f in due) _reminderCard(f),
       ]])),
       ForgeTitledSection(fields: ['📜 היסטוריית-תזכורות · ${sentAll.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-        if (sentAll.isEmpty) ForgeSearchEmptyState(fields: ['טרם נשלחו תזכורות', '']) else
+        if (sentAll.isEmpty) ForgeAnimatedEmpty(fields: ['טרם נשלחו תזכורות', '']) else
           for (final x in sentAll)
             ForgeNotifRow(items: [['${(x['f'] as Map)['name']} · ${(x['c'] as Map)['grade'] ?? 'תזכורת'}', fmtDate((x['c'] as Map)['at'] as String?)]]),
       ]])),
@@ -1181,7 +1181,7 @@ class _FeesScreenState extends State<FeesScreen> {
   // ═══ 🧾 אודיט: כל פעולה (מי·מה·מתי) — TimelineItem ═══
   Widget _auditView() => ForgeTitledSection(fields: ['🧾 יומן-אודיט · ${_FeesData.audit.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (_FeesData.audit.isEmpty)
-          ForgeSearchEmptyState(fields: ['אין פעולות עדיין — כל חיוב/תשלום/ביטול/הנחה/תזכורת יירשם כאן', ''])
+          ForgeAnimatedEmpty(fields: ['אין פעולות עדיין — כל חיוב/תשלום/ביטול/הנחה/תזכורת יירשם כאן', ''])
         else
           for (final a in _FeesData.audit)
             ForgeNotifRow(items: [['${a['role']} · ${a['family'] == '*' ? 'כלל-המערכת' : _FeesData.families.firstWhere((f) => f['id'] == a['family'], orElse: () => const {'name': '?'})['name']}', fmtDate(a['date'] as String?)]]),
@@ -1229,7 +1229,7 @@ class _FeesScreenState extends State<FeesScreen> {
                 _gap(10),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['סקירה', 'חיובים', 'תשלומים', 'הו״ק', 'תזכורות', 'הנחות', 'הסדר', 'דוחות', 'אודיט']) [s]], selected: {tab}, onSelect: (i) => setSheet(() => tab = i)),
+                  child: ForgeSegPickerSelection(bare: true, items: [for (final s in const ['סקירה', 'חיובים', 'תשלומים', 'הו״ק', 'תזכורות', 'הנחות', 'הסדר', 'דוחות', 'אודיט']) [s]], selected: {tab}, onSelect: (i) => setSheet(() => tab = i)),
                 ),
                 _gap(10),
                 ...switch (tab) {
@@ -1296,7 +1296,7 @@ class _FeesScreenState extends State<FeesScreen> {
     final cs = _FeesData.chargesOf(f);
     final dups = _FeesData.duplicateCharges(f).map((c) => c['id']).toSet();
     return [
-      if (cs.isEmpty) ForgeSearchEmptyState(fields: ['אין חיובים למשפחה — לרשום חיוב-שנה', '']),
+      if (cs.isEmpty) ForgeAnimatedEmpty(fields: ['אין חיובים למשפחה — לרשום חיוב-שנה', '']),
       for (final c in cs)
         () {
           final cancelled = c['cancelledAt'] != null || _FeesData.cancelledIds.contains(c['id']);
@@ -1314,7 +1314,7 @@ class _FeesScreenState extends State<FeesScreen> {
   List<Widget> _tabPayments(Map<String, dynamic> f) {
     final ps = [..._FeesData.paymentsOf(f)]..sort((a, b) => '${b['date']}'.compareTo('${a['date']}'));
     return [
-      if (ps.isEmpty) ForgeSearchEmptyState(fields: ['אין תשלומים רשומים', '']),
+      if (ps.isEmpty) ForgeAnimatedEmpty(fields: ['אין תשלומים רשומים', '']),
       for (final p in ps)
         ForgeNotifRow(items: [['${p['method']}${p['method'] == 'הו״ק' ? ' 💳' : ''}', fmtDate(p['date'] as String?)]]),
       ForgeToneBanner(items: [['קבלת-מס / אישור-סליקה / חשבונית = שער-חיצוני (מקום-שמור: מס׳-קבלה יואר כאן כשיגיע מהשער; המסך אינו מנפיק)']], variants: const <int>[0]),
@@ -1323,7 +1323,7 @@ class _FeesScreenState extends State<FeesScreen> {
 
   // הו״ק: מצב-החודש (hokEffectivelyActive⊕hokRecordedThisMonth) + היסטוריית-סליקה + הפעל/הפסק
   List<Widget> _tabHok(Map<String, dynamic> f, void Function(void Function()) act) {
-    if (!_FeesData.hasHok(f)) return [ForgeSearchEmptyState(fields: ['אין הוראת-קבע למשפחה (מקום-שמור: תוגדר בשער-הסליקה)', ''])];
+    if (!_FeesData.hasHok(f)) return [ForgeAnimatedEmpty(fields: ['אין הוראת-קבע למשפחה (מקום-שמור: תוגדר בשער-הסליקה)', ''])];
     final h = f['hok'] as Map;
     final hist = (f['hist'] as List?) ?? const [];
     return [
@@ -1344,7 +1344,7 @@ class _FeesScreenState extends State<FeesScreen> {
       _gap(6),
       Text('היסטוריית-סליקה · ${hist.length}', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
       for (final e in hist) ForgeNotifRow(items: [['${(e as Map)['clearer']}', fmtDate(e['d'] as String?)]]),
-      if (hist.isEmpty) ForgeSearchEmptyState(fields: ['אין היסטוריית-סליקה (הו״ק ידנית)', '']),
+      if (hist.isEmpty) ForgeAnimatedEmpty(fields: ['אין היסטוריית-סליקה (הו״ק ידנית)', '']),
     ];
   }
 
@@ -1352,7 +1352,7 @@ class _FeesScreenState extends State<FeesScreen> {
   List<Widget> _tabReminders(Map<String, dynamic> f, void Function(void Function()) act) {
     final plan = _FeesData.reminderPlan(f), sent = _FeesData.remindersSent(f), nr = _FeesData.nextReminder(f);
     return [
-      if (_FeesData.fullScholarship(f)) ForgeToneBanner(items: [['מלגה מלאה — אפס-תזכורות (מגן-כבוד)']], variants: const <int>[1]) else if (plan.isEmpty) ForgeSearchEmptyState(fields: ['אין חוב פתוח — אין לוח-תזכורות', '']) else ...[
+      if (_FeesData.fullScholarship(f)) ForgeToneBanner(items: [['מלגה מלאה — אפס-תזכורות (מגן-כבוד)']], variants: const <int>[1]) else if (plan.isEmpty) ForgeAnimatedEmpty(fields: ['אין חוב פתוח — אין לוח-תזכורות', '']) else ...[
         Text('לוח מדורג (מהחיוב-הפתוח-הוותיק ${fmtDate(_FeesData.oldestOpenDate(f))})', style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)),
         _wrap([for (var i = 0; i < plan.length; i++) ForgeStatusChip(items: [['${i < sent.length ? '✅' : '${plan[i]['date']}'.compareTo(_FeesData.today) <= 0 ? '⏰' : '⏳'} ${plan[i]['grade']} · ${fmtDate(plan[i]['date'] as String?)}']], variants: [const <int>[0, 1, 3, 2][(i < sent.length ? 1 : nr != null && nr['grade'] == plan[i]['grade'] ? 3 : 0) % 4]])]),
         if (nr != null && _FeesData.can(_role, 'fees.remind')) _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.sendReminder(f, _roleName, nr['grade'] as String)), child: ForgeToneButton(items: [['📨 שלח תזכורת ${nr['grade']} (פרטי)']], variants: const <int>[2]))], top: 8),
@@ -1386,7 +1386,7 @@ class _FeesScreenState extends State<FeesScreen> {
     final ins = _FeesData.installments(f);
     return [
       if (ins.isEmpty) ...[
-        ForgeSearchEmptyState(fields: ['אין הסדר-תשלומים', '']),
+        ForgeAnimatedEmpty(fields: ['אין הסדר-תשלומים', '']),
         if (_FeesData.can(_role, 'fees.arrangement') && _FeesData.balance(f) > 0)
           _wrap([for (final n in const [2, 3, 6]) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _FeesData.setArrangement(f, _roleName, n)), child: ForgeToneButton(items: [['📆 פריסה ל-$n']], variants: const <int>[0]))], top: 4),
       ] else ...[
@@ -1425,7 +1425,7 @@ class _FeesScreenState extends State<FeesScreen> {
   List<Widget> _tabAudit(Map<String, dynamic> f) {
     final rows = _FeesData.audit.where((a) => a['family'] == f['id']).toList();
     return [
-      if (rows.isEmpty) ForgeSearchEmptyState(fields: ['אין פעולות למשפחה זו עדיין', '']) else
+      if (rows.isEmpty) ForgeAnimatedEmpty(fields: ['אין פעולות למשפחה זו עדיין', '']) else
         for (final a in rows) ForgeNotifRow(items: [['${a['role']}', fmtDate(a['date'] as String?)]]),
     ];
   }

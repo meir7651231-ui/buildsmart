@@ -1,4 +1,4 @@
-// 🎨 schoolos_attendance.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar · board=ForgeKanbanBoard
+// 🎨 schoolos_attendance.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×1 · chip×1 · statRow×13 · button×29 · statusChip×20 · banner×22 · emptyState×7 · mediaRow×3 · section×10 · segmented×6 · meter×3 · frame×3 · timeline×8 · enumField×1 · search×1 · pageHeader×1 · table×1 · bars×2 · calendar×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS · מודול נוכחות (ATTENDANCE) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT): knowledge/SPEC-ATTENDANCE-FULL-2026-09-04.md · הסטנדרט: schoolos.dart (מלאי).
@@ -771,7 +771,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות פר-תפקיד (roleOf⊕canGrantedAction)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal, reverse: true,
-          child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _Placement.roleDefs) r['label'] as String]) [s]], selected: {_AttData.role}, onSelect: (i) => setState(() => _AttData.setRole(i))),
+          child: ForgeSegPickerSelection(bare: true, items: [for (final s in [for (final r in _Placement.roleDefs) r['label'] as String]) [s]], selected: {_AttData.role}, onSelect: (i) => setState(() => _AttData.setRole(i))),
         ),
         _gap(10),
         // ── פס-עליון: בורר-תאריך (◀ היום ▶ · שם-יום · חג) + בורר-כיתה (בהיקף) + חיפוש + נעילה ──
@@ -793,7 +793,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ]),
         _gap(10),
         Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-          ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final c in vClasses) c['name'] as String]) [s]], selected: {_cls}, onSelect: (i) => setState(() => _cls = i)),
+          ForgeSegPickerSelection(bare: true, items: [for (final s in [for (final c in vClasses) c['name'] as String]) [s]], selected: {_cls}, onSelect: (i) => setState(() => _cls = i)),
           GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0])),
           if (_AttData.can('att.lock') && !locked) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.lockDay(_date)), child: ForgeToneButton(items: [['🔒 נעל-יום']], variants: const <int>[2])),
           if (_AttData.can('att.unlock') && locked) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.unlockDay(_date)), child: ForgeToneButton(items: [['🔓 פתח יום-נעול']], variants: const <int>[1])),
@@ -841,7 +841,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         // ── מרכז-אוטומציות (פרואקטיבי · 23-ג): רק התרעות פעילות — כל אחת = מנוע-מדף ⊕ AlertBanner/StatusChip ──
         ..._automations(cls),
         // ── 8 טאבים (SegmentedSwitch מבוקר, גלילה-אופקית) ──
-        SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in _tabs) [s]], selected: {_tab}, onSelect: (i) => setState(() => _tab = i))),
+        SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: ForgeSegPickerSelection(bare: true, items: [for (final s in _tabs) [s]], selected: {_tab}, onSelect: (i) => setState(() => _tab = i))),
         _gap(10),
         if (_loading)
           _loadingView()
@@ -864,13 +864,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         else if (holiday != null)
           ForgeToneBanner(items: [['$holiday — יום-חופש: היום לא נספר בנוכחות (סנכרון-לוח)']], variants: const <int>[2])
         else if (lessons.isEmpty)
-          ForgeSearchEmptyState(fields: ['אין-שיעורים ביום זה (שבת)', ''])
+          ForgeAnimatedEmpty(fields: ['אין-שיעורים ביום זה (שבת)', ''])
         else ...[
           // ── בורר-שיעור (פר-שיעור, לא פר-יום) + מבט + רישום-מרוכז ──
           // בורר-שיעור בגלילה-אופקית (תוקן ברנדר-בדיקה: 5 שיעורים גלשו ב-800px בפונט-רחב ⇒ במובייל ודאי)
-          SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final l in lessons) '${l['n']} · ${l['time']}']) [s]], selected: {lessonIdx < 0 ? 0 : lessonIdx}, onSelect: (i) => setState(() => _lesson = lessons[i]['n'] as int))),
+          SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: ForgeSegPickerSelection(bare: true, items: [for (final s in [for (final l in lessons) '${l['n']} · ${l['time']}']) [s]], selected: {lessonIdx < 0 ? 0 : lessonIdx}, onSelect: (i) => setState(() => _lesson = lessons[i]['n'] as int))),
           _gap(8),
-          Align(alignment: Alignment.centerRight, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['📋 גיליון', '🗂 טבלה']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i))),
+          Align(alignment: Alignment.centerRight, child: ForgeSegPickerSelection(bare: true, items: [for (final s in const ['📋 גיליון', '🗂 טבלה']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i))),
           _gap(8),
           Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
             ForgeStatusChip(items: [['${lessons[lessonIdx < 0 ? 0 : lessonIdx]['subject']} · ${recorded ? 'נרשם' : 'טרם-נרשם'}']], variants: [const <int>[0, 1, 3, 2][(recorded ? 1 : 3) % 4]]),
@@ -883,9 +883,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ]),
           _gap(8),
           if (roster.isEmpty)
-            ForgeSearchEmptyState(fields: ['כיתה ריקה — אין תלמידים פעילים', ''])
+            ForgeAnimatedEmpty(fields: ['כיתה ריקה — אין תלמידים פעילים', ''])
           else if (visible.isEmpty)
-            ForgeSearchEmptyState(fields: ['אין תלמידים תואמים לחיפוש/סינון', ''])
+            ForgeAnimatedEmpty(fields: ['אין תלמידים תואמים לחיפוש/סינון', ''])
           else if (_mode == 1)
             ForgeTitledSection(fields: ['🗂 טבלה · ${_AttData.className(cls)} · ${fmtDate(_date)} · ${visible.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_table(visible)]]))
           else
@@ -986,8 +986,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget _historyTab(String cls) {
     final from = _AttData.shift(_Placement.today, -_rangeDays[_range]);
     final rows = _AttData.marksInRange(from, _Placement.today, cls: cls);
-    return ForgeTitledSection(fields: ['📜 היסטוריה · ${_AttData.className(cls)} · ${rows.length} סימונים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in const ['7 י׳', '30 י׳', '90 י׳']) [s]], selected: {_range}, onSelect: (i) => setState(() => _range = i))), ...[
-        if (rows.isEmpty) ForgeSearchEmptyState(fields: ['אין סימונים בטווח', '']) else
+    return ForgeTitledSection(fields: ['📜 היסטוריה · ${_AttData.className(cls)} · ${rows.length} סימונים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: ForgeSegPickerSelection(bare: true, items: [for (final s in const ['7 י׳', '30 י׳', '90 י׳']) [s]], selected: {_range}, onSelect: (i) => setState(() => _range = i))), ...[
+        if (rows.isEmpty) ForgeAnimatedEmpty(fields: ['אין סימונים בטווח', '']) else
           for (final m in rows)
             ForgeNotifRow(items: [['${_AttData.statusLabel[m['status']]} · ${_AttData.studentById(m['sid'] as String)['name']} · שיעור ${m['lesson']}', '${fmtDate(m['date'] as String)}${m['arrival'] != null ? ' ${m['arrival']}' : ''}']]),
       ]]));
@@ -997,7 +997,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget _makeupsTab(String cls) {
     final pend = _AttData.pendingMakeupList.where((p) => p['courseId'] == cls).toList();
     return ForgeTitledSection(fields: ['🔁 השלמות · ${_AttData.className(cls)} · ${pend.length} ממתינות', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-      if (pend.isEmpty) ForgeSearchEmptyState(fields: ['אין השלמות ממתינות', '']) else
+      if (pend.isEmpty) ForgeAnimatedEmpty(fields: ['אין השלמות ממתינות', '']) else
         for (final p in pend)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
             Expanded(child: ForgeNotifRow(items: [['${_AttData.studentById(p['memberId'] as String)['name']} · ${p['makeupDate'] == null ? 'ממתין לתזמון' : 'מתוזמן ${fmtDate(p['makeupDate'] as String)}'}', fmtDate(p['date'] as String)]])),
@@ -1032,7 +1032,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         Expanded(child: ForgeStatPlain(fields: ['🗂 סיבות-שונות', '${by.length}'])),
       ]),
       _gap(10),
-      if (by.isEmpty) ForgeSearchEmptyState(fields: ['אין חיסורים החודש', '']) else ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final e in by) (e[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      if (by.isEmpty) ForgeAnimatedEmpty(fields: ['אין חיסורים החודש', '']) else ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final e in by) (e[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
     ]]));
   }
 
@@ -1042,7 +1042,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     return ForgeTitledSection(fields: ['👪 תקשורת-הורים · ${q.length} הודעות · ${q.where((n) => _AttData.sent.contains(n['key'])).length} נשלחו', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
       ForgeToneBanner(items: [['שקע-שליחה (מודול-הורים · SMS/וואטסאפ) לא מחובר בהצבה — ההודעות מנוהלות בתור (מקום-שמור)']], variants: const <int>[0]),
       _gap(8),
-      if (q.isEmpty) ForgeSearchEmptyState(fields: ['אין הודעות ממתינות', '']) else
+      if (q.isEmpty) ForgeAnimatedEmpty(fields: ['אין הודעות ממתינות', '']) else
         for (final n in q)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
             Expanded(child: ForgeNotifRow(items: [['${n['auto'] == true ? '🤖 אוטו' : '✍️ ידני'} · ${n['to']} (${n['phone']})', fmtDate(n['date'] as String)]])),
