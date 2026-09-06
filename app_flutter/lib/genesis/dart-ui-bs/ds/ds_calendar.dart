@@ -12,6 +12,33 @@ class DsCalendar extends StatefulWidget {
 
   @override
   State<DsCalendar> createState() => _DsCalendarState();
+  /// G14 · תפר-דאטה לאטום-forge (EventCalendar): אותו חישוב-חודש של build — כותרת + תאים (יום · טוקן-וריאנט: ''/'pad'/'has'/'today' · מונה)
+  static const List<String> dows = _DsCalendarState._dows;
+  static ({String title, List<(String, String, String)> cells}) grid(List<Map<String, String>> records, String Function(Map<String, String>) dateOf, int off) {
+    final now = DateTime.now();
+    final anchor = DateTime(now.year, now.month + off);
+    final first = DateTime(anchor.year, anchor.month, 1);
+    final daysInMonth = DateTime(anchor.year, anchor.month + 1, 0).day;
+    final lead = first.weekday % 7;
+    final byDay = <int, int>{};
+    for (final r in records) { final d = DateTime.tryParse(dateOf(r)); if (d != null && d.year == anchor.year && d.month == anchor.month) byDay[d.day] = (byDay[d.day] ?? 0) + 1; }
+    final cells = <(String, String, String)>[for (var i = 0; i < lead; i++) ('', 'pad', '')];
+    for (var day = 1; day <= daysInMonth; day++) { final n = byDay[day] ?? 0; final today = off == 0 && day == now.day; cells.add(('$day', today ? 'today' : n > 0 ? 'has' : '', n > 0 ? '$n' : '')); }
+    return (title: '${_DsCalendarState._months[anchor.month - 1]} ${anchor.year}', cells: cells);
+  }
+}
+
+/// G14 · מחזיק היסט-חודש לאטום-forge (state קטן, כמו _off של DsCalendar)
+class DsMonthOffset extends StatefulWidget {
+  const DsMonthOffset({required this.builder, super.key});
+  final Widget Function(BuildContext context, int off, void Function(int delta) shift) builder;
+  @override
+  State<DsMonthOffset> createState() => _DsMonthOffsetState();
+}
+class _DsMonthOffsetState extends State<DsMonthOffset> {
+  int _off = 0;
+  @override
+  Widget build(BuildContext context) => widget.builder(context, _off, (d) => setState(() => _off += d));
 }
 
 class _DsCalendarState extends State<DsCalendar> {

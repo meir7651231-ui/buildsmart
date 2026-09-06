@@ -1,4 +1,4 @@
-// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
+// 🎨 schoolos.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×1 · chip×4 · statRow×25 · kpi×2 · navTile×9 · button×11 · statusChip×3 · banner×6 · emptyState×2 · mediaRow×4 · section×4 · segmented×3 · meter×3 · frame×4 · timeline×2 · search×1 · pageHeader×1 · table×1 · bars×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS — בנייה מאפס לפי THE-WAY הנכון (פעולה-ראשונה · הרכבה-תמיד).
 // כל מסך: מטרה → פעולות-יסוד הכי-מתאימות → הרכבה (תמיד כמה) → חיווט → אימות-מול-המטרה.
@@ -433,15 +433,15 @@ class _InventoryState extends State<_Inventory> {
           Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
           // רענון — מדגים את מצב-הטעינה השמור (חיבור-אסינק אמיתי יאיר אותו זהה)
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0]))),
           if (_InvData.can(_role, 'inv.add')) ...[
             const SizedBox(width: 8),
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {}, child: ForgeSoftButton(fields: ['➕']))),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {}, child: ForgeToneButton(items: [['➕']], variants: const <int>[0]))),
           ],
           if (_InvData.exportOk(_role)) ...[
             const SizedBox(width: 6),
             // ייצוא (23-ג): toCsv⊕csvEscape⊕exportAllowed — מייצא את הרשימה-הנראית (אחרי איתור+חריגה)
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible), child: ForgeSoftButton(fields: ['⬇ CSV']))),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible), child: ForgeToneButton(items: [['⬇ CSV']], variants: const <int>[0]))),
           ],
         ]),
         // צ׳יפי-סינון-חריגה (FilterChipPill מבוקר) — פעולת-יסוד "זיהוי-חריגה"
@@ -468,11 +468,11 @@ class _InventoryState extends State<_Inventory> {
         const SizedBox(height: 8),
         // מרכז-אוטומציות (23-ג · פרואקטיבי): המערכת מתריעה לפני שדבר נשמט — פקיעה + מלאי-מת
         if (_InvData.expiringList.isNotEmpty) ...[
-          ForgeSectionPill(items: [['${_InvData.expiringList.length} פוקעים תוך $shopExpiryWarnDays ימים: ${_InvData.expiringList.map((e) => e['itemName']).join(' · ')}']], variants: const <int>[0]),
+          ForgeToneBanner(items: [['${_InvData.expiringList.length} פוקעים תוך $shopExpiryWarnDays ימים: ${_InvData.expiringList.map((e) => e['itemName']).join(' · ')}']], variants: const <int>[2]),
           _gap(8),
         ],
         if (_InvData.deadItems.isNotEmpty) ...[
-          ForgeSectionPill(items: [['${_InvData.deadItems.length} מלאי-מת (איטי + מלאי-רב) · ${shekel(_InvData.deadCapital)} הון-כלוא: ${_InvData.deadItems.map((s) => s['name']).join(' · ')}']], variants: const <int>[0]),
+          ForgeToneBanner(items: [['${_InvData.deadItems.length} מלאי-מת (איטי + מלאי-רב) · ${shekel(_InvData.deadCapital)} הון-כלוא: ${_InvData.deadItems.map((s) => s['name']).join(' · ')}']], variants: const <int>[2]),
           _gap(8),
         ],
         // בורר-מבט (SegmentedSwitch מבוקר): 🎯 חכם (טריאז'-החלטה) · 📋 טבלה (כל-העמודות)
@@ -485,7 +485,7 @@ class _InventoryState extends State<_Inventory> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
+          ForgeToneBanner(items: [[_error!]], variants: const <int>[3])
         else if (_mode == 2)
           _movements() // אימות: יומן-תנועות (מנוע intakeLog + TimelineItem) — לא מסונן (ציר-אמת)
         else if (shown == 0)
@@ -510,7 +510,7 @@ class _InventoryState extends State<_Inventory> {
                   Flexible(child: ForgeStatusChip(items: [['לא-פעיל']], variants: const <int>[0])),
                   if (_InvData.can(_role, 'inv.toggle')) ...[
                     const SizedBox(width: 8),
-                    GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _InvData.toggleActive(s)), child: ForgeSoftButton(fields: ['▶ הפעל'])),
+                    GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _InvData.toggleActive(s)), child: ForgeToneButton(items: [['▶ הפעל']], variants: const <int>[1])),
                   ],
                 ]),
               ),
@@ -639,14 +639,14 @@ class _InventoryState extends State<_Inventory> {
                   // פעולות מגודרות פר-הרשאה (canGrantedAction); אין-הרשאה ⇒ מצב נעילת-הרשאות (AlertBanner)
                   Builder(builder: (_) {
                     final acts = <Widget>[
-                      if (_InvData.can(_role, 'inv.receive')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.receive(s, 5)), child: ForgeSoftButton(fields: ['📥 קבלה +5'])),
-                      if (_InvData.can(_role, 'inv.issue')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.issue(s, 5)), child: ForgeSoftButton(fields: ['📤 הוצאה −5'])),
-                      if (_InvData.can(_role, 'inv.count')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.countTo(s, target)), child: ForgeSoftButton(fields: ['📦 מלא-ליעד'])),
-                      if (_InvData.can(_role, 'inv.order')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => ordered ? _ordered.remove(name) : _ordered.add(name)), child: ForgeSoftButton(fields: [ordered ? '↩ בטל הזמנה' : '🛒 סמן הוזמן'])),
-                      if (_InvData.can(_role, 'inv.toggle')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.toggleActive(s)), child: ForgeSoftButton(fields: ['⏸ השבת'])),
+                      if (_InvData.can(_role, 'inv.receive')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.receive(s, 5)), child: ForgeToneButton(items: [['📥 קבלה +5']], variants: const <int>[1])),
+                      if (_InvData.can(_role, 'inv.issue')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.issue(s, 5)), child: ForgeToneButton(items: [['📤 הוצאה −5']], variants: const <int>[3])),
+                      if (_InvData.can(_role, 'inv.count')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.countTo(s, target)), child: ForgeToneButton(items: [['📦 מלא-ליעד']], variants: const <int>[0])),
+                      if (_InvData.can(_role, 'inv.order')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => ordered ? _ordered.remove(name) : _ordered.add(name)), child: ForgeToneButton(items: [[ordered ? '↩ בטל הזמנה' : '🛒 סמן הוזמן']], variants: const <int>[0])),
+                      if (_InvData.can(_role, 'inv.toggle')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _InvData.toggleActive(s)), child: ForgeToneButton(items: [['⏸ השבת']], variants: const <int>[0])),
                     ];
                     return acts.isEmpty
-                        ? ForgeSectionPill(items: [['צפייה-בלבד — אין הרשאת-פעולה']], variants: const <int>[0])
+                        ? ForgeToneBanner(items: [['צפייה-בלבד — אין הרשאת-פעולה']], variants: const <int>[3])
                         : Wrap(spacing: 8, runSpacing: 8, children: acts);
                   }),
                   _gap(16),
@@ -681,7 +681,7 @@ class _InventoryState extends State<_Inventory> {
               ForgeContactTile(fields: ['ייצוא CSV', '${items.length} פריטים · ${_InvData.csvHeaderLen} עמודות']),
               _gap(10),
               if (!allowed)
-                ForgeSectionPill(items: [['ייצוא חסום (שער-הרשאות)']], variants: const <int>[0])
+                ForgeToneBanner(items: [['ייצוא חסום (שער-הרשאות)']], variants: const <int>[3])
               else ...[
                 const Text('תצוגה מקדימה (BOM + חסימת-הזרקה):', style: TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700)),
                 _gap(8),
@@ -747,7 +747,7 @@ class _InventoryState extends State<_Inventory> {
     if (_ordered.contains(name)) {
       return _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         header,
-        _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _ordered.remove(name)), child: ForgeSoftButton(fields: ['בטל']))], top: 8),
+        _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _ordered.remove(name)), child: ForgeToneButton(items: [['בטל']], variants: const <int>[0]))], top: 8),
       ]));
     }
     if (band == 0) {
@@ -777,7 +777,7 @@ class _InventoryState extends State<_Inventory> {
     final price = s['price'] as int?;
     final why = _InvData.isShort(s) ? 'גירעון-הקצאה + ' : ''; // סיבת-הדחיפות המאוחדת
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      ForgeSectionPill(items: [[sev == 2 ? '$whyחייבים להזמין היום' : 'הזמן תוך $mustIn ימים']], variants: [const <int>[0, 0, 0, 0][(sev == 2 ? 2 : 3) % 4]]),
+      ForgeToneBanner(items: [[sev == 2 ? '$whyחייבים להזמין היום' : 'הזמן תוך $mustIn ימים']], variants: [const <int>[0, 1, 3, 2][(sev == 2 ? 2 : 3) % 4]]),
       _gap(),
       Row(children: [
         Expanded(child: ForgeStatPlain(fields: ['במלאי', '$cur'])),
@@ -792,7 +792,7 @@ class _InventoryState extends State<_Inventory> {
           Expanded(child: ForgeStatPlain(fields: ['= עלות', shekel(qty * price)])),
         ]),
       ],
-      _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _ordered.add(s['name'] as String)), child: ForgeSoftButton(fields: ['סמן: הוזמן']))], top: 10),
+      _wrap([GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _ordered.add(s['name'] as String)), child: ForgeToneButton(items: [['סמן: הוזמן']], variants: const <int>[1]))], top: 10),
     ]);
   }
 

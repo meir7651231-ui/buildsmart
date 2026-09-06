@@ -1,4 +1,4 @@
-// 🎨 schoolos_rooms.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
+// 🎨 schoolos_rooms.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×1 · chip×10 · statRow×17 · button×32 · statusChip×9 · banner×16 · emptyState×12 · mediaRow×9 · section×5 · segmented×7 · meter×1 · frame×8 · timeline×6 · field×2 · search×1 · table×1 · bars×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
 // המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: RoomsScreen.
@@ -762,17 +762,17 @@ class _RoomsScreenState extends State<RoomsScreen> {
         Row(children: [
           Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0]))),
           const SizedBox(width: 6),
-          if (_can('rooms.book')) Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pickRoom(visible, (r) => _openBook(context, r, (f) { f(); setState(() {}); })), child: ForgeSoftButton(fields: ['📌 הזמן-חדר']))),
-          if (_can('rooms.fault')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pickRoom(visible, (r) => _openFault(context, r, (f) { f(); setState(() {}); })), child: ForgeSoftButton(fields: ['🔧 דווח-תקלה'])))],
+          if (_can('rooms.book')) Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pickRoom(visible, (r) => _openBook(context, r, (f) { f(); setState(() {}); })), child: ForgeToneButton(items: [['📌 הזמן-חדר']], variants: const <int>[1]))),
+          if (_can('rooms.fault')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pickRoom(visible, (r) => _openFault(context, r, (f) { f(); setState(() {}); })), child: ForgeToneButton(items: [['🔧 דווח-תקלה']], variants: const <int>[3])))],
           if (_RoomsData.exportOk(_role)) ...[
-            const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible, ical: false), child: ForgeSoftButton(fields: ['⬇ CSV']))),
-            const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible, ical: true), child: ForgeSoftButton(fields: ['📆 iCal']))),
+            const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible, ical: false), child: ForgeToneButton(items: [['⬇ CSV']], variants: const <int>[0]))),
+            const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible, ical: true), child: ForgeToneButton(items: [['📆 iCal']], variants: const <int>[0]))),
           ],
         ]),
         // צ׳יפי-סינון (FilterChipPill ⊕ finderMatches) — 11 צירי-המפרט; סוג = מקום-שמור (מואר כשיגיע נתון)
-        Wrap(spacing: 8, runSpacing: 6, children: [Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final b in _RoomsData.buildings) (('🏢 $b'), _locks[('building')] == (b), () => setState(() => _locks[('building')] == (b) ? _locks.remove(('building')) : _locks[('building')] = (b))), for (final f in _RoomsData.floors) (('🪜 $f'), _locks[('floor')] == (f), () => setState(() => _locks[('floor')] == (f) ? _locks.remove(('floor')) : _locks[('floor')] = (f))), for (final t in _RoomsData.types) (('🏷 $t'), _locks[('type')] == (t), () => setState(() => _locks[('type')] == (t) ? _locks.remove(('type')) : _locks[('type')] = (t))), for (final n in _RoomsData.capSteps) ('👥 ≥$n', _locks['cap$n'] == '1', () => _setCap(_locks['cap$n'] == '1' ? null : n)), for (final k in _RoomsData.eqKeys) ((('🧰 יש $k')), _locks[(('eq:$k'))] == ('1'), () => setState(() => _locks[(('eq:$k'))] == ('1') ? _locks.remove((('eq:$k'))) : _locks[(('eq:$k'))] = ('1'))), ('🟢 פנוי-במשבצת $_slotHour', _freeAtOn, () => _setFreeAt(!_freeAtOn)), ((('🔴 תפוס-עכשיו')), _locks[(('busy'))] == ('1'), () => setState(() => _locks[(('busy'))] == ('1') ? _locks.remove((('busy'))) : _locks[(('busy'))] = ('1'))), ((('🔧 תקלה-פתוחה')), _locks[(('fault'))] == ('1'), () => setState(() => _locks[(('fault'))] == ('1') ? _locks.remove((('fault'))) : _locks[(('fault'))] = ('1'))), ((('🪑 ניצולת<${_RoomsData.utilFloor}%')), _locks[(('under'))] == ('1'), () => setState(() => _locks[(('under'))] == ('1') ? _locks.remove((('under'))) : _locks[(('under'))] = ('1'))), ((('♿ נגיש')), _locks[(('access'))] == ('1'), () => setState(() => _locks[(('access'))] == ('1') ? _locks.remove((('access'))) : _locks[(('access'))] = ('1')))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }), if (_locks.isNotEmpty || _q.isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _locks.clear(); _q = ''; }), child: ForgeSoftButton(fields: ['✖ נקה (${visible.length}/${rooms.length})']))]),
+        Wrap(spacing: 8, runSpacing: 6, children: [Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final b in _RoomsData.buildings) (('🏢 $b'), _locks[('building')] == (b), () => setState(() => _locks[('building')] == (b) ? _locks.remove(('building')) : _locks[('building')] = (b))), for (final f in _RoomsData.floors) (('🪜 $f'), _locks[('floor')] == (f), () => setState(() => _locks[('floor')] == (f) ? _locks.remove(('floor')) : _locks[('floor')] = (f))), for (final t in _RoomsData.types) (('🏷 $t'), _locks[('type')] == (t), () => setState(() => _locks[('type')] == (t) ? _locks.remove(('type')) : _locks[('type')] = (t))), for (final n in _RoomsData.capSteps) ('👥 ≥$n', _locks['cap$n'] == '1', () => _setCap(_locks['cap$n'] == '1' ? null : n)), for (final k in _RoomsData.eqKeys) ((('🧰 יש $k')), _locks[(('eq:$k'))] == ('1'), () => setState(() => _locks[(('eq:$k'))] == ('1') ? _locks.remove((('eq:$k'))) : _locks[(('eq:$k'))] = ('1'))), ('🟢 פנוי-במשבצת $_slotHour', _freeAtOn, () => _setFreeAt(!_freeAtOn)), ((('🔴 תפוס-עכשיו')), _locks[(('busy'))] == ('1'), () => setState(() => _locks[(('busy'))] == ('1') ? _locks.remove((('busy'))) : _locks[(('busy'))] = ('1'))), ((('🔧 תקלה-פתוחה')), _locks[(('fault'))] == ('1'), () => setState(() => _locks[(('fault'))] == ('1') ? _locks.remove((('fault'))) : _locks[(('fault'))] = ('1'))), ((('🪑 ניצולת<${_RoomsData.utilFloor}%')), _locks[(('under'))] == ('1'), () => setState(() => _locks[(('under'))] == ('1') ? _locks.remove((('under'))) : _locks[(('under'))] = ('1'))), ((('♿ נגיש')), _locks[(('access'))] == ('1'), () => setState(() => _locks[(('access'))] == ('1') ? _locks.remove((('access'))) : _locks[(('access'))] = ('1')))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }), if (_locks.isNotEmpty || _q.isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _locks.clear(); _q = ''; }), child: ForgeToneButton(items: [['✖ נקה (${visible.length}/${rooms.length})']], variants: const <int>[3]))]),
         if (_freeAtOn && hoursAll.isNotEmpty) ...[
           const SizedBox(height: 6),
           Align(alignment: Alignment.centerRight, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in hoursAll) [s]], selected: {hoursAll.indexOf(_slotHour).clamp(0, hoursAll.length - 1)}, onSelect: (i) => setState(() => _slotHour = hoursAll[i])))),
@@ -799,7 +799,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
+          ForgeToneBanner(items: [[_error!]], variants: const <int>[3])
         else if (rooms.isEmpty)
           ForgeSearchEmptyState(fields: ['אין חדרים — הוסף חדר ראשון', ''])
         else if (visible.isEmpty)
@@ -811,7 +811,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
         else ...[
           // מצב-מיוחד: יום-חסום (שבת/שישי/חג/צום-נדחה/חוה"מ) — blockReason מסנכרן-לוח ⇒ כל המשבצות הפנויות חסומות
           if (blocked != null) ...[
-            ForgeSectionPill(items: [['יום חסום לתפיסה — $blocked']], variants: const <int>[0]),
+            ForgeToneBanner(items: [['יום חסום לתפיסה — $blocked']], variants: const <int>[3]),
             const SizedBox(height: 8),
           ],
           ForgeTitledSection(fields: ['📅 יומן-חדרים · ${names[_dayIdx]} $_iso · ${visible.length} חדרים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_dayGrid(visible)]])),
@@ -936,7 +936,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                 // התנגשויות (אדום) — חוסם: כפל-תפיסה בחדר זה
                 for (final c in conf) ...[
                   _gap(8),
-                  ForgeSectionPill(items: [['כפל-תפיסה ${c['iso']} ${c['time']}: ${(c['a'] as Map)['name']} ⊕ ${(c['b'] as Map)['name']}']], variants: const <int>[0]),
+                  ForgeToneBanner(items: [['כפל-תפיסה ${c['iso']} ${c['time']}: ${(c['a'] as Map)['name']} ⊕ ${(c['b'] as Map)['name']}']], variants: const <int>[3]),
                 ],
                 _gap(12),
                 SingleChildScrollView(
@@ -996,7 +996,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           _wrap([for (final e in eq.entries) ForgeStatusChip(items: [['${e.key}${broken.contains(e.key) ? ' · תקול' : e.value ? '' : ' · חסר'}']], variants: [const <int>[0, 1, 3, 2][(broken.contains(e.key) ? 2 : e.value ? 1 : 3) % 4]])]),
           if (r['eqStock'] == null) ...[
             _gap(8),
-            ForgeSectionPill(items: [['מקום-שמור: כמות-ציוד מפריטי-המלאי (eqStock ⇐ מודול-מלאי) — יאיר כשיגיע נתון']], variants: const <int>[0]),
+            ForgeToneBanner(items: [['מקום-שמור: כמות-ציוד מפריטי-המלאי (eqStock ⇐ מודול-מלאי) — יאיר כשיגיע נתון']], variants: const <int>[0]),
           ],
         ];
       case 4: // תקלות · פתוחות (TimelineItem) + סגור-תקלה
@@ -1007,7 +1007,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           for (final f in fs)
             Row(children: [
               Expanded(child: ForgeNotifRow(items: [['🔧 ${f['name']} · ${f['severity']}', '${f['date']}']])),
-              if (_can('rooms.faultClose')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.closeFault(_who, f)), child: ForgeSoftButton(fields: ['✔ סגור']))),
+              if (_can('rooms.faultClose')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.closeFault(_who, f)), child: ForgeToneButton(items: [['✔ סגור']], variants: const <int>[1]))),
             ]),
         ];
       case 5: // אחזקה · זמינות (שיפוץ/סגור) · בדיקה-תקופתית (lastCheck = מקום-שמור) · חסימות-תאריך
@@ -1019,7 +1019,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           ]),
           if (_RoomsData.blockedDates.isNotEmpty) ...[
             _h('חסימות-תאריך ידניות'),
-            _wrap([for (final d in _RoomsData.blockedDates) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.unblockDate(_who, d)), child: ForgeSoftButton(fields: ['⛔ $d · בטל']))]),
+            _wrap([for (final d in _RoomsData.blockedDates) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.unblockDate(_who, d)), child: ForgeToneButton(items: [['⛔ $d · בטל']], variants: const <int>[3]))]),
           ],
         ];
       case 6: // היסטוריה · תקלות-שנסגרו ⊕ אירועים-שבוצעו/נדחו (TimelineItem)
@@ -1042,11 +1042,11 @@ class _RoomsScreenState extends State<RoomsScreen> {
       ForgeNotifRow(items: [['${isEv ? '📌' : '🎓'} ${o['name']}', '${dayNames()[o['dayIdx'] as int]} ${o['iso']} ${_RoomsData._m2hm(o['start'])}']]),
       _wrap([
         if (isEv && st == 'proposed' && _can('rooms.approve')) ...[
-          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, _RoomsData.eventById(o['id'])!, 'pending')), child: ForgeSoftButton(fields: ['✔ אשר'])),
-          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, _RoomsData.eventById(o['id'])!, 'rejected')), child: ForgeSoftButton(fields: ['✖ דחה'])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, _RoomsData.eventById(o['id'])!, 'pending')), child: ForgeToneButton(items: [['✔ אשר']], variants: const <int>[1])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, _RoomsData.eventById(o['id'])!, 'rejected')), child: ForgeToneButton(items: [['✖ דחה']], variants: const <int>[3])),
         ],
-        if (isEv && _can('rooms.cancel')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, _RoomsData.eventById(o['id'])!, 'cancelled')), child: ForgeSoftButton(fields: ['↩ בטל-תפיסה'])),
-        if (_can('rooms.move')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMove(ctx, r, o, act), child: ForgeSoftButton(fields: ['➡ העבר לחדר-אחר'])),
+        if (isEv && _can('rooms.cancel')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, _RoomsData.eventById(o['id'])!, 'cancelled')), child: ForgeToneButton(items: [['↩ בטל-תפיסה']], variants: const <int>[3])),
+        if (_can('rooms.move')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMove(ctx, r, o, act), child: ForgeToneButton(items: [['➡ העבר לחדר-אחר']], variants: const <int>[0])),
       ]),
       _gap(8),
     ]);
@@ -1073,7 +1073,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
             for (final a in alts)
               Row(children: [
                 Expanded(child: ForgeContactTile(fields: ['${a['name']}', '${a['location']} · קיבולת ${a['cap']} (+${a['spare']})${a['sameBuilding'] == true ? ' · אותו בניין' : ''}'])),
-                Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => isEv ? _RoomsData.moveEvent(_who, ev!, a) : _RoomsData.moveCourse(_who, c!, a)); Navigator.of(c2).pop(); }, child: ForgeSoftButton(fields: ['בחר']))),
+                Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => isEv ? _RoomsData.moveEvent(_who, ev!, a) : _RoomsData.moveCourse(_who, c!, a)); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['בחר']], variants: const <int>[1]))),
               ]),
         ])),
       ),
@@ -1099,11 +1099,11 @@ class _RoomsScreenState extends State<RoomsScreen> {
             SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in dayNames()) [s]], selected: {day}, onSelect: (i) => setB(() => day = i))),
             _gap(8),
             if (blocked != null)
-              ForgeSectionPill(items: [['יום חסום — $blocked']], variants: const <int>[0])
+              ForgeToneBanner(items: [['יום חסום — $blocked']], variants: const <int>[3])
             else if (free.isEmpty)
               ForgeSearchEmptyState(fields: ['אין משבצות פנויות ביום זה', ''])
             else
-              _wrap([for (final f in free) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => weekly ? _RoomsData.bookWeekly(_who, r, day, '${f['time']}', title) : _RoomsData.book(_who, r, iso, '${f['time']}', title, approved: _RoomsData.autoApprove(_role))); Navigator.of(c2).pop(); }, child: ForgeSoftButton(fields: ['🟢 ${f['time']}']))]),
+              _wrap([for (final f in free) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => weekly ? _RoomsData.bookWeekly(_who, r, day, '${f['time']}', title) : _RoomsData.book(_who, r, iso, '${f['time']}', title, approved: _RoomsData.autoApprove(_role))); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['🟢 ${f['time']}']], variants: const <int>[1]))]),
             _gap(8),
           ])),
         );
@@ -1127,9 +1127,9 @@ class _RoomsScreenState extends State<RoomsScreen> {
           ForgeDsField(state: (name).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['תיאור', ''], control: DsField(label: 'תיאור', hint: 'מה התקלה', value: name, onChanged: (v) => name = v, bare: true)),
           ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in sevs) [s]], selected: {sev}, onSelect: (i) => setB(() => sev = i)),
           _h('ציוד מעורב (אופציונלי)'),
-          _wrap([for (final k in _RoomsData.eqOf(r).keys) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setB(() => detail = detail == k ? '' : k), child: ForgeSoftButton(fields: [detail == k ? '✔ $k' : k]))]),
+          _wrap([for (final k in _RoomsData.eqOf(r).keys) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setB(() => detail = detail == k ? '' : k), child: ForgeToneButton(items: [[detail == k ? '✔ $k' : k]], variants: [const <int>[0, 1, 3, 2][(detail == k ? 1 : 0) % 4]]))]),
           _gap(10),
-          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => _RoomsData.reportFault(_who, r, name, sevs[sev], detail: detail)); Navigator.of(c2).pop(); }, child: ForgeSoftButton(fields: ['📨 שלח דיווח'])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => _RoomsData.reportFault(_who, r, name, sevs[sev], detail: detail)); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['📨 שלח דיווח']], variants: const <int>[3])),
           _gap(8),
         ])),
       )),
@@ -1140,19 +1140,19 @@ class _RoomsScreenState extends State<RoomsScreen> {
   List<Widget> _actions(BuildContext ctx, Map<String, dynamic> r, void Function(void Function()) act) {
     final active = _RoomsData.activeOf(r);
     final acts = <Widget>[
-      if (active && _can('rooms.book')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBook(ctx, r, act), child: ForgeSoftButton(fields: [_RoomsData.autoApprove(_role) ? '📌 הזמן-חדר' : '📌 הזמן-חדר (לאישור)'])),
-      if (active && _can('rooms.bookWeekly')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBook(ctx, r, act, weekly: true), child: ForgeSoftButton(fields: ['🔁 הזמנה-חוזרת'])),
-      if (_can('rooms.fault')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openFault(ctx, r, act), child: ForgeSoftButton(fields: ['🔧 דווח-תקלה'])),
-      if (_can('rooms.availability')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setActive(_who, r, !active)), child: ForgeSoftButton(fields: [active ? '⛔ סמן לא-זמין/שיפוץ' : '✅ החזר לזמינות'])),
-      if (_can('rooms.eq')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEq(_who, r, 'מקרן', true)), child: ForgeSoftButton(fields: ['➕ הוסף-ציוד: מקרן'])),
-      if (_can('rooms.eq')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEq(_who, r, 'מקרן', false)), child: ForgeSoftButton(fields: ['📉 דווח ציוד-חסר: מקרן'])),
-      if (_can('rooms.block')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.blockDate(_who, _iso)), child: ForgeSoftButton(fields: ['📅 חסום-תאריך: $_iso'])),
-      if (_can('rooms.notify')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.notifyUsers(_who, r, 'שינוי בחדר ${r['name']} — בדקו את היומן')), child: ForgeSoftButton(fields: ['✉ הודעה למשתמשי-החדר (${_RoomsData.usersOf(r).length})'])),
-      if (_can('rooms.print')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openPrint(ctx, r), child: ForgeSoftButton(fields: ['🖨 הדפס יומן-יומי'])),
+      if (active && _can('rooms.book')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBook(ctx, r, act), child: ForgeToneButton(items: [[_RoomsData.autoApprove(_role) ? '📌 הזמן-חדר' : '📌 הזמן-חדר (לאישור)']], variants: const <int>[1])),
+      if (active && _can('rooms.bookWeekly')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBook(ctx, r, act, weekly: true), child: ForgeToneButton(items: [['🔁 הזמנה-חוזרת']], variants: const <int>[0])),
+      if (_can('rooms.fault')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openFault(ctx, r, act), child: ForgeToneButton(items: [['🔧 דווח-תקלה']], variants: const <int>[3])),
+      if (_can('rooms.availability')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setActive(_who, r, !active)), child: ForgeToneButton(items: [[active ? '⛔ סמן לא-זמין/שיפוץ' : '✅ החזר לזמינות']], variants: [const <int>[0, 1, 3, 2][(active ? 2 : 1) % 4]])),
+      if (_can('rooms.eq')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEq(_who, r, 'מקרן', true)), child: ForgeToneButton(items: [['➕ הוסף-ציוד: מקרן']], variants: const <int>[0])),
+      if (_can('rooms.eq')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEq(_who, r, 'מקרן', false)), child: ForgeToneButton(items: [['📉 דווח ציוד-חסר: מקרן']], variants: const <int>[3])),
+      if (_can('rooms.block')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.blockDate(_who, _iso)), child: ForgeToneButton(items: [['📅 חסום-תאריך: $_iso']], variants: const <int>[3])),
+      if (_can('rooms.notify')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.notifyUsers(_who, r, 'שינוי בחדר ${r['name']} — בדקו את היומן')), child: ForgeToneButton(items: [['✉ הודעה למשתמשי-החדר (${_RoomsData.usersOf(r).length})']], variants: const <int>[0])),
+      if (_can('rooms.print')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openPrint(ctx, r), child: ForgeToneButton(items: [['🖨 הדפס יומן-יומי']], variants: const <int>[0])),
       // 4 · תקלה ⇒ העברת-שיעורים-אוטו + הודעה (רק כשהחדר תקול/לא-זמין ויש תפיסות)
-      if (!active || _RoomsData.faulty(r)) if (_can('rooms.move') && _RoomsData.affectedByFault(r).isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.autoRelocate(_who, r)), child: ForgeSoftButton(fields: ['🚚 העבר-אוטו ${_RoomsData.affectedByFault(r).length} תפיסות + הודעה'])),
+      if (!active || _RoomsData.faulty(r)) if (_can('rooms.move') && _RoomsData.affectedByFault(r).isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.autoRelocate(_who, r)), child: ForgeToneButton(items: [['🚚 העבר-אוטו ${_RoomsData.affectedByFault(r).length} תפיסות + הודעה']], variants: const <int>[3])),
     ];
-    return acts.isEmpty ? [ForgeSectionPill(items: [['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה']], variants: const <int>[0])] : acts;
+    return acts.isEmpty ? [ForgeToneBanner(items: [['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה']], variants: const <int>[3])] : acts;
   }
 
   // הדפס-יומן-יומי: תצוגת-הדפסה (טקסט-נקי של buildSlots) — ההדפסה עצמה = שקע-פלטפורמה (הצבה)
@@ -1189,43 +1189,43 @@ class _RoomsScreenState extends State<RoomsScreen> {
         // 1 · גילוי-כפל-תפיסה בזמן-אמת (חוסם) ⇒ פתור = העברה לחדר-חלופי (altRooms)
         for (final c in conf)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
-            Expanded(child: ForgeSectionPill(items: [['כפל-תפיסה ${(c['room'] as Map)['name']} · ${c['iso']} ${c['time']}: ${(c['a'] as Map)['name']} ⊕ ${(c['b'] as Map)['name']}']], variants: const <int>[0])),
-            if (_can('rooms.move')) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMove(context, c['room'] as Map<String, dynamic>, {...(c['b'] as Map<String, dynamic>), 'iso': c['iso'], 'dayIdx': _RoomsData.dow('${c['iso']}')}, act), child: ForgeSoftButton(fields: ['➡ פתור']))],
+            Expanded(child: ForgeToneBanner(items: [['כפל-תפיסה ${(c['room'] as Map)['name']} · ${c['iso']} ${c['time']}: ${(c['a'] as Map)['name']} ⊕ ${(c['b'] as Map)['name']}']], variants: const <int>[3])),
+            if (_can('rooms.move')) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMove(context, c['room'] as Map<String, dynamic>, {...(c['b'] as Map<String, dynamic>), 'iso': c['iso'], 'dayIdx': _RoomsData.dow('${c['iso']}')}, act), child: ForgeToneButton(items: [['➡ פתור']], variants: const <int>[3]))],
           ])),
         // 9 · הזמנות-ממתינות (מחוץ-למדיניות) ⇒ אשר/דחה (rooms.approve)
         for (final e in pend)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
-            Expanded(child: ForgeSectionPill(items: [['ממתין-אישור: ${e['title']} · ${_RoomsData._room('${e['roomId']}')['name']} · ${e['date']} ${e['time']} · ${_RoomsData.teacherName(e['requestedBy'])} · ${e['attendees']} משתתפים']], variants: const <int>[0])),
+            Expanded(child: ForgeToneBanner(items: [['ממתין-אישור: ${e['title']} · ${_RoomsData._room('${e['roomId']}')['name']} · ${e['date']} ${e['time']} · ${_RoomsData.teacherName(e['requestedBy'])} · ${e['attendees']} משתתפים']], variants: const <int>[2])),
             if (_can('rooms.approve')) ...[
-              const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, e, 'pending')), child: ForgeSoftButton(fields: ['✔'])),
-              const SizedBox(width: 4), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, e, 'rejected')), child: ForgeSoftButton(fields: ['✖'])),
+              const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, e, 'pending')), child: ForgeToneButton(items: [['✔']], variants: const <int>[1])),
+              const SizedBox(width: 4), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.setEventStatus(_who, e, 'rejected')), child: ForgeToneButton(items: [['✖']], variants: const <int>[3])),
             ],
           ])),
         // 7 · ציוד-נדרש-לשיעור חסר/תקול בחדר (התרעה) ⇒ העבר לחדר עם הציוד (altRooms needsEq)
         for (final c in miss)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
-            Expanded(child: ForgeSectionPill(items: [['ציוד חסר לשיעור: ${c['name']} ב-${_RoomsData._room(_RoomsData.roomOfCourse(c))['name']} — ${_RoomsData.missingEqFor(c).join(', ')}']], variants: const <int>[0])),
+            Expanded(child: ForgeToneBanner(items: [['ציוד חסר לשיעור: ${c['name']} ב-${_RoomsData._room(_RoomsData.roomOfCourse(c))['name']} — ${_RoomsData.missingEqFor(c).join(', ')}']], variants: const <int>[2])),
             if (_can('rooms.move')) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
               final s0 = (_RoomsData._sess(c).first as Map);
               final d = s0['day'] as int;
               _openMove(context, _RoomsData._room(_RoomsData.roomOfCourse(c)), {'kind': 'course', 'id': c['id'], 'name': c['name'], 'who': _RoomsData.teacherName(c['teacherId']), 'start': _RoomsData._t2m(s0['time']), 'iso': _RoomsData.weekIsos[d.clamp(0, 5)], 'dayIdx': d.clamp(0, 5)}, act);
-            }, child: ForgeSoftButton(fields: ['➡ העבר']))],
+            }, child: ForgeToneButton(items: [['➡ העבר']], variants: const <int>[0]))],
           ])),
         // שיעור-בלי-חדר (inactiveRoomCourses ⊕ roomId ריק) ⇒ שבץ = חדר-חלופי
         for (final o in orphan)
-          Padding(padding: const EdgeInsets.only(bottom: 6), child: ForgeSectionPill(items: [['שיעור בלי חדר-פעיל: ${(o['course'] as Map)['name']} (${o['roomName']})']], variants: const <int>[0])),
+          Padding(padding: const EdgeInsets.only(bottom: 6), child: ForgeToneBanner(items: [['שיעור בלי חדר-פעיל: ${(o['course'] as Map)['name']} (${o['roomName']})']], variants: const <int>[3])),
         // 4 · חדר-תקול (תקלה-חמורה פתוחה) ⇒ העברת-שיעורים-אוטו + הודעה
         for (final r in faultyRooms)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
-            Expanded(child: ForgeSectionPill(items: [['חדר תקול (תקלה חמורה): ${r['name']} — ${_RoomsData.affectedByFault(r).length} תפיסות השבוע מושפעות']], variants: const <int>[0])),
-            if (_can('rooms.move') && _RoomsData.affectedByFault(r).isNotEmpty) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.autoRelocate(_who, r)), child: ForgeSoftButton(fields: ['🚚 העבר-אוטו']))],
+            Expanded(child: ForgeToneBanner(items: [['חדר תקול (תקלה חמורה): ${r['name']} — ${_RoomsData.affectedByFault(r).length} תפיסות השבוע מושפעות']], variants: const <int>[3])),
+            if (_can('rooms.move') && _RoomsData.affectedByFault(r).isNotEmpty) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomsData.autoRelocate(_who, r)), child: ForgeToneButton(items: [['🚚 העבר-אוטו']], variants: const <int>[3]))],
           ])),
       ]])),
       // 6 · חדר-לא-מנוצל · 3 · סנכרון-לוח (חגים קרובים ⇒ חסימה-אוטו) · 5 · בדיקה-תקופתית (מקום-שמור)
-      if (under.isNotEmpty) ...[ForgeSectionPill(items: [['${under.length} חדרים מתחת לסף-ניצולת ${_RoomsData.utilFloor}%: ${under.map((r) => '${r['name']} ${_RoomsData.utilPct(r)}%').join(' · ')}']], variants: const <int>[0]), _gap(8)],
-      if (hol.isNotEmpty) ...[ForgeSectionPill(items: [['סנכרון-לוח · ${hol.length} חגים ב-45 יום ⇒ חסימה-אוטו: ${hol.map((h) => '${h['name']} ${h['iso']}').join(' · ')}']], variants: const <int>[0]), _gap(8)],
-      if (dueCheck.isNotEmpty) ...[ForgeSectionPill(items: [['בדיקה-תקופתית באיחור (>${_RoomsData.checkEveryDays} יום): ${dueCheck.map((r) => r['name']).join(' · ')}']], variants: const <int>[0]), _gap(8)],
-      if (unknownCheck > 0) ...[ForgeSectionPill(items: [['תזכורת-בדיקה-תקופתית (מזגן/כיבוי-אש): אין תאריך-בדיקה ל-$unknownCheck חדרים — מקום-שמור (lastCheck), מאיר כשיגיע נתון']], variants: const <int>[0]), _gap(8)],
+      if (under.isNotEmpty) ...[ForgeToneBanner(items: [['${under.length} חדרים מתחת לסף-ניצולת ${_RoomsData.utilFloor}%: ${under.map((r) => '${r['name']} ${_RoomsData.utilPct(r)}%').join(' · ')}']], variants: const <int>[2]), _gap(8)],
+      if (hol.isNotEmpty) ...[ForgeToneBanner(items: [['סנכרון-לוח · ${hol.length} חגים ב-45 יום ⇒ חסימה-אוטו: ${hol.map((h) => '${h['name']} ${h['iso']}').join(' · ')}']], variants: const <int>[0]), _gap(8)],
+      if (dueCheck.isNotEmpty) ...[ForgeToneBanner(items: [['בדיקה-תקופתית באיחור (>${_RoomsData.checkEveryDays} יום): ${dueCheck.map((r) => r['name']).join(' · ')}']], variants: const <int>[2]), _gap(8)],
+      if (unknownCheck > 0) ...[ForgeToneBanner(items: [['תזכורת-בדיקה-תקופתית (מזגן/כיבוי-אש): אין תאריך-בדיקה ל-$unknownCheck חדרים — מקום-שמור (lastCheck), מאיר כשיגיע נתון']], variants: const <int>[0]), _gap(8)],
       // 8 · ניצולת-שבועית-להנהלה (admin): NeonBars על ערכי-אמת (utilPct) — לא bar_chart המזייף
       if (_RoomsData.roleName(_role) == 'admin') ...[
         ForgeTitledSection(fields: ['📊 ניצולת-שבועית להנהלה · ממוצע ${_RoomsData.utilAvgPct}%', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
@@ -1258,7 +1258,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
               ForgeContactTile(fields: [ical ? 'ייצוא iCal (VCALENDAR)' : 'ייצוא CSV', ical ? '${rs.length} חדרים · $occN תפיסות השבוע · RFC5545 (buildIcs)' : '${rs.length} חדרים · ${_RoomsData.csvRows(rs).first.length} עמודות · BOM + חסימת-הזרקה']),
               _gap(10),
               if (!ok)
-                ForgeSectionPill(items: [[blockedMsg]], variants: const <int>[0])
+                ForgeToneBanner(items: [[blockedMsg]], variants: const <int>[3])
               else
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -1290,7 +1290,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
           for (final r in rs)
             Row(children: [
               Expanded(child: ForgeContactTile(fields: ['${r['name']}', '${r['location']} · ${_RoomsData.statusOf(r)}'])),
-              Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(c2).pop(); then(r); }, child: ForgeSoftButton(fields: ['בחר']))),
+              Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(c2).pop(); then(r); }, child: ForgeToneButton(items: [['בחר']], variants: const <int>[1]))),
             ]),
         ])),
       ),

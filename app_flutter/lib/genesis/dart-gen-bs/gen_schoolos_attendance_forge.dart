@@ -1,5 +1,5 @@
-// 🎨 schoolos_attendance.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
-//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×1 · statRow×13 · button×29 · statusChip×20 · banner×22 · emptyState×7 · mediaRow×3 · section×10 · segmented×6 · meter×3 · frame×3 · timeline×8 · enumField×1 · search×1 · pageHeader×1 · table×1 · bars×2 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎨 schoolos_attendance.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar
+//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×1 · statRow×13 · button×29 · statusChip×20 · banner×22 · emptyState×7 · mediaRow×3 · section×10 · segmented×6 · meter×3 · frame×3 · timeline×8 · enumField×1 · search×1 · pageHeader×1 · table×1 · bars×2 · calendar×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS · מודול נוכחות (ATTENDANCE) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT): knowledge/SPEC-ATTENDANCE-FULL-2026-09-04.md · הסטנדרט: schoolos.dart (מלאי).
 // מטרה: "לדעת מי נוכח ומי לא — עכשיו, היום, החודש — ולפעול לפני שהיעדרות הופכת לנשירה."
@@ -74,6 +74,7 @@ import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/temporal/temporal.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
 // פיגמנטים מוזרקים לאטומי-מדף טהורים (חוק-6: צבע=הצבה)
@@ -775,7 +776,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         _gap(10),
         // ── פס-עליון: בורר-תאריך (◀ היום ▶ · שם-יום · חג) + בורר-כיתה (בהיקף) + חיפוש + נעילה ──
         Row(children: [
-          Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _date = _AttData.shift(_date, -1)), child: ForgeSoftButton(fields: ['◀']))),
+          Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _date = _AttData.shift(_date, -1)), child: ForgeToneButton(items: [['◀']], variants: const <int>[0]))),
           const SizedBox(width: 6),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
@@ -784,22 +785,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ]),
           ),
           const SizedBox(width: 6),
-          Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _date = _AttData.shift(_date, 1)), child: ForgeSoftButton(fields: ['▶']))),
+          Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _date = _AttData.shift(_date, 1)), child: ForgeToneButton(items: [['▶']], variants: const <int>[0]))),
           if (_date != _Placement.today) ...[
             const SizedBox(width: 6),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _date = _Placement.today), child: ForgeSoftButton(fields: ['היום'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _date = _Placement.today), child: ForgeToneButton(items: [['היום']], variants: const <int>[1])),
           ],
         ]),
         _gap(10),
         Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
           ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final c in vClasses) c['name'] as String]) [s]], selected: {_cls}, onSelect: (i) => setState(() => _cls = i)),
-          GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄'])),
-          if (_AttData.can('att.lock') && !locked) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.lockDay(_date)), child: ForgeSoftButton(fields: ['🔒 נעל-יום'])),
-          if (_AttData.can('att.unlock') && locked) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.unlockDay(_date)), child: ForgeSoftButton(fields: ['🔓 פתח יום-נעול'])),
-          if (_AttData.exportOk) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible), child: ForgeSoftButton(fields: ['⬇ CSV'])),
-          if (_AttData.exportOk) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _notice = 'ייצוא-PDF: שקע-מדפסת/PDF לא מחובר בהצבה — מקום-שמור (CSV זמין)'), child: ForgeSoftButton(fields: ['📄 PDF'])),
-          if (_AttData.exportOk) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _notice = 'הדפסה: שקע-מדפסת לא מחובר בהצבה — מקום-שמור'), child: ForgeSoftButton(fields: ['🖨 הדפס-גיליון'])),
-          if (_AttData.exportOk && (_AttData.can('att.audit') || _AttData.roleName == 'admin')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openCsv('דוח-שבועי להנהלה', _AttData.weeklyRows(), _AttData.weeklyCsv), child: ForgeSoftButton(fields: ['📈 דוח-שבועי'])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0])),
+          if (_AttData.can('att.lock') && !locked) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.lockDay(_date)), child: ForgeToneButton(items: [['🔒 נעל-יום']], variants: const <int>[2])),
+          if (_AttData.can('att.unlock') && locked) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.unlockDay(_date)), child: ForgeToneButton(items: [['🔓 פתח יום-נעול']], variants: const <int>[1])),
+          if (_AttData.exportOk) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible), child: ForgeToneButton(items: [['⬇ CSV']], variants: const <int>[0])),
+          if (_AttData.exportOk) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _notice = 'ייצוא-PDF: שקע-מדפסת/PDF לא מחובר בהצבה — מקום-שמור (CSV זמין)'), child: ForgeToneButton(items: [['📄 PDF']], variants: const <int>[0])),
+          if (_AttData.exportOk) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _notice = 'הדפסה: שקע-מדפסת לא מחובר בהצבה — מקום-שמור'), child: ForgeToneButton(items: [['🖨 הדפס-גיליון']], variants: const <int>[0])),
+          if (_AttData.exportOk && (_AttData.can('att.audit') || _AttData.roleName == 'admin')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openCsv('דוח-שבועי להנהלה', _AttData.weeklyRows(), _AttData.weeklyCsv), child: ForgeToneButton(items: [['📈 דוח-שבועי']], variants: const <int>[0])),
         ]),
         _gap(8),
         ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true)),
@@ -830,11 +831,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ])),
         _gap(8),
         // ── מצבי-מסך: הודעה · נעילה · לא-נרשם-היום (התרעה-למורה) ──
-        if (_notice != null) ...[ForgeSectionPill(items: [[_notice!]], variants: const <int>[0]), _gap(8)],
-        if (locked) ...[ForgeSectionPill(items: [['יום-נעול (${_AttData._locked.contains(_date) ? 'נעילה-ידנית' : 'נעילה-אוטומטית סוף-יום/עבר'}) — רישום חסום; רכז/ת פותח/ת']], variants: const <int>[0]), _gap(8)],
-        if (why != null && !locked && _tab == 0) ...[ForgeSectionPill(items: [['צפייה-בלבד: $why']], variants: const <int>[0]), _gap(8)],
+        if (_notice != null) ...[ForgeToneBanner(items: [[_notice!]], variants: const <int>[0]), _gap(8)],
+        if (locked) ...[ForgeToneBanner(items: [['יום-נעול (${_AttData._locked.contains(_date) ? 'נעילה-ידנית' : 'נעילה-אוטומטית סוף-יום/עבר'}) — רישום חסום; רכז/ת פותח/ת']], variants: const <int>[2]), _gap(8)],
+        if (why != null && !locked && _tab == 0) ...[ForgeToneBanner(items: [['צפייה-בלבד: $why']], variants: const <int>[3]), _gap(8)],
         if (_date == _Placement.today && notRec.isNotEmpty && (timeToMin(_Placement.nowHm) as num) >= (timeToMin(_Placement.remindHm) as num)) ...[
-          ForgeSectionPill(items: [['לא-נרשם-היום (תזכורת ${_Placement.remindHm}): ${notRec.map(_AttData.className).join(' · ')} — שיעור שהתחיל ללא רישום']], variants: const <int>[0]),
+          ForgeToneBanner(items: [['לא-נרשם-היום (תזכורת ${_Placement.remindHm}): ${notRec.map(_AttData.className).join(' · ')} — שיעור שהתחיל ללא רישום']], variants: const <int>[3]),
           _gap(8),
         ],
         // ── מרכז-אוטומציות (פרואקטיבי · 23-ג): רק התרעות פעילות — כל אחת = מנוע-מדף ⊕ AlertBanner/StatusChip ──
@@ -845,7 +846,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         if (_loading)
           _loadingView()
         else if (_error != null)
-          ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
+          ForgeToneBanner(items: [[_error!]], variants: const <int>[3])
         else if (_tab == 1)
           _monthTab(cls)
         else if (_tab == 2)
@@ -861,7 +862,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         else if (_tab == 7)
           _auditTab()
         else if (holiday != null)
-          ForgeSectionPill(items: [['$holiday — יום-חופש: היום לא נספר בנוכחות (סנכרון-לוח)']], variants: const <int>[0])
+          ForgeToneBanner(items: [['$holiday — יום-חופש: היום לא נספר בנוכחות (סנכרון-לוח)']], variants: const <int>[2])
         else if (lessons.isEmpty)
           ForgeSearchEmptyState(fields: ['אין-שיעורים ביום זה (שבת)', ''])
         else ...[
@@ -877,8 +878,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() {
                 final n = _AttData.allPresent(_date, cls, _lessonN);
                 _notice = 'שיעור $_lessonN · ${_AttData.className(cls)}: נרשם "כולם נוכחים" ($n סימונים אופסו)';
-              }), child: ForgeSoftButton(fields: ['✅ כולם-נוכחים'])),
-            if (_AttData.can('att.notify')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _AttData.notifyClass(cls, 'הודעה מהמחנך/ת ל-${_AttData.className(cls)} · ${fmtDate(_date)}'); _notice = 'הודעה-לכיתה נרשמה בתור ל-${_AttData.studentsOf(cls).where((s) => _Placement.parents[s['id']] != null).length} הורים (שקע-שליחה: מקום-שמור)'; }), child: ForgeSoftButton(fields: ['📣 הודעה-לכיתה'])),
+              }), child: ForgeToneButton(items: [['✅ כולם-נוכחים']], variants: const <int>[1])),
+            if (_AttData.can('att.notify')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _AttData.notifyClass(cls, 'הודעה מהמחנך/ת ל-${_AttData.className(cls)} · ${fmtDate(_date)}'); _notice = 'הודעה-לכיתה נרשמה בתור ל-${_AttData.studentsOf(cls).where((s) => _Placement.parents[s['id']] != null).length} הורים (שקע-שליחה: מקום-שמור)'; }), child: ForgeToneButton(items: [['📣 הודעה-לכיתה']], variants: const <int>[0])),
           ]),
           _gap(8),
           if (roster.isEmpty)
@@ -944,7 +945,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         Expanded(child: ForgeContactTile(fields: [s['name'] as String, sub])),
         const SizedBox(width: 6),
         if (_AttData.canMarkOn(_date))
-          Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.cycle(_date, _lessonN, sid)), child: ForgeSoftButton(fields: [_AttData.statusLabel[st]!])))
+          Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.cycle(_date, _lessonN, sid)), child: ForgeToneButton(items: [[_AttData.statusLabel[st]!]], variants: [const <int>[0, 1, 3, 2][(_AttData.statusTone[st]!) % 4]])))
         else
           Flexible(child: ForgeStatusChip(items: [[_AttData.statusLabel[st]!]], variants: [const <int>[0, 1, 3, 2][(_AttData.statusTone[st]!) % 4]])),
         IconButton(onPressed: () => _openPanel(s), icon: const Icon(Icons.chevron_left, color: _acc, size: 26), tooltip: 'פרטים ופעולות'),
@@ -972,7 +973,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final days = _AttData.schoolDaysInMonth(_date);
     final hols = [for (var i = 1; i <= 31; i++) if (DateTime.parse('${monthKey(_date)}-01T12:00:00').add(Duration(days: i - 1)).month == int.parse(_date.substring(5, 7))) _AttData.shift('${monthKey(_date)}-01', i - 1)].where((d) => _AttData.holidayName(d) != null).toList();
     return ForgeTitledSection(fields: ['🗓 ${_AttData.className(cls)} · ${recs.length} חיסורים החודש · ${days.length} ימי-לימודים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-      DsCalendar(records: recs, dateOf: (r) => r['date']!, titleOf: (r) => r['title']!),
+      DsMonthOffset(builder: (ctx, off, shift) { final g = DsCalendar.grid(recs, (r) => r['date']!, off); return ForgeEventCalendar(fields: [g.title, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''], columns: DsCalendar.dows, items: [for (final c in g.cells) [c.$1, c.$3]], variants: [for (final c in g.cells) const <String>['pad', '', 'has', 'today'].indexOf(c.$2).clamp(0, 3)], onAction: (k) => shift(k == 0 ? -1 : 1)); }),
       _gap(8),
       Wrap(spacing: 6, runSpacing: 6, children: [
         for (final d in hols) ForgeStatusChip(items: [['🕎 ${fmtDate(d)} ${_AttData.holidayName(d)} · לא-נספר']], variants: const <int>[2]),
@@ -1001,9 +1002,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
             Expanded(child: ForgeNotifRow(items: [['${_AttData.studentById(p['memberId'] as String)['name']} · ${p['makeupDate'] == null ? 'ממתין לתזמון' : 'מתוזמן ${fmtDate(p['makeupDate'] as String)}'}', fmtDate(p['date'] as String)]])),
             if (_AttData.can('att.makeup') && p['makeupDate'] == null)
-              Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _patchAbsence(p, {'makeupDate': _AttData.nextSchoolDay(_Placement.today)})), child: ForgeSoftButton(fields: ['📅 תזמן']))),
+              Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _patchAbsence(p, {'makeupDate': _AttData.nextSchoolDay(_Placement.today)})), child: ForgeToneButton(items: [['📅 תזמן']], variants: const <int>[1]))),
             if (_AttData.can('att.makeup') && p['makeupDate'] != null)
-              Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _patchAbsence(p, {'makeup': false, 'makeupDone': true})), child: ForgeSoftButton(fields: ['✅ בוצע']))),
+              Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _patchAbsence(p, {'makeup': false, 'makeupDone': true})), child: ForgeToneButton(items: [['✅ בוצע']], variants: const <int>[1]))),
           ])),
     ]]));
   }
@@ -1039,15 +1040,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget _parentsTab(String cls) {
     final q = _AttData.notificationQueue.where((n) => _AttData.studentById(n['sid'] as String)['cls'] == cls && (_AttData.roleDef['child'] == null || n['sid'] == _AttData.roleDef['child'])).toList();
     return ForgeTitledSection(fields: ['👪 תקשורת-הורים · ${q.length} הודעות · ${q.where((n) => _AttData.sent.contains(n['key'])).length} נשלחו', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-      ForgeSectionPill(items: [['שקע-שליחה (מודול-הורים · SMS/וואטסאפ) לא מחובר בהצבה — ההודעות מנוהלות בתור (מקום-שמור)']], variants: const <int>[0]),
+      ForgeToneBanner(items: [['שקע-שליחה (מודול-הורים · SMS/וואטסאפ) לא מחובר בהצבה — ההודעות מנוהלות בתור (מקום-שמור)']], variants: const <int>[0]),
       _gap(8),
       if (q.isEmpty) ForgeSearchEmptyState(fields: ['אין הודעות ממתינות', '']) else
         for (final n in q)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
             Expanded(child: ForgeNotifRow(items: [['${n['auto'] == true ? '🤖 אוטו' : '✍️ ידני'} · ${n['to']} (${n['phone']})', fmtDate(n['date'] as String)]])),
             if (_AttData.sent.contains(n['key'])) Flexible(child: ForgeStatusChip(items: [['נשלח · חלון-תגובה']], variants: const <int>[1]))
-            else if (_AttData.can('att.notify')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.send(n['key'] as String)), child: ForgeSoftButton(fields: ['📨 שלח']))),
-            if (_AttData.can('att.parentOk') && n['lesson'] != 0) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { final saved = _AttData.role; _AttData.setRole(2); _AttData.patch(n['date'] as String, n['lesson'] as int, n['sid'] as String, {'parentOk': true}); _AttData.setRole(saved); }), child: ForgeSoftButton(fields: ['✔ אשר-חיסור']))),
+            else if (_AttData.can('att.notify')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _AttData.send(n['key'] as String)), child: ForgeToneButton(items: [['📨 שלח']], variants: const <int>[0]))),
+            if (_AttData.can('att.parentOk') && n['lesson'] != 0) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { final saved = _AttData.role; _AttData.setRole(2); _AttData.patch(n['date'] as String, n['lesson'] as int, n['sid'] as String, {'parentOk': true}); _AttData.setRole(saved); }), child: ForgeToneButton(items: [['✔ אשר-חיסור']], variants: const <int>[1]))),
           ])),
     ]]));
   }
@@ -1082,10 +1083,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   // 🧾 אודיט-רישום: פעולות-הסשן (audit) + סימוני-הבסיס (by/at) — TimelineItem · מגודר att.audit
   Widget _auditTab() {
-    if (!_AttData.can('att.audit')) return ForgeSectionPill(items: [['אודיט — רכז/ת והנהלה בלבד']], variants: const <int>[0]);
+    if (!_AttData.can('att.audit')) return ForgeToneBanner(items: [['אודיט — רכז/ת והנהלה בלבד']], variants: const <int>[3]);
     final base = [..._AttData.baseMarks]..sort((a, b) => '${b['at']}'.compareTo('${a['at']}'));
     return ForgeTitledSection(fields: ['🧾 אודיט-רישום · ${_AttData.audit.length} פעולות-סשן · ${base.length} סימוני-בסיס', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-      ForgeSectionPill(items: [['שקע-אחסון (pushAuditRing/pullAuditRing · Firestore) לא מחובר בהצבה — הטבעת בזיכרון (מקום-שמור)']], variants: const <int>[0]),
+      ForgeToneBanner(items: [['שקע-אחסון (pushAuditRing/pullAuditRing · Firestore) לא מחובר בהצבה — הטבעת בזיכרון (מקום-שמור)']], variants: const <int>[0]),
       _gap(8),
       for (final a in _AttData.audit) ForgeNotifRow(items: [['${a['action']} · ${a['key']}', '${(a['at'] as String).replaceFirst('T', ' ')} #${a['seq']}']]),
       for (final m in base.take(12)) ForgeNotifRow(items: [['${m['status']} · ${_AttData.studentById(m['sid'] as String)['name']} · שיעור ${m['lesson']}', '${(m['at'] as String).replaceFirst('T', ' ')}']]),
@@ -1107,15 +1108,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final groups = _AttData.groupAbsences.where((g) => child == null || g['cls'] == _AttData.studentById(child)['cls']).toList(), up = _AttData.upcoming;
     final autoLock = _AttData.autoLocked(_Placement.today);
     final out = <Widget>[
-      if (streaks.isNotEmpty) ForgeSectionPill(items: [['התרעת-רצף (≥${_Placement.streakAlert}): ${streaks.map((s) => '${s['name']} (${_AttData.streak(s['id'] as String)})').join(' · ')}']], variants: const <int>[0]),
-      if (preds.isNotEmpty) ForgeSectionPill(items: [['ניבוי-נשירה: ${preds.map((s) => '${s['name']} ${_AttData.risk(s['id'] as String)} · ${_AttData.riskWhy(s['id'] as String)}${_AttData.patterns(s['id'] as String).isEmpty ? '' : ' · ${_AttData.patterns(s['id'] as String).keys.join(', ')}'}').join(' | ')}']], variants: const <int>[0]),
-      if (exp.isNotEmpty) ForgeSectionPill(items: [['חלון-תגובה (${_Placement.responseWindowDays} י׳) פג ללא אישור-הורה: ${exp.map((m) => '${_AttData.studentById(m['sid'] as String)['name']} ${fmtDate(m['date'] as String)}').join(' · ')} — הסלמה לרכז/ת']], variants: const <int>[0]),
-      if (mk.isNotEmpty) ForgeSectionPill(items: [['הצעת-השלמה (חיסור-מוצדק זכאי): ${mk.map((m) => '${_AttData.studentById(m['sid'] as String)['name']} ${fmtDate(m['date'] as String)} ש${m['lesson']}').join(' · ')}']], variants: const <int>[0]),
-      if (below.isNotEmpty) ForgeSectionPill(items: [['מתחת לסף-הרגולטורי ${_Placement.minAttendancePct}%: ${below.map((s) => '${s['name']} ${(_AttData.attendancePct(s) * 100).round()}%').join(' · ')}']], variants: const <int>[0]),
-      if (near.isNotEmpty) ForgeSectionPill(items: [['התרעה-מקדימה (עד ${_Placement.thresholdWarnPct}% מעל הסף): ${near.map((s) => '${s['name']} ${(_AttData.attendancePct(s) * 100).round()}%').join(' · ')}']], variants: const <int>[0]),
-      if (groups.isNotEmpty) ForgeSectionPill(items: [['חיסור-קבוצתי (≥חצי-כיתה): ${groups.map((g) => '${_AttData.className(g['cls'] as String)} ${fmtDate(g['date'] as String)} ${g['absent']}/${g['total']}').join(' · ')} — אירוע? לסמן כלא-נספר']], variants: const <int>[0]),
-      if (up.isNotEmpty) ForgeSectionPill(items: [['סנכרון-לוח (30 י׳): ${up.map((h) => '${fmtDate(h['iso'] as String)} ${h['name']}').join(' · ')} — לא ייספרו']], variants: const <int>[0]),
-      ForgeSectionPill(items: [[autoLock ? 'נעילה-אוטומטית סוף-יום פעילה (${_Placement.nowHm} ≥ ${_Placement.lockHm})' : 'נעילה-אוטומטית סוף-יום ב-${_Placement.lockHm} (עכשיו ${_Placement.nowHm})']], variants: [const <int>[0, 0, 0, 0][(autoLock ? 3 : 0) % 4]]),
+      if (streaks.isNotEmpty) ForgeToneBanner(items: [['התרעת-רצף (≥${_Placement.streakAlert}): ${streaks.map((s) => '${s['name']} (${_AttData.streak(s['id'] as String)})').join(' · ')}']], variants: const <int>[3]),
+      if (preds.isNotEmpty) ForgeToneBanner(items: [['ניבוי-נשירה: ${preds.map((s) => '${s['name']} ${_AttData.risk(s['id'] as String)} · ${_AttData.riskWhy(s['id'] as String)}${_AttData.patterns(s['id'] as String).isEmpty ? '' : ' · ${_AttData.patterns(s['id'] as String).keys.join(', ')}'}').join(' | ')}']], variants: const <int>[3]),
+      if (exp.isNotEmpty) ForgeToneBanner(items: [['חלון-תגובה (${_Placement.responseWindowDays} י׳) פג ללא אישור-הורה: ${exp.map((m) => '${_AttData.studentById(m['sid'] as String)['name']} ${fmtDate(m['date'] as String)}').join(' · ')} — הסלמה לרכז/ת']], variants: const <int>[2]),
+      if (mk.isNotEmpty) ForgeToneBanner(items: [['הצעת-השלמה (חיסור-מוצדק זכאי): ${mk.map((m) => '${_AttData.studentById(m['sid'] as String)['name']} ${fmtDate(m['date'] as String)} ש${m['lesson']}').join(' · ')}']], variants: const <int>[0]),
+      if (below.isNotEmpty) ForgeToneBanner(items: [['מתחת לסף-הרגולטורי ${_Placement.minAttendancePct}%: ${below.map((s) => '${s['name']} ${(_AttData.attendancePct(s) * 100).round()}%').join(' · ')}']], variants: const <int>[3]),
+      if (near.isNotEmpty) ForgeToneBanner(items: [['התרעה-מקדימה (עד ${_Placement.thresholdWarnPct}% מעל הסף): ${near.map((s) => '${s['name']} ${(_AttData.attendancePct(s) * 100).round()}%').join(' · ')}']], variants: const <int>[2]),
+      if (groups.isNotEmpty) ForgeToneBanner(items: [['חיסור-קבוצתי (≥חצי-כיתה): ${groups.map((g) => '${_AttData.className(g['cls'] as String)} ${fmtDate(g['date'] as String)} ${g['absent']}/${g['total']}').join(' · ')} — אירוע? לסמן כלא-נספר']], variants: const <int>[2]),
+      if (up.isNotEmpty) ForgeToneBanner(items: [['סנכרון-לוח (30 י׳): ${up.map((h) => '${fmtDate(h['iso'] as String)} ${h['name']}').join(' · ')} — לא ייספרו']], variants: const <int>[0]),
+      ForgeToneBanner(items: [[autoLock ? 'נעילה-אוטומטית סוף-יום פעילה (${_Placement.nowHm} ≥ ${_Placement.lockHm})' : 'נעילה-אוטומטית סוף-יום ב-${_Placement.lockHm} (עכשיו ${_Placement.nowHm})']], variants: [const <int>[0, 1, 3, 2][(autoLock ? 3 : 0) % 4]]),
     ];
     return [for (final w in out) ...[w, _gap(8)]];
   }
@@ -1174,7 +1175,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 Wrap(spacing: 6, runSpacing: 6, children: [
                   for (final l in _AttData.lessonsOf(_date))
                     if (canMark)
-                      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _AttData.cycle(_date, l['n'] as int, sid)), child: ForgeSoftButton(fields: ['ש${l['n']} ${_AttData.statusLabel[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']}']))
+                      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _AttData.cycle(_date, l['n'] as int, sid)), child: ForgeToneButton(items: [['ש${l['n']} ${_AttData.statusLabel[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']}']], variants: [const <int>[0, 1, 3, 2][(_AttData.statusTone[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']!) % 4]]))
                     else
                       ForgeStatusChip(items: [['ש${l['n']} ${_AttData.statusLabel[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']}']], variants: [const <int>[0, 1, 3, 2][(_AttData.statusTone[_AttData.markOf(_date, l['n'] as int, sid)?['status'] as String? ?? 'present']!) % 4]]),
                 ]),
@@ -1190,7 +1191,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ]),
                 _gap(12),
                 ForgeLinearProgressStatus(fields: ['נוכחות% החודש (סף ${_Placement.minAttendancePct}%)', '${(pct * 100).round()}%'], values: [pct]),
-                if (pct * 100 < _Placement.minAttendancePct) ...[_gap(6), ForgeSectionPill(items: [['מתחת לסף-הרגולטורי ${_Placement.minAttendancePct}% (זכאות/תעודה) — התרעה-מקדימה']], variants: [const <int>[0, 0, 0, 0][(pct * 100 < _Placement.minAttendancePct - 5 ? 2 : 3) % 4]])],
+                if (pct * 100 < _Placement.minAttendancePct) ...[_gap(6), ForgeToneBanner(items: [['מתחת לסף-הרגולטורי ${_Placement.minAttendancePct}% (זכאות/תעודה) — התרעה-מקדימה']], variants: [const <int>[0, 1, 3, 2][(pct * 100 < _Placement.minAttendancePct - 5 ? 2 : 3) % 4]])],
                 _gap(8),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Expanded(child: TrendStat(value: '${_AttData.absencesThisMonth(sid)}', delta: -((t['pct'] as num).toDouble()), label: 'חיסורים החודש · מגמת-נוכחות (↓=מחמיר)')),
@@ -1221,7 +1222,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 const Text('קשר-הורה', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
                 _gap(6),
                 if (parent == null)
-                  ForgeSectionPill(items: [['אין קשר-הורה מוזרק (בלוק-הצבה) — הודעות לא יישלחו']], variants: const <int>[0])
+                  ForgeToneBanner(items: [['אין קשר-הורה מוזרק (בלוק-הצבה) — הודעות לא יישלחו']], variants: const <int>[2])
                 else
                   Wrap(spacing: 8, runSpacing: 6, children: [
                     for (final f in _AttData.metaFields) if (parent[f['key']] != null) ForgeStatusChip(items: [['${f['prefix']}${parent[f['key']]}${f['suffix']}']], variants: const <int>[0]),
@@ -1236,24 +1237,24 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 _gap(8),
                 Builder(builder: (_) {
                   final acts = <Widget>[
-                    if (canMark) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _mark(sid, 'absent')), child: ForgeSoftButton(fields: ['⛔ סמן-חיסור'])),
-                    if (canMark) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _mark(sid, 'late')), child: ForgeSoftButton(fields: ['⏰ סמן-איחור'])),
-                    if (canMark) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _mark(sid, 'released')), child: ForgeSoftButton(fields: ['🚪 סמן-שחרור'])),
-                    if (canMark && m != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _mark(sid, 'present')), child: ForgeSoftButton(fields: ['↩ בטל'])),
-                    if (_AttData.can('att.justify') && m != null && m['justified'] != true) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'justified': true})), child: ForgeSoftButton(fields: ['✔ סמן-מוצדק'])),
-                    if (canMark && m != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _notice = 'צרף-אישור: שקע-קובץ (medicalDoc) לא מחובר בהצבה — מקום-שמור'), child: ForgeSoftButton(fields: ['📎 צרף-אישור'])),
+                    if (canMark) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _mark(sid, 'absent')), child: ForgeToneButton(items: [['⛔ סמן-חיסור']], variants: const <int>[3])),
+                    if (canMark) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _mark(sid, 'late')), child: ForgeToneButton(items: [['⏰ סמן-איחור']], variants: const <int>[2])),
+                    if (canMark) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _mark(sid, 'released')), child: ForgeToneButton(items: [['🚪 סמן-שחרור']], variants: const <int>[0])),
+                    if (canMark && m != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _mark(sid, 'present')), child: ForgeToneButton(items: [['↩ בטל']], variants: const <int>[0])),
+                    if (_AttData.can('att.justify') && m != null && m['justified'] != true) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'justified': true})), child: ForgeToneButton(items: [['✔ סמן-מוצדק']], variants: const <int>[1])),
+                    if (canMark && m != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _notice = 'צרף-אישור: שקע-קובץ (medicalDoc) לא מחובר בהצבה — מקום-שמור'), child: ForgeToneButton(items: [['📎 צרף-אישור']], variants: const <int>[0])),
                     if (_AttData.can('att.makeup') && m != null && m['status'] == 'absent' && elig!['eligible'] == true && m['makeupDate'] == null)
-                      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': true, 'makeupDate': _AttData.nextSchoolDay(_Placement.today)})), child: ForgeSoftButton(fields: ['📅 תזמן-השלמה'])),
-                    if (_AttData.can('att.makeup') && m != null && m['makeupDate'] != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': false, 'makeupDone': true})), child: ForgeSoftButton(fields: ['✅ השלמה-בוצעה'])),
-                    if (_AttData.can('att.notify') && m != null && m['parentOk'] != true && parent != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _AttData.send(_AttData.keyOf(_date, _lessonN, sid)); _notice = 'הודעה ל-${parent['name']} (${parent['phone']}) נרשמה בתור — שקע-שליחה (מודול-הורים) מקום-שמור'; }), child: ForgeSoftButton(fields: ['📨 הודעה-להורה'])),
-                    if (_AttData.can('att.parentOk') && m != null && m['parentOk'] != true) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { final saved = _AttData.role; _AttData.setRole(2); _AttData.patch(_date, _lessonN, sid, {'parentOk': true}); _AttData.setRole(saved); }), child: ForgeSoftButton(fields: ['✔ אשר-חיסור (הורה)'])),
-                    if (_AttData.can('att.mark') || _AttData.can('att.justify')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => (_AttData.notes[sid] ??= []).insert(0, 'הערה ${(_AttData.notes[sid]?.length ?? 0) + 1} · ${_AttData.riskWhy(sid)}')), child: ForgeSoftButton(fields: ['📝 הוסף-הערה'])),
+                      GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': true, 'makeupDate': _AttData.nextSchoolDay(_Placement.today)})), child: ForgeToneButton(items: [['📅 תזמן-השלמה']], variants: const <int>[1])),
+                    if (_AttData.can('att.makeup') && m != null && m['makeupDate'] != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _AttData.patch(_date, _lessonN, sid, {'makeup': false, 'makeupDone': true})), child: ForgeToneButton(items: [['✅ השלמה-בוצעה']], variants: const <int>[1])),
+                    if (_AttData.can('att.notify') && m != null && m['parentOk'] != true && parent != null) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { _AttData.send(_AttData.keyOf(_date, _lessonN, sid)); _notice = 'הודעה ל-${parent['name']} (${parent['phone']}) נרשמה בתור — שקע-שליחה (מודול-הורים) מקום-שמור'; }), child: ForgeToneButton(items: [['📨 הודעה-להורה']], variants: const <int>[0])),
+                    if (_AttData.can('att.parentOk') && m != null && m['parentOk'] != true) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { final saved = _AttData.role; _AttData.setRole(2); _AttData.patch(_date, _lessonN, sid, {'parentOk': true}); _AttData.setRole(saved); }), child: ForgeToneButton(items: [['✔ אשר-חיסור (הורה)']], variants: const <int>[1])),
+                    if (_AttData.can('att.mark') || _AttData.can('att.justify')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => (_AttData.notes[sid] ??= []).insert(0, 'הערה ${(_AttData.notes[sid]?.length ?? 0) + 1} · ${_AttData.riskWhy(sid)}')), child: ForgeToneButton(items: [['📝 הוסף-הערה']], variants: const <int>[0])),
                   ];
-                  return acts.isEmpty ? ForgeSectionPill(items: [['צפייה-בלבד — ${_AttData.whyCannot(_date) ?? 'אין הרשאת-פעולה'}']], variants: const <int>[0]) : Wrap(spacing: 8, runSpacing: 8, children: acts);
+                  return acts.isEmpty ? ForgeToneBanner(items: [['צפייה-בלבד — ${_AttData.whyCannot(_date) ?? 'אין הרשאת-פעולה'}']], variants: const <int>[3]) : Wrap(spacing: 8, runSpacing: 8, children: acts);
                 }),
                 if (m != null && m['status'] == 'absent') ...[
                   _gap(10),
-                  if (elig!['eligible'] != true) ForgeSectionPill(items: [['לא-זכאי להשלמה (חיסור לא-מוצדק = no-show · makeupEligibility)']], variants: const <int>[0]),
+                  if (elig!['eligible'] != true) ForgeToneBanner(items: [['לא-זכאי להשלמה (חיסור לא-מוצדק = no-show · makeupEligibility)']], variants: const <int>[2]),
                   if (canMark) ForgeDsEnumField(fields: ['סיבה (מובנית)'], control: DsEnumField(label: 'סיבה (מובנית)', options: _AttData.reasons, value: '${m['reason'] ?? ''}', onChanged: (v) => act(() => _AttData.patch(_date, _lessonN, sid, {'reason': v})), bare: true)),
                 ],
               ]))),

@@ -1,5 +1,9 @@
-// 🎨 schoolos_students.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar
-//   החלפות: stat×0 · hero×1 · chipRow×1 · chip×3 · statRow×21 · button×34 · statusChip×25 · banner×16 · emptyState×11 · mediaRow×5 · section×2 · segmented×4 · meter×3 · frame×9 · timeline×7 · field×4 · enumField×3 · search×1 · table×1 · bars×3 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
+// 🎯 MemberScreen — retarget של schoolos_students.dart לישות Member (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_students.dart --entity Member
+//   זרע-ראשי: families (מועמדים: families(27/33) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) members(11/15) tasks(9/12) enrollments(8/11) courses(6/9) events(6/8) teachers(4/4) audit(4/4)) · מיפוי שם 16 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 12 · חוזה-מנוע (לא משתנה) 5
+//   id⇒id(name) · phone⇒phone(name) · phone2⇒phone2(name) · notes⇒notes(name) · first⇒first(name) · gender⇒gender(name) · birth⇒birth(name) · idNum⇒idNum(name) · school⇒school(name) · grade⇒grade(name) · health⇒health(name) · mSefach⇒mSefach(name) · mInvite⇒mInvite(name) · mRecommend⇒mRecommend(name) · mPhotos⇒mPhotos(name) · mVideos⇒mVideos(name) · name⇒∅(engine-contract) · status⇒∅(engine-contract) · createdAt⇒∅(engine-contract) · docs⇒∅(engine-contract) · members⇒∅(engine-contract) · father⇒∅(reserved) · mother⇒∅(reserved) · email⇒∅(reserved) · city⇒∅(reserved) · address⇒∅(reserved) · language⇒∅(reserved) · maritalStatus⇒∅(reserved) · tzedaka⇒∅(reserved) · discount⇒∅(reserved) · addedAt⇒∅(reserved) · cred⇒∅(reserved) · log⇒∅(reserved)
+//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×21 (ב-Row, Expanded) · פנימיים: button×35 statusChip×25 banner×17 emptyState×11 mediaRow×5 · StatHero⇒ForgeStatPlain ×1 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
+//   תפר-עובדות (G9b): MemberFacts · count=families.length (seed-db) · מדדים 6 · hero=highN · שורות-מדד (G10a) highN/newN/midN/medicalN/noParentN/openTicketsN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה db (families/members · 1 עמודות-שמורות)
+//   שדות-Member בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): isParent · תוויות: מונחי student (תלמיד/ה/תלמידים) ⇒ Member (בן/בת משפחה/בני משפחה) · 13 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Member
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
 // פעולות-יסוד (לא אזורי-מפרט): איתור · הערכת-מצב · חיבור-אותות-להכרעה · זיהוי-חריגה · הכרעה · ביצוע · אימות.
@@ -426,7 +430,9 @@ class _StuData {
     return b == 2 ? 'ועדת-שילוב + ביקור-בית' : 'שיחת-מחנך/ת + יידוע-הורים';
   }
   static int get highN => active.where((s) => band(s) == 2).length;
+  static List<Map<String, dynamic>> get rowsOf_highN => active.where((s) => band(s) == 2).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד highN (מהצורה של ה-getter, לא מילון)
   static int get midN => active.where((s) => band(s) == 1).length;
+  static List<Map<String, dynamic>> get rowsOf_midN => active.where((s) => band(s) == 1).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד midN (מהצורה של ה-getter, לא מילון)
 
   // ─── KPI (הערכת-מצב · הכל מנועי-מדף/שדות-אמת) ───
   static int? get avgAttendance {
@@ -441,9 +447,13 @@ class _StuData {
     return (grandTotal(withData, (s) { final g = (s as Map)['grades'] as Map; return grandTotal(g.values.toList(), (v) => v as num) / g.length; }) / withData.length).round();
   }
   static int get medicalN => active.where((s) => '${s['health'] ?? ''}'.isNotEmpty).length;
+  static List<Map<String, dynamic>> get rowsOf_medicalN => active.where((s) => '${s['health'] ?? ''}'.isNotEmpty).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד medicalN (מהצורה של ה-getter, לא מילון)
   static int get noParentN => active.where(parentMissing).length;
+  static List<Map<String, dynamic>> get rowsOf_noParentN => active.where(parentMissing).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד noParentN (מהצורה של ה-getter, לא מילון)
   static int get openTicketsN => tasks().where((t) => '${t['doneAt'] ?? ''}'.isEmpty && (t['ref'] as Map?)?['kind'] == 'family').length;
+  static List<Map<String, dynamic>> get rowsOf_openTicketsN => tasks().where((t) => '${t['doneAt'] ?? ''}'.isEmpty && (t['ref'] as Map?)?['kind'] == 'family').cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד openTicketsN (מהצורה של ה-getter, לא מילון)
   static int get newN => active.where(isNew).length;
+  static List<Map<String, dynamic>> get rowsOf_newN => active.where(isNew).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד newN (מהצורה של ה-getter, לא מילון)
   static List<List<Object>> byClass() => countBy(active, (s) => className(s as Map<String, dynamic>));
   static String fmt(String? iso) => fmtDate(iso);
 
@@ -485,6 +495,8 @@ class _StuData {
   //   הוספת שדה לרשומה (photo/grades/…) ⇒ העמודה מאירה לבד, אפס-שינוי-קוד.
   static int roleCtx = 0; // התפקיד-הפעיל (מוזרק מהמסך לפני רינדור-טבלה)
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של Member (G5h · חוק-7): 1 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'isParent', 'label': 'isParent'}, // G5h · מקום-שמור: שדה-Member מהסכמה (boolean) — מאיר כשהנתון מוזרם
     {'key': 'photo', 'label': 'תמונה'},                                                   // מקום-שמור (ImageProvider/URL)
     {'label': 'שם-מלא', 'get': (Map<String, dynamic> s) => '${s['name']}'},
     {'label': 'מס׳', 'get': (Map<String, dynamic> s) => '${s['id']}'},
@@ -792,7 +804,7 @@ class _StuData {
   static int percentile(Map<String, dynamic> s) { final c = cohort(s); if (c.length < 2) return 50; final me = risk(s); return (c.where((o) => risk(o) < me).length * 100 / (c.length - 1)).round().clamp(0, 100); }
   // 8. דוח-יועץ שבועי (טקסט מהאותות): סיכון-גבוה · קפיצות · פניות-פתוחות · ללא-הורה · אישורים-פגים
   static String weeklyReport() => [
-        'דוח-יועץ/ת שבועי · ${fmt(today)}', 'תלמידים פעילים: ${active.length} · סיכון-גבוה: $highN · בינוני: $midN',
+        'דוח-יועץ/ת שבועי · ${fmt(today)}', 'בני משפחה פעילים: ${active.length} · סיכון-גבוה: $highN · בינוני: $midN',
         'קפיצות-סיכון (30 יום): ${riskJumps.map((j) => '${(j['s'] as Map)['name']} ${j['prev']}→${j['now']}').join(', ')}'.replaceAll(': ,', ': —'),
         'פניות-פתוחות: $openTicketsN · ללא-הורה-מעודכן: $noParentN · אישורים-פגים: ${expiredConsents.length}',
         'ללא-הערת-מחנך/ת $noteSilentDays יום: ${noNote90.map((s) => s['name']).join(', ')}',
@@ -846,8 +858,10 @@ class _StuData {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════
-class StudentsScreen extends StatefulWidget {
-  const StudentsScreen({super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+class MemberScreen extends StatefulWidget {
+  const MemberScreen({this.initialMetric, this.initialPanelId, super.key, this.db}); // db מוזרק (חוק-6) — null ⇒ דאטה-האמת המובנית
+  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (MemberFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
+  final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   final Map<String, dynamic>? db;
   /// אינטגרציה לוח-הנהלה⇒מונים: המונים של המודול (המנהל מחווט; אין ייבוא-בין-מודולים)
   static Map<String, int> get counters => {
@@ -855,10 +869,11 @@ class StudentsScreen extends StatefulWidget {
         'noParent': _StuData.noParentN, 'openTickets': _StuData.openTicketsN, 'medical': _StuData.medicalN, 'avgAttendance': _StuData.avgAttendance ?? -1, 'avgGrades': _StuData.avgGrades ?? -1,
       };
   @override
-  State<StudentsScreen> createState() => _StudentsScreenState();
+  State<MemberScreen> createState() => _MemberScreenState();
 }
 
-class _StudentsScreenState extends State<StudentsScreen> {
+  String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
+class _MemberScreenState extends State<MemberScreen> {
   String _q = ''; // איתור (DsSearch)
   int _mode = 0; // 0=🎯 טריאז' (קיבוץ-פר-סיכון) · 1=📋 טבלה (columnDefs) — SegmentedSwitch→תצוגה
   int _sort = 0; // 0=סיכון · 1=כיתה · 2=שם — SegmentedSwitch→דירוג
@@ -874,10 +889,13 @@ class _StudentsScreenState extends State<StudentsScreen> {
   @override
   void initState() {
     super.initState();
+    _metric = widget.initialMetric != null && MemberFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
+    final p0 = widget.initialPanelId == null ? null : MemberFacts.byId(widget.initialPanelId!); // G10a
+    if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
     if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset();
   }
   @override
-  void didUpdateWidget(covariant StudentsScreen old) { // שקע-קלט מתחלף ⇒ דאטה חדשה (נתפס בבדיקת-widget: pumpWidget מעדכן State, לא initState)
+  void didUpdateWidget(covariant MemberScreen old) { // שקע-קלט מתחלף ⇒ דאטה חדשה (נתפס בבדיקת-widget: pumpWidget מעדכן State, לא initState)
     super.didUpdateWidget(old);
     if (!identical(old.db, widget.db)) { if (widget.db != null) _StuData.use(widget.db!); else _StuData.reset(); _locks.clear(); _q = ''; }
   }
@@ -896,13 +914,17 @@ class _StudentsScreenState extends State<StudentsScreen> {
     final avgAtt = _StuData.avgAttendance, avgGr = _StuData.avgGrades;
     // דירוג (מיון-נבחר) ⇒ הנראים (פעילים); לא-פעילים בסקשן-ארכיון נפרד
     // איתור⊕חריגה (23-ג): search=smartFilter⊕smartScore⊕normSearch · filter=finderMatches. הפייפליין מזין טריאז' וטבלה וארכיון.
-    final visible = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
+    final visibleAll = _StuData.filter(_StuData.search(_StuData.sorted(all, _sort), _q), _locks);
+    final visible = _metric == null ? visibleAll : visibleAll.where((r) => MemberFacts.heroRows(_metric!).any((h) => '${h[MemberFacts.idKey] ?? h['id']}' == '${r[MemberFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
     final inactiveVisible = _StuData.filter(_StuData.search(_StuData.sorted(_StuData.scoped(_role, _StuData.inactive), _sort), _q), _locks);
     final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: []};
     for (final s in visible) { buckets[_StuData.band(s)]!.add(s); }
     return DsScaffold(
-      title: 'תלמידים', subtitle: '${_StuData.students.length} תלמידים · ${_StuData.byClass().length} כיתות · ${_StuData.highN} בסיכון-גבוה', icon: '🎓',
+      title: 'בני משפחה', subtitle: '${_StuData.students.length} בני משפחה · ${_StuData.byClass().length} כיתות · ${_StuData.highN} בסיכון-גבוה', icon: '🎓',
       children: [
+        // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
+        if (_metric != null) ForgeToneBanner(items: [['מסונן למדד: ${MemberFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}']], variants: const <int>[1]),
+        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeToneButton(items: [['✖ בטל סינון-מדד']], variants: const <int>[3]))),
         // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות+נראות פר-תפקיד (roleOf⊕canGrantedAction⊕scope)
         Row(children: [
           Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, reverse: true, child: ForgeSegmentedPillToggleSelection(bare: true, items: [for (final s in [for (final r in _StuData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i)))),
@@ -934,10 +956,10 @@ class _StudentsScreenState extends State<StudentsScreen> {
         const SizedBox(height: 12),
         // KPI-10 (המפרט): hero = המטרה (מי-נופל) + 10 מדדי-מצב (BareStat נושאי-ערך; חסר-נתון ⇒ '—' מקום-שמור)
         ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['תלמידים בסיכון-גבוה — לפעול עכשיו', '${_StuData.highN}'])),
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['בני משפחה בסיכון-גבוה — לפעול עכשיו', '${_StuData.highN}'])),
             const SizedBox(height: 14),
             Row(children: [
-              Expanded(child: ForgeStatPlain(fields: ['🎓 סך-תלמידים', '${_StuData.students.length}'])),
+              Expanded(child: ForgeStatPlain(fields: ['🎓 סך-בני משפחה', '${_StuData.students.length}'])),
               Expanded(child: ForgeStatPlain(fields: ['✅ פעילים', '${all.length}'])),
               Expanded(child: ForgeStatPlain(fields: ['🆕 חדשים-השנה', '${_StuData.newN}'])),
               Expanded(child: ForgeStatPlain(fields: ['🔴 סיכון-גבוה', '${_StuData.highN}'])),
@@ -965,7 +987,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
           if (_can('stu.ticket') || _StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'דוח-יועץ/ת שבועי', _StuData.weeklyReport()), child: ForgeToneButton(items: [['🧭 דוח-יועץ שבועי']], variants: const <int>[0])),
           if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'מעבר-שנה · העברת-כיתות מרוכזת (תצוגה-מקדימה)', _StuData.yearRolloverPreview().join('\n')), child: ForgeToneButton(items: [['🗓 מעבר-שנה (תצוגה)']], variants: const <int>[0])),
           if (_StuData.roleName(_role) == 'admin') GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { final r = _StuData.yearRolloverExecute(_who); _importResult = null; _error = null; _rollover = 'מעבר-שנה בוצע: ${r['moved']} הועברו · ${r['graduated']} בוגרים · ${r['skipped']} ללא כיתת-יעד (לא הומצאה)'; }), child: ForgeToneButton(items: [['🗓 בצע מעבר-שנה']], variants: const <int>[3])),
-          if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא CSV · ${visible.length} תלמידים (BOM + חסימת-הזרקה)', _StuData.csvOf(visible)), child: ForgeToneButton(items: [['⬇ CSV (${visible.length})']], variants: const <int>[0])),
+          if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא CSV · ${visible.length} בני משפחה (BOM + חסימת-הזרקה)', _StuData.csvOf(visible)), child: ForgeToneButton(items: [['⬇ CSV (${visible.length})']], variants: const <int>[0])),
           if (_StuData.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _showText(context, 'ייצוא PDF', 'מקום-שמור: אין מנוע-PDF במדף (§20-ג) — יאיר כשיתווסף; עד אז: הדפס-כרטיס (טקסט) + CSV.'), child: ForgeToneButton(items: [['⬇ PDF — מקום-שמור']], variants: const <int>[0])),
         ]),
         _gap(8),
@@ -981,9 +1003,9 @@ class _StudentsScreenState extends State<StudentsScreen> {
         if (_loading)
           _loadingView()
         else if (_StuData.students.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין תלמידים עדיין — רשום תלמיד ראשון או ייבא', '']))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין בני משפחה עדיין — רשום תלמיד ראשון או ייבא', '']))
         else if (visible.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין תלמידים תואמים לחיפוש/סינון', '']))
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeSearchEmptyState(fields: ['אין בני משפחה תואמים לחיפוש/סינון', '']))
         else if (_mode == 1)
           _table(visible)
         else ...[
@@ -1128,7 +1150,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
           ]),
           _gap(10),
           // השוואת-שכבה (percentile): התפלגות-הסיכון בשכבה (supScoreBins ⇒ NeonBars) + אחוזון-התלמיד
-          _h('השוואת-שכבה ${_StuData.level(s)} · ${_StuData.cohort(s).length} תלמידים'),
+          _h('השוואת-שכבה ${_StuData.level(s)} · ${_StuData.cohort(s).length} בני משפחה'),
           Row(children: [
             Expanded(child: ForgeStatPlain(fields: ['אחוזון-סיכון בשכבה (גבוה=חמור)', '${_StuData.percentile(s)}'])),
             Expanded(child: ForgeStatPlain(fields: ['ממוצע-סיכון בשכבה', '${(grandTotal(_StuData.cohort(s), (o) => _StuData.risk(o as Map<String, dynamic>)) / (_StuData.cohort(s).isEmpty ? 1 : _StuData.cohort(s).length)).round()}'])),
@@ -1317,7 +1339,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => StatefulBuilder(builder: (c2, setS) => DraggableScrollableSheet(
       initialChildSize: 0.8, minChildSize: 0.4, maxChildSize: 0.95, expand: false,
       builder: (c2, scroll) => Padding(padding: const EdgeInsets.all(12), child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-        const Text('רישום תלמיד/ה חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        const Text('רישום בן/בת משפחה חדש/ה', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
         for (final k in vals.keys) ForgeDsField(state: (vals[k]!).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [labels[k]!, ''], control: DsField(label: labels[k]!, hint: '', value: vals[k]!, onChanged: (x) => vals[k] = x, bare: true)),
         ForgeDsEnumField(fields: ['כיתה'], control: DsEnumField(label: 'כיתה', options: classes, value: cls, onChanged: (x) => setS(() => cls = x), bare: true)),
         _gap(8),
@@ -1335,8 +1357,8 @@ class _StudentsScreenState extends State<StudentsScreen> {
     showModalBottomSheet<void>(context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true, builder: (c2) => Padding(
       padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(c2).viewInsets.bottom + 12),
       child: ForgeStripPanelFrame(fields: ['', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Text('ייבוא תלמידים (CSV)', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
-        const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל תלמיד/ה', style: TextStyle(color: _muted, fontSize: 12)),
+        const Text('ייבוא בני משפחה (CSV)', style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        const Text('עמודות: שם-פרטי, שם-משפחה, כיתה, לידה, הורה, טלפון — שורה לכל בן/בת משפחה', style: TextStyle(color: _muted, fontSize: 12)),
         ForgeDsField(state: (text).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['CSV', ''], control: DsField(label: 'CSV', hint: 'דנה,כהן,י׳-1 · כיתת-חינוך,2010-05-05,רונית,0501234567', value: text, onChanged: (x) => text = x, bare: true)),
         Row(children: [Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
           Navigator.of(c2).pop();
@@ -1359,7 +1381,30 @@ class _StudentsScreenState extends State<StudentsScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
           CircularProgressIndicator(color: _acc),
           const SizedBox(height: 14),
-          const Text('טוען תלמידים…', style: TextStyle(color: _muted, fontSize: 14)),
+          const Text('טוען בני משפחה…', style: TextStyle(color: _muted, fontSize: 14)),
         ]),
       );
+}
+
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): MemberFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class MemberFacts {
+  static const String entity = 'Member';
+  static const String label = 'בני משפחה'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => ((_StuData.db['families'] as List?)?.length ?? 0); // רשומות הזרע-הראשי "families" (seed-db)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'highN', 'label': '🔴 סיכון-גבוה', 'tone': 'danger'}, {'key': 'newN', 'label': '🆕 חדשים-השנה', 'tone': 'plain'}, {'key': 'midN', 'label': '🟠 סיכון-בינוני', 'tone': 'plain'}, {'key': 'medicalN', 'label': '🩺 רפואי/צרכים', 'tone': 'plain'}, {'key': 'noParentN', 'label': '📵 ללא-הורה-מעודכן', 'tone': 'danger'}, {'key': 'openTicketsN', 'label': '📨 פניות-פתוחות', 'tone': 'plain'}]; // 6 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
+  static Map<String, String> get metrics => <String, String>{'highN': '${_StuData.highN}', 'newN': '${_StuData.newN}', 'midN': '${_StuData.midN}', 'medicalN': '${_StuData.medicalN}', 'noParentN': '${_StuData.noParentN}', 'openTicketsN': '${_StuData.openTicketsN}'};
+  static const String heroKey = 'highN'; // ה-StatHero של הזהב (המטרה המוצהרת)
+  static String get hero => metrics[heroKey] ?? '$count';
+  static String get heroLabel => '🔴 סיכון-גבוה';
+  static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
+  static List<Map<String, dynamic>> get rows => ((_StuData.db['families'] as List?) ?? const []).cast<Map<String, dynamic>>(); // כל רשומות הזרע-הראשי (seed-db)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['highN', 'newN', 'midN', 'medicalN', 'noParentN', 'openTicketsN']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'highN': return _StuData.rowsOf_highN; case 'newN': return _StuData.rowsOf_newN; case 'midN': return _StuData.rowsOf_midN; case 'medicalN': return _StuData.rowsOf_medicalN; case 'noParentN': return _StuData.rowsOf_noParentN; case 'openTicketsN': return _StuData.rowsOf_openTicketsN; default: return const []; } } // G10a · 6 מדדים עם שורות (צורת X.where(P).length)
+  static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
+  // G10b-ב · תפר-הזרקה (חוק-6: הדאטה מוזרקת, לא מומצאת): seed() = זרע-ההצבה של הזהב · seedList/rowList = היכן רשומת-המסך חיה (מצורת _build()) · reservedColumns = עמודות-מקום-שמור של G5h
+  static Map<String, dynamic> seed() => _StuData.seed();
+  static const String seedList = 'families';
+  static const String? rowList = 'members'; // null ⇒ רשומת-המסך = רשומת-הזרע עצמה
+  static const List<String> reservedColumns = <String>['isParent'];
+  static const String? tableView = '📋 טבלה'; // תווית-המבט שמגלה את הטבלה (null ⇒ הטבלה תמיד גלויה)
 }

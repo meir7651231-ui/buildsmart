@@ -12,6 +12,7 @@ export 'save_draft_button.dart';
 export 'outlined_action_button.dart';
 export 'link_btn.dart';
 export 'soft_button.dart';
+export 'tone_button.dart';
 export 'gold_button.dart';
 export 'glass_button.dart';
 export 'neon_button.dart';

@@ -1,4 +1,5 @@
 export 'snack_toast.dart';
+export 'tone_banner.dart';
 export 'alert_banner.dart';
 export '5_atoms_feedback.dart';
 export 'modal_dialog.dart';

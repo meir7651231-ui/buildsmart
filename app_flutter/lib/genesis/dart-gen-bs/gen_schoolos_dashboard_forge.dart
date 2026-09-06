@@ -1,4 +1,4 @@
-// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeSoftButton · statusChip=ForgeStatusChip · banner=ForgeSectionPill · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart
+// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · navTile=ForgeHubTile · stat=ForgeStatPlain · hero=ForgeStatPlain · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeSearchEmptyState · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegmentedPillToggleSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeGlassCard · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · section×15 · segmented×1 · meter×3 · frame×5 · timeline×3 · search×1 · pageHeader×1 · table×1 · bars×5 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 📊 SchoolOS · לוח-הנהלה (DASHBOARD) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-DASHBOARD-FULL-2026-09-04.
 // 🎯 המטרה: שהמנהל/ת יפתח את הבוקר ותוך 30 שניות יידע: מה דורש-החלטה היום · מה בסיכון · מה מגמתי · מה הפעולה-הראשונה.
@@ -622,14 +622,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(children: [
           Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
           const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeSoftButton(fields: ['🔄']))),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0]))),
           if (d.exportOk(_role)) ...[
             const SizedBox(width: 6),
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('ייצוא CSV · תור-המשימות', d.csvOf(open), ltr: true), child: ForgeSoftButton(fields: ['⬇ CSV']))),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('ייצוא CSV · תור-המשימות', d.csvOf(open), ltr: true), child: ForgeToneButton(items: [['⬇ CSV']], variants: const <int>[0]))),
           ],
           if (_DashData.can(_role, 'dash.act')) ...[
             const SizedBox(width: 6),
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _openRules, child: ForgeSoftButton(fields: ['⚙️ כללים']))),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _openRules, child: ForgeToneButton(items: [['⚙️ כללים']], variants: const <int>[0]))),
           ],
         ]),
         // ── צ׳יפי-חריגה (finderMatches · AND): מודול (עם מונה) · דחיפות · SLA · סטטוס · אחראי ──
@@ -657,13 +657,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
         // ── מצבי-מסך שמורים: טעינה · שגיאה-כללית · שגיאה-במודול-אחד (הלוח ממשיך) · מודול-לא-מופעל · יום-חופש · אזעקה ──
         if (_loading) _loadingView()
-        else if (_error != null) ForgeSectionPill(items: [[_error!]], variants: const <int>[0])
+        else if (_error != null) ForgeToneBanner(items: [[_error!]], variants: const <int>[3])
         else ...[
-          for (final m in d.erroredModules) ...[ForgeSectionPill(items: [['מודול ${m['label']} בשגיאה — ${m['error']} · הלוח ממשיך בלעדיו (מקום-שמור)']], variants: const <int>[0]), _gap(8)],
+          for (final m in d.erroredModules) ...[ForgeToneBanner(items: [['מודול ${m['label']} בשגיאה — ${m['error']} · הלוח ממשיך בלעדיו (מקום-שמור)']], variants: const <int>[2]), _gap(8)],
           if (d.disabledModules.isNotEmpty) ...[_wrap([for (final m in d.disabledModules) ForgeStatusChip(items: [['${m['glyph']} ${m['label']} · לא-מופעל (נתון-לא-זמין)']], variants: const <int>[0])], top: 0), _gap(8)],
-          if (holiday != null) ...[ForgeSectionPill(items: [['יום-חופש: $holiday — לוח-רזה (KPI + התרעות בלבד; התור מוקפא)']], variants: const <int>[0]), _gap(8)],
-          if (red >= 3) ...[ForgeSectionPill(items: [['אזעקה: $red משימות דורשות-החלטה היום · $breached SLA-פרוצים — התחל מ: ${firstAction?['title'] ?? ''}']], variants: const <int>[0]), _gap(8)]
-          else if (firstAction != null) ...[ForgeSectionPill(items: [['הפעולה-הראשונה: ${firstAction['action']} — ${firstAction['title']}']], variants: const <int>[0]), _gap(8)],
+          if (holiday != null) ...[ForgeToneBanner(items: [['יום-חופש: $holiday — לוח-רזה (KPI + התרעות בלבד; התור מוקפא)']], variants: const <int>[1]), _gap(8)],
+          if (red >= 3) ...[ForgeToneBanner(items: [['אזעקה: $red משימות דורשות-החלטה היום · $breached SLA-פרוצים — התחל מ: ${firstAction?['title'] ?? ''}']], variants: const <int>[3]), _gap(8)]
+          else if (firstAction != null) ...[ForgeToneBanner(items: [['הפעולה-הראשונה: ${firstAction['action']} — ${firstAction['title']}']], variants: const <int>[2]), _gap(8)],
           // ── KPI · הערכת-בריאות: hero=דורש-החלטה · התקדמות (cockpitProgress) · 12 BareStat עם מקור-אמת/מקום-שמור ──
           ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['דורש-החלטה היום · ${open.length} פתוחות', '$red'])),
@@ -680,9 +680,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ])),
           const SizedBox(height: 8),
           // ── אוטומציות פרואקטיביות: קפיצת-מגמה · יעד-בסיכון · חג-קרוב (סנכרון-לוח) ──
-          if (jump != null && jump <= -3) ...[ForgeSectionPill(items: [['קפיצת-מגמה: נוכחות ירדה ${(-jump).toStringAsFixed(1)} נק׳ בשבוע האחרון (4 שבועות: ${d.series('attendance', 'weeklyPct')!.map((v) => '$v%').join(' · ')})']], variants: const <int>[0]), _gap(8)],
-          for (final g in _goalsAtRisk()) ...[ForgeSectionPill(items: [[g]], variants: const <int>[0]), _gap(8)],
-          if (d.upcoming.isNotEmpty && d.upcoming.first['iso'] != d.today) ...[ForgeSectionPill(items: [['סנכרון-לוח: ${d.upcoming.first['name']} ב-${fmtDate(d.upcoming.first['iso'] as String)} (עוד ${dayDiff(d.today, d.upcoming.first['iso'] as String).toInt()} י׳) · ${d.upcoming.length} חגים ב-45 יום']], variants: const <int>[0]), _gap(8)],
+          if (jump != null && jump <= -3) ...[ForgeToneBanner(items: [['קפיצת-מגמה: נוכחות ירדה ${(-jump).toStringAsFixed(1)} נק׳ בשבוע האחרון (4 שבועות: ${d.series('attendance', 'weeklyPct')!.map((v) => '$v%').join(' · ')})']], variants: const <int>[3]), _gap(8)],
+          for (final g in _goalsAtRisk()) ...[ForgeToneBanner(items: [[g]], variants: const <int>[2]), _gap(8)],
+          if (d.upcoming.isNotEmpty && d.upcoming.first['iso'] != d.today) ...[ForgeToneBanner(items: [['סנכרון-לוח: ${d.upcoming.first['name']} ב-${fmtDate(d.upcoming.first['iso'] as String)} (עוד ${dayDiff(d.today, d.upcoming.first['iso'] as String).toInt()} י׳) · ${d.upcoming.length} חגים ב-45 יום']], variants: const <int>[0]), _gap(8)],
           // ── טאבים (SegmentedSwitch מבוקר · 9) ──
           _seg(tabs, _tab, (i) => setState(() => _tab = summary ? 7 : i)),
           const SizedBox(height: 10),
@@ -705,7 +705,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Expanded(child: _seg(const ['🎯 טריאז׳', '📋 טבלה'], _mode, (i) => setState(() => _mode = i))),
           if (_DashData.can(_role, 'dash.act')) ...[
             const SizedBox(width: 6),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBrief(open), child: ForgeSoftButton(fields: ['☀️ שלח-תדרוך'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBrief(open), child: ForgeToneButton(items: [['☀️ שלח-תדרוך']], variants: const <int>[1])),
           ],
         ]),
         _gap(10),
@@ -744,8 +744,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ]),
           if (!done && _DashData.can(_role, 'dash.act'))
             _wrap([
-              GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _open('${t['link']}'), child: ForgeSoftButton(fields: ['▶ ${t['action']}'])),
-              GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.doneIds.add(t['id'] as String); d.log(t['owner'] as String, 'סימן בוצע: ${t['title']}'); }), child: ForgeSoftButton(fields: ['✅ בוצע'])),
+              GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _open('${t['link']}'), child: ForgeToneButton(items: [['▶ ${t['action']}']], variants: const <int>[1])),
+              GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.doneIds.add(t['id'] as String); d.log(t['owner'] as String, 'סימן בוצע: ${t['title']}'); }), child: ForgeToneButton(items: [['✅ בוצע']], variants: const <int>[0])),
             ], top: 8),
         ])),
     );
@@ -766,7 +766,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Row(children: [
                 Expanded(child: ForgeContactTile(fields: ['${k['label']}', d.live(k['mod'] as String) ? 'מקור: מודול ${d.module(k['mod'] as String)?['label']}' : 'נתון-לא-זמין (מודול ${k['mod']} לא מופעל/בשגיאה) — מקום-שמור'])),
                 Expanded(child: ForgeStatPlain(fields: [const ['', '✅', '🔴', '🟠'][d.kpiTone(k)], d.kpiText(k)])),
-                Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => d.pinned.contains(k['key']) ? d.pinned.remove(k['key']) : d.pinned.add(k['key'] as String)), child: ForgeSoftButton(fields: [d.pinned.contains(k['key']) ? '📌 הסר' : '📌 הצמד']))),
+                Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => d.pinned.contains(k['key']) ? d.pinned.remove(k['key']) : d.pinned.add(k['key'] as String)), child: ForgeToneButton(items: [[d.pinned.contains(k['key']) ? '📌 הסר' : '📌 הצמד']], variants: const <int>[0]))),
               ]),
             ),
         ]])),
@@ -882,8 +882,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ]),
               if (_DashData.can(_role, 'dash.goals') || _DashData.can(_role, 'dash.act'))
                 _wrap([
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.goalOverride[g.$1] = goal - 1; d.log('מנהל', 'יעד ${g.$2}: ${goal - 1}'); }), child: ForgeSoftButton(fields: ['🎯 יעד −1'])),
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.goalOverride[g.$1] = goal + 1; d.log('מנהל', 'יעד ${g.$2}: ${goal + 1}'); }), child: ForgeSoftButton(fields: ['🎯 יעד +1'])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.goalOverride[g.$1] = goal - 1; d.log('מנהל', 'יעד ${g.$2}: ${goal - 1}'); }), child: ForgeToneButton(items: [['🎯 יעד −1']], variants: const <int>[0])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { d.goalOverride[g.$1] = goal + 1; d.log('מנהל', 'יעד ${g.$2}: ${goal + 1}'); }), child: ForgeToneButton(items: [['🎯 יעד +1']], variants: const <int>[0])),
                 ], top: 8),
             ]]));
           }(),
@@ -893,11 +893,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Widget> _reportsTab(List<Map<String, dynamic>> open) => [
         ForgeTitledSection(fields: ['📄 דוחות ותוצרים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           _wrap([
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('דוח שבועי · עד ${fmtDate(d.rangeTo(1))}', d.briefText(d.inRange(open, 1))), child: ForgeSoftButton(fields: ['📅 דוח שבועי'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('דוח חודשי · עד ${fmtDate(d.rangeTo(2))}', d.briefText(d.inRange(open, 2))), child: ForgeSoftButton(fields: ['🗓 דוח חודשי'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('דוח שנתי · עד ${fmtDate(d.rangeTo(3))}', d.briefText(d.inRange(open, 3))), child: ForgeSoftButton(fields: ['📆 דוח שנתי'])),
-            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('הדפסה · לוח-הנהלה', d.briefText(open)), child: ForgeSoftButton(fields: ['🖨 הדפס-לוח'])),
-            if (d.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('ייצוא CSV', d.csvOf(open), ltr: true), child: ForgeSoftButton(fields: ['⬇ CSV'])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('דוח שבועי · עד ${fmtDate(d.rangeTo(1))}', d.briefText(d.inRange(open, 1))), child: ForgeToneButton(items: [['📅 דוח שבועי']], variants: const <int>[0])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('דוח חודשי · עד ${fmtDate(d.rangeTo(2))}', d.briefText(d.inRange(open, 2))), child: ForgeToneButton(items: [['🗓 דוח חודשי']], variants: const <int>[0])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('דוח שנתי · עד ${fmtDate(d.rangeTo(3))}', d.briefText(d.inRange(open, 3))), child: ForgeToneButton(items: [['📆 דוח שנתי']], variants: const <int>[0])),
+            GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('הדפסה · לוח-הנהלה', d.briefText(open)), child: ForgeToneButton(items: [['🖨 הדפס-לוח']], variants: const <int>[0])),
+            if (d.exportOk(_role)) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openText('ייצוא CSV', d.csvOf(open), ltr: true), child: ForgeToneButton(items: [['⬇ CSV']], variants: const <int>[0])),
           ], top: 0),
           _gap(10),
           _wrap([
@@ -918,12 +918,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Widget> _alertsTab(List<Map<String, dynamic>> open, num? jump) {
     final breached = open.where(d.slaBreached).toList();
     final items = <Widget>[
-      for (final t in breached) ForgeSectionPill(items: [['SLA-פרוץ — הוסלם ל-🔴: ${t['title']} · ${t['owner']} · מאז ${d.since(t)} י׳ (SLA ${d.slaOf(t)})']], variants: const <int>[0]),
-      if (jump != null && jump <= -3) ForgeSectionPill(items: [['קפיצת-מגמה: נוכחות ${jump.toStringAsFixed(1)} נק׳ בשבוע']], variants: const <int>[0]),
-      for (final g in _goalsAtRisk()) ForgeSectionPill(items: [[g]], variants: const <int>[0]),
-      for (final x in d.gradeOutliers('attendancePct')) ForgeSectionPill(items: [['חריגה-סטטיסטית: שכבה ${x['name']} נוכחות ${x['attendancePct']}% (z=${(x['z'] as num).toStringAsFixed(1)})']], variants: const <int>[0]),
-      for (final m in d.erroredModules) ForgeSectionPill(items: [['מודול ${m['label']}: ${m['error']}']], variants: const <int>[0]),
-      for (final h in d.upcoming) ForgeSectionPill(items: [['${h['name']} · ${fmtDate(h['iso'] as String)}']], variants: const <int>[0]),
+      for (final t in breached) ForgeToneBanner(items: [['SLA-פרוץ — הוסלם ל-🔴: ${t['title']} · ${t['owner']} · מאז ${d.since(t)} י׳ (SLA ${d.slaOf(t)})']], variants: const <int>[3]),
+      if (jump != null && jump <= -3) ForgeToneBanner(items: [['קפיצת-מגמה: נוכחות ${jump.toStringAsFixed(1)} נק׳ בשבוע']], variants: const <int>[3]),
+      for (final g in _goalsAtRisk()) ForgeToneBanner(items: [[g]], variants: const <int>[2]),
+      for (final x in d.gradeOutliers('attendancePct')) ForgeToneBanner(items: [['חריגה-סטטיסטית: שכבה ${x['name']} נוכחות ${x['attendancePct']}% (z=${(x['z'] as num).toStringAsFixed(1)})']], variants: const <int>[2]),
+      for (final m in d.erroredModules) ForgeToneBanner(items: [['מודול ${m['label']}: ${m['error']}']], variants: const <int>[2]),
+      for (final h in d.upcoming) ForgeToneBanner(items: [['${h['name']} · ${fmtDate(h['iso'] as String)}']], variants: const <int>[0]),
     ];
     return [
       ForgeTitledSection(fields: ['🔔 התרעות · ${items.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
@@ -996,19 +996,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   if ('${t['note'] ?? ''}'.isNotEmpty) ForgeStatusChip(items: [['📝 ${t['note']}']], variants: const <int>[0]),
                 ]),
                 _gap(12),
-                ForgeSectionPill(items: [['השפעה-אם-לא: ${_impactIfNot(t)}']], variants: [const <int>[0, 0, 0, 0][(d.sev(t) == 2 ? 2 : 3) % 4]]),
+                ForgeToneBanner(items: [['השפעה-אם-לא: ${_impactIfNot(t)}']], variants: [const <int>[0, 1, 3, 2][(d.sev(t) == 2 ? 2 : 3) % 4]]),
                 _gap(14),
                 _title('פעולות'),
                 _gap(8),
-                if (!canAct) ForgeSectionPill(items: [[done ? 'המשימה סומנה כבוצעה' : 'צפייה-בלבד — אין הרשאת-פעולה במבט זה']], variants: const <int>[0])
+                if (!canAct) ForgeToneBanner(items: [[done ? 'המשימה סומנה כבוצעה' : 'צפייה-בלבד — אין הרשאת-פעולה במבט זה']], variants: const <int>[3])
                 else _wrap([
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(ctx).pop(); _open('${t['link']}'); }, child: ForgeSoftButton(fields: ['▶ ${t['action']} (במודול)'])),
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { d.doneIds.add(t['id'] as String); d.log('${t['owner']}', 'בוצע: ${t['title']}'); }), child: ForgeSoftButton(fields: ['✅ סמן-בוצע'])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(ctx).pop(); _open('${t['link']}'); }, child: ForgeToneButton(items: [['▶ ${t['action']} (במודול)']], variants: const <int>[1])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { d.doneIds.add(t['id'] as String); d.log('${t['owner']}', 'בוצע: ${t['title']}'); }), child: ForgeToneButton(items: [['✅ סמן-בוצע']], variants: const <int>[0])),
                   for (final why in const ['ממתין-למידע', 'לא-דחוף', 'תלוי-בגורם-חיצוני'])
-                    GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { d.deferred[t['id'] as String] = why; d.log('${t['owner']}', 'נדחה ($why): ${t['title']}'); }), child: ForgeSoftButton(fields: ['⏸ דחה · $why'])),
+                    GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { d.deferred[t['id'] as String] = why; d.log('${t['owner']}', 'נדחה ($why): ${t['title']}'); }), child: ForgeToneButton(items: [['⏸ דחה · $why']], variants: const <int>[2])),
                   for (final s in d.input.staff)
-                    if (s['name'] != t['owner']) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { d.delegated[t['id'] as String] = s['name'] as String; d.log('${t['owner']}', 'הואצל ל-${s['name']}: ${t['title']}'); }), child: ForgeSoftButton(fields: ['🤝 האצל ל-${s['name']}'])),
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(ctx).pop(); _open('${t['route']}'); }, child: ForgeSoftButton(fields: ['🧭 פתח-מודול ${t['moduleLabel']}'])),
+                    if (s['name'] != t['owner']) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() { d.delegated[t['id'] as String] = s['name'] as String; d.log('${t['owner']}', 'הואצל ל-${s['name']}: ${t['title']}'); }), child: ForgeToneButton(items: [['🤝 האצל ל-${s['name']}']], variants: const <int>[0])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(ctx).pop(); _open('${t['route']}'); }, child: ForgeToneButton(items: [['🧭 פתח-מודול ${t['moduleLabel']}']], variants: const <int>[0])),
                 ], top: 0),
                 _gap(16),
                 _title('היסטוריה · ${hist.length}'),
@@ -1045,10 +1045,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Expanded(child: ForgeStatPlain(fields: ['סף 🟠', '${d.mid}'])),
                 ]),
                 _wrap([
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.hi = math.max(d.mid + 1, d.hi - 1)), child: ForgeSoftButton(fields: ['🔴 −1'])),
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.hi += 1), child: ForgeSoftButton(fields: ['🔴 +1'])),
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.mid = math.max(1, d.mid - 1)), child: ForgeSoftButton(fields: ['🟠 −1'])),
-                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.mid = math.min(d.hi - 1, d.mid + 1)), child: ForgeSoftButton(fields: ['🟠 +1'])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.hi = math.max(d.mid + 1, d.hi - 1)), child: ForgeToneButton(items: [['🔴 −1']], variants: const <int>[0])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.hi += 1), child: ForgeToneButton(items: [['🔴 +1']], variants: const <int>[0])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.mid = math.max(1, d.mid - 1)), child: ForgeToneButton(items: [['🟠 −1']], variants: const <int>[0])),
+                  GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.mid = math.min(d.hi - 1, d.mid + 1)), child: ForgeToneButton(items: [['🟠 +1']], variants: const <int>[0])),
                 ]),
                 _gap(14),
                 _title('SLA פר-סוג (ימים)'),
@@ -1059,9 +1059,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Row(children: [
                       Expanded(child: ForgeLinearProgressStatus(fields: [_DashData.kindLabel(e.key), '${e.value} י׳'], values: [(e.value / 14).clamp(0.0, 1.0)])),
                       const SizedBox(width: 6),
-                      Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.slaDays[e.key] = math.max(1, e.value - 1)), child: ForgeSoftButton(fields: ['−']))),
+                      Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.slaDays[e.key] = math.max(1, e.value - 1)), child: ForgeToneButton(items: [['−']], variants: const <int>[0]))),
                       const SizedBox(width: 4),
-                      Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.slaDays[e.key] = e.value + 1), child: ForgeSoftButton(fields: ['+']))),
+                      Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => d.slaDays[e.key] = e.value + 1), child: ForgeToneButton(items: [['+']], variants: const <int>[0]))),
                     ]),
                   ),
               ])),
