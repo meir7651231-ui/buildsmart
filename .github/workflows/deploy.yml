@@ -98,6 +98,13 @@ jobs:
       # ─── Publish combined output FIRST ──────────────────────────
       # The web deploy must NOT depend on the (fragile, Android-toolchain)
       # APK build below — otherwise an APK failure freezes the live site.
+      # G14 · תיקיות-הדמו של המחולל (genesis) שורדות פריסה: מועתקות מ-gh-pages הקיים לתוך הפלט לפני הדחיפה-הכופה. האתר-החי לא מושפע.
+      - name: Keep genesis demo folders
+        run: |
+          git fetch -q --depth=1 origin gh-pages:refs/remotes/origin/gh-pages || exit 0
+          for d in schoolos schoolos-classic studio kehila tzedaka; do
+            git archive origin/gh-pages "$d" 2>/dev/null | tar -x -C app/dist || true
+          done
       - name: Push to gh-pages
         run: |
           cd app/dist
