@@ -18,15 +18,22 @@ import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודו
 import '../dart-forge-bs/temporal/temporal.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutEnt4Screen extends StatefulWidget {
-  const GenAppSechirutEnt4Screen({super.key});
+  const GenAppSechirutEnt4Screen({this.scopeField, this.scopeId, super.key});
+
+  final String? scopeField;   // G26 · היקף-הורה (ניווט-מקשרים): שדה-הקשר + מזהה ⇒ הרשימה מסוננת לרשומת-ההורה והטופס ממולא-מראש
+  final String? scopeId;
 
   @override
   State<GenAppSechirutEnt4Screen> createState() => _GenAppSechirutEnt4ScreenState();
 }
 
 class _GenAppSechirutEnt4ScreenState extends State<GenAppSechirutEnt4Screen> {
+  static const List<String> _labelsAll = [gen_app_sechirut_ent4_c9, gen_app_sechirut_ent4_c10, gen_app_sechirut_ent4_c14, gen_app_sechirut_ent4_c17];
   Map<int, String> _v = {};
   String? _editId;   // ריק = הוספה · מזהה = עריכת-רשומה קיימת
+  void _prefill() { if (widget.scopeId != null) { final i = _labelsAll.indexOf(widget.scopeField ?? ''); if (i >= 0) _v[i] = widget.scopeId!; } }
+  @override
+  void initState() { super.initState(); _prefill(); }
   String _q = '';    // מחרוזת-חיפוש (סינון-רשומות חי)
   int _view = 0;   // 0=רשימה · לוח · לוח-שנה · טבלה
   String? _err;      // שגיאת-ולידציה (שדות-חובה חסרים)
@@ -45,7 +52,7 @@ class _GenAppSechirutEnt4ScreenState extends State<GenAppSechirutEnt4Screen> {
     } else {
       appStore.add('app_sechirut_ent4', <String, String>{...map});
     }
-    setState(() { _v = {}; _editId = null; _err = null; });
+    setState(() { _v = {}; _editId = null; _err = null; _prefill(); });
   }
 
   void _edit(Map<String, String> r) {
@@ -132,7 +139,7 @@ class _GenAppSechirutEnt4ScreenState extends State<GenAppSechirutEnt4Screen> {
           AnimatedBuilder(
             animation: appStore,
             builder: (context, _) {
-              final all = appStore.records('app_sechirut_ent4');
+              final all = (widget.scopeId == null ? appStore.records('app_sechirut_ent4') : appStore.records('app_sechirut_ent4').where((r) => (r[widget.scopeField ?? ''] ?? '') == widget.scopeId).toList());
               if (all.isEmpty) return const DsEmpty(label: gen_app_sechirut_ent4_c7);
               final q = _q.trim().toLowerCase();
               final rs = q.isEmpty ? all : all.where((r) => r.entries.any((e) => !e.key.startsWith('__') && e.value.toLowerCase().contains(q))).toList();

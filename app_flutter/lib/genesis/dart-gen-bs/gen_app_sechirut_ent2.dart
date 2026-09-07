@@ -16,15 +16,22 @@ import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במוד
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutEnt2Screen extends StatefulWidget {
-  const GenAppSechirutEnt2Screen({super.key});
+  const GenAppSechirutEnt2Screen({this.scopeField, this.scopeId, super.key});
+
+  final String? scopeField;   // G26 · היקף-הורה (ניווט-מקשרים): שדה-הקשר + מזהה ⇒ הרשימה מסוננת לרשומת-ההורה והטופס ממולא-מראש
+  final String? scopeId;
 
   @override
   State<GenAppSechirutEnt2Screen> createState() => _GenAppSechirutEnt2ScreenState();
 }
 
 class _GenAppSechirutEnt2ScreenState extends State<GenAppSechirutEnt2Screen> {
+  static const List<String> _labelsAll = [gen_app_sechirut_ent2_c9, gen_app_sechirut_ent2_c10, gen_app_sechirut_ent2_c11, gen_app_sechirut_ent2_c12, gen_app_sechirut_ent2_c16, gen_app_sechirut_ent2_c20, gen_app_sechirut_ent2_c21, gen_app_sechirut_ent2_c23, gen_app_sechirut_ent2_c24, gen_app_sechirut_ent2_c26];
   Map<int, String> _v = {};
   String? _editId;   // ריק = הוספה · מזהה = עריכת-רשומה קיימת
+  void _prefill() { if (widget.scopeId != null) { final i = _labelsAll.indexOf(widget.scopeField ?? ''); if (i >= 0) _v[i] = widget.scopeId!; } }
+  @override
+  void initState() { super.initState(); _prefill(); }
   String _q = '';    // מחרוזת-חיפוש (סינון-רשומות חי)
   int _view = 0;   // 0=רשימה · לוח · לוח-שנה · טבלה
   String? _err;      // שגיאת-ולידציה (שדות-חובה חסרים)
@@ -45,7 +52,7 @@ class _GenAppSechirutEnt2ScreenState extends State<GenAppSechirutEnt2Screen> {
     } else {
       appStore.add('app_sechirut_ent2', <String, String>{...map});
     }
-    setState(() { _v = {}; _editId = null; _err = null; });
+    setState(() { _v = {}; _editId = null; _err = null; _prefill(); });
   }
 
   void _edit(Map<String, String> r) {
@@ -168,7 +175,7 @@ class _GenAppSechirutEnt2ScreenState extends State<GenAppSechirutEnt2Screen> {
           AnimatedBuilder(
             animation: appStore,
             builder: (context, _) {
-              final all = appStore.records('app_sechirut_ent2');
+              final all = (widget.scopeId == null ? appStore.records('app_sechirut_ent2') : appStore.records('app_sechirut_ent2').where((r) => (r[widget.scopeField ?? ''] ?? '') == widget.scopeId).toList());
               if (all.isEmpty) return const DsEmpty(label: gen_app_sechirut_ent2_c7);
               final q = _q.trim().toLowerCase();
               final rs = q.isEmpty ? all : all.where((r) => r.entries.any((e) => !e.key.startsWith('__') && e.value.toLowerCase().contains(q))).toList();

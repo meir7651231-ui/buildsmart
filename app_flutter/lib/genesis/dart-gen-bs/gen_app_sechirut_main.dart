@@ -3,7 +3,7 @@ import '../dart-data-bs/auto/gen_app_sechirut_main_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import 'gen_app_sechirut_relations.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
-import 'gen_app_sechirut_hub.dart';
+import 'gen_app_sechirut_shell.dart';
 import 'package:flutter/material.dart';
 
 void main() { registerAppRelations(appStore); runApp(const GenAppSechirutMainScreen()); }
@@ -25,6 +25,6 @@ class GenAppSechirutMainScreen extends StatelessWidget {
           textDirection: TextDirection.rtl,
           child: child ?? const SizedBox.shrink(),
         ),
-        home: const GenAppSechirutHubScreen(),
+        home: const GenAppSechirutShellScreen(),
       );
 }

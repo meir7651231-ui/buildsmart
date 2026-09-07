@@ -19,15 +19,22 @@ import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודו
 import '../dart-forge-bs/temporal/temporal.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutEnt1Screen extends StatefulWidget {
-  const GenAppSechirutEnt1Screen({super.key});
+  const GenAppSechirutEnt1Screen({this.scopeField, this.scopeId, super.key});
+
+  final String? scopeField;   // G26 · היקף-הורה (ניווט-מקשרים): שדה-הקשר + מזהה ⇒ הרשימה מסוננת לרשומת-ההורה והטופס ממולא-מראש
+  final String? scopeId;
 
   @override
   State<GenAppSechirutEnt1Screen> createState() => _GenAppSechirutEnt1ScreenState();
 }
 
 class _GenAppSechirutEnt1ScreenState extends State<GenAppSechirutEnt1Screen> {
+  static const List<String> _labelsAll = [gen_app_sechirut_ent1_c9, gen_app_sechirut_ent1_c10, gen_app_sechirut_ent1_c11, gen_app_sechirut_ent1_c12, gen_app_sechirut_ent1_c13, gen_app_sechirut_ent1_c15, gen_app_sechirut_ent1_c16, gen_app_sechirut_ent1_c19, gen_app_sechirut_ent1_c22, gen_app_sechirut_ent1_c26, gen_app_sechirut_ent1_c27, gen_app_sechirut_ent1_c28];
   Map<int, String> _v = {};
   String? _editId;   // ריק = הוספה · מזהה = עריכת-רשומה קיימת
+  void _prefill() { if (widget.scopeId != null) { final i = _labelsAll.indexOf(widget.scopeField ?? ''); if (i >= 0) _v[i] = widget.scopeId!; } }
+  @override
+  void initState() { super.initState(); _prefill(); }
   String _q = '';    // מחרוזת-חיפוש (סינון-רשומות חי)
   int _view = 0;   // 0=רשימה · לוח · לוח-שנה · טבלה
   String? _err;      // שגיאת-ולידציה (שדות-חובה חסרים)
@@ -48,7 +55,7 @@ class _GenAppSechirutEnt1ScreenState extends State<GenAppSechirutEnt1Screen> {
     } else {
       appStore.add('app_sechirut_ent1', <String, String>{...map, '__stage': '0'});
     }
-    setState(() { _v = {}; _editId = null; _err = null; });
+    setState(() { _v = {}; _editId = null; _err = null; _prefill(); });
   }
 
   void _edit(Map<String, String> r) {
@@ -109,7 +116,7 @@ class _GenAppSechirutEnt1ScreenState extends State<GenAppSechirutEnt1Screen> {
     final hid = _rlsHiddenSet;
     final labels = const [gen_app_sechirut_ent1_c9, gen_app_sechirut_ent1_c10, gen_app_sechirut_ent1_c11, gen_app_sechirut_ent1_c12, gen_app_sechirut_ent1_c13, gen_app_sechirut_ent1_c15, gen_app_sechirut_ent1_c16, gen_app_sechirut_ent1_c19, gen_app_sechirut_ent1_c22, gen_app_sechirut_ent1_c26, gen_app_sechirut_ent1_c27, gen_app_sechirut_ent1_c28];
     b.writeln([for (var i = 0; i < labels.length; i++) if (!hid.contains(i)) labels[i]].map((h) => '"' + h.replaceAll('"', '""') + '"').join(','));
-    for (final r in appStore.scoped('app_sechirut_ent1', _rlsScope[_rlsRole])) {
+    for (final r in (widget.scopeId == null ? appStore.scoped('app_sechirut_ent1', _rlsScope[_rlsRole]) : appStore.scoped('app_sechirut_ent1', _rlsScope[_rlsRole]).where((r) => (r[widget.scopeField ?? ''] ?? '') == widget.scopeId).toList())) {
       final vals = [r[gen_app_sechirut_ent1_c9] ?? '', r[gen_app_sechirut_ent1_c10] ?? '', r[gen_app_sechirut_ent1_c11] ?? '', r[gen_app_sechirut_ent1_c12] ?? '', r[gen_app_sechirut_ent1_c13] ?? '', r[gen_app_sechirut_ent1_c15] ?? '', r[gen_app_sechirut_ent1_c16] ?? '', r[gen_app_sechirut_ent1_c19] ?? '', r[gen_app_sechirut_ent1_c22] ?? '', r[gen_app_sechirut_ent1_c26] ?? '', r[gen_app_sechirut_ent1_c27] ?? '', r[gen_app_sechirut_ent1_c28] ?? ''];
       b.writeln([for (var i = 0; i < vals.length; i++) if (!hid.contains(i)) vals[i]].map((v) => '"' + v.replaceAll('"', '""') + '"').join(','));
     }
@@ -194,7 +201,7 @@ class _GenAppSechirutEnt1ScreenState extends State<GenAppSechirutEnt1Screen> {
           AnimatedBuilder(
             animation: appStore,
             builder: (context, _) {
-              final all = appStore.scoped('app_sechirut_ent1', _rlsScope[_rlsRole]);
+              final all = (widget.scopeId == null ? appStore.scoped('app_sechirut_ent1', _rlsScope[_rlsRole]) : appStore.scoped('app_sechirut_ent1', _rlsScope[_rlsRole]).where((r) => (r[widget.scopeField ?? ''] ?? '') == widget.scopeId).toList());
               if (all.isEmpty) return const DsEmpty(label: gen_app_sechirut_ent1_c7);
               final q = _q.trim().toLowerCase();
               final rs = q.isEmpty ? all : all.where((r) => r.entries.any((e) => !e.key.startsWith('__') && e.value.toLowerCase().contains(q))).toList();
