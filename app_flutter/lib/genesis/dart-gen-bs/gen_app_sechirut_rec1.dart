@@ -20,8 +20,8 @@ class _GenAppSechirutRec1ScreenState extends State<GenAppSechirutRec1Screen> {
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: appStore,
         builder: (context, _) {
-          final recs = appStore.scoped('app_sechirut_ent1', gen_app_sechirut_rec1_c30);
-          if (recs.isEmpty) return Center(child: Text(gen_app_sechirut_rec1_c31));
+          final recs = appStore.scoped('app_sechirut_ent1', gen_app_sechirut_rec1_c32);
+          if (recs.isEmpty) return Center(child: Text(gen_app_sechirut_rec1_c33));
           final i0 = _sel ?? (widget.initialId != null ? recs.indexWhere((r) => r['__id'] == widget.initialId) : 0);
           final i = (i0 < 0 ? 0 : i0).clamp(0, recs.length - 1);
           final r = recs[i];
@@ -53,14 +53,15 @@ class _GenAppSechirutRec1ScreenState extends State<GenAppSechirutRec1Screen> {
               Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_sechirut_rec1_c17] ?? '', label: gen_app_sechirut_rec1_c18)),
               Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_sechirut_rec1_c19] ?? '', label: gen_app_sechirut_rec1_c20)),
               Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_sechirut_rec1_c21] ?? '', label: gen_app_sechirut_rec1_c22)),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Callout(value: r[gen_app_sechirut_rec1_c23] ?? '', label: gen_app_sechirut_rec1_c24)),
               const SizedBox(height: 8),
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(gen_app_sechirut_rec1_c29, style: const TextStyle(fontWeight: FontWeight.w800))),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(gen_app_sechirut_rec1_c31, style: const TextStyle(fontWeight: FontWeight.w800))),
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: Wrap(spacing: 10, runSpacing: 10, children: [
-                Callout(value: appStore.countRef('app_sechirut_ent2', gen_app_sechirut_rec1_c23, id).toString(), label: gen_app_sechirut_rec1_c24),
-                Callout(value: appStore.countRef('app_sechirut_ent3', gen_app_sechirut_rec1_c25, id).toString(), label: gen_app_sechirut_rec1_c26),
-                Callout(value: appStore.countRef('app_sechirut_ent4', gen_app_sechirut_rec1_c27, id).toString(), label: gen_app_sechirut_rec1_c28),
+                Callout(value: appStore.countRef('app_sechirut_ent2', gen_app_sechirut_rec1_c25, id).toString(), label: gen_app_sechirut_rec1_c26),
+                Callout(value: appStore.countRef('app_sechirut_ent3', gen_app_sechirut_rec1_c27, id).toString(), label: gen_app_sechirut_rec1_c28),
+                Callout(value: appStore.countRef('app_sechirut_ent4', gen_app_sechirut_rec1_c29, id).toString(), label: gen_app_sechirut_rec1_c30),
                 ]),
               ),
             ],
