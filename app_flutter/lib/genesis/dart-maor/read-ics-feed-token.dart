@@ -26,7 +26,7 @@ typedef GetDocFn = Future<dynamic> Function(dynamic ref);
 /// bubble. Verbatim behaviour of new/atoms/read-ics-feed-token.mjs.
 Future<String?> readIcsFeedToken(
   String slug,
-  Map<String, dynamic> db,
+  dynamic db,
   DocFn doc,
   GetDocFn getDoc,
 ) async {

@@ -36,7 +36,7 @@ int _len(dynamic v) {
 /// Returns whether the care-tracking ("eye") case is active. Verbatim behaviour of
 /// the JS source `ayinActive`: falsy input ⇒ false; otherwise true when the stage
 /// is not 'new', or any of names / lastTouch / answers / log carry content.
-bool ayinActive(String a) {
+bool ayinActive(dynamic a) {
   if (!_truthy(a)) return false;
   return (_prop(a, 'stage') != 'new') ||
       (_len(_prop(a, 'names')) > 0) ||

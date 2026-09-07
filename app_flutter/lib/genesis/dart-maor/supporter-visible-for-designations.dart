@@ -27,7 +27,7 @@
 /// Empty/absent allowed ⇒ everything visible; supporter without a (trimmed)
 /// forWho ⇒ hidden; otherwise visible iff trimmed forWho ∈ trimmed allowed.
 /// Verbatim port of new/atoms/supporter-visible-for-designations.mjs.
-bool supporterVisibleForDesignations(String sup, String allowed) {
+bool supporterVisibleForDesignations(dynamic sup, dynamic allowed) {
   if (_falsy(allowed) || _falsy(_lengthOf(allowed))) return true;
   final fw = _jsTrim((_forWhoOf(sup) ?? '') as String);
   if (fw.isEmpty) return false;

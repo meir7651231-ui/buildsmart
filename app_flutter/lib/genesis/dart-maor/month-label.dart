@@ -11,7 +11,7 @@
 bool _rqTruthy(dynamic v) =>
     !(v == null || v == false || v == '' || (v is num && (v == 0 || v.isNaN)));
 
-String monthLabel(String key) {
+dynamic monthLabel(dynamic key) {
   final parts = key.split('-');
   final dynamic y = _rqTruthy(parts.isNotEmpty) ? parts[0] : null; // JS split תמיד ≥1 איבר; שימור-פירוק ליתר-ביטחון
   final dynamic m = _rqTruthy(parts.length > 1) ? parts[1] : null; // אין '-' ⇒ undefined בפירוק-JS

@@ -21,7 +21,7 @@ String _sliceJs(String s, num start, num end) {
 String _trimEs(String s) =>
     s.replaceAll(RegExp(r'^\s+|\s+$', unicode: true), '');
 
-String supportPreview(String text, [dynamic max = 40]) {
+dynamic supportPreview(dynamic text, [dynamic max = 40]) {
   final t = _trimEs(
       (text ?? '').replaceAll(RegExp(r'\s+', unicode: true), ' ') as String);
   return t.length > ((max) as num) ? _sliceJs(t, 0, ((max - 1) as num)) + '…' : t;

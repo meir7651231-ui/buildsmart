@@ -160,7 +160,7 @@ List<dynamic> _jsSpread(dynamic msgs) {
 /// (חוק-1: decorate-sort-undecorate). התנהגות זהה-ביט ל-JS:
 /// שוויון/undefined/מפתח-חסר ⇒ 0 ⇒ סדר-המקור נשמר; מחרוזת-קלט ⇒ פירוק לתווים
 /// בסדר-המקור (מפתח-המיון לכל תו הוא אותה מתודת-at ⇒ הכול שווה ⇒ יציבות).
-List<dynamic> sortTeamMsgs(String msgs) {
+List<dynamic> sortTeamMsgs(dynamic msgs) {
   final copy = _jsSpread(msgs);
   final decorated = [
     for (var i = 0; i < copy.length; i++) [i, copy[i]],

@@ -47,7 +47,7 @@ String _esTrim(String s) {
   return s.substring(start, end);
 }
 
-String termOf(Map<String, dynamic> cfg, String key, String fallback) {
+dynamic termOf(dynamic cfg, dynamic key, dynamic fallback) {
   // ‏cfg.terms?.[key] — ‏terms חסר/לא-מפה ⇒ אין דריסה (אפס-זריקות, ערבות 3).
   final terms = (cfg is Map) ? cfg['terms'] : null;
   final v = (terms is Map) ? terms[key] : null;

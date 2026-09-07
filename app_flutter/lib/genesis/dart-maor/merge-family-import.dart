@@ -21,7 +21,7 @@
 
 /// Verbatim behaviour of the JS source new/atoms/merge-family-import.mjs.
 /// Spreads [f] into a fresh map, then overlays every truthy own-field of [obj].
-Map<String, dynamic> mergeFamilyImport(String f, String obj) {
+Map<String, dynamic> mergeFamilyImport(dynamic f, dynamic obj) {
   final out = <String, dynamic>{};
   // out = { ...f }  — spread copies every own field, no truthiness filter.
   for (final e in _ownEntries(f)) {

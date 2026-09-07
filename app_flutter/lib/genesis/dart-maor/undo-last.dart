@@ -9,7 +9,7 @@ bool _falsy(dynamic v) =>
     (v is num && (v == 0 || v.isNaN)) ||
     v == '';
 
-Map<String, dynamic> undoLast(Map<String, dynamic> c, List<String> requeueOutcomes) {
+dynamic undoLast(dynamic c, dynamic requeueOutcomes) {
   final List log = c['log'] as List;
   final dynamic last = log.isEmpty ? null : log[log.length - 1];
   if (_falsy(last)) return c;

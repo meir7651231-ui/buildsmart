@@ -12,7 +12,7 @@
 //    machtzev/emit/js-compat-reference.dart · חוק-1: אטום לא-מייבא).
 //  · NaN מטופל טבעית: `NaN<0` ו-`NaN>=length` שניהם false ⇒ מחזיר NaN, כמו-JS.
 
-num? tourAdvance(num index, num delta, num length) {
+num? tourAdvance(dynamic index, dynamic delta, dynamic length) {
   final double next = _jsNum(index) + _jsNum(delta); // ‏index+delta ב-float64
   if (next < 0) return 0;
   if (next >= _jsNum(length)) return null;

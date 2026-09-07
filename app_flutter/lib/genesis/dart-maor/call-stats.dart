@@ -44,7 +44,7 @@ dynamic _prop(dynamic o, String k) {
 /// a string has `.length`, iterates as chars, and `char.outcome`/`char.at` are
 /// undefined. The 'last' key is omitted whenever the JS value would be undefined
 /// (matching JSON.stringify), and is '' only for an empty log.
-Map<String, dynamic> callStats(String calls) {
+Map<String, dynamic> callStats(dynamic calls) {
   final list = calls ?? const [];
   final int total = _len(list);
   var noanswer = 0;

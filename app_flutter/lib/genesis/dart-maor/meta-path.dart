@@ -3,7 +3,7 @@
 // מקור: cloudRoot ? 'meta/org' : 'orgs/' + slug + '/meta/org'
 // כלל-המרה 7 (truthiness): המנוע פספס — הגולדן מזין מחרוזות ל-cloudRoot,
 // ו-"" ב-JS הוא falsy. שקע-truthy מפורש מחקה את סמנטיקת-ה-JS. אפס-import (dart-core בלבד).
-String metaPath(String slug, String cloudRoot) {
+String metaPath(dynamic slug, dynamic cloudRoot) {
   return _truthy(cloudRoot) ? 'meta/org' : 'orgs/' + _jsStr(slug) + '/meta/org';
 }
 

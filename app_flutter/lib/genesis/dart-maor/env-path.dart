@@ -35,6 +35,6 @@ String _jsStr(dynamic v) {
 }
 
 /// Encryption-envelope document path. Verbatim behaviour of new/atoms/env-path.mjs.
-String envPath(String slug, String cloudRoot) {
+String envPath(dynamic slug, dynamic cloudRoot) {
   return _truthy(cloudRoot) ? '_enc/envelope' : 'orgs/' + _jsStr(slug) + '/_enc/envelope';
 }

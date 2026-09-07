@@ -10,6 +10,6 @@
 
 /// stageLabel(cfg, stage, termOf) — כמו ב-JS: המפתח מורכב 'ayin.stage.'+stage,
 /// וכל הכרעת-המונח אצל שקע-termOf(cfg, key, fallback).
-String stageLabel(Map<String, dynamic> cfg, String stage, dynamic termOf, {required Map<String, dynamic> stageFallback}) {
+dynamic stageLabel(dynamic cfg, dynamic stage, dynamic termOf, {required Map<String, dynamic> stageFallback}) {
   return termOf(cfg, 'ayin.stage.' + (stage as String), stageFallback[stage]);
 }

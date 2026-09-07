@@ -50,7 +50,7 @@ String _jsReplaceFirst(String str, String pattern, String replacement) {
 /// בניית צעדי-הסיור: סינון לפי מודולים פעילים (צעד בלי module תמיד נשאר)
 /// + מיתוג-מחדש דרך termOf. בלי config ⇒ הצעד מוחזר זהה-זהות (אפס-העתקה).
 List<dynamic> tourSteps(
-    List<dynamic> steps, dynamic isModuleOn, dynamic termOf, Map<String, String> T2, [Map<String, dynamic>? config]) {
+    List<dynamic> steps, dynamic isModuleOn, dynamic termOf, Map<String, String> T2, [dynamic config]) {
   dynamic t(String k, String fb) =>
       _falsy(config) ? fb : termOf(config, k, fb);
 
