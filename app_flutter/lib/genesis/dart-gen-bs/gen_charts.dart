@@ -1,6 +1,6 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: רכיבים חיים - גרפים
-// 🧬 בקשה: רכיבים חיים - גרפים: · הירו 📊 גרפים חיים | תרשימים שהמחולל מרכיב ממשפט · כותרת נתונים חזותיים · עמודות 150 7 תרשים עמודות · מגמה 130 20 קו מגמה · עוגה 170 5 תרשים טבעת · מד 160 מד ביצועים · חום 150 8 מפת חום · באנר כל גרף כאן חי - נבחר ממילה בעברית
+// 🧬 בקשה: רכיבים חיים - גרפים: · הירו 📊 גרפים חיים | תרשימים שהמחולל מרכיב ממשפט · כותרת נתונים חזותיים · עמודות 150 12 9 15 6 18 4 11 תרשים עמודות · מגמה 130 20 קו מגמה · עוגה 170 5 תרשים טבעת · מד 160 73 מד ביצועים · חום 150 8 מפת חום · באנר כל גרף כאן חי - נבחר ממילה בעברית
 // 🧬 אטומים שנבחרו: HeroCard · CaSubTitle · BarChart · LineSpark · DonutChart · RadialGauge · HeatGrid · CoinBanner
 import '../dart-data-bs/auto/gen_charts_content.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
@@ -40,10 +40,10 @@ class _GenChartsScreenState extends State<GenChartsScreen> {
           children: [
           HeroCard(glyph: gen_charts_card_glyph, title: gen_charts_card_title, sub: gen_charts_card_sub, onTap: () => _toast(gen_charts_card_toast), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           CaSubTitle(gen_charts_header_text),
-          BarChart(height: 150, bars: 7, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          BarChart(height: 150, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight, values: const <double>[12, 9, 15, 6, 18, 4, 11]),
           LineSpark(height: 130, points: 20, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           DonutChart(height: 170, slices: 5, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          RadialGauge(height: 160, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          RadialGauge(height: 160, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight, pct: 73),
           HeatGrid(height: 150, cells: 8, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CoinBanner(coins: 0, sub: gen_charts_banner_sub),
           ],

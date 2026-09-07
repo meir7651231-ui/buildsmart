@@ -1,6 +1,6 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: רכיבים חיים - כרטיסי-דשבורד
-// 🧬 בקשה: רכיבים חיים - כרטיסי-דשבורד: · הירו 📊 כרטיסי-דשבורד | ביצועים מזג ופריט ממשפט · כותרת מדדים · ביצועים 140 2480₪ | הכנסה חודשית · מזג 160 28° | שמש חלקית · פריט 64 הזמנה חדשה התקבלה | לפני 5 דקות · בלוק 90 מדדים: מבקרים / הזמנות / הכנסה · באנר כל רכיב כאן חי - נבחר ממילה בעברית
+// 🧬 בקשה: רכיבים חיים - כרטיסי-דשבורד: · הירו 📊 כרטיסי-דשבורד | ביצועים מזג ופריט ממשפט · כותרת מדדים · ביצועים 140 2480₪ | הכנסה חודשית · מזג 160 28° | שמש חלקית · פריט 64 הזמנה חדשה התקבלה | לפני 5 דקות · בלוק 90 1240 318 42 מדדים: מבקרים / הזמנות / הכנסה · באנר כל רכיב כאן חי - נבחר ממילה בעברית
 // 🧬 אטומים שנבחרו: HeroCard · CaSubTitle · TrendCard · WeatherCard · NotifItem · StatBlock · CoinBanner
 import '../dart-data-bs/auto/gen_dash11_content.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
@@ -42,7 +42,7 @@ class _GenDash11ScreenState extends State<GenDash11Screen> {
           TrendCard(title: gen_dash11_statcard_title, sub: gen_dash11_statcard_sub, height: 140, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           WeatherCard(title: gen_dash11_weather_title, sub: gen_dash11_weather_sub, height: 160, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           NotifItem(title: gen_dash11_notifitem_title, sub: gen_dash11_notifitem_sub, height: 64, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          StatBlock(labels: const <String>[gen_dash11_statblock_option, gen_dash11_statblock_option2, gen_dash11_statblock_option3], height: 90, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          StatBlock(labels: const <String>[gen_dash11_statblock_option, gen_dash11_statblock_option2, gen_dash11_statblock_option3], height: 90, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight, values: const <num>[1240, 318, 42]),
           CoinBanner(coins: 0, sub: gen_dash11_banner_sub),
           ],
         ),

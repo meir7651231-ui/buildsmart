@@ -1,6 +1,6 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: רכיבים חיים - תפריטים ומדיה
-// 🧬 בקשה: רכיבים חיים - תפריטים ומדיה: · הירו 🎬 תפריטים ומדיה | גיליון קרוסלה ואווטארים ממשפט · כותרת תפריטים · מגירה 180 גיליון תחתון | פעולות נוספות · חיווי 56 נשמר בהצלחה · כותרת מדיה · צף 60 תפריט צף · פרצופים 56 8 משתתפים · קרוסלה 150 שקופיות: ראשונה / שנייה / שלישית · באנר כל רכיב כאן חי - נבחר ממילה בעברית
+// 🧬 בקשה: רכיבים חיים - תפריטים ומדיה: · הירו 🎬 תפריטים ומדיה | גיליון קרוסלה ואווטארים ממשפט · כותרת תפריטים · מגירה 180 גיליון תחתון | פעולות נוספות · חיווי 56 נשמר בהצלחה · כותרת מדיה · צף 60 תפריט צף: עריכה / שיתוף / מועדפים · פרצופים 56 8 משתתפים · קרוסלה 150 שקופיות: ראשונה / שנייה / שלישית · באנר כל רכיב כאן חי - נבחר ממילה בעברית
 // 🧬 אטומים שנבחרו: HeroCard · CaSubTitle · SlideSheet · SnackToast · CaSubTitle · FabMenu · AvatarStack · CarouselDeck · CoinBanner
 import '../dart-data-bs/auto/gen_media_content.dart';
 import '../dart-ui-bs/auto/bs_tokens.dart';
@@ -22,7 +22,7 @@ class GenMediaScreen extends StatefulWidget {
 }
 
 class _GenMediaScreenState extends State<GenMediaScreen> {
-  
+  int _n1 = 0;
 
   void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
@@ -43,7 +43,7 @@ class _GenMediaScreenState extends State<GenMediaScreen> {
           SlideSheet(title: gen_media_sheet_title, sub: gen_media_sheet_sub, height: 180, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           SnackToast(label: gen_media_snack_label, height: 56, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_media_header_text2),
-          FabMenu(height: 60, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          FabMenu(height: 60, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight, labels: const <String>[gen_media_fab_option, gen_media_fab_option2, gen_media_fab_option3], onSelect: (v) => setState(() => _n1 = v)),
           AvatarStack(height: 56, faces: 8, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CarouselDeck(labels: const <String>[gen_media_carousel_option, gen_media_carousel_option2, gen_media_carousel_option3], height: 150, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CoinBanner(coins: 0, sub: gen_media_banner_sub),

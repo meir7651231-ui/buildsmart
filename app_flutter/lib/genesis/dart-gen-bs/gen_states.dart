@@ -1,6 +1,6 @@
 // 🧬 חולל ע"י המחולל (genesis-gen, הכרעות 17+18) — בקשה ⇒ בחירת-אטומים ⇒ חיווט ⇒ מסך. אל תערוך ידנית.
 // 🧬 שם: רכיבים חיים - טעינה ומעברים
-// 🧬 בקשה: רכיבים חיים - טעינה ומעברים: · הירו ⏳ טעינה ומעברים | מצבי-טעינה וכניסות שהמחולל מרכיב ממשפט · כותרת מצבי טעינה · טוען 60 מסתובב · טבעת 90 התקדמות · נקודות 44 נקודות קופצות · כותרת מצב ריק ומעברים · ריק 160 אין עדיין נתונים | הוסיפו פריט ראשון להתחלה · מדורג 44 5 רשימה נכנסת בגלים · חשיפה 130 כרטיס נחשף | כניסה מונפשת בסקייל · באנר כל מצב כאן חי - נבחר ממילה בעברית
+// 🧬 בקשה: רכיבים חיים - טעינה ומעברים: · הירו ⏳ טעינה ומעברים | מצבי-טעינה וכניסות שהמחולל מרכיב ממשפט · כותרת מצבי טעינה · טוען 60 מסתובב · טבעת 90 62 התקדמות · נקודות 44 נקודות קופצות · כותרת מצב ריק ומעברים · ריק 160 אין עדיין נתונים | הוסיפו פריט ראשון להתחלה · מדורג 44 5 רשימה נכנסת בגלים · חשיפה 130 כרטיס נחשף | כניסה מונפשת בסקייל · באנר כל מצב כאן חי - נבחר ממילה בעברית
 // 🧬 אטומים שנבחרו: HeroCard · CaSubTitle · OrbitSpinner · ProgressRing · DotsLoader · CaSubTitle · AnimatedEmpty · StaggerList · RevealCard · CoinBanner
 import '../dart-data-bs/auto/gen_states_content.dart';
 import '../dart-ui-bs/animated_empty.dart';
@@ -42,7 +42,7 @@ class _GenStatesScreenState extends State<GenStatesScreen> {
           HeroCard(glyph: gen_states_card_glyph, title: gen_states_card_title, sub: gen_states_card_sub, onTap: () => _toast(gen_states_card_toast), cardColor: BsTokens.cardLight, inkColor: BsTokens.inkLight, mutedColor: BsTokens.mutedLight, borderColor: BsTokens.divider, radius: 12),
           CaSubTitle(gen_states_header_text),
           OrbitSpinner(height: 60, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight),
-          ProgressRing(height: 90, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          ProgressRing(height: 90, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight, pct: 62),
           DotsLoader(height: 44, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight),
           CaSubTitle(gen_states_header_text2),
           AnimatedEmpty(icon: Icons.tune, title: gen_states_empty_title, sub: gen_states_empty_sub, height: 160, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),

@@ -41,7 +41,7 @@ class _GenRichScreenState extends State<GenRichScreen> {
           CaSubTitle(gen_rich_header_text),
           MapPins(height: 150, pins: 6, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CaSubTitle(gen_rich_header_text2),
-          StoryRing(height: 90, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          StoryRing(height: 90, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight, initials: gen_rich_story_initials),
           IconGrid(height: 150, cells: 8, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           PriceTicker(label: gen_rich_ticker_label, height: 60, target: 4820, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           CoinBanner(coins: 0, sub: gen_rich_banner_sub),

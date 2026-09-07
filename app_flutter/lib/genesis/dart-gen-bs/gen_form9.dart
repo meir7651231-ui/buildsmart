@@ -21,7 +21,7 @@ class GenForm9Screen extends StatefulWidget {
 }
 
 class _GenForm9ScreenState extends State<GenForm9Screen> {
-  
+  int _n1 = 0;
 
   void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
@@ -42,7 +42,7 @@ class _GenForm9ScreenState extends State<GenForm9Screen> {
           NumberStepper(label: gen_form9_numstep_label, height: 40, target: 3, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           DropSelect(labels: const <String>[gen_form9_dropdown_option, gen_form9_dropdown_option2, gen_form9_dropdown_option3], height: 52, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
           DatePills(height: 60, days: 7, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
-          PinPad(height: 240, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight),
+          PinPad(height: 240, radius: 12, accentColor: BsTokens.brand, baseColor: BsTokens.inkLight, fillColor: BsTokens.cardLight, onDigit: (v) => setState(() => _n1 = v)),
           CoinBanner(coins: 0, sub: gen_form9_banner_sub),
           ],
         ),

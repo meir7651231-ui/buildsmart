@@ -2049,18 +2049,18 @@
       "family": "action",
       "cls": "ForgeFabAction",
       "file": "fab_action.dart",
-      "seam": "zero",
+      "seam": "fields",
       "states": false,
       "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
-        "FabAction",
-        "ZERO · no seam"
+        "＋",
+        "Label"
       ],
       "sig": {
         "root": {
           "tag": "div",
-          "decorated": true,
+          "decorated": false,
           "interactive": false,
           "dir": "row"
         },
@@ -2070,12 +2070,12 @@
         "fills": 0,
         "slots": [
           {
-            "fs": 12,
+            "fs": 23,
             "fw": 400,
-            "inBtn": false
+            "inBtn": true
           },
           {
-            "fs": 9,
+            "fs": 16,
             "fw": 400,
             "inBtn": false
           }
@@ -2085,7 +2085,7 @@
       "child": true,
       "bare": false,
       "control": false,
-      "actions": 0,
+      "actions": 1,
       "items": null,
       "columns": 0,
       "values": 0
@@ -2094,20 +2094,22 @@
       "family": "action",
       "cls": "ForgeFabMenu",
       "file": "fab_menu.dart",
-      "seam": "zero",
+      "seam": "items",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 2,
+      "fieldSlots": 4,
       "fieldDemo": [
-        "FabMenu",
-        "ZERO · no seam"
+        "Action",
+        "Action",
+        "Action",
+        "＋"
       ],
       "sig": {
         "root": {
           "tag": "div",
-          "decorated": true,
+          "decorated": false,
           "interactive": false,
-          "dir": "row"
+          "dir": "block"
         },
         "svg": false,
         "input": null,
@@ -2115,14 +2117,24 @@
         "fills": 0,
         "slots": [
           {
-            "fs": 12,
-            "fw": 400,
-            "inBtn": false
+            "fs": 13,
+            "fw": 700,
+            "inBtn": true
           },
           {
-            "fs": 9,
+            "fs": 13,
+            "fw": 700,
+            "inBtn": true
+          },
+          {
+            "fs": 13,
+            "fw": 700,
+            "inBtn": true
+          },
+          {
+            "fs": 23,
             "fw": 400,
-            "inBtn": false
+            "inBtn": true
           }
         ],
         "numEmph": 0
@@ -2130,7 +2142,7 @@
       "child": true,
       "bare": false,
       "control": false,
-      "actions": 0,
+      "actions": 4,
       "items": null,
       "columns": 0,
       "values": 0
@@ -2595,13 +2607,13 @@
       "family": "action",
       "cls": "ForgeDsToggleTile",
       "file": "ds_toggle_tile.dart",
-      "seam": "zero",
+      "seam": "fields",
       "states": false,
       "stateIds": null,
       "fieldSlots": 2,
       "fieldDemo": [
         "Label",
-        "ZERO · no seam"
+        "tile"
       ],
       "sig": {
         "root": {
@@ -2616,8 +2628,8 @@
         "fills": 0,
         "slots": [
           {
-            "fs": 12,
-            "fw": 400,
+            "fs": 13,
+            "fw": 600,
             "inBtn": false
           },
           {
@@ -2631,7 +2643,7 @@
       "child": true,
       "bare": false,
       "control": false,
-      "actions": 0,
+      "actions": 1,
       "items": null,
       "columns": 0,
       "values": 0
